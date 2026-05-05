@@ -20,6 +20,7 @@
 /storage/*.key
 /storage/pail
 /vendor
+e-biasiswa.sql
 _ide_helper.php
 Homestead.json
 Homestead.yaml
