@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title' => 'Log Masuk - MyHEP POLIBESUT',
+    'brand_subtitle' => 'Sistem Hal Ehwal Pelajar',
+    'system_active' => 'Sistem Aktif',
+    'welcome_back' => 'Selamat Kembali',
+    'login_continue' => 'Sila log masuk untuk meneruskan sesi anda',
+    'role_student' => 'Pelajar',
+    'role_admin' => 'Admin',
+    'username_label_student' => 'No. Matrik',
+    'username_label_admin' => 'NRIC Admin',
+    'username_placeholder_student' => 'Contoh: 23DIT00001',
+    'username_placeholder_admin' => 'Contoh: 800101011234',
+    'password_label_student' => 'Kata Laluan Pelajar',
+    'password_label_admin' => 'Kata Laluan Admin',
+    'password_placeholder_student' => 'Default: NRIC / kata laluan baharu',
+    'password_placeholder_admin' => 'Kata Laluan',
+    'show_password' => 'Papar kata laluan',
+    'remember_me' => 'Ingat Saya',
+    'forgot_password' => 'Lupa kata laluan?',
+    'login_button' => 'Log Masuk',
+    'home_button' => 'Laman Utama',
+    'error_prefix' => 'Ralat:',
+];

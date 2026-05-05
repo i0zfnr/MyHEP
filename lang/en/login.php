@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title' => 'Login - MyHEP POLIBESUT',
+    'brand_subtitle' => 'Student Affairs System',
+    'system_active' => 'System Active',
+    'welcome_back' => 'Welcome Back',
+    'login_continue' => 'Please sign in to continue your session',
+    'role_student' => 'Student',
+    'role_admin' => 'Admin',
+    'username_label_student' => 'Matric No.',
+    'username_label_admin' => 'Admin NRIC',
+    'username_placeholder_student' => 'Example: 23DIT00001',
+    'username_placeholder_admin' => 'Example: 800101011234',
+    'password_label_student' => 'Student Password',
+    'password_label_admin' => 'Admin Password',
+    'password_placeholder_student' => 'Default: NRIC / new password',
+    'password_placeholder_admin' => 'Password',
+    'show_password' => 'Show password',
+    'remember_me' => 'Remember Me',
+    'forgot_password' => 'Forgot password?',
+    'login_button' => 'Sign In',
+    'home_button' => 'Home Page',
+    'error_prefix' => 'Error:',
+];
