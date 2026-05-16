@@ -1,39 +1,50 @@
-# MyHEP
+# 🎓 MyHEP
 
-MyHEP is a Laravel-based scholarship management application.
+MyHEP is a Laravel-based scholarship management system developed for managing student scholarship applications, records, and related administrative processes at Politeknik Besut.
 
-## Requirements
+The application provides an organized platform for students and administrators to manage scholarship information efficiently through a modern web interface powered by Laravel.
 
-- PHP 8.2+
+---
+
+# ✨ Features
+
+- Student scholarship application management
+- Scholarship record tracking
+- User authentication and authorization
+- Admin dashboard and management tools
+- Database seeding for development setup
+- Modern frontend asset compilation using Vite
+
+---
+
+# 🛠 Tech Stack
+
+| Technology | Version |
+|---|---|
+| PHP | 8.2+ |
+| Laravel | Latest |
+| MySQL | 8+ |
+| Node.js | Latest LTS |
+| npm | Latest |
+
+---
+
+# 📋 Requirements
+
+Before running the project, ensure you have installed:
+
+- PHP 8.2 or higher
 - Composer
 - Node.js and npm
-- MySQL or MariaDB
+- MySQL Server
+- Git
 
-## Setup
+---
 
-```bash
-cp .env.example .env
-composer install
-php artisan key:generate
-php artisan migrate --seed
-npm install
-npm run build
-```
+# ⚙️ Installation
 
-## Run Locally
+## 1. Clone the Repository
 
 ```bash
-php artisan serve
-```
-
-## Useful Commands
-
-```bash
-php artisan test
-npm run dev
-```
-
-## Repository
-
-- Main branch: `main`
-- Remote: `origin` (`https://github.com/i0zfnr/MyHEP.git`)
+git clone https://github.com/i0zfnr/MyHEP.git
+cd MyHEP
