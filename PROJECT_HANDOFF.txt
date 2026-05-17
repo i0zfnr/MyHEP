@@ -1,0 +1,200 @@
+PROJECT HANDOFF - MyHEP / e-biasiswa
+Date: 2026-05-17
+Path: C:\laragon\www\e-biasiswa
+
+Summary
+-------
+This project is a Laravel-based scholarship and student affairs management app named MyHEP / e-biasiswa.
+It appears to target scholarship, discipline, student profile, fine payment, vehicle sticker, announcements,
+reports, admin management, and student self-service workflows.
+
+Current Git State
+-----------------
+- Branch: main
+- Local branch status when checked: main is behind origin/main by 2 commits.
+- Local working tree when checked: clean.
+- Latest local commits:
+  - 53cc0c5 Add project files, update README, and refine gitignore
+  - 6ca4f05 Added login feature
+  - f372b8b first commit
+- Remote from README: https://github.com/i0zfnr/MyHEP.git
+
+Technology
+----------
+- Laravel app.
+- composer.json requires:
+  - PHP ^8.3
+  - laravel/framework ^13.0
+  - laravel/tinker ^3.0
+  - dompdf/dompdf 3.1
+- Frontend uses Vite, Tailwind CSS 4, laravel-vite-plugin, concurrently.
+- Database configured in .env appeared to use MySQL database e_biasiswa at 127.0.0.1:3306.
+
+Important Files / Structure
+---------------------------
+- routes/web.php
+  - Main application routes are here.
+  - This file is large and contains most CRUD workflow logic as route closures.
+  - Some routes use controllers, but most admin/student feature logic is inline.
+- app/Http/Controllers/Auth/LoginController.php
+- app/Http/Controllers/Admin/DashboardController.php
+- app/Http/Controllers/Admin/ReportController.php
+- app/Http/Controllers/Student/DashboardController.php
+- app/Http/Controllers/Student/ProfileController.php
+- app/Http/Controllers/SettingController.php
+- app/Support/helpers.php
+- resources/views/
+  - Contains admin, student, auth, dashboard, settings, and layout Blade views.
+- database/migrations/
+  - Contains Laravel defaults plus project-specific migrations.
+- e-biasiswa.sql
+  - SQL dump exists in project root.
+
+Built Feature Areas Observed
+----------------------------
+There are 98 registered routes.
+
+Public/auth:
+- Home page with system overview stats.
+- Live system overview JSON endpoint.
+- Locale switcher for en/ms.
+- Login/logout.
+- Forgot password, verify reset code, reset password.
+- Settings page for authenticated admin/student session.
+
+Student side:
+- Dashboard.
+- Profile update.
+- Password update.
+- AI helper page.
+- Scholarship status self-report form.
+- Scholarship records page.
+- Rules page.
+- Discipline announcements page.
+- Offenses page.
+- Fine payment application submission.
+- Vehicle sticker application submission with image uploads.
+
+Admin side:
+- Dashboard.
+- System monitoring live endpoint.
+- Monthly report.
+- Student scholarship status review.
+- AI helper page.
+- Admin user CRUD and reset password.
+- Maintenance mode enable/disable.
+- Student CRUD, search, export, reset password.
+- Scholarship CRUD and export.
+- Scholarship announcement CRUD and export.
+- Rule CRUD and export.
+- Offense CRUD, export, print, PDF, mark paid.
+- Discipline announcement CRUD and export.
+- Fine payment application index/export/decision.
+- Vehicle sticker index/export/decision.
+
+Database Migrations Observed
+----------------------------
+- 0001_01_01_000000_create_users_table.php
+- 0001_01_01_000001_create_cache_table.php
+- 0001_01_01_000002_create_jobs_table.php
+- 2026_04_22_000003_create_audit_logs_table.php
+- 2026_04_22_000004_add_email_to_students_and_admins.php
+- 2026_04_22_000005_create_password_reset_codes_table.php
+- 2026_04_22_000006_create_student_scholarship_status_forms_table.php
+- 2026_04_24_000007_add_evidence_photo_to_offenses_table.php
+- 2026_04_24_000008_add_document_paths_to_vehicle_sticker_applications_table.php
+- 2026_04_26_000009_add_extended_profile_fields_to_students_table.php
+
+Verification Already Run
+------------------------
+- php artisan test
+  - Result: PASS
+  - 2 tests passed, 2 assertions.
+  - Important: these are only default/example tests, so they do not prove the real workflows.
+
+- php artisan route:list
+  - Result: PASS
+  - 98 routes registered.
+
+Known Problems / Blockers
+-------------------------
+1. Local branch is behind remote by 2 commits.
+   - Before continuing, inspect or pull origin/main.
+   - Avoid overwriting user changes.
+
+2. Database was not reachable.
+   - php artisan migrate:status failed with:
+     SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+   - Host: 127.0.0.1
+   - Port: 3306
+   - Database: e_biasiswa
+   - Likely MySQL/MariaDB in Laragon was not running or connection settings need checking.
+
+3. Frontend production build fails.
+   - npm run build failed because Vite cannot resolve:
+     resources/css/app.css
+   - Check vite.config.js and Blade layout references.
+   - Either restore/create resources/css/app.css or adjust the Vite entry to match existing assets.
+
+4. routes/web.php is very large.
+   - Many production workflows are implemented as route closures.
+   - Future maintainability would improve by moving large admin/student CRUD logic into controllers or service classes.
+
+5. Test coverage is minimal.
+   - Only example tests exist:
+     tests/Feature/ExampleTest.php
+     tests/Unit/ExampleTest.php
+   - Add feature tests for login, dashboard access, admin CRUD, student application submissions, exports, and uploads.
+
+Suggested Next Steps For New Agent
+----------------------------------
+1. Run:
+   git status --short --branch
+   git log --oneline --decorate -5
+
+2. Inspect remote commits before pulling:
+   git fetch origin
+   git log --oneline HEAD..origin/main
+
+3. Fix local database availability:
+   - Start MySQL/MariaDB in Laragon.
+   - Confirm .env DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT.
+   - Then run:
+     php artisan migrate:status
+
+4. Fix frontend build:
+   - Check vite.config.js.
+   - Create or restore resources/css/app.css if it is the intended entry.
+   - Then run:
+     npm run build
+
+5. Run full basic checks:
+   php artisan test
+   php artisan route:list
+   npm run build
+
+6. After the app boots, manually verify:
+   - Home page.
+   - Login.
+   - Admin dashboard.
+   - Student dashboard.
+   - Student scholarship status submission.
+   - Fine payment application.
+   - Vehicle sticker upload.
+   - Admin approval/decision screens.
+   - CSV exports and PDF/print routes.
+
+Notes For Future Development
+----------------------------
+- Be careful with routes/web.php. It is the main behavior file and is easy to break because many workflows are inside it.
+- Do not assume migrations fully recreate the current database content; the root e-biasiswa.sql dump may contain important schema/data.
+- File upload routes use the public disk. Make sure storage link exists:
+  php artisan storage:link
+- Some roles/scopes are enforced through middleware such as:
+  auth.session:student
+  auth.session:admin
+  admin.scope:system
+  admin.scope:scholarship
+  admin.scope:discipline
+- Helper functions such as auditLog(), downloadCsv(), and option helpers may live in app/Support/helpers.php.
+
