@@ -1,39 +1,71 @@
-# MyHEP
+# 🎓 MyHEP
 
-MyHEP is a Laravel-based scholarship management application.
+MyHEP is a Laravel-based student management system developed for Politeknik Besut that focuses on:
 
-## Requirements
+- 📚 Scholarship Management
+- ⚠️ Student Offense & Disciplinary Record Management
 
-- PHP 8.2+
+The system helps administrators efficiently manage scholarship applications, monitor student disciplinary records, and maintain organized student data through a modern web-based platform.
+
+---
+
+# ✨ Features
+
+## 📚 Scholarship Module
+
+- Scholarship application management
+- Scholarship status tracking
+- Student scholarship records
+- Scholarship approval workflow
+- Scholarship data management for administrators
+
+## ⚠️ Offense Management Module
+
+- Student disciplinary/offense record management
+- Offense category tracking
+- Offense history monitoring
+- Administrative disciplinary actions
+- Student conduct reporting
+
+## 🔐 General Features
+
+- User authentication & authorization
+- Admin dashboard
+- Role-based access control
+- Responsive interface
+- Database seeding for development setup
+
+---
+
+# 🛠 Tech Stack
+
+| Technology | Version |
+|---|---|
+| PHP | 8.2+ |
+| Laravel | Latest |
+| MySQL | 8+ |
+| Node.js | Latest LTS |
+| npm | Latest |
+| Vite | Frontend Build Tool |
+
+---
+
+# 📋 Requirements
+
+Before running the project, ensure you have installed:
+
+- PHP 8.2 or higher
 - Composer
 - Node.js and npm
-- MySQL or MariaDB
+- MySQL Server
+- Git
 
-## Setup
+---
 
-```bash
-cp .env.example .env
-composer install
-php artisan key:generate
-php artisan migrate --seed
-npm install
-npm run build
-```
+# ⚙️ Installation
 
-## Run Locally
+## 1. Clone the Repository
 
 ```bash
-php artisan serve
-```
-
-## Useful Commands
-
-```bash
-php artisan test
-npm run dev
-```
-
-## Repository
-
-- Main branch: `main`
-- Remote: `origin` (`https://github.com/i0zfnr/MyHEP.git`)
+git clone https://github.com/i0zfnr/MyHEP.git
+cd MyHEP
