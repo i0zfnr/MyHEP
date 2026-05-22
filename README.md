@@ -41,8 +41,8 @@ The system helps administrators efficiently manage scholarship applications, mon
 
 | Technology | Version |
 |---|---|
-| PHP | 8.2+ |
-| Laravel | Latest |
+| PHP | 8.4 |
+| Laravel | 13 |
 | MySQL | 8+ |
 | Node.js | Latest LTS |
 | npm | Latest |
