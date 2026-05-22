@@ -37,7 +37,7 @@ The system helps administrators efficiently manage scholarship applications, mon
 
 ---
 
-# 🛠 Tech Stack
+#  Tech Stack
 
 | Technology | Version |
 |---|---|
@@ -50,7 +50,7 @@ The system helps administrators efficiently manage scholarship applications, mon
 
 ---
 
-# 📋 Requirements
+#  Requirements
 
 Before running the project, ensure you have installed:
 
