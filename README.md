@@ -1,17 +1,17 @@
-# 🎓 MyHEP
+#  MyHEP
 
 MyHEP is a Laravel-based student management system developed for Politeknik Besut that focuses on:
 
-- 📚 Scholarship Management
-- ⚠️ Student Offense & Disciplinary Record Management
+-  Scholarship Management
+-  Student Offense & Disciplinary Record Management
 
 The system helps administrators efficiently manage scholarship applications, monitor student disciplinary records, and maintain organized student data through a modern web-based platform.
 
 ---
 
-# ✨ Features
+#  Features
 
-## 📚 Scholarship Module
+##  Scholarship Module
 
 - Scholarship application management
 - Scholarship status tracking
@@ -19,7 +19,7 @@ The system helps administrators efficiently manage scholarship applications, mon
 - Scholarship approval workflow
 - Scholarship data management for administrators
 
-## ⚠️ Offense Management Module
+##  Offense Management Module
 
 - Student disciplinary/offense record management
 - Offense category tracking
@@ -27,7 +27,7 @@ The system helps administrators efficiently manage scholarship applications, mon
 - Administrative disciplinary actions
 - Student conduct reporting
 
-## 🔐 General Features
+##  General Features
 
 - User authentication & authorization
 - Admin dashboard
