@@ -31,6 +31,22 @@
             --glass-blur: 18px;
             --shadow-lg: 0 22px 52px rgba(164,141,120,.18), inset 0 1px 0 rgba(255,255,255,.74);
         }
+        body[data-theme="dark"] {
+            --primary: #d7bfa8;
+            --primary-dark: #f2dfca;
+            --primary-light: #b99b82;
+            --accent: #f2c999;
+            --surface: #17130f;
+            --bg: #080807;
+            --text: #f7efe8;
+            --text-muted: #c8b8a9;
+            --border: rgba(226, 209, 192, .18);
+            --glass-bg: rgba(23,19,15,.88);
+            --glass-border: rgba(226,209,192,.18);
+            --glass-line: rgba(226,209,192,.16);
+            --shadow-lg: 0 28px 64px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.04);
+            color-scheme: dark;
+        }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -61,6 +77,12 @@
             width: 500px; height: 500px;
             background: radial-gradient(circle, rgba(250,215,188,.35) 0%, transparent 70%);
             bottom: -150px; left: -100px;
+        }
+        body[data-theme="dark"]::before {
+            background: radial-gradient(circle, rgba(215,191,168,.10) 0%, transparent 70%);
+        }
+        body[data-theme="dark"]::after {
+            background: radial-gradient(circle, rgba(242,201,153,.07) 0%, transparent 70%);
         }
 
         .page-wrapper {
@@ -302,9 +324,103 @@
             z-index: 5;
             pointer-events: none;
         }
+        body[data-theme="dark"] .page-wrapper {
+            background: #12100e;
+            border-color: rgba(226, 209, 192, .16);
+            box-shadow: 0 30px 70px rgba(0,0,0,.55);
+        }
+        body[data-theme="dark"] .brand-panel {
+            background:
+                linear-gradient(145deg, #3b3129 0%, #7b6757 58%, #a88f79 100%),
+                radial-gradient(circle at 18% 18%, rgba(255,255,255,.16), transparent 38%);
+        }
+        body[data-theme="dark"] .brand-panel::before {
+            opacity: .55;
+        }
+        body[data-theme="dark"] .brand-title,
+        body[data-theme="dark"] .brand-subtitle,
+        body[data-theme="dark"] .brand-badge {
+            text-shadow: 0 1px 8px rgba(0,0,0,.28);
+        }
+        body[data-theme="dark"] .form-panel {
+            background:
+                linear-gradient(145deg, rgba(18,16,14,.98), rgba(13,12,10,.98)),
+                radial-gradient(circle at 100% 0%, rgba(215,191,168,.08), transparent 38%);
+            border-left-color: rgba(226, 209, 192, .14);
+        }
+        body[data-theme="dark"] .form-heading {
+            color: #fff8f1;
+        }
+        body[data-theme="dark"] .form-subheading,
+        body[data-theme="dark"] .field label,
+        body[data-theme="dark"] .remember-label {
+            color: #cbbdaf;
+        }
+        body[data-theme="dark"] .role-toggle {
+            background: #0d0c0b;
+            border-color: rgba(226, 209, 192, .18);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+        }
+        body[data-theme="dark"] .role-toggle label {
+            color: #b8a899;
+        }
+        body[data-theme="dark"] .role-toggle input[type="radio"]:checked + label {
+            background: #d7bfa8;
+            color: #14110f;
+            box-shadow: 0 10px 22px rgba(215,191,168,.16);
+        }
+        body[data-theme="dark"] .field input[type="text"],
+        body[data-theme="dark"] .field input[type="password"] {
+            background: #0d0c0b;
+            border-color: rgba(226, 209, 192, .20);
+            color: #fff8f1;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+        }
+        body[data-theme="dark"] .field input[type="text"]::placeholder,
+        body[data-theme="dark"] .field input[type="password"]::placeholder {
+            color: #7f7165;
+        }
+        body[data-theme="dark"] .field input:focus {
+            border-color: #d7bfa8;
+            box-shadow: 0 0 0 3px rgba(215,191,168,.16);
+        }
+        body[data-theme="dark"] .input-icon,
+        body[data-theme="dark"] .pwd-toggle {
+            color: #8f8173;
+        }
+        body[data-theme="dark"] .link-inline {
+            color: #e8cdb5;
+        }
+        body[data-theme="dark"] .btn-submit {
+            background: linear-gradient(135deg, #d7bfa8, #f2dfca);
+            color: #17130f;
+            box-shadow: 0 12px 26px rgba(215,191,168,.18);
+        }
+        body[data-theme="dark"] .btn-home {
+            background: rgba(255,255,255,.08);
+            border-color: rgba(226,209,192,.18);
+            color: #f2dfca;
+            box-shadow: none;
+        }
+        body[data-theme="dark"] .btn-home:hover {
+            background: rgba(215,191,168,.14);
+            border-color: rgba(215,191,168,.45);
+        }
+        body[data-theme="dark"] .lang-switch {
+            background: #17130f;
+            border-color: rgba(226,209,192,.20);
+            box-shadow: 0 12px 24px rgba(0,0,0,.28);
+        }
+        body[data-theme="dark"] .lang-switch select {
+            color: #f7efe8;
+            background: transparent;
+        }
+        body[data-theme="dark"] .app-footer {
+            color: #7f7165;
+        }
     </style>
 </head>
-<body>
+<body data-theme="{{ session('theme', 'light') }}">
 <form method="POST" action="{{ route('locale.update') }}" class="lang-switch">
     @csrf
     <select name="locale" onchange="this.form.submit()">

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 if (!function_exists('isStudentAuthenticated')) {
@@ -124,5 +125,120 @@ if (!function_exists('auditLog')) {
         } catch (\Throwable $e) {
             // Do not block main flow if audit logging fails.
         }
+    }
+}
+
+if (!function_exists('systemCacheConfigPath')) {
+    function systemCacheConfigPath(): string
+    {
+        return storage_path('app/system-cache.json');
+    }
+}
+
+if (!function_exists('isSystemCacheEnabled')) {
+    function isSystemCacheEnabled(): bool
+    {
+        $path = systemCacheConfigPath();
+        if (!is_file($path)) {
+            return true;
+        }
+
+        $payload = json_decode((string) file_get_contents($path), true);
+        if (!is_array($payload)) {
+            return true;
+        }
+
+        return (bool) ($payload['enabled'] ?? true);
+    }
+}
+
+if (!function_exists('setSystemCacheEnabled')) {
+    function setSystemCacheEnabled(bool $enabled): void
+    {
+        $payload = systemCacheMeta();
+        $payload['enabled'] = $enabled;
+        $payload['updated_at'] = now()->toIso8601String();
+        writeSystemCacheMeta($payload);
+    }
+}
+
+if (!function_exists('systemCacheKeys')) {
+    function systemCacheKeys(): array
+    {
+        return [
+            'myhep.home_stats.counts',
+            'myhep.dashboard.discipline_stats',
+            'myhep.dashboard.scholarship_stats',
+            'myhep.dashboard.recent_offenses',
+            'myhep.dashboard.recent_fine_applications',
+            'myhep.dashboard.recent_scholarship_records',
+            'myhep.dashboard.recent_scholarship_announcements',
+        ];
+    }
+}
+
+if (!function_exists('clearSystemCaches')) {
+    function clearSystemCaches(): void
+    {
+        foreach (systemCacheKeys() as $key) {
+            Cache::forget($key);
+        }
+
+        $payload = systemCacheMeta();
+        $payload['last_cleared_at'] = now()->toIso8601String();
+        writeSystemCacheMeta($payload);
+    }
+}
+
+if (!function_exists('systemCacheRemember')) {
+    function systemCacheRemember(string $key, int $ttlSeconds, callable $callback)
+    {
+        if (!isSystemCacheEnabled()) {
+            return $callback();
+        }
+
+        return Cache::remember($key, now()->addSeconds($ttlSeconds), $callback);
+    }
+}
+
+if (!function_exists('systemCacheMeta')) {
+    function systemCacheMeta(): array
+    {
+        $path = systemCacheConfigPath();
+        if (!is_file($path)) {
+            return [
+                'enabled' => true,
+                'updated_at' => null,
+                'last_cleared_at' => null,
+            ];
+        }
+
+        $payload = json_decode((string) file_get_contents($path), true);
+        if (!is_array($payload)) {
+            return [
+                'enabled' => true,
+                'updated_at' => null,
+                'last_cleared_at' => null,
+            ];
+        }
+
+        return [
+            'enabled' => (bool) ($payload['enabled'] ?? true),
+            'updated_at' => $payload['updated_at'] ?? null,
+            'last_cleared_at' => $payload['last_cleared_at'] ?? null,
+        ];
+    }
+}
+
+if (!function_exists('writeSystemCacheMeta')) {
+    function writeSystemCacheMeta(array $payload): void
+    {
+        $path = systemCacheConfigPath();
+        $directory = dirname($path);
+        if (!is_dir($directory)) {
+            @mkdir($directory, 0755, true);
+        }
+
+        file_put_contents($path, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 }

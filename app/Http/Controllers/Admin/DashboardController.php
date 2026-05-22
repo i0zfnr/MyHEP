@@ -31,70 +31,101 @@ class DashboardController extends Controller
         $recentScholarshipAnnouncements = collect();
 
         if ($hasDisciplineAccess) {
-            $totalStudents = DB::table('students')->count();
-            $totalOffenses = DB::table('offenses')->count();
-            $unpaidOffenses = DB::table('offenses')->where('status', 'unpaid')->count();
-            $pendingFineApplications = DB::table('fine_payment_applications')
-                ->where('status', 'pending')
-                ->count();
+            $disciplineStats = systemCacheRemember('myhep.dashboard.discipline_stats', 90, function () {
+                return [
+                    'total_students' => DB::table('students')->count(),
+                    'total_offenses' => DB::table('offenses')->count(),
+                    'unpaid_offenses' => DB::table('offenses')->where('status', 'unpaid')->count(),
+                    'pending_fine_applications' => DB::table('fine_payment_applications')
+                        ->where('status', 'pending')
+                        ->count(),
+                ];
+            });
+            $totalStudents = (int) ($disciplineStats['total_students'] ?? 0);
+            $totalOffenses = (int) ($disciplineStats['total_offenses'] ?? 0);
+            $unpaidOffenses = (int) ($disciplineStats['unpaid_offenses'] ?? 0);
+            $pendingFineApplications = (int) ($disciplineStats['pending_fine_applications'] ?? 0);
 
-            $recentOffenses = DB::table('offenses')
-                ->join('students', 'students.id', '=', 'offenses.student_id')
-                ->select(
-                    'offenses.id',
-                    'offenses.status',
-                    'offenses.created_at',
-                    'students.full_name as student_name',
-                    'students.matric_no'
-                )
-                ->orderByDesc('offenses.created_at')
-                ->limit(6)
-                ->get();
+            $recentOffenses = collect(systemCacheRemember('myhep.dashboard.recent_offenses', 45, function () {
+                return DB::table('offenses')
+                    ->join('students', 'students.id', '=', 'offenses.student_id')
+                    ->select(
+                        'offenses.id',
+                        'offenses.status',
+                        'offenses.created_at',
+                        'students.full_name as student_name',
+                        'students.matric_no'
+                    )
+                    ->orderByDesc('offenses.created_at')
+                    ->limit(6)
+                    ->get()
+                    ->map(fn ($row) => (array) $row)
+                    ->all();
+            }))->map(fn ($row) => (object) $row);
 
-            $recentFineApplications = DB::table('fine_payment_applications')
-                ->join('students', 'students.id', '=', 'fine_payment_applications.student_id')
-                ->join('offenses', 'offenses.id', '=', 'fine_payment_applications.offense_id')
-                ->select(
-                    'fine_payment_applications.id',
-                    'fine_payment_applications.status',
-                    'fine_payment_applications.created_at',
-                    'fine_payment_applications.meeting_date',
-                    'students.full_name as student_name',
-                    'offenses.place'
-                )
-                ->orderByDesc('fine_payment_applications.created_at')
-                ->limit(6)
-                ->get();
+            $recentFineApplications = collect(systemCacheRemember('myhep.dashboard.recent_fine_applications', 45, function () {
+                return DB::table('fine_payment_applications')
+                    ->join('students', 'students.id', '=', 'fine_payment_applications.student_id')
+                    ->join('offenses', 'offenses.id', '=', 'fine_payment_applications.offense_id')
+                    ->select(
+                        'fine_payment_applications.id',
+                        'fine_payment_applications.status',
+                        'fine_payment_applications.created_at',
+                        'fine_payment_applications.meeting_date',
+                        'students.full_name as student_name',
+                        'offenses.place'
+                    )
+                    ->orderByDesc('fine_payment_applications.created_at')
+                    ->limit(6)
+                    ->get()
+                    ->map(fn ($row) => (array) $row)
+                    ->all();
+            }))->map(fn ($row) => (object) $row);
         }
 
         if ($hasScholarshipAccess) {
-            $totalScholarshipRecords = DB::table('scholarships')->count();
-            $activeScholarships = DB::table('scholarships')
-                ->where('status', 'confirmed')
-                ->whereIn('type', ['scholarship', 'welfare', 'sponsorship'])
-                ->count();
-            $pendingScholarships = DB::table('scholarships')
-                ->where('status', 'pending')
-                ->count();
+            $scholarshipStats = systemCacheRemember('myhep.dashboard.scholarship_stats', 90, function () {
+                return [
+                    'total_scholarship_records' => DB::table('scholarships')->count(),
+                    'active_scholarships' => DB::table('scholarships')
+                        ->where('status', 'confirmed')
+                        ->whereIn('type', ['scholarship', 'welfare', 'sponsorship'])
+                        ->count(),
+                    'pending_scholarships' => DB::table('scholarships')
+                        ->where('status', 'pending')
+                        ->count(),
+                ];
+            });
+            $totalScholarshipRecords = (int) ($scholarshipStats['total_scholarship_records'] ?? 0);
+            $activeScholarships = (int) ($scholarshipStats['active_scholarships'] ?? 0);
+            $pendingScholarships = (int) ($scholarshipStats['pending_scholarships'] ?? 0);
 
-            $recentScholarshipRecords = DB::table('scholarships')
-                ->join('students', 'students.id', '=', 'scholarships.student_id')
-                ->select(
-                    'scholarships.id',
-                    'scholarships.type',
-                    'scholarships.status',
-                    'students.full_name as student_name',
-                    'students.matric_no'
-                )
-                ->orderByDesc('scholarships.created_at')
-                ->limit(6)
-                ->get();
+            $recentScholarshipRecords = collect(systemCacheRemember('myhep.dashboard.recent_scholarship_records', 45, function () {
+                return DB::table('scholarships')
+                    ->join('students', 'students.id', '=', 'scholarships.student_id')
+                    ->select(
+                        'scholarships.id',
+                        'scholarships.type',
+                        'scholarships.status',
+                        'students.full_name as student_name',
+                        'students.matric_no'
+                    )
+                    ->orderByDesc('scholarships.created_at')
+                    ->limit(6)
+                    ->get()
+                    ->map(fn ($row) => (array) $row)
+                    ->all();
+            }))->map(fn ($row) => (object) $row);
 
-            $recentScholarshipAnnouncements = DB::table('scholarship_announcements')
-                ->select('id', 'title', 'type', 'created_at')
-                ->orderByDesc('created_at')
-                ->limit(6)
-                ->get();
+            $recentScholarshipAnnouncements = collect(systemCacheRemember('myhep.dashboard.recent_scholarship_announcements', 45, function () {
+                return DB::table('scholarship_announcements')
+                    ->select('id', 'title', 'type', 'created_at')
+                    ->orderByDesc('created_at')
+                    ->limit(6)
+                    ->get()
+                    ->map(fn ($row) => (array) $row)
+                    ->all();
+            }))->map(fn ($row) => (object) $row);
         }
 
         $systemMonitoring = $showSystemMonitoring ? $this->buildSystemMonitoring() : null;

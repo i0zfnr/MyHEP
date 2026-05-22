@@ -36,6 +36,19 @@
             --radius-lg:  24px;
             --radius-xl:  32px;
         }
+        body[data-theme="dark"] {
+            --bg:             #0f0e0d;
+            --surface:        #171412;
+            --surface-warm:   #201b17;
+            --border:         rgba(226, 209, 192, .16);
+            --border-strong:  rgba(226, 209, 192, .28);
+            --text-primary:   #f7efe8;
+            --text-secondary: #c8b8a9;
+            --text-muted:     #a99888;
+            --accent:         #d7bfa8;
+            --accent-hover:   #f2dfca;
+            color-scheme: dark;
+        }
 
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -47,6 +60,36 @@
             background: var(--bg);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+        }
+        body[data-theme="dark"] .hero,
+        body[data-theme="dark"] .section,
+        body[data-theme="dark"] footer {
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+        body[data-theme="dark"] .card,
+        body[data-theme="dark"] .stat-card,
+        body[data-theme="dark"] .portal-card,
+        body[data-theme="dark"] .role-card {
+            background: var(--surface);
+            border-color: var(--border);
+        }
+        body[data-theme="dark"] .headline,
+        body[data-theme="dark"] .section-title,
+        body[data-theme="dark"] h1,
+        body[data-theme="dark"] h2,
+        body[data-theme="dark"] h3 {
+            color: var(--text-primary);
+        }
+        body[data-theme="dark"] .subtitle,
+        body[data-theme="dark"] p,
+        body[data-theme="dark"] .brand-text p {
+            color: var(--text-secondary);
+        }
+        body[data-theme="dark"] .lang-switch select {
+            background: rgba(24, 21, 18, .88);
+            border-color: var(--border);
+            color: var(--text-primary);
         }
 
         /* ── Language Switch ── */
@@ -640,7 +683,7 @@
         }
     </style>
 </head>
-<body>
+<body data-theme="{{ session('theme', 'light') }}">
 @php
     $homeStats = $homeStats ?? [
         'students_managed' => 0,

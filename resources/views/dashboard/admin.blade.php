@@ -48,6 +48,30 @@
         background: var(--c-bg);
         color: var(--c-text-primary);
     }
+    body[data-theme="dark"] {
+        --c-bg: #080807;
+        --c-surface: rgba(28, 25, 22, .86);
+        --c-surface-2: rgba(255,255,255,.055);
+        --c-border: rgba(226, 209, 192, .14);
+        --c-border-strong: rgba(226, 209, 192, .24);
+        --c-text-primary: #f7efe8;
+        --c-text-secondary: #c8b8a9;
+        --c-text-muted: #9e8f81;
+        --c-accent: #5fbe91;
+        --c-accent-light: rgba(95, 190, 145, .16);
+        --c-accent-text: #cdf7df;
+        --c-gold-light: rgba(245, 158, 11, .16);
+        --c-gold-text: #fde68a;
+        --c-red-light: rgba(239, 68, 68, .16);
+        --c-red-text: #fecaca;
+        --c-blue-light: rgba(96, 165, 250, .16);
+        --c-blue-text: #bfdbfe;
+        --c-amber-light: rgba(245, 158, 11, .16);
+        --c-amber-text: #fde68a;
+        --shadow-sm: 0 16px 36px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.07);
+        --shadow-md: 0 24px 52px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.10);
+        --shadow-focus: 0 0 0 3px rgba(95,190,145,.18);
+    }
 
     /* ── Layout ── */
     .adash {
@@ -528,6 +552,29 @@
         overflow: hidden;
         transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
     }
+    body[data-theme="dark"] .monitor-kpi {
+        background:
+            linear-gradient(145deg, rgba(34, 30, 26, .88), rgba(14, 13, 12, .76)),
+            radial-gradient(circle at 0% 0%, rgba(255,255,255,.07), transparent 34%) !important;
+        border-color: rgba(226, 209, 192, .16) !important;
+    }
+    body[data-theme="dark"] .monitor-kpi-label,
+    body[data-theme="dark"] .stat-label,
+    body[data-theme="dark"] .portal-card-head,
+    body[data-theme="dark"] .section-heading {
+        color: #a99a8c;
+    }
+    body[data-theme="dark"] .monitor-kpi-value,
+    body[data-theme="dark"] .stat-value,
+    body[data-theme="dark"] .monitor-title,
+    body[data-theme="dark"] .trend-title {
+        color: #f7efe8;
+    }
+    body[data-theme="dark"] .monitor-kpi-sub,
+    body[data-theme="dark"] .monitor-key,
+    body[data-theme="dark"] .dash-hero p {
+        color: #b9aa9d;
+    }
     .monitor-kpi::before {
         content: '';
         position: absolute;
@@ -687,6 +734,46 @@
     .trend-col.active .trend-day {
         color: #3d5faa;
     }
+    body[data-theme="dark"] .perf-circle {
+        background: conic-gradient(#5fbe91 var(--angle, 0deg), rgba(255,255,255,.10) 0deg);
+        box-shadow: 0 18px 38px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.10);
+    }
+    body[data-theme="dark"] .perf-circle::after {
+        background: rgba(10, 9, 8, .72);
+        border-color: rgba(255,255,255,.10);
+    }
+    body[data-theme="dark"] .perf-circle-text strong {
+        color: #cdf7df;
+    }
+    body[data-theme="dark"] .trend-chart {
+        background:
+            linear-gradient(to top, rgba(255,255,255,.055) 1px, transparent 1px) 0 0/100% 33.33%,
+            linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+        border-color: rgba(226, 209, 192, .14);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    body[data-theme="dark"] .trend-bar {
+        background: linear-gradient(180deg, #74d0a5 0%, #3f9a73 100%);
+        box-shadow: 0 8px 18px rgba(95,190,145,.16);
+    }
+    body[data-theme="dark"] .trend-col.active .trend-bar {
+        background: linear-gradient(180deg, #9ab7ff 0%, #5b7ee6 100%);
+    }
+    body[data-theme="dark"] .trend-col.active .trend-day {
+        color: #a9c1ff;
+    }
+    body[data-theme="dark"] .meter-track {
+        background: rgba(255,255,255,.13);
+        box-shadow: inset 0 1px 2px rgba(0,0,0,.28);
+    }
+    body[data-theme="dark"] .monitor-item {
+        border-bottom-color: rgba(226, 209, 192, .10);
+    }
+    body[data-theme="dark"] .monitor-pill.ok {
+        background: rgba(95, 190, 145, .15);
+        color: #cdf7df;
+        border-color: rgba(95, 190, 145, .42);
+    }
 
     /* Admin UX Identity v2 */
     .adash {
@@ -729,6 +816,27 @@
         bottom: 0;
         width: 3px;
         background: linear-gradient(180deg, #8f6f52 0%, #c7a98b 100%);
+    }
+    body[data-theme="dark"] .adash::before {
+        background:
+            radial-gradient(900px 420px at -12% -18%, rgba(215, 191, 168, .10) 0%, transparent 58%),
+            radial-gradient(820px 360px at 112% -10%, rgba(95, 190, 145, .08) 0%, transparent 54%);
+    }
+    body[data-theme="dark"] .portal-card,
+    body[data-theme="dark"] .data-card,
+    body[data-theme="dark"] .stat-card,
+    body[data-theme="dark"] .dash-hero {
+        box-shadow: 0 16px 36px rgba(0, 0, 0, .26), inset 0 1px 0 rgba(255,255,255,.07);
+    }
+    body[data-theme="dark"] .portal-card:hover,
+    body[data-theme="dark"] .data-card:hover,
+    body[data-theme="dark"] .stat-card:hover,
+    body[data-theme="dark"] .dash-hero:hover {
+        border-color: rgba(215, 191, 168, .34);
+        box-shadow: 0 24px 52px rgba(0, 0, 0, .36), inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    body[data-theme="dark"] .data-card-head::before {
+        background: linear-gradient(180deg, #5fbe91 0%, #d7bfa8 100%);
     }
 
     @media (prefers-reduced-motion: reduce) {

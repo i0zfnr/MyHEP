@@ -4,8 +4,8 @@
 
 @push('styles')
 <style>
-    .wrap { max-width: 1050px; margin: 0 auto; }
-    .quick { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .wrap { max-width: 1050px; margin: 0 auto; display: grid; gap: 14px; }
+    .quick { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px; }
     .card { background:#fff; border:1px solid #ede4d9; border-radius:12px; margin-bottom:12px; overflow:hidden; }
     .card-head { padding:10px 14px; border-bottom:1px solid #f0e7dc; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
     .card-body { padding:12px 14px; }
@@ -20,7 +20,117 @@
     .btn-primary { border:none; color:#fff; background:linear-gradient(135deg,#A48D78,#CBB9A4); }
     .msg-ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
     .msg-err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
-    .evidence-img { margin-top:8px; max-width:260px; border:1px solid #ede4d9; border-radius:8px; display:block; }
+    .evidence-img { width:100%; max-width:260px; aspect-ratio:4 / 3; object-fit:cover; border:1px solid #ede4d9; border-radius:10px; display:block; }
+    .offense-card { margin-bottom: 0; }
+    .offense-card .card-head {
+        align-items: flex-start;
+        padding: 14px 16px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,250,245,.46)),
+            radial-gradient(circle at 100% 0%, rgba(164,141,120,.10), transparent 34%);
+    }
+    .offense-meta {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+    }
+    .offense-line {
+        display: flex;
+        gap: 6px;
+        align-items: baseline;
+        color: var(--stu-ink);
+        font-size: .95rem;
+        line-height: 1.35;
+    }
+    .offense-line span {
+        color: var(--stu-muted);
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+    .fine-box {
+        display: grid;
+        justify-items: end;
+        gap: 8px;
+        min-width: 130px;
+    }
+    .fine-label {
+        color: var(--stu-muted);
+        font-size: .72rem;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+    .fine-amount {
+        color: var(--stu-ink);
+        font-size: 1.25rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .offense-content {
+        display: grid;
+        gap: 16px;
+    }
+    .offense-content.has-evidence {
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+        align-items: start;
+    }
+    .offense-section-title {
+        margin: 0 0 8px;
+        color: var(--stu-ink);
+        font-weight: 800;
+    }
+    .offense-rules {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 8px;
+    }
+    .offense-rule {
+        border: 1px solid rgba(233,222,209,.78);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(255,253,250,.68);
+        color: var(--stu-ink);
+    }
+    .offense-rule small {
+        display: block;
+        margin-top: 4px;
+        color: var(--stu-muted);
+    }
+    .evidence-panel {
+        border: 1px solid rgba(233,222,209,.78);
+        border-radius: 14px;
+        padding: 10px;
+        background: rgba(255,253,250,.68);
+    }
+    .evidence-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: .82rem;
+        font-weight: 800;
+        color: var(--stu-ink);
+    }
+    .evidence-link {
+        color: #7b5b43;
+        font-size: .74rem;
+        text-decoration: none;
+        font-weight: 800;
+    }
+    .payment-line {
+        margin-top: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--stu-muted);
+        font-size: .82rem;
+        font-weight: 700;
+    }
     /* Student UX Identity v2 */
     :root {
         --stu-ink: #1f1d1a;
@@ -148,7 +258,56 @@
         border-radius: 999px;
         font-weight: 700;
     }
+    body[data-theme="dark"] .offense-card {
+        background:
+            linear-gradient(145deg, rgba(31, 27, 23, .88), rgba(14, 13, 12, .78)),
+            radial-gradient(circle at 8% 0%, rgba(255,255,255,.06), transparent 36%) !important;
+        border-color: rgba(226, 209, 192, .16) !important;
+        box-shadow:
+            0 18px 38px rgba(0,0,0,.24),
+            inset 0 1px 0 rgba(255,255,255,.07) !important;
+        backdrop-filter: blur(16px) saturate(126%);
+        -webkit-backdrop-filter: blur(16px) saturate(126%);
+    }
+    body[data-theme="dark"] .offense-card .card-head {
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.025)),
+            radial-gradient(circle at 100% 0%, rgba(215,191,168,.08), transparent 38%) !important;
+        border-color: rgba(226, 209, 192, .13) !important;
+    }
+    body[data-theme="dark"] .offense-line,
+    body[data-theme="dark"] .fine-amount,
+    body[data-theme="dark"] .offense-section-title,
+    body[data-theme="dark"] .offense-rule,
+    body[data-theme="dark"] .evidence-title {
+        color: #fff7ef !important;
+    }
+    body[data-theme="dark"] .offense-line span,
+    body[data-theme="dark"] .fine-label,
+    body[data-theme="dark"] .offense-rule small,
+    body[data-theme="dark"] .payment-line {
+        color: rgba(247,239,232,.66) !important;
+    }
+    body[data-theme="dark"] .offense-rule,
+    body[data-theme="dark"] .evidence-panel {
+        background: rgba(255,255,255,.055) !important;
+        border-color: rgba(226, 209, 192, .14) !important;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.055);
+    }
+    body[data-theme="dark"] .evidence-img {
+        border-color: rgba(226, 209, 192, .24) !important;
+        box-shadow: 0 12px 28px rgba(0,0,0,.26);
+    }
+    body[data-theme="dark"] .evidence-link {
+        color: #d7bfa8 !important;
+    }
     @media (max-width: 980px) {
+        .offense-content.has-evidence {
+            grid-template-columns: 1fr;
+        }
+        .fine-box {
+            justify-items: start;
+        }
         .head,
         .toolbar,
         .actions {
@@ -191,43 +350,61 @@
     </div>
 
     @forelse($offenses as $offense)
-        <div class="card">
+        <div class="card offense-card">
             <div class="card-head">
-                <div><strong>{{ __('Tarikh:') }}</strong> {{ $offense->offense_date }} {{ $offense->offense_time }}<br><strong>{{ __('Tempat:') }}</strong> {{ $offense->place }}</div>
-                <div style="text-align:right;"><div><strong>{{ __('Denda:') }}</strong> RM {{ number_format((float)$offense->fine_amount, 2) }}</div><div style="margin-top:6px;"><span class="status-badge status-{{ strtolower($offense->status) }}">{{ __($offense->status) }}</span></div></div>
+                <div class="offense-meta">
+                    <div class="offense-line"><span>{{ __('Date') }}</span> {{ $offense->offense_date }} {{ $offense->offense_time }}</div>
+                    <div class="offense-line"><span>{{ __('Location') }}</span> {{ $offense->place }}</div>
+                </div>
+                <div class="fine-box">
+                    <div>
+                        <div class="fine-label">{{ __('Fine') }}</div>
+                        <div class="fine-amount">RM {{ number_format((float)$offense->fine_amount, 2) }}</div>
+                    </div>
+                    <span class="status-badge status-{{ strtolower($offense->status) }}">{{ __($offense->status) }}</span>
+                </div>
             </div>
             <div class="card-body">
-                <div><strong>{{ __('Peraturan Dilanggar:') }}</strong></div>
-                <ul>
-                    @foreach(($itemsByOffense[$offense->id] ?? collect()) as $item)
-                        <li>[{{ __($item->rule_reference) }}] {{ __($item->description) }} @if($item->note)<br><small>{{ __('Nota') }}: {{ $item->note }}</small>@endif</li>
-                    @endforeach
-                </ul>
+                <div class="offense-content {{ !empty($offense->evidence_photo_path) ? 'has-evidence' : '' }}">
+                    <div>
+                        <div class="offense-section-title">{{ __('Violated Rules') }}</div>
+                        <ul class="offense-rules">
+                            @foreach(($itemsByOffense[$offense->id] ?? collect()) as $item)
+                                <li class="offense-rule">
+                                    [{{ __($item->rule_reference) }}] {{ __($item->description) }}
+                                    @if($item->note)<small>{{ __('Note') }}: {{ $item->note }}</small>@endif
+                                </li>
+                            @endforeach
+                        </ul>
 
-                @if(!empty($offense->evidence_photo_path))
-                    <div style="margin-top:10px;">
-                        <strong>{{ __('Bukti Gambar') }}:</strong>
-                        <a href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank">{{ __('Lihat gambar asal') }}</a>
-                        <img src="{{ asset('storage/' . $offense->evidence_photo_path) }}" alt="{{ __('Bukti Gambar') }}" class="evidence-img">
+                        @php $app = $fineAppsByOffense[$offense->id] ?? null; @endphp
+                        @if($app)
+                            <div class="payment-line">
+                                <strong>{{ __('Payment application') }}</strong>
+                                <span class="status-badge status-{{ strtolower($app->status) }}">{{ __($app->status) }}</span>
+                                @if($app->meeting_date)<span>| {{ __('Date') }}: {{ $app->meeting_date }}</span>@endif
+                            </div>
+                        @elseif($offense->status !== 'paid')
+                            <form method="POST" action="{{ route('student.fine-applications.store') }}" style="margin-top:12px;">
+                                @csrf
+                                <input type="hidden" name="offense_id" value="{{ $offense->id }}">
+                                <label for="note_{{ $offense->id }}" style="font-size:13px; font-weight:600; color:#7a6555;">{{ __('Catatan permohonan (optional)') }}</label>
+                                <textarea id="note_{{ $offense->id }}" name="student_note" rows="2" placeholder="{{ __('Contoh: Saya ingin membuat bayaran pada minggu ini.') }}"></textarea>
+                                <button class="btn btn-primary" type="submit" style="margin-top:8px;">{{ __('Mohon Bayaran Denda') }}</button>
+                            </form>
+                        @endif
                     </div>
-                @endif
 
-                @php $app = $fineAppsByOffense[$offense->id] ?? null; @endphp
-                @if($app)
-                    <div style="margin-top:10px; font-size:13px; color:#7a6555;">
-                        <strong>{{ __('Permohonan bayaran:') }}</strong>
-                        <span class="status-badge status-{{ strtolower($app->status) }}">{{ __($app->status) }}</span>
-                        @if($app->meeting_date)| <strong>{{ __('Tarikh') }}:</strong> {{ $app->meeting_date }} @endif
-                    </div>
-                @elseif($offense->status !== 'paid')
-                    <form method="POST" action="{{ route('student.fine-applications.store') }}" style="margin-top:12px;">
-                        @csrf
-                        <input type="hidden" name="offense_id" value="{{ $offense->id }}">
-                        <label for="note_{{ $offense->id }}" style="font-size:13px; font-weight:600; color:#7a6555;">{{ __('Catatan permohonan (optional)') }}</label>
-                        <textarea id="note_{{ $offense->id }}" name="student_note" rows="2" placeholder="{{ __('Contoh: Saya ingin membuat bayaran pada minggu ini.') }}"></textarea>
-                        <button class="btn btn-primary" type="submit" style="margin-top:8px;">{{ __('Mohon Bayaran Denda') }}</button>
-                    </form>
-                @endif
+                    @if(!empty($offense->evidence_photo_path))
+                        <div class="evidence-panel">
+                            <div class="evidence-title">
+                                <span>{{ __('Evidence Photo') }}</span>
+                                <a class="evidence-link" href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank">{{ __('Open original') }}</a>
+                            </div>
+                            <img src="{{ asset('storage/' . $offense->evidence_photo_path) }}" alt="{{ __('Bukti Gambar') }}" class="evidence-img">
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     @empty

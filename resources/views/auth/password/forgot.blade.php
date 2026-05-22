@@ -8,14 +8,16 @@
     <link rel="apple-touch-icon" href="{{ asset('images/logohep.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background:#fdf8f3; margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem; }
-        .card { width:100%; max-width:460px; background:#fff; border:1px solid #eadfd2; border-radius:14px; padding:18px; }
+        :root { --bg:#fdf8f3; --surface:#fff; --text:#111827; --muted:#6b7280; --border:#eadfd2; --field:#fff; --primary:#8a7362; }
+        body[data-theme="dark"] { --bg:#0f0e0d; --surface:#171412; --text:#f7efe8; --muted:#c8b8a9; --border:rgba(226,209,192,.16); --field:rgba(24,21,18,.82); --primary:#d7bfa8; color-scheme:dark; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background:var(--bg); color:var(--text); margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem; }
+        .card { width:100%; max-width:460px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
         h1 { margin:0 0 6px; font-size:22px; }
-        p { margin:0 0 14px; color:#6b7280; font-size:14px; }
-        label { display:block; font-size:13px; font-weight:600; color:#6b7280; margin-bottom:6px; }
-        input, select { width:100%; border:1px solid #e5d8c8; border-radius:8px; padding:9px 10px; font-size:14px; margin-bottom:10px; }
+        p { margin:0 0 14px; color:var(--muted); font-size:14px; }
+        label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; }
+        input, select { width:100%; border:1px solid var(--border); border-radius:8px; padding:9px 10px; font-size:14px; margin-bottom:10px; background:var(--field); color:var(--text); }
         .actions { display:flex; gap:8px; margin-top:8px; }
-        .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:9px 12px; text-decoration:none; font-size:13px; font-weight:600; cursor:pointer; }
+        .btn { display:inline-block; border:1px solid #cbb9a4; background:var(--surface); color:var(--primary); border-radius:8px; padding:9px 12px; text-decoration:none; font-size:13px; font-weight:600; cursor:pointer; }
         .btn-primary { background:linear-gradient(135deg,#A48D78,#CBB9A4); color:#fff; border:none; }
         .ok { margin-bottom:10px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:9px; font-size:13px; }
         .warn { margin-bottom:10px; background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:8px; padding:9px; font-size:13px; }
@@ -27,12 +29,12 @@
             bottom: .75rem;
             text-align: center;
             font-size: .76rem;
-            color: #7a6555;
+            color: var(--muted);
             pointer-events: none;
         }
     </style>
 </head>
-<body>
+<body data-theme="{{ session('theme', 'light') }}">
 <div class="card">
     <h1>Lupa Kata Laluan</h1>
     <p>Masukkan maklumat akaun dan email berdaftar untuk menerima kod verifikasi.</p>

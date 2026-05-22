@@ -29,6 +29,8 @@
     }
     .maint-eyebrow.on { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
     .maint-eyebrow.off { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .maint-eyebrow.cache-on { background: #ecfeff; border: 1px solid #a5f3fc; color: #155e75; }
+    .maint-eyebrow.cache-off { background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }
     .maint-hero h3 { margin: 0; font-size: 1.55rem; color: #1f1712; letter-spacing: -.02em; }
     .maint-hero p { margin: .45rem 0 0; color: #74675d; line-height: 1.65; max-width: 720px; }
     .maint-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
@@ -140,6 +142,22 @@
                     <span class="maint-key">Server Time</span>
                     <span class="maint-val">{{ $maintenance['server_time'] }}</span>
                 </div>
+                <div class="maint-row">
+                    <span class="maint-key">System Cache</span>
+                    <span class="maint-val">{{ $maintenance['cache_enabled'] ? 'Enabled' : 'Disabled' }}</span>
+                </div>
+                <div class="maint-row">
+                    <span class="maint-key">Tracked Cache Keys</span>
+                    <span class="maint-val">{{ $maintenance['cache_key_count'] }}</span>
+                </div>
+                <div class="maint-row">
+                    <span class="maint-key">Last Cache Clear</span>
+                    <span class="maint-val">{{ $maintenance['cache_last_cleared_at'] ?: '-' }}</span>
+                </div>
+                <div class="maint-row">
+                    <span class="maint-key">Cache Toggle Updated</span>
+                    <span class="maint-val">{{ $maintenance['cache_updated_at'] ?: '-' }}</span>
+                </div>
 
                 @if($maintenance['bypass_url'])
                     <a class="maint-url" href="{{ $maintenance['bypass_url'] }}" target="_blank" rel="noopener">
@@ -168,6 +186,27 @@
                             @csrf
                             <input type="hidden" name="action" value="enable">
                             <button type="submit" class="maint-btn warn">Enable Maintenance</button>
+                        </form>
+                    @endif
+                </div>
+
+                <hr style="border:none;border-top:1px dashed rgba(122,101,85,.25);margin:1rem 0;">
+
+                <span class="maint-eyebrow {{ $maintenance['cache_enabled'] ? 'cache-on' : 'cache-off' }}">
+                    {{ $maintenance['cache_enabled'] ? 'Cache On' : 'Cache Off' }}
+                </span>
+                <div class="maint-actions">
+                    @if($maintenance['cache_enabled'])
+                        <form method="POST" action="{{ route('admin.maintenance.update') }}">
+                            @csrf
+                            <input type="hidden" name="action" value="cache_disable">
+                            <button type="submit" class="maint-btn warn">Disable Cache</button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('admin.maintenance.update') }}">
+                            @csrf
+                            <input type="hidden" name="action" value="cache_enable">
+                            <button type="submit" class="maint-btn ok">Enable Cache</button>
                         </form>
                     @endif
                 </div>

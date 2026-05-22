@@ -36,20 +36,25 @@ Route::get('/', function () {
         }
     };
 
-    $homeStats = [
-        'students_managed' => $countTable('students'),
-        'open_actions' => $countTable('scholarships', fn ($query) => $query->where('status', 'pending'))
-            + $countTable('fine_payment_applications', fn ($query) => $query->where('status', 'pending'))
-            + $countTable('vehicle_sticker_applications', fn ($query) => $query->where('status', 'pending')),
-        'digital_records' => $countTable('students')
-            + $countTable('scholarships')
-            + $countTable('offenses')
-            + $countTable('student_scholarship_status_forms')
-            + $countTable('fine_payment_applications')
-            + $countTable('vehicle_sticker_applications'),
+    $counts = systemCacheRemember('myhep.home_stats.counts', 120, function () use ($countTable) {
+        return [
+            'students_managed' => $countTable('students'),
+            'open_actions' => $countTable('scholarships', fn ($query) => $query->where('status', 'pending'))
+                + $countTable('fine_payment_applications', fn ($query) => $query->where('status', 'pending'))
+                + $countTable('vehicle_sticker_applications', fn ($query) => $query->where('status', 'pending')),
+            'digital_records' => $countTable('students')
+                + $countTable('scholarships')
+                + $countTable('offenses')
+                + $countTable('student_scholarship_status_forms')
+                + $countTable('fine_payment_applications')
+                + $countTable('vehicle_sticker_applications'),
+        ];
+    });
+
+    $homeStats = array_merge($counts, [
         'server_time' => now()->format('Y-m-d H:i:s'),
         'system_online' => true,
-    ];
+    ]);
 
     return view('welcome', compact('homeStats'));
 })->name('home');
@@ -71,8 +76,8 @@ Route::get('/system-overview/live', function () {
         }
     };
 
-    return response()->json([
-        'data' => [
+    $counts = systemCacheRemember('myhep.home_stats.counts', 120, function () use ($countTable) {
+        return [
             'students_managed' => $countTable('students'),
             'open_actions' => $countTable('scholarships', fn ($query) => $query->where('status', 'pending'))
                 + $countTable('fine_payment_applications', fn ($query) => $query->where('status', 'pending'))
@@ -83,9 +88,14 @@ Route::get('/system-overview/live', function () {
                 + $countTable('student_scholarship_status_forms')
                 + $countTable('fine_payment_applications')
                 + $countTable('vehicle_sticker_applications'),
+        ];
+    });
+
+    return response()->json([
+        'data' => array_merge($counts, [
             'server_time' => now()->format('Y-m-d H:i:s'),
             'system_online' => true,
-        ],
+        ]),
     ]);
 })->name('system-overview.live');
 Route::post('/locale', function (Request $request) {
@@ -297,8 +307,13 @@ Route::get('/admin/maintenance', function () {
         ? json_decode((string) file_get_contents($downFile), true)
         : [];
 
+    $cacheMeta = systemCacheMeta();
     $maintenance = [
         'enabled' => app()->isDownForMaintenance(),
+        'cache_enabled' => isSystemCacheEnabled(),
+        'cache_last_cleared_at' => $cacheMeta['last_cleared_at'] ?? null,
+        'cache_updated_at' => $cacheMeta['updated_at'] ?? null,
+        'cache_key_count' => count(systemCacheKeys()),
         'secret' => is_array($downPayload) ? ($downPayload['secret'] ?? null) : null,
         'retry' => is_array($downPayload) ? ($downPayload['retry'] ?? null) : null,
         'refresh' => is_array($downPayload) ? ($downPayload['refresh'] ?? null) : null,
@@ -316,7 +331,7 @@ Route::get('/admin/maintenance', function () {
 
 Route::post('/admin/maintenance', function (Request $request) {
     $validated = $request->validate([
-        'action' => ['required', Rule::in(['enable', 'disable'])],
+        'action' => ['required', Rule::in(['enable', 'disable', 'cache_enable', 'cache_disable'])],
     ]);
 
     if ($validated['action'] === 'enable') {
@@ -329,6 +344,24 @@ Route::post('/admin/maintenance', function (Request $request) {
 
         return redirect()->route('admin.maintenance.index')
             ->with('success', 'Maintenance mode enabled. Use the bypass URL to continue admin access.');
+    }
+
+    if ($validated['action'] === 'cache_enable') {
+        setSystemCacheEnabled(true);
+        clearSystemCaches();
+        auditLog('cache.enable', 'system', null, 'Enable system cache');
+
+        return redirect()->route('admin.maintenance.index')
+            ->with('success', 'System cache enabled.');
+    }
+
+    if ($validated['action'] === 'cache_disable') {
+        setSystemCacheEnabled(false);
+        clearSystemCaches();
+        auditLog('cache.disable', 'system', null, 'Disable system cache');
+
+        return redirect()->route('admin.maintenance.index')
+            ->with('success', 'System cache disabled.');
     }
 
     Artisan::call('up');

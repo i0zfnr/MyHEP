@@ -46,6 +46,29 @@
             --glass-shadow-hover: 0 22px 48px rgba(61, 46, 34, .14), inset 0 1px 0 rgba(255,255,255,.82);
             --glass-blur: 16px;
         }
+        body[data-theme="dark"] {
+            --primary: #d7bfa8;
+            --primary-dark: #f2dfca;
+            --primary-light: #b99b82;
+            --primary-hover: rgba(215, 191, 168, .14);
+            --accent: #f2c999;
+            --accent-light: rgba(242, 201, 153, .18);
+            --surface: #171412;
+            --bg: #0f0e0d;
+            --text: #f7efe8;
+            --text-muted: #c8b8a9;
+            --text-light: #927f70;
+            --border: rgba(226, 209, 192, .16);
+            --danger: #fca5a5;
+            --danger-light: rgba(127, 29, 29, .24);
+            --glass-bg: rgba(24, 21, 18, .68);
+            --glass-bg-strong: rgba(24, 21, 18, .84);
+            --glass-border: rgba(226, 209, 192, .14);
+            --glass-line: rgba(226, 209, 192, .12);
+            --glass-shadow: 0 16px 38px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255,255,255,.04);
+            --glass-shadow-hover: 0 22px 48px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255,255,255,.06);
+            color-scheme: dark;
+        }
         html, body { margin: 0; padding: 0; min-height: 100vh; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -54,6 +77,194 @@
                 radial-gradient(circle at 92% 6%, rgba(250, 215, 188, .12), transparent 30%),
                 var(--bg);
             color: var(--text);
+        }
+        body[data-theme="dark"] {
+            background:
+                radial-gradient(circle at 8% 8%, rgba(215, 191, 168, .12), transparent 34%),
+                radial-gradient(circle at 92% 6%, rgba(242, 201, 153, .08), transparent 30%),
+                var(--bg);
+        }
+        body[data-theme="dark"] input,
+        body[data-theme="dark"] select,
+        body[data-theme="dark"] textarea {
+            background: rgba(24, 21, 18, .82);
+            border-color: var(--border);
+            color: var(--text);
+        }
+        body[data-theme="dark"] input::placeholder,
+        body[data-theme="dark"] textarea::placeholder {
+            color: var(--text-light);
+        }
+        body[data-theme="dark"] .page-body .card,
+        body[data-theme="dark"] .page-body .stat,
+        body[data-theme="dark"] .page-body .sch-card,
+        body[data-theme="dark"] .page-body .ann-item,
+        body[data-theme="dark"] .page-body .rule-row,
+        body[data-theme="dark"] .page-body .portal-card,
+        body[data-theme="dark"] .page-body .data-card,
+        body[data-theme="dark"] .page-body .monitor-card,
+        body[data-theme="dark"] .page-body .monitor-kpi {
+            background: var(--surface);
+            border-color: var(--border);
+            color: var(--text);
+        }
+        body[data-theme="dark"] .page-body h1,
+        body[data-theme="dark"] .page-body h2,
+        body[data-theme="dark"] .page-body h3,
+        body[data-theme="dark"] .page-body .title,
+        body[data-theme="dark"] .page-body .stat-value,
+        body[data-theme="dark"] .page-body .stat .value {
+            color: var(--text) !important;
+        }
+        body[data-theme="dark"] .page-body p,
+        body[data-theme="dark"] .page-body label,
+        body[data-theme="dark"] .page-body small,
+        body[data-theme="dark"] .page-body .muted,
+        body[data-theme="dark"] .page-body .hint,
+        body[data-theme="dark"] .page-body .cat {
+            color: var(--text-muted);
+        }
+        body[data-theme="dark"] .page-body table,
+        body[data-theme="dark"] .page-body th,
+        body[data-theme="dark"] .page-body td {
+            border-color: var(--border);
+            color: var(--text);
+        }
+        body[data-theme="dark"] .page-body th {
+            background: rgba(215, 191, 168, .10);
+        }
+        body[data-theme="dark"] .page-body .btn:not(.btn-primary):not(.btn-danger),
+        body[data-theme="dark"] .page-body .ann-link {
+            background: var(--surface);
+            border-color: var(--border);
+            color: var(--primary-dark);
+        }
+        body[data-theme="dark"] .sidebar {
+            background: rgba(18, 16, 14, .94);
+            border-right-color: var(--glass-line);
+        }
+        body[data-theme="dark"] .sb-header,
+        body[data-theme="dark"] .sb-footer,
+        body[data-theme="dark"] .app-footer {
+            background: rgba(18, 16, 14, .90);
+            border-color: var(--glass-line);
+            color: var(--text-muted);
+        }
+        body[data-theme="dark"] .page-header {
+            background:
+                linear-gradient(180deg, rgba(18, 16, 14, .88), rgba(18, 16, 14, .72)),
+                radial-gradient(circle at 96% 0%, rgba(215,191,168,.10), transparent 34%),
+                radial-gradient(circle at 10% 0%, rgba(95,190,145,.07), transparent 28%);
+            border-color: rgba(226, 209, 192, .12);
+            box-shadow:
+                0 12px 30px rgba(0,0,0,.24),
+                inset 0 1px 0 rgba(255,255,255,.055);
+            color: var(--text-muted);
+        }
+        body[data-theme="dark"] .page-header::after {
+            background: linear-gradient(90deg, transparent, rgba(215,191,168,.22), rgba(95,190,145,.14), transparent);
+        }
+        body[data-theme="dark"] .sb-brand-icon {
+            background: rgba(255, 255, 255, .92);
+            border-color: rgba(255, 255, 255, .14);
+        }
+        body[data-theme="dark"] .sb-user {
+            background: linear-gradient(135deg, rgba(44, 37, 31, .96), rgba(30, 26, 22, .92));
+            border-color: var(--glass-border);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, .26);
+        }
+        body[data-theme="dark"] .nav-link {
+            color: var(--text-muted);
+        }
+        body[data-theme="dark"] .nav-link:hover,
+        body[data-theme="dark"] .nav-link.active,
+        body[data-theme="dark"] .nav-group[open] > .nav-group-toggle,
+        body[data-theme="dark"] .nav-group:hover > .nav-group-toggle {
+            background: rgba(215, 191, 168, .16);
+            color: var(--text);
+        }
+        body[data-theme="dark"] .nav-icon,
+        body[data-theme="dark"] .nav-chevron {
+            color: var(--primary);
+        }
+        body[data-theme="dark"] .btn-logout {
+            background: rgba(127, 29, 29, .12);
+            border-color: rgba(252, 165, 165, .55);
+            color: #fecaca;
+        }
+        body[data-theme="dark"] .btn-logout:hover {
+            background: rgba(127, 29, 29, .24);
+        }
+        body[data-theme="dark"] .page-header h1,
+        body[data-theme="dark"] .page-header h2,
+        body[data-theme="dark"] .page-header h3,
+        body[data-theme="dark"] .page-header [style*="color:#2d1f14"],
+        body[data-theme="dark"] .page-header [style*="color: #2d1f14"],
+        body[data-theme="dark"] .page-header [style*="color:#241a12"],
+        body[data-theme="dark"] .page-header [style*="color: #241a12"] {
+            color: var(--text) !important;
+        }
+        body[data-theme="dark"] .header-support,
+        body[data-theme="dark"] .header-user,
+        body[data-theme="dark"] .header-user-menu {
+            background: rgba(255,255,255,.075);
+            border-color: rgba(226, 209, 192, .16);
+            color: var(--text);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.075);
+        }
+        body[data-theme="dark"] .header-support {
+            color: var(--text-muted);
+        }
+        body[data-theme="dark"] .header-user-menu {
+            background:
+                linear-gradient(180deg, rgba(42, 37, 32, .92), rgba(25, 22, 19, .88)),
+                radial-gradient(circle at 100% 0%, rgba(215,191,168,.14), transparent 42%) !important;
+            border-color: rgba(226, 209, 192, .20);
+            box-shadow:
+                0 20px 46px rgba(0,0,0,.42),
+                inset 0 1px 0 rgba(255,255,255,.10),
+                inset 0 0 0 1px rgba(255,255,255,.035);
+            backdrop-filter: blur(30px) saturate(150%);
+            -webkit-backdrop-filter: blur(30px) saturate(150%);
+        }
+        body[data-theme="dark"] .header-user-menu::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(10, 9, 8, .20);
+            pointer-events: none;
+        }
+        body[data-theme="dark"] .header-user-menu > * {
+            position: relative;
+            z-index: 1;
+        }
+        body[data-theme="dark"] .header-menu-name,
+        body[data-theme="dark"] .header-menu-link,
+        body[data-theme="dark"] .header-menu-btn {
+            color: #fff7ef;
+            text-shadow: 0 1px 1px rgba(0,0,0,.28);
+        }
+        body[data-theme="dark"] .header-user-avatar {
+            background: linear-gradient(135deg, #b99b82, #ead5bd);
+            color: #17110d;
+            box-shadow: 0 6px 14px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.24);
+        }
+        body[data-theme="dark"] .header-user-role,
+        body[data-theme="dark"] .header-menu-role {
+            color: var(--text-light);
+        }
+        body[data-theme="dark"] .header-support:hover,
+        body[data-theme="dark"] .header-user:hover,
+        body[data-theme="dark"] .header-menu-link:hover,
+        body[data-theme="dark"] .header-menu-btn:hover {
+            background: rgba(215,191,168,.14);
+            border-color: rgba(215,191,168,.34);
+            color: var(--text);
+        }
+        body[data-theme="dark"] .header-menu-head,
+        body[data-theme="dark"] .header-menu-sep {
+            border-color: rgba(226, 209, 192, .12);
         }
         .app-layout { display: flex; min-height: 100vh; align-items: stretch; }
 
@@ -289,6 +500,61 @@
         .nav-link.active { background: var(--primary-hover); color: var(--primary-dark); font-weight: 700; }
         .nav-link.active::before { content: ''; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; background: var(--primary); border-radius: 0 3px 3px 0; }
         .nav-icon { width: 15px; height: 15px; color: var(--primary-light); }
+        .nav-group { margin-bottom: 2px; }
+        .nav-group summary { list-style: none; }
+        .nav-group summary::-webkit-details-marker { display: none; }
+        .nav-group-toggle {
+            width: 100%;
+            border: 0;
+            cursor: pointer;
+            font-family: inherit;
+            user-select: none;
+        }
+        .nav-group-toggle .nav-chevron {
+            width: 13px;
+            height: 13px;
+            margin-left: auto;
+            color: var(--text-light);
+            transition: transform var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+        }
+        .nav-group[open] > .nav-group-toggle,
+        .nav-group:hover > .nav-group-toggle {
+            background: var(--primary-hover);
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .nav-group[open] > .nav-group-toggle .nav-chevron,
+        .nav-group:hover > .nav-group-toggle .nav-chevron {
+            transform: rotate(180deg);
+            color: var(--primary-dark);
+        }
+        .nav-group.active > .nav-group-toggle::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 18%;
+            bottom: 18%;
+            width: 3px;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+        .nav-submenu {
+            display: none;
+            margin: .15rem 0 .45rem;
+            padding-left: .45rem;
+            border-left: 1px solid var(--border);
+        }
+        .nav-group[open] > .nav-submenu,
+        .nav-group:hover > .nav-submenu,
+        .nav-group:focus-within > .nav-submenu {
+            display: block;
+        }
+        .nav-submenu .nav-link {
+            margin-left: .35rem;
+            padding-top: .5rem;
+            padding-bottom: .5rem;
+            font-size: .78rem;
+        }
 
         .sb-footer { padding: .75rem .875rem; border-top: 1px solid var(--glass-line); flex-shrink: 0; background: rgba(255,255,255,.68); }
         .btn-logout { display: flex; align-items: center; gap: .5rem; width: 100%; padding: .55rem .75rem; border-radius: 8px; border: 1px solid #fecaca; background: none; font-size: .8125rem; font-weight: 600; color: var(--danger); cursor: pointer; }
@@ -326,16 +592,49 @@
         .is-open-ham .ham-line:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
         .page-header {
-            background: var(--glass-bg-strong);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.64)),
+                radial-gradient(circle at 100% 0%, rgba(203,185,164,.18), transparent 34%);
             border-bottom: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
+            box-shadow: 0 10px 28px rgba(61, 46, 34, .08), inset 0 1px 0 rgba(255,255,255,.72);
             padding: 1rem 1.25rem;
             backdrop-filter: blur(var(--glass-blur)) saturate(125%);
             -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(125%);
         }
+        .page-header::after {
+            content: '';
+            position: absolute;
+            left: 1.25rem;
+            right: 1.25rem;
+            bottom: -1px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(164,141,120,.32), transparent);
+            pointer-events: none;
+        }
         @media (min-width: 640px) { .page-header { padding: 1.125rem 1.5rem; } }
-        @media (min-width: 1024px) { .page-header { padding: 1.25rem 2rem; } }
+        @media (min-width: 1024px) {
+            .page-header { padding: 1.05rem 2rem; }
+            .page-header::after { left: 2rem; right: 2rem; }
+        }
         .page-header-inner { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+        .page-header-left {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+        }
+        .page-header-left h1,
+        .page-header-left h2,
+        .page-header-left h3 {
+            margin: 0 !important;
+            font-size: clamp(1rem, 1.5vw, 1.15rem) !important;
+            line-height: 1.25 !important;
+            font-weight: 800 !important;
+            letter-spacing: 0 !important;
+            color: var(--text) !important;
+        }
         .page-header-right { display: flex; align-items: center; gap: .55rem; margin-left: auto; position: relative; }
         .header-support {
             display: inline-flex;
@@ -401,12 +700,15 @@
             top: calc(100% + 6px);
             right: 0;
             min-width: 230px;
-            background: rgba(255, 255, 255, .88);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,250,245,.84));
             border: 1px solid var(--glass-border);
             border-radius: 12px;
-            box-shadow: 0 12px 28px rgba(45,31,20,.12);
-            backdrop-filter: blur(calc(var(--glass-blur) * .85)) saturate(128%);
-            -webkit-backdrop-filter: blur(calc(var(--glass-blur) * .85)) saturate(128%);
+            box-shadow:
+                0 18px 38px rgba(45,31,20,.18),
+                inset 0 1px 0 rgba(255,255,255,.76);
+            backdrop-filter: blur(24px) saturate(145%);
+            -webkit-backdrop-filter: blur(24px) saturate(145%);
             padding: .45rem;
             z-index: 50;
             display: none;
@@ -569,6 +871,262 @@
             box-shadow: var(--glass-shadow-hover) !important;
         }
 
+        body[data-theme="dark"] .page-body {
+            background:
+                radial-gradient(circle at 12% 4%, rgba(215, 191, 168, .09), transparent 28%),
+                radial-gradient(circle at 88% 12%, rgba(95, 132, 113, .08), transparent 30%),
+                linear-gradient(180deg, rgba(255,255,255,.015), transparent 18%);
+        }
+        body[data-theme="dark"] .page-body .card,
+        body[data-theme="dark"] .page-body .portal-card,
+        body[data-theme="dark"] .page-body .stat-card,
+        body[data-theme="dark"] .page-body .data-card,
+        body[data-theme="dark"] .page-body .monitor-card,
+        body[data-theme="dark"] .page-body .monitor-kpi,
+        body[data-theme="dark"] .page-body .no-access,
+        body[data-theme="dark"] .page-body .settings-card,
+        body[data-theme="dark"] .page-body .filters,
+        body[data-theme="dark"] .page-body .filter-card,
+        body[data-theme="dark"] .page-body .form-card,
+        body[data-theme="dark"] .page-body .panel,
+        body[data-theme="dark"] .page-body .table-wrap,
+        body[data-theme="dark"] .page-body form.card {
+            background:
+                linear-gradient(145deg, rgba(32, 28, 24, .82), rgba(15, 14, 12, .72)),
+                radial-gradient(circle at 8% 0%, rgba(255,255,255,.065), transparent 34%),
+                radial-gradient(circle at 100% 0%, rgba(215,191,168,.055), transparent 40%) !important;
+            border-color: rgba(226, 209, 192, .15) !important;
+            box-shadow:
+                0 18px 42px rgba(0, 0, 0, .28),
+                inset 0 1px 0 rgba(255,255,255,.07),
+                inset 0 -1px 0 rgba(0,0,0,.22) !important;
+            color: var(--text);
+            backdrop-filter: blur(18px) saturate(126%);
+            -webkit-backdrop-filter: blur(18px) saturate(126%);
+        }
+        body[data-theme="dark"] .page-body .dash-hero {
+            background:
+                linear-gradient(135deg, rgba(38, 33, 29, .92), rgba(18, 16, 14, .82)),
+                radial-gradient(circle at 10% 0%, rgba(255,255,255,.075), transparent 36%),
+                radial-gradient(circle at 100% 50%, rgba(215,191,168,.07), transparent 42%) !important;
+        }
+        body[data-theme="dark"] .page-body .dash-hero::before {
+            background: linear-gradient(135deg, transparent 0%, rgba(215,191,168,.10) 100%) !important;
+        }
+        body[data-theme="dark"] .page-body .card h2,
+        body[data-theme="dark"] .page-body .card h3,
+        body[data-theme="dark"] .page-body .data-card-head,
+        body[data-theme="dark"] .page-body .ui-card-head,
+        body[data-theme="dark"] .page-body .filters,
+        body[data-theme="dark"] .page-body thead th {
+            background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025)) !important;
+            border-color: rgba(226, 209, 192, .14) !important;
+        }
+        body[data-theme="dark"] .page-body input,
+        body[data-theme="dark"] .page-body select,
+        body[data-theme="dark"] .page-body textarea {
+            background: rgba(10, 9, 8, .72) !important;
+            border-color: rgba(226, 209, 192, .22) !important;
+            color: var(--text) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+        }
+        body[data-theme="dark"] .page-body .btn:not(.btn-primary),
+        body[data-theme="dark"] .page-body .btn-link,
+        body[data-theme="dark"] .page-body .portal-link,
+        body[data-theme="dark"] .page-body .action-btn,
+        body[data-theme="dark"] .page-body .btn-ghost {
+            background: rgba(255,255,255,.075) !important;
+            border-color: rgba(226, 209, 192, .18) !important;
+            color: var(--text) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+        }
+        body[data-theme="dark"] .page-body .portal-link:hover,
+        body[data-theme="dark"] .page-body .btn:not(.btn-primary):hover {
+            background: rgba(215,191,168,.16) !important;
+            border-color: rgba(215,191,168,.42) !important;
+        }
+        body[data-theme="dark"] .page-body .monitor-pill,
+        body[data-theme="dark"] .page-body .dash-hero-label,
+        body[data-theme="dark"] .page-body .status-badge,
+        body[data-theme="dark"] .page-body .status {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+        }
+        body[data-theme="dark"] .page-body .card:hover,
+        body[data-theme="dark"] .page-body .portal-card:hover,
+        body[data-theme="dark"] .page-body .stat-card:hover,
+        body[data-theme="dark"] .page-body .data-card:hover,
+        body[data-theme="dark"] .page-body .monitor-card:hover,
+        body[data-theme="dark"] .page-body .monitor-kpi:hover {
+            border-color: rgba(215,191,168,.30) !important;
+            box-shadow:
+                0 24px 52px rgba(0, 0, 0, .36),
+                inset 0 1px 0 rgba(255,255,255,.10) !important;
+        }
+        body[data-theme="dark"] .page-body .head,
+        body[data-theme="dark"] .page-body .card h2,
+        body[data-theme="dark"] .page-body .card-head,
+        body[data-theme="dark"] .page-body .maint-card-head,
+        body[data-theme="dark"] .page-body .section-head,
+        body[data-theme="dark"] .page-body .panel-head {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.025)) !important;
+            border-color: rgba(226, 209, 192, .14) !important;
+            color: var(--text) !important;
+        }
+        body[data-theme="dark"] .page-body .head h1,
+        body[data-theme="dark"] .page-body .head h2,
+        body[data-theme="dark"] .page-body .head h3,
+        body[data-theme="dark"] .page-body .card h2,
+        body[data-theme="dark"] .page-body .card-head *,
+        body[data-theme="dark"] .page-body .maint-card-head {
+            color: var(--text) !important;
+        }
+        body[data-theme="dark"] .page-body .head::before,
+        body[data-theme="dark"] .page-body .card h2::before {
+            background: linear-gradient(180deg, #d7bfa8 0%, #5fbe91 100%) !important;
+        }
+        body[data-theme="dark"] .page-body .stat,
+        body[data-theme="dark"] .page-body .summary,
+        body[data-theme="dark"] .page-body .summary-card,
+        body[data-theme="dark"] .page-body .maint-hero,
+        body[data-theme="dark"] .page-body .maint-card,
+        body[data-theme="dark"] .page-body .camera-panel,
+        body[data-theme="dark"] .page-body .camera-box,
+        body[data-theme="dark"] .page-body .upload-box,
+        body[data-theme="dark"] .page-body .rules-list,
+        body[data-theme="dark"] .page-body .rule-row {
+            background:
+                linear-gradient(145deg, rgba(30, 26, 22, .82), rgba(12, 11, 10, .70)),
+                radial-gradient(circle at 8% 0%, rgba(255,255,255,.055), transparent 36%) !important;
+            border-color: rgba(226, 209, 192, .16) !important;
+            color: var(--text) !important;
+            box-shadow:
+                0 16px 34px rgba(0, 0, 0, .24),
+                inset 0 1px 0 rgba(255,255,255,.06) !important;
+        }
+        body[data-theme="dark"] .page-body .rules-list {
+            padding: .45rem;
+            scrollbar-color: rgba(215,191,168,.45) rgba(255,255,255,.06);
+        }
+        body[data-theme="dark"] .page-body .rule-top,
+        body[data-theme="dark"] .page-body .rule-row label,
+        body[data-theme="dark"] .page-body .rules-selected-only,
+        body[data-theme="dark"] .page-body .rules-selected-count,
+        body[data-theme="dark"] .page-body .camera-msg,
+        body[data-theme="dark"] .page-body .help,
+        body[data-theme="dark"] .page-body .hint,
+        body[data-theme="dark"] .page-body .maint-key,
+        body[data-theme="dark"] .page-body .maint-hero p {
+            color: var(--text-muted) !important;
+        }
+        body[data-theme="dark"] .page-body .maint-hero h3,
+        body[data-theme="dark"] .page-body .maint-val,
+        body[data-theme="dark"] .page-body .rule-title,
+        body[data-theme="dark"] .page-body .rule-row strong {
+            color: var(--text) !important;
+        }
+        body[data-theme="dark"] .page-body .maint-row {
+            border-color: rgba(226, 209, 192, .14) !important;
+        }
+        body[data-theme="dark"] .page-body .maint-note,
+        body[data-theme="dark"] .page-body .camera-msg.err,
+        body[data-theme="dark"] .page-body .error {
+            background: rgba(127, 29, 29, .22) !important;
+            border-color: rgba(252, 165, 165, .28) !important;
+            color: #fecaca !important;
+        }
+        body[data-theme="dark"] .page-body .maint-url {
+            background: rgba(10, 9, 8, .62) !important;
+            border-color: rgba(226, 209, 192, .20) !important;
+            color: var(--primary-dark) !important;
+        }
+        body[data-theme="dark"] .page-body input[type="file"] {
+            padding: .55rem !important;
+        }
+        body[data-theme="dark"] .page-body input[type="file"]::file-selector-button {
+            margin-right: .75rem;
+            border: 1px solid rgba(226, 209, 192, .22);
+            border-radius: 8px;
+            background: rgba(255,255,255,.085);
+            color: var(--text);
+            padding: .45rem .7rem;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        body[data-theme="dark"] .page-body table {
+            background: rgba(14, 13, 12, .72) !important;
+            border-color: rgba(226, 209, 192, .14) !important;
+        }
+        body[data-theme="dark"] .page-body tbody tr {
+            background: rgba(12, 11, 10, .34) !important;
+        }
+        body[data-theme="dark"] .page-body tbody tr:hover {
+            background: rgba(215, 191, 168, .075) !important;
+        }
+        body[data-theme="dark"] .page-body td,
+        body[data-theme="dark"] .page-body th {
+            border-color: rgba(226, 209, 192, .13) !important;
+        }
+        body[data-theme="dark"] .page-body [style*="color:#2d1f14"],
+        body[data-theme="dark"] .page-body [style*="color: #2d1f14"],
+        body[data-theme="dark"] .page-body [style*="color:#241a12"],
+        body[data-theme="dark"] .page-body [style*="color: #241a12"] {
+            color: var(--text) !important;
+        }
+        body[data-theme="dark"] .page-body .btn-primary,
+        body[data-theme="dark"] .page-body .maint-btn.ok,
+        body[data-theme="dark"] .page-body button.btn-primary {
+            background: linear-gradient(135deg, #b99b82 0%, #e4cdb7 100%) !important;
+            border-color: rgba(255,255,255,.08) !important;
+            color: #15110e !important;
+            box-shadow: 0 10px 22px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.25) !important;
+        }
+        body[data-theme="dark"] .page-body .maint-btn.warn {
+            background: rgba(127, 29, 29, .22) !important;
+            border-color: rgba(252, 165, 165, .32) !important;
+            color: #fecaca !important;
+        }
+        body[data-theme="dark"] .page-body .badge,
+        body[data-theme="dark"] .page-body .status {
+            border-color: rgba(255,255,255,.16) !important;
+        }
+        body[data-theme="dark"] .page-body .miya-page {
+            background:
+                radial-gradient(780px 360px at 50% -12%, rgba(104, 151, 130, .22) 0%, rgba(32, 43, 37, .16) 48%, transparent 76%),
+                linear-gradient(145deg, rgba(33, 31, 28, .82), rgba(14, 13, 12, .72)) !important;
+            border-color: rgba(226, 209, 192, .18) !important;
+            box-shadow: 0 24px 58px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08) !important;
+        }
+        body[data-theme="dark"] .page-body .miya-page::before {
+            background:
+                linear-gradient(120deg, rgba(255,255,255,.09), transparent 42%),
+                radial-gradient(circle at 86% 18%, rgba(95, 190, 145, .12), transparent 32%) !important;
+        }
+        body[data-theme="dark"] .page-body .miya-clock,
+        body[data-theme="dark"] .page-body .miya-close,
+        body[data-theme="dark"] .page-body .miya-title,
+        body[data-theme="dark"] .page-body .miya-chip {
+            color: var(--text) !important;
+        }
+        body[data-theme="dark"] .page-body .miya-logo,
+        body[data-theme="dark"] .page-body .miya-chip,
+        body[data-theme="dark"] .page-body .miya-input-wrap,
+        body[data-theme="dark"] .page-body .miya-close,
+        body[data-theme="dark"] .page-body .miya-mic {
+            background: rgba(255,255,255,.075) !important;
+            border-color: rgba(226, 209, 192, .18) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+        }
+        body[data-theme="dark"] .page-body .miya-input {
+            background: transparent !important;
+            color: var(--text) !important;
+        }
+        body[data-theme="dark"] .page-body .miya-terms,
+        body[data-theme="dark"] .page-body .miya-note {
+            color: var(--text-muted) !important;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 1ms !important;
@@ -606,7 +1164,7 @@
         }
     </style>
 </head>
-<body>
+<body data-theme="{{ session('theme', 'light') }}">
 @php
     $authUser = session('auth_user');
     $isStudent = ($authUser['role'] ?? null) === 'student';
@@ -622,6 +1180,15 @@
         || request()->routeIs('student.rules.*')
         || request()->routeIs('student.vehicle-stickers.*')
         || request()->routeIs('student.discipline-announcements.*');
+    $adminOnDiscipline = request()->routeIs('admin.students.*')
+        || request()->routeIs('admin.offenses.*')
+        || request()->routeIs('admin.fine-applications.*')
+        || request()->routeIs('admin.vehicle-stickers.*')
+        || request()->routeIs('admin.discipline-announcements.*')
+        || request()->routeIs('admin.rules.*');
+    $adminOnScholarship = request()->routeIs('admin.scholarships.*')
+        || request()->routeIs('admin.student-scholarship-status.*')
+        || request()->routeIs('admin.scholarship-announcements.*');
     $showSidebar = (bool) $authUser && !($isStudent && $studentOnDashboard);
     $showHeaderUserMenu = (bool) $authUser && ($studentOnDashboard || $adminOnDashboard);
 @endphp
@@ -687,19 +1254,19 @@
                     <nav>
                         <a href="{{ route('student.offenses.index') }}" class="nav-link {{ request()->routeIs('student.offenses.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 6h10"/></svg>
-                            {{ __('Offense') }}
+                            {{ __('My Offenses') }}
                         </a>
                         <a href="{{ route('student.vehicle-stickers.index') }}" class="nav-link {{ request()->routeIs('student.vehicle-stickers.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l1.5-4.5a2.25 2.25 0 012.136-1.54h9.228A2.25 2.25 0 0118.75 9l1.5 4.5M5.25 13.5h13.5M6 16.5h.75m10.5 0H18m-12 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75H6zm10.5 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75h-.75z"/></svg>
-                            {{ __('Sticker Kenderaan') }}
+                            {{ __('Vehicle Sticker') }}
                         </a>
                         <a href="{{ route('student.discipline-announcements.index') }}" class="nav-link {{ request()->routeIs('student.discipline-announcements.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
-                            {{ __('Pengumuman') }}
+                            {{ __('Announcements') }}
                         </a>
                         <a href="{{ route('student.rules.index') }}" class="nav-link {{ request()->routeIs('student.rules.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75H7.5A2.25 2.25 0 005.25 9v9A2.25 2.25 0 007.5 20.25h9A2.25 2.25 0 0018.75 18V9A2.25 2.25 0 0016.5 6.75H12z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 11.25h6M9 14.25h6"/></svg>
-                            {{ __('Peraturan') }}
+                            {{ __('Rules') }}
                         </a>
                     </nav>
                 @endif
@@ -707,18 +1274,44 @@
                 @if(!$studentOnScholarship && !$studentOnDiscipline)
                     <div class="nav-label">{{ __('Portal Pelajar') }}</div>
                     <nav>
-                        <a href="{{ route('student.scholarships.index') }}" class="nav-link {{ request()->routeIs('student.scholarships.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-                            {{ __('Scholarship') }}
-                        </a>
-                        <a href="{{ route('student.scholarship-status.form') }}" class="nav-link {{ request()->routeIs('student.scholarship-status.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
-                            {{ __('Borang Status Biasiswa') }}
-                        </a>
-                        <a href="{{ route('student.offenses.index') }}" class="nav-link {{ request()->routeIs('student.offenses.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 6h10"/></svg>
-                            {{ __('Offense') }}
-                        </a>
+                        <details class="nav-group">
+                            <summary class="nav-link nav-group-toggle">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+                                {{ __('Scholarship') }}
+                                <svg class="nav-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                            </summary>
+                            <div class="nav-submenu">
+                                <a href="{{ route('student.scholarships.index') }}" class="nav-link">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+                                    {{ __('Scholarship Records') }}
+                                </a>
+                                <a href="{{ route('student.scholarship-status.form') }}" class="nav-link">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
+                                    {{ __('Status Form') }}
+                                </a>
+                            </div>
+                        </details>
+                        <details class="nav-group">
+                            <summary class="nav-link nav-group-toggle">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                {{ __('Discipline') }}
+                                <svg class="nav-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                            </summary>
+                            <div class="nav-submenu">
+                                <a href="{{ route('student.offenses.index') }}" class="nav-link">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 6h10"/></svg>
+                                    {{ __('My Offenses') }}
+                                </a>
+                                <a href="{{ route('student.vehicle-stickers.index') }}" class="nav-link">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l1.5-4.5a2.25 2.25 0 012.136-1.54h9.228A2.25 2.25 0 0118.75 9l1.5 4.5M5.25 13.5h13.5M6 16.5h.75m10.5 0H18m-12 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75H6zm10.5 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75h-.75z"/></svg>
+                                    {{ __('Vehicle Sticker') }}
+                                </a>
+                                <a href="{{ route('student.rules.index') }}" class="nav-link">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75H7.5A2.25 2.25 0 005.25 9v9A2.25 2.25 0 007.5 20.25h9A2.25 2.25 0 0018.75 18V9A2.25 2.25 0 0016.5 6.75H12z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 11.25h6M9 14.25h6"/></svg>
+                                    {{ __('Rules') }}
+                                </a>
+                            </div>
+                        </details>
                     </nav>
                 @endif
 
@@ -751,66 +1344,94 @@
                 </nav>
 
                 @if($isScholarshipAdmin)
-                    <div class="nav-label">{{ __('Scholarship') }}</div>
                     <nav>
-                        <a href="{{ route('admin.scholarships.index') }}" class="nav-link {{ request()->routeIs('admin.scholarships.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-                            {{ __('Rekod Scholarship') }}
-                        </a>
-                        <a href="{{ route('admin.student-scholarship-status.index') }}" class="nav-link {{ request()->routeIs('admin.student-scholarship-status.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
-                            {{ __('Data Status Biasiswa') }}
-                        </a>
-                        <a href="{{ route('admin.scholarships.create') }}" class="nav-link {{ request()->routeIs('admin.scholarships.create') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            {{ __('Tambah Rekod') }}
-                        </a>
-                        <a href="{{ route('admin.scholarship-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.scholarship-announcements.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
-                            {{ __('Pengumuman') }}
-                        </a>
-                        <a href="{{ route('admin.scholarship-announcements.create') }}" class="nav-link {{ request()->routeIs('admin.scholarship-announcements.create') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            {{ __('Tambah Pengumuman') }}
-                        </a>
+                        @if($adminScope === 'system_admin')
+                            <details class="nav-group {{ $adminOnScholarship ? 'active' : '' }}" {{ $adminOnScholarship ? 'open' : '' }}>
+                                <summary class="nav-link nav-group-toggle">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+                                    {{ __('Scholarship') }}
+                                    <svg class="nav-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                                </summary>
+                                <div class="nav-submenu">
+                        @else
+                            <div>
+                        @endif
+                                <a href="{{ route('admin.scholarships.index') }}" class="nav-link {{ request()->routeIs('admin.scholarships.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+                                    {{ __('Rekod Scholarship') }}
+                                </a>
+                                <a href="{{ route('admin.student-scholarship-status.index') }}" class="nav-link {{ request()->routeIs('admin.student-scholarship-status.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
+                                    {{ __('Data Status Biasiswa') }}
+                                </a>
+                                <a href="{{ route('admin.scholarships.create') }}" class="nav-link {{ request()->routeIs('admin.scholarships.create') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                    {{ __('Tambah Rekod') }}
+                                </a>
+                                <a href="{{ route('admin.scholarship-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.scholarship-announcements.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
+                                    {{ __('Pengumuman') }}
+                                </a>
+                                <a href="{{ route('admin.scholarship-announcements.create') }}" class="nav-link {{ request()->routeIs('admin.scholarship-announcements.create') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                    {{ __('Tambah Pengumuman') }}
+                                </a>
+                            </div>
+                        @if($adminScope === 'system_admin')
+                            </details>
+                        @endif
                     </nav>
                 @endif
 
                 @if($isDisciplineAdmin)
-                    <div class="nav-label">{{ __('Disiplin') }}</div>
                     <nav>
-                        <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                            {{ __('Pelajar') }}
-                        </a>
-                        <a href="{{ route('admin.offenses.index') }}" class="nav-link {{ request()->routeIs('admin.offenses.index') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6"/></svg>
-                            {{ __('Senarai Kesalahan') }}
-                        </a>
-                        <a href="{{ route('admin.offenses.create') }}" class="nav-link {{ request()->routeIs('admin.offenses.create') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            {{ __('Daftar Kesalahan') }}
-                        </a>
-                        <a href="{{ route('admin.fine-applications.index') }}" class="nav-link {{ request()->routeIs('admin.fine-applications.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5"/></svg>
-                            {{ __('Permohonan Bayaran') }}
-                        </a>
-                        <a href="{{ route('admin.vehicle-stickers.index') }}" class="nav-link {{ request()->routeIs('admin.vehicle-stickers.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l1.5-4.5a2.25 2.25 0 012.136-1.54h9.228A2.25 2.25 0 0118.75 9l1.5 4.5M5.25 13.5h13.5M6 16.5h.75m10.5 0H18m-12 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75H6zm10.5 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75h-.75z"/></svg>
-                            {{ __('Sticker Kenderaan') }}
-                        </a>
-                        <a href="{{ route('admin.discipline-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.discipline-announcements.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
-                            {{ __('Pengumuman Disiplin') }}
-                        </a>
-                        <a href="{{ route('admin.discipline-announcements.create') }}" class="nav-link {{ request()->routeIs('admin.discipline-announcements.create') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            {{ __('Tambah Pengumuman') }}
-                        </a>
-                        <a href="{{ route('admin.rules.index') }}" class="nav-link {{ request()->routeIs('admin.rules.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75H7.5A2.25 2.25 0 005.25 9v9A2.25 2.25 0 007.5 20.25h9A2.25 2.25 0 0018.75 18V9A2.25 2.25 0 0016.5 6.75H12z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 11.25h6M9 14.25h6"/></svg>
-                            {{ __('Peraturan') }}
-                        </a>
+                        @if($adminScope === 'system_admin')
+                            <details class="nav-group {{ $adminOnDiscipline ? 'active' : '' }}" {{ $adminOnDiscipline ? 'open' : '' }}>
+                                <summary class="nav-link nav-group-toggle">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008M4.5 19.5h15l-7.5-15-7.5 15z"/></svg>
+                                    {{ __('Discipline') }}
+                                    <svg class="nav-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                                </summary>
+                                <div class="nav-submenu">
+                        @else
+                            <div>
+                        @endif
+                                <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                                    {{ __('Pelajar') }}
+                                </a>
+                                <a href="{{ route('admin.offenses.index') }}" class="nav-link {{ request()->routeIs('admin.offenses.index') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6"/></svg>
+                                    {{ __('Senarai Kesalahan') }}
+                                </a>
+                                <a href="{{ route('admin.offenses.create') }}" class="nav-link {{ request()->routeIs('admin.offenses.create') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                    {{ __('Daftar Kesalahan') }}
+                                </a>
+                                <a href="{{ route('admin.fine-applications.index') }}" class="nav-link {{ request()->routeIs('admin.fine-applications.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5"/></svg>
+                                    {{ __('Permohonan Bayaran') }}
+                                </a>
+                                <a href="{{ route('admin.vehicle-stickers.index') }}" class="nav-link {{ request()->routeIs('admin.vehicle-stickers.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l1.5-4.5a2.25 2.25 0 012.136-1.54h9.228A2.25 2.25 0 0118.75 9l1.5 4.5M5.25 13.5h13.5M6 16.5h.75m10.5 0H18m-12 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75H6zm10.5 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75h-.75z"/></svg>
+                                    {{ __('Sticker Kenderaan') }}
+                                </a>
+                                <a href="{{ route('admin.discipline-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.discipline-announcements.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
+                                    {{ __('Pengumuman Disiplin') }}
+                                </a>
+                                <a href="{{ route('admin.discipline-announcements.create') }}" class="nav-link {{ request()->routeIs('admin.discipline-announcements.create') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                    {{ __('Tambah Pengumuman') }}
+                                </a>
+                                <a href="{{ route('admin.rules.index') }}" class="nav-link {{ request()->routeIs('admin.rules.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75H7.5A2.25 2.25 0 005.25 9v9A2.25 2.25 0 007.5 20.25h9A2.25 2.25 0 0018.75 18V9A2.25 2.25 0 0016.5 6.75H12z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 11.25h6M9 14.25h6"/></svg>
+                                    {{ __('Peraturan') }}
+                                </a>
+                            </div>
+                        @if($adminScope === 'system_admin')
+                            </details>
+                        @endif
                     </nav>
                 @endif
 

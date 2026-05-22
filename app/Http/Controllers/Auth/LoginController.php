@@ -277,10 +277,21 @@ class LoginController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        $locale = $request->session()->get('locale');
+        $theme = $request->session()->get('theme');
+
         auditLog('auth.logout', session('auth_user.role'), session('auth_user.id'), 'Pengguna log keluar');
         $request->session()->forget('auth_user');
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($locale) {
+            $request->session()->put('locale', $locale);
+        }
+
+        if ($theme) {
+            $request->session()->put('theme', $theme);
+        }
 
         return redirect()->route('login');
     }
