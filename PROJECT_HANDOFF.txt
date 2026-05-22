@@ -1,5 +1,5 @@
 PROJECT HANDOFF - MyHEP / e-biasiswa
-Date: 2026-05-17
+Date: 2026-05-22
 Path: C:\laragon\www\e-biasiswa
 
 Summary
@@ -11,12 +11,14 @@ reports, admin management, and student self-service workflows.
 Current Git State
 -----------------
 - Branch: main
-- Local branch status when checked: main is behind origin/main by 2 commits.
+- Local branch status when checked: main is synced with origin/main.
 - Local working tree when checked: clean.
-- Latest local commits:
-  - 53cc0c5 Add project files, update README, and refine gitignore
-  - 6ca4f05 Added login feature
-  - f372b8b first commit
+- Latest commits:
+  - 7e5762d Update application UI and dashboard code
+  - 277da9b Update README.md
+  - b7fa6f8 Update README.md
+  - cae01af Update README.md
+  - 79e124b Update README.md
 - Remote from README: https://github.com/i0zfnr/MyHEP.git
 
 Technology
@@ -107,6 +109,10 @@ Database Migrations Observed
 
 Verification Already Run
 ------------------------
+- git status --short --branch
+  - Result: clean.
+  - Branch state: main...origin/main, no ahead/behind marker.
+
 - php artisan test
   - Result: PASS
   - 2 tests passed, 2 assertions.
@@ -116,35 +122,49 @@ Verification Already Run
   - Result: PASS
   - 98 routes registered.
 
+- npm run build
+  - Result: PASS.
+  - Vite built public/build/manifest.json, app CSS, and app JS successfully.
+
+- php artisan migrate:status
+  - Result: PASS.
+  - MySQL is reachable at 127.0.0.1:3306.
+  - All 10 migration files are marked Ran.
+
+- PHP syntax check
+  - Result: PASS.
+  - php -l completed for 220 PHP files.
+
+- Local HTTP smoke check on php artisan serve --host=127.0.0.1 --port=8001
+  - GET / returned 200 OK.
+  - GET /login returned 200 OK.
+  - GET /up returned 200 OK.
+  - GET /system-overview/live returned 200 OK with application/json.
+  - GET /admin/dashboard, /student/dashboard, and /settings redirected to /login with 302 when unauthenticated.
+  - Temporary dev server was stopped after the check.
+
+- git push origin main
+  - Result: PASS.
+  - Commit pushed: 7e5762d Update application UI and dashboard code.
+
 Known Problems / Blockers
 -------------------------
-1. Local branch is behind remote by 2 commits.
-   - Before continuing, inspect or pull origin/main.
-   - Avoid overwriting user changes.
-
-2. Database was not reachable.
-   - php artisan migrate:status failed with:
-     SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
-   - Host: 127.0.0.1
-   - Port: 3306
-   - Database: e_biasiswa
-   - Likely MySQL/MariaDB in Laragon was not running or connection settings need checking.
-
-3. Frontend production build fails.
-   - npm run build failed because Vite cannot resolve:
-     resources/css/app.css
-   - Check vite.config.js and Blade layout references.
-   - Either restore/create resources/css/app.css or adjust the Vite entry to match existing assets.
-
-4. routes/web.php is very large.
+1. routes/web.php is very large.
    - Many production workflows are implemented as route closures.
    - Future maintainability would improve by moving large admin/student CRUD logic into controllers or service classes.
 
-5. Test coverage is minimal.
+2. Test coverage is minimal.
    - Only example tests exist:
      tests/Feature/ExampleTest.php
      tests/Unit/ExampleTest.php
    - Add feature tests for login, dashboard access, admin CRUD, student application submissions, exports, and uploads.
+
+Resolved Since Previous Handoff
+-------------------------------
+- Git branch is no longer behind origin/main.
+- Local changes were committed and pushed to GitHub.
+- Frontend build issue is resolved because resources/css/app.css exists and npm run build passes.
+- Database connection issue is resolved for now; MySQL is running and php artisan migrate:status passes.
 
 Suggested Next Steps For New Agent
 ----------------------------------
@@ -152,28 +172,16 @@ Suggested Next Steps For New Agent
    git status --short --branch
    git log --oneline --decorate -5
 
-2. Inspect remote commits before pulling:
-   git fetch origin
-   git log --oneline HEAD..origin/main
-
-3. Fix local database availability:
-   - Start MySQL/MariaDB in Laragon.
-   - Confirm .env DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT.
-   - Then run:
-     php artisan migrate:status
-
-4. Fix frontend build:
-   - Check vite.config.js.
-   - Create or restore resources/css/app.css if it is the intended entry.
-   - Then run:
-     npm run build
-
-5. Run full basic checks:
+2. Run full basic checks:
    php artisan test
    php artisan route:list
    npm run build
+   php artisan migrate:status
 
-6. After the app boots, manually verify:
+3. Start the app locally:
+   php artisan serve
+
+4. After the app boots, manually verify authenticated workflows:
    - Home page.
    - Login.
    - Admin dashboard.
@@ -198,3 +206,21 @@ Notes For Future Development
   admin.scope:discipline
 - Helper functions such as auditLog(), downloadCsv(), and option helpers may live in app/Support/helpers.php.
 
+Working With Codex / User Collaboration Notes
+---------------------------------------------
+- The user prefers direct, practical help and usually wants the agent to execute the next step, not only suggest it.
+- Keep updates short and concrete while working. Explain what is being checked or changed, then continue.
+- Before git operations, inspect:
+  git status --short --branch
+  git remote -v
+  git log --oneline --decorate -5
+- Do not overwrite local/user changes. If the tree is dirty, summarize the changes before staging or committing.
+- Previous Codex work in this session:
+  - Checked git status and remote.
+  - Committed local UI/application updates.
+  - Rebased local main onto origin/main.
+  - Pushed commit 7e5762d to GitHub.
+  - Verified php artisan test, php artisan route:list, npm run build, php artisan migrate:status, PHP syntax, and local HTTP smoke checks.
+  - Updated this PROJECT_HANDOFF.txt to remove stale blockers and record current status.
+- The user initially ran php artisan migrate:status and hit a MySQL connection refused error, but later MySQL was running and migrate:status passed.
+- Next agent should continue with authenticated manual workflow checks and real feature test coverage.

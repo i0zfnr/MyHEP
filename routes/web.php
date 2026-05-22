@@ -18,8 +18,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-Route::get('/', function () {
-    $countTable = function (string $table, ?callable $scope = null): int {
+if (! function_exists('myhepCountTable')) {
+    function myhepCountTable(string $table, ?callable $scope = null): int
+    {
         if (!Schema::hasTable($table)) {
             return 0;
         }
@@ -34,22 +35,31 @@ Route::get('/', function () {
         } catch (Throwable $e) {
             return 0;
         }
-    };
+    }
+}
 
-    $counts = systemCacheRemember('myhep.home_stats.counts', 120, function () use ($countTable) {
-        return [
-            'students_managed' => $countTable('students'),
-            'open_actions' => $countTable('scholarships', fn ($query) => $query->where('status', 'pending'))
-                + $countTable('fine_payment_applications', fn ($query) => $query->where('status', 'pending'))
-                + $countTable('vehicle_sticker_applications', fn ($query) => $query->where('status', 'pending')),
-            'digital_records' => $countTable('students')
-                + $countTable('scholarships')
-                + $countTable('offenses')
-                + $countTable('student_scholarship_status_forms')
-                + $countTable('fine_payment_applications')
-                + $countTable('vehicle_sticker_applications'),
-        ];
-    });
+if (! function_exists('myhepHomeStatCounts')) {
+    function myhepHomeStatCounts(): array
+    {
+        return systemCacheRemember('myhep.home_stats.counts', 120, function () {
+            return [
+                'students_managed' => myhepCountTable('students'),
+                'open_actions' => myhepCountTable('scholarships', fn ($query) => $query->where('status', 'pending'))
+                    + myhepCountTable('fine_payment_applications', fn ($query) => $query->where('status', 'pending'))
+                    + myhepCountTable('vehicle_sticker_applications', fn ($query) => $query->where('status', 'pending')),
+                'digital_records' => myhepCountTable('students')
+                    + myhepCountTable('scholarships')
+                    + myhepCountTable('offenses')
+                    + myhepCountTable('student_scholarship_status_forms')
+                    + myhepCountTable('fine_payment_applications')
+                    + myhepCountTable('vehicle_sticker_applications'),
+            ];
+        });
+    }
+}
+
+Route::get('/', function () {
+    $counts = myhepHomeStatCounts();
 
     $homeStats = array_merge($counts, [
         'server_time' => now()->format('Y-m-d H:i:s'),
@@ -59,37 +69,7 @@ Route::get('/', function () {
     return view('welcome', compact('homeStats'));
 })->name('home');
 Route::get('/system-overview/live', function () {
-    $countTable = function (string $table, ?callable $scope = null): int {
-        if (!Schema::hasTable($table)) {
-            return 0;
-        }
-
-        try {
-            $query = DB::table($table);
-            if ($scope) {
-                $scope($query);
-            }
-
-            return (int) $query->count();
-        } catch (Throwable $e) {
-            return 0;
-        }
-    };
-
-    $counts = systemCacheRemember('myhep.home_stats.counts', 120, function () use ($countTable) {
-        return [
-            'students_managed' => $countTable('students'),
-            'open_actions' => $countTable('scholarships', fn ($query) => $query->where('status', 'pending'))
-                + $countTable('fine_payment_applications', fn ($query) => $query->where('status', 'pending'))
-                + $countTable('vehicle_sticker_applications', fn ($query) => $query->where('status', 'pending')),
-            'digital_records' => $countTable('students')
-                + $countTable('scholarships')
-                + $countTable('offenses')
-                + $countTable('student_scholarship_status_forms')
-                + $countTable('fine_payment_applications')
-                + $countTable('vehicle_sticker_applications'),
-        ];
-    });
+    $counts = myhepHomeStatCounts();
 
     return response()->json([
         'data' => array_merge($counts, [
