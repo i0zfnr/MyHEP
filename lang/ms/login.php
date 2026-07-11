@@ -22,4 +22,7 @@ return [
     'login_button' => 'Log Masuk',
     'home_button' => 'Laman Utama',
     'error_prefix' => 'Ralat:',
+    'error_throttle' => 'Terlalu banyak cubaan log masuk. Cuba lagi dalam :seconds saat.',
+    'error_invalid_student' => 'Maklumat log masuk pelajar tidak sah.',
+    'error_invalid_admin' => 'Maklumat log masuk admin tidak sah. Guna IC admin atau nama penuh.',
 ];

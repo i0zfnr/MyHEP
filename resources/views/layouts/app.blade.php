@@ -23,7 +23,7 @@
             --primary-hover: #f5ede6;
             --accent: #FFDDAB;
             --accent-light: #FAD7BC;
-            --sidebar-w: 256px;
+            --sidebar-w: 288px;
             --topbar-h: 56px;
             --surface: #ffffff;
             --bg: #faf7f4;
@@ -69,7 +69,7 @@
             --glass-shadow-hover: 0 22px 48px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255,255,255,.06);
             color-scheme: dark;
         }
-        html, body { margin: 0; padding: 0; min-height: 100vh; }
+        html, body { margin: 0 !important; padding: 0 !important; min-height: 100vh; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background:
@@ -77,6 +77,14 @@
                 radial-gradient(circle at 92% 6%, rgba(250, 215, 188, .12), transparent 30%),
                 var(--bg);
             color: var(--text);
+            position: relative;
+            top: 0 !important;
+        }
+        body > .app-layout {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            position: relative;
+            top: 0 !important;
         }
         body[data-theme="dark"] {
             background:
@@ -329,11 +337,65 @@
             border-color: rgba(215,191,168,.34);
             color: var(--text);
         }
+        body[data-theme="dark"] .header-support {
+            background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.08),
+                0 12px 24px rgba(0,0,0,.16);
+        }
+        body[data-theme="dark"] .header-user {
+            background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.08),
+                0 14px 28px rgba(0,0,0,.18);
+        }
+        body[data-theme="dark"] .header-support:hover,
+        body[data-theme="dark"] .header-user:hover {
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.10),
+                0 18px 34px rgba(0,0,0,.22);
+        }
         body[data-theme="dark"] .header-menu-head,
         body[data-theme="dark"] .header-menu-sep {
             border-color: rgba(226, 209, 192, .12);
         }
-        .app-layout { display: flex; min-height: 100vh; align-items: stretch; }
+        body[data-theme="dark"] .header-menu-link,
+        body[data-theme="dark"] .header-menu-btn {
+            border: 1px solid transparent;
+        }
+        body[data-theme="dark"] .header-menu-btn.logout {
+            background: linear-gradient(180deg, rgba(127,29,29,.88), rgba(91,18,18,.96));
+            border-color: rgba(248, 113, 113, .28);
+            color: #fff4ef;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.10),
+                0 14px 28px rgba(0,0,0,.24);
+        }
+        body[data-theme="dark"] .header-menu-btn.logout:hover {
+            background: linear-gradient(180deg, rgba(153,27,27,.94), rgba(111,18,18,1));
+            border-color: rgba(252, 165, 165, .34);
+            color: #fff9f6;
+        }
+        body[data-theme="dark"] .header-support:focus-visible,
+        body[data-theme="dark"] .header-user:focus-visible,
+        body[data-theme="dark"] .header-menu-link:focus-visible,
+        body[data-theme="dark"] .header-menu-btn:focus-visible {
+            box-shadow: 0 0 0 3px rgba(215,191,168,.18);
+        }
+        .app-layout {
+            position: fixed !important;
+            inset: 0 !important;
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            min-height: 0;
+            margin: 0 !important;
+            overflow: hidden;
+            align-items: stretch;
+        }
+        @supports (height: 100dvh) {
+            .app-layout { height: 100dvh; }
+        }
 
         .ui-shell { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
         .ui-hero {
@@ -571,7 +633,7 @@
         }
         .nav-label { font-size: .625rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); padding: .2rem .5rem .45rem; margin-top: .875rem; }
         .nav-label:first-child { margin-top: 0; }
-        .nav-link { display: flex; align-items: center; gap: .625rem; padding: .575rem .625rem; border-radius: 8px; font-size: .8125rem; font-weight: 500; color: var(--text-muted); text-decoration: none; margin-bottom: 2px; position: relative; transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+        .nav-link { display: flex; align-items: center; gap: .625rem; padding: .575rem .625rem; border-radius: 8px; font-size: .8125rem; font-weight: 500; color: var(--text-muted); text-decoration: none; margin-bottom: 2px; position: relative; white-space: nowrap; transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
         .nav-link:hover { background: var(--primary-hover); color: var(--primary-dark); transform: translateX(2px); }
         .nav-link.active { background: var(--primary-hover); color: var(--primary-dark); font-weight: 700; }
         .nav-link.active::before { content: ''; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; background: var(--primary); border-radius: 0 3px 3px 0; }
@@ -655,7 +717,15 @@
         .sb-overlay.is-visible { opacity: 1; pointer-events: auto; }
         @media (max-width: 1023px) { .sb-overlay { display: block; } }
 
-        .main-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .main-wrap {
+            flex: 1;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
         .topbar {
             display: flex;
             align-items: center;
@@ -709,7 +779,7 @@
             .page-header { padding: 1.05rem 2rem; }
             .page-header::after { left: 2rem; right: 2rem; }
         }
-        .page-header-inner { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+        .page-header-inner { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; position: relative; }
         .page-header-left {
             min-width: 0;
             display: flex;
@@ -726,37 +796,75 @@
             color: var(--text) !important;
         }
         .page-header-right { display: flex; align-items: center; gap: .55rem; margin-left: auto; position: relative; }
+        @media (min-width: 1024px) {
+            .page-header-inner {
+                min-height: 0;
+            }
+            .page-header-left {
+                padding-right: 15rem;
+            }
+            .page-header-right {
+                position: absolute;
+                top: 50%;
+                right: 0;
+                margin-left: 0;
+                transform: translateY(-50%);
+            }
+        }
         .header-support {
             display: inline-flex;
             align-items: center;
             gap: .35rem;
             border: 1px solid var(--glass-border);
             border-radius: 999px;
-            padding: .45rem .7rem;
+            padding: .48rem .82rem;
             font-size: .78rem;
             color: var(--text-muted);
             text-decoration: none;
-            background: rgba(255, 255, 255, .82);
-            font-weight: 600;
+            background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,248,241,.74));
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.82),
+                0 10px 22px rgba(45,31,20,.08);
+            font-weight: 700;
+            transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
         }
-        .header-support:hover { border-color: var(--primary-light); color: var(--primary-dark); background: var(--primary-hover); }
+        .header-support:hover {
+            border-color: var(--primary-light);
+            color: var(--primary-dark);
+            background: linear-gradient(180deg, rgba(255,247,238,.98), rgba(248,232,214,.82));
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.9),
+                0 14px 28px rgba(45,31,20,.12);
+            transform: translateY(-1px);
+        }
         .header-user {
             display: inline-flex;
             align-items: center;
-            gap: .5rem;
+            gap: .58rem;
             border: 1px solid var(--glass-border);
             border-radius: 999px;
-            padding: .28rem .6rem .28rem .28rem;
+            padding: .3rem .72rem .3rem .3rem;
             text-decoration: none;
             color: var(--text);
-            background: rgba(255, 255, 255, .82);
+            background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,248,241,.76));
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.88),
+                0 10px 24px rgba(45,31,20,.10);
             min-width: 0;
             cursor: pointer;
+            transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
         }
-        .header-user:hover { border-color: var(--primary-light); background: var(--primary-hover); }
+        .header-user:hover {
+            border-color: var(--primary-light);
+            background: linear-gradient(180deg, rgba(255,247,238,.98), rgba(248,232,214,.82));
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.9),
+                0 16px 30px rgba(45,31,20,.13);
+            transform: translateY(-1px);
+        }
         .header-user-avatar {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary-dark), var(--primary));
             color: #fff;
@@ -833,11 +941,32 @@
             color: var(--primary-dark);
         }
         .header-menu-sep { border-top: 1px solid var(--border); margin: .35rem 0; }
-        .header-menu-btn.logout { color: var(--danger); }
-        .header-menu-btn.logout:hover { background: var(--danger-light); color: var(--danger); }
-        .page-body { flex: 1; padding: 1.25rem 1rem; }
-        @media (min-width: 640px) { .page-body { padding: 1.5rem; } }
-        @media (min-width: 1024px) { .page-body { padding: 2rem; } }
+        .header-menu-btn.logout {
+            margin-top: .2rem;
+            justify-content: center;
+            padding: .72rem .85rem;
+            border: 1px solid rgba(185, 28, 28, .18);
+            background: linear-gradient(180deg, rgba(255,241,239,.98), rgba(255,232,227,.94));
+            color: #b42318;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.96),
+                0 8px 16px rgba(185,28,28,.08);
+        }
+        .header-menu-btn.logout:hover {
+            background: linear-gradient(180deg, rgba(255,232,228,1), rgba(255,214,208,.98));
+            color: #8f1a14;
+            border-color: rgba(185, 28, 28, .28);
+        }
+        .header-support:focus-visible,
+        .header-user:focus-visible,
+        .header-menu-link:focus-visible,
+        .header-menu-btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(182,147,114,.22);
+        }
+        .page-body { flex: 1; padding: 1rem 1rem 1.25rem; }
+        @media (min-width: 640px) { .page-body { padding: 1.1rem 1.5rem 1.5rem; } }
+        @media (min-width: 1024px) { .page-body { padding: 1.1rem 2rem 2rem; } }
         .app-footer {
             position: relative;
             padding: .75rem .875rem;
@@ -871,8 +1000,8 @@
         }
 
         @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(14px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         @keyframes softPop {
             from { opacity: 0; transform: scale(.985); }
@@ -1294,6 +1423,8 @@
     $adminScope = $authUser['admin_role'] ?? null;
     $isScholarshipAdmin = $isAdmin && in_array($adminScope, ['scholarship_admin', 'system_admin'], true);
     $isDisciplineAdmin = $isAdmin && in_array($adminScope, ['discipline_admin', 'system_admin'], true);
+    $isMovementAdmin = $isAdmin && in_array($adminScope, ['guard', 'discipline_admin', 'system_admin'], true);
+    $isGuardAdmin = $isAdmin && $adminScope === 'guard';
     $studentOnDashboard = request()->routeIs('student.dashboard');
     $adminOnDashboard = request()->routeIs('admin.dashboard');
     $studentOnScholarship = request()->routeIs('student.scholarships.*')
@@ -1354,10 +1485,10 @@
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2 7-7 7 7"/></svg>
                         {{ __('Index') }}
                     </a>
-                    <a href="{{ route('student.ai-helper.index') }}" class="nav-link {{ request()->routeIs('student.ai-helper.*') ? 'active' : '' }}">
+                    <span class="nav-link" style="opacity:.55; cursor:not-allowed;" aria-disabled="true" title="{{ __('Unavailable') }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-2.846.813a1.125 1.125 0 000 2.124L9 22.5l.813 2.846a1.125 1.125 0 002.124 0L12.75 22.5l2.846-.813a1.125 1.125 0 000-2.124L12.75 18.75l-.813-2.846a1.125 1.125 0 00-2.124 0zM18.75 8.25l-.433 1.517L16.8 10.2a.75.75 0 000 1.44l1.517.433.433 1.517a.75.75 0 001.44 0l.433-1.517 1.517-.433a.75.75 0 000-1.44l-1.517-.433-.433-1.517a.75.75 0 00-1.44 0zM2.25 4.5l.433 1.517L4.2 6.45a.75.75 0 010 1.44l-1.517.433L2.25 9.84a.75.75 0 01-1.44 0L.377 8.323-1.14 7.89a.75.75 0 010-1.44l1.517-.433L.81 4.5a.75.75 0 011.44 0z"/></svg>
-                        {{ __('AI Helper') }}
-                    </a>
+                        {{ __('AI Helper') }} · {{ __('Unavailable') }}
+                    </span>
                 </nav>
 
                 @if($studentOnScholarship)
@@ -1474,15 +1605,43 @@
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2 7-7 7 7"/></svg>
                         {{ __('ui.dashboard') }}
                     </a>
-                    <a href="{{ route('admin.reports.monthly') }}" class="nav-link {{ request()->routeIs('admin.reports.monthly') ? 'active' : '' }}">
-                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v18h16.5M7.5 15l3-3 2.25 2.25L16.5 9"/></svg>
-                        {{ __('ui.monthly_report') }}
-                    </a>
-                    <a href="{{ route('admin.ai-helper.index') }}" class="nav-link {{ request()->routeIs('admin.ai-helper.*') ? 'active' : '' }}">
-                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-2.846.813a1.125 1.125 0 000 2.124L9 22.5l.813 2.846a1.125 1.125 0 002.124 0L12.75 22.5l2.846-.813a1.125 1.125 0 000-2.124L12.75 18.75l-.813-2.846a1.125 1.125 0 00-2.124 0zM18.75 8.25l-.433 1.517L16.8 10.2a.75.75 0 000 1.44l1.517.433.433 1.517a.75.75 0 001.44 0l.433-1.517 1.517-.433a.75.75 0 000-1.44l-1.517-.433-.433-1.517a.75.75 0 00-1.44 0zM2.25 4.5l.433 1.517L4.2 6.45a.75.75 0 010 1.44l-1.517.433L2.25 9.84a.75.75 0 01-1.44 0L.377 8.323-1.14 7.89a.75.75 0 010-1.44l1.517-.433L.81 4.5a.75.75 0 011.44 0z"/></svg>
-                        {{ __('AI Helper') }}
-                    </a>
+                    @if(!$isGuardAdmin)
+                        <a href="{{ route('admin.reports.monthly') }}" class="nav-link {{ request()->routeIs('admin.reports.monthly') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v18h16.5M7.5 15l3-3 2.25 2.25L16.5 9"/></svg>
+                            {{ __('ui.monthly_report') }}
+                        </a>
+                        <a href="{{ route('admin.ai-helper.index') }}" class="nav-link {{ request()->routeIs('admin.ai-helper.*') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-2.846.813a1.125 1.125 0 000 2.124L9 22.5l.813 2.846a1.125 1.125 0 002.124 0L12.75 22.5l2.846-.813a1.125 1.125 0 000-2.124L12.75 18.75l-.813-2.846a1.125 1.125 0 00-2.124 0zM18.75 8.25l-.433 1.517L16.8 10.2a.75.75 0 000 1.44l1.517.433.433 1.517a.75.75 0 001.44 0l.433-1.517 1.517-.433a.75.75 0 000-1.44l-1.517-.433-.433-1.517a.75.75 0 00-1.44 0zM2.25 4.5l.433 1.517L4.2 6.45a.75.75 0 010 1.44l-1.517.433L2.25 9.84a.75.75 0 01-1.44 0L.377 8.323-1.14 7.89a.75.75 0 010-1.44l1.517-.433L.81 4.5a.75.75 0 011.44 0z"/></svg>
+                            {{ __('AI Helper') }}
+                        </a>
+                    @endif
                 </nav>
+
+                @if($isGuardAdmin)
+                    <div class="nav-label">{{ __('Guard House') }}</div>
+                    <nav>
+                        <a href="{{ route('admin.movements.qr') }}" class="nav-link {{ request()->routeIs('admin.movements.qr*') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zm-12 12h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zM9 6h6M6 9v6M18 9v6M9 18h6"/></svg>
+                            {{ __('Guard House QR') }}
+                        </a>
+                        <a href="{{ route('admin.movements.index') }}" class="nav-link {{ request()->routeIs('admin.movements.index') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
+                            {{ __('Student Movement') }}
+                        </a>
+                        <a href="{{ route('admin.movements.outside') }}" class="nav-link {{ request()->routeIs('admin.movements.outside') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                            {{ __('Outside Campus') }}
+                        </a>
+                        <a href="{{ route('admin.movements.violations') }}" class="nav-link {{ request()->routeIs('admin.movements.violations') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008M4.5 19.5h15l-7.5-15-7.5 15z"/></svg>
+                            {{ __('Violations') }}
+                        </a>
+                        <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                            {{ __('Pelajar') }}
+                        </a>
+                    </nav>
+                @endif
 
                 @if($isScholarshipAdmin)
                     <nav>
@@ -1561,7 +1720,7 @@
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
                                     {{ __('Student Movement') }}
                                 </a>
-                                <a href="{{ route('admin.discipline-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.discipline-announcements.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.discipline-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.discipline-announcements.index') || request()->routeIs('admin.discipline-announcements.edit') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
                                     {{ __('Pengumuman Disiplin') }}
                                 </a>
@@ -1590,6 +1749,10 @@
                         <a href="{{ route('admin.admin-users.index') }}" class="nav-link {{ request()->routeIs('admin.admin-users.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.742-1.34 9.04 9.04 0 00-2.983-3.163m-1.358 5.663A9.035 9.035 0 0112 21a9.035 9.035 0 01-5.401-1.68m10.802 0a9.035 9.035 0 00-10.802 0M6.599 19.32a9.04 9.04 0 01-2.983-3.16A9.095 9.095 0 007.358 14.82m11.384-.44a9.05 9.05 0 00-15.484 0m15.484 0A9.03 9.03 0 0012 12c-2.305 0-4.41.867-6 2.38m12.742 0A9.03 9.03 0 0112 12m0 0a3 3 0 100-6 3 3 0 000 6z"/></svg>
                             {{ __('Pengurusan Admin') }}
+                        </a>
+                        <a href="{{ route('admin.bug-reports.index') }}" class="nav-link {{ request()->routeIs('admin.bug-reports.*') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h6m-7.5-7.5h8.25L18 7.5v12.75A2.25 2.25 0 0115.75 22.5h-9A2.25 2.25 0 014.5 20.25V6A2.25 2.25 0 016.75 3.75H6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 3.75V7.5H18"/></svg>
+                            {{ __('bug_reports.nav_label') }}
                         </a>
                     </nav>
                 @endif
@@ -1628,7 +1791,7 @@
         @endif
 
         @hasSection('header')
-            <div class="page-header">
+            <div class="page-header{{ $showHeaderUserMenu ? ' has-user-menu' : '' }}">
                 <div class="page-header-inner">
                     <div class="page-header-left">@yield('header')</div>
                     @if($showHeaderUserMenu)
@@ -1747,6 +1910,7 @@
     var confirmCancelBtn = document.getElementById('confirmCancelBtn');
     var confirmProceedBtn = document.getElementById('confirmProceedBtn');
     var pendingForm = null;
+    var pendingSubmitter = null;
     var confirmedForm = null;
 
     function closeConfirmModal() {
@@ -1754,15 +1918,21 @@
         confirmModal.classList.remove('is-open');
         confirmModal.setAttribute('aria-hidden', 'true');
         pendingForm = null;
+        pendingSubmitter = null;
     }
 
-    function openConfirmModal(form) {
+    function openConfirmModal(form, submitter) {
         if (!confirmModal || !confirmMessage || !confirmProceedBtn) return false;
         pendingForm = form;
+        pendingSubmitter = submitter || null;
         var message = form.getAttribute('data-confirm-message') || @json(__('Are you sure you want to continue?'));
         var title = form.getAttribute('data-confirm-title') || @json(__('Confirm action'));
-        var action = form.getAttribute('data-confirm-action') || @json(__('Continue'));
-        var tone = form.getAttribute('data-confirm-tone') || 'primary';
+        var action = (submitter && submitter.getAttribute('data-confirm-action'))
+            || form.getAttribute('data-confirm-action')
+            || @json(__('Continue'));
+        var tone = (submitter && submitter.getAttribute('data-confirm-tone'))
+            || form.getAttribute('data-confirm-tone')
+            || 'primary';
 
         if (confirmTitle) confirmTitle.textContent = title;
         confirmMessage.textContent = message;
@@ -1775,6 +1945,14 @@
         return true;
     }
 
+    document.addEventListener('click', function (event) {
+        var submitter = event.target instanceof Element
+            ? event.target.closest('button[type="submit"], input[type="submit"]')
+            : null;
+        if (!submitter || !submitter.form || !submitter.form.hasAttribute('data-confirm-message')) return;
+        pendingSubmitter = submitter;
+    }, true);
+
     document.addEventListener('submit', function (event) {
         var form = event.target;
         if (!(form instanceof HTMLFormElement) || !form.hasAttribute('data-confirm-message')) return;
@@ -1783,7 +1961,7 @@
             return;
         }
         event.preventDefault();
-        openConfirmModal(form);
+        openConfirmModal(form, event.submitter || pendingSubmitter);
     }, true);
 
     if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', closeConfirmModal);
@@ -1802,7 +1980,12 @@
             if (!pendingForm) return;
             confirmedForm = pendingForm;
             var form = pendingForm;
+            var submitter = pendingSubmitter;
             closeConfirmModal();
+            if (submitter) {
+                form.requestSubmit(submitter);
+                return;
+            }
             form.requestSubmit();
         });
     }

@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Senarai Kesalahan')
+@section('title', __('Senarai Kesalahan'))
 
 @push('styles')
 <style>
@@ -191,7 +191,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Senarai Kesalahan Pelajar</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Senarai Kesalahan Pelajar') }}</h2>
 @endsection
 
 @section('content')
@@ -201,22 +201,22 @@
 
     <div class="card">
         <div class="head">
-            <h1 style="margin:0;font-size:20px;">Senarai Kesalahan Pelajar</h1>
+            <h1 style="margin:0;font-size:20px;">{{ __('Senarai Kesalahan Pelajar') }}</h1>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a>
-                <a class="btn" href="{{ route('admin.offenses.export', request()->query()) }}">Export CSV</a>
-                <a class="btn" href="{{ route('admin.offenses.create') }}">Daftar Kesalahan</a>
+                <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                <a class="btn" href="{{ route('admin.offenses.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                <a class="btn" href="{{ route('admin.offenses.create') }}">{{ __('Daftar Kesalahan') }}</a>
             </div>
         </div>
         <div class="filters">
             <form method="GET" action="{{ route('admin.offenses.index') }}">
                 <div class="filter-grid">
                     <div>
-                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari nama pelajar / matrik / tempat">
+                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama pelajar / matrik / tempat') }}">
                     </div>
                     <div>
                         <select name="status">
-                            <option value="">Semua status</option>
+                            <option value="">{{ __('Semua status') }}</option>
                             <option value="unpaid" {{ ($filters['status'] ?? '') === 'unpaid' ? 'selected' : '' }}>{{ __('unpaid') }}</option>
                             <option value="applied" {{ ($filters['status'] ?? '') === 'applied' ? 'selected' : '' }}>{{ __('applied') }}</option>
                             <option value="paid" {{ ($filters['status'] ?? '') === 'paid' ? 'selected' : '' }}>{{ __('paid') }}</option>
@@ -229,15 +229,15 @@
                         <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}">
                     </div>
                     <div class="filter-actions">
-                        <button class="btn" type="submit">Filter</button>
-                        <a class="btn" href="{{ route('admin.offenses.index') }}">Reset</a>
+                        <button class="btn" type="submit">{{ __('Filter') }}</button>
+                        <a class="btn" href="{{ route('admin.offenses.index') }}">{{ __('Reset') }}</a>
                     </div>
                 </div>
             </form>
         </div>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th>Pelajar</th><th>No Matrik</th><th>Tarikh</th><th>Masa</th><th>Tempat</th><th>Bukti</th><th>Denda (RM)</th><th>Status</th><th>Tindakan</th></tr></thead>
+                <thead><tr><th>{{ __('Pelajar') }}</th><th>{{ __('No. Matrik') }}</th><th>{{ __('Tarikh') }}</th><th>{{ __('Masa') }}</th><th>{{ __('Tempat') }}</th><th>{{ __('Bukti') }}</th><th>{{ __('Denda (RM)') }}</th><th>{{ __('Status') }}</th><th>{{ __('Tindakan') }}</th></tr></thead>
                 <tbody>
                     @forelse($offenses as $offense)
                         <tr>
@@ -248,7 +248,7 @@
                             <td>{{ $offense->place }}</td>
                             <td>
                                 @if(!empty($offense->evidence_photo_path))
-                                    <a class="btn" href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank" style="padding:6px 10px; font-size:12px;">Lihat</a>
+                                    <a class="btn" href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank" style="padding:6px 10px; font-size:12px;">{{ __('Lihat') }}</a>
                                 @else
                                     <span style="color:#7a6555;">-</span>
                                 @endif

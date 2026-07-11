@@ -52,13 +52,28 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 1.5rem;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             color: var(--text);
+        }
+
+        .login-shell {
+            width: 100%;
+            max-width: 900px;
+            min-height: calc(100vh - 3rem);
+            min-height: calc(100dvh - 3rem);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
         }
 
         body::before, body::after {
@@ -100,6 +115,7 @@
             position: relative;
             z-index: 1;
             animation: fadeUp .5s cubic-bezier(.22,.61,.36,1) both;
+            margin: 3.5rem 0 1rem;
         }
 
         .brand-panel {
@@ -220,6 +236,8 @@
 
         .form-row {
             display: flex; align-items: center; justify-content: space-between;
+            gap: .75rem;
+            flex-wrap: wrap;
             margin: .25rem 0 1.5rem;
         }
         .remember-label {
@@ -284,11 +302,79 @@
         }
 
         @media (max-width: 700px) {
-            .page-wrapper { flex-direction: column; max-width: 420px; min-height: auto; }
-            .brand-panel { padding: 2rem 1.5rem; }
+            body {
+                display: block;
+                padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+            }
+            .login-shell {
+                min-height: calc(100vh - max(2rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+                min-height: calc(100dvh - max(2rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+                max-width: 420px;
+                margin: 0 auto;
+            }
+            .page-wrapper {
+                flex-direction: column;
+                max-width: 100%;
+                min-height: auto;
+                margin: 4.25rem 0 1rem;
+                border-radius: 18px;
+            }
+            .brand-panel { padding: 1.9rem 1.35rem 1.65rem; }
             .brand-logo { width: 64px; height: 64px; }
             .brand-title { font-size: 1.2rem; }
-            .form-panel { flex: none; padding: 2rem 1.5rem; }
+            .brand-badge { margin-top: 1.1rem; }
+            .form-panel {
+                flex: none;
+                padding: 1.7rem 1.35rem 1.35rem;
+                justify-content: flex-start;
+            }
+            .form-subheading { margin-bottom: 1.25rem; }
+            .role-toggle { margin-bottom: 1.1rem; }
+            .form-row {
+                align-items: flex-start;
+                margin-bottom: 1.15rem;
+            }
+            .remember-label,
+            .link-inline {
+                font-size: .82rem;
+            }
+            .lang-switch {
+                top: max(.75rem, env(safe-area-inset-top));
+                right: 1rem;
+                padding: .24rem .5rem;
+            }
+            .app-footer {
+                padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding-left: .75rem;
+                padding-right: .75rem;
+            }
+            .page-wrapper {
+                margin-top: 4rem;
+            }
+            .brand-panel,
+            .form-panel {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .form-heading {
+                font-size: 1.25rem;
+            }
+            .field input[type="text"],
+            .field input[type="password"] {
+                font-size: .92rem;
+            }
+            .btn-submit,
+            .btn-home {
+                padding: .78rem;
+            }
+            .app-footer {
+                font-size: .72rem;
+            }
         }
 
         .lang-switch {
@@ -314,15 +400,12 @@
             cursor: pointer;
         }
         .app-footer {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: .75rem;
+            position: relative;
             text-align: center;
             font-size: .76rem;
             color: #7a6555;
             z-index: 5;
-            pointer-events: none;
+            padding: 0 1rem 1.25rem;
         }
         body[data-theme="dark"] .page-wrapper {
             background: #12100e;
@@ -428,6 +511,7 @@
         <option value="ms" {{ app()->getLocale() === 'ms' ? 'selected' : '' }}>BM</option>
     </select>
 </form>
+<div class="login-shell">
 <div class="page-wrapper">
 
     <div class="brand-panel">
@@ -525,6 +609,7 @@
     </div>
 </div>
 @include('partials.app_footer')
+</div>
 
 <script>
     const roleStudent = document.getElementById('role_student');

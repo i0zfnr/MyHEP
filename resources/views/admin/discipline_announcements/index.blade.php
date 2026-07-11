@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Pengumuman Disiplin')
+@section('title', __('Pengumuman Disiplin'))
 
 @push('styles')
 <style>
@@ -182,7 +182,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Pengumuman Disiplin</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Pengumuman Disiplin') }}</h2>
 @endsection
 
 @section('content')
@@ -192,21 +192,21 @@
 
     <div class="card">
         <div class="head">
-            <h1 style="margin:0;font-size:20px;">Pengurusan Pengumuman Disiplin</h1>
+            <h1 style="margin:0;font-size:20px;">{{ __('Pengurusan Pengumuman Disiplin') }}</h1>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a>
-                <a class="btn" href="{{ route('admin.discipline-announcements.export', request()->query()) }}">Export CSV</a>
-                <a class="btn" href="{{ route('admin.discipline-announcements.create') }}">Tambah Pengumuman</a>
+                <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                <a class="btn" href="{{ route('admin.discipline-announcements.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                <a class="btn" href="{{ route('admin.discipline-announcements.create') }}">{{ __('Tambah Pengumuman') }}</a>
             </div>
         </div>
 
         <div class="filters">
             <form method="GET" action="{{ route('admin.discipline-announcements.index') }}">
                 <div class="filter-grid">
-                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari tajuk/penerangan"></div>
+                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari tajuk/penerangan') }}"></div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn" type="submit">Filter</button>
-                        <a class="btn" href="{{ route('admin.discipline-announcements.index') }}">Reset</a>
+                        <button class="btn" type="submit">{{ __('Filter') }}</button>
+                        <a class="btn" href="{{ route('admin.discipline-announcements.index') }}">{{ __('Reset') }}</a>
                     </div>
                 </div>
             </form>
@@ -216,11 +216,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Tajuk</th>
-                        <th>Penerangan</th>
-                        <th>Dicipta Oleh</th>
-                        <th>Tarikh</th>
-                        <th>Tindakan</th>
+                        <th>{{ __('Tajuk') }}</th>
+                        <th>{{ __('Penerangan') }}</th>
+                        <th>{{ __('Dicipta Oleh') }}</th>
+                        <th>{{ __('Tarikh') }}</th>
+                        <th>{{ __('Tindakan') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -232,7 +232,7 @@
                             <td>{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</td>
                             <td>
                                 <div class="actions-cell">
-                                    <a class="btn" href="{{ route('admin.discipline-announcements.edit', $item->id) }}">Edit</a>
+                                    <a class="btn" href="{{ route('admin.discipline-announcements.edit', $item->id) }}">{{ __('Edit') }}</a>
                                     <form method="POST" action="{{ route('admin.discipline-announcements.destroy', $item->id) }}" style="margin:0;"
                                         data-confirm-title="{{ __('Delete announcement') }}"
                                         data-confirm-message="{{ __('Delete this announcement?') }}"
@@ -240,13 +240,13 @@
                                         data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-danger" type="submit">Delete</button>
+                                        <button class="btn btn-danger" type="submit">{{ __('Delete') }}</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" style="text-align:center;color:#7a6555;">Tiada pengumuman disiplin.</td></tr>
+                        <tr><td colspan="5" style="text-align:center;color:#7a6555;">{{ __('Tiada pengumuman disiplin.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

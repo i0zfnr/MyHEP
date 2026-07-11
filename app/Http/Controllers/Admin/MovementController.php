@@ -112,6 +112,28 @@ class MovementController extends Controller
         ]);
     }
 
+    public function qrStatus()
+    {
+        $checkpoint = DB::table('movement_checkpoints')->orderBy('id')->first();
+        $scanUrl = $checkpoint ? route('student.movements.index', ['token' => $checkpoint->qr_token]) : null;
+        $isValid = $checkpoint
+            && $checkpoint->is_active
+            && (!$checkpoint->valid_from || now()->gte($checkpoint->valid_from))
+            && (!$checkpoint->valid_until || now()->lte($checkpoint->valid_until));
+
+        return response()->json([
+            'checkpoint' => $checkpoint ? [
+                'id' => (int) $checkpoint->id,
+                'name' => $checkpoint->name,
+                'is_active' => (bool) $checkpoint->is_active,
+                'valid_from' => $checkpoint->valid_from,
+                'valid_until' => $checkpoint->valid_until,
+                'is_valid' => $isValid,
+            ] : null,
+            'scan_url' => $scanUrl,
+        ]);
+    }
+
     public function qrPrint(): View
     {
         $checkpoint = DB::table('movement_checkpoints')->orderBy('id')->first();

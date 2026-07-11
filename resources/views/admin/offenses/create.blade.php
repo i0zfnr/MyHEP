@@ -27,6 +27,17 @@
     .camera-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
     .camera-msg { margin-top:8px; color:#7a6555; font-size:12px; }
     .camera-msg.err { color:#991b1b; background:#fff; border:none; margin-bottom:0; padding:0; }
+    .preview-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .btn-danger-soft {
+        border-color:#f3b0b7 !important;
+        background:linear-gradient(180deg, #fff5f5 0%, #fdeaea 100%) !important;
+        color:#b42318 !important;
+    }
+    .btn-danger-soft:hover {
+        border-color:#ea8d98 !important;
+        background:linear-gradient(180deg, #ffeaea 0%, #fbd7da 100%) !important;
+        color:#912018 !important;
+    }
     .rules-toolbar { display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:12px; }
     @media (min-width:900px) { .rules-toolbar { grid-template-columns:1.2fr auto auto auto; align-items:center; } }
     .rules-toolbar input[type="text"] { width:100%; }
@@ -255,6 +266,7 @@
                             <button class="btn" type="button" id="open_camera_btn">{{ __('Guna Kamera') }}</button>
                             <button class="btn" type="button" id="capture_camera_btn" style="display:none;">{{ __('Tangkap Gambar') }}</button>
                             <button class="btn" type="button" id="close_camera_btn" style="display:none;">{{ __('Tutup Kamera') }}</button>
+                            <button class="btn btn-danger-soft" type="button" id="remove_evidence_btn" style="display:none;">{{ __('Buang Gambar') }}</button>
                         </div>
                         <video id="camera_live" class="camera-live" autoplay playsinline></video>
                         <canvas id="camera_canvas" style="display:none;"></canvas>
@@ -313,21 +325,53 @@
     const openCameraBtn = document.getElementById('open_camera_btn');
     const captureCameraBtn = document.getElementById('capture_camera_btn');
     const closeCameraBtn = document.getElementById('close_camera_btn');
+    const removeEvidenceBtn = document.getElementById('remove_evidence_btn');
     const cameraLive = document.getElementById('camera_live');
     const cameraCanvas = document.getElementById('camera_canvas');
     const cameraMsg = document.getElementById('camera_msg');
     let cameraStream = null;
+    let evidenceObjectUrl = null;
+
+    const resetEvidencePreview = () => {
+        if (evidenceObjectUrl) {
+            URL.revokeObjectURL(evidenceObjectUrl);
+            evidenceObjectUrl = null;
+        }
+        evidencePreview.style.display = 'none';
+        evidencePreview.removeAttribute('src');
+        if (removeEvidenceBtn) removeEvidenceBtn.style.display = 'none';
+    };
+
+    const clearSelectedEvidence = () => {
+        if (evidenceInput) {
+            evidenceInput.value = '';
+        }
+        resetEvidencePreview();
+        cameraMsg.textContent = @json(__('Gambar bukti dibuang. Anda boleh pilih atau tangkap semula.'));
+        cameraMsg.classList.remove('err');
+    };
 
     if (evidenceInput && evidencePreview) {
         evidenceInput.addEventListener('change', () => {
             const file = evidenceInput.files && evidenceInput.files[0] ? evidenceInput.files[0] : null;
             if (!file) {
-                evidencePreview.style.display = 'none';
-                evidencePreview.removeAttribute('src');
+                resetEvidencePreview();
                 return;
             }
-            evidencePreview.src = URL.createObjectURL(file);
+            if (evidenceObjectUrl) {
+                URL.revokeObjectURL(evidenceObjectUrl);
+            }
+            evidenceObjectUrl = URL.createObjectURL(file);
+            evidencePreview.src = evidenceObjectUrl;
             evidencePreview.style.display = 'block';
+            if (removeEvidenceBtn) removeEvidenceBtn.style.display = 'inline-block';
+        });
+    }
+
+    if (removeEvidenceBtn) {
+        removeEvidenceBtn.addEventListener('click', () => {
+            stopCamera();
+            clearSelectedEvidence();
         });
     }
 

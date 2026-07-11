@@ -16,4 +16,12 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_guest_is_cleanly_redirected_to_login_from_admin_dashboard(): void
+    {
+        $response = $this->get('/admin/dashboard');
+
+        $response->assertRedirect('/login');
+        $response->assertStatus(302);
+    }
 }

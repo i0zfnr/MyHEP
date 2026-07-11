@@ -186,6 +186,7 @@
 @section('content')
 <div class="wrap">
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+    @php($roleOptions = ['guard', 'scholarship_admin', 'discipline_admin', 'system_admin'])
 
     <form method="POST" action="{{ route('admin.admin-users.store') }}">
         @csrf
@@ -211,8 +212,8 @@
                     <div>
                         <label for="role">{{ __('Role') }}</label>
                         <select id="role" name="role" required>
-                            @foreach(['scholarship_admin','discipline_admin','system_admin'] as $role)
-                                <option value="{{ $role }}" {{ old('role') === $role ? 'selected' : '' }}>{{ $role }}</option>
+                            @foreach($roleOptions as $role)
+                                <option value="{{ $role }}" {{ old('role') === $role ? 'selected' : '' }}>{{ str_replace('_', ' ', ucfirst($role)) }}</option>
                             @endforeach
                         </select>
                     </div>

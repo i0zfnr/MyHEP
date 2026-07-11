@@ -773,122 +773,6 @@
             <p class="section-desc">{{ __('home.about_desc') }}</p>
         </section>
 
-        <section class="section-card" aria-labelledby="features-title">
-            <h3 class="section-title" id="features-title">{{ __('home.features_title') }}</h3>
-            <div class="feature-grid">
-                <article class="feature-box">
-                    <div class="feature-head">
-                        <span class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/></svg>
-                        </span>
-                        <strong>{{ __('home.feature_scholarship_title') }}</strong>
-                    </div>
-                    <p>{{ __('home.feature_scholarship_desc') }}</p>
-                </article>
-                <article class="feature-box">
-                    <div class="feature-head">
-                        <span class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z"/></svg>
-                        </span>
-                        <strong>{{ __('home.feature_discipline_title') }}</strong>
-                    </div>
-                    <p>{{ __('home.feature_discipline_desc') }}</p>
-                </article>
-                <article class="feature-box">
-                    <div class="feature-head">
-                        <span class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
-                        </span>
-                        <strong>{{ __('home.feature_dashboard_title') }}</strong>
-                    </div>
-                    <p>{{ __('home.feature_dashboard_desc') }}</p>
-                </article>
-                <article class="feature-box">
-                    <div class="feature-head">
-                        <span class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
-                        </span>
-                        <strong>{{ __('home.feature_profile_title') }}</strong>
-                    </div>
-                    <p>{{ __('home.feature_profile_desc') }}</p>
-                </article>
-                <article class="feature-box">
-                    <div class="feature-head">
-                        <span class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-                        </span>
-                        <strong>{{ __('home.feature_secure_title') }}</strong>
-                    </div>
-                    <p>{{ __('home.feature_secure_desc') }}</p>
-                </article>
-                <article class="feature-box">
-                    <div class="feature-head">
-                        <span class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/></svg>
-                        </span>
-                        <strong>{{ __('home.feature_document_title') }}</strong>
-                    </div>
-                    <p>{{ __('home.feature_document_desc') }}</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="section-card" aria-labelledby="roles-title">
-            <h3 class="section-title" id="roles-title">{{ __('home.roles_title') }}</h3>
-            <div class="role-grid">
-                <article class="role-box"><h4>{{ __('home.role_admin_title') }}</h4><p>{{ __('home.role_admin_desc') }}</p></article>
-                <article class="role-box"><h4>{{ __('home.role_staff_title') }}</h4><p>{{ __('home.role_staff_desc') }}</p></article>
-                <article class="role-box"><h4>{{ __('home.role_student_title') }}</h4><p>{{ __('home.role_student_desc') }}</p></article>
-            </div>
-        </section>
-
-        <section class="section-card" aria-labelledby="why-title">
-            <h3 class="section-title" id="why-title">{{ __('home.benefits_title') }}</h3>
-            <div class="benefit-list">
-                <div class="benefit-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {{ __('home.benefit_fast') }}
-                </div>
-                <div class="benefit-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {{ __('home.benefit_paperwork') }}
-                </div>
-                <div class="benefit-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {{ __('home.benefit_transparency') }}
-                </div>
-                <div class="benefit-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {{ __('home.benefit_decision') }}
-                </div>
-                <div class="benefit-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {{ __('home.benefit_centralised') }}
-                </div>
-            </div>
-        </section>
-
-        <section class="section-card" aria-labelledby="impact-title">
-            <h3 class="section-title" id="impact-title">{{ __('home.impact_title') }}</h3>
-            <div class="impact-grid">
-                <article class="impact-box">
-                    <h4>{{ __('home.impact_students') }}</h4>
-                    <strong data-home-stat="students-managed">{{ number_format($homeStats['students_managed']) }}</strong>
-                    <span>{{ __('home.impact_students_desc') }}</span>
-                </article>
-                <article class="impact-box">
-                    <h4>{{ __('home.impact_actions') }}</h4>
-                    <strong data-home-stat="open-actions">{{ number_format($homeStats['open_actions']) }}</strong>
-                    <span>{{ __('home.impact_actions_desc') }}</span>
-                </article>
-                <article class="impact-box">
-                    <h4>{{ __('home.impact_records') }}</h4>
-                    <strong data-home-stat="digital-records">{{ number_format($homeStats['digital_records']) }}</strong>
-                    <span>{{ __('home.impact_records_desc') }}</span>
-                </article>
-            </div>
-        </section>
-
         <section class="section-card cta-card" aria-labelledby="cta-title">
             <h3 class="section-title" id="cta-title">{{ __('home.cta_title') }}</h3>
             <p class="section-desc">{{ __('home.cta_desc') }}</p>
@@ -896,6 +780,10 @@
                 <a href="{{ route('login') }}" class="cta-btn primary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
                     {{ __('home.cta_login') }}
+                </a>
+                <a href="{{ route('bug-reports.create') }}" class="cta-btn secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 12h9m-9 4h5.25M6 3.75h8.25L18 7.5v12.75A2.25 2.25 0 0115.75 22.5h-9A2.25 2.25 0 014.5 20.25V6A2.25 2.25 0 016.75 3.75H6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 3.75V7.5H18"/></svg>
+                    {{ __('home.cta_report') }}
                 </a>
                 <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="cta-btn secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>

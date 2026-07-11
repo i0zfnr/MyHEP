@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Edit Pengumuman Disiplin')
+@section('title', __('Edit Pengumuman Disiplin'))
 
 @push('styles')
 <style>
@@ -178,7 +178,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Edit Pengumuman Disiplin</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Edit Pengumuman Disiplin') }}</h2>
 @endsection
 
 @section('content')
@@ -189,23 +189,23 @@
         @csrf
         @method('PUT')
         <div class="card">
-            <h2>Maklumat Pengumuman</h2>
+            <h2>{{ __('Maklumat Pengumuman') }}</h2>
             <div class="body">
                 <div>
-                    <label for="title">Tajuk</label>
+                    <label for="title">{{ __('Tajuk') }}</label>
                     <input id="title" type="text" name="title" value="{{ old('title', $announcement->title) }}" required>
                 </div>
 
                 <div style="margin-top:12px;">
-                    <label for="body">Penerangan</label>
+                    <label for="body">{{ __('Penerangan') }}</label>
                     <textarea id="body" name="body" rows="7" required>{{ old('body', $announcement->body) }}</textarea>
                 </div>
             </div>
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" type="submit">Simpan Perubahan</button>
-            <a class="btn" href="{{ route('admin.discipline-announcements.index') }}">Batal</a>
+            <button class="btn btn-primary" type="submit">{{ __('Simpan Perubahan') }}</button>
+            <a class="btn" href="{{ route('admin.discipline-announcements.index') }}">{{ __('Batal') }}</a>
         </div>
     </form>
 </div>

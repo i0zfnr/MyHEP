@@ -874,6 +874,8 @@
             <p>
                 @if($hasDisciplineAccess && $hasScholarshipAccess)
                     Gambaran keseluruhan modul disiplin dan scholarship.
+                @elseif($hasMovementAccess && !$hasDisciplineAccess && !$hasScholarshipAccess)
+                    Gambaran keseluruhan pemantauan guard house dan pergerakan pelajar.
                 @elseif($hasDisciplineAccess)
                     Gambaran keseluruhan modul disiplin pelajar.
                 @elseif($hasScholarshipAccess)
@@ -893,10 +895,26 @@
     <div class="portal-card">
         <div class="portal-card-head">Portal Utama</div>
         <div class="portal-links">
-            <a href="{{ route('admin.reports.monthly') }}" class="portal-link">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Laporan Bulanan
-            </a>
+            @if((session('auth_user.admin_role') ?? null) !== 'guard')
+                <a href="{{ route('admin.reports.monthly') }}" class="portal-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Laporan Bulanan
+                </a>
+            @endif
+            @if($hasMovementAccess)
+                <a href="{{ route('admin.movements.qr') }}" class="portal-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zm-12 12h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zM9 6h6M6 9v6M18 9v6M9 18h6"/></svg>
+                    Guard House QR
+                </a>
+                <a href="{{ route('admin.movements.index') }}" class="portal-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
+                    Student Movement
+                </a>
+                <a href="{{ route('admin.students.index') }}" class="portal-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                    Senarai Pelajar
+                </a>
+            @endif
             @if($hasDisciplineAccess)
                 <a href="{{ route('admin.offenses.create') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -1055,26 +1073,28 @@
     @endif
 
     {{-- ── Discipline Module ── --}}
-    @if($hasDisciplineAccess)
-        <p class="section-heading">Disiplin</p>
+    @if($hasMovementAccess)
+        <p class="section-heading">{{ $hasDisciplineAccess ? 'Disiplin' : 'Student Movement' }}</p>
 
         <div class="stats-grid">
             <div class="stat-card accent">
                 <div class="stat-label">Jumlah Pelajar</div>
                 <div class="stat-value">{{ $totalStudents }}</div>
             </div>
-            <div class="stat-card blue">
-                <div class="stat-label">Jumlah Kesalahan</div>
-                <div class="stat-value">{{ $totalOffenses }}</div>
-            </div>
-            <div class="stat-card red">
-                <div class="stat-label">Kes Unpaid</div>
-                <div class="stat-value">{{ $unpaidOffenses }}</div>
-            </div>
-            <div class="stat-card gold">
-                <div class="stat-label">Rekod Belum Disahkan</div>
-                <div class="stat-value">{{ $pendingFineApplications }}</div>
-            </div>
+            @if($hasDisciplineAccess)
+                <div class="stat-card blue">
+                    <div class="stat-label">Jumlah Kesalahan</div>
+                    <div class="stat-value">{{ $totalOffenses }}</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-label">Kes Unpaid</div>
+                    <div class="stat-value">{{ $unpaidOffenses }}</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-label">Rekod Belum Disahkan</div>
+                    <div class="stat-value">{{ $pendingFineApplications }}</div>
+                </div>
+            @endif
             <div class="stat-card accent">
                 <div class="stat-label">{{ __('Outside Now') }}</div>
                 <div class="stat-value">{{ $outsideNow ?? 0 }}</div>
@@ -1093,6 +1113,7 @@
             </div>
         </div>
 
+        @if($hasDisciplineAccess)
         <div class="two-col">
             <div class="data-card">
                 <div class="data-card-head">
@@ -1168,6 +1189,37 @@
                 @endif
             </div>
         </div>
+        @else
+        <div class="two-col">
+            <div class="data-card">
+                <div class="data-card-head">
+                    <strong>Guard House Access</strong>
+                    <a class="btn-ghost" href="{{ route('admin.movements.qr') }}">
+                        Buka QR
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zm-12 12h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zM9 6h6M6 9v6M18 9v6M9 18h6"/></svg>
+                    Buka paparan QR guard house untuk tayangan monitor dan pengesahan imbasan pelajar.
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="data-card-head">
+                    <strong>Live Monitoring</strong>
+                    <a class="btn-ghost" href="{{ route('admin.movements.outside') }}">
+                        Pantau
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
+                    Pantau pelajar di luar kampus, semak kelewatan, dan buka senarai pelajar untuk semakan pantas di pondok pengawal.
+                </div>
+            </div>
+        </div>
+        @endif
     @endif
 
     {{-- ── Scholarship Module ── --}}
@@ -1272,7 +1324,7 @@
         </div>
     @endif
 
-    @if(!$hasDisciplineAccess && !$hasScholarshipAccess)
+    @if(!$hasDisciplineAccess && !$hasScholarshipAccess && !$hasMovementAccess)
         <div class="no-access">
             <div class="icon-wrap">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" style="color:#9E9892;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>

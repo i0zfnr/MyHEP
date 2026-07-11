@@ -13,7 +13,8 @@ class TranslateFrontendContent
         /** @var Response $response */
         $response = $next($request);
 
-        if (app()->getLocale() !== 'en') {
+        // Redirect and error responses must keep their original body and headers.
+        if (! $response->isSuccessful() || app()->getLocale() !== 'en') {
             return $response;
         }
 

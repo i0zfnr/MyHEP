@@ -22,4 +22,7 @@ return [
     'login_button' => 'Sign In',
     'home_button' => 'Home Page',
     'error_prefix' => 'Error:',
+    'error_throttle' => 'Too many login attempts. Try again in :seconds seconds.',
+    'error_invalid_student' => 'Invalid student login details.',
+    'error_invalid_admin' => 'Invalid admin login details. Use the admin NRIC or full name.',
 ];

@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BugReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\MovementController as StudentMovementController;
@@ -90,6 +92,11 @@ Route::post('/locale', function (Request $request) {
 
     return redirect()->back();
 })->name('locale.update');
+
+Route::get('/report-problem', [BugReportController::class, 'create'])->name('bug-reports.create');
+Route::post('/report-problem', [BugReportController::class, 'store'])
+    ->middleware('throttle:6,10')
+    ->name('bug-reports.store');
 
 // Login Routes
 Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -210,7 +217,8 @@ Route::post('/student/profile/password', [ProfileController::class, 'updatePassw
     ->middleware('auth.session:student')
     ->name('student.profile.password.update');
 Route::get('/student/ai-helper', function () {
-    return view('student.ai_helper.index');
+    return redirect()->route('student.dashboard')
+        ->withErrors(['ai_helper' => __('AI Helper is currently unavailable for students.')]);
 })->middleware('auth.session:student')->name('student.ai-helper.index');
 Route::get('/student/movements', [StudentMovementController::class, 'index'])
     ->middleware('auth.session:student')
@@ -226,7 +234,7 @@ Route::get('/admin/system-monitoring/live', [AdminDashboardController::class, 'l
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.system-monitoring.live');
 Route::get('/admin/reports/monthly', [AdminReportController::class, 'monthly'])
-    ->middleware('auth.session:admin')
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice'])
     ->name('admin.reports.monthly');
 Route::get('/admin/student-scholarship-status', function (Request $request) {
     $filters = $request->validate([
@@ -279,27 +287,30 @@ Route::get('/admin/student-scholarship-status', function (Request $request) {
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.student-scholarship-status.index');
 Route::get('/admin/ai-helper', function () {
     return view('admin.ai_helper.index');
-})->middleware('auth.session:admin')->name('admin.ai-helper.index');
+})->middleware(['auth.session:admin', 'admin.scope:backoffice'])->name('admin.ai-helper.index');
 Route::get('/admin/movements', [AdminMovementController::class, 'index'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.index');
 Route::get('/admin/movements/export', [AdminMovementController::class, 'export'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.export');
 Route::get('/admin/movements/outside', [AdminMovementController::class, 'outside'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.outside');
 Route::get('/admin/movements/violations', [AdminMovementController::class, 'violations'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.violations');
 Route::get('/admin/movements/qr', [AdminMovementController::class, 'qr'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.qr');
+Route::get('/admin/movements/qr/status', [AdminMovementController::class, 'qrStatus'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
+    ->name('admin.movements.qr.status');
 Route::get('/admin/movements/qr/print', [AdminMovementController::class, 'qrPrint'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.qr.print');
 Route::post('/admin/movements/qr', [AdminMovementController::class, 'updateQr'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.qr.update');
 Route::get('/admin/movements/settings', [AdminMovementController::class, 'settings'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
@@ -400,12 +411,21 @@ Route::post('/admin/admin-users/{id}/reset-password', [AdminUserController::clas
 Route::delete('/admin/admin-users/{id}', [AdminUserController::class, 'destroy'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.destroy');
+Route::get('/admin/bug-reports', [AdminBugReportController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.bug-reports.index');
+Route::put('/admin/bug-reports/{id}', [AdminBugReportController::class, 'update'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.bug-reports.update');
+Route::delete('/admin/bug-reports/{id}', [AdminBugReportController::class, 'destroy'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.bug-reports.destroy');
 
 Route::get('/admin/students', [StudentController::class, 'index'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.students.index');
 Route::get('/admin/students/search', [StudentController::class, 'search'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.students.search');
 Route::get('/admin/students/export', [StudentController::class, 'export'])
     ->middleware(['auth.session:admin', 'admin.scope:discipline'])

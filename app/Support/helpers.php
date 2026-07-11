@@ -44,6 +44,18 @@ if (!function_exists('canAccessDisciplineAdmin')) {
     }
 }
 
+if (!function_exists('canAccessMovementAdmin')) {
+    function canAccessMovementAdmin(): bool
+    {
+        if (!isAdminAuthenticated()) {
+            return false;
+        }
+
+        $adminRole = session('auth_user.admin_role');
+        return in_array($adminRole, ['guard', 'discipline_admin', 'system_admin'], true);
+    }
+}
+
 if (!function_exists('baseRuleCategories')) {
     function baseRuleCategories(): array
     {

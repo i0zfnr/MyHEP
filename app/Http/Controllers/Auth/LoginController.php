@@ -39,7 +39,7 @@ class LoginController extends Controller
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
             return redirect()->route('login')->withErrors([
-                'username' => "Terlalu banyak cubaan log masuk. Cuba lagi dalam {$seconds} saat.",
+                'username' => __('login.error_throttle', ['seconds' => $seconds]),
             ])->withInput();
         }
 
@@ -61,7 +61,7 @@ class LoginController extends Controller
                 RateLimiter::hit($throttleKey, 900);
                 auditLog('auth.login_failed', 'student', $student->id ?? null, 'Percubaan login pelajar gagal');
                 return redirect()->route('login')->withErrors([
-                    'username' => 'Maklumat log masuk pelajar tidak sah.',
+                    'username' => __('login.error_invalid_student'),
                 ])->withInput();
             }
 
@@ -87,7 +87,7 @@ class LoginController extends Controller
             RateLimiter::hit($throttleKey, 900);
             auditLog('auth.login_failed', 'admin', $admin->id ?? null, 'Percubaan login admin gagal');
             return redirect()->route('login')->withErrors([
-                'username' => 'Maklumat log masuk admin tidak sah. Guna IC admin atau nama penuh.',
+                'username' => __('login.error_invalid_admin'),
             ])->withInput();
         }
 

@@ -44,6 +44,9 @@
             radial-gradient(circle at 50% 50%, rgba(164,141,120,.08), transparent 58%),
             rgba(255,255,255,.62);
     }
+    .move-scanner.is-live {
+        border-color: transparent;
+    }
     .move-scanner video {
         position:absolute;
         inset:0;
@@ -66,6 +69,7 @@
         pointer-events:none;
         z-index:3;
     }
+    .move-scanner.is-live .move-scanner-overlay { display:none; }
     .move-scan-frame {
         width:min(72vw, 280px);
         max-width:78%;
@@ -183,16 +187,15 @@
 @section('content')
 @php
     $insideCampus = !$currentMovement;
-    $checkpointValid = $hasScannedToken
-        && $checkpoint
-        && $checkpoint->is_active
-        && (!$checkpoint->valid_from || \Illuminate\Support\Carbon::parse($checkpoint->valid_from)->lte(now()))
-        && (!$checkpoint->valid_until || \Illuminate\Support\Carbon::parse($checkpoint->valid_until)->gte(now()));
+    $checkpointValid = $checkpoint !== null;
 @endphp
 
 <div class="ui-shell">
     @if(session('success'))
         <div class="move-alert">{{ session('success') }}</div>
+    @endif
+    @if(session('scan_ready'))
+        <div class="move-alert">{{ session('scan_ready') }}</div>
     @endif
     @if($errors->any())
         <div class="move-alert danger">{{ $errors->first() }}</div>
@@ -200,7 +203,7 @@
 
     <div class="ui-hero">
         <h3>{{ __('Campus Movement') }}</h3>
-        <p>{{ __('Students must scan the guard house QR first. After a valid scan, the system unlocks movement options for check-out or return.') }}</p>
+        <p>{{ __('Students must scan the latest guard house QR first. Each scan opens a short one-time pass before the movement options unlock.') }}</p>
     </div>
 
     <div class="move-grid">
@@ -250,7 +253,7 @@
             <div class="ui-card-body move-scan-card">
                 <div class="move-scan-head">
                     <div>
-                        <p class="move-note" style="margin-top:0;">{{ __('Use the device camera to scan the active QR code at the guard house. The movement menu will only appear after a valid scan.') }}</p>
+                        <p class="move-note" style="margin-top:0;">{{ __('Use the device camera to scan the active QR code at the guard house. Each QR scan is single-use and expires quickly.') }}</p>
                     </div>
                     <div class="move-scan-actions">
                         <button type="button" class="ui-btn primary" id="scanStartBtn">{{ __('Start Scanner') }}</button>
@@ -260,6 +263,7 @@
 
                 <div class="move-scanner" id="moveScanner">
                     <video id="moveScannerVideo" playsinline muted></video>
+                    <canvas id="moveScannerCanvas" hidden></canvas>
                     <div class="move-scan-placeholder" id="moveScannerPlaceholder">
                         <div class="move-scan-placeholder-copy">
                             <strong>{{ __('Camera scanner is idle') }}</strong>
@@ -273,11 +277,16 @@
 
                 <div class="move-scan-status {{ $checkpointValid ? 'ok' : 'warn' }}" id="moveScanStatus">
                     {{ $checkpointValid
-                        ? __('Valid QR scan detected. You can now choose a movement below.')
-                        : __('Waiting for a valid QR scan from the guard house checkpoint.') }}
+                        ? __('Latest QR verified. Complete the movement before this one-time pass expires.')
+                        : __('Waiting for a valid QR scan from the live guard house checkpoint.') }}
                 </div>
 
                 @if($checkpointValid)
+                    @if($scanExpiresAt)
+                        <div class="move-note" id="moveScanExpiry" data-expiry="{{ $scanExpiresAt->toIso8601String() }}">
+                            {{ __('Scan pass expires at :time.', ['time' => $scanExpiresAt->format('d M Y, h:i:s A')]) }}
+                        </div>
+                    @endif
                     <form method="POST" action="{{ route('student.movements.store') }}" data-confirm-message="{{ __('Confirm this movement record?') }}" data-confirm-action="{{ __('Confirm Movement') }}">
                         @csrf
                         <input type="hidden" name="checkpoint_id" value="{{ $checkpoint->id }}">
@@ -305,7 +314,7 @@
 
                         <div class="ui-actions" style="margin-top:1rem;">
                             <button type="submit" class="ui-btn primary">{{ __('Confirm') }}</button>
-                            <a href="{{ route('student.movements.index') }}" class="ui-btn">{{ __('Reset Scan') }}</a>
+                            <a href="{{ route('student.movements.index', ['reset_scan' => 1]) }}" class="ui-btn">{{ __('Reset Scan') }}</a>
                         </div>
                     </form>
                 @endif
@@ -349,6 +358,10 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+@endpush
+
+@push('scripts')
 <script>
 (() => {
     const lat = document.getElementById('gpsLatitude');
@@ -363,13 +376,15 @@
     const startBtn = document.getElementById('scanStartBtn');
     const stopBtn = document.getElementById('scanStopBtn');
     const video = document.getElementById('moveScannerVideo');
+    const canvas = document.getElementById('moveScannerCanvas');
     const scanner = document.getElementById('moveScanner');
     const placeholder = document.getElementById('moveScannerPlaceholder');
     const overlay = document.getElementById('moveScannerOverlay');
     const statusNode = document.getElementById('moveScanStatus');
+    const expiryNode = document.getElementById('moveScanExpiry');
     const currentUrl = new URL(window.location.href);
 
-    if (!startBtn || !stopBtn || !video || !scanner || !placeholder || !overlay || !statusNode) {
+    if (!startBtn || !stopBtn || !video || !canvas || !scanner || !placeholder || !overlay || !statusNode) {
         return;
     }
 
@@ -377,11 +392,15 @@
     let detector = null;
     let scanTimer = null;
     let isScanning = false;
+    const jsQr = window.jsQR || null;
+    const canvasContext = canvas.getContext('2d', { willReadFrequently: true });
 
     const supportsDetector = 'BarcodeDetector' in window;
     if (supportsDetector) {
         detector = new window.BarcodeDetector({ formats: ['qr_code'] });
     }
+    const supportsFallbackQr = typeof jsQr === 'function' && !!canvasContext;
+    const supportsAnyQrScanner = supportsDetector || supportsFallbackQr;
 
     const setStatus = (message, tone) => {
         statusNode.textContent = message;
@@ -429,33 +448,77 @@
     };
 
     const scanFrame = async () => {
-        if (!detector || !isScanning || video.readyState < 2) {
+        if (!isScanning || video.readyState < 2) {
             return;
         }
 
         try {
-            const barcodes = await detector.detect(video);
-            if (barcodes.length > 0) {
-                handleDetectedValue(barcodes[0].rawValue);
+            if (detector) {
+                const barcodes = await detector.detect(video);
+                if (barcodes.length > 0) {
+                    handleDetectedValue(barcodes[0].rawValue);
+                }
+                return;
+            }
+
+            if (supportsFallbackQr) {
+                const width = video.videoWidth || 0;
+                const height = video.videoHeight || 0;
+                if (!width || !height) {
+                    return;
+                }
+
+                if (canvas.width !== width || canvas.height !== height) {
+                    canvas.width = width;
+                    canvas.height = height;
+                }
+
+                canvasContext.drawImage(video, 0, 0, width, height);
+                const imageData = canvasContext.getImageData(0, 0, width, height);
+                const qrCode = jsQr(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: 'dontInvert',
+                });
+
+                if (qrCode?.data) {
+                    handleDetectedValue(qrCode.data);
+                }
             }
         } catch (error) {
             setStatus(@json(__('Unable to read the QR frame right now. Keep the camera steady and try again.')), 'danger');
         }
     };
 
+    const requestCameraStream = async () => {
+        const attempts = [
+            { video: { facingMode: { exact: 'environment' } }, audio: false },
+            { video: { facingMode: { ideal: 'environment' } }, audio: false },
+            { video: true, audio: false },
+        ];
+
+        let lastError = null;
+        for (const constraints of attempts) {
+            try {
+                return await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (error) {
+                lastError = error;
+            }
+        }
+
+        throw lastError;
+    };
+
     startBtn.addEventListener('click', async () => {
-        if (!supportsDetector || !navigator.mediaDevices?.getUserMedia) {
-            setStatus(@json(__('This browser does not support the built-in QR scanner. Use a supported mobile Chrome/Edge browser.')), 'danger');
+        if (!supportsAnyQrScanner || !navigator.mediaDevices?.getUserMedia) {
+            setStatus(@json(__('QR scanning is unavailable on this device. Allow camera access and make sure the page is opened over HTTPS.')), 'danger');
             return;
         }
 
         try {
             stopScanner();
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { ideal: 'environment' } },
-                audio: false,
-            });
+            stream = await requestCameraStream();
             video.srcObject = stream;
+            video.setAttribute('playsinline', 'true');
+            video.setAttribute('autoplay', 'true');
             await video.play();
             scanner.classList.add('is-live');
             placeholder.hidden = true;
@@ -472,6 +535,22 @@
         stopScanner();
         setStatus(@json(__('Scanner stopped. Start it again when you are ready to scan the guard house QR code.')), 'warn');
     });
+
+    if (expiryNode?.dataset.expiry) {
+        const expiry = new Date(expiryNode.dataset.expiry);
+        const timer = window.setInterval(() => {
+            const diff = expiry.getTime() - Date.now();
+            if (diff <= 0) {
+                clearInterval(timer);
+                window.location.assign(@json(route('student.movements.index', ['reset_scan' => 1])));
+                return;
+            }
+
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            expiryNode.textContent = @json(__('Scan pass expires in :time.')).replace(':time', `${minutes}:${String(seconds).padStart(2, '0')}`);
+        }, 1000);
+    }
 
     window.addEventListener('beforeunload', stopScanner);
 })();

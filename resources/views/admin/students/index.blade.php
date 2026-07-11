@@ -194,54 +194,57 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Pelajar</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Pelajar') }}</h2>
 @endsection
 
 @section('content')
 <div class="wrap">
+    @php($isGuardAdmin = (session('auth_user.admin_role') ?? null) === 'guard')
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
     <div class="stats">
         <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page', 'password_status'), ['password_status' => ''])) }}">
-            <div class="stat-label">Total Pelajar</div>
+            <div class="stat-label">{{ __('Total Pelajar') }}</div>
             <div class="stat-value">{{ $studentStats['total'] }}</div>
         </a>
         <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'default'])) }}">
-            <div class="stat-label">Default IC</div>
+            <div class="stat-label">{{ __('Default IC') }}</div>
             <div class="stat-value">{{ $studentStats['default_ic'] }}</div>
         </a>
         <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'custom'])) }}">
-            <div class="stat-label">Custom Password</div>
+            <div class="stat-label">{{ __('Custom Password') }}</div>
             <div class="stat-value">{{ $studentStats['custom_password'] }}</div>
         </a>
     </div>
 
     <div class="card">
         <div class="head">
-            <h1 style="margin:0;font-size:20px;">Senarai Pelajar</h1>
+            <h1 style="margin:0;font-size:20px;">{{ __('Senarai Pelajar') }}</h1>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a>
-                <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">Export CSV</a>
-                <a class="btn" href="{{ route('admin.students.create') }}">Tambah Pelajar</a>
+                <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                @unless($isGuardAdmin)
+                    <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                    <a class="btn" href="{{ route('admin.students.create') }}">{{ __('Tambah Pelajar') }}</a>
+                @endunless
             </div>
         </div>
 
         <div class="filters">
             <form method="GET" action="{{ route('admin.students.index') }}">
                 <div class="filter-grid">
-                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari nama / matrik / IC"></div>
-                    <div><input type="text" name="program" value="{{ $filters['program'] ?? '' }}" placeholder="Cari program"></div>
+                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama / matrik / IC') }}"></div>
+                    <div><input type="text" name="program" value="{{ $filters['program'] ?? '' }}" placeholder="{{ __('Cari program') }}"></div>
                     <div>
                         <select name="password_status">
-                            <option value="">Semua status kata laluan</option>
-                            <option value="default" {{ ($filters['password_status'] ?? '') === 'default' ? 'selected' : '' }}>Default IC</option>
-                            <option value="custom" {{ ($filters['password_status'] ?? '') === 'custom' ? 'selected' : '' }}>Custom Password</option>
+                            <option value="">{{ __('Semua status kata laluan') }}</option>
+                            <option value="default" {{ ($filters['password_status'] ?? '') === 'default' ? 'selected' : '' }}>{{ __('Default IC') }}</option>
+                            <option value="custom" {{ ($filters['password_status'] ?? '') === 'custom' ? 'selected' : '' }}>{{ __('Custom Password') }}</option>
                         </select>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn" type="submit">Filter</button>
-                        <a class="btn" href="{{ route('admin.students.index') }}">Reset</a>
+                        <button class="btn" type="submit">{{ __('Filter') }}</button>
+                        <a class="btn" href="{{ route('admin.students.index') }}">{{ __('Reset') }}</a>
                     </div>
                 </div>
             </form>
@@ -276,25 +279,29 @@
                                 @endif
                             </td>
                             <td>
-                                <div class="actions-cell">
-                                    <a class="btn" href="{{ route('admin.students.edit', $student->id) }}">Edit</a>
-                                    <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;"
-                                        data-confirm-title="{{ __('Reset password') }}"
-                                        data-confirm-message="{{ __('Reset this student password to NRIC?') }}"
-                                        data-confirm-action="{{ __('Reset Password') }}">
-                                        @csrf
-                                        <button class="btn btn-warn" type="submit">Reset Password</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.students.destroy', $student->id) }}" style="margin:0;"
-                                        data-confirm-title="{{ __('Delete student') }}"
-                                        data-confirm-message="{{ __('Delete this student record?') }}"
-                                        data-confirm-action="{{ __('Delete') }}"
-                                        data-confirm-tone="danger">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger" type="submit">Delete</button>
-                                    </form>
-                                </div>
+                                @if($isGuardAdmin)
+                                    <span class="muted">Read only</span>
+                                @else
+                                    <div class="actions-cell">
+                                        <a class="btn" href="{{ route('admin.students.edit', $student->id) }}">Edit</a>
+                                        <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;"
+                                            data-confirm-title="{{ __('Reset password') }}"
+                                            data-confirm-message="{{ __('Reset this student password to NRIC?') }}"
+                                            data-confirm-action="{{ __('Reset Password') }}">
+                                            @csrf
+                                            <button class="btn btn-warn" type="submit">Reset Password</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.students.destroy', $student->id) }}" style="margin:0;"
+                                            data-confirm-title="{{ __('Delete student') }}"
+                                            data-confirm-message="{{ __('Delete this student record?') }}"
+                                            data-confirm-action="{{ __('Delete') }}"
+                                            data-confirm-tone="danger">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-danger" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                @endif
                             </td>
                         </tr>
                     @empty

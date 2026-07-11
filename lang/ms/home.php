@@ -59,6 +59,7 @@ return [
     'cta_desc' => 'Gunakan StudentEdge untuk memusatkan data biasiswa dan disiplin dalam satu platform selamat.',
     'cta_login' => 'Log Masuk Sistem',
     'cta_contact' => 'Hubungi Pentadbir',
+    'cta_report' => 'Laporkan Masalah',
     'support_title' => 'Hubungan & Sokongan',
     'support_email' => 'Emel',
     'support_office' => 'Pejabat',

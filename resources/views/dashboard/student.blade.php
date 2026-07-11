@@ -846,7 +846,7 @@
                 </div>
                 <div class="stat-label">{{ __('Status Stiker') }}</div>
                 <div class="stat-value sm {{ ($stickerStatusLabel ?? 'none') === 'approved' ? 'teal' : '' }}">
-                    {{ $stickerStatusLabel ?? __('Tiada') }}
+                    {{ __($stickerStatusLabel ?? 'Tiada') }}
                 </div>
             </div>
 
@@ -860,33 +860,6 @@
                 </div>
             </div>
 
-        </div>
-    </div>
-
-    {{-- â”€â”€ QUICK ACTIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
-    <div>
-        <p class="section-label">{{ __('Tindakan Pantas') }}</p>
-        <div class="actions-row">
-            <a href="{{ route('student.offenses.index') }}" class="action-btn primary">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.5 4.5a.5.5 0 00-1 0v3h-3a.5.5 0 000 1h3v3a.5.5 0 001 0v-3h3a.5.5 0 000-1h-3v-3z"/></svg>
-                {{ __('Mohon Bayaran Denda') }}
-            </a>
-            <a href="{{ route('student.vehicle-stickers.index') }}" class="action-btn">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2a1 1 0 00-1 1v1a1 1 0 001 1h1v1.5a.5.5 0 001 0V5h6v1.5a.5.5 0 001 0V5h1a1 1 0 001-1V3a1 1 0 00-1-1H3zm1 5.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm7 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/></svg>
-                {{ __('Mohon Stiker Kenderaan') }}
-            </a>
-            <a href="{{ route('student.movements.index') }}" class="action-btn">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 106.5 6.5A6.508 6.508 0 008 1.5zM8.75 4a.75.75 0 00-1.5 0v4.1l2.55 1.7a.75.75 0 10.84-1.24L8.75 7.3V4z"/></svg>
-                {{ __('Rekod Pergerakan') }}
-            </a>
-            <a href="{{ route('student.rules.index') }}" class="action-btn">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z"/><path d="M5 8h6v1H5V8zm0 2h6v1H5v-1zm0 2h4v1H5v-1z"/></svg>
-                {{ __('Lihat Peraturan') }}
-            </a>
-            <a href="{{ route('student.profile') }}" class="action-btn">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm2-3a2 2 0 11-4 0 2 2 0 014 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
-                {{ __('Profil Saya') }}
-            </a>
         </div>
     </div>
 

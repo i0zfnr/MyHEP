@@ -7,14 +7,10 @@
     .st-ai {
         width: min(100%, 1140px);
         margin: 0 auto;
-        display: grid;
-        grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr);
-        gap: 1rem;
-        align-items: start;
+        display: block;
     }
 
-    .st-ai-shell,
-    .st-ai-side {
+    .st-ai-shell {
         position: relative;
         overflow: hidden;
         border: 1px solid rgba(220, 205, 191, .72);
@@ -27,8 +23,7 @@
         -webkit-backdrop-filter: blur(18px) saturate(128%);
     }
 
-    body[data-theme="dark"] .st-ai-shell,
-    body[data-theme="dark"] .st-ai-side {
+    body[data-theme="dark"] .st-ai-shell {
         border-color: rgba(226, 209, 192, .14);
         background:
             linear-gradient(180deg, rgba(35,31,28,.94), rgba(20,18,16,.92)),
@@ -36,8 +31,7 @@
         box-shadow: 0 22px 48px rgba(0, 0, 0, .30);
     }
 
-    .st-ai-shell::before,
-    .st-ai-side::before {
+    .st-ai-shell::before {
         content: '';
         position: absolute;
         inset: 0;
@@ -47,8 +41,7 @@
         pointer-events: none;
     }
 
-    .st-ai-shell > *,
-    .st-ai-side > * {
+    .st-ai-shell > * {
         position: relative;
         z-index: 1;
     }
@@ -215,96 +208,10 @@
         gap: .95rem;
     }
 
-    .st-ai-section-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: .75rem;
-        margin-bottom: .1rem;
-    }
-
-    .st-ai-section-title {
-        margin: 0;
-        color: #241a14;
-        font-size: .96rem;
-        font-weight: 800;
-    }
-
-    .st-ai-section-note {
-        color: #7a6858;
-        font-size: .8rem;
-        line-height: 1.5;
-    }
-
-    body[data-theme="dark"] .st-ai-section-title {
-        color: #fff7ef;
-    }
-
-    body[data-theme="dark"] .st-ai-section-note {
-        color: rgba(247,239,232,.66);
-    }
-
-    .st-ai-cards {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: .8rem;
-    }
-
-    .st-ai-card {
-        border: 1px solid rgba(220, 205, 191, .78);
-        border-radius: 16px;
-        padding: .95rem;
-        background:
-            linear-gradient(180deg, rgba(255,255,255,.88), rgba(248,242,235,.76));
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.44);
-    }
-
-    body[data-theme="dark"] .st-ai-card {
-        border-color: rgba(226, 209, 192, .12);
-        background:
-            linear-gradient(180deg, rgba(49,44,39,.76), rgba(31,28,25,.82));
-    }
-
-    .st-ai-card-label {
-        color: #816d5d;
-        font-size: .73rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-    }
-
-    .st-ai-card-value {
-        margin-top: .35rem;
-        color: #241a14;
-        font-size: 1.35rem;
-        font-weight: 800;
-    }
-
-    .st-ai-card-note {
-        margin-top: .4rem;
-        color: #7a6858;
-        font-size: .8rem;
-        line-height: 1.5;
-    }
-
-    body[data-theme="dark"] .st-ai-card-label,
-    body[data-theme="dark"] .st-ai-card-note {
-        color: rgba(247,239,232,.68);
-    }
-
-    body[data-theme="dark"] .st-ai-card-value {
-        color: #fff7ef;
-    }
-
     .st-ai-prompts {
         display: grid;
-        gap: .8rem;
-    }
-
-    .st-ai-row {
-        display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: .8rem;
+        gap: .9rem;
     }
 
     .st-ai-chip {
@@ -313,8 +220,8 @@
         gap: .8rem;
         min-height: 100%;
         border: 1px solid rgba(220, 205, 191, .78);
-        border-radius: 16px;
-        padding: .95rem 1rem;
+        border-radius: 20px;
+        padding: 1rem 1.05rem;
         background:
             linear-gradient(180deg, rgba(255,255,255,.80), rgba(246,239,231,.72));
         color: #2d221a;
@@ -326,7 +233,7 @@
     .st-ai-chip:hover {
         transform: translateY(-2px);
         border-color: rgba(189, 158, 126, .90);
-        box-shadow: 0 16px 24px rgba(43, 34, 28, .10);
+        box-shadow: 0 18px 28px rgba(43, 34, 28, .12);
     }
 
     body[data-theme="dark"] .st-ai-chip {
@@ -360,6 +267,30 @@
         height: 20px;
     }
 
+    .st-ai-chip-copy {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .st-ai-chip-kicker {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: .35rem;
+        padding: .18rem .5rem;
+        border-radius: 999px;
+        background: rgba(126, 193, 153, .12);
+        color: #2e7851;
+        font-size: .66rem;
+        font-weight: 800;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    body[data-theme="dark"] .st-ai-chip-kicker {
+        background: rgba(95,190,145,.14);
+        color: #cfe9da;
+    }
+
     .st-ai-chip-title {
         font-size: .96rem;
         font-weight: 800;
@@ -376,6 +307,27 @@
 
     body[data-theme="dark"] .st-ai-chip-desc {
         color: rgba(247,239,232,.70);
+    }
+
+    .st-ai-chip-arrow {
+        align-self: center;
+        color: #907865;
+        opacity: .72;
+        transition: transform 170ms ease, opacity 170ms ease, color 170ms ease;
+    }
+
+    .st-ai-chip:hover .st-ai-chip-arrow {
+        transform: translateX(3px);
+        opacity: 1;
+        color: #5d4a3d;
+    }
+
+    body[data-theme="dark"] .st-ai-chip-arrow {
+        color: rgba(247,239,232,.52);
+    }
+
+    body[data-theme="dark"] .st-ai-chip:hover .st-ai-chip-arrow {
+        color: #fff7ef;
     }
 
     .st-ai-input-card {
@@ -487,138 +439,12 @@
         color: rgba(247,239,232,.74);
     }
 
-    .st-ai-side-head {
-        padding: 1.05rem 1.05rem .9rem;
-        border-bottom: 1px solid rgba(220, 205, 191, .64);
-    }
-
-    body[data-theme="dark"] .st-ai-side-head {
-        border-bottom-color: rgba(226, 209, 192, .10);
-    }
-
-    .st-ai-side-title {
-        margin: 0;
-        color: #2d221a;
-        font-size: 1rem;
-        font-weight: 800;
-    }
-
-    .st-ai-side-sub {
-        margin: .38rem 0 0;
-        color: #7b6758;
-        font-size: .83rem;
-        line-height: 1.6;
-    }
-
-    body[data-theme="dark"] .st-ai-side-title {
-        color: #fff7ef;
-    }
-
-    body[data-theme="dark"] .st-ai-side-sub {
-        color: rgba(247,239,232,.68);
-    }
-
-    .st-ai-side-body {
-        padding: 1rem;
-        display: grid;
-        gap: .85rem;
-    }
-
-    .st-ai-side-box {
-        border: 1px solid rgba(220, 205, 191, .70);
-        border-radius: 16px;
-        padding: .95rem;
-        background:
-            linear-gradient(180deg, rgba(255,255,255,.80), rgba(246,239,231,.72));
-    }
-
-    body[data-theme="dark"] .st-ai-side-box {
-        border-color: rgba(226, 209, 192, .12);
-        background:
-            linear-gradient(180deg, rgba(49,44,39,.76), rgba(31,28,25,.82));
-    }
-
-    .st-ai-side-box h4 {
-        margin: 0 0 .55rem;
-        font-size: .84rem;
-        color: #725e4f;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-    }
-
-    body[data-theme="dark"] .st-ai-side-box h4 {
-        color: #ceb8a2;
-    }
-
-    .st-ai-side-list {
-        display: grid;
-        gap: .55rem;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
-
-    .st-ai-side-list li {
-        color: #4e3a2c;
-        font-size: .84rem;
-        line-height: 1.6;
-        padding-left: 1rem;
-        position: relative;
-    }
-
-    .st-ai-side-list li::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: .6rem;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #7ac193;
-    }
-
-    body[data-theme="dark"] .st-ai-side-list li {
-        color: rgba(247,239,232,.74);
-    }
-
-    .st-ai-terms {
-        color: #655344;
-        font-size: .83rem;
-        line-height: 1.65;
-    }
-
-    .st-ai-terms a {
-        color: #355bc9;
-        text-decoration: none;
-        font-weight: 700;
-    }
-
-    @media (max-width: 980px) {
-        .st-ai {
+    @media (max-width: 700px) {
+        .st-ai-prompts {
             grid-template-columns: 1fr;
         }
 
         .st-ai-shell {
-            order: 1;
-        }
-
-        .st-ai-side {
-            order: 2;
-        }
-    }
-
-    @media (max-width: 700px) {
-        .st-ai {
-            gap: .85rem;
-        }
-
-        .st-ai-cards,
-        .st-ai-row {
-            grid-template-columns: 1fr;
-        }
-
-        .st-ai-shell,
-        .st-ai-side {
             border-radius: 18px;
         }
 
@@ -718,22 +544,6 @@
             height: 44px;
         }
 
-        .st-ai-cards {
-            gap: .65rem;
-        }
-
-        .st-ai-card {
-            padding: .85rem .9rem;
-        }
-
-        .st-ai-card-value {
-            font-size: 1.18rem;
-        }
-
-        .st-ai-prompts {
-            gap: .65rem;
-        }
-
         .st-ai-chip {
             gap: .7rem;
             padding: .85rem .9rem;
@@ -756,23 +566,6 @@
             line-height: 1.45;
         }
 
-        .st-ai-side-head {
-            padding-top: .95rem;
-            padding-bottom: .8rem;
-        }
-
-        .st-ai-side-body {
-            gap: .75rem;
-        }
-
-        .st-ai-side-box {
-            padding: .9rem;
-        }
-
-        .st-ai-side-list li {
-            font-size: .82rem;
-            line-height: 1.55;
-        }
     }
 
     @media (max-width: 480px) {
@@ -780,8 +573,7 @@
             width: 100%;
         }
 
-        .st-ai-shell,
-        .st-ai-side {
+        .st-ai-shell {
             border-radius: 16px;
         }
 
@@ -789,23 +581,9 @@
             font-size: 1.72rem;
         }
 
-        .st-ai-section-head {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: .2rem;
-        }
-
-        .st-ai-card-note,
-        .st-ai-section-note,
         .st-ai-input-note,
-        .st-ai-disclaimer,
-        .st-ai-side-sub,
-        .st-ai-terms {
+        .st-ai-disclaimer {
             font-size: .78rem;
-        }
-
-        .st-ai-side {
-            display: none;
         }
     }
 </style>
@@ -865,118 +643,69 @@
                 <p class="st-ai-disclaimer">{{ __('Beta: Changxie is still learning. Independently verify before use.') }}</p>
             </div>
 
-            <div class="st-ai-cards">
-                <article class="st-ai-card">
-                    <div class="st-ai-card-label">{{ __('Module') }}</div>
-                    <div class="st-ai-card-value">{{ __('Student Portal') }}</div>
-                    <div class="st-ai-card-note">{{ __('Built for scholarship and discipline guidance.') }}</div>
-                </article>
-                <article class="st-ai-card">
-                    <div class="st-ai-card-label">{{ __('Mode') }}</div>
-                    <div class="st-ai-card-value">Beta</div>
-                    <div class="st-ai-card-note">{{ __('Answers should still be verified when important.') }}</div>
-                </article>
-                <article class="st-ai-card">
-                    <div class="st-ai-card-label">{{ __('Status') }}</div>
-                    <div class="st-ai-card-value">{{ __('Ready') }}</div>
-                    <div class="st-ai-card-note">{{ __('Choose a prompt or type your own question below.') }}</div>
-                </article>
-            </div>
-
             <div class="st-ai-prompts">
-                <div class="st-ai-section-head">
-                    <h4 class="st-ai-section-title">{{ __('Quick actions') }}</h4>
-                    <div class="st-ai-section-note">{{ __('Tap a topic to understand what you can ask.') }}</div>
-                </div>
+                <a href="#" class="st-ai-chip">
+                    <span class="st-ai-chip-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </span>
+                    <span class="st-ai-chip-copy">
+                        <span class="st-ai-chip-kicker">{{ __('Overview') }}</span>
+                        <span class="st-ai-chip-title">{{ __('What can Changxie help me with?') }}</span>
+                        <span class="st-ai-chip-desc">{{ __('See the main things this assistant can explain for students.') }}</span>
+                    </span>
+                    <span class="st-ai-chip-arrow" aria-hidden="true">-></span>
+                </a>
 
-                <div class="st-ai-row">
-                    <a href="#" class="st-ai-chip">
-                        <span class="st-ai-chip-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                        </span>
-                        <span>
-                            <span class="st-ai-chip-title">{{ __('What can Changxie help me with?') }}</span>
-                            <span class="st-ai-chip-desc">{{ __('See the main things this assistant can explain for students.') }}</span>
-                        </span>
-                    </a>
-                    <a href="#" class="st-ai-chip">
-                        <span class="st-ai-chip-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-                                <path d="M7 8h10"></path>
-                                <path d="M7 12h6"></path>
-                            </svg>
-                        </span>
-                        <span>
-                            <span class="st-ai-chip-title">{{ __('My Scholarship') }}</span>
-                            <span class="st-ai-chip-desc">{{ __('Ask about scholarship records, sponsor, or current status.') }}</span>
-                        </span>
-                    </a>
-                </div>
+                <a href="#" class="st-ai-chip">
+                    <span class="st-ai-chip-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                            <path d="M7 8h10"></path>
+                            <path d="M7 12h6"></path>
+                        </svg>
+                    </span>
+                    <span class="st-ai-chip-copy">
+                        <span class="st-ai-chip-kicker">{{ __('Scholarship') }}</span>
+                        <span class="st-ai-chip-title">{{ __('My Scholarship') }}</span>
+                        <span class="st-ai-chip-desc">{{ __('Ask about scholarship records, sponsor, or current status.') }}</span>
+                    </span>
+                    <span class="st-ai-chip-arrow" aria-hidden="true">-></span>
+                </a>
 
-                <div class="st-ai-row">
-                    <a href="#" class="st-ai-chip">
-                        <span class="st-ai-chip-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 1v22"></path>
-                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6"></path>
-                            </svg>
-                        </span>
-                        <span>
-                            <span class="st-ai-chip-title">{{ __('Make Payment Now') }}</span>
-                            <span class="st-ai-chip-desc">{{ __('Ask how to review fines or continue payment-related steps.') }}</span>
-                        </span>
-                    </a>
-                    <a href="#" class="st-ai-chip">
-                        <span class="st-ai-chip-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                            </svg>
-                        </span>
-                        <span>
-                            <span class="st-ai-chip-title">{{ __('View Rules') }}</span>
-                            <span class="st-ai-chip-desc">{{ __('Ask for rules, procedures, or what to do before applying.') }}</span>
-                        </span>
-                    </a>
-                </div>
+                <a href="#" class="st-ai-chip">
+                    <span class="st-ai-chip-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1v22"></path>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </span>
+                    <span class="st-ai-chip-copy">
+                        <span class="st-ai-chip-kicker">{{ __('Payments') }}</span>
+                        <span class="st-ai-chip-title">{{ __('Make Payment Now') }}</span>
+                        <span class="st-ai-chip-desc">{{ __('Ask how to review fines or continue payment-related steps.') }}</span>
+                    </span>
+                    <span class="st-ai-chip-arrow" aria-hidden="true">-></span>
+                </a>
+
+                <a href="#" class="st-ai-chip">
+                    <span class="st-ai-chip-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </span>
+                    <span class="st-ai-chip-copy">
+                        <span class="st-ai-chip-kicker">{{ __('Rules') }}</span>
+                        <span class="st-ai-chip-title">{{ __('View Rules') }}</span>
+                        <span class="st-ai-chip-desc">{{ __('Ask for rules, procedures, or what to do before applying.') }}</span>
+                    </span>
+                    <span class="st-ai-chip-arrow" aria-hidden="true">-></span>
+                </a>
             </div>
         </div>
     </section>
-
-    <aside class="st-ai-side">
-        <div class="st-ai-side-head">
-            <h3 class="st-ai-side-title">{{ __('Quick Guide') }}</h3>
-            <p class="st-ai-side-sub">{{ __('Use this helper for light guidance before you move to the actual scholarship or discipline page.') }}</p>
-        </div>
-
-        <div class="st-ai-side-body">
-            <section class="st-ai-side-box">
-                <h4>{{ __('Good topics to ask') }}</h4>
-                <ul class="st-ai-side-list">
-                    <li>{{ __('How do I check my scholarship status?') }}</li>
-                    <li>{{ __('How do I review my offense record?') }}</li>
-                    <li>{{ __('How do I submit a fine payment application?') }}</li>
-                    <li>{{ __('Where can I read the latest scholarship announcements?') }}</li>
-                </ul>
-            </section>
-
-            <section class="st-ai-side-box">
-                <h4>{{ __('Before you rely on an answer') }}</h4>
-                <ul class="st-ai-side-list">
-                    <li>{{ __('Double-check important dates, amounts, and status changes in the actual module page.') }}</li>
-                    <li>{{ __('Use the official scholarship, offense, or settings page for final actions.') }}</li>
-                </ul>
-            </section>
-
-            <section class="st-ai-side-box">
-                <h4>{{ __('Terms') }}</h4>
-                <div class="st-ai-terms">{{ __('By messaging Changxie, you agree to our') }} <a href="#">{{ __('Terms') }}</a>.</div>
-            </section>
-        </div>
-    </aside>
 </div>
 @endsection
 

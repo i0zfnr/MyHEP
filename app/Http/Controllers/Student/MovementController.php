@@ -7,18 +7,37 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class MovementController extends Controller
 {
-    public function index(Request $request): View
+    private const SCAN_SESSION_KEY = 'student_movement.scan_pass';
+    private const SCAN_PASS_TTL_MINUTES = 2;
+
+    public function index(Request $request): View|RedirectResponse
     {
         $studentId = (int) session('auth_user.id');
+
+        if ($request->boolean('reset_scan')) {
+            $request->session()->forget(self::SCAN_SESSION_KEY);
+
+            return redirect()->route('student.movements.index');
+        }
+
         $token = (string) $request->query('token', '');
-        $checkpoint = $token !== ''
-            ? $this->checkpointByToken($token)
-            : null;
+        if ($token !== '') {
+            $checkpoint = $this->checkpointByToken($token);
+            if ($this->checkpointIsUsable($checkpoint)) {
+                $this->issueScanPass($request, $checkpoint);
+
+                return redirect()->route('student.movements.index')
+                    ->with('scan_ready', __('QR scan verified. Complete your movement within the next 2 minutes.'));
+            }
+        }
+
+        $checkpoint = $this->activeScanCheckpoint($request);
 
         $currentMovement = $this->currentMovement($studentId);
         $movementTypes = DB::table('movement_types')
@@ -45,14 +64,21 @@ class MovementController extends Controller
             'currentMovement' => $currentMovement,
             'movementTypes' => $movementTypes,
             'records' => $records,
-            'token' => $token,
-            'hasScannedToken' => $token !== '',
+            'scanExpiresAt' => $this->scanPassExpiry($request),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $studentId = (int) session('auth_user.id');
+        $scanPass = $this->scanPass($request);
+        $checkpoint = $this->activeScanCheckpoint($request, $scanPass);
+
+        if (!$scanPass || !$checkpoint) {
+            return redirect()->route('student.movements.index')
+                ->withErrors(['checkpoint' => __('Please scan the latest guard house QR code before recording movement.')]);
+        }
+
         $validated = $request->validate([
             'checkpoint_id' => ['required', 'integer', 'exists:movement_checkpoints,id'],
             'movement_type_id' => ['required', 'integer', 'exists:movement_types,id'],
@@ -60,10 +86,9 @@ class MovementController extends Controller
             'gps_longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
-        $checkpoint = DB::table('movement_checkpoints')->where('id', $validated['checkpoint_id'])->first();
-        if (!$this->checkpointIsUsable($checkpoint)) {
+        if ((int) $validated['checkpoint_id'] !== (int) $checkpoint->id || !$this->checkpointIsUsable($checkpoint)) {
             return redirect()->route('student.movements.index')
-                ->withErrors(['checkpoint' => __('QR checkpoint tidak aktif atau telah tamat tempoh.')]);
+                ->withErrors(['checkpoint' => __('The scanned QR pass is no longer valid. Please scan the latest guard house QR code again.')]);
         }
 
         $type = DB::table('movement_types')
@@ -77,7 +102,7 @@ class MovementController extends Controller
         }
 
         if (!$this->passesGpsValidation($checkpoint, $validated['gps_latitude'] ?? null, $validated['gps_longitude'] ?? null)) {
-            return redirect()->route('student.movements.index', ['token' => $checkpoint->qr_token])
+            return redirect()->route('student.movements.index')
                 ->withErrors(['gps' => __('Lokasi anda berada di luar radius checkpoint yang dibenarkan.')]);
         }
 
@@ -86,7 +111,7 @@ class MovementController extends Controller
 
         if ($type->direction === 'return') {
             if (!$currentMovement) {
-                return redirect()->route('student.movements.index', ['token' => $checkpoint->qr_token])
+                return redirect()->route('student.movements.index')
                     ->withErrors(['movement_type_id' => __('Tiada rekod keluar kampus yang sedang aktif.')]);
             }
 
@@ -109,13 +134,14 @@ class MovementController extends Controller
                 ]);
 
             auditLog('student_movement.return', 'student_movements', (int) $currentMovement->id, 'Student returned to campus');
+            $request->session()->forget(self::SCAN_SESSION_KEY);
 
             return redirect()->route('student.movements.index')
                 ->with('success', __('Kepulangan ke kampus berjaya direkodkan.'));
         }
 
         if ($currentMovement) {
-            return redirect()->route('student.movements.index', ['token' => $checkpoint->qr_token])
+            return redirect()->route('student.movements.index')
                 ->withErrors(['movement_type_id' => __('Anda masih direkodkan berada di luar kampus. Sila pilih Return to Campus terlebih dahulu.')]);
         }
 
@@ -138,6 +164,7 @@ class MovementController extends Controller
         ]);
 
         auditLog('student_movement.checkout', 'student_movements', (int) $movementId, 'Student checked out from campus');
+        $request->session()->forget(self::SCAN_SESSION_KEY);
 
         return redirect()->route('student.movements.index')
             ->with('success', __('Pergerakan keluar kampus berjaya direkodkan.'));
@@ -164,6 +191,71 @@ class MovementController extends Controller
         return DB::table('movement_checkpoints')
             ->where('qr_token', $token)
             ->first();
+    }
+
+    private function issueScanPass(Request $request, object $checkpoint): void
+    {
+        DB::table('movement_checkpoints')
+            ->where('id', $checkpoint->id)
+            ->update([
+                'qr_token' => Str::random(48),
+                'updated_at' => now(),
+            ]);
+
+        $request->session()->put(self::SCAN_SESSION_KEY, [
+            'checkpoint_id' => (int) $checkpoint->id,
+            'scanned_at' => now()->toIso8601String(),
+            'expires_at' => now()->addMinutes(self::SCAN_PASS_TTL_MINUTES)->toIso8601String(),
+        ]);
+    }
+
+    private function scanPass(Request $request): ?array
+    {
+        $scanPass = $request->session()->get(self::SCAN_SESSION_KEY);
+        if (!is_array($scanPass) || empty($scanPass['checkpoint_id']) || empty($scanPass['expires_at'])) {
+            return null;
+        }
+
+        try {
+            if (Carbon::parse($scanPass['expires_at'])->isPast()) {
+                $request->session()->forget(self::SCAN_SESSION_KEY);
+
+                return null;
+            }
+        } catch (\Throwable) {
+            $request->session()->forget(self::SCAN_SESSION_KEY);
+
+            return null;
+        }
+
+        return $scanPass;
+    }
+
+    private function scanPassExpiry(Request $request): ?Carbon
+    {
+        $scanPass = $this->scanPass($request);
+
+        return $scanPass ? Carbon::parse($scanPass['expires_at']) : null;
+    }
+
+    private function activeScanCheckpoint(Request $request, ?array $scanPass = null): ?object
+    {
+        $scanPass ??= $this->scanPass($request);
+        if (!$scanPass) {
+            return null;
+        }
+
+        $checkpoint = DB::table('movement_checkpoints')
+            ->where('id', (int) $scanPass['checkpoint_id'])
+            ->first();
+
+        if (!$this->checkpointIsUsable($checkpoint)) {
+            $request->session()->forget(self::SCAN_SESSION_KEY);
+
+            return null;
+        }
+
+        return $checkpoint;
     }
 
     private function checkpointIsUsable(?object $checkpoint): bool

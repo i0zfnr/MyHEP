@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureAdminScope;
 use App\Http\Middleware\RequireSessionAuthenticated;
 use App\Http\Middleware\RequireSessionRole;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\TranslateFrontendContent;
 use App\Http\Middleware\UseForwardedHostForUrls;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             SetLocale::class,
+            TranslateFrontendContent::class,
         ]);
 
         $middleware->alias([

@@ -19,6 +19,8 @@ class EnsureAdminScope
         $allowed = match ($scope) {
             'scholarship' => ['scholarship_admin', 'system_admin'],
             'discipline' => ['discipline_admin', 'system_admin'],
+            'movement' => ['guard', 'discipline_admin', 'system_admin'],
+            'backoffice' => ['scholarship_admin', 'discipline_admin', 'system_admin'],
             default => ['system_admin'],
         };
 

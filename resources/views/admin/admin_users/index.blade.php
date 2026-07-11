@@ -16,6 +16,7 @@
     .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .role { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; text-transform:uppercase; border:1px solid #ede4d9; }
+    .role.guard { background:#ede9fe; color:#6d28d9; border-color:#ddd6fe; }
     .role.system_admin { background:#e0f2fe; color:#075985; border-color:#bae6fd; }
     .role.scholarship_admin { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
     .role.discipline_admin { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
@@ -217,7 +218,7 @@
                         <tr>
                             <td>{{ $admin->full_name }}</td>
                             <td>{{ $admin->ic_no }}</td>
-                            <td><span class="role {{ $admin->role }}">{{ $admin->role }}</span></td>
+                            <td><span class="role {{ $admin->role }}">{{ str_replace('_', ' ', ucfirst($admin->role)) }}</span></td>
                             <td>{{ $admin->created_at ? \Illuminate\Support\Carbon::parse($admin->created_at)->format('Y-m-d') : '-' }}</td>
                             <td>
                                 <div class="actions">

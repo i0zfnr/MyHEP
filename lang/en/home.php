@@ -59,6 +59,7 @@ return [
     'cta_desc' => 'Use StudentEdge to centralise scholarship and discipline data in one secure platform.',
     'cta_login' => 'Login to System',
     'cta_contact' => 'Contact Administrator',
+    'cta_report' => 'Report a Problem',
     'support_title' => 'Contact & Support',
     'support_email' => 'Email',
     'support_office' => 'Office',

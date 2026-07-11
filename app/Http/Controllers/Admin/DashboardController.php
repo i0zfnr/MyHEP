@@ -17,6 +17,7 @@ class DashboardController extends Controller
         $showSystemMonitoring = $adminRole === 'system_admin';
 
         $hasDisciplineAccess = canAccessDisciplineAdmin();
+        $hasMovementAccess = canAccessMovementAdmin();
         $hasScholarshipAccess = canAccessScholarshipAdmin();
 
         $totalStudents = 0;
@@ -35,6 +36,20 @@ class DashboardController extends Controller
         $recentScholarshipRecords = collect();
         $recentScholarshipAnnouncements = collect();
 
+        if ($hasMovementAccess) {
+            $totalStudents = DB::table('students')->count();
+
+            if (Schema::hasTable('student_movements')) {
+                $outsideNow = DB::table('student_movements')->whereNull('return_at')->count();
+                $movementCheckoutsToday = DB::table('student_movements')->whereDate('checkout_at', now()->toDateString())->count();
+                $movementLateReturns = DB::table('student_movements')->where('rule_status', 'late')->count();
+                $movementOvernightRecords = DB::table('student_movements')
+                    ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
+                    ->where('movement_types.slug', 'overnight_stay')
+                    ->count();
+            }
+        }
+
         if ($hasDisciplineAccess) {
             $disciplineStats = systemCacheRemember('myhep.dashboard.discipline_stats', 90, function () {
                 return [
@@ -50,16 +65,6 @@ class DashboardController extends Controller
             $totalOffenses = (int) ($disciplineStats['total_offenses'] ?? 0);
             $unpaidOffenses = (int) ($disciplineStats['unpaid_offenses'] ?? 0);
             $pendingFineApplications = (int) ($disciplineStats['pending_fine_applications'] ?? 0);
-
-            if (Schema::hasTable('student_movements')) {
-                $outsideNow = DB::table('student_movements')->whereNull('return_at')->count();
-                $movementCheckoutsToday = DB::table('student_movements')->whereDate('checkout_at', now()->toDateString())->count();
-                $movementLateReturns = DB::table('student_movements')->where('rule_status', 'late')->count();
-                $movementOvernightRecords = DB::table('student_movements')
-                    ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
-                    ->where('movement_types.slug', 'overnight_stay')
-                    ->count();
-            }
 
             $recentOffenses = collect(systemCacheRemember('myhep.dashboard.recent_offenses', 45, function () {
                 return DB::table('offenses')
@@ -150,6 +155,7 @@ class DashboardController extends Controller
             'showSystemMonitoring',
             'systemMonitoring',
             'hasDisciplineAccess',
+            'hasMovementAccess',
             'hasScholarshipAccess',
             'totalStudents',
             'totalOffenses',

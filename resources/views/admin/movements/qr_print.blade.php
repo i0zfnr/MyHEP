@@ -70,6 +70,17 @@
             font-size:12px;
             line-height:1.5;
         }
+        .warning {
+            margin:0 0 6mm;
+            padding:4mm 5mm;
+            border:1px solid #f1c27d;
+            border-radius:12px;
+            background:#fff4e5;
+            color:#8a4b08;
+            font-size:12px;
+            line-height:1.5;
+            text-align:center;
+        }
         .url {
             margin:0;
             padding:4mm;
@@ -123,6 +134,7 @@
 
         <section class="card">
             <div class="checkpoint">{{ $checkpoint?->name ?? __('Checkpoint') }}</div>
+            <div class="warning">{{ __('This QR rotates after each successful scan. A printed copy can expire after the first use and should only be used as a temporary backup.') }}</div>
 
             @if($scanUrl)
                 <div class="qr-box">

@@ -21,7 +21,18 @@
     .actions { display:flex; gap:10px; flex-wrap:wrap; }
     .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:9px 14px; text-decoration:none; font-weight:600; font-size:14px; cursor:pointer; }
     .btn-primary { background:linear-gradient(135deg,#A48D78,#CBB9A4); color:#fff; border:none; }
+    .btn-danger-soft {
+        border-color:#f3b0b7 !important;
+        background:linear-gradient(180deg, #fff5f5 0%, #fdeaea 100%) !important;
+        color:#b42318 !important;
+    }
+    .btn-danger-soft:hover {
+        border-color:#ea8d98 !important;
+        background:linear-gradient(180deg, #ffeaea 0%, #fbd7da 100%) !important;
+        color:#912018 !important;
+    }
     .error { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
+    .preview-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
     .rules-toolbar { display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:12px; }
     @media (min-width:900px) { .rules-toolbar { grid-template-columns:1.2fr auto auto auto; align-items:center; } }
     .rules-toolbar input[type="text"] { width:100%; }
@@ -253,17 +264,21 @@
 
                     @if(!empty($offense->evidence_photo_path))
                         <div style="margin-top:10px;">
-                            <a href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank" class="btn" style="padding:6px 10px; font-size:12px;">{{ __('Lihat Gambar Semasa') }}</a>
+                            <div class="preview-actions">
+                                <a href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank" class="btn" style="padding:6px 10px; font-size:12px;">{{ __('Lihat Gambar Semasa') }}</a>
+                                <button type="button" class="btn btn-danger-soft" id="remove_current_evidence_btn">{{ __('Buang Gambar Semasa') }}</button>
+                            </div>
                             <div style="margin-top:8px;">
                                 <img id="current_evidence_preview" src="{{ asset('storage/' . $offense->evidence_photo_path) }}" alt="{{ __('Gambar bukti semasa') }}" style="max-width:220px; border-radius:8px; border:1px solid #ede4d9;">
                             </div>
-                            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-weight:500;">
-                                <input type="checkbox" name="remove_evidence_photo" value="1" {{ old('remove_evidence_photo') ? 'checked' : '' }} style="width:auto;">
-                                {{ __('Buang gambar bukti semasa') }}
-                            </label>
+                            <input type="checkbox" name="remove_evidence_photo" id="remove_evidence_photo" value="1" {{ old('remove_evidence_photo') ? 'checked' : '' }} style="display:none;">
+                            <div id="remove_current_evidence_state" class="hint" style="margin-top:8px; {{ old('remove_evidence_photo') ? '' : 'display:none;' }}">{{ __('Gambar semasa akan dibuang apabila anda simpan perubahan.') }}</div>
                         </div>
                     @endif
 
+                    <div class="preview-actions">
+                        <button type="button" class="btn btn-danger-soft" id="remove_new_evidence_btn" style="display:none;">{{ __('Buang Gambar Baharu') }}</button>
+                    </div>
                     <img id="evidence_preview" alt="{{ __('Preview gambar baharu') }}" style="display:none; margin-top:10px; max-width:220px; border-radius:8px; border:1px solid #ede4d9;">
                 </div>
             </div>
@@ -314,20 +329,71 @@
 <script>
     const evidenceInput = document.getElementById('evidence_photo');
     const evidencePreview = document.getElementById('evidence_preview');
+    const currentEvidencePreview = document.getElementById('current_evidence_preview');
+    const removeCurrentEvidenceBtn = document.getElementById('remove_current_evidence_btn');
+    const removeCurrentEvidenceCheckbox = document.getElementById('remove_evidence_photo');
+    const removeCurrentEvidenceState = document.getElementById('remove_current_evidence_state');
+    const removeNewEvidenceBtn = document.getElementById('remove_new_evidence_btn');
     const offenseForm = document.getElementById('offense_form');
     const ajaxFormFeedback = document.getElementById('ajax_form_feedback');
+    let evidenceObjectUrl = null;
+
+    const syncCurrentEvidenceState = () => {
+        if (!removeCurrentEvidenceCheckbox) return;
+        const isMarked = removeCurrentEvidenceCheckbox.checked;
+        if (currentEvidencePreview) currentEvidencePreview.style.display = isMarked ? 'none' : 'block';
+        if (removeCurrentEvidenceState) removeCurrentEvidenceState.style.display = isMarked ? 'block' : 'none';
+        if (removeCurrentEvidenceBtn) {
+            removeCurrentEvidenceBtn.textContent = isMarked
+                ? @json(__('Batal Buang Gambar Semasa'))
+                : @json(__('Buang Gambar Semasa'));
+        }
+    };
+
+    const resetNewEvidencePreview = () => {
+        if (evidenceObjectUrl) {
+            URL.revokeObjectURL(evidenceObjectUrl);
+            evidenceObjectUrl = null;
+        }
+        evidencePreview.style.display = 'none';
+        evidencePreview.removeAttribute('src');
+        if (removeNewEvidenceBtn) removeNewEvidenceBtn.style.display = 'none';
+    };
 
     if (evidenceInput && evidencePreview) {
         evidenceInput.addEventListener('change', () => {
             const file = evidenceInput.files && evidenceInput.files[0] ? evidenceInput.files[0] : null;
             if (!file) {
-                evidencePreview.style.display = 'none';
-                evidencePreview.removeAttribute('src');
+                resetNewEvidencePreview();
                 return;
             }
-            evidencePreview.src = URL.createObjectURL(file);
+            if (evidenceObjectUrl) {
+                URL.revokeObjectURL(evidenceObjectUrl);
+            }
+            evidenceObjectUrl = URL.createObjectURL(file);
+            evidencePreview.src = evidenceObjectUrl;
             evidencePreview.style.display = 'block';
+            if (removeNewEvidenceBtn) removeNewEvidenceBtn.style.display = 'inline-block';
+            if (removeCurrentEvidenceCheckbox) {
+                removeCurrentEvidenceCheckbox.checked = false;
+                syncCurrentEvidenceState();
+            }
         });
+    }
+
+    if (removeNewEvidenceBtn) {
+        removeNewEvidenceBtn.addEventListener('click', () => {
+            evidenceInput.value = '';
+            resetNewEvidencePreview();
+        });
+    }
+
+    if (removeCurrentEvidenceBtn && removeCurrentEvidenceCheckbox) {
+        removeCurrentEvidenceBtn.addEventListener('click', () => {
+            removeCurrentEvidenceCheckbox.checked = !removeCurrentEvidenceCheckbox.checked;
+            syncCurrentEvidenceState();
+        });
+        syncCurrentEvidenceState();
     }
 
     const showAjaxError = (messages) => {

@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Permohonan Bayaran Denda')
+@section('title', __('Permohonan Bayaran Denda'))
 
 @push('styles')
 <style>
@@ -192,7 +192,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Permohonan Bayaran Denda</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Permohonan Bayaran Denda') }}</h2>
 @endsection
 
 @section('content')
@@ -202,18 +202,18 @@
 
     <div class="card">
         <div class="head">
-            <h1 style="margin:0;font-size:20px;">Permohonan Bayaran Denda</h1>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;"><a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a><a class="btn" href="{{ route('admin.fine-applications.export', request()->query()) }}">Export CSV</a><a class="btn" href="{{ route('admin.offenses.index') }}">Senarai Kesalahan</a></div>
+            <h1 style="margin:0;font-size:20px;">{{ __('Permohonan Bayaran Denda') }}</h1>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;"><a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a><a class="btn" href="{{ route('admin.fine-applications.export', request()->query()) }}">{{ __('Export CSV') }}</a><a class="btn" href="{{ route('admin.offenses.index') }}">{{ __('Senarai Kesalahan') }}</a></div>
         </div>
         <div class="filters">
             <form method="GET" action="{{ route('admin.fine-applications.index') }}">
                 <div class="filter-grid">
                     <div>
-                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari nama pelajar / matrik / tempat">
+                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama pelajar / matrik / tempat') }}">
                     </div>
                     <div>
                         <select name="status">
-                            <option value="">Semua status</option>
+                            <option value="">{{ __('Semua status') }}</option>
                             <option value="pending" {{ ($filters['status'] ?? '') === 'pending' ? 'selected' : '' }}>{{ __('pending') }}</option>
                             <option value="approved" {{ ($filters['status'] ?? '') === 'approved' ? 'selected' : '' }}>{{ __('approved') }}</option>
                             <option value="rejected" {{ ($filters['status'] ?? '') === 'rejected' ? 'selected' : '' }}>{{ __('rejected') }}</option>
@@ -226,15 +226,15 @@
                         <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}">
                     </div>
                     <div class="filter-actions">
-                        <button class="btn" type="submit">Filter</button>
-                        <a class="btn" href="{{ route('admin.fine-applications.index') }}">Reset</a>
+                        <button class="btn" type="submit">{{ __('Filter') }}</button>
+                        <a class="btn" href="{{ route('admin.fine-applications.index') }}">{{ __('Reset') }}</a>
                     </div>
                 </div>
             </form>
         </div>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th>Pelajar</th><th>Kesalahan</th><th>Catatan Pelajar</th><th>Status</th><th>Meeting Date</th><th>Tindakan</th></tr></thead>
+                <thead><tr><th>{{ __('Pelajar') }}</th><th>{{ __('Kesalahan') }}</th><th>{{ __('Catatan Pelajar') }}</th><th>{{ __('Status') }}</th><th>{{ __('Meeting Date') }}</th><th>{{ __('Tindakan') }}</th></tr></thead>
                 <tbody>
                     @forelse($applications as $app)
                         <tr>

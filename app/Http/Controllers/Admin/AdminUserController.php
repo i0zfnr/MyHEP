@@ -10,6 +10,8 @@ use Illuminate\Validation\Rule;
 
 class AdminUserController extends Controller
 {
+    private const ADMIN_ROLES = ['guard', 'scholarship_admin', 'discipline_admin', 'system_admin'];
+
     public function index()
     {
         $admins = DB::table('admins')
@@ -31,7 +33,7 @@ class AdminUserController extends Controller
             'full_name' => ['required', 'string', 'max:150'],
             'ic_no' => ['required', 'string', 'max:20', 'unique:admins,ic_no'],
             'email' => ['nullable', 'email', 'max:150', 'unique:admins,email'],
-            'role' => ['required', Rule::in(['scholarship_admin', 'discipline_admin', 'system_admin'])],
+            'role' => ['required', Rule::in(self::ADMIN_ROLES)],
             'password' => ['required', 'string', 'min:8'],
         ]);
 
@@ -73,7 +75,7 @@ class AdminUserController extends Controller
             'full_name' => ['required', 'string', 'max:150'],
             'ic_no' => ['required', 'string', 'max:20', Rule::unique('admins', 'ic_no')->ignore($id)],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
-            'role' => ['required', Rule::in(['scholarship_admin', 'discipline_admin', 'system_admin'])],
+            'role' => ['required', Rule::in(self::ADMIN_ROLES)],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
 

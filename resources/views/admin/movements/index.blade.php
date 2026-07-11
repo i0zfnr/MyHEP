@@ -43,16 +43,121 @@
     .mv-toolbar { display:grid; grid-template-columns:1fr; gap:.85rem; align-items:start; }
     @media (min-width: 1100px) { .mv-toolbar { grid-template-columns:1.2fr .8fr; } }
     .mv-actions { display:flex; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
-    .mv-filter-grid { display:grid; grid-template-columns:1fr; gap:.75rem; }
-    @media (min-width: 880px) { .mv-filter-grid { grid-template-columns:1.3fr repeat(5, minmax(0, 1fr)) auto auto; } }
+    .mv-actions .ui-btn { min-width:0; }
+    .mv-actions .ui-btn.active {
+        border-color:rgba(95,190,145,.42);
+        background:rgba(95,190,145,.12);
+        color:#d8f7e7;
+        box-shadow:inset 0 0 0 1px rgba(95,190,145,.14);
+    }
+    .mv-filter-shell {
+        display:grid;
+        gap:1rem;
+    }
+    .mv-filter-top {
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:1rem;
+        flex-wrap:wrap;
+    }
+    .mv-filter-copy {
+        display:grid;
+        gap:.3rem;
+    }
+    .mv-filter-title {
+        font-size:1rem;
+        font-weight:800;
+        color:var(--text);
+    }
+    .mv-filter-desc {
+        color:var(--text-muted);
+        font-size:.8rem;
+        max-width:720px;
+    }
+    .mv-results-badge {
+        display:inline-flex;
+        align-items:center;
+        gap:.45rem;
+        padding:.55rem .8rem;
+        border-radius:999px;
+        border:1px solid rgba(226,209,192,.14);
+        background:rgba(255,255,255,.04);
+        color:var(--text-muted);
+        font-size:.78rem;
+        font-weight:700;
+    }
+    .mv-results-badge strong { color:var(--text); font-size:.95rem; }
+    .mv-filter-grid { display:grid; grid-template-columns:1fr; gap:.8rem; }
+    @media (min-width: 880px) { .mv-filter-grid { grid-template-columns:1.45fr repeat(5, minmax(0, 1fr)); } }
     .mv-field { display:flex; flex-direction:column; gap:.3rem; }
     .mv-field span { font-size:.72rem; font-weight:700; color:var(--text-muted); }
     .mv-field input,
     .mv-field select { width:100%; min-width:0; }
+    .mv-field input::placeholder { color:#8e8175; }
+    .mv-filter-actions {
+        display:flex;
+        flex-wrap:wrap;
+        gap:.65rem;
+        align-items:center;
+        justify-content:space-between;
+    }
+    .mv-filter-buttons {
+        display:flex;
+        flex-wrap:wrap;
+        gap:.65rem;
+    }
+    .mv-filter-meta {
+        display:flex;
+        flex-wrap:wrap;
+        gap:.5rem;
+        align-items:center;
+    }
+    .mv-chip {
+        display:inline-flex;
+        align-items:center;
+        padding:.42rem .7rem;
+        border-radius:999px;
+        background:rgba(255,255,255,.05);
+        border:1px solid rgba(226,209,192,.14);
+        color:var(--text-muted);
+        font-size:.74rem;
+        font-weight:700;
+    }
+    .mv-chip strong { color:var(--text); margin-right:.28rem; }
     .mv-table-note { color:var(--text-muted); font-size:.78rem; margin-top:.15rem; }
     .mv-student { font-weight:700; color:var(--text); }
     .mv-sub { color:var(--text-muted); font-size:.76rem; }
+    .mv-type-badge {
+        display:inline-flex;
+        align-items:center;
+        padding:.34rem .64rem;
+        border-radius:999px;
+        background:rgba(215,191,168,.1);
+        border:1px solid rgba(215,191,168,.16);
+        color:#e4cfbb;
+        font-size:.74rem;
+        font-weight:700;
+    }
+    .mv-time {
+        display:grid;
+        gap:.18rem;
+        min-width:155px;
+    }
+    .mv-time strong { color:var(--text); font-size:.83rem; }
+    .mv-time span { color:var(--text-muted); font-size:.72rem; }
+    .mv-row-quiet { color:var(--text-muted); font-size:.76rem; }
     .mv-empty { padding:2rem 1rem; text-align:center; color:var(--text-muted); }
+    .mv-table-head {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:1rem;
+        padding:1rem 1rem 0;
+        flex-wrap:wrap;
+    }
+    .mv-table-head strong { color:var(--text); font-size:.96rem; }
+    .mv-table-head span { color:var(--text-muted); font-size:.78rem; }
     body[data-theme="dark"] .mv-kpi {
         border-color:rgba(226,209,192,.16);
         background:
@@ -63,10 +168,29 @@
     body[data-theme="dark"] .mv-kpi-label { color:#cdb7a4; }
     body[data-theme="dark"] .mv-kpi-value,
     body[data-theme="dark"] .mv-student { color:#f7efe8; }
+    body[data-theme="dark"] .mv-results-badge strong,
+    body[data-theme="dark"] .mv-filter-title,
+    body[data-theme="dark"] .mv-time strong,
+    body[data-theme="dark"] .mv-chip strong,
+    body[data-theme="dark"] .mv-table-head strong { color:#f7efe8; }
+    @media (max-width: 880px) {
+        .mv-filter-actions,
+        .mv-table-head { align-items:flex-start; }
+    }
 </style>
 @endpush
 
 @section('content')
+@php
+    $activeFilterValues = array_filter([
+        'search' => $filters['q'] ?? null,
+        'from' => $filters['date_from'] ?? null,
+        'to' => $filters['date_to'] ?? null,
+        'type' => collect($movementTypes)->firstWhere('id', (int) ($filters['movement_type_id'] ?? 0))?->name,
+        'status' => $filters['movement_status'] ?? null,
+        'rule' => $filters['rule_status'] ?? null,
+    ], fn ($value) => filled($value));
+@endphp
 <div class="ui-shell mv-admin">
     @if(session('success'))
         <div class="ui-card"><div class="ui-card-body" style="color:#166534;">{{ session('success') }}</div></div>
@@ -91,14 +215,17 @@
                 <div class="mv-table-note">{{ __('Filter by student, date, movement type, status, or rule result.') }}</div>
             </div>
             <div class="mv-actions">
+                <a class="ui-btn active" href="{{ route('admin.movements.index') }}">{{ __('Records') }}</a>
                 <a class="ui-btn" href="{{ route('admin.movements.outside') }}">{{ __('Outside Campus') }}</a>
                 <a class="ui-btn" href="{{ route('admin.movements.violations') }}">{{ __('Violations') }}</a>
                 <a class="ui-btn" href="{{ route('admin.movements.qr') }}">{{ __('QR Code') }}</a>
-                <a class="ui-btn" href="{{ route('admin.movements.settings') }}">{{ __('Settings') }}</a>
+                @if((session('auth_user.admin_role') ?? null) === 'system_admin')
+                    <a class="ui-btn" href="{{ route('admin.movements.settings') }}">{{ __('Settings') }}</a>
+                @endif
             </div>
         </div>
         <div class="ui-card-body">
-            <form method="GET" class="mv-filter-grid">
+            <form method="GET" class="mv-filter-grid" id="movementFilterForm">
                 <label class="mv-field">
                     <span>{{ __('Search') }}</span>
                     <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Student / matric / programme') }}">
@@ -137,13 +264,34 @@
                         <option value="late" @selected(($filters['rule_status'] ?? '') === 'late')>{{ __('Late Return') }}</option>
                     </select>
                 </label>
-                <button class="ui-btn primary" type="submit" style="align-self:end;">{{ __('Filter') }}</button>
-                <a class="ui-btn" href="{{ route('admin.movements.export', request()->query()) }}" style="align-self:end;">{{ __('Export CSV') }}</a>
             </form>
+            <div class="mv-filter-actions" style="margin-top:1rem;">
+                <div class="mv-filter-meta">
+                    <div class="mv-results-badge">
+                        <strong>{{ $records->total() }}</strong>
+                        <span>{{ __('Records') }}</span>
+                    </div>
+                    @foreach($activeFilterValues as $label => $value)
+                        <span class="mv-chip"><strong>{{ ucfirst($label) }}:</strong> {{ __($value) }}</span>
+                    @endforeach
+                </div>
+                <div class="mv-filter-buttons">
+                    <button class="ui-btn primary" type="submit" form="movementFilterForm">{{ __('Filter') }}</button>
+                    <a class="ui-btn" href="{{ route('admin.movements.index') }}">{{ __('Reset') }}</a>
+                    <a class="ui-btn" href="{{ route('admin.movements.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                </div>
+            </div>
         </div>
     </section>
 
     <section class="ui-card">
+        <div class="mv-table-head">
+            <div>
+                <strong>{{ __('Movement Timeline') }}</strong>
+                <span>{{ __('Latest check-out and return activity for students.') }}</span>
+            </div>
+            <span class="mv-row-quiet">{{ __('Page') }} {{ $records->currentPage() }} / {{ $records->lastPage() }}</span>
+        </div>
         <div style="overflow-x:auto;">
             <table class="ui-table">
                 <thead>
@@ -161,10 +309,24 @@
                     @forelse($records as $record)
                         <tr>
                             <td><span class="mv-student">{{ $record->student_name }}</span><br><span class="mv-sub">{{ $record->matric_no }}</span></td>
-                            <td>{{ $record->program }}</td>
-                            <td>{{ __($record->movement_type_name) }}</td>
-                            <td>{{ \Illuminate\Support\Carbon::parse($record->checkout_at)->format('d M Y, h:i A') }}</td>
-                            <td>{{ $record->return_at ? \Illuminate\Support\Carbon::parse($record->return_at)->format('d M Y, h:i A') : '-' }}</td>
+                            <td>{{ $record->program }}<br><span class="mv-sub">{{ $record->checkpoint_name }}</span></td>
+                            <td><span class="mv-type-badge">{{ __($record->movement_type_name) }}</span></td>
+                            <td>
+                                <div class="mv-time">
+                                    <strong>{{ \Illuminate\Support\Carbon::parse($record->checkout_at)->format('d M Y') }}</strong>
+                                    <span>{{ \Illuminate\Support\Carbon::parse($record->checkout_at)->format('h:i A') }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                @if($record->return_at)
+                                    <div class="mv-time">
+                                        <strong>{{ \Illuminate\Support\Carbon::parse($record->return_at)->format('d M Y') }}</strong>
+                                        <span>{{ \Illuminate\Support\Carbon::parse($record->return_at)->format('h:i A') }}</span>
+                                    </div>
+                                @else
+                                    <span class="mv-row-quiet">{{ __('Not returned yet') }}</span>
+                                @endif
+                            </td>
                             <td><span class="ui-status status-{{ $record->movement_status === 'outside' ? 'pending' : 'confirmed' }}">{{ __($record->movement_status) }}</span></td>
                             <td><span class="ui-status status-{{ $record->rule_status === 'late' ? 'rejected' : ($record->rule_status === 'pending' ? 'pending' : 'confirmed') }}">{{ __($record->rule_status) }}</span></td>
                         </tr>

@@ -1,226 +1,170 @@
 PROJECT HANDOFF - StudentEdge / e-biasiswa
-Date: 2026-05-22
+Date: 2026-07-12
 Path: C:\laragon\www\e-biasiswa
 
 Summary
 -------
-This project is a Laravel-based scholarship and student affairs management app named StudentEdge / e-biasiswa.
-It appears to target scholarship, discipline, student profile, fine payment, vehicle sticker, announcements,
-reports, admin management, and student self-service workflows.
+StudentEdge is a Laravel 13 student affairs application covering scholarship,
+discipline, student profiles, fines, vehicle stickers, announcements, reports,
+admin management, and guard-house student movement tracking.
 
 Current Git State
 -----------------
 - Branch: main
-- Local branch status when checked: main is synced with origin/main.
-- Local working tree when checked: clean.
-- Latest commits:
-  - 7e5762d Update application UI and dashboard code
-  - 277da9b Update README.md
-  - b7fa6f8 Update README.md
-  - cae01af Update README.md
-  - 79e124b Update README.md
-- Remote from README: https://github.com/i0zfnr/MyHEP.git
+- HEAD: e9f3e35 Add guard role to admins enum
+- At the last check, main matched origin/main.
+- The working tree is NOT clean. There are uncommitted changes across controllers,
+  middleware, routes, translations, tests, and many Blade views.
+- Do not reset, discard, or overwrite these changes. Inspect git status and diff
+  before staging or committing anything.
 
-Technology
-----------
-- Laravel app.
-- composer.json requires:
-  - PHP ^8.3
-  - laravel/framework ^13.0
-  - laravel/tinker ^3.0
-  - dompdf/dompdf 3.1
-- Frontend uses Vite, Tailwind CSS 4, laravel-vite-plugin, concurrently.
-- Database configured in .env appeared to use MySQL database e_biasiswa at 127.0.0.1:3306.
+Recent Completed Work
+---------------------
+- Added the guard admin role and migration:
+  database/migrations/2026_07_11_000011_add_guard_role_to_admins_table.php
+- Added admin and student movement management, QR generation, scanning, history,
+  reporting, guard access, and related navigation.
+- Added a Safari-compatible QR scanner fallback using jsQR and device camera video.
+- Improved responsive login, dashboard, sidebar, header, footer, and dark theme UI.
+- Fixed the application shell so the sidebar and header begin at the viewport top.
+- Standardized the Admin Dashboard header spacing with other admin pages.
+- Updated English and Malay frontend translations across multiple admin/student pages.
+- Fixed discipline announcement sidebar active states so only the current item is active.
+- Marked the student AI helper as unavailable and removed its quick-action content.
+- Fixed redirect translation handling: TranslateFrontendContent now ignores redirects
+  and error responses so Laravel redirect headers remain unchanged.
+- Added a regression test for unauthenticated Admin Dashboard redirects to /login.
+- All 11 migrations were applied successfully at the last check.
+- public/storage is linked.
 
-Important Files / Structure
----------------------------
-- routes/web.php
-  - Main application routes are here.
-  - This file is large and contains most CRUD workflow logic as route closures.
-  - Some routes use controllers, but most admin/student feature logic is inline.
-- app/Http/Controllers/Auth/LoginController.php
-- app/Http/Controllers/Admin/DashboardController.php
-- app/Http/Controllers/Admin/ReportController.php
-- app/Http/Controllers/Student/DashboardController.php
-- app/Http/Controllers/Student/ProfileController.php
-- app/Http/Controllers/SettingController.php
-- app/Support/helpers.php
-- resources/views/
-  - Contains admin, student, auth, dashboard, settings, and layout Blade views.
-- database/migrations/
-  - Contains Laravel defaults plus project-specific migrations.
-- e-biasiswa.sql
-  - SQL dump exists in project root.
-
-Built Feature Areas Observed
+Current Verification Results
 ----------------------------
-There are 98 registered routes.
+- php artisan test: PASS
+  - 3 tests, 5 assertions.
+  - Coverage is still minimal and does not validate real business workflows.
+- npm run build: PASS with Vite 8.0.9.
+- php artisan route:list --except-vendor: PASS, 108 routes.
+- php artisan migrate:status: PASS, all 11 migrations marked Ran.
+- php artisan view:cache: PASS after the latest layout changes.
+- composer audit: FAIL because 16 advisories affect 9 installed packages.
 
-Public/auth:
-- Home page with system overview stats.
-- Live system overview JSON endpoint.
-- Locale switcher for en/ms.
-- Login/logout.
-- Forgot password, verify reset code, reset password.
-- Settings page for authenticated admin/student session.
-
-Student side:
-- Dashboard.
-- Profile update.
-- Password update.
-- AI helper page.
-- Scholarship status self-report form.
-- Scholarship records page.
-- Rules page.
-- Discipline announcements page.
-- Offenses page.
-- Fine payment application submission.
-- Vehicle sticker application submission with image uploads.
-
-Admin side:
-- Dashboard.
-- System monitoring live endpoint.
-- Monthly report.
-- Student scholarship status review.
-- AI helper page.
-- Admin user CRUD and reset password.
-- Maintenance mode enable/disable.
-- Student CRUD, search, export, reset password.
-- Scholarship CRUD and export.
-- Scholarship announcement CRUD and export.
-- Rule CRUD and export.
-- Offense CRUD, export, print, PDF, mark paid.
-- Discipline announcement CRUD and export.
-- Fine payment application index/export/decision.
-- Vehicle sticker index/export/decision.
-
-Database Migrations Observed
-----------------------------
-- 0001_01_01_000000_create_users_table.php
-- 0001_01_01_000001_create_cache_table.php
-- 0001_01_01_000002_create_jobs_table.php
-- 2026_04_22_000003_create_audit_logs_table.php
-- 2026_04_22_000004_add_email_to_students_and_admins.php
-- 2026_04_22_000005_create_password_reset_codes_table.php
-- 2026_04_22_000006_create_student_scholarship_status_forms_table.php
-- 2026_04_24_000007_add_evidence_photo_to_offenses_table.php
-- 2026_04_24_000008_add_document_paths_to_vehicle_sticker_applications_table.php
-- 2026_04_26_000009_add_extended_profile_fields_to_students_table.php
-
-Verification Already Run
-------------------------
-- git status --short --branch
-  - Result: clean.
-  - Branch state: main...origin/main, no ahead/behind marker.
-
-- php artisan test
-  - Result: PASS
-  - 2 tests passed, 2 assertions.
-  - Important: these are only default/example tests, so they do not prove the real workflows.
-
-- php artisan route:list
-  - Result: PASS
-  - 98 routes registered.
-
-- npm run build
-  - Result: PASS.
-  - Vite built public/build/manifest.json, app CSS, and app JS successfully.
-
-- php artisan migrate:status
-  - Result: PASS.
-  - MySQL is reachable at 127.0.0.1:3306.
-  - All 10 migration files are marked Ran.
-
-- PHP syntax check
-  - Result: PASS.
-  - php -l completed for 220 PHP files.
-
-- Local HTTP smoke check on php artisan serve --host=127.0.0.1 --port=8001
-  - GET / returned 200 OK.
-  - GET /login returned 200 OK.
-  - GET /up returned 200 OK.
-  - GET /system-overview/live returned 200 OK with application/json.
-  - GET /admin/dashboard, /student/dashboard, and /settings redirected to /login with 302 when unauthenticated.
-  - Temporary dev server was stopped after the check.
-
-- git push origin main
-  - Result: PASS.
-  - Commit pushed: 7e5762d Update application UI and dashboard code.
-
-Known Problems / Blockers
+Outstanding Priority Work
 -------------------------
-1. routes/web.php is very large.
-   - Many production workflows are implemented as route closures.
-   - Future maintainability would improve by moving large admin/student CRUD logic into controllers or service classes.
+1. Production/debug configuration
+   - The local .env uses APP_ENV=local and APP_DEBUG=true.
+   - This is acceptable only for local development. Do not expose detailed errors on
+     a real deployment or long-lived public Cloudflare tunnel.
+   - Production must use APP_ENV=production and APP_DEBUG=false.
+   - Keep environment-specific values out of committed application code.
 
-2. Test coverage is minimal.
-   - Only example tests exist:
-     tests/Feature/ExampleTest.php
-     tests/Unit/ExampleTest.php
-   - Add feature tests for login, dashboard access, admin CRUD, student application submissions, exports, and uploads.
+2. Dependency security updates
+   - composer audit reported 16 known advisories affecting Laravel, Symfony, Guzzle,
+     and related packages, including high-severity advisories.
+   - Update dependencies in a dedicated change, then run the full test/build/manual
+     verification suite before deployment.
 
-Resolved Since Previous Handoff
--------------------------------
-- Git branch is no longer behind origin/main.
-- Local changes were committed and pushed to GitHub.
-- Frontend build issue is resolved because resources/css/app.css exists and npm run build passes.
-- Database connection issue is resolved for now; MySQL is running and php artisan migrate:status passes.
+3. QR token race condition
+   - File: app/Http/Controllers/Student/MovementController.php
+   - Token lookup and token rotation are separate operations. Concurrent scans could
+     both validate the same token before it is rotated.
+   - Make validation and rotation atomic using a database transaction with
+     lockForUpdate(), or use a conditional atomic update.
 
-Suggested Next Steps For New Agent
-----------------------------------
-1. Run:
+4. Duplicate active movement race condition
+   - File: app/Http/Controllers/Student/MovementController.php
+   - The active-movement check and checkout insert are not in one transaction.
+   - Concurrent submissions could create multiple active checkout records.
+   - Add transaction/locking protection and, if practical, a database-level invariant.
+
+5. Password reset throttling
+   - File: app/Http/Controllers/Auth/LoginController.php
+   - Login attempts are throttled, but six-digit verification attempts are not.
+   - Add per-reference/IP throttling, failed-attempt counting, and invalidation after a
+     small number of failures. Reset completion should remain single-use and atomic.
+
+6. Stale session authorization
+   - Files: app/Http/Middleware/RequireSessionRole.php and EnsureAdminScope.php
+   - Authorization currently trusts role/scope data stored in the login session.
+   - Revalidate that the account still exists and that its current database role matches
+     the required scope, especially for system-admin routes.
+
+7. Real feature test coverage
+   - Existing tests only cover the homepage and a guest redirect.
+   - Add tests for login throttling, admin scopes, stale/deleted accounts, password reset
+     attempts, QR single use, concurrent movement submissions, CRUD authorization,
+     uploads, exports, and EN/MS locale switching.
+
+8. routes/web.php maintainability
+   - routes/web.php is approximately 1,858 lines and contains substantial CRUD/business
+     logic in closures.
+   - Move scholarship, discipline, announcements, fines, stickers, and exports into
+     controllers, Form Requests, and focused service classes in small verified stages.
+
+Architecture / Important Files
+------------------------------
+- routes/web.php
+  Main route definitions and many inline workflows. Treat as high risk when editing.
+- app/Http/Controllers/Auth/LoginController.php
+  Login, logout, forgot password, verification code, and password reset flows.
+- app/Http/Controllers/Admin/MovementController.php
+  Movement administration, QR lifecycle, settings, reports, and exports.
+- app/Http/Controllers/Student/MovementController.php
+  Student scan-pass validation, checkout/return recording, GPS checks, and history.
+- app/Http/Middleware/EnsureAdminScope.php
+  Admin scope authorization for system, scholarship, discipline, and movement roles.
+- app/Http/Middleware/TranslateFrontendContent.php
+  Legacy frontend text replacement for successful English HTML responses only.
+- resources/views/layouts/app.blade.php
+  Shared responsive application shell, sidebar, header, footer, theme, and navigation.
+- lang/en.json and lang/ms.json
+  Primary JSON translation dictionaries.
+- lang/en/frontend_replace.php
+  Compatibility replacement map for remaining hardcoded Malay frontend content.
+- app/Support/helpers.php
+  Shared audit, CSV, cache, and option helpers.
+- e-biasiswa.sql
+  Root SQL dump. Migrations may not fully recreate all legacy schema/data.
+
+Recommended Next Execution Order
+--------------------------------
+1. Preserve the current work:
    git status --short --branch
-   git log --oneline --decorate -5
+   git diff --stat
 
-2. Run full basic checks:
+2. Complete and verify the QR/movement transaction fixes.
+
+3. Add password reset throttling and live account/role session validation.
+
+4. Add focused feature tests for the above security behavior.
+
+5. Commit the current application changes before attempting dependency updates.
+
+6. Update Composer dependencies in a separate commit and rerun:
+   composer audit
    php artisan test
-   php artisan route:list
+   php artisan route:list --except-vendor
    npm run build
    php artisan migrate:status
 
-3. Start the app locally:
-   php artisan serve
+7. Manually verify desktop and mobile workflows:
+   - Login/logout and forgot-password flow.
+   - Admin/student dashboards and language switching.
+   - Guard QR generation, Safari/Chrome scanning, checkout, and return.
+   - Student scholarship, offense, fine, and sticker workflows.
+   - Admin CRUD, approvals, CSV exports, PDF/print, and uploaded files.
 
-4. After the app boots, manually verify authenticated workflows:
-   - Home page.
-   - Login.
-   - Admin dashboard.
-   - Student dashboard.
-   - Student scholarship status submission.
-   - Fine payment application.
-   - Vehicle sticker upload.
-   - Admin approval/decision screens.
-   - CSV exports and PDF/print routes.
+Operational Notes
+-----------------
+- Cloudflare trycloudflare hostnames are temporary. Host changes can make old browser
+  cookies/sessions appear stale; clear site data when testing a new tunnel hostname.
+- Use HTTPS for camera access on mobile Safari/Chrome. localhost is also a secure context.
+- File uploads use the public disk. Verify php artisan storage:link after deployment.
+- Do not commit .env or expose APP_DEBUG=true on a public production environment.
+- Session, cache, and queue currently use database-backed drivers in the local setup.
 
-Notes For Future Development
-----------------------------
-- Be careful with routes/web.php. It is the main behavior file and is easy to break because many workflows are inside it.
-- Do not assume migrations fully recreate the current database content; the root e-biasiswa.sql dump may contain important schema/data.
-- File upload routes use the public disk. Make sure storage link exists:
-  php artisan storage:link
-- Some roles/scopes are enforced through middleware such as:
-  auth.session:student
-  auth.session:admin
-  admin.scope:system
-  admin.scope:scholarship
-  admin.scope:discipline
-- Helper functions such as auditLog(), downloadCsv(), and option helpers may live in app/Support/helpers.php.
-
-Working With Codex / User Collaboration Notes
----------------------------------------------
-- The user prefers direct, practical help and usually wants the agent to execute the next step, not only suggest it.
-- Keep updates short and concrete while working. Explain what is being checked or changed, then continue.
-- Before git operations, inspect:
-  git status --short --branch
-  git remote -v
-  git log --oneline --decorate -5
-- Do not overwrite local/user changes. If the tree is dirty, summarize the changes before staging or committing.
-- Previous Codex work in this session:
-  - Checked git status and remote.
-  - Committed local UI/application updates.
-  - Rebased local main onto origin/main.
-  - Pushed commit 7e5762d to GitHub.
-  - Verified php artisan test, php artisan route:list, npm run build, php artisan migrate:status, PHP syntax, and local HTTP smoke checks.
-  - Updated this PROJECT_HANDOFF.txt to remove stale blockers and record current status.
-- The user initially ran php artisan migrate:status and hit a MySQL connection refused error, but later MySQL was running and migrate:status passed.
-- Next agent should continue with authenticated manual workflow checks and real feature test coverage.
+Collaboration Notes
+-------------------
+- The user generally wants changes implemented and verified, not only suggested.
+- Keep progress updates concise and explain visible behavior in plain language.
+- Preserve unrelated/user changes in the dirty worktree.
+- Before any commit or push, inspect status, diff, branch, remote, and recent history.

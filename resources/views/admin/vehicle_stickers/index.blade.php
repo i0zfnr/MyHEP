@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Permohonan Sticker Kenderaan')
+@section('title', __('Permohonan Sticker Kenderaan'))
 
 @push('styles')
 <style>
@@ -192,7 +192,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Permohonan Sticker Kenderaan</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Permohonan Sticker Kenderaan') }}</h2>
 @endsection
 
 @section('content')
@@ -202,25 +202,25 @@
 
     <div class="card">
         <div class="head">
-            <h1 style="margin:0;font-size:20px;">Permohonan Sticker Kenderaan</h1>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;"><a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a><a class="btn" href="{{ route('admin.vehicle-stickers.export', request()->query()) }}">Export CSV</a></div>
+            <h1 style="margin:0;font-size:20px;">{{ __('Permohonan Sticker Kenderaan') }}</h1>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;"><a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a><a class="btn" href="{{ route('admin.vehicle-stickers.export', request()->query()) }}">{{ __('Export CSV') }}</a></div>
         </div>
 
         <div class="filters">
             <form method="GET" action="{{ route('admin.vehicle-stickers.index') }}">
                 <div class="filter-grid">
-                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari nama pelajar / matrik / no kenderaan"></div>
+                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama pelajar / matrik / no kenderaan') }}"></div>
                     <div>
                         <select name="status">
-                            <option value="">Semua status</option>
+                            <option value="">{{ __('Semua status') }}</option>
                             @foreach(['pending','approved','rejected'] as $status)
                                 <option value="{{ $status }}" {{ ($filters['status'] ?? '') === $status ? 'selected' : '' }}>{{ __($status) }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn" type="submit">Filter</button>
-                        <a class="btn" href="{{ route('admin.vehicle-stickers.index') }}">Reset</a>
+                        <button class="btn" type="submit">{{ __('Filter') }}</button>
+                        <a class="btn" href="{{ route('admin.vehicle-stickers.index') }}">{{ __('Reset') }}</a>
                     </div>
                 </div>
             </form>
@@ -228,7 +228,7 @@
 
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th>Pelajar</th><th>Kenderaan</th><th>Dokumen</th><th>Status</th><th>Disemak Oleh</th><th>Tarikh</th><th>Tindakan</th></tr></thead>
+                <thead><tr><th>{{ __('Pelajar') }}</th><th>{{ __('Kenderaan') }}</th><th>{{ __('Dokumen') }}</th><th>{{ __('Status') }}</th><th>{{ __('Disemak Oleh') }}</th><th>{{ __('Tarikh') }}</th><th>{{ __('Tindakan') }}</th></tr></thead>
                 <tbody>
                     @forelse($applications as $app)
                         <tr>
@@ -236,13 +236,13 @@
                             <td>{{ $app->vehicle_no }}<br><span style="color:#7a6555">{{ $app->vehicle_type }}</span></td>
                             <td>
                                 @if($app->license_card_path)
-                                    <a class="doc-link" href="{{ asset('storage/' . $app->license_card_path) }}" target="_blank">Kad Lesen</a><br>
+                                    <a class="doc-link" href="{{ asset('storage/' . $app->license_card_path) }}" target="_blank">{{ __('Kad Lesen') }}</a><br>
                                 @endif
                                 @if($app->parent_permission_path)
-                                    <a class="doc-link" href="{{ asset('storage/' . $app->parent_permission_path) }}" target="_blank">Surat Ibu Bapa</a><br>
+                                    <a class="doc-link" href="{{ asset('storage/' . $app->parent_permission_path) }}" target="_blank">{{ __('Surat Ibu Bapa') }}</a><br>
                                 @endif
                                 @if($app->vehicle_photo_path)
-                                    <a class="doc-link" href="{{ asset('storage/' . $app->vehicle_photo_path) }}" target="_blank">Gambar Kenderaan</a>
+                                    <a class="doc-link" href="{{ asset('storage/' . $app->vehicle_photo_path) }}" target="_blank">{{ __('Gambar Kenderaan') }}</a>
                                     <img src="{{ asset('storage/' . $app->vehicle_photo_path) }}" alt="Vehicle plate image" class="doc-thumb">
                                 @endif
                             </td>
