@@ -151,9 +151,9 @@ class LoginController extends Controller
         $deliveryMessage = null;
         try {
             Mail::raw(
-                "Kod verifikasi reset kata laluan MyHEP anda: {$code}. Kod ini sah selama 15 minit.",
+                "Kod verifikasi reset kata laluan StudentEdge anda: {$code}. Kod ini sah selama 15 minit.",
                 function ($message) use ($email) {
-                    $message->to($email)->subject('Kod Verifikasi Reset Kata Laluan MyHEP');
+                    $message->to($email)->subject('Kod Verifikasi Reset Kata Laluan StudentEdge');
                 }
             );
         } catch (\Throwable $e) {

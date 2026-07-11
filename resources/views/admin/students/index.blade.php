@@ -278,11 +278,18 @@
                             <td>
                                 <div class="actions-cell">
                                     <a class="btn" href="{{ route('admin.students.edit', $student->id) }}">Edit</a>
-                                    <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;" onsubmit="return confirm('Reset kata laluan pelajar ini kepada No. IC?');">
+                                    <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Reset password') }}"
+                                        data-confirm-message="{{ __('Reset this student password to NRIC?') }}"
+                                        data-confirm-action="{{ __('Reset Password') }}">
                                         @csrf
                                         <button class="btn btn-warn" type="submit">Reset Password</button>
                                     </form>
-                                    <form method="POST" action="{{ route('admin.students.destroy', $student->id) }}" style="margin:0;" onsubmit="return confirm('Padam rekod pelajar ini?');">
+                                    <form method="POST" action="{{ route('admin.students.destroy', $student->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Delete student') }}"
+                                        data-confirm-message="{{ __('Delete this student record?') }}"
+                                        data-confirm-action="{{ __('Delete') }}"
+                                        data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-danger" type="submit">Delete</button>

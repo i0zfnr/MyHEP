@@ -1,4 +1,4 @@
-# UAT Checklist (MyHEP POLIBESUT)
+# UAT Checklist (StudentEdge)
 
 ## 1) Authentication
 - [ ] Student login with `matric_no + ic_no` (default) works.

@@ -161,7 +161,7 @@
                 @if($logoDataUri)
                     <img src="{{ $logoDataUri }}" alt="Logo Politeknik Besut Terengganu" class="logo">
                 @else
-                    <div class="logo-fallback">Logo POLIBESUT</div>
+                    <div class="logo-fallback">StudentEdge</div>
                 @endif
             </div>
             <div class="header-cell header-mid">
@@ -269,4 +269,3 @@
     @endif
 </body>
 </html>
-

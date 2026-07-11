@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -22,6 +23,10 @@ class DashboardController extends Controller
         $totalOffenses = 0;
         $unpaidOffenses = 0;
         $pendingFineApplications = 0;
+        $outsideNow = 0;
+        $movementCheckoutsToday = 0;
+        $movementLateReturns = 0;
+        $movementOvernightRecords = 0;
         $recentOffenses = collect();
         $recentFineApplications = collect();
         $totalScholarshipRecords = 0;
@@ -45,6 +50,16 @@ class DashboardController extends Controller
             $totalOffenses = (int) ($disciplineStats['total_offenses'] ?? 0);
             $unpaidOffenses = (int) ($disciplineStats['unpaid_offenses'] ?? 0);
             $pendingFineApplications = (int) ($disciplineStats['pending_fine_applications'] ?? 0);
+
+            if (Schema::hasTable('student_movements')) {
+                $outsideNow = DB::table('student_movements')->whereNull('return_at')->count();
+                $movementCheckoutsToday = DB::table('student_movements')->whereDate('checkout_at', now()->toDateString())->count();
+                $movementLateReturns = DB::table('student_movements')->where('rule_status', 'late')->count();
+                $movementOvernightRecords = DB::table('student_movements')
+                    ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
+                    ->where('movement_types.slug', 'overnight_stay')
+                    ->count();
+            }
 
             $recentOffenses = collect(systemCacheRemember('myhep.dashboard.recent_offenses', 45, function () {
                 return DB::table('offenses')
@@ -140,6 +155,10 @@ class DashboardController extends Controller
             'totalOffenses',
             'unpaidOffenses',
             'pendingFineApplications',
+            'outsideNow',
+            'movementCheckoutsToday',
+            'movementLateReturns',
+            'movementOvernightRecords',
             'recentOffenses',
             'recentFineApplications',
             'totalScholarshipRecords',

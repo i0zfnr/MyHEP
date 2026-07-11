@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 
 return [
     // Branding + encoding cleanup
-    'e-Biasiswa Â· Politeknik Besut' => 'MyHEP POLIBESUT',
-    'E-BIASISWA Â· POLITEKNIK BESUT' => 'MyHEP POLIBESUT',
-    'e-Biasiswa · Politeknik Besut' => 'MyHEP POLIBESUT',
-    'E-BIASISWA · POLITEKNIK BESUT' => 'MyHEP POLIBESUT',
-    'e-Biasiswa � Politeknik Besut' => 'MyHEP POLIBESUT',
-    'E-BIASISWA � POLITEKNIK BESUT' => 'MyHEP POLIBESUT',
+    'e-Biasiswa Ã‚Â· Politeknik Besut' => 'StudentEdge',
+    'E-BIASISWA Ã‚Â· POLITEKNIK BESUT' => 'StudentEdge',
+    'e-Biasiswa Â· Politeknik Besut' => 'StudentEdge',
+    'E-BIASISWA Â· POLITEKNIK BESUT' => 'StudentEdge',
+    'e-Biasiswa · Politeknik Besut' => 'StudentEdge',
+    'E-BIASISWA · POLITEKNIK BESUT' => 'StudentEdge',
     // Core navigation / layout
     'Menu Utama' => 'Main Menu',
     'Buka sidebar' => 'Open sidebar',
@@ -58,7 +58,7 @@ return [
     // Student dashboard
     'Dashboard Pelajar' => 'Student Dashboard',
     'Selamat Datang,' => 'Welcome,',
-    'Ringkasan akaun pelajar untuk modul scholarship dan disiplin.' => 'Student account summary for scholarship and discipline modules.',
+    'Ringkasan akaun pelajar untuk modul scholarship dan discipline.' => 'Student account summary for scholarship and discipline modules.',
     'Jumlah Kesalahan' => 'Total Offenses',
     'Kesalahan Unpaid' => 'Unpaid Offenses',
     'Scholarship Aktif' => 'Active Scholarships',

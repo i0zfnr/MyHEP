@@ -242,7 +242,11 @@
                             <td>
                                 <div class="actions-cell">
                                     <a class="btn" href="{{ route('admin.rules.edit', $rule->id) }}">Edit</a>
-                                    <form method="POST" action="{{ route('admin.rules.destroy', $rule->id) }}" style="margin:0;" onsubmit="return confirm('Padam peraturan ini?');">
+                                    <form method="POST" action="{{ route('admin.rules.destroy', $rule->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Delete rule') }}"
+                                        data-confirm-message="{{ __('Delete this rule?') }}"
+                                        data-confirm-action="{{ __('Delete') }}"
+                                        data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-danger" type="submit">Delete</button>

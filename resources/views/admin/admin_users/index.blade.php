@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Pengurusan Admin')
+@section('title', __('Pengurusan Admin'))
 
 @push('styles')
 <style>
@@ -184,7 +184,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Pengurusan Admin</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Pengurusan Admin') }}</h2>
 @endsection
 
 @section('content')
@@ -194,10 +194,10 @@
 
     <div class="card">
         <div class="head">
-            <h1 style="margin:0;font-size:20px;">Senarai Akaun Admin</h1>
+            <h1 style="margin:0;font-size:20px;">{{ __('Senarai Akaun Admin') }}</h1>
             <div style="display:flex; gap:8px;">
-                <a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a>
-                <a class="btn" href="{{ route('admin.admin-users.create') }}">Tambah Admin</a>
+                <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                <a class="btn" href="{{ route('admin.admin-users.create') }}">{{ __('Tambah Admin') }}</a>
             </div>
         </div>
 
@@ -205,11 +205,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Nama</th>
+                        <th>{{ __('Nama') }}</th>
                         <th>IC</th>
                         <th>Role</th>
-                        <th>Tarikh Cipta</th>
-                        <th>Tindakan</th>
+                        <th>{{ __('Tarikh Cipta') }}</th>
+                        <th>{{ __('Tindakan') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -221,21 +221,28 @@
                             <td>{{ $admin->created_at ? \Illuminate\Support\Carbon::parse($admin->created_at)->format('Y-m-d') : '-' }}</td>
                             <td>
                                 <div class="actions">
-                                    <a class="btn" href="{{ route('admin.admin-users.edit', $admin->id) }}">Edit</a>
-                                    <form method="POST" action="{{ route('admin.admin-users.reset-password', $admin->id) }}" style="margin:0;" onsubmit="return confirm('Reset kata laluan admin ini kepada Admin@12345?');">
+                                    <a class="btn" href="{{ route('admin.admin-users.edit', $admin->id) }}">{{ __('Edit') }}</a>
+                                    <form method="POST" action="{{ route('admin.admin-users.reset-password', $admin->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Reset password') }}"
+                                        data-confirm-message="{{ __('Reset this admin password to Admin@12345?') }}"
+                                        data-confirm-action="{{ __('Reset Password') }}">
                                         @csrf
-                                        <button class="btn btn-warn" type="submit">Reset Password</button>
+                                        <button class="btn btn-warn" type="submit">{{ __('Reset Password') }}</button>
                                     </form>
-                                    <form method="POST" action="{{ route('admin.admin-users.destroy', $admin->id) }}" style="margin:0;" onsubmit="return confirm('Padam admin ini?');">
+                                    <form method="POST" action="{{ route('admin.admin-users.destroy', $admin->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Delete admin') }}"
+                                        data-confirm-message="{{ __('Delete this admin account?') }}"
+                                        data-confirm-action="{{ __('Delete') }}"
+                                        data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-danger" type="submit">Delete</button>
+                                        <button class="btn btn-danger" type="submit">{{ __('Delete') }}</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" style="text-align:center;color:#7a6555;">Tiada rekod admin.</td></tr>
+                        <tr><td colspan="5" style="text-align:center;color:#7a6555;">{{ __('Tiada rekod admin.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

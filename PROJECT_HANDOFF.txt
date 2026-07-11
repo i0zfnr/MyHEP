@@ -1,10 +1,10 @@
-PROJECT HANDOFF - MyHEP / e-biasiswa
+PROJECT HANDOFF - StudentEdge / e-biasiswa
 Date: 2026-05-22
 Path: C:\laragon\www\e-biasiswa
 
 Summary
 -------
-This project is a Laravel-based scholarship and student affairs management app named MyHEP / e-biasiswa.
+This project is a Laravel-based scholarship and student affairs management app named StudentEdge / e-biasiswa.
 It appears to target scholarship, discipline, student profile, fine payment, vehicle sticker, announcements,
 reports, admin management, and student self-service workflows.
 

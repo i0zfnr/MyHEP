@@ -50,10 +50,20 @@ class DashboardController extends Controller
         $latestScholarshipStatusForm = DB::table('student_scholarship_status_forms')
             ->where('student_id', $studentId)
             ->first();
+        $currentMovement = Schema::hasTable('student_movements')
+            ? DB::table('student_movements')
+                ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
+                ->where('student_movements.student_id', $studentId)
+                ->whereNull('student_movements.return_at')
+                ->select('student_movements.checkout_at', 'student_movements.expected_return_at', 'movement_types.name as movement_type_name')
+                ->orderByDesc('student_movements.checkout_at')
+                ->first()
+            : null;
 
         $stickerStatusLabel = $latestSticker->status ?? 'none';
         $needsScholarshipStatusSubmission = $latestScholarshipStatusForm === null;
         $showPaymentAlert = $unpaidOffenses > 0;
+        $movementStatusLabel = $currentMovement ? 'Outside Campus' : 'Inside Campus';
 
         return view('dashboard.student', compact(
             'authUser',
@@ -64,7 +74,9 @@ class DashboardController extends Controller
             'pendingFineApplications',
             'stickerStatusLabel',
             'needsScholarshipStatusSubmission',
-            'showPaymentAlert'
+            'showPaymentAlert',
+            'currentMovement',
+            'movementStatusLabel'
         ));
     }
 }

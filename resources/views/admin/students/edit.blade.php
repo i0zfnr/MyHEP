@@ -238,7 +238,10 @@
         </div>
     </form>
 
-    <form id="resetPwdForm" method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" onsubmit="return confirm('Reset kata laluan pelajar ini kepada No. IC?');">
+    <form id="resetPwdForm" method="POST" action="{{ route('admin.students.reset-password', $student->id) }}"
+        data-confirm-title="{{ __('Reset password') }}"
+        data-confirm-message="{{ __('Reset this student password to NRIC?') }}"
+        data-confirm-action="{{ __('Reset Password') }}">
         @csrf
     </form>
 </div>

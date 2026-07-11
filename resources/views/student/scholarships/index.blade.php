@@ -270,6 +270,7 @@
         <a class="sch-chip" href="{{ route('student.offenses.index') }}">{{ __('Semak Offense') }}</a>
         <a class="sch-chip" href="{{ route('student.vehicle-stickers.index') }}">{{ __('Permohonan Sticker') }}</a>
         <a class="sch-chip" href="{{ route('student.rules.index') }}">{{ __('Lihat Peraturan') }}</a>
+        <a class="sch-chip" href="{{ route('student.scholarships.announcements') }}">{{ __('Lihat Pengumuman Biasiswa') }}</a>
         <a class="sch-chip primary" href="{{ route('student.scholarship-status.form') }}">{{ __('Isi Borang Status Biasiswa') }}</a>
     </div>
 

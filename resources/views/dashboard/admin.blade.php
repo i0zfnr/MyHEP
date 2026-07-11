@@ -1072,8 +1072,24 @@
                 <div class="stat-value">{{ $unpaidOffenses }}</div>
             </div>
             <div class="stat-card gold">
-                <div class="stat-label">Permohonan Pending</div>
+                <div class="stat-label">Rekod Belum Disahkan</div>
                 <div class="stat-value">{{ $pendingFineApplications }}</div>
+            </div>
+            <div class="stat-card accent">
+                <div class="stat-label">{{ __('Outside Now') }}</div>
+                <div class="stat-value">{{ $outsideNow ?? 0 }}</div>
+            </div>
+            <div class="stat-card blue">
+                <div class="stat-label">{{ __('Check-Outs Today') }}</div>
+                <div class="stat-value">{{ $movementCheckoutsToday ?? 0 }}</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-label">{{ __('Late Returns') }}</div>
+                <div class="stat-value">{{ $movementLateReturns ?? 0 }}</div>
+            </div>
+            <div class="stat-card gold">
+                <div class="stat-label">{{ __('Overnight Stay') }}</div>
+                <div class="stat-value">{{ $movementOvernightRecords ?? 0 }}</div>
             </div>
         </div>
 
@@ -1168,7 +1184,7 @@
                 <div class="stat-value">{{ $activeScholarships }}</div>
             </div>
             <div class="stat-card gold">
-                <div class="stat-label">Permohonan Pending</div>
+                <div class="stat-label">Rekod Belum Disahkan</div>
                 <div class="stat-value">{{ $pendingScholarships }}</div>
             </div>
             <div class="stat-card" style="border-left:3px solid var(--c-text-muted);">

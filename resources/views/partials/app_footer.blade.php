@@ -1,4 +1,6 @@
 @php($footerClass = $footerClass ?? 'app-footer')
 <footer class="{{ $footerClass }}">
-    &copy; {{ date('Y') }} MyHEP POLIBESUT. {{ __('home.copyright') }}
+    <div class="app-footer-inner">
+        &copy; {{ date('Y') }} StudentEdge. {{ __('home.copyright') }}
+    </div>
 </footer>

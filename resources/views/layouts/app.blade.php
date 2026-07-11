@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'MyHEP POLIBESUT'))</title>
+    <title>@yield('title', config('app.name', 'StudentEdge'))</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logohep.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/logohep.png') }}">
 
@@ -194,6 +194,73 @@
         }
         body[data-theme="dark"] .btn-logout:hover {
             background: rgba(127, 29, 29, .24);
+        }
+        .confirm-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            background: rgba(5, 4, 3, .58);
+            backdrop-filter: blur(8px);
+        }
+        .confirm-modal.is-open {
+            display: flex;
+        }
+        .confirm-dialog {
+            width: min(430px, 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            background: var(--glass-bg-strong);
+            color: var(--text);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255,255,255,.18);
+            overflow: hidden;
+        }
+        .confirm-head {
+            padding: 1rem 1.1rem .35rem;
+        }
+        .confirm-title {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+        .confirm-body {
+            padding: .25rem 1.1rem 1rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+            font-size: .92rem;
+        }
+        .confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: .65rem;
+            padding: .9rem 1.1rem 1.1rem;
+        }
+        .confirm-btn {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .65rem 1rem;
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+            background: var(--surface);
+            color: var(--text);
+        }
+        .confirm-btn.primary {
+            border-color: #7f6249;
+            background: linear-gradient(135deg, #8f6f52 0%, #c0a183 100%);
+            color: #fff;
+        }
+        .confirm-btn.danger {
+            border-color: rgba(220, 38, 38, .45);
+            background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+            color: #fff;
+        }
+        .confirm-btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(182, 147, 114, .24);
         }
         body[data-theme="dark"] .page-header h1,
         body[data-theme="dark"] .page-header h2,
@@ -434,13 +501,16 @@
 
         .sidebar {
             position: fixed; top: 0; left: 0; bottom: 0;
-            width: var(--sidebar-w); height: 100%; min-height: 100vh;
+            width: var(--sidebar-w); height: 100vh; min-height: 100vh;
             z-index: 200; display: flex; flex-direction: column;
             background: rgba(255,255,255,.84); border-right: 1px solid var(--glass-line);
             backdrop-filter: blur(var(--glass-blur)) saturate(130%);
             -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(130%);
             transform: translateX(-100%); transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-            overflow: visible;
+            overflow: hidden;
+        }
+        @supports (height: 100dvh) {
+            .sidebar { height: 100dvh; min-height: 100dvh; }
         }
         .sidebar.is-open { transform: translateX(0); box-shadow: 8px 0 40px rgba(164,141,120,.2); }
         @media (min-width: 1024px) {
@@ -492,7 +562,13 @@
         .sb-role-badge.student { background: #edfaf4; color: #166534; border: 1px solid #bbf7d0; }
         .sb-role-badge.admin { background: var(--primary-hover); color: var(--primary-dark); border: 1px solid var(--primary-light); }
 
-        .sb-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: .625rem .875rem; min-height: 0; }
+        .sb-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: .625rem .875rem 1rem;
+            min-height: 0;
+        }
         .nav-label { font-size: .625rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); padding: .2rem .5rem .45rem; margin-top: .875rem; }
         .nav-label:first-child { margin-top: 0; }
         .nav-link { display: flex; align-items: center; gap: .625rem; padding: .575rem .625rem; border-radius: 8px; font-size: .8125rem; font-weight: 500; color: var(--text-muted); text-decoration: none; margin-bottom: 2px; position: relative; transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
@@ -556,10 +632,24 @@
             font-size: .78rem;
         }
 
-        .sb-footer { padding: .75rem .875rem; border-top: 1px solid var(--glass-line); flex-shrink: 0; background: rgba(255,255,255,.68); }
+        .sb-footer {
+            padding: .75rem .875rem calc(.75rem + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--glass-line);
+            flex-shrink: 0;
+            background: rgba(255,255,255,.68);
+        }
         .btn-logout { display: flex; align-items: center; gap: .5rem; width: 100%; padding: .55rem .75rem; border-radius: 8px; border: 1px solid #fecaca; background: none; font-size: .8125rem; font-weight: 600; color: var(--danger); cursor: pointer; }
         .btn-logout:hover { background: var(--danger-light); border-color: #fca5a5; }
         .btn-logout svg { width: 14px; height: 14px; }
+        @media (max-width: 1023px) {
+            .sb-scroll {
+                padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+            }
+            .btn-logout {
+                min-height: 44px;
+                justify-content: center;
+            }
+        }
 
         .sb-overlay { display: none; position: fixed; inset: 0; z-index: 150; background: rgba(45,31,20,.45); opacity: 0; pointer-events: none; transition: opacity var(--dur) var(--ease); }
         .sb-overlay.is-visible { opacity: 1; pointer-events: auto; }
@@ -749,8 +839,8 @@
         @media (min-width: 640px) { .page-body { padding: 1.5rem; } }
         @media (min-width: 1024px) { .page-body { padding: 2rem; } }
         .app-footer {
-            border-top: 1px solid var(--border);
-            padding: .85rem 1rem;
+            position: relative;
+            padding: .75rem .875rem;
             font-size: .78rem;
             color: var(--text-muted);
             text-align: center;
@@ -758,7 +848,27 @@
             backdrop-filter: blur(calc(var(--glass-blur) * .5));
             -webkit-backdrop-filter: blur(calc(var(--glass-blur) * .5));
         }
-        @media (min-width: 1024px) { .app-footer { padding: .95rem 2rem; } }
+        .app-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: .875rem;
+            right: .875rem;
+            height: 1px;
+            background: var(--glass-line);
+        }
+        .app-footer-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 30px;
+            border-radius: 8px;
+        }
+        @media (min-width: 1024px) {
+            .app-footer {
+                padding: .85rem .875rem;
+            }
+        }
 
         @keyframes fadeSlideIn {
             from { opacity: 0; transform: translateY(14px); }
@@ -877,6 +987,8 @@
                 radial-gradient(circle at 88% 12%, rgba(95, 132, 113, .08), transparent 30%),
                 linear-gradient(180deg, rgba(255,255,255,.015), transparent 18%);
         }
+        body[data-theme="dark"] .page-body .ui-card,
+        body[data-theme="dark"] .page-body .ui-stat-card,
         body[data-theme="dark"] .page-body .card,
         body[data-theme="dark"] .page-body .portal-card,
         body[data-theme="dark"] .page-body .stat-card,
@@ -913,10 +1025,10 @@
         body[data-theme="dark"] .page-body .dash-hero::before {
             background: linear-gradient(135deg, transparent 0%, rgba(215,191,168,.10) 100%) !important;
         }
+        body[data-theme="dark"] .page-body .ui-card-head,
         body[data-theme="dark"] .page-body .card h2,
         body[data-theme="dark"] .page-body .card h3,
         body[data-theme="dark"] .page-body .data-card-head,
-        body[data-theme="dark"] .page-body .ui-card-head,
         body[data-theme="dark"] .page-body .filters,
         body[data-theme="dark"] .page-body thead th {
             background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025)) !important;
@@ -930,6 +1042,7 @@
             color: var(--text) !important;
             box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
         }
+        body[data-theme="dark"] .page-body .ui-btn:not(.primary),
         body[data-theme="dark"] .page-body .btn:not(.btn-primary),
         body[data-theme="dark"] .page-body .btn-link,
         body[data-theme="dark"] .page-body .portal-link,
@@ -940,7 +1053,13 @@
             color: var(--text) !important;
             box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
         }
+        body[data-theme="dark"] .page-body .ui-btn.primary {
+            background: linear-gradient(135deg, #b99b82 0%, #e4cdb7 100%) !important;
+            border-color: rgba(255,255,255,.10) !important;
+            color: #17110d !important;
+        }
         body[data-theme="dark"] .page-body .portal-link:hover,
+        body[data-theme="dark"] .page-body .ui-btn:not(.primary):hover,
         body[data-theme="dark"] .page-body .btn:not(.btn-primary):hover {
             background: rgba(215,191,168,.16) !important;
             border-color: rgba(215,191,168,.42) !important;
@@ -951,6 +1070,8 @@
         body[data-theme="dark"] .page-body .status {
             box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
         }
+        body[data-theme="dark"] .page-body .ui-card:hover,
+        body[data-theme="dark"] .page-body .ui-stat-card:hover,
         body[data-theme="dark"] .page-body .card:hover,
         body[data-theme="dark"] .page-body .portal-card:hover,
         body[data-theme="dark"] .page-body .stat-card:hover,
@@ -963,6 +1084,7 @@
                 inset 0 1px 0 rgba(255,255,255,.10) !important;
         }
         body[data-theme="dark"] .page-body .head,
+        body[data-theme="dark"] .page-body .ui-card-head,
         body[data-theme="dark"] .page-body .card h2,
         body[data-theme="dark"] .page-body .card-head,
         body[data-theme="dark"] .page-body .maint-card-head,
@@ -1175,15 +1297,18 @@
     $studentOnDashboard = request()->routeIs('student.dashboard');
     $adminOnDashboard = request()->routeIs('admin.dashboard');
     $studentOnScholarship = request()->routeIs('student.scholarships.*')
+        || request()->routeIs('student.scholarships.announcements')
         || request()->routeIs('student.scholarship-status.*');
     $studentOnDiscipline = request()->routeIs('student.offenses.*')
         || request()->routeIs('student.rules.*')
         || request()->routeIs('student.vehicle-stickers.*')
+        || request()->routeIs('student.movements.*')
         || request()->routeIs('student.discipline-announcements.*');
     $adminOnDiscipline = request()->routeIs('admin.students.*')
         || request()->routeIs('admin.offenses.*')
         || request()->routeIs('admin.fine-applications.*')
         || request()->routeIs('admin.vehicle-stickers.*')
+        || request()->routeIs('admin.movements.*')
         || request()->routeIs('admin.discipline-announcements.*')
         || request()->routeIs('admin.rules.*');
     $adminOnScholarship = request()->routeIs('admin.scholarships.*')
@@ -1199,9 +1324,9 @@
         <div class="sb-header">
             <a href="{{ route('home') }}" class="sb-brand">
                 <div class="sb-brand-icon">
-                    <img src="{{ asset('images/logohep.png') }}" alt="Logo MyHEP POLIBESUT">
+                    <img src="{{ asset('images/logohep.png') }}" alt="Logo StudentEdge">
                 </div>
-                <div><div class="sb-brand-name">MyHEP</div><div class="sb-brand-sub">POLIBESUT</div></div>
+                <div><div class="sb-brand-name">StudentEdge</div><div class="sb-brand-sub">Student Affairs</div></div>
             </a>
             <button class="sb-close" id="sbClose" aria-label="{{ __('Tutup sidebar') }}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
@@ -1238,9 +1363,13 @@
                 @if($studentOnScholarship)
                     <div class="nav-label">{{ __('Scholarship') }}</div>
                     <nav>
-                        <a href="{{ route('student.scholarships.index') }}" class="nav-link {{ request()->routeIs('student.scholarships.*') ? 'active' : '' }}">
+                        <a href="{{ route('student.scholarships.index') }}" class="nav-link {{ request()->routeIs('student.scholarships.index') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
                             {{ __('Scholarship') }}
+                        </a>
+                        <a href="{{ route('student.scholarships.announcements') }}" class="nav-link {{ request()->routeIs('student.scholarships.announcements') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
+                            {{ __('Pengumuman Biasiswa') }}
                         </a>
                         <a href="{{ route('student.scholarship-status.form') }}" class="nav-link {{ request()->routeIs('student.scholarship-status.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
@@ -1259,6 +1388,10 @@
                         <a href="{{ route('student.vehicle-stickers.index') }}" class="nav-link {{ request()->routeIs('student.vehicle-stickers.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l1.5-4.5a2.25 2.25 0 012.136-1.54h9.228A2.25 2.25 0 0118.75 9l1.5 4.5M5.25 13.5h13.5M6 16.5h.75m10.5 0H18m-12 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75H6zm10.5 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75h-.75z"/></svg>
                             {{ __('Vehicle Sticker') }}
+                        </a>
+                        <a href="{{ route('student.movements.index') }}" class="nav-link {{ request()->routeIs('student.movements.*') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
+                            {{ __('Student Movement') }}
                         </a>
                         <a href="{{ route('student.discipline-announcements.index') }}" class="nav-link {{ request()->routeIs('student.discipline-announcements.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
@@ -1285,6 +1418,10 @@
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
                                     {{ __('Scholarship Records') }}
                                 </a>
+                                <a href="{{ route('student.scholarships.announcements') }}" class="nav-link">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
+                                    {{ __('Scholarship Announcements') }}
+                                </a>
                                 <a href="{{ route('student.scholarship-status.form') }}" class="nav-link">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
                                     {{ __('Status Form') }}
@@ -1305,6 +1442,10 @@
                                 <a href="{{ route('student.vehicle-stickers.index') }}" class="nav-link">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l1.5-4.5a2.25 2.25 0 012.136-1.54h9.228A2.25 2.25 0 0118.75 9l1.5 4.5M5.25 13.5h13.5M6 16.5h.75m10.5 0H18m-12 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75H6zm10.5 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75h-.75z"/></svg>
                                     {{ __('Vehicle Sticker') }}
+                                </a>
+                                <a href="{{ route('student.movements.index') }}" class="nav-link">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
+                                    {{ __('Student Movement') }}
                                 </a>
                                 <a href="{{ route('student.rules.index') }}" class="nav-link">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75H7.5A2.25 2.25 0 005.25 9v9A2.25 2.25 0 007.5 20.25h9A2.25 2.25 0 0018.75 18V9A2.25 2.25 0 0016.5 6.75H12z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 11.25h6M9 14.25h6"/></svg>
@@ -1364,11 +1505,11 @@
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
                                     {{ __('Data Status Biasiswa') }}
                                 </a>
-                                <a href="{{ route('admin.scholarships.create') }}" class="nav-link {{ request()->routeIs('admin.scholarships.create') ? 'active' : '' }}">
+                                <span class="nav-link" style="opacity:.55; cursor:not-allowed;" aria-disabled="true" title="Unavailable">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                    {{ __('Tambah Rekod') }}
-                                </a>
-                                <a href="{{ route('admin.scholarship-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.scholarship-announcements.*') ? 'active' : '' }}">
+                                    Unavailable
+                                </span>
+                                <a href="{{ route('admin.scholarship-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.scholarship-announcements.index') || request()->routeIs('admin.scholarship-announcements.edit') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
                                     {{ __('Pengumuman') }}
                                 </a>
@@ -1415,6 +1556,10 @@
                                 <a href="{{ route('admin.vehicle-stickers.index') }}" class="nav-link {{ request()->routeIs('admin.vehicle-stickers.*') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l1.5-4.5a2.25 2.25 0 012.136-1.54h9.228A2.25 2.25 0 0118.75 9l1.5 4.5M5.25 13.5h13.5M6 16.5h.75m10.5 0H18m-12 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75H6zm10.5 0a.75.75 0 00-.75.75v.75c0 .414.336.75.75.75h.75a.75.75 0 00.75-.75v-.75a.75.75 0 00-.75-.75h-.75z"/></svg>
                                     {{ __('Sticker Kenderaan') }}
+                                </a>
+                                <a href="{{ route('admin.movements.index') }}" class="nav-link {{ request()->routeIs('admin.movements.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
+                                    {{ __('Student Movement') }}
                                 </a>
                                 <a href="{{ route('admin.discipline-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.discipline-announcements.*') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
@@ -1478,7 +1623,7 @@
             <button class="btn-ham" id="sbToggle" aria-label="{{ __('Buka sidebar') }}" aria-expanded="false" aria-controls="appSidebar">
                 <div class="ham-box" id="hamBox"><span class="ham-line"></span><span class="ham-line"></span><span class="ham-line"></span></div>
             </button>
-            <span class="topbar-title">MyHEP POLIBESUT</span>
+            <span class="topbar-title">StudentEdge</span>
         </div>
         @endif
 
@@ -1488,7 +1633,7 @@
                     <div class="page-header-left">@yield('header')</div>
                     @if($showHeaderUserMenu)
                         <div class="page-header-right">
-                            <a href="mailto:support@polibesut.edu.my?subject=MyHEP%20Support" class="header-support">
+                            <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-support">
                                 {{ __('Support') }}
                             </a>
                             <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu">
@@ -1504,7 +1649,7 @@
                                     <div class="header-menu-role">{{ $authUser['role'] ?? '-' }}</div>
                                 </div>
                                 <a href="{{ route('settings.show') }}" class="header-menu-link">{{ __('Settings') }}</a>
-                                <a href="mailto:support@polibesut.edu.my?subject=MyHEP%20Support" class="header-menu-link">{{ __('Support') }}</a>
+                                <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">{{ __('Support') }}</a>
                                 <div class="header-menu-sep"></div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -1519,6 +1664,19 @@
 
         <main class="page-body">@yield('content')</main>
         @include('partials.app_footer')
+    </div>
+</div>
+
+<div class="confirm-modal" id="confirmModal" aria-hidden="true">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+        <div class="confirm-head">
+            <h2 class="confirm-title" id="confirmTitle">{{ __('Confirm action') }}</h2>
+        </div>
+        <div class="confirm-body" id="confirmMessage">{{ __('Are you sure you want to continue?') }}</div>
+        <div class="confirm-actions">
+            <button type="button" class="confirm-btn" id="confirmCancelBtn">{{ __('Cancel') }}</button>
+            <button type="button" class="confirm-btn primary" id="confirmProceedBtn">{{ __('Continue') }}</button>
+        </div>
     </div>
 </div>
 
@@ -1582,8 +1740,73 @@
             }
         });
     }
+
+    var confirmModal = document.getElementById('confirmModal');
+    var confirmTitle = document.getElementById('confirmTitle');
+    var confirmMessage = document.getElementById('confirmMessage');
+    var confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    var confirmProceedBtn = document.getElementById('confirmProceedBtn');
+    var pendingForm = null;
+    var confirmedForm = null;
+
+    function closeConfirmModal() {
+        if (!confirmModal) return;
+        confirmModal.classList.remove('is-open');
+        confirmModal.setAttribute('aria-hidden', 'true');
+        pendingForm = null;
+    }
+
+    function openConfirmModal(form) {
+        if (!confirmModal || !confirmMessage || !confirmProceedBtn) return false;
+        pendingForm = form;
+        var message = form.getAttribute('data-confirm-message') || @json(__('Are you sure you want to continue?'));
+        var title = form.getAttribute('data-confirm-title') || @json(__('Confirm action'));
+        var action = form.getAttribute('data-confirm-action') || @json(__('Continue'));
+        var tone = form.getAttribute('data-confirm-tone') || 'primary';
+
+        if (confirmTitle) confirmTitle.textContent = title;
+        confirmMessage.textContent = message;
+        confirmProceedBtn.textContent = action;
+        confirmProceedBtn.classList.toggle('danger', tone === 'danger');
+        confirmProceedBtn.classList.toggle('primary', tone !== 'danger');
+        confirmModal.classList.add('is-open');
+        confirmModal.setAttribute('aria-hidden', 'false');
+        confirmCancelBtn && confirmCancelBtn.focus();
+        return true;
+    }
+
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (!(form instanceof HTMLFormElement) || !form.hasAttribute('data-confirm-message')) return;
+        if (confirmedForm === form) {
+            confirmedForm = null;
+            return;
+        }
+        event.preventDefault();
+        openConfirmModal(form);
+    }, true);
+
+    if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', closeConfirmModal);
+    if (confirmModal) {
+        confirmModal.addEventListener('click', function (event) {
+            if (event.target === confirmModal) closeConfirmModal();
+        });
+    }
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && confirmModal && confirmModal.classList.contains('is-open')) {
+            closeConfirmModal();
+        }
+    });
+    if (confirmProceedBtn) {
+        confirmProceedBtn.addEventListener('click', function () {
+            if (!pendingForm) return;
+            confirmedForm = pendingForm;
+            var form = pendingForm;
+            closeConfirmModal();
+            form.requestSubmit();
+        });
+    }
 })();
 </script>
 </body>
 </html>
-

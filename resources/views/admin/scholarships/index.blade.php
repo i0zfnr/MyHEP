@@ -201,7 +201,7 @@
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a>
                 <a class="btn" href="{{ route('admin.scholarships.export', request()->query()) }}">Export CSV</a>
-                <a class="btn" href="{{ route('admin.scholarships.create') }}">Tambah Rekod</a>
+                <span class="btn" style="opacity:.55; cursor:not-allowed;" aria-disabled="true" title="Unavailable">Unavailable</span>
             </div>
         </div>
 
@@ -256,7 +256,11 @@
                             <td>
                                 <div class="actions-cell">
                                     <a class="btn" href="{{ route('admin.scholarships.edit', $record->id) }}">Edit</a>
-                                    <form method="POST" action="{{ route('admin.scholarships.destroy', $record->id) }}" style="margin:0;" onsubmit="return confirm('Padam rekod scholarship ini?');">
+                                    <form method="POST" action="{{ route('admin.scholarships.destroy', $record->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Delete scholarship record') }}"
+                                        data-confirm-message="{{ __('Delete this scholarship record?') }}"
+                                        data-confirm-action="{{ __('Delete') }}"
+                                        data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-danger" type="submit">Delete</button>

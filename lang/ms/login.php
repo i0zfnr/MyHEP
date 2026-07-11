@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'page_title' => 'Log Masuk - MyHEP POLIBESUT',
+    'page_title' => 'Log Masuk - StudentEdge',
     'brand_subtitle' => 'Sistem Hal Ehwal Pelajar',
     'system_active' => 'Sistem Aktif',
     'welcome_back' => 'Selamat Kembali',

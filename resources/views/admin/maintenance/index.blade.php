@@ -182,7 +182,10 @@
                             <button type="submit" class="maint-btn ok">Disable Maintenance</button>
                         </form>
                     @else
-                        <form method="POST" action="{{ route('admin.maintenance.update') }}" onsubmit="return confirm('Enable maintenance mode now? Visitors will be blocked until it is disabled.');">
+            <form method="POST" action="{{ route('admin.maintenance.update') }}"
+                data-confirm-title="{{ __('Enable maintenance mode') }}"
+                data-confirm-message="{{ __('Enable maintenance mode now? Visitors will be blocked until it is disabled.') }}"
+                data-confirm-action="{{ __('Enable') }}">
                             @csrf
                             <input type="hidden" name="action" value="enable">
                             <button type="submit" class="maint-btn warn">Enable Maintenance</button>

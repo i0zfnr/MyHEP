@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Edit Admin')
+@section('title', __('Edit Admin'))
 
 @push('styles')
 <style>
@@ -180,7 +180,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Edit Admin</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Edit Admin') }}</h2>
 @endsection
 
 @section('content')
@@ -191,15 +191,15 @@
         @csrf
         @method('PUT')
         <div class="card">
-            <h2>Maklumat Admin</h2>
+            <h2>{{ __('Maklumat Admin') }}</h2>
             <div class="body">
                 <div class="grid grid-2">
                     <div>
-                        <label for="full_name">Nama Penuh</label>
+                        <label for="full_name">{{ __('Nama Penuh') }}</label>
                         <input id="full_name" type="text" name="full_name" value="{{ old('full_name', $adminUser->full_name) }}" required>
                     </div>
                     <div>
-                        <label for="ic_no">No. IC</label>
+                        <label for="ic_no">{{ __('No. IC') }}</label>
                         <input id="ic_no" type="text" name="ic_no" value="{{ old('ic_no', $adminUser->ic_no) }}" required>
                     </div>
                 </div>
@@ -210,7 +210,7 @@
                         <input id="email" type="email" name="email" value="{{ old('email', $adminUser->email) }}">
                     </div>
                     <div>
-                        <label for="role">Role</label>
+                        <label for="role">{{ __('Role') }}</label>
                         <select id="role" name="role" required>
                             @foreach(['scholarship_admin','discipline_admin','system_admin'] as $role)
                                 <option value="{{ $role }}" {{ old('role', $adminUser->role) === $role ? 'selected' : '' }}>{{ $role }}</option>
@@ -218,16 +218,16 @@
                         </select>
                     </div>
                     <div>
-                        <label for="password">Kata Laluan Baharu (optional)</label>
-                        <input id="password" type="password" name="password" minlength="8" placeholder="Kosongkan jika tidak tukar">
+                        <label for="password">{{ __('Kata Laluan Baharu (optional)') }}</label>
+                        <input id="password" type="password" name="password" minlength="8" placeholder="{{ __('Kosongkan jika tidak tukar') }}">
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" type="submit">Simpan Perubahan</button>
-            <a class="btn" href="{{ route('admin.admin-users.index') }}">Batal</a>
+            <button class="btn btn-primary" type="submit">{{ __('Simpan Perubahan') }}</button>
+            <a class="btn" href="{{ route('admin.admin-users.index') }}">{{ __('Batal') }}</a>
         </div>
     </form>
 </div>

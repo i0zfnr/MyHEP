@@ -729,7 +729,7 @@
                 </a>
                 <div class="stat-pill" data-home-live data-live-url="{{ route('system-overview.live') }}" aria-label="System status: online">
                     <span class="dot" aria-hidden="true"></span>
-                    <span data-home-stat="system-status">{{ __('home.official_label') }} · MyHEP · {{ __('home.live_label') }}</span>
+                    <span data-home-stat="system-status">{{ __('home.official_label') }} · StudentEdge · {{ __('home.live_label') }}</span>
                 </div>
             </div>
 
@@ -759,7 +759,7 @@
 
             <div class="badge-row">
                 <span>{{ __('home.official_label') }}</span>
-                <span class="badge">MyHEP</span>
+                <span class="badge">StudentEdge</span>
             </div>
 
         </div>
@@ -897,7 +897,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
                     {{ __('home.cta_login') }}
                 </a>
-                <a href="mailto:support@polibesut.edu.my?subject=MyHEP%20Support" class="cta-btn secondary">
+                <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="cta-btn secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
                     {{ __('home.cta_contact') }}
                 </a>
@@ -924,7 +924,7 @@
             <span>{{ __('home.system_version') }}</span>
         </div>
         <div class="footer-copy">
-            &copy; {{ date('Y') }} MyHEP POLIBESUT. {{ __('home.copyright') }}
+            &copy; {{ date('Y') }} StudentEdge. {{ __('home.copyright') }}
         </div>
     </footer>
 

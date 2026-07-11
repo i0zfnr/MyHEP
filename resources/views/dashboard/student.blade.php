@@ -769,7 +769,7 @@
     {{-- â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
     <div class="hero">
         <div class="hero-text">
-            <p class="hero-eyebrow">{{ __('MyHEP POLIBESUT') }}</p>
+            <p class="hero-eyebrow">{{ __('StudentEdge') }}</p>
             <h3 class="hero-name">{{ __('Selamat Datang,') }}<br>{{ $studentName }}</h3>
             <p class="hero-sub">{{ $studentMatric }} &nbsp;&middot;&nbsp; {{ $studentProgram }}</p>
         </div>
@@ -850,6 +850,16 @@
                 </div>
             </div>
 
+            <div class="stat-card">
+                <div class="stat-icon sand">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v3.19l2.22 2.22a.75.75 0 101.06-1.06l-1.78-1.78V6.75z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="stat-label">{{ __('Campus Status') }}</div>
+                <div class="stat-value sm {{ ($movementStatusLabel ?? '') === 'Inside Campus' ? 'teal' : 'red' }}">
+                    {{ __($movementStatusLabel ?? 'Inside Campus') }}
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -864,6 +874,10 @@
             <a href="{{ route('student.vehicle-stickers.index') }}" class="action-btn">
                 <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2a1 1 0 00-1 1v1a1 1 0 001 1h1v1.5a.5.5 0 001 0V5h6v1.5a.5.5 0 001 0V5h1a1 1 0 001-1V3a1 1 0 00-1-1H3zm1 5.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm7 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/></svg>
                 {{ __('Mohon Stiker Kenderaan') }}
+            </a>
+            <a href="{{ route('student.movements.index') }}" class="action-btn">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 106.5 6.5A6.508 6.508 0 008 1.5zM8.75 4a.75.75 0 00-1.5 0v4.1l2.55 1.7a.75.75 0 10.84-1.24L8.75 7.3V4z"/></svg>
+                {{ __('Rekod Pergerakan') }}
             </a>
             <a href="{{ route('student.rules.index') }}" class="action-btn">
                 <svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 4.5V14a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2h5.5L14 4.5zm-3 0A1.5 1.5 0 019.5 3V1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5h-2z"/><path d="M5 8h6v1H5V8zm0 2h6v1H5v-1zm0 2h4v1H5v-1z"/></svg>
@@ -917,6 +931,18 @@
                 </span>
             </a>
 
+            <a href="{{ route('student.movements.index') }}" class="portal-card profile">
+                <div class="portal-card-icon sand">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v3.19l2.22 2.22a.75.75 0 101.06-1.06l-1.78-1.78V6.75z" clip-rule="evenodd"/></svg>
+                </div>
+                <h4>{{ __('Pergerakan Kampus') }}</h4>
+                <p>{{ __('Semak status masuk/keluar kampus, imbas QR guard house, dan lihat sejarah pergerakan.') }}</p>
+                <span class="portal-card-cta">
+                    {{ __('Buka portal') }}
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M1 8a.5.5 0 01.5-.5h11.793l-3.147-3.146a.5.5 0 01.708-.708l4 4a.5.5 0 010 .708l-4 4a.5.5 0 01-.708-.708L13.293 8.5H1.5A.5.5 0 011 8z" clip-rule="evenodd"/></svg>
+                </span>
+            </a>
+
         </div>
     </div>
 
@@ -930,7 +956,7 @@
     const timeNode = document.getElementById('heroClock');
     if (!dateNode || !timeNode) return;
 
-    const locale = @json($jsLocale);
+    const locale = navigator.language || @json($jsLocale);
     const updateClock = () => {
         const now = new Date();
         dateNode.textContent = now.toLocaleDateString(locale, {
@@ -941,7 +967,8 @@
         timeNode.textContent = now.toLocaleTimeString(locale, {
             hour: '2-digit',
             minute: '2-digit',
-            second: '2-digit'
+            second: '2-digit',
+            hour12: false
         });
     };
 
@@ -950,4 +977,3 @@
 })();
 </script>
 @endpush
-

@@ -1,6 +1,6 @@
-#  MyHEP
+#  StudentEdge
 
-MyHEP is a Laravel-based student management system developed for Politeknik Besut that focuses on:
+StudentEdge is a Laravel-based student management system developed for student affairs operations that focuses on:
 
 -  Scholarship Management
 -  Student Offense & Disciplinary Record Management

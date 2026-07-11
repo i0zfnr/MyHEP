@@ -432,8 +432,8 @@
 
     <div class="brand-panel">
         <div class="brand-panel-inner">
-            {{-- <img src="{{ asset('images/politeknik-logo.png') }}" alt="Logo MyHEP POLIBESUT" class="brand-logo"> --}}
-            <div class="brand-title">MyHEP<br>POLIBESUT</div>
+            {{-- <img src="{{ asset('images/politeknik-logo.png') }}" alt="Logo StudentEdge" class="brand-logo"> --}}
+            <div class="brand-title">StudentEdge</div>
             <div class="brand-subtitle">{{ __('login.brand_subtitle') }}</div>
             <div class="brand-badge">{{ __('login.system_active') }}</div>
         </div>
@@ -577,4 +577,3 @@
 </script>
 </body>
 </html>
-

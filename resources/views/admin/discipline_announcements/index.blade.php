@@ -233,7 +233,11 @@
                             <td>
                                 <div class="actions-cell">
                                     <a class="btn" href="{{ route('admin.discipline-announcements.edit', $item->id) }}">Edit</a>
-                                    <form method="POST" action="{{ route('admin.discipline-announcements.destroy', $item->id) }}" style="margin:0;" onsubmit="return confirm('Padam pengumuman ini?');">
+                                    <form method="POST" action="{{ route('admin.discipline-announcements.destroy', $item->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Delete announcement') }}"
+                                        data-confirm-message="{{ __('Delete this announcement?') }}"
+                                        data-confirm-action="{{ __('Delete') }}"
+                                        data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-danger" type="submit">Delete</button>

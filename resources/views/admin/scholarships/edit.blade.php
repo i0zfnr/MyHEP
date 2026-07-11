@@ -195,18 +195,27 @@
             <div class="body">
                 <div class="grid grid-2">
                     <div>
+                        <label for="student_search">Cari Pelajar</label>
+                        <input id="student_search" type="text" placeholder="Taip nama atau nombor matrik">
+                        <div style="margin-top:6px;font-size:12px;color:#7a6555;">Taip sekurang-kurangnya 2 huruf untuk cari pelajar melalui AJAX.</div>
+                    </div>
+                    <div>
                         <label for="student_id">Pelajar</label>
                         <select id="student_id" name="student_id" required>
                             <option value="">Pilih pelajar</option>
-                            @foreach($students as $student)
-                                <option value="{{ $student->id }}" {{ (string)old('student_id', $record->student_id) === (string)$student->id ? 'selected' : '' }}>{{ $student->full_name }} ({{ $student->matric_no }})</option>
-                            @endforeach
+                            @if($selectedStudent)
+                                <option value="{{ $selectedStudent->id }}" selected>{{ $selectedStudent->full_name }} ({{ $selectedStudent->matric_no }})</option>
+                            @endif
                         </select>
                     </div>
+                </div>
+
+                <div class="grid grid-2" style="margin-top:12px;">
                     <div>
                         <label for="provider_name">Penyedia</label>
                         <input id="provider_name" type="text" name="provider_name" value="{{ old('provider_name', $record->provider_name) }}" placeholder="Contoh: JPA / MARA">
                     </div>
+                    <div></div>
                 </div>
 
                 <div class="grid grid-3" style="margin-top:12px;">
@@ -246,5 +255,49 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    const studentSearch = document.getElementById('student_search');
+    const studentSelect = document.getElementById('student_id');
+
+    if (studentSearch && studentSelect) {
+        let studentSearchTimer = null;
+
+        studentSearch.addEventListener('input', () => {
+            const q = studentSearch.value.trim();
+            if (studentSearchTimer) clearTimeout(studentSearchTimer);
+
+            if (q.length < 2) return;
+
+            studentSearchTimer = setTimeout(async () => {
+                try {
+                    const resp = await fetch(`{{ route('admin.students.search') }}?q=${encodeURIComponent(q)}`, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const payload = await resp.json().catch(() => ({ data: [] }));
+                    if (!resp.ok || !Array.isArray(payload.data)) return;
+
+                    const current = studentSelect.value;
+                    studentSelect.innerHTML = '<option value="">' + @json(__('Pilih pelajar')) + '</option>';
+                    payload.data.forEach((s) => {
+                        const opt = document.createElement('option');
+                        opt.value = String(s.id);
+                        opt.textContent = `${s.full_name} (${s.matric_no})`;
+                        if (String(s.id) === current) opt.selected = true;
+                        studentSelect.appendChild(opt);
+                    });
+
+                    if (!studentSelect.value && payload.data.length === 1) {
+                        studentSelect.value = String(payload.data[0].id);
+                    }
+                } catch (e) {
+                    // silent fallback to manual selection
+                }
+            }, 320);
+        });
+    }
+</script>
+@endpush
 
 

@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'page_title' => 'MyHEP POLIBESUT - Scholarship and Welfare',
-    'brand_name' => 'MyHEP POLIBESUT',
-    'brand_sub' => 'POLITEKNIK BESUT TERENGGANU',
+    'page_title' => 'StudentEdge - Scholarship and Welfare',
+    'brand_name' => 'StudentEdge',
+    'brand_sub' => 'Student Affairs Management Platform',
     'headline_prefix' => 'Management System for',
     'headline_focus' => 'Scholarship & Discipline',
     'headline_suffix' => 'Students',
@@ -15,8 +15,8 @@ return [
     'card_discipline_desc' => 'Student discipline monitoring to ensure compliance with campus regulations.',
     'official_label' => 'Politeknik Malaysia Besut - Official HEP System',
     'live_label' => 'Live',
-    'about_title' => 'About MyHEP POLIBESUT',
-    'about_desc' => 'MyHEP POLIBESUT is an integrated management system developed for Politeknik Besut Terengganu to streamline student scholarship tracking and discipline monitoring. The platform centralises data, improves transparency, and enhances administrative efficiency.',
+    'about_title' => 'About StudentEdge',
+    'about_desc' => 'StudentEdge is an integrated student affairs management system developed to streamline scholarship tracking, discipline monitoring, and campus administration. The platform centralises data, improves transparency, and enhances administrative efficiency.',
     'features_title' => 'Key Features',
     'feature_scholarship_title' => 'Scholarship Management',
     'feature_scholarship_desc' => 'Track student sponsorships, allowances, and funding status with ease.',
@@ -56,7 +56,7 @@ return [
     'impact_records' => 'Digital Records',
     'impact_records_desc' => 'paperless data workflow',
     'cta_title' => 'Start managing student records efficiently today.',
-    'cta_desc' => 'Use MyHEP POLIBESUT to centralise scholarship and discipline data in one secure platform.',
+    'cta_desc' => 'Use StudentEdge to centralise scholarship and discipline data in one secure platform.',
     'cta_login' => 'Login to System',
     'cta_contact' => 'Contact Administrator',
     'support_title' => 'Contact & Support',

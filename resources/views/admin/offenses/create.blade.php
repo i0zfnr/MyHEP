@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Daftar Kesalahan')
+@section('title', __('Daftar Kesalahan'))
 
 @push('styles')
 <style>
@@ -12,8 +12,10 @@
     input, select, textarea { width:100%; border:1px solid #e5d8c8; border-radius:8px; padding:9px 10px; font-size:14px; }
     .grid { display:grid; grid-template-columns:1fr; gap:12px; }
     @media (min-width:900px) { .grid-2 { grid-template-columns:1fr 1fr; } .grid-3 { grid-template-columns:1fr 1fr 1fr; } }
-    .rule-row { border:1px solid #ede4d9; border-radius:10px; padding:10px; margin-bottom:10px; }
-    .rule-top { display:flex; gap:8px; align-items:flex-start; }
+    .rule-row { border:1px solid #ede4d9; border-radius:10px; padding:10px 12px; margin-bottom:10px; }
+    .rule-top { display:grid; grid-template-columns:18px minmax(0, 1fr); gap:10px; align-items:start; }
+    .rule-top input[type="checkbox"] { width:16px !important; height:16px; margin:2px 0 0; padding:0; justify-self:start; }
+    .rule-top label { min-width:0; line-height:1.45; }
     .rule-note { margin-top:10px; display:none; }
     .rule-row.show-note .rule-note { display:block; }
     .actions { display:flex; gap:10px; flex-wrap:wrap; }
@@ -204,7 +206,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Daftar Kesalahan Pelajar</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Daftar Kesalahan Pelajar') }}</h2>
 @endsection
 
 @section('content')
@@ -218,62 +220,62 @@
     <form id="offense_form" method="POST" action="{{ route('admin.offenses.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="card">
-            <h2>Maklumat Kesalahan</h2>
+            <h2>{{ __('Maklumat Kesalahan') }}</h2>
             <div class="body">
                 <div class="grid grid-2">
                     <div>
-                        <label for="student_search">Cari Pelajar (Nama / Matrik)</label>
-                        <input type="text" id="student_search" placeholder="Contoh: 23DIT0001 atau Irfan">
-                        <p class="hint">Taip sekurang-kurangnya 2 huruf untuk cari pelajar melalui AJAX.</p>
+                        <label for="student_search">{{ __('Cari Pelajar (Nama / Matrik)') }}</label>
+                        <input type="text" id="student_search" placeholder="{{ __('Contoh: 23DIT0001 atau Irfan') }}">
+                        <p class="hint">{{ __('Taip sekurang-kurangnya 2 huruf untuk cari pelajar melalui AJAX.') }}</p>
 
-                        <label for="student_id">Pelajar</label>
+                        <label for="student_id">{{ __('Pelajar') }}</label>
                         <select name="student_id" id="student_id" required>
-                            <option value="">Pilih pelajar</option>
+                            <option value="">{{ __('Pilih pelajar') }}</option>
                             @foreach($students as $student)
                                 <option value="{{ $student->id }}" {{ (string)old('student_id') === (string)$student->id ? 'selected' : '' }}>{{ $student->full_name }} ({{ $student->matric_no }})</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label for="place">Tempat</label>
+                        <label for="place">{{ __('Tempat') }}</label>
                         <input type="text" id="place" name="place" value="{{ old('place') }}" required>
                     </div>
                 </div>
                 <div class="grid grid-3" style="margin-top:12px;">
-                    <div><label for="offense_date">Tarikh</label><input type="date" id="offense_date" name="offense_date" value="{{ old('offense_date') }}" required></div>
-                    <div><label for="offense_time">Masa</label><input type="time" id="offense_time" name="offense_time" value="{{ old('offense_time') }}" required></div>
-                    <div><label for="fine_amount">Jumlah Denda (RM)</label><input type="number" id="fine_amount" name="fine_amount" min="0" step="0.01" value="{{ old('fine_amount', '0.00') }}" required></div>
+                    <div><label for="offense_date">{{ __('Tarikh') }}</label><input type="date" id="offense_date" name="offense_date" value="{{ old('offense_date') }}" required></div>
+                    <div><label for="offense_time">{{ __('Masa') }}</label><input type="time" id="offense_time" name="offense_time" value="{{ old('offense_time') }}" required></div>
+                    <div><label for="fine_amount">{{ __('Jumlah Denda (RM)') }}</label><input type="number" id="fine_amount" name="fine_amount" min="0" step="0.01" value="{{ old('fine_amount', '0.00') }}" required></div>
                 </div>
                 <div style="margin-top:12px;">
-                    <label for="evidence_photo">Gambar Bukti (Opsyenal)</label>
+                    <label for="evidence_photo">{{ __('Gambar Bukti (Opsyenal)') }}</label>
                     <input type="file" id="evidence_photo" name="evidence_photo" accept="image/jpeg,image/png,image/webp" capture="environment">
-                    <small style="display:block; margin-top:6px; color:#7a6555;">Ambil gambar terus dari kamera atau upload fail (JPG/PNG/WEBP, max 5MB).</small>
+                    <small style="display:block; margin-top:6px; color:#7a6555;">{{ __('Ambil gambar terus dari kamera atau upload fail (JPG/PNG/WEBP, max 5MB).') }}</small>
                     <div class="camera-panel">
                         <div class="camera-actions">
-                            <button class="btn" type="button" id="open_camera_btn">Guna Kamera</button>
-                            <button class="btn" type="button" id="capture_camera_btn" style="display:none;">Tangkap Gambar</button>
-                            <button class="btn" type="button" id="close_camera_btn" style="display:none;">Tutup Kamera</button>
+                            <button class="btn" type="button" id="open_camera_btn">{{ __('Guna Kamera') }}</button>
+                            <button class="btn" type="button" id="capture_camera_btn" style="display:none;">{{ __('Tangkap Gambar') }}</button>
+                            <button class="btn" type="button" id="close_camera_btn" style="display:none;">{{ __('Tutup Kamera') }}</button>
                         </div>
                         <video id="camera_live" class="camera-live" autoplay playsinline></video>
                         <canvas id="camera_canvas" style="display:none;"></canvas>
-                        <div id="camera_msg" class="camera-msg">Tekan "Guna Kamera" untuk benarkan akses kamera.</div>
+                        <div id="camera_msg" class="camera-msg">{{ __('Tekan "Guna Kamera" untuk benarkan akses kamera.') }}</div>
                     </div>
-                    <img id="evidence_preview" alt="Preview gambar bukti" style="display:none; margin-top:10px; max-width:220px; border-radius:8px; border:1px solid #ede4d9;">
+                    <img id="evidence_preview" alt="{{ __('Preview gambar bukti') }}" style="display:none; margin-top:10px; max-width:220px; border-radius:8px; border:1px solid #ede4d9;">
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <h2>Pilih Peraturan Dilanggar</h2>
+            <h2>{{ __('Pilih Peraturan Dilanggar') }}</h2>
             <div class="body">
                 <div class="rules-toolbar">
-                    <input type="text" id="rule_search" placeholder="Cari rujukan atau peraturan...">
+                    <input type="text" id="rule_search" placeholder="{{ __('Cari rujukan atau peraturan...') }}">
                     <label class="rules-selected-only" for="rule_selected_only">
                         <input type="checkbox" id="rule_selected_only">
-                        Tunjuk dipilih sahaja
+                        {{ __('Tunjuk dipilih sahaja') }}
                     </label>
-                    <button type="button" class="btn" id="rule_clear_btn">Reset</button>
-                    <span class="rules-selected-count" id="rule_selected_count">0 dipilih</span>
+                    <button type="button" class="btn" id="rule_clear_btn">{{ __('Reset') }}</button>
+                    <span class="rules-selected-count" id="rule_selected_count">{{ __('0 dipilih') }}</span>
                 </div>
                 <div class="rules-list" id="rules_list">
                 @foreach($offenseTypes as $type)
@@ -283,8 +285,8 @@
                             <label for="rule_{{ $type->id }}" style="margin:0; font-weight:500; color:#2d1f14;"><strong>{{ __($type->rule_reference) }}</strong> - {{ __($type->description) }}</label>
                         </div>
                         <div class="rule-note">
-                            <label for="note_{{ $type->id }}">Catatan</label>
-                            <textarea id="note_{{ $type->id }}" name="notes[{{ $type->id }}]" rows="2" placeholder="Isi catatan jika perlu">{{ old('notes.'.$type->id) }}</textarea>
+                            <label for="note_{{ $type->id }}">{{ __('Catatan') }}</label>
+                            <textarea id="note_{{ $type->id }}" name="notes[{{ $type->id }}]" rows="2" placeholder="{{ __('Isi catatan jika perlu') }}">{{ old('notes.'.$type->id) }}</textarea>
                         </div>
                     </div>
                 @endforeach
@@ -293,8 +295,8 @@
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" type="submit">Simpan Kesalahan</button>
-            <a href="{{ route('admin.dashboard') }}" class="btn">Batal</a>
+            <button class="btn btn-primary" type="submit">{{ __('Simpan Kesalahan') }}</button>
+            <a href="{{ route('admin.dashboard') }}" class="btn">{{ __('Batal') }}</a>
         </div>
     </form>
 </div>
@@ -347,7 +349,7 @@
                     if (!resp.ok || !Array.isArray(payload.data)) return;
 
                     const current = studentSelect.value;
-                    studentSelect.innerHTML = '<option value="">Pilih pelajar</option>';
+                    studentSelect.innerHTML = '<option value="">' + @json(__('Pilih pelajar')) + '</option>';
                     payload.data.forEach((s) => {
                         const opt = document.createElement('option');
                         opt.value = String(s.id);
@@ -385,7 +387,7 @@
             const submitBtn = offenseForm.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Menyimpan...';
+                submitBtn.textContent = @json(__('Menyimpan...'));
             }
 
             try {
@@ -408,16 +410,16 @@
 
                 if (response.status === 422 && payload.errors) {
                     const errors = Object.values(payload.errors).flat();
-                    showAjaxError(errors.length ? errors : 'Sila semak semula input borang.');
+                    showAjaxError(errors.length ? errors : @json(__('Sila semak semula input borang.')));
                 } else {
-                    showAjaxError(payload.message || 'Gagal menyimpan rekod kesalahan.');
+                    showAjaxError(payload.message || @json(__('Gagal menyimpan rekod kesalahan.')));
                 }
             } catch (error) {
-                showAjaxError('Ralat rangkaian. Sila cuba semula.');
+                showAjaxError(@json(__('Ralat rangkaian. Sila cuba semula.')));
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Simpan Kesalahan';
+                    submitBtn.textContent = @json(__('Simpan Kesalahan'));
                 }
             }
         });
@@ -449,10 +451,10 @@
                 cameraLive.style.display = 'block';
                 captureCameraBtn.style.display = 'inline-block';
                 closeCameraBtn.style.display = 'inline-block';
-                cameraMsg.textContent = 'Kamera aktif. Tekan "Tangkap Gambar" untuk guna sebagai bukti.';
+                cameraMsg.textContent = @json(__('Kamera aktif. Tekan "Tangkap Gambar" untuk guna sebagai bukti.'));
                 cameraMsg.classList.remove('err');
             } catch (err) {
-                cameraMsg.textContent = 'Akses kamera gagal. Sila benarkan permission kamera dalam browser atau guna upload fail.';
+                cameraMsg.textContent = @json(__('Akses kamera gagal. Sila benarkan permission kamera dalam browser atau guna upload fail.'));
                 cameraMsg.classList.add('err');
             }
         });
@@ -468,7 +470,7 @@
 
             cameraCanvas.toBlob((blob) => {
                 if (!blob) {
-                    cameraMsg.textContent = 'Gagal memproses gambar daripada kamera.';
+                    cameraMsg.textContent = @json(__('Gagal memproses gambar daripada kamera.'));
                     cameraMsg.classList.add('err');
                     return;
                 }
@@ -479,7 +481,7 @@
                 evidenceInput.files = dt.files;
                 evidenceInput.dispatchEvent(new Event('change'));
 
-                cameraMsg.textContent = 'Gambar berjaya ditangkap dan dipilih.';
+                cameraMsg.textContent = @json(__('Gambar berjaya ditangkap dan dipilih.'));
                 cameraMsg.classList.remove('err');
                 stopCamera();
             }, 'image/jpeg', 0.92);
@@ -487,7 +489,7 @@
 
         closeCameraBtn.addEventListener('click', () => {
             stopCamera();
-            cameraMsg.textContent = 'Kamera ditutup.';
+            cameraMsg.textContent = @json(__('Kamera ditutup.'));
             cameraMsg.classList.remove('err');
         });
 
@@ -521,7 +523,7 @@
         });
 
         if (ruleSelectedCount) {
-            ruleSelectedCount.textContent = `${selectedCount} dipilih`;
+            ruleSelectedCount.textContent = `${selectedCount} ${@json(__('dipilih'))}`;
         }
     };
 

@@ -268,7 +268,11 @@
                                         </form>
                                     @endif
 
-                                    <form method="POST" action="{{ route('admin.offenses.destroy', $offense->id) }}" style="margin:0;" onsubmit="return confirm('Padam rekod kesalahan ini?');">
+                                    <form method="POST" action="{{ route('admin.offenses.destroy', $offense->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Delete offense') }}"
+                                        data-confirm-message="{{ __('Delete this offense record?') }}"
+                                        data-confirm-action="{{ __('Delete') }}"
+                                        data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-danger" type="submit">Delete</button>

@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\MovementController as AdminMovementController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\MovementController as StudentMovementController;
 use App\Http\Controllers\Student\ProfileController;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -12,7 +16,6 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -117,7 +120,7 @@ Route::get('/student/scholarship-status', function () {
 
     if (!$student) {
         return redirect()->route('student.dashboard')
-            ->withErrors(['student' => 'Rekod pelajar tidak dijumpai.']);
+            ->withErrors(['student' => __('Rekod pelajar tidak dijumpai.')]);
     }
 
     $submission = DB::table('student_scholarship_status_forms')
@@ -195,7 +198,7 @@ Route::post('/student/scholarship-status', function (Request $request) {
     });
 
     return redirect()->route('student.scholarships.index')
-        ->with('success', 'Status biasiswa anda berjaya dihantar dan direkodkan.');
+        ->with('success', __('Status biasiswa anda berjaya dihantar dan direkodkan.'));
 })->middleware('auth.session:student')->name('student.scholarship-status.submit');
 Route::get('/student/profile', [ProfileController::class, 'show'])
     ->middleware('auth.session:student')
@@ -209,6 +212,12 @@ Route::post('/student/profile/password', [ProfileController::class, 'updatePassw
 Route::get('/student/ai-helper', function () {
     return view('student.ai_helper.index');
 })->middleware('auth.session:student')->name('student.ai-helper.index');
+Route::get('/student/movements', [StudentMovementController::class, 'index'])
+    ->middleware('auth.session:student')
+    ->name('student.movements.index');
+Route::post('/student/movements', [StudentMovementController::class, 'store'])
+    ->middleware('auth.session:student')
+    ->name('student.movements.store');
 
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
@@ -271,15 +280,37 @@ Route::get('/admin/student-scholarship-status', function (Request $request) {
 Route::get('/admin/ai-helper', function () {
     return view('admin.ai_helper.index');
 })->middleware('auth.session:admin')->name('admin.ai-helper.index');
+Route::get('/admin/movements', [AdminMovementController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.movements.index');
+Route::get('/admin/movements/export', [AdminMovementController::class, 'export'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.movements.export');
+Route::get('/admin/movements/outside', [AdminMovementController::class, 'outside'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.movements.outside');
+Route::get('/admin/movements/violations', [AdminMovementController::class, 'violations'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.movements.violations');
+Route::get('/admin/movements/qr', [AdminMovementController::class, 'qr'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.movements.qr');
+Route::get('/admin/movements/qr/print', [AdminMovementController::class, 'qrPrint'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.movements.qr.print');
+Route::post('/admin/movements/qr', [AdminMovementController::class, 'updateQr'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.movements.qr.update');
+Route::get('/admin/movements/settings', [AdminMovementController::class, 'settings'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.movements.settings');
+Route::post('/admin/movements/settings', [AdminMovementController::class, 'updateSettings'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.movements.settings.update');
 
-Route::get('/admin/admin-users', function () {
-    $admins = DB::table('admins')
-        ->select('id', 'full_name', 'ic_no', 'role', 'created_at')
-        ->orderBy('full_name')
-        ->paginate(15);
-
-    return view('admin.admin_users.index', compact('admins'));
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.admin-users.index');
+Route::get('/admin/admin-users', [AdminUserController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.admin-users.index');
 
 Route::get('/admin/maintenance', function () {
     $downFile = storage_path('framework/down');
@@ -351,342 +382,52 @@ Route::post('/admin/maintenance', function (Request $request) {
         ->with('success', 'Maintenance mode disabled. The system is public again.');
 })->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.maintenance.update');
 
-Route::get('/admin/admin-users/create', function () {
-    return view('admin.admin_users.create');
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.admin-users.create');
+Route::get('/admin/admin-users/create', [AdminUserController::class, 'create'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.admin-users.create');
+Route::post('/admin/admin-users', [AdminUserController::class, 'store'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.admin-users.store');
+Route::get('/admin/admin-users/{id}/edit', [AdminUserController::class, 'edit'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.admin-users.edit');
+Route::put('/admin/admin-users/{id}', [AdminUserController::class, 'update'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.admin-users.update');
+Route::post('/admin/admin-users/{id}/reset-password', [AdminUserController::class, 'resetPassword'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.admin-users.reset-password');
+Route::delete('/admin/admin-users/{id}', [AdminUserController::class, 'destroy'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.admin-users.destroy');
 
-Route::post('/admin/admin-users', function (Request $request) {
-    $validated = $request->validate([
-        'full_name' => ['required', 'string', 'max:150'],
-        'ic_no' => ['required', 'string', 'max:20', 'unique:admins,ic_no'],
-        'email' => ['nullable', 'email', 'max:150', 'unique:admins,email'],
-        'role' => ['required', Rule::in(['scholarship_admin', 'discipline_admin', 'system_admin'])],
-        'password' => ['required', 'string', 'min:8'],
-    ]);
-
-    DB::table('admins')->insert([
-        'full_name' => $validated['full_name'],
-        'ic_no' => $validated['ic_no'],
-        'email' => $validated['email'] ?? null,
-        'password' => Hash::make($validated['password']),
-        'role' => $validated['role'],
-        'photo' => null,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    return redirect()->route('admin.admin-users.index')
-        ->with('success', 'Admin baharu berjaya ditambah.');
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.admin-users.store');
-
-Route::get('/admin/admin-users/{id}/edit', function (int $id) {
-    $adminUser = DB::table('admins')->where('id', $id)->first();
-    if (!$adminUser) {
-        return redirect()->route('admin.admin-users.index')
-            ->withErrors(['admin' => 'Rekod admin tidak dijumpai.']);
-    }
-
-    return view('admin.admin_users.edit', compact('adminUser'));
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.admin-users.edit');
-
-Route::put('/admin/admin-users/{id}', function (Request $request, int $id) {
-    $adminUser = DB::table('admins')->where('id', $id)->first();
-    if (!$adminUser) {
-        return redirect()->route('admin.admin-users.index')
-            ->withErrors(['admin' => 'Rekod admin tidak dijumpai.']);
-    }
-
-    $validated = $request->validate([
-        'full_name' => ['required', 'string', 'max:150'],
-        'ic_no' => ['required', 'string', 'max:20', Rule::unique('admins', 'ic_no')->ignore($id)],
-        'email' => ['nullable', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
-        'role' => ['required', Rule::in(['scholarship_admin', 'discipline_admin', 'system_admin'])],
-        'password' => ['nullable', 'string', 'min:8'],
-    ]);
-
-    $payload = [
-        'full_name' => $validated['full_name'],
-        'ic_no' => $validated['ic_no'],
-        'email' => $validated['email'] ?? null,
-        'role' => $validated['role'],
-        'updated_at' => now(),
-    ];
-
-    if (!empty($validated['password'])) {
-        $payload['password'] = Hash::make($validated['password']);
-    }
-
-    DB::table('admins')->where('id', $id)->update($payload);
-
-    return redirect()->route('admin.admin-users.index')
-        ->with('success', 'Maklumat admin berjaya dikemaskini.');
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.admin-users.update');
-
-Route::post('/admin/admin-users/{id}/reset-password', function (int $id) {
-    $adminUser = DB::table('admins')->where('id', $id)->first();
-    if (!$adminUser) {
-        return redirect()->route('admin.admin-users.index')
-            ->withErrors(['admin' => 'Rekod admin tidak dijumpai.']);
-    }
-
-    DB::table('admins')
-        ->where('id', $id)
-        ->update([
-            'password' => Hash::make('Admin@12345'),
-            'updated_at' => now(),
-        ]);
-    auditLog('admin_users.reset_password', 'admins', $id, 'Reset kata laluan admin kepada default');
-
-    return redirect()->route('admin.admin-users.index')
-        ->with('success', 'Kata laluan admin telah direset kepada Admin@12345.');
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.admin-users.reset-password');
-
-Route::delete('/admin/admin-users/{id}', function (int $id) {
-    if ((int) session('auth_user.id') === $id) {
-        return redirect()->route('admin.admin-users.index')
-            ->withErrors(['admin' => 'Anda tidak boleh padam akaun sendiri.']);
-    }
-
-    $deleted = DB::table('admins')->where('id', $id)->delete();
-    if (!$deleted) {
-        return redirect()->route('admin.admin-users.index')
-            ->withErrors(['admin' => 'Rekod admin tidak dijumpai.']);
-    }
-    auditLog('admin_users.delete', 'admins', $id, 'Padam rekod admin');
-
-    return redirect()->route('admin.admin-users.index')
-        ->with('success', 'Rekod admin berjaya dipadam.');
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.admin-users.destroy');
-
-Route::get('/admin/students', function (Request $request) {
-    $studentStats = [
-        'total' => DB::table('students')->count(),
-        'default_ic' => DB::table('students')->whereNull('password')->count(),
-        'custom_password' => DB::table('students')->whereNotNull('password')->count(),
-    ];
-
-    $filters = $request->validate([
-        'q' => ['nullable', 'string', 'max:150'],
-        'program' => ['nullable', 'string', 'max:100'],
-        'password_status' => ['nullable', Rule::in(['default', 'custom'])],
-    ]);
-
-    $query = DB::table('students')
-        ->select('id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'created_at')
-        ->selectRaw('CASE WHEN password IS NULL THEN 0 ELSE 1 END as has_custom_password');
-
-    if (!empty($filters['q'])) {
-        $q = trim($filters['q']);
-        $query->where(function ($sub) use ($q) {
-            $sub->where('full_name', 'like', "%{$q}%")
-                ->orWhere('matric_no', 'like', "%{$q}%")
-                ->orWhere('ic_no', 'like', "%{$q}%");
-        });
-    }
-
-    if (!empty($filters['program'])) {
-        $query->where('program', 'like', '%' . trim($filters['program']) . '%');
-    }
-
-    if (!empty($filters['password_status'])) {
-        if ($filters['password_status'] === 'custom') {
-            $query->whereNotNull('password');
-        } else {
-            $query->whereNull('password');
-        }
-    }
-
-    $students = $query
-        ->orderBy('full_name')
-        ->paginate(15)
-        ->withQueryString();
-
-    return view('admin.students.index', compact('students', 'filters', 'studentStats'));
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.index');
-
-Route::get('/admin/students/search', function (Request $request) {
-    $validated = $request->validate([
-        'q' => ['nullable', 'string', 'max:150'],
-    ]);
-
-    $q = trim((string) ($validated['q'] ?? ''));
-    if ($q === '') {
-        return response()->json(['data' => []]);
-    }
-
-    $students = DB::table('students')
-        ->select('id', 'full_name', 'matric_no')
-        ->where(function ($sub) use ($q) {
-            $sub->where('full_name', 'like', "%{$q}%")
-                ->orWhere('matric_no', 'like', "%{$q}%");
-        })
-        ->orderBy('full_name')
-        ->limit(20)
-        ->get();
-
-    return response()->json(['data' => $students]);
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.search');
-
-Route::get('/admin/students/export', function (Request $request) {
-    $filters = $request->validate([
-        'q' => ['nullable', 'string', 'max:150'],
-        'program' => ['nullable', 'string', 'max:100'],
-        'password_status' => ['nullable', Rule::in(['default', 'custom'])],
-    ]);
-
-    $query = DB::table('students')
-        ->select('id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'created_at')
-        ->selectRaw('CASE WHEN password IS NULL THEN "default_ic" ELSE "custom_password" END as password_status');
-
-    if (!empty($filters['q'])) {
-        $q = trim($filters['q']);
-        $query->where(function ($sub) use ($q) {
-            $sub->where('full_name', 'like', "%{$q}%")
-                ->orWhere('matric_no', 'like', "%{$q}%")
-                ->orWhere('ic_no', 'like', "%{$q}%");
-        });
-    }
-
-    if (!empty($filters['program'])) {
-        $query->where('program', 'like', '%' . trim($filters['program']) . '%');
-    }
-
-    if (!empty($filters['password_status'])) {
-        if ($filters['password_status'] === 'custom') {
-            $query->whereNotNull('password');
-        } else {
-            $query->whereNull('password');
-        }
-    }
-
-    $rows = $query
-        ->orderBy('full_name')
-        ->get()
-        ->map(fn ($student) => [
-            $student->id,
-            $student->full_name,
-            $student->matric_no,
-            $student->ic_no,
-            $student->program,
-            $student->phone ?? '',
-            $student->password_status,
-            $student->created_at,
-        ]);
-
-    return downloadCsv(
-        'students_' . now()->format('Ymd_His') . '.csv',
-        ['ID', 'Nama', 'No Matrik', 'No IC', 'Program', 'Telefon', 'Status Kata Laluan', 'Tarikh Daftar'],
-        $rows
-    );
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.export');
-
-Route::get('/admin/students/create', function () {
-    return view('admin.students.create');
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.create');
-
-Route::post('/admin/students', function (Request $request) {
-    $validated = $request->validate([
-        'full_name' => ['required', 'string', 'max:150'],
-        'matric_no' => ['required', 'string', 'max:20', 'unique:students,matric_no'],
-        'ic_no' => ['required', 'string', 'max:20', 'unique:students,ic_no'],
-        'email' => ['nullable', 'email', 'max:150', 'unique:students,email'],
-        'program' => ['required', 'string', 'max:100'],
-        'phone' => ['nullable', 'string', 'max:20'],
-        'address' => ['nullable', 'string'],
-    ]);
-
-    DB::table('students')->insert([
-        'full_name' => $validated['full_name'],
-        'matric_no' => $validated['matric_no'],
-        'ic_no' => $validated['ic_no'],
-        'email' => $validated['email'] ?? null,
-        'program' => $validated['program'],
-        'phone' => $validated['phone'] ?? null,
-        'address' => $validated['address'] ?? null,
-        'photo' => null,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    return redirect()->route('admin.students.index')
-        ->with('success', 'Pelajar berjaya ditambah.');
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.store');
-
-Route::get('/admin/students/{id}/edit', function (int $id) {
-    $student = DB::table('students')->where('id', $id)->first();
-    if (!$student) {
-        return redirect()->route('admin.students.index')
-            ->withErrors(['student' => 'Rekod pelajar tidak dijumpai.']);
-    }
-
-    return view('admin.students.edit', compact('student'));
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.edit');
-
-Route::put('/admin/students/{id}', function (Request $request, int $id) {
-    $student = DB::table('students')->where('id', $id)->first();
-    if (!$student) {
-        return redirect()->route('admin.students.index')
-            ->withErrors(['student' => 'Rekod pelajar tidak dijumpai.']);
-    }
-
-    $validated = $request->validate([
-        'full_name' => ['required', 'string', 'max:150'],
-        'matric_no' => ['required', 'string', 'max:20', Rule::unique('students', 'matric_no')->ignore($id)],
-        'ic_no' => ['required', 'string', 'max:20', Rule::unique('students', 'ic_no')->ignore($id)],
-        'email' => ['nullable', 'email', 'max:150', Rule::unique('students', 'email')->ignore($id)],
-        'program' => ['required', 'string', 'max:100'],
-        'phone' => ['nullable', 'string', 'max:20'],
-        'address' => ['nullable', 'string'],
-    ]);
-
-    DB::table('students')
-        ->where('id', $id)
-        ->update([
-            'full_name' => $validated['full_name'],
-            'matric_no' => $validated['matric_no'],
-            'ic_no' => $validated['ic_no'],
-            'email' => $validated['email'] ?? null,
-            'program' => $validated['program'],
-            'phone' => $validated['phone'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'updated_at' => now(),
-        ]);
-
-    return redirect()->route('admin.students.index')
-        ->with('success', 'Maklumat pelajar berjaya dikemaskini.');
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.update');
-
-Route::delete('/admin/students/{id}', function (int $id) {
-    $deleted = DB::table('students')->where('id', $id)->delete();
-    if (!$deleted) {
-        return redirect()->route('admin.students.index')
-            ->withErrors(['student' => 'Rekod pelajar tidak dijumpai.']);
-    }
-    auditLog('students.delete', 'students', $id, 'Padam rekod pelajar');
-
-    return redirect()->route('admin.students.index')
-        ->with('success', 'Rekod pelajar berjaya dipadam.');
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.destroy');
-
-Route::post('/admin/students/{id}/reset-password', function (int $id) {
-    $student = DB::table('students')->where('id', $id)->first();
-    if (!$student) {
-        return redirect()->route('admin.students.index')
-            ->withErrors(['student' => 'Rekod pelajar tidak dijumpai.']);
-    }
-
-    DB::table('students')
-        ->where('id', $id)
-        ->update([
-            // Null password means fallback login to IC is enabled.
-            'password' => null,
-            'updated_at' => now(),
-        ]);
-    auditLog('students.reset_password', 'students', $id, 'Reset kata laluan pelajar kepada IC');
-
-    return redirect()->route('admin.students.index')
-        ->with('success', 'Kata laluan pelajar telah direset kepada No. IC.');
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.students.reset-password');
+Route::get('/admin/students', [StudentController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.index');
+Route::get('/admin/students/search', [StudentController::class, 'search'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.search');
+Route::get('/admin/students/export', [StudentController::class, 'export'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.export');
+Route::get('/admin/students/create', [StudentController::class, 'create'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.create');
+Route::post('/admin/students', [StudentController::class, 'store'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.store');
+Route::get('/admin/students/{id}/edit', [StudentController::class, 'edit'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.edit');
+Route::put('/admin/students/{id}', [StudentController::class, 'update'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.update');
+Route::delete('/admin/students/{id}', [StudentController::class, 'destroy'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.destroy');
+Route::post('/admin/students/{id}/reset-password', [StudentController::class, 'resetPassword'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.reset-password');
 
 Route::get('/admin/scholarships', function (Request $request) {
     $filters = $request->validate([
@@ -795,12 +536,8 @@ Route::get('/admin/scholarships/export', function (Request $request) {
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.export');
 
 Route::get('/admin/scholarships/create', function () {
-    $students = DB::table('students')
-        ->select('id', 'full_name', 'matric_no')
-        ->orderBy('full_name')
-        ->get();
-
-    return view('admin.scholarships.create', compact('students'));
+    return redirect()->route('admin.scholarships.index')
+        ->withErrors(['scholarship' => 'Add Record is unavailable for this module.']);
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.create');
 
 Route::post('/admin/scholarships', function (Request $request) {
@@ -825,7 +562,7 @@ Route::post('/admin/scholarships', function (Request $request) {
     ]);
 
     return redirect()->route('admin.scholarships.index')
-        ->with('success', 'Rekod scholarship berjaya ditambah.');
+        ->with('success', __('Rekod scholarship berjaya ditambah.'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.store');
 
 Route::get('/admin/scholarships/{id}/edit', function (int $id) {
@@ -835,12 +572,12 @@ Route::get('/admin/scholarships/{id}/edit', function (int $id) {
             ->withErrors(['scholarship' => 'Rekod scholarship tidak dijumpai.']);
     }
 
-    $students = DB::table('students')
+    $selectedStudent = DB::table('students')
         ->select('id', 'full_name', 'matric_no')
-        ->orderBy('full_name')
-        ->get();
+        ->where('id', (int) old('student_id', $record->student_id))
+        ->first();
 
-    return view('admin.scholarships.edit', compact('record', 'students'));
+    return view('admin.scholarships.edit', compact('record', 'selectedStudent'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.edit');
 
 Route::put('/admin/scholarships/{id}', function (Request $request, int $id) {
@@ -872,7 +609,7 @@ Route::put('/admin/scholarships/{id}', function (Request $request, int $id) {
         ]);
 
     return redirect()->route('admin.scholarships.index')
-        ->with('success', 'Rekod scholarship berjaya dikemaskini.');
+        ->with('success', __('Rekod scholarship berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.update');
 
 Route::delete('/admin/scholarships/{id}', function (int $id) {
@@ -883,7 +620,7 @@ Route::delete('/admin/scholarships/{id}', function (int $id) {
     }
 
     return redirect()->route('admin.scholarships.index')
-        ->with('success', 'Rekod scholarship berjaya dipadam.');
+        ->with('success', __('Rekod scholarship berjaya dipadam.'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.destroy');
 
 Route::get('/admin/scholarship-announcements', function (Request $request) {
@@ -1002,7 +739,7 @@ Route::post('/admin/scholarship-announcements', function (Request $request) {
     ]);
 
     return redirect()->route('admin.scholarship-announcements.index')
-        ->with('success', 'Pengumuman scholarship berjaya ditambah.');
+        ->with('success', __('Pengumuman scholarship berjaya ditambah.'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarship-announcements.store');
 
 Route::get('/admin/scholarship-announcements/{id}/edit', function (int $id) {
@@ -1042,7 +779,7 @@ Route::put('/admin/scholarship-announcements/{id}', function (Request $request, 
         ]);
 
     return redirect()->route('admin.scholarship-announcements.index')
-        ->with('success', 'Pengumuman scholarship berjaya dikemaskini.');
+        ->with('success', __('Pengumuman scholarship berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarship-announcements.update');
 
 Route::delete('/admin/scholarship-announcements/{id}', function (int $id) {
@@ -1054,7 +791,7 @@ Route::delete('/admin/scholarship-announcements/{id}', function (int $id) {
     auditLog('scholarship_announcements.delete', 'scholarship_announcements', $id, 'Padam pengumuman scholarship');
 
     return redirect()->route('admin.scholarship-announcements.index')
-        ->with('success', 'Pengumuman scholarship berjaya dipadam.');
+        ->with('success', __('Pengumuman scholarship berjaya dipadam.'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarship-announcements.destroy');
 
 Route::get('/admin/discipline-announcements', function (Request $request) {
@@ -1148,7 +885,7 @@ Route::post('/admin/discipline-announcements', function (Request $request) {
     ]);
 
     return redirect()->route('admin.discipline-announcements.index')
-        ->with('success', 'Pengumuman disiplin berjaya ditambah.');
+        ->with('success', __('Pengumuman disiplin berjaya ditambah.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.discipline-announcements.store');
 
 Route::get('/admin/discipline-announcements/{id}/edit', function (int $id) {
@@ -1182,7 +919,7 @@ Route::put('/admin/discipline-announcements/{id}', function (Request $request, i
         ]);
 
     return redirect()->route('admin.discipline-announcements.index')
-        ->with('success', 'Pengumuman disiplin berjaya dikemaskini.');
+        ->with('success', __('Pengumuman disiplin berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.discipline-announcements.update');
 
 Route::delete('/admin/discipline-announcements/{id}', function (int $id) {
@@ -1194,7 +931,7 @@ Route::delete('/admin/discipline-announcements/{id}', function (int $id) {
     auditLog('discipline_announcements.delete', 'discipline_announcements', $id, 'Padam pengumuman disiplin');
 
     return redirect()->route('admin.discipline-announcements.index')
-        ->with('success', 'Pengumuman disiplin berjaya dipadam.');
+        ->with('success', __('Pengumuman disiplin berjaya dipadam.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.discipline-announcements.destroy');
 
 Route::get('/admin/rules', function (Request $request) {
@@ -1317,7 +1054,7 @@ Route::post('/admin/rules', function (Request $request) {
     ]);
 
     return redirect()->route('admin.rules.index')
-        ->with('success', 'Peraturan berjaya ditambah.');
+        ->with('success', __('Peraturan berjaya ditambah.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.rules.store');
 
 Route::get('/admin/rules/{id}/edit', function (int $id) {
@@ -1357,7 +1094,7 @@ Route::put('/admin/rules/{id}', function (Request $request, int $id) {
         ]);
 
     return redirect()->route('admin.rules.index')
-        ->with('success', 'Peraturan berjaya dikemaskini.');
+        ->with('success', __('Peraturan berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.rules.update');
 
 Route::delete('/admin/rules/{id}', function (int $id) {
@@ -1368,7 +1105,7 @@ Route::delete('/admin/rules/{id}', function (int $id) {
     }
 
     return redirect()->route('admin.rules.index')
-        ->with('success', 'Peraturan berjaya dipadam.');
+        ->with('success', __('Peraturan berjaya dipadam.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.rules.destroy');
 
 Route::get('/admin/offenses', function (Request $request) {
@@ -1515,7 +1252,7 @@ Route::get('/admin/offenses/{id}/print', function (int $id) {
 
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => 'Rekod kesalahan tidak dijumpai.']);
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
     $items = DB::table('offense_items')
@@ -1556,7 +1293,7 @@ Route::get('/admin/offenses/{id}/pdf', function (int $id) {
 
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => 'Rekod kesalahan tidak dijumpai.']);
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
     $items = DB::table('offense_items')
@@ -1661,20 +1398,20 @@ Route::post('/admin/offenses', function (Request $request) {
     if ($request->expectsJson()) {
         return response()->json([
             'ok' => true,
-            'message' => 'Rekod kesalahan berjaya disimpan.',
+            'message' => __('Rekod kesalahan berjaya disimpan.'),
             'redirect' => route('admin.offenses.index'),
         ]);
     }
 
     return redirect()->route('admin.offenses.index')
-        ->with('success', 'Rekod kesalahan berjaya disimpan.');
+        ->with('success', __('Rekod kesalahan berjaya disimpan.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.store');
 
 Route::get('/admin/offenses/{id}/edit', function (int $id) {
     $offense = DB::table('offenses')->where('id', $id)->first();
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => 'Rekod kesalahan tidak dijumpai.']);
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
     $students = DB::table('students')
@@ -1711,7 +1448,7 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
     $offense = DB::table('offenses')->where('id', $id)->first();
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => 'Rekod kesalahan tidak dijumpai.']);
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
     $validated = $request->validate([
@@ -1783,13 +1520,13 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
     if ($request->expectsJson()) {
         return response()->json([
             'ok' => true,
-            'message' => 'Rekod kesalahan berjaya dikemaskini.',
+            'message' => __('Rekod kesalahan berjaya dikemaskini.'),
             'redirect' => route('admin.offenses.index'),
         ]);
     }
 
     return redirect()->route('admin.offenses.index')
-        ->with('success', 'Rekod kesalahan berjaya dikemaskini.');
+        ->with('success', __('Rekod kesalahan berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.update');
 
 Route::post('/admin/offenses/{id}/mark-paid', function (int $id) {
@@ -1802,12 +1539,12 @@ Route::post('/admin/offenses/{id}/mark-paid', function (int $id) {
 
     if (!$updated) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => 'Rekod kesalahan tidak dijumpai.']);
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
     auditLog('offenses.mark_paid', 'offenses', $id, 'Tukar status kesalahan ke paid');
 
     return redirect()->route('admin.offenses.index')
-        ->with('success', 'Status kesalahan telah ditetapkan kepada paid.');
+        ->with('success', __('Status kesalahan telah ditetapkan kepada paid.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.mark-paid');
 
 Route::delete('/admin/offenses/{id}', function (int $id) {
@@ -1818,13 +1555,13 @@ Route::delete('/admin/offenses/{id}', function (int $id) {
 
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => 'Rekod kesalahan tidak dijumpai.']);
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
     $deleted = DB::table('offenses')->where('id', $id)->delete();
     if (!$deleted) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => 'Rekod kesalahan tidak dijumpai.']);
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
     if (!empty($offense->evidence_photo_path)) {
@@ -1833,7 +1570,7 @@ Route::delete('/admin/offenses/{id}', function (int $id) {
     auditLog('offenses.delete', 'offenses', $id, 'Padam rekod kesalahan');
 
     return redirect()->route('admin.offenses.index')
-        ->with('success', 'Rekod kesalahan berjaya dipadam.');
+        ->with('success', __('Rekod kesalahan berjaya dipadam.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.destroy');
 
 Route::get('/student/offenses', function () {
@@ -1888,6 +1625,11 @@ Route::get('/student/scholarships', function () {
         ->first();
 
     if ($statusForm) {
+        $managedRecord = DB::table('scholarships')
+            ->where('student_id', $studentId)
+            ->where('proof_file', 'student_status_form')
+            ->first();
+
         $managedPayload = [
             'student_id' => $studentId,
             'type' => $statusForm->has_scholarship === 'yes' ? 'scholarship' : 'none',
@@ -1897,15 +1639,13 @@ Route::get('/student/scholarships', function () {
             'amount' => $statusForm->has_scholarship === 'yes'
                 ? $statusForm->monthly_amount
                 : null,
-            'status' => $statusForm->has_scholarship === 'yes' ? 'pending' : 'confirmed',
+            // Do not downgrade admin-reviewed records when the student portal self-heals.
+            'status' => $managedRecord && in_array($managedRecord->status, ['confirmed', 'rejected'], true)
+                ? $managedRecord->status
+                : ($statusForm->has_scholarship === 'yes' ? 'pending' : 'confirmed'),
             'proof_file' => 'student_status_form',
             'updated_at' => now(),
         ];
-
-        $managedRecord = DB::table('scholarships')
-            ->where('student_id', $studentId)
-            ->where('proof_file', 'student_status_form')
-            ->first();
 
         if ($managedRecord) {
             DB::table('scholarships')
@@ -1931,6 +1671,15 @@ Route::get('/student/scholarships', function () {
 
     return view('student.scholarships.index', compact('records', 'announcements'));
 })->middleware('auth.session:student')->name('student.scholarships.index');
+
+Route::get('/student/scholarship-announcements', function () {
+    $announcements = DB::table('scholarship_announcements')
+        ->select('id', 'title', 'body', 'type', 'link_url', 'link_label', 'created_at')
+        ->orderByDesc('created_at')
+        ->paginate(12);
+
+    return view('student.scholarships.announcements', compact('announcements'));
+})->middleware('auth.session:student')->name('student.scholarships.announcements');
 
 Route::get('/student/rules', function (Request $request) {
     $categories = ruleCategoryOptions();
@@ -2048,7 +1797,7 @@ Route::post('/student/vehicle-stickers', function (Request $request) {
     }
 
     return redirect()->route('student.vehicle-stickers.index')
-        ->with('success', 'Permohonan sticker kenderaan berjaya dihantar.');
+        ->with('success', __('Permohonan sticker kenderaan berjaya dihantar.'));
 })->middleware('auth.session:student')->name('student.vehicle-stickers.store');
 
 Route::post('/student/fine-applications', function (Request $request) {
@@ -2100,7 +1849,7 @@ Route::post('/student/fine-applications', function (Request $request) {
     });
 
     return redirect()->route('student.offenses.index')
-        ->with('success', 'Permohonan pembayaran berjaya dihantar.');
+        ->with('success', __('Permohonan pembayaran berjaya dihantar.'));
 })->middleware('auth.session:student')->name('student.fine-applications.store');
 
 Route::get('/admin/fine-applications', function (Request $request) {
@@ -2338,7 +2087,7 @@ Route::post('/admin/vehicle-stickers/{id}/decision', function (Request $request,
 
     $application = DB::table('vehicle_sticker_applications')->where('id', $id)->first();
     if (!$application) {
-        return redirect()->route('admin.vehicle-stickers.index')
+         return redirect()->route('admin.vehicle-stickers.index')
             ->withErrors(['status' => 'Permohonan sticker tidak dijumpai.']);
     }
 
@@ -2352,7 +2101,7 @@ Route::post('/admin/vehicle-stickers/{id}/decision', function (Request $request,
     auditLog('vehicle_stickers.decision', 'vehicle_sticker_applications', $id, 'Status: ' . $validated['status']);
 
     return redirect()->route('admin.vehicle-stickers.index')
-        ->with('success', 'Status permohonan sticker berjaya dikemaskini.');
+        ->with('success', __('Status permohonan sticker berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.vehicle-stickers.decision');
 
 Route::post('/admin/fine-applications/{id}/decision', function (Request $request, int $id) {
@@ -2386,5 +2135,6 @@ Route::post('/admin/fine-applications/{id}/decision', function (Request $request
     auditLog('fine_applications.decision', 'fine_payment_applications', $id, 'Status: ' . $validated['status']);
 
     return redirect()->route('admin.fine-applications.index')
-        ->with('success', 'Status permohonan berjaya dikemaskini.');
+        ->with('success', __('Status permohonan berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.fine-applications.decision');
+ 

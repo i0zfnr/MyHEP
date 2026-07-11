@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'page_title' => 'MyHEP POLIBESUT - Biasiswa dan Kebajikan',
-    'brand_name' => 'MyHEP',
-    'brand_sub' => 'POLIBESUT',
+    'page_title' => 'StudentEdge - Biasiswa dan Kebajikan',
+    'brand_name' => 'StudentEdge',
+    'brand_sub' => 'Platform Pengurusan Hal Ehwal Pelajar',
     'headline_prefix' => 'Sistem Pengurusan',
     'headline_focus' => 'Biasiswa & Disiplin',
     'headline_suffix' => 'Pelajar',
@@ -15,8 +15,8 @@ return [
     'card_discipline_desc' => 'Pemantauan disiplin pelajar bagi memastikan pematuhan peraturan kampus.',
     'official_label' => 'Politeknik Malaysia Besut - Sistem Rasmi HEP',
     'live_label' => 'Langsung',
-    'about_title' => 'Tentang MyHEP POLIBESUT',
-    'about_desc' => 'MyHEP POLIBESUT ialah sistem pengurusan bersepadu yang dibangunkan untuk Politeknik Besut Terengganu bagi melancarkan pemantauan biasiswa pelajar dan rekod disiplin. Platform ini memusatkan data, meningkatkan ketelusan, dan memperkukuh kecekapan pentadbiran.',
+    'about_title' => 'Tentang StudentEdge',
+    'about_desc' => 'StudentEdge ialah sistem pengurusan hal ehwal pelajar bersepadu yang dibangunkan untuk melancarkan pemantauan biasiswa pelajar, rekod disiplin, dan pentadbiran kampus. Platform ini memusatkan data, meningkatkan ketelusan, dan memperkukuh kecekapan pentadbiran.',
     'features_title' => 'Ciri Utama',
     'feature_scholarship_title' => 'Pengurusan Biasiswa',
     'feature_scholarship_desc' => 'Pantau tajaan pelajar, elaun, dan status pembiayaan dengan mudah.',
@@ -56,7 +56,7 @@ return [
     'impact_records' => 'Rekod Digital',
     'impact_records_desc' => 'aliran kerja data tanpa kertas',
     'cta_title' => 'Mula urus rekod pelajar dengan lebih cekap hari ini.',
-    'cta_desc' => 'Gunakan MyHEP POLIBESUT untuk memusatkan data biasiswa dan disiplin dalam satu platform selamat.',
+    'cta_desc' => 'Gunakan StudentEdge untuk memusatkan data biasiswa dan disiplin dalam satu platform selamat.',
     'cta_login' => 'Log Masuk Sistem',
     'cta_contact' => 'Hubungi Pentadbir',
     'support_title' => 'Hubungan & Sokongan',
