@@ -110,6 +110,7 @@
 <body>
     @php
         $logoCandidates = [
+            public_path('images/newlogo.png'),
             public_path('images/logohep.png'),
             public_path('images/politeknik-besut.png'),
             public_path('images/politeknik-besut-terengganu.png'),

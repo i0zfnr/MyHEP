@@ -1,0 +1,26 @@
+{
+    "name": "StudentEdge",
+    "short_name": "StudentEdge",
+    "description": "Student affairs management platform for scholarship, discipline, and campus services.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#0f0e0d",
+    "theme_color": "#171412",
+    "lang": "en",
+    "icons": [
+        {
+            "src": "/images/pwa/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/images/pwa/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

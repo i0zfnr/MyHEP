@@ -4,9 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#171412">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>@yield('title', config('app.name', 'StudentEdge'))</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logohep.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logohep.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/pwa/icon-180.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1455,7 +1460,7 @@
         <div class="sb-header">
             <a href="{{ route('home') }}" class="sb-brand">
                 <div class="sb-brand-icon">
-                    <img src="{{ asset('images/logohep.png') }}" alt="Logo StudentEdge">
+                    <img src="{{ asset('images/newlogo.png') }}" alt="Logo StudentEdge">
                 </div>
                 <div><div class="sb-brand-name">StudentEdge</div><div class="sb-brand-sub">Student Affairs</div></div>
             </a>
