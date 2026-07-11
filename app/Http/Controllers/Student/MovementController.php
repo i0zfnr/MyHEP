@@ -137,7 +137,7 @@ class MovementController extends Controller
             $request->session()->forget(self::SCAN_SESSION_KEY);
 
             return redirect()->route('student.movements.index')
-                ->with('success', __('Kepulangan ke kampus berjaya direkodkan.'));
+                ->with('success', __('Return to campus recorded successfully.'));
         }
 
         if ($currentMovement) {
@@ -167,7 +167,7 @@ class MovementController extends Controller
         $request->session()->forget(self::SCAN_SESSION_KEY);
 
         return redirect()->route('student.movements.index')
-            ->with('success', __('Pergerakan keluar kampus berjaya direkodkan.'));
+            ->with('success', __('Check-out movement recorded successfully.'));
     }
 
     private function currentMovement(int $studentId): ?object

@@ -306,9 +306,9 @@ Route::get('/admin/movements/qr', [AdminMovementController::class, 'qr'])
 Route::get('/admin/movements/qr/status', [AdminMovementController::class, 'qrStatus'])
     ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.qr.status');
-Route::get('/admin/movements/qr/print', [AdminMovementController::class, 'qrPrint'])
+Route::get('/admin/movements/qr/display', [AdminMovementController::class, 'qrDisplay'])
     ->middleware(['auth.session:admin', 'admin.scope:movement'])
-    ->name('admin.movements.qr.print');
+    ->name('admin.movements.qr.display');
 Route::post('/admin/movements/qr', [AdminMovementController::class, 'updateQr'])
     ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.qr.update');

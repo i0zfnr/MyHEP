@@ -9,6 +9,8 @@
     "background_color": "#0f0e0d",
     "theme_color": "#171412",
     "lang": "en",
+    "categories": ["education", "productivity", "utilities"],
+    "id": "/",
     "icons": [
         {
             "src": "/images/pwa/icon-192.png",
@@ -21,6 +23,32 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Student Login",
+            "short_name": "Login",
+            "url": "/login",
+            "icons": [
+                {
+                    "src": "/images/pwa/icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Report a Problem",
+            "short_name": "Report",
+            "url": "/report-problem",
+            "icons": [
+                {
+                    "src": "/images/pwa/icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
         }
     ]
 }

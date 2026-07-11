@@ -29,7 +29,7 @@
             --accent: #FFDDAB;
             --accent-light: #FAD7BC;
             --sidebar-w: 288px;
-            --topbar-h: 56px;
+            --topbar-h: 72px;
             --surface: #ffffff;
             --bg: #faf7f4;
             --text: #2d1f14;
@@ -734,9 +734,9 @@
         .topbar {
             display: flex;
             align-items: center;
-            gap: .75rem;
+            gap: 1rem;
             height: var(--topbar-h);
-            padding: 0 1rem;
+            padding: 0 1.15rem;
             background: var(--glass-bg-strong);
             border-bottom: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
@@ -747,8 +747,80 @@
             -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(125%);
         }
         @media (min-width: 1024px) { .topbar { display: none; } }
-        .topbar-title { font-size: .875rem; font-weight: 700; color: var(--text); flex: 1; }
-        .btn-ham { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: none; cursor: pointer; color: var(--text-muted); }
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: .9rem;
+            min-width: 0;
+            flex: 1;
+            padding-block: .45rem;
+        }
+        .topbar-brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            border: 1px solid rgba(226, 209, 192, .12);
+            background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .topbar-brand-mark img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            display: block;
+        }
+        .topbar-brand-copy {
+            min-width: 0;
+            display: grid;
+            gap: .06rem;
+        }
+        .topbar-title {
+            font-size: 1.12rem;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            color: var(--text);
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .topbar-subtitle {
+            display: block;
+            font-size: .66rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        @media (max-width: 420px) {
+            .topbar-subtitle { display: none; }
+            .topbar-title { font-size: 1rem; }
+            .topbar {
+                gap: .9rem;
+                padding: 0 1rem;
+            }
+            .topbar-brand {
+                gap: .8rem;
+                padding-block: .35rem;
+            }
+            .topbar-brand-mark {
+                width: 38px;
+                height: 38px;
+            }
+            .topbar-brand-mark img {
+                width: 25px;
+                height: 25px;
+            }
+        }
+        .btn-ham { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-right: .12rem; border: 1px solid var(--border); border-radius: 12px; background: none; cursor: pointer; color: var(--text-muted); flex-shrink: 0; }
         .btn-ham:hover { background: var(--primary-hover); color: var(--primary-dark); }
         .ham-box { display: flex; flex-direction: column; gap: 4px; }
         .ham-line { display: block; width: 17px; height: 2px; background: currentColor; border-radius: 2px; }
@@ -784,11 +856,12 @@
             .page-header { padding: 1.05rem 2rem; }
             .page-header::after { left: 2rem; right: 2rem; }
         }
-        .page-header-inner { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; position: relative; }
+        .page-header-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; flex-wrap: wrap; position: relative; }
         .page-header-left {
             min-width: 0;
             display: flex;
             align-items: center;
+            flex: 1 1 100%;
         }
         .page-header-left h1,
         .page-header-left h2,
@@ -800,13 +873,39 @@
             letter-spacing: 0 !important;
             color: var(--text) !important;
         }
-        .page-header-right { display: flex; align-items: center; gap: .55rem; margin-left: auto; position: relative; }
+        .page-header-right {
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            margin-left: 0;
+            position: relative;
+            flex: 1 1 100%;
+            justify-content: flex-start;
+            padding-top: .2rem;
+        }
+        @media (max-width: 639px) {
+            .page-header-right {
+                gap: .45rem;
+            }
+            .header-support {
+                padding: .42rem .7rem;
+                font-size: .74rem;
+            }
+            .header-user {
+                padding: .28rem .62rem .28rem .28rem;
+            }
+            .header-user-name {
+                max-width: 132px;
+            }
+        }
         @media (min-width: 1024px) {
             .page-header-inner {
                 min-height: 0;
+                align-items: center;
             }
             .page-header-left {
                 padding-right: 15rem;
+                flex: 1 1 auto;
             }
             .page-header-right {
                 position: absolute;
@@ -814,6 +913,9 @@
                 right: 0;
                 margin-left: 0;
                 transform: translateY(-50%);
+                flex: 0 0 auto;
+                justify-content: flex-end;
+                padding-top: 0;
             }
         }
         .header-support {
@@ -1791,7 +1893,15 @@
             <button class="btn-ham" id="sbToggle" aria-label="{{ __('Buka sidebar') }}" aria-expanded="false" aria-controls="appSidebar">
                 <div class="ham-box" id="hamBox"><span class="ham-line"></span><span class="ham-line"></span><span class="ham-line"></span></div>
             </button>
-            <span class="topbar-title">StudentEdge</span>
+            <div class="topbar-brand">
+                <span class="topbar-brand-mark">
+                    <img src="{{ asset('images/newlogo.png') }}" alt="StudentEdge">
+                </span>
+                <span class="topbar-brand-copy">
+                    <span class="topbar-title">StudentEdge</span>
+                    <span class="topbar-subtitle">{{ __('Student Affairs') }}</span>
+                </span>
+            </div>
         </div>
         @endif
 

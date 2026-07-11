@@ -79,7 +79,7 @@
             <div class="ui-card-body qr-print-sheet">
                 @if($scanUrl)
                     <div class="qr-card-actions">
-                        <a class="ui-btn" href="{{ route('admin.movements.qr.print') }}" target="_blank" rel="noopener">{{ __('Print Current QR') }}</a>
+                        <a class="ui-btn primary" href="{{ route('admin.movements.qr.display') }}" target="_blank" rel="noopener">{{ __('Open Live Display') }}</a>
                     </div>
                     <div class="qr-box" id="qrBox">
                         <img id="qrImage" alt="{{ __('Movement QR Code') }}" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ urlencode($scanUrl) }}">

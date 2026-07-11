@@ -134,11 +134,11 @@ class MovementController extends Controller
         ]);
     }
 
-    public function qrPrint(): View
+    public function qrDisplay(): View
     {
         $checkpoint = DB::table('movement_checkpoints')->orderBy('id')->first();
 
-        return view('admin.movements.qr_print', [
+        return view('admin.movements.qr_display', [
             'checkpoint' => $checkpoint,
             'scanUrl' => $checkpoint ? route('student.movements.index', ['token' => $checkpoint->qr_token]) : null,
         ]);
