@@ -591,6 +591,75 @@
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 0.875rem;
         }
+        .location-grid {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.5fr);
+            gap: 1rem;
+            align-items: stretch;
+        }
+        .location-box {
+            background: var(--surface-warm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+        .location-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: fit-content;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--desert-rock);
+            padding: 0.45rem 0.85rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .location-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.35;
+        }
+        .location-address {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.75;
+        }
+        .location-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            width: fit-content;
+            text-decoration: none;
+            color: var(--desert-rock);
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+        .location-link:hover { color: var(--accent-hover); }
+        .location-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .map-shell {
+            min-height: 340px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--surface-warm);
+            box-shadow: 0 2px 14px rgba(42,33,24,0.05);
+        }
+        .map-shell iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 340px;
+            border: 0;
+            display: block;
+        }
         .support-box {
             background: var(--surface-warm);
             border: 1px solid var(--border);
@@ -656,6 +725,7 @@
             .role-grid,
             .impact-grid,
             .support-grid { grid-template-columns: 1fr 1fr; }
+            .location-grid { grid-template-columns: 1fr; }
             .flow-row { grid-template-columns: 1fr 1fr; }
         }
 
@@ -675,10 +745,13 @@
             .support-grid,
             .flow-row { grid-template-columns: 1fr; }
             .benefit-list { grid-template-columns: 1fr; }
+            .location-grid { grid-template-columns: 1fr; }
             .welcome-footer { width: calc(100% - 1.5rem); }
             .footer-meta { justify-content: center; text-align: center; }
             .footer-links { justify-content: center; }
             .section-card { padding: 1.375rem 1.25rem; }
+            .map-shell,
+            .map-shell iframe { min-height: 280px; }
         }
 
         @media (max-width: 480px) {
@@ -803,6 +876,35 @@
                 <article class="support-box"><h5>{{ __('home.support_email') }}</h5><p>support@polibesut.edu.my</p></article>
                 <article class="support-box"><h5>{{ __('home.support_office') }}</h5><p>{{ __('home.support_office_value') }}</p></article>
                 <article class="support-box"><h5>{{ __('home.support_phone') }}</h5><p>+60 XXX XXX XXX</p></article>
+            </div>
+        </section>
+
+        <section class="section-card" aria-labelledby="location-title">
+            <h3 class="section-title" id="location-title">{{ __('home.location_title') }}</h3>
+            <p class="section-desc">{{ __('home.location_desc') }}</p>
+            <div class="location-grid">
+                <article class="location-box">
+                    <span class="location-kicker">{{ __('home.location_kicker') }}</span>
+                    <div class="location-name">{{ __('home.location_name') }}</div>
+                    <p class="location-address">{{ __('home.location_address') }}</p>
+                    <a
+                        href="https://www.google.com/maps/search/?api=1&query=Politeknik%20Besut%20Terengganu%2C%20Jalan%20Bukit%20Keluang%2C%2022200%20Besut%2C%20Terengganu%2C%20Malaysia"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="location-link"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6-4.35 6-10.2A6 6 0 006 10.8C6 16.65 12 21 12 21z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a2.7 2.7 0 100-5.4 2.7 2.7 0 000 5.4z"/></svg>
+                        {{ __('home.location_open_map') }}
+                    </a>
+                </article>
+                <div class="map-shell">
+                    <iframe
+                        title="{{ __('home.location_iframe_title') }}"
+                        src="https://maps.google.com/maps?q=Politeknik%20Besut%20Terengganu%2C%20Jalan%20Bukit%20Keluang%2C%2022200%20Besut%2C%20Terengganu%2C%20Malaysia&z=15&output=embed"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                </div>
             </div>
         </section>
 

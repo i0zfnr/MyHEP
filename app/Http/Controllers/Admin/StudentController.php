@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
@@ -95,6 +96,10 @@ class StudentController extends Controller
             'program' => $validated['program'],
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
+            'residence_status' => $validated['residence_status'],
+            'room_number' => $validated['residence_status'] === 'inside_campus'
+                ? ($validated['room_number'] ?? null)
+                : null,
             'photo' => null,
             'created_at' => now(),
             'updated_at' => now(),
@@ -133,6 +138,10 @@ class StudentController extends Controller
                 'program' => $validated['program'],
                 'phone' => $validated['phone'] ?? null,
                 'address' => $validated['address'] ?? null,
+                'residence_status' => $validated['residence_status'],
+                'room_number' => $validated['residence_status'] === 'inside_campus'
+                    ? ($validated['room_number'] ?? null)
+                    : null,
                 'updated_at' => now(),
             ]);
 
@@ -211,7 +220,7 @@ class StudentController extends Controller
 
     private function validateStudent(Request $request, ?int $id = null): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
             'matric_no' => ['required', 'string', 'max:20', Rule::unique('students', 'matric_no')->ignore($id)],
             'ic_no' => ['required', 'string', 'max:20', Rule::unique('students', 'ic_no')->ignore($id)],
@@ -219,7 +228,17 @@ class StudentController extends Controller
             'program' => ['required', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string'],
+            'residence_status' => ['required', Rule::in(['inside_campus', 'live_out'])],
+            'room_number' => ['nullable', 'string', 'max:30'],
         ]);
+
+        if (($validated['residence_status'] ?? null) === 'inside_campus' && blank($validated['room_number'] ?? null)) {
+            throw ValidationException::withMessages([
+                'room_number' => __('Room number is required for inside-campus students.'),
+            ]);
+        }
+
+        return $validated;
     }
 
     private function studentNotFoundRedirect()

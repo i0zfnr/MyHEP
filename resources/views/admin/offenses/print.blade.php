@@ -151,8 +151,10 @@
     @if(empty($isPdf))
         <div class="actions">
             <button class="btn" onclick="window.print()">Cetak Saman</button>
-            <a class="btn" href="{{ route('admin.offenses.pdf', $offense->id) }}">Muat Turun PDF</a>
-            <a class="btn" href="{{ route('admin.offenses.index') }}">Kembali</a>
+            @if(!empty($pdfRoute))
+                <a class="btn" href="{{ $pdfRoute }}">Muat Turun PDF</a>
+            @endif
+            <a class="btn" href="{{ $backRoute ?? url()->previous() }}">Kembali</a>
         </div>
     @endif
 
@@ -197,26 +199,6 @@
                 <tr><th>Tempat</th><td>{{ $offense->place }}</td></tr>
                 <tr><th>Jumlah Denda (RM)</th><td>{{ number_format((float) $offense->fine_amount, 2) }}</td></tr>
                 <tr><th>Dikeluarkan Oleh</th><td>{{ $offense->issued_by ?? '-' }}</td></tr>
-                @if(!empty($offense->evidence_photo_path))
-                    <tr>
-                        <th>Bukti Gambar</th>
-                        <td>
-                            @if(!empty($isPdf))
-                                @php $photoFile = storage_path('app/public/' . $offense->evidence_photo_path); @endphp
-                                @if(file_exists($photoFile))
-                                    <img src="{{ $photoFile }}" alt="Bukti gambar" style="max-width:300px; max-height:220px;">
-                                @else
-                                    -
-                                @endif
-                            @else
-                                <a href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank" style="display:inline-block; margin-bottom:8px;">Lihat gambar asal</a>
-                                <div>
-                                    <img src="{{ asset('storage/' . $offense->evidence_photo_path) }}" alt="Bukti gambar" style="max-width:300px; max-height:220px;">
-                                </div>
-                            @endif
-                        </td>
-                    </tr>
-                @endif
             </table>
         </div>
 

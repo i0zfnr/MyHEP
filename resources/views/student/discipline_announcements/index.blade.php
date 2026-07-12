@@ -1,188 +1,261 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
-@section('title', __('Pengumuman Disiplin'))
+@section('title', __('Discipline Announcements'))
 
 @push('styles')
 <style>
-    .wrap { max-width: 1000px; margin: 0 auto; }
-    .card { background:#fff; border:1px solid #ede4d9; border-radius:12px; overflow:hidden; }
-    .item { padding:14px 16px; border-bottom:1px solid #f0e7dc; }
-    .item:last-child { border-bottom:none; }
-    .title { margin:0 0 6px; font-size:16px; color:#2d1f14; }
-    .meta { font-size:12px; color:#7a6555; margin-bottom:8px; }
-    .body { margin:0; font-size:13px; color:#4f3b2d; line-height:1.5; }
-    /* Student UX Identity v2 */
-    :root {
-        --stu-ink: #1f1d1a;
-        --stu-muted: #6f675f;
-        --stu-line: #e9ded1;
-        --stu-soft: #fbf7f1;
-        --stu-accent: #7b5b43;
-        --stu-accent-2: #b69172;
-        --stu-glow: rgba(123, 91, 67, 0.18);
+    .disc-page {
+        width: min(1120px, 100%);
+        margin: 0 auto;
+        display: grid;
+        gap: 18px;
     }
-    body {
+    .disc-hero,
+    .disc-card {
+        border: 1px solid rgba(226, 209, 192, .14);
+        border-radius: 24px;
         background:
-            radial-gradient(1200px 520px at -8% -18%, #efe2d4 0%, transparent 56%),
-            radial-gradient(900px 350px at 108% -14%, #f3e9de 0%, transparent 54%),
-            linear-gradient(180deg, #faf7f2 0%, #f5efe7 100%);
+            radial-gradient(circle at top right, rgba(215, 191, 168, .08), transparent 34%),
+            linear-gradient(180deg, rgba(29, 26, 23, .96), rgba(17, 15, 13, .98));
+        box-shadow: 0 22px 48px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255,255,255,.04);
     }
-    .wrap,
-    .student-dashboard,
-    .dash-student,
-    .sdash,
-    .adash {
-        width: min(1160px, 100%);
+    .disc-hero {
+        padding: 26px 28px;
+        display: grid;
+        gap: 12px;
     }
-    .card,
-    .panel,
-    .box,
-    .stat,
-    .summary,
-    .tile {
-        border: 1px solid var(--stu-line) !important;
-        border-radius: 16px;
-        background: linear-gradient(180deg, #fff 0%, #fffdfa 100%);
-        box-shadow: 0 1px 2px rgba(31, 29, 26, 0.07), 0 10px 24px rgba(61, 46, 34, 0.06);
-        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
-    }
-    .card:hover,
-    .panel:hover,
-    .box:hover,
-    .stat:hover,
-    .summary:hover,
-    .tile:hover {
-        transform: translateY(-2px);
-        border-color: #dcc7b0 !important;
-        box-shadow: 0 5px 14px rgba(31, 29, 26, 0.11), 0 18px 30px rgba(61, 46, 34, 0.10);
-    }
-    .head,
-    .card h2,
-    .card h3,
-    .section-head,
-    .panel-head {
-        position: relative;
-        background: linear-gradient(180deg, #fff 0%, #fbf4ec 100%);
-    }
-    .head::before,
-    .card h2::before,
-    .card h3::before,
-    .section-head::before,
-    .panel-head::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: linear-gradient(180deg, var(--stu-accent) 0%, var(--stu-accent-2) 100%);
-    }
-    .btn,
-    .button,
-    button[type='submit'],
-    input[type='submit'] {
-        border-radius: 10px;
-        border: 1px solid #ceb79f;
-        background: linear-gradient(180deg, #ffffff 0%, #f9f3ec 100%);
-        color: #685141;
-        font-weight: 700;
-        transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease, color 170ms ease;
-    }
-    .btn:hover,
-    .button:hover,
-    button[type='submit']:hover,
-    input[type='submit']:hover {
-        transform: translateY(-1px);
-        border-color: #ba9b7b;
-        box-shadow: 0 8px 16px rgba(97, 73, 52, 0.13);
-    }
-    .btn-primary,
-    .primary,
-    .is-primary {
-        border-color: #7f6249 !important;
-        background: linear-gradient(135deg, #7b5b43 0%, #b69172 100%) !important;
-        color: #fff !important;
-    }
-    input,
-    select,
-    textarea {
-        border-color: #decdb8 !important;
-        background: #fffdfb;
-        color: var(--stu-ink);
-        transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
-    }
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: #b89576 !important;
-        box-shadow: 0 0 0 4px rgba(184, 149, 118, 0.18);
-        outline: none;
-        background: #fff;
-    }
-    .filters,
-    .toolbar,
-    .search-bar {
-        background: linear-gradient(180deg, #fffdfb 0%, #faf3eb 100%);
-        border-top: 1px solid #efe2d5;
-        border-bottom: 1px solid #efe2d5;
-    }
-    table tbody tr {
-        transition: background-color 140ms ease;
-    }
-    table tbody tr:hover {
-        background: #fcf7f1;
-    }
-    .badge,
-    .status,
-    .pill {
+    .disc-eyebrow {
+        display: inline-flex;
+        width: fit-content;
+        padding: 7px 12px;
         border-radius: 999px;
-        font-weight: 700;
+        background: rgba(95, 190, 145, .12);
+        color: #d8f7e7;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
     }
-    @media (max-width: 980px) {
-        .head,
-        .toolbar,
-        .actions {
-            align-items: flex-start;
+    .disc-hero h3 {
+        margin: 0;
+        font-size: clamp(1.7rem, 2.8vw, 2.4rem);
+        line-height: 1.08;
+        letter-spacing: -.04em;
+        color: #f7efe8;
+    }
+    .disc-hero p {
+        margin: 0;
+        max-width: 760px;
+        color: #c8b8a9;
+        font-size: 1rem;
+        line-height: 1.75;
+    }
+    .disc-toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .disc-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .disc-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border-radius: 999px;
+        border: 1px solid rgba(226, 209, 192, .16);
+        background: rgba(255,255,255,.03);
+        color: #f7efe8;
+        text-decoration: none;
+        font-size: .92rem;
+        font-weight: 700;
+        transition: transform .18s ease, border-color .18s ease, background-color .18s ease;
+    }
+    .disc-chip:hover {
+        transform: translateY(-1px);
+        border-color: rgba(226, 209, 192, .28);
+        background: rgba(255,255,255,.08);
+    }
+    .disc-chip.primary {
+        background: linear-gradient(135deg, #c9ae95 0%, #ecd7c3 100%);
+        border-color: rgba(215, 191, 168, .55);
+        color: #2a1d15;
+        box-shadow: 0 12px 28px rgba(201, 174, 149, .22);
+    }
+    .disc-card {
+        overflow: hidden;
+    }
+    .disc-head {
+        padding: 18px 22px;
+        border-bottom: 1px solid rgba(226, 209, 192, .12);
+        display: grid;
+        gap: 4px;
+    }
+    .disc-head strong {
+        color: #f7efe8;
+        font-size: 1.15rem;
+    }
+    .disc-head span {
+        color: #a99888;
+        font-size: .88rem;
+    }
+    .disc-list {
+        display: grid;
+    }
+    .disc-item {
+        padding: 20px 22px;
+        border-top: 1px solid rgba(226, 209, 192, .1);
+        display: grid;
+        gap: 12px;
+    }
+    .disc-item:first-child {
+        border-top: 0;
+    }
+    .disc-item-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .disc-title {
+        margin: 0;
+        color: #f7efe8;
+        font-size: 1.18rem;
+        font-weight: 800;
+        letter-spacing: -.02em;
+    }
+    .disc-date {
+        color: #a99888;
+        font-size: .84rem;
+        white-space: nowrap;
+    }
+    .disc-meta {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .disc-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: rgba(242, 201, 153, .12);
+        color: #f2d3b4;
+        font-size: .76rem;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+    .disc-author {
+        color: #b8a898;
+        font-size: .88rem;
+    }
+    .disc-body {
+        margin: 0;
+        color: #ddd0c4;
+        font-size: .95rem;
+        line-height: 1.8;
+        white-space: pre-line;
+    }
+    .disc-empty {
+        padding: 36px 22px;
+        color: #b8a898;
+        text-align: center;
+        font-size: .95rem;
+    }
+    .disc-pagination {
+        display: flex;
+        justify-content: center;
+    }
+    .disc-pagination nav {
+        width: 100%;
+    }
+    @media (max-width: 960px) {
+        .disc-page { gap: 16px; }
+    }
+    @media (max-width: 640px) {
+        .disc-page {
+            gap: 14px;
         }
-        .head > div,
-        .head form,
-        .toolbar > div,
-        .toolbar form {
-            width: 100%;
+        .disc-hero,
+        .disc-head,
+        .disc-item {
+            padding-left: 16px;
+            padding-right: 16px;
         }
-        .stats,
-        .summary-grid,
-        .cards-grid {
-            grid-template-columns: 1fr !important;
+        .disc-hero {
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
-        table th,
-        table td {
-            font-size: 12px !important;
-            padding: 9px 10px !important;
+        .disc-title {
+            font-size: 1.02rem;
+        }
+        .disc-body {
+            font-size: .92rem;
         }
     }
 </style>
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Pengumuman Disiplin') }}</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;">{{ __('Discipline Announcements') }}</h2>
 @endsection
 
 @section('content')
-<div class="wrap">
-    <div class="card">
-        @forelse($announcements as $item)
-            <article class="item">
-                <h3 class="title">{{ $item->title }}</h3>
-                <div class="meta">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }} · {{ $item->admin_name }}</div>
-                <p class="body">{{ $item->body }}</p>
-            </article>
-        @empty
-            <div class="item" style="color:#7a6555;">{{ __('Tiada pengumuman disiplin.') }}</div>
-        @endforelse
+<div class="disc-page">
+    <section class="disc-hero">
+        <span class="disc-eyebrow">{{ __('Student Discipline Portal') }}</span>
+        <h3>{{ __('Latest discipline notices for students.') }}</h3>
+        <p>{{ __('Check new updates from the discipline team here.') }}</p>
+    </section>
+
+    <div class="disc-toolbar">
+        <div class="disc-actions">
+            <a class="disc-chip" href="{{ route('student.dashboard') }}">{{ __('Back to Dashboard') }}</a>
+            <a class="disc-chip" href="{{ route('student.offenses.index') }}">{{ __('My Offenses') }}</a>
+            <a class="disc-chip primary" href="{{ route('student.rules.index') }}">{{ __('View Rules') }}</a>
+        </div>
     </div>
 
-    <div style="margin-top:14px;">{{ $announcements->links() }}</div>
+    <section class="disc-card">
+        <div class="disc-head">
+            <strong>{{ __('Announcement Board') }}</strong>
+            <span>{{ __('Latest posted announcements.') }}</span>
+        </div>
+
+        @if($announcements->count())
+            <div class="disc-list">
+                @foreach($announcements as $item)
+                    <article class="disc-item">
+                        <div class="disc-item-top">
+                            <h3 class="disc-title">{{ $item->title }}</h3>
+                            <div class="disc-date">
+                                {{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('d M Y') : '-' }}
+                            </div>
+                        </div>
+
+                        <div class="disc-meta">
+                            <span class="disc-pill">{{ __('Discipline Notice') }}</span>
+                            <span class="disc-author">{{ __('Published by') }} {{ $item->admin_name }}</span>
+                        </div>
+
+                        <p class="disc-body">{{ $item->body }}</p>
+                    </article>
+                @endforeach
+            </div>
+        @else
+            <div class="disc-empty">{{ __('No discipline announcements are available right now.') }}</div>
+        @endif
+    </section>
+
+    <div class="disc-pagination">{{ $announcements->links() }}</div>
 </div>
 @endsection
-

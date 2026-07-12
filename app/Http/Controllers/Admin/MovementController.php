@@ -55,7 +55,10 @@ class MovementController extends Controller
                 $record->student_name,
                 $record->matric_no,
                 $record->program,
+                $record->residence_status,
+                $record->room_number,
                 $record->movement_type_name,
+                $record->vehicle_plate_no ?? '',
                 $record->checkpoint_name,
                 $record->checkout_at,
                 $record->expected_return_at,
@@ -67,7 +70,7 @@ class MovementController extends Controller
 
         return downloadCsv(
             'student_movements_' . now()->format('Ymd_His') . '.csv',
-            ['ID', 'Pelajar', 'No Matrik', 'Program', 'Jenis', 'Checkpoint', 'Keluar', 'Jangka Pulang', 'Pulang', 'Status', 'Rule Status', 'Lewat (min)'],
+            ['ID', 'Pelajar', 'No Matrik', 'Program', 'Status Kediaman', 'No Bilik', 'Jenis', 'No Plat', 'Checkpoint', 'Keluar', 'Jangka Pulang', 'Pulang', 'Status', 'Rule Status', 'Lewat (min)'],
             $rows
         );
     }
@@ -260,6 +263,8 @@ class MovementController extends Controller
                 'students.full_name as student_name',
                 'students.matric_no',
                 'students.program',
+                'students.residence_status',
+                'students.room_number',
                 'movement_types.name as movement_type_name',
                 'movement_checkpoints.name as checkpoint_name'
             );

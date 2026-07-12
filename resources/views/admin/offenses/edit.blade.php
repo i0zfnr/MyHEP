@@ -31,6 +31,12 @@
         background:linear-gradient(180deg, #ffeaea 0%, #fbd7da 100%) !important;
         color:#912018 !important;
     }
+    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:10px; }
+    .evidence-card { position:relative; border:1px solid #e7daca; border-radius:10px; background:#fffdfb; padding:8px; }
+    .evidence-card img { width:100%; aspect-ratio:4 / 3; object-fit:cover; border-radius:8px; display:block; }
+    .evidence-card button { margin-top:8px; width:100%; }
+    .evidence-card small { display:block; margin-top:6px; color:#7a6555; text-align:center; }
+    .evidence-card.is-removed { opacity:.45; }
     .error { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .preview-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
     .rules-toolbar { display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:12px; }
@@ -259,27 +265,38 @@
                 </div>
                 <div style="margin-top:12px;">
                     <label for="evidence_photo">{{ __('Gambar Bukti (Opsyenal)') }}</label>
-                    <input type="file" id="evidence_photo" name="evidence_photo" accept="image/jpeg,image/png,image/webp" capture="environment">
-                    <small style="display:block; margin-top:6px; color:#7a6555;">{{ __('Upload gambar baharu jika mahu gantikan gambar sedia ada (JPG/PNG/WEBP, max 5MB).') }}</small>
+                    <input type="file" id="evidence_photo" name="evidence_photos[]" accept="image/jpeg,image/png,image/webp" capture="environment" multiple>
+                    <small style="display:block; margin-top:6px; color:#7a6555;">{{ __('You can upload up to 3 evidence images (JPG/PNG/WEBP, max 5MB each).') }}</small>
 
-                    @if(!empty($offense->evidence_photo_path))
+                    @if(($offense->evidence_count ?? 0) > 0)
                         <div style="margin-top:10px;">
-                            <div class="preview-actions">
-                                <a href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank" class="btn" style="padding:6px 10px; font-size:12px;">{{ __('Lihat Gambar Semasa') }}</a>
-                                <button type="button" class="btn btn-danger-soft" id="remove_current_evidence_btn">{{ __('Buang Gambar Semasa') }}</button>
+                            <div class="hint">{{ __('Current evidence images') }}</div>
+                            <div id="current_evidence_grid" class="evidence-grid">
+                                @foreach($offense->evidence_photos as $index => $photo)
+                                    <div class="evidence-card {{ old('remove_evidence_photo') && $photo->is_primary ? 'is-removed' : '' }}" data-current-evidence-card="{{ $photo->is_primary ? 'primary' : $photo->id }}">
+                                        <a href="{{ asset('storage/' . $photo->photo_path) }}" target="_blank">
+                                            <img src="{{ asset('storage/' . $photo->photo_path) }}" alt="{{ __('Current evidence image') }}">
+                                        </a>
+                                        <small>{{ $photo->is_primary ? __('Primary image') : __('Image :number', ['number' => $index + 1]) }}</small>
+                                        @if($photo->is_primary)
+                                            <button type="button" class="btn btn-danger-soft" id="remove_current_evidence_btn">{{ __('Remove this image') }}</button>
+                                            <input type="checkbox" name="remove_evidence_photo" id="remove_evidence_photo" value="1" {{ old('remove_evidence_photo') ? 'checked' : '' }} style="display:none;">
+                                        @else
+                                            <button type="button" class="btn btn-danger-soft" data-toggle-extra-remove="{{ $photo->id }}">{{ __('Remove this image') }}</button>
+                                            <input type="checkbox" name="remove_evidence_extra_ids[]" value="{{ $photo->id }}" data-extra-remove-input="{{ $photo->id }}" {{ in_array((string) $photo->id, array_map('strval', old('remove_evidence_extra_ids', [])), true) ? 'checked' : '' }} style="display:none;">
+                                        @endif
+                                    </div>
+                                @endforeach
                             </div>
-                            <div style="margin-top:8px;">
-                                <img id="current_evidence_preview" src="{{ asset('storage/' . $offense->evidence_photo_path) }}" alt="{{ __('Gambar bukti semasa') }}" style="max-width:220px; border-radius:8px; border:1px solid #ede4d9;">
-                            </div>
-                            <input type="checkbox" name="remove_evidence_photo" id="remove_evidence_photo" value="1" {{ old('remove_evidence_photo') ? 'checked' : '' }} style="display:none;">
-                            <div id="remove_current_evidence_state" class="hint" style="margin-top:8px; {{ old('remove_evidence_photo') ? '' : 'display:none;' }}">{{ __('Gambar semasa akan dibuang apabila anda simpan perubahan.') }}</div>
+                            <div id="remove_current_evidence_state" class="hint" style="margin-top:8px; display:none;">{{ __('This image will be removed when you save changes.') }}</div>
                         </div>
                     @endif
 
                     <div class="preview-actions">
-                        <button type="button" class="btn btn-danger-soft" id="remove_new_evidence_btn" style="display:none;">{{ __('Buang Gambar Baharu') }}</button>
+                        <button type="button" class="btn btn-danger-soft" id="remove_new_evidence_btn" style="display:none;">{{ __('Remove selected images') }}</button>
                     </div>
-                    <img id="evidence_preview" alt="{{ __('Preview gambar baharu') }}" style="display:none; margin-top:10px; max-width:220px; border-radius:8px; border:1px solid #ede4d9;">
+                    <div id="evidence_preview_grid" class="evidence-grid"></div>
+                    <div id="evidence_count_hint" class="hint">{{ __('Current active evidence: :count / 3 images.', ['count' => $offense->evidence_count ?? 0]) }}</div>
                 </div>
             </div>
         </div>
@@ -328,63 +345,124 @@
 @push('scripts')
 <script>
     const evidenceInput = document.getElementById('evidence_photo');
-    const evidencePreview = document.getElementById('evidence_preview');
-    const currentEvidencePreview = document.getElementById('current_evidence_preview');
+    const evidencePreviewGrid = document.getElementById('evidence_preview_grid');
+    const currentEvidenceGrid = document.getElementById('current_evidence_grid');
     const removeCurrentEvidenceBtn = document.getElementById('remove_current_evidence_btn');
     const removeCurrentEvidenceCheckbox = document.getElementById('remove_evidence_photo');
     const removeCurrentEvidenceState = document.getElementById('remove_current_evidence_state');
     const removeNewEvidenceBtn = document.getElementById('remove_new_evidence_btn');
+    const evidenceCountHint = document.getElementById('evidence_count_hint');
     const offenseForm = document.getElementById('offense_form');
     const ajaxFormFeedback = document.getElementById('ajax_form_feedback');
-    let evidenceObjectUrl = null;
+    const maxEvidenceFiles = 3;
+    let selectedEvidenceFiles = [];
+    let evidenceObjectUrls = [];
+
+    const currentExtraInputs = Array.from(document.querySelectorAll('[data-extra-remove-input]'));
+
+    const currentActiveCount = () => {
+        let count = 0;
+        if (removeCurrentEvidenceCheckbox && !removeCurrentEvidenceCheckbox.checked) count += 1;
+        currentExtraInputs.forEach((input) => {
+            if (!input.checked) count += 1;
+        });
+        return count;
+    };
 
     const syncCurrentEvidenceState = () => {
-        if (!removeCurrentEvidenceCheckbox) return;
+        if (!removeCurrentEvidenceCheckbox || !currentEvidenceGrid) return;
         const isMarked = removeCurrentEvidenceCheckbox.checked;
-        if (currentEvidencePreview) currentEvidencePreview.style.display = isMarked ? 'none' : 'block';
+        const card = currentEvidenceGrid.querySelector('[data-current-evidence-card="primary"]');
+        if (card) card.classList.toggle('is-removed', isMarked);
         if (removeCurrentEvidenceState) removeCurrentEvidenceState.style.display = isMarked ? 'block' : 'none';
         if (removeCurrentEvidenceBtn) {
             removeCurrentEvidenceBtn.textContent = isMarked
-                ? @json(__('Batal Buang Gambar Semasa'))
-                : @json(__('Buang Gambar Semasa'));
+                ? @json(__('Cancel remove current image'))
+                : @json(__('Remove this image'));
+        }
+        updateEvidenceCount();
+    };
+
+    const syncEvidenceInput = () => {
+        if (!evidenceInput) return;
+        const dt = new DataTransfer();
+        selectedEvidenceFiles.forEach((file) => dt.items.add(file));
+        evidenceInput.files = dt.files;
+    };
+
+    const updateEvidenceCount = () => {
+        if (evidenceCountHint) {
+            const total = currentActiveCount() + selectedEvidenceFiles.length;
+            evidenceCountHint.textContent = @json(__('Current active evidence: :count / 3 images.', ['count' => '__COUNT__'])).replace('__COUNT__', String(total));
         }
     };
 
-    const resetNewEvidencePreview = () => {
-        if (evidenceObjectUrl) {
-            URL.revokeObjectURL(evidenceObjectUrl);
-            evidenceObjectUrl = null;
+    const renderNewEvidencePreviews = () => {
+        evidenceObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+        evidenceObjectUrls = [];
+
+        if (!evidencePreviewGrid) return;
+        evidencePreviewGrid.innerHTML = '';
+
+        selectedEvidenceFiles.forEach((file, index) => {
+            const objectUrl = URL.createObjectURL(file);
+            evidenceObjectUrls.push(objectUrl);
+
+            const card = document.createElement('div');
+            card.className = 'evidence-card';
+            card.innerHTML = `
+                <img src="${objectUrl}" alt="Evidence ${index + 1}">
+                <small>${@json(__('Image :number', ['number' => '__NUM__'])).replace('__NUM__', String(index + 1))}</small>
+                <button type="button" class="btn btn-danger-soft" data-remove-new-evidence-index="${index}">${@json(__('Remove this image'))}</button>
+            `;
+            evidencePreviewGrid.appendChild(card);
+        });
+
+        if (removeNewEvidenceBtn) {
+            removeNewEvidenceBtn.style.display = selectedEvidenceFiles.length ? 'inline-block' : 'none';
         }
-        evidencePreview.style.display = 'none';
-        evidencePreview.removeAttribute('src');
-        if (removeNewEvidenceBtn) removeNewEvidenceBtn.style.display = 'none';
+        updateEvidenceCount();
     };
 
-    if (evidenceInput && evidencePreview) {
+    const mergeEvidenceFiles = (incomingFiles, replaceExisting = false) => {
+        const nextFiles = replaceExisting ? [] : [...selectedEvidenceFiles];
+        let trimmed = false;
+
+        incomingFiles.forEach((file) => {
+            if (currentActiveCount() + nextFiles.length < maxEvidenceFiles) {
+                nextFiles.push(file);
+            } else {
+                trimmed = true;
+            }
+        });
+
+        selectedEvidenceFiles = nextFiles;
+        syncEvidenceInput();
+        renderNewEvidencePreviews();
+
+        if (trimmed && ajaxFormFeedback) {
+            ajaxFormFeedback.innerHTML = `<div>${@json(__('You can upload up to 3 evidence images only.'))}</div>`;
+            ajaxFormFeedback.style.display = 'block';
+        }
+    };
+
+    if (evidenceInput) {
         evidenceInput.addEventListener('change', () => {
-            const file = evidenceInput.files && evidenceInput.files[0] ? evidenceInput.files[0] : null;
-            if (!file) {
-                resetNewEvidencePreview();
+            const files = Array.from(evidenceInput.files || []);
+            if (!files.length) {
+                selectedEvidenceFiles = [];
+                renderNewEvidencePreviews();
                 return;
             }
-            if (evidenceObjectUrl) {
-                URL.revokeObjectURL(evidenceObjectUrl);
-            }
-            evidenceObjectUrl = URL.createObjectURL(file);
-            evidencePreview.src = evidenceObjectUrl;
-            evidencePreview.style.display = 'block';
-            if (removeNewEvidenceBtn) removeNewEvidenceBtn.style.display = 'inline-block';
-            if (removeCurrentEvidenceCheckbox) {
-                removeCurrentEvidenceCheckbox.checked = false;
-                syncCurrentEvidenceState();
-            }
+            mergeEvidenceFiles(files, true);
         });
     }
 
     if (removeNewEvidenceBtn) {
         removeNewEvidenceBtn.addEventListener('click', () => {
-            evidenceInput.value = '';
-            resetNewEvidencePreview();
+            selectedEvidenceFiles = [];
+            syncEvidenceInput();
+            renderNewEvidencePreviews();
         });
     }
 
@@ -394,6 +472,51 @@
             syncCurrentEvidenceState();
         });
         syncCurrentEvidenceState();
+    }
+
+    if (currentEvidenceGrid) {
+        currentEvidenceGrid.addEventListener('click', (event) => {
+            const trigger = event.target.closest('[data-toggle-extra-remove]');
+            if (!trigger) return;
+
+            const id = trigger.getAttribute('data-toggle-extra-remove');
+            const input = document.querySelector(`[data-extra-remove-input="${id}"]`);
+            const card = document.querySelector(`[data-current-evidence-card="${id}"]`);
+            if (!input || !card) return;
+
+            input.checked = !input.checked;
+            card.classList.toggle('is-removed', input.checked);
+            trigger.textContent = input.checked
+                ? @json(__('Cancel remove current image'))
+                : @json(__('Remove this image'));
+            if (removeCurrentEvidenceState) {
+                removeCurrentEvidenceState.style.display = document.querySelectorAll('[data-extra-remove-input]:checked').length || (removeCurrentEvidenceCheckbox && removeCurrentEvidenceCheckbox.checked) ? 'block' : 'none';
+            }
+            updateEvidenceCount();
+        });
+
+        currentExtraInputs.forEach((input) => {
+            if (input.checked) {
+                const card = document.querySelector(`[data-current-evidence-card="${input.value}"]`);
+                const button = document.querySelector(`[data-toggle-extra-remove="${input.value}"]`);
+                if (card) card.classList.add('is-removed');
+                if (button) button.textContent = @json(__('Cancel remove current image'));
+            }
+        });
+    }
+
+    if (evidencePreviewGrid) {
+        evidencePreviewGrid.addEventListener('click', (event) => {
+            const trigger = event.target.closest('[data-remove-new-evidence-index]');
+            if (!trigger) return;
+
+            const index = Number(trigger.getAttribute('data-remove-new-evidence-index'));
+            if (Number.isNaN(index)) return;
+
+            selectedEvidenceFiles = selectedEvidenceFiles.filter((_, fileIndex) => fileIndex !== index);
+            syncEvidenceInput();
+            renderNewEvidencePreviews();
+        });
     }
 
     const showAjaxError = (messages) => {
@@ -497,6 +620,8 @@
             applyRuleFilters();
         });
     }
+    renderNewEvidencePreviews();
+    updateEvidenceCount();
     applyRuleFilters();
 </script>
 @endpush

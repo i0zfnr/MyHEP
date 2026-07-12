@@ -13,11 +13,12 @@
         position: relative;
         overflow: hidden;
         border-radius: 22px;
-        border: 1px solid rgba(226, 209, 192, .16);
+        border: 1px solid rgba(214, 189, 166, .46);
         background:
-            radial-gradient(circle at top right, rgba(215, 191, 168, .12), transparent 32%),
-            linear-gradient(180deg, rgba(35, 31, 27, .92), rgba(20, 18, 16, .94));
-        box-shadow: 0 24px 52px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.05);
+            radial-gradient(circle at top right, rgba(215, 191, 168, .18), transparent 32%),
+            radial-gradient(circle at bottom left, rgba(203, 230, 210, .14), transparent 28%),
+            linear-gradient(180deg, rgba(255, 252, 248, .96), rgba(247, 239, 231, .96));
+        box-shadow: 0 20px 42px rgba(76, 57, 41, .10), inset 0 1px 0 rgba(255,255,255,.78);
         padding: 1rem 1.1rem 1.15rem;
     }
     .bugs-stat::after {
@@ -25,17 +26,18 @@
         position: absolute;
         inset: auto 0 0 0;
         height: 3px;
-        background: linear-gradient(90deg, rgba(95, 190, 145, .9), rgba(215, 191, 168, .65));
-        opacity: .78;
+        background: linear-gradient(90deg, rgba(95, 190, 145, .92), rgba(183, 146, 107, .72));
+        opacity: .86;
     }
-    .bugs-stat-label { color: #a99888; font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-    .bugs-stat-value { margin-top: .45rem; font-size: 2rem; font-weight: 900; color: #f7efe8; }
+    .bugs-stat-label { color: #8b715e; font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .bugs-stat-value { margin-top: .45rem; font-size: 2rem; font-weight: 900; color: #2f2116; }
     .bugs-card {
         border-radius: 26px;
-        border: 1px solid rgba(226, 209, 192, .14);
+        border: 1px solid rgba(214, 189, 166, .42);
         background:
-            linear-gradient(180deg, rgba(29, 26, 23, .94), rgba(17, 15, 13, .96));
-        box-shadow: 0 28px 60px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.05);
+            radial-gradient(circle at top right, rgba(215, 191, 168, .14), transparent 32%),
+            linear-gradient(180deg, rgba(255, 252, 248, .98), rgba(247, 239, 231, .98));
+        box-shadow: 0 28px 58px rgba(76, 57, 41, .12), inset 0 1px 0 rgba(255,255,255,.82);
         overflow: hidden;
     }
     .bugs-card-head {
@@ -44,19 +46,21 @@
         justify-content: space-between;
         gap: 1rem;
         padding: 1.15rem 1.3rem;
-        border-bottom: 1px solid rgba(226, 209, 192, .12);
-        background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+        border-bottom: 1px solid rgba(214, 189, 166, .24);
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,246,237,.42)),
+            radial-gradient(circle at 100% 0%, rgba(240,196,135,.16), transparent 34%);
     }
-    .bugs-card-head h3 { margin: 0; font-size: 1.4rem; color: #f7efe8; letter-spacing: -.02em; }
+    .bugs-card-head h3 { margin: 0; font-size: 1.4rem; color: #2f2116; letter-spacing: -.02em; }
     .bugs-actions { display: flex; gap: .65rem; flex-wrap: wrap; }
     .bugs-btn,
     .bugs-select,
     .bugs-input,
     .bugs-textarea {
-        border: 1px solid rgba(226, 209, 192, .18);
+        border: 1px solid rgba(214, 189, 166, .46);
         border-radius: 14px;
-        background: rgba(255,255,255,.04);
-        color: #f7efe8;
+        background: rgba(255,255,255,.82);
+        color: #2f2116;
         font: inherit;
     }
     .bugs-btn {
@@ -72,9 +76,9 @@
     }
     .bugs-btn:hover {
         transform: translateY(-1px);
-        border-color: rgba(226, 209, 192, .28);
-        background: rgba(255,255,255,.08);
-        box-shadow: 0 12px 24px rgba(0,0,0,.18);
+        border-color: rgba(194, 164, 133, .58);
+        background: rgba(255,250,245,.96);
+        box-shadow: 0 12px 24px rgba(76,57,41,.10);
     }
     .bugs-btn.primary {
         background: linear-gradient(135deg, #c9ae95 0%, #ecd7c3 100%);
@@ -102,7 +106,7 @@
         grid-template-columns: minmax(0, 1.6fr) 220px auto auto;
         gap: .8rem;
         padding: 1rem 1.3rem;
-        border-bottom: 1px solid rgba(226, 209, 192, .12);
+        border-bottom: 1px solid rgba(214, 189, 166, .24);
     }
     .bugs-input,
     .bugs-select,
@@ -111,23 +115,24 @@
         padding: .85rem .95rem;
     }
     .bugs-input::placeholder,
-    .bugs-textarea::placeholder { color: #8e8175; }
+    .bugs-textarea::placeholder { color: #9a816d; }
     .bugs-input:focus,
     .bugs-select:focus,
     .bugs-textarea:focus {
         outline: none;
-        border-color: rgba(215, 191, 168, .5);
-        box-shadow: 0 0 0 4px rgba(215, 191, 168, .12);
-        background: rgba(255,255,255,.06);
+        border-color: rgba(183, 146, 107, .62);
+        box-shadow: 0 0 0 4px rgba(215, 191, 168, .14);
+        background: rgba(255,255,255,.98);
     }
     .bugs-textarea { min-height: 112px; resize: vertical; }
     .bugs-list { display: grid; gap: 1rem; padding: 1rem 1.3rem 1.3rem; }
     .bug-item {
         border-radius: 20px;
-        border: 1px solid rgba(226, 209, 192, .12);
+        border: 1px solid rgba(214, 189, 166, .34);
         background:
-            radial-gradient(circle at top right, rgba(95, 190, 145, .06), transparent 28%),
-            linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.025));
+            radial-gradient(circle at top right, rgba(95, 190, 145, .08), transparent 28%),
+            radial-gradient(circle at bottom left, rgba(240, 196, 135, .10), transparent 26%),
+            linear-gradient(180deg, rgba(255,255,255,.76), rgba(255,249,243,.68));
         overflow: hidden;
     }
     .bug-item-head {
@@ -135,9 +140,9 @@
         justify-content: space-between;
         gap: 1rem;
         padding: 1rem 1rem .9rem;
-        border-bottom: 1px solid rgba(226, 209, 192, .1);
+        border-bottom: 1px solid rgba(214, 189, 166, .18);
     }
-    .bug-title { margin: 0; font-size: 1.05rem; color: #f7efe8; }
+    .bug-title { margin: 0; font-size: 1.05rem; color: #2f2116; }
     .bug-meta { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .55rem; }
     .bug-pill {
         display: inline-flex;
@@ -150,43 +155,43 @@
         text-transform: uppercase;
         border: 1px solid transparent;
     }
-    .bug-pill.category { background: rgba(215, 191, 168, .12); border-color: rgba(215, 191, 168, .18); color: #e4cfbb; }
+    .bug-pill.category { background: rgba(215, 191, 168, .18); border-color: rgba(215, 191, 168, .32); color: #7b614a; }
     .bug-pill.status-new { background: rgba(96, 165, 250, .14); border-color: rgba(147, 197, 253, .2); color: #bfdbfe; }
     .bug-pill.status-in_progress { background: rgba(245, 158, 11, .14); border-color: rgba(253, 186, 116, .2); color: #fdba74; }
     .bug-pill.status-resolved { background: rgba(34, 197, 94, .14); border-color: rgba(134, 239, 172, .2); color: #bbf7d0; }
     .bug-pill.status-closed { background: rgba(148, 163, 184, .14); border-color: rgba(203, 213, 225, .2); color: #cbd5e1; }
-    .bug-date { color: #a99888; font-size: .85rem; white-space: nowrap; }
+    .bug-date { color: #8b715e; font-size: .85rem; white-space: nowrap; }
     .bug-item-body {
         display: grid;
         grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
         gap: 1rem;
         padding: 1rem;
     }
-    .bug-copy { color: #cdbeb0; line-height: 1.72; }
+    .bug-copy { color: #6e5848; line-height: 1.72; }
     .bug-copy p { margin: 0 0 .9rem; }
-    .bug-copy strong { color: #f7efe8; }
+    .bug-copy strong { color: #2f2116; }
     .bug-kv { display: grid; gap: .45rem; margin-bottom: 1rem; }
-    .bug-link { color: #e4cfbb; font-weight: 700; word-break: break-all; }
+    .bug-link { color: #8b6648; font-weight: 700; word-break: break-all; }
     .bug-shot {
         margin-top: .95rem;
         border-radius: 14px;
-        border: 1px solid rgba(226, 209, 192, .14);
+        border: 1px solid rgba(214, 189, 166, .28);
         overflow: hidden;
-        background: rgba(255,255,255,.03);
+        background: rgba(255,255,255,.74);
     }
     .bug-shot img { display: block; width: 100%; height: auto; }
     .bug-side form { display: grid; gap: .8rem; }
     .bug-side-actions { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
     .bug-side-actions form { margin: 0; }
     .bug-notes-meta {
-        color: #a99888;
+        color: #8b715e;
         font-size: .8rem;
         line-height: 1.6;
     }
     .bug-empty {
         padding: 1.4rem;
         text-align: center;
-        color: #9e8f81;
+        color: #8b715e;
         font-weight: 700;
     }
     @media (max-width: 980px) {

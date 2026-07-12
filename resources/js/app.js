@@ -1,4 +1,5 @@
 const PWA_PROMPT_KEY = 'studentedge-pwa-dismissed-v1';
+const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
 
 const isStandaloneMode = () =>
     window.matchMedia('(display-mode: standalone)').matches
@@ -150,8 +151,12 @@ const hidePrompt = (persistDismissal = false) => {
     shell.classList.remove('is-visible');
 };
 
-const showPrompt = ({ kicker, title, copy, actions = '', extra = '' }) => {
-    if (isStandaloneMode() || window.localStorage.getItem(PWA_PROMPT_KEY) === '1') {
+const clearPromptDismissal = (key) => {
+    window.localStorage.removeItem(key);
+};
+
+const showPrompt = ({ kicker, title, copy, actions = '', extra = '', dismissalKey = null }) => {
+    if (dismissalKey && window.localStorage.getItem(dismissalKey) === '1') {
         return;
     }
 
@@ -166,6 +171,98 @@ const showPrompt = ({ kicker, title, copy, actions = '', extra = '' }) => {
     shell.classList.add('is-visible');
 }
 
+const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+const getPushConfig = () => window.studentEdgePush || null;
+
+const urlBase64ToUint8Array = (base64String) => {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+
+    return outputArray;
+};
+
+const syncPushSubscription = async () => {
+    const config = getPushConfig();
+    const csrf = getCsrfToken();
+
+    if (!config?.enabled || !config?.authenticated || !config?.publicKey || !csrf) {
+        return false;
+    }
+
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+        return false;
+    }
+
+    if (Notification.permission !== 'granted') {
+        return false;
+    }
+
+    const registration = await navigator.serviceWorker.ready;
+    let subscription = await registration.pushManager.getSubscription();
+
+    if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(config.publicKey),
+        });
+    }
+
+    const payload = subscription.toJSON();
+    payload.contentEncoding = window.PushManager?.supportedContentEncodings?.[0] || 'aes128gcm';
+
+    await fetch(config.subscribeUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': csrf,
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(payload),
+    });
+
+    return true;
+};
+
+const unlinkPushSubscription = async (useKeepalive = false) => {
+    const config = getPushConfig();
+    const csrf = getCsrfToken();
+
+    if (!config?.authenticated || !csrf || !('serviceWorker' in navigator)) {
+        return;
+    }
+
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+
+        if (!subscription) {
+            return;
+        }
+
+        fetch(config.unsubscribeUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            credentials: 'same-origin',
+            keepalive: useKeepalive,
+            body: JSON.stringify({ endpoint: subscription.endpoint }),
+        }).catch(() => {});
+    } catch (error) {
+        // Keep logout reliable even if push cleanup fails.
+    }
+};
+
 const registerPwaPromptUi = () => {
     let deferredPrompt = null;
 
@@ -177,6 +274,7 @@ const registerPwaPromptUi = () => {
             kicker: 'Install App',
             title: 'Install StudentEdge',
             copy: 'Add StudentEdge to your home screen for faster access and a cleaner mobile app experience.',
+            dismissalKey: PWA_PROMPT_KEY,
             actions: `
                 <button type="button" class="pwa-prompt-btn primary" id="pwaInstallBtn">Install now</button>
                 <button type="button" class="pwa-prompt-btn link" id="pwaDismissBtn">Not now</button>
@@ -209,6 +307,7 @@ const registerPwaPromptUi = () => {
             kicker: 'Add to Home Screen',
             title: 'Install StudentEdge on iPhone',
             copy: 'Safari does not show the standard install popup. Use the share menu once to pin StudentEdge like an app.',
+            dismissalKey: PWA_PROMPT_KEY,
             extra: `
                 <ol class="pwa-prompt-steps">
                     <li>Tap the <strong>Share</strong> button in Safari.</li>
@@ -225,6 +324,79 @@ const registerPwaPromptUi = () => {
             hidePrompt(true);
         });
     }
+};
+
+const registerPushPromptUi = () => {
+    const config = getPushConfig();
+
+    if (!config?.enabled || !config?.authenticated) {
+        return;
+    }
+
+    if (!('Notification' in window) || !('PushManager' in window) || !('serviceWorker' in navigator)) {
+        return;
+    }
+
+    if (!isStandaloneMode()) {
+        return;
+    }
+
+    if (Notification.permission === 'granted') {
+        clearPromptDismissal(PUSH_PROMPT_KEY);
+        syncPushSubscription().catch(() => {});
+        return;
+    }
+
+    if (Notification.permission === 'denied' || window.localStorage.getItem(PUSH_PROMPT_KEY) === '1') {
+        return;
+    }
+
+    showPrompt({
+        kicker: config.prompt?.kicker || 'Notifications',
+        title: config.prompt?.title || 'Turn on push notifications',
+        copy: config.prompt?.copy || 'Get instant alerts when fines, stickers, and important account updates happen.',
+        actions: `
+            <button type="button" class="pwa-prompt-btn primary" id="pushEnableBtn">${config.prompt?.enable || 'Enable notifications'}</button>
+            <button type="button" class="pwa-prompt-btn link" id="pushLaterBtn">${config.prompt?.later || 'Maybe later'}</button>
+        `,
+    });
+
+    document.getElementById('pushEnableBtn')?.addEventListener('click', async () => {
+        try {
+            const permission = await Notification.requestPermission();
+
+            if (permission === 'granted') {
+                await syncPushSubscription();
+                clearPromptDismissal(PUSH_PROMPT_KEY);
+                hidePrompt(false);
+                return;
+            }
+        } catch (error) {
+            // Keep the app usable even if permission request fails.
+        }
+
+        window.localStorage.setItem(PUSH_PROMPT_KEY, '1');
+        hidePrompt(false);
+    });
+
+    document.getElementById('pushLaterBtn')?.addEventListener('click', () => {
+        window.localStorage.setItem(PUSH_PROMPT_KEY, '1');
+        hidePrompt(false);
+    });
+};
+
+const registerLogoutPushCleanup = () => {
+    const config = getPushConfig();
+
+    if (!config?.authenticated) {
+        return;
+    }
+
+    document.querySelectorAll('form[action$="/logout"]').forEach((form) => {
+        form.addEventListener('submit', () => {
+            unlinkPushSubscription(true);
+        });
+    });
 };
 
 if ('serviceWorker' in navigator) {
@@ -244,4 +416,6 @@ if ('serviceWorker' in navigator) {
 
 window.addEventListener('DOMContentLoaded', () => {
     registerPwaPromptUi();
+    registerPushPromptUi();
+    registerLogoutPushCleanup();
 });

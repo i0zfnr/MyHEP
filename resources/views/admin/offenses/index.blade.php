@@ -247,9 +247,13 @@
                             <td>{{ $offense->offense_time }}</td>
                             <td>{{ $offense->place }}</td>
                             <td>
-                                @if(!empty($offense->evidence_photo_path))
-                                    <a class="btn" href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank" style="padding:6px 10px; font-size:12px;">{{ __('Lihat') }}</a>
-                                @else
+                                @if(($offense->evidence_count ?? 0) > 0)
+                                    <a class="btn" href="{{ asset('storage/' . $offense->evidence_photos[0]->photo_path) }}" target="_blank" style="padding:6px 10px; font-size:12px;">{{ __('Lihat') }} ({{ $offense->evidence_count }})</a>
+                                @endif
+                                @if(!empty($offense->payment_receipt?->receipt_path))
+                                    <a class="btn" href="{{ asset('storage/' . $offense->payment_receipt->receipt_path) }}" target="_blank" style="padding:6px 10px; font-size:12px;">{{ __('View Receipt') }}</a>
+                                @endif
+                                @if(($offense->evidence_count ?? 0) === 0 && empty($offense->payment_receipt?->receipt_path))
                                     <span style="color:#7a6555;">-</span>
                                 @endif
                             </td>

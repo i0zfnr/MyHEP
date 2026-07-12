@@ -63,6 +63,57 @@ if (! function_exists('myhepHomeStatCounts')) {
     }
 }
 
+if (! function_exists('myhepAttachOffenseEvidence')) {
+    function myhepAttachOffenseEvidence(iterable $offenses): void
+    {
+        $items = [];
+        foreach ($offenses as $offense) {
+            if (is_object($offense) && !empty($offense->id)) {
+                $items[] = $offense;
+            }
+        }
+
+        if ($items === []) {
+            return;
+        }
+
+        $offenseIds = array_values(array_unique(array_map(fn ($offense) => (int) $offense->id, $items)));
+        $extrasByOffense = collect();
+
+        if (Schema::hasTable('offense_evidence_photos')) {
+            $extrasByOffense = DB::table('offense_evidence_photos')
+                ->whereIn('offense_id', $offenseIds)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get()
+                ->groupBy('offense_id');
+        }
+
+        foreach ($items as $offense) {
+            $evidence = collect();
+
+            if (!empty($offense->evidence_photo_path)) {
+                $evidence->push((object) [
+                    'id' => null,
+                    'photo_path' => $offense->evidence_photo_path,
+                    'is_primary' => true,
+                ]);
+            }
+
+            foreach ($extrasByOffense->get((int) $offense->id, collect()) as $extra) {
+                $evidence->push((object) [
+                    'id' => (int) $extra->id,
+                    'photo_path' => $extra->photo_path,
+                    'is_primary' => false,
+                ]);
+            }
+
+            $offense->evidence_photos = $evidence->values();
+            $offense->evidence_count = $evidence->count();
+        }
+    }
+}
+
 Route::get('/', function () {
     $counts = myhepHomeStatCounts();
 
@@ -114,6 +165,52 @@ Route::get('/settings', [SettingController::class, 'show'])
 Route::post('/settings', [SettingController::class, 'update'])
     ->middleware('auth.session.any')
     ->name('settings.update');
+Route::post('/push/subscribe', function (Request $request) {
+    $validated = $request->validate([
+        'endpoint' => ['required', 'string', 'max:2048'],
+        'keys.p256dh' => ['required', 'string', 'max:255'],
+        'keys.auth' => ['required', 'string', 'max:255'],
+        'contentEncoding' => ['nullable', 'string', 'max:32'],
+    ]);
+
+    $authUser = session('auth_user');
+    $endpointHash = hash('sha256', $validated['endpoint']);
+    $existingCreatedAt = DB::table('push_subscriptions')
+        ->where('endpoint_hash', $endpointHash)
+        ->value('created_at');
+
+    DB::table('push_subscriptions')->updateOrInsert(
+        ['endpoint_hash' => $endpointHash],
+        [
+            'user_type' => $authUser['role'],
+            'user_id' => (int) $authUser['id'],
+            'endpoint' => $validated['endpoint'],
+            'public_key' => $validated['keys']['p256dh'],
+            'auth_token' => $validated['keys']['auth'],
+            'content_encoding' => $validated['contentEncoding'] ?? 'aes128gcm',
+            'locale' => app()->getLocale(),
+            'user_agent' => Str::limit((string) $request->userAgent(), 255, ''),
+            'last_seen_at' => now(),
+            'updated_at' => now(),
+            'created_at' => $existingCreatedAt ?: now(),
+        ]
+    );
+
+    return response()->json(['ok' => true]);
+})->middleware('auth.session.any')->name('push.subscribe');
+Route::post('/push/unsubscribe', function (Request $request) {
+    $validated = $request->validate([
+        'endpoint' => ['required', 'string', 'max:2048'],
+    ]);
+
+    DB::table('push_subscriptions')
+        ->where('endpoint_hash', hash('sha256', $validated['endpoint']))
+        ->where('user_type', session('auth_user.role'))
+        ->where('user_id', (int) session('auth_user.id'))
+        ->delete();
+
+    return response()->json(['ok' => true]);
+})->middleware('auth.session.any')->name('push.unsubscribe');
 
 Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
     ->middleware('auth.session:student')
@@ -747,7 +844,7 @@ Route::post('/admin/scholarship-announcements', function (Request $request) {
         'link_label' => ['nullable', 'string', 'max:100'],
     ]);
 
-    DB::table('scholarship_announcements')->insert([
+    $announcementId = DB::table('scholarship_announcements')->insertGetId([
         'admin_id' => session('auth_user.id'),
         'title' => $validated['title'],
         'body' => $validated['body'],
@@ -756,6 +853,13 @@ Route::post('/admin/scholarship-announcements', function (Request $request) {
         'link_label' => $validated['link_label'] ?? null,
         'created_at' => now(),
         'updated_at' => now(),
+    ]);
+
+    myhepSendPushToAllStudents([
+        'title' => 'New scholarship announcement',
+        'body' => Str::limit($validated['title'], 90),
+        'url' => route('student.scholarships.announcements'),
+        'tag' => 'scholarship-announcement-' . $announcementId,
     ]);
 
     return redirect()->route('admin.scholarship-announcements.index')
@@ -896,12 +1000,19 @@ Route::post('/admin/discipline-announcements', function (Request $request) {
         'body' => ['required', 'string'],
     ]);
 
-    DB::table('discipline_announcements')->insert([
+    $announcementId = DB::table('discipline_announcements')->insertGetId([
         'admin_id' => session('auth_user.id'),
         'title' => $validated['title'],
         'body' => $validated['body'],
         'created_at' => now(),
         'updated_at' => now(),
+    ]);
+
+    myhepSendPushToAllStudents([
+        'title' => 'New discipline announcement',
+        'body' => Str::limit($validated['title'], 90),
+        'url' => route('student.discipline-announcements.index'),
+        'tag' => 'discipline-announcement-' . $announcementId,
     ]);
 
     return redirect()->route('admin.discipline-announcements.index')
@@ -1064,8 +1175,11 @@ Route::post('/admin/rules', function (Request $request) {
         'description' => ['required', 'string'],
     ]);
 
+    $selectedCategory = $categories->firstWhere('id', (int) $validated['category_id']);
+
     DB::table('rules')->insert([
         'title' => $validated['title'],
+        'category' => $selectedCategory?->name ?? 'General',
         'category_id' => $validated['category_id'],
         'description' => $validated['description'],
         'updated_by' => session('auth_user.id'),
@@ -1103,10 +1217,13 @@ Route::put('/admin/rules/{id}', function (Request $request, int $id) {
         'description' => ['required', 'string'],
     ]);
 
+    $selectedCategory = $categories->firstWhere('id', (int) $validated['category_id']);
+
     DB::table('rules')
         ->where('id', $id)
         ->update([
             'title' => $validated['title'],
+            'category' => $selectedCategory?->name ?? 'General',
             'category_id' => $validated['category_id'],
             'description' => $validated['description'],
             'updated_by' => session('auth_user.id'),
@@ -1176,6 +1293,25 @@ Route::get('/admin/offenses', function (Request $request) {
         ->orderByDesc('offenses.offense_time')
         ->paginate(15)
         ->withQueryString();
+
+    myhepAttachOffenseEvidence($offenses->items());
+    $offenseIds = collect($offenses->items())->pluck('id')->map(fn ($id) => (int) $id)->all();
+    $latestReceiptsByOffense = collect();
+
+    if ($offenseIds !== []) {
+        $latestReceiptsByOffense = DB::table('fine_payment_applications')
+            ->whereIn('offense_id', $offenseIds)
+            ->whereNotNull('receipt_path')
+            ->select('offense_id', 'receipt_path', 'created_at', 'status')
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy('offense_id')
+            ->map(fn ($rows) => $rows->first());
+
+        foreach ($offenses->items() as $offense) {
+            $offense->payment_receipt = $latestReceiptsByOffense->get((int) $offense->id);
+        }
+    }
 
     return view('admin.offenses.index', compact('offenses', 'filters'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.index');
@@ -1275,6 +1411,8 @@ Route::get('/admin/offenses/{id}/print', function (int $id) {
             ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
+    myhepAttachOffenseEvidence([$offense]);
+
     $items = DB::table('offense_items')
         ->join('offense_types', 'offense_types.id', '=', 'offense_items.offense_type_id')
         ->where('offense_items.offense_id', $id)
@@ -1286,7 +1424,10 @@ Route::get('/admin/offenses/{id}/print', function (int $id) {
         ->orderBy('offense_types.rule_reference')
         ->get();
 
-    return view('admin.offenses.print', compact('offense', 'items'));
+    $backRoute = route('admin.offenses.index');
+    $pdfRoute = route('admin.offenses.pdf', $offense->id);
+
+    return view('admin.offenses.print', compact('offense', 'items', 'backRoute', 'pdfRoute'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.print');
 
 Route::get('/admin/offenses/{id}/pdf', function (int $id) {
@@ -1315,6 +1456,8 @@ Route::get('/admin/offenses/{id}/pdf', function (int $id) {
         return redirect()->route('admin.offenses.index')
             ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
+
+    myhepAttachOffenseEvidence([$offense]);
 
     $items = DB::table('offense_items')
         ->join('offense_types', 'offense_types.id', '=', 'offense_items.offense_type_id')
@@ -1368,33 +1511,50 @@ Route::post('/admin/offenses', function (Request $request) {
         'offense_time' => ['required', 'date_format:H:i'],
         'place' => ['required', 'string', 'max:150'],
         'fine_amount' => ['required', 'numeric', 'min:0'],
-        'evidence_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        'evidence_photos' => ['nullable', 'array', 'max:3'],
+        'evidence_photos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         'offense_type_ids' => ['required', 'array', 'min:1'],
         'offense_type_ids.*' => ['integer', 'exists:offense_types,id'],
         'notes' => ['nullable', 'array'],
     ]);
 
     $adminId = session('auth_user.id');
-    $photoPath = null;
+    $photoPaths = [];
 
-    if ($request->hasFile('evidence_photo')) {
-        $photoPath = $request->file('evidence_photo')->store('offenses/evidence', 'public');
+    foreach ((array) $request->file('evidence_photos', []) as $photo) {
+        if ($photo) {
+            $photoPaths[] = $photo->store('offenses/evidence', 'public');
+        }
     }
 
+    $offenseId = null;
+
     try {
-        DB::transaction(function () use ($validated, $request, $adminId, $photoPath) {
+        DB::transaction(function () use ($validated, $request, $adminId, $photoPaths, &$offenseId) {
             $offenseId = DB::table('offenses')->insertGetId([
                 'student_id' => $validated['student_id'],
                 'admin_id' => $adminId,
                 'offense_date' => $validated['offense_date'],
                 'offense_time' => $validated['offense_time'],
                 'place' => $validated['place'],
-                'evidence_photo_path' => $photoPath,
+                'evidence_photo_path' => $photoPaths[0] ?? null,
                 'fine_amount' => $validated['fine_amount'],
                 'status' => 'unpaid',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            if (Schema::hasTable('offense_evidence_photos')) {
+                foreach (array_values(array_slice($photoPaths, 1)) as $index => $photoPath) {
+                    DB::table('offense_evidence_photos')->insert([
+                        'offense_id' => $offenseId,
+                        'photo_path' => $photoPath,
+                        'sort_order' => $index + 2,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
 
             $typeIds = array_values(array_unique($validated['offense_type_ids']));
             foreach ($typeIds as $typeId) {
@@ -1408,12 +1568,20 @@ Route::post('/admin/offenses', function (Request $request) {
             }
         });
     } catch (\Throwable $e) {
-        if (!empty($photoPath)) {
-            Storage::disk('public')->delete($photoPath);
+        if ($photoPaths !== []) {
+            Storage::disk('public')->delete($photoPaths);
         }
 
         throw $e;
     }
+
+    myhepSendPushNotification('student', (int) $validated['student_id'], [
+        'title' => 'New offense recorded',
+        'body' => 'A new discipline record has been added to your account. Please review it in My Offenses.',
+        'url' => route('student.offenses.index'),
+        'tag' => 'student-offense-' . $offenseId,
+        'requireInteraction' => true,
+    ]);
 
     if ($request->expectsJson()) {
         return response()->json([
@@ -1455,6 +1623,8 @@ Route::get('/admin/offenses/{id}/edit', function (int $id) {
         ->mapWithKeys(fn ($item) => [(string) $item->offense_type_id => $item->note])
         ->all();
 
+    myhepAttachOffenseEvidence([$offense]);
+
     return view('admin.offenses.edit', compact(
         'offense',
         'students',
@@ -1478,27 +1648,61 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
         'place' => ['required', 'string', 'max:150'],
         'fine_amount' => ['required', 'numeric', 'min:0'],
         'status' => ['required', Rule::in(['unpaid', 'applied', 'paid'])],
-        'evidence_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        'evidence_photos' => ['nullable', 'array', 'max:3'],
+        'evidence_photos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         'remove_evidence_photo' => ['nullable', 'boolean'],
+        'remove_evidence_extra_ids' => ['nullable', 'array'],
+        'remove_evidence_extra_ids.*' => ['integer'],
         'offense_type_ids' => ['required', 'array', 'min:1'],
         'offense_type_ids.*' => ['integer', 'exists:offense_types,id'],
         'notes' => ['nullable', 'array'],
     ]);
 
-    $oldPhotoPath = $offense->evidence_photo_path;
-    $newPhotoPath = $oldPhotoPath;
+    $existingExtras = Schema::hasTable('offense_evidence_photos')
+        ? DB::table('offense_evidence_photos')
+            ->where('offense_id', $id)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+        : collect();
+
+    $oldPhotoPath = $offense->evidence_photo_path ?: null;
     $removeExistingPhoto = $request->boolean('remove_evidence_photo');
+    $removeExtraIds = collect($validated['remove_evidence_extra_ids'] ?? [])->map(fn ($value) => (int) $value)->all();
+    $retainedExtraPaths = $existingExtras
+        ->reject(fn ($extra) => in_array((int) $extra->id, $removeExtraIds, true))
+        ->pluck('photo_path')
+        ->values()
+        ->all();
+    $newUploadedPaths = [];
 
-    if ($removeExistingPhoto) {
-        $newPhotoPath = null;
+    foreach ((array) $request->file('evidence_photos', []) as $photo) {
+        if ($photo) {
+            $newUploadedPaths[] = $photo->store('offenses/evidence', 'public');
+        }
     }
 
-    if ($request->hasFile('evidence_photo')) {
-        $newPhotoPath = $request->file('evidence_photo')->store('offenses/evidence', 'public');
+    $finalPaths = [];
+    if (!$removeExistingPhoto && $oldPhotoPath) {
+        $finalPaths[] = $oldPhotoPath;
     }
+    $finalPaths = array_merge($finalPaths, $retainedExtraPaths, $newUploadedPaths);
+
+    if (count($finalPaths) > 3) {
+        if ($newUploadedPaths !== []) {
+            Storage::disk('public')->delete($newUploadedPaths);
+        }
+
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'evidence_photos' => __('You can upload up to 3 evidence images only.'),
+        ]);
+    }
+
+    $newPrimaryPath = $finalPaths[0] ?? null;
+    $newExtraPaths = array_values(array_slice($finalPaths, 1));
 
     try {
-        DB::transaction(function () use ($validated, $request, $id, $newPhotoPath) {
+        DB::transaction(function () use ($validated, $request, $id, $newPrimaryPath, $newExtraPaths) {
             DB::table('offenses')
                 ->where('id', $id)
                 ->update([
@@ -1506,11 +1710,25 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
                     'offense_date' => $validated['offense_date'],
                     'offense_time' => $validated['offense_time'],
                     'place' => $validated['place'],
-                    'evidence_photo_path' => $newPhotoPath,
+                    'evidence_photo_path' => $newPrimaryPath,
                     'fine_amount' => $validated['fine_amount'],
                     'status' => $validated['status'],
                     'updated_at' => now(),
                 ]);
+
+            if (Schema::hasTable('offense_evidence_photos')) {
+                DB::table('offense_evidence_photos')->where('offense_id', $id)->delete();
+
+                foreach ($newExtraPaths as $index => $photoPath) {
+                    DB::table('offense_evidence_photos')->insert([
+                        'offense_id' => $id,
+                        'photo_path' => $photoPath,
+                        'sort_order' => $index + 2,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
 
             DB::table('offense_items')->where('offense_id', $id)->delete();
 
@@ -1526,15 +1744,24 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
             }
         });
     } catch (\Throwable $e) {
-        if ($request->hasFile('evidence_photo') && !empty($newPhotoPath) && $newPhotoPath !== $oldPhotoPath) {
-            Storage::disk('public')->delete($newPhotoPath);
+        if ($newUploadedPaths !== []) {
+            Storage::disk('public')->delete($newUploadedPaths);
         }
 
         throw $e;
     }
 
-    if (!empty($oldPhotoPath) && $oldPhotoPath !== $newPhotoPath) {
-        Storage::disk('public')->delete($oldPhotoPath);
+    $pathsToDelete = [];
+    if ($oldPhotoPath && !in_array($oldPhotoPath, $finalPaths, true)) {
+        $pathsToDelete[] = $oldPhotoPath;
+    }
+    foreach ($existingExtras as $extra) {
+        if (!in_array($extra->photo_path, $finalPaths, true)) {
+            $pathsToDelete[] = $extra->photo_path;
+        }
+    }
+    if ($pathsToDelete !== []) {
+        Storage::disk('public')->delete(array_values(array_unique($pathsToDelete)));
     }
 
     if ($request->expectsJson()) {
@@ -1550,6 +1777,16 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.update');
 
 Route::post('/admin/offenses/{id}/mark-paid', function (int $id) {
+    $offense = DB::table('offenses')
+        ->select('id', 'student_id')
+        ->where('id', $id)
+        ->first();
+
+    if (!$offense) {
+        return redirect()->route('admin.offenses.index')
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+    }
+
     $updated = DB::table('offenses')
         ->where('id', $id)
         ->update([
@@ -1558,10 +1795,16 @@ Route::post('/admin/offenses/{id}/mark-paid', function (int $id) {
         ]);
 
     if (!$updated) {
-        return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+        return redirect()->route('admin.offenses.index');
     }
     auditLog('offenses.mark_paid', 'offenses', $id, 'Tukar status kesalahan ke paid');
+
+    myhepSendPushNotification('student', (int) $offense->student_id, [
+        'title' => 'Fine marked as paid',
+        'body' => 'Your offense payment status has been updated to paid.',
+        'url' => route('student.offenses.index'),
+        'tag' => 'student-offense-paid-' . $id,
+    ]);
 
     return redirect()->route('admin.offenses.index')
         ->with('success', __('Status kesalahan telah ditetapkan kepada paid.'));
@@ -1578,14 +1821,22 @@ Route::delete('/admin/offenses/{id}', function (int $id) {
             ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
+    $extraPaths = Schema::hasTable('offense_evidence_photos')
+        ? DB::table('offense_evidence_photos')->where('offense_id', $id)->pluck('photo_path')->all()
+        : [];
+
     $deleted = DB::table('offenses')->where('id', $id)->delete();
     if (!$deleted) {
         return redirect()->route('admin.offenses.index')
             ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
     }
 
-    if (!empty($offense->evidence_photo_path)) {
-        Storage::disk('public')->delete($offense->evidence_photo_path);
+    $pathsToDelete = array_values(array_filter(array_merge(
+        !empty($offense->evidence_photo_path) ? [$offense->evidence_photo_path] : [],
+        $extraPaths
+    )));
+    if ($pathsToDelete !== []) {
+        Storage::disk('public')->delete($pathsToDelete);
     }
     auditLog('offenses.delete', 'offenses', $id, 'Padam rekod kesalahan');
 
@@ -1602,6 +1853,8 @@ Route::get('/student/offenses', function () {
         ->orderByDesc('offense_date')
         ->orderByDesc('offense_time')
         ->paginate(10);
+
+    myhepAttachOffenseEvidence($offenses->items());
 
     $offenseIds = $offenses->pluck('id')->all();
     $itemsByOffense = collect();
@@ -1624,7 +1877,7 @@ Route::get('/student/offenses', function () {
         $fineAppsByOffense = DB::table('fine_payment_applications')
             ->whereIn('offense_id', $offenseIds)
             ->where('student_id', $studentId)
-            ->select('offense_id', 'status', 'meeting_date', 'created_at')
+            ->select('offense_id', 'status', 'meeting_date', 'created_at', 'receipt_path')
             ->orderByDesc('created_at')
             ->get()
             ->groupBy('offense_id')
@@ -1633,6 +1886,55 @@ Route::get('/student/offenses', function () {
 
     return view('student.offenses.index', compact('offenses', 'itemsByOffense', 'fineAppsByOffense'));
 })->middleware('auth.session:student')->name('student.offenses.index');
+
+Route::get('/student/offenses/{id}/print', function (int $id) {
+    $studentId = (int) session('auth_user.id');
+
+    $offense = DB::table('offenses')
+        ->join('students', 'students.id', '=', 'offenses.student_id')
+        ->leftJoin('admins', 'admins.id', '=', 'offenses.admin_id')
+        ->where('offenses.id', $id)
+        ->where('offenses.student_id', $studentId)
+        ->select(
+            'offenses.id',
+            'offenses.offense_date',
+            'offenses.offense_time',
+            'offenses.place',
+            'offenses.evidence_photo_path',
+            'offenses.fine_amount',
+            'offenses.status',
+            'offenses.created_at',
+            'students.full_name as student_name',
+            'students.matric_no',
+            'students.ic_no',
+            'students.program',
+            'admins.full_name as issued_by'
+        )
+        ->first();
+
+    if (!$offense) {
+        return redirect()->route('student.offenses.index')
+            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+    }
+
+    myhepAttachOffenseEvidence([$offense]);
+
+    $items = DB::table('offense_items')
+        ->join('offense_types', 'offense_types.id', '=', 'offense_items.offense_type_id')
+        ->where('offense_items.offense_id', $id)
+        ->select(
+            'offense_types.rule_reference',
+            'offense_types.description',
+            'offense_items.note'
+        )
+        ->orderBy('offense_types.rule_reference')
+        ->get();
+
+    $backRoute = route('student.offenses.index');
+    $pdfRoute = null;
+
+    return view('admin.offenses.print', compact('offense', 'items', 'backRoute', 'pdfRoute'));
+})->middleware('auth.session:student')->name('student.offenses.print');
 
 Route::get('/student/scholarships', function () {
     $studentId = session('auth_user.id');
@@ -1826,6 +2128,7 @@ Route::post('/student/fine-applications', function (Request $request) {
     $validated = $request->validate([
         'offense_id' => ['required', 'integer', 'exists:offenses,id'],
         'student_note' => ['nullable', 'string'],
+        'payment_receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
     ]);
 
     $offense = DB::table('offenses')
@@ -1849,153 +2152,65 @@ Route::post('/student/fine-applications', function (Request $request) {
             ->withErrors(['offense_id' => 'Permohonan pembayaran sedang diproses.']);
     }
 
-    DB::transaction(function () use ($validated, $studentId) {
-        DB::table('fine_payment_applications')->insert([
-            'offense_id' => $validated['offense_id'],
-            'student_id' => $studentId,
-            'student_note' => $validated['student_note'] ?? null,
-            'status' => 'pending',
-            'meeting_date' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+    $receiptPath = $request->file('payment_receipt')->store('fine_payment_receipts', 'public');
 
-        DB::table('offenses')
-            ->where('id', $validated['offense_id'])
-            ->update([
-                'status' => 'applied',
+    try {
+        DB::transaction(function () use ($validated, $studentId, $receiptPath) {
+            DB::table('fine_payment_applications')->insert([
+                'offense_id' => $validated['offense_id'],
+                'student_id' => $studentId,
+                'student_note' => $validated['student_note'] ?? null,
+                'receipt_path' => $receiptPath,
+                'status' => 'pending',
+                'meeting_date' => null,
+                'created_at' => now(),
                 'updated_at' => now(),
             ]);
-    });
+
+            DB::table('offenses')
+                ->where('id', $validated['offense_id'])
+                ->update([
+                    'status' => 'applied',
+                    'updated_at' => now(),
+                ]);
+        });
+    } catch (\Throwable $e) {
+        Storage::disk('public')->delete($receiptPath);
+        throw $e;
+    }
+
+    myhepSendPushToAdminsByScope('discipline', [
+        'title' => 'New payment receipt uploaded',
+        'body' => 'A student submitted a fine payment receipt for admin review.',
+        'url' => route('admin.offenses.index', ['status' => 'applied']),
+        'tag' => 'admin-fine-receipt-' . $validated['offense_id'],
+        'requireInteraction' => true,
+    ]);
 
     return redirect()->route('student.offenses.index')
         ->with('success', __('Permohonan pembayaran berjaya dihantar.'));
 })->middleware('auth.session:student')->name('student.fine-applications.store');
 
 Route::get('/admin/fine-applications', function (Request $request) {
-    $filters = $request->validate([
-        'q' => ['nullable', 'string', 'max:150'],
-        'status' => ['nullable', Rule::in(['pending', 'approved', 'rejected'])],
-        'date_from' => ['nullable', 'date'],
-        'date_to' => ['nullable', 'date'],
-    ]);
+    $query = array_filter([
+        'status' => 'applied',
+        'q' => $request->query('q'),
+        'date_from' => $request->query('date_from'),
+        'date_to' => $request->query('date_to'),
+    ], static fn ($value) => $value !== null && $value !== '');
 
-    $query = DB::table('fine_payment_applications')
-        ->join('students', 'students.id', '=', 'fine_payment_applications.student_id')
-        ->join('offenses', 'offenses.id', '=', 'fine_payment_applications.offense_id')
-        ->select(
-            'fine_payment_applications.id',
-            'fine_payment_applications.status',
-            'fine_payment_applications.student_note',
-            'fine_payment_applications.meeting_date',
-            'fine_payment_applications.created_at',
-            'students.full_name as student_name',
-            'students.matric_no',
-            'offenses.offense_date',
-            'offenses.place',
-            'offenses.fine_amount'
-        );
-
-    if (!empty($filters['q'])) {
-        $q = trim($filters['q']);
-        $query->where(function ($sub) use ($q) {
-            $sub->where('students.full_name', 'like', "%{$q}%")
-                ->orWhere('students.matric_no', 'like', "%{$q}%")
-                ->orWhere('offenses.place', 'like', "%{$q}%");
-        });
-    }
-
-    if (!empty($filters['status'])) {
-        $query->where('fine_payment_applications.status', $filters['status']);
-    }
-
-    if (!empty($filters['date_from'])) {
-        $query->whereDate('fine_payment_applications.created_at', '>=', $filters['date_from']);
-    }
-
-    if (!empty($filters['date_to'])) {
-        $query->whereDate('fine_payment_applications.created_at', '<=', $filters['date_to']);
-    }
-
-    $applications = $query
-        ->orderByRaw("CASE fine_payment_applications.status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END")
-        ->orderByDesc('fine_payment_applications.created_at')
-        ->paginate(15)
-        ->withQueryString();
-
-    return view('admin.fine_applications.index', compact('applications', 'filters'));
+    return redirect()->route('admin.offenses.index', $query);
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.fine-applications.index');
 
 Route::get('/admin/fine-applications/export', function (Request $request) {
-    $filters = $request->validate([
-        'q' => ['nullable', 'string', 'max:150'],
-        'status' => ['nullable', Rule::in(['pending', 'approved', 'rejected'])],
-        'date_from' => ['nullable', 'date'],
-        'date_to' => ['nullable', 'date'],
-    ]);
+    $query = array_filter([
+        'status' => 'applied',
+        'q' => $request->query('q'),
+        'date_from' => $request->query('date_from'),
+        'date_to' => $request->query('date_to'),
+    ], static fn ($value) => $value !== null && $value !== '');
 
-    $query = DB::table('fine_payment_applications')
-        ->join('students', 'students.id', '=', 'fine_payment_applications.student_id')
-        ->join('offenses', 'offenses.id', '=', 'fine_payment_applications.offense_id')
-        ->select(
-            'fine_payment_applications.id',
-            'students.full_name as student_name',
-            'students.matric_no',
-            'offenses.offense_date',
-            'offenses.place',
-            'offenses.fine_amount',
-            'fine_payment_applications.student_note',
-            'fine_payment_applications.status',
-            'fine_payment_applications.meeting_date',
-            'fine_payment_applications.created_at'
-        );
-
-    if (!empty($filters['q'])) {
-        $q = trim($filters['q']);
-        $query->where(function ($sub) use ($q) {
-            $sub->where('students.full_name', 'like', "%{$q}%")
-                ->orWhere('students.matric_no', 'like', "%{$q}%")
-                ->orWhere('offenses.place', 'like', "%{$q}%");
-        });
-    }
-
-    if (!empty($filters['status'])) {
-        $query->where('fine_payment_applications.status', $filters['status']);
-    }
-
-    if (!empty($filters['date_from'])) {
-        $query->whereDate('fine_payment_applications.created_at', '>=', $filters['date_from']);
-    }
-
-    if (!empty($filters['date_to'])) {
-        $query->whereDate('fine_payment_applications.created_at', '<=', $filters['date_to']);
-    }
-
-    $rows = $query
-        ->orderByRaw("CASE fine_payment_applications.status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END")
-        ->orderByDesc('fine_payment_applications.created_at')
-        ->get()
-        ->map(function ($app) {
-            return [
-                $app->id,
-                $app->student_name,
-                $app->matric_no,
-                $app->matric_no,
-                $app->offense_date,
-                $app->place,
-                number_format((float) $app->fine_amount, 2, '.', ''),
-                $app->student_note ?? '',
-                $app->status,
-                $app->meeting_date ?? '',
-                $app->created_at,
-            ];
-        });
-
-    return downloadCsv(
-        'fine_payment_applications_' . now()->format('Ymd_His') . '.csv',
-        ['ID', 'Pelajar', 'No Matrik', 'Tarikh Kesalahan', 'Tempat', 'Denda (RM)', 'Catatan Pelajar', 'Status', 'Meeting Date', 'Tarikh Mohon'],
-        $rows
-    );
+    return redirect()->route('admin.offenses.index', $query);
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.fine-applications.export');
 
 Route::get('/admin/vehicle-stickers', function (Request $request) {
@@ -2120,19 +2335,57 @@ Route::post('/admin/vehicle-stickers/{id}/decision', function (Request $request,
         ]);
     auditLog('vehicle_stickers.decision', 'vehicle_sticker_applications', $id, 'Status: ' . $validated['status']);
 
+    myhepSendPushNotification('student', (int) $application->student_id, [
+        'title' => $validated['status'] === 'approved' ? 'Vehicle sticker approved' : 'Vehicle sticker update',
+        'body' => $validated['status'] === 'approved'
+            ? 'Your vehicle sticker application has been approved.'
+            : 'Your vehicle sticker application has been rejected. Please review the latest status.',
+        'url' => route('student.vehicle-stickers.index'),
+        'tag' => 'vehicle-sticker-' . $id,
+        'requireInteraction' => $validated['status'] !== 'approved',
+    ]);
+
     return redirect()->route('admin.vehicle-stickers.index')
         ->with('success', __('Status permohonan sticker berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.vehicle-stickers.decision');
 
+Route::delete('/admin/vehicle-stickers/{id}', function (int $id) {
+    $application = DB::table('vehicle_sticker_applications')->where('id', $id)->first();
+
+    if (!$application) {
+        return redirect()->route('admin.vehicle-stickers.index')
+            ->withErrors(['status' => 'Permohonan sticker tidak dijumpai.']);
+    }
+
+    DB::transaction(function () use ($application) {
+        DB::table('vehicle_sticker_applications')->where('id', $application->id)->delete();
+    });
+
+    foreach ([
+        $application->license_card_path,
+        $application->parent_permission_path,
+        $application->vehicle_photo_path,
+    ] as $path) {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    auditLog('vehicle_stickers.delete', 'vehicle_sticker_applications', $id, 'Deleted vehicle sticker application');
+
+    return redirect()->route('admin.vehicle-stickers.index')
+        ->with('success', __('Permohonan sticker berjaya dipadam.'));
+})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.vehicle-stickers.destroy');
+
 Route::post('/admin/fine-applications/{id}/decision', function (Request $request, int $id) {
     $validated = $request->validate([
         'status' => ['required', Rule::in(['approved', 'rejected'])],
-        'meeting_date' => ['nullable', 'date', 'required_if:status,approved'],
+        'meeting_date' => ['nullable', 'date'],
     ]);
 
     $application = DB::table('fine_payment_applications')->where('id', $id)->first();
     if (!$application) {
-        return redirect()->route('admin.fine-applications.index')
+        return redirect()->route('admin.offenses.index', ['status' => 'applied'])
             ->withErrors(['status' => 'Permohonan tidak dijumpai.']);
     }
 
@@ -2148,13 +2401,23 @@ Route::post('/admin/fine-applications/{id}/decision', function (Request $request
         DB::table('offenses')
             ->where('id', $application->offense_id)
             ->update([
-                'status' => $validated['status'] === 'approved' ? 'applied' : 'unpaid',
+                'status' => $validated['status'] === 'approved' ? 'paid' : 'unpaid',
                 'updated_at' => now(),
             ]);
     });
     auditLog('fine_applications.decision', 'fine_payment_applications', $id, 'Status: ' . $validated['status']);
 
-    return redirect()->route('admin.fine-applications.index')
+    myhepSendPushNotification('student', (int) $application->student_id, [
+        'title' => $validated['status'] === 'approved' ? 'Payment verified' : 'Payment receipt update',
+        'body' => $validated['status'] === 'approved'
+            ? 'Your fine payment receipt has been verified. The offense is now marked as paid.'
+            : 'Your fine payment receipt was rejected. Please review your offense record and upload a new receipt if needed.',
+        'url' => route('student.offenses.index'),
+        'tag' => 'fine-application-' . $id,
+        'requireInteraction' => $validated['status'] !== 'approved',
+    ]);
+
+    return redirect()->route('admin.offenses.index', ['status' => 'applied'])
         ->with('success', __('Status permohonan berjaya dikemaskini.'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.fine-applications.decision');
  

@@ -88,6 +88,14 @@ class BugReportController extends Controller
 
         auditLog('bug_reports.update', 'bug_reports', $id, 'Bug report status updated to ' . $status);
 
+        myhepSendPushToAccountsByEmail($bugReport->reporter_email, [
+            'title' => 'Bug report updated',
+            'body' => 'Your submitted bug report "' . \Illuminate\Support\Str::limit($bugReport->subject, 48) . '" is now ' . str_replace('_', ' ', $status) . '.',
+            'url' => route('bug-reports.create'),
+            'tag' => 'bug-report-' . $id,
+            'requireInteraction' => in_array($status, ['resolved', 'closed'], true),
+        ]);
+
         return redirect()->route('admin.bug-reports.index')
             ->with('success', __('bug_reports.admin_update_success'));
     }

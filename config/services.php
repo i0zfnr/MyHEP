@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'ipayment' => [
+        'url' => env('IPAYMENT_URL'),
+    ],
+
+    'webpush' => [
+        'subject' => env('WEBPUSH_VAPID_SUBJECT'),
+        'public_key' => env('WEBPUSH_VAPID_PUBLIC_KEY'),
+        'private_key' => env('WEBPUSH_VAPID_PRIVATE_KEY'),
+        'icon' => env('WEBPUSH_ICON', '/images/pwa/icon-192.png'),
+        'badge' => env('WEBPUSH_BADGE', '/images/pwa/icon-192.png'),
+        'openssl_conf' => env('WEBPUSH_OPENSSL_CONF'),
+        'ca_bundle' => env('WEBPUSH_CA_BUNDLE'),
+    ],
+
 ];

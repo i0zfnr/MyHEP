@@ -21,6 +21,7 @@
     .msg-ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
     .msg-err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .evidence-img { width:100%; max-width:260px; aspect-ratio:4 / 3; object-fit:cover; border:1px solid #ede4d9; border-radius:10px; display:block; }
+    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; }
     .offense-card { margin-bottom: 0; }
     .offense-card .card-head {
         align-items: flex-start;
@@ -130,6 +131,28 @@
         color: var(--stu-muted);
         font-size: .82rem;
         font-weight: 700;
+    }
+    .payment-actions {
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        margin-top:12px;
+    }
+    .receipt-hint {
+        margin-top:8px;
+        color:var(--stu-muted);
+        font-size:.8rem;
+        line-height:1.5;
+    }
+    .receipt-link {
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        margin-top:10px;
+        font-size:.82rem;
+        font-weight:700;
+        color:#7b5b43;
+        text-decoration:none;
     }
     /* Student UX Identity v2 */
     :root {
@@ -365,7 +388,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <div class="offense-content {{ !empty($offense->evidence_photo_path) ? 'has-evidence' : '' }}">
+                <div class="offense-content {{ ($offense->evidence_count ?? 0) > 0 ? 'has-evidence' : '' }}">
                     <div>
                         <div class="offense-section-title">{{ __('Violated Rules') }}</div>
                         <ul class="offense-rules">
@@ -378,30 +401,48 @@
                         </ul>
 
                         @php $app = $fineAppsByOffense[$offense->id] ?? null; @endphp
+                        <div class="payment-actions">
+                            <a class="btn" href="{{ route('student.offenses.print', $offense->id) }}" target="_blank" rel="noopener">{{ __('Cetak Saman') }}</a>
+                        </div>
                         @if($app)
                             <div class="payment-line">
                                 <strong>{{ __('Payment application') }}</strong>
                                 <span class="status-badge status-{{ strtolower($app->status) }}">{{ __($app->status) }}</span>
                                 @if($app->meeting_date)<span>| {{ __('Date') }}: {{ $app->meeting_date }}</span>@endif
                             </div>
+                            @if(!empty($app->receipt_path))
+                                <a class="receipt-link" href="{{ asset('storage/' . $app->receipt_path) }}" target="_blank">{{ __('View uploaded receipt') }}</a>
+                            @endif
                         @elseif($offense->status !== 'paid')
-                            <form method="POST" action="{{ route('student.fine-applications.store') }}" style="margin-top:12px;">
+                            <form method="POST" action="{{ route('student.fine-applications.store') }}" style="margin-top:12px;" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="offense_id" value="{{ $offense->id }}">
-                                <label for="note_{{ $offense->id }}" style="font-size:13px; font-weight:600; color:#7a6555;">{{ __('Catatan permohonan (optional)') }}</label>
-                                <textarea id="note_{{ $offense->id }}" name="student_note" rows="2" placeholder="{{ __('Contoh: Saya ingin membuat bayaran pada minggu ini.') }}"></textarea>
+                                <div class="payment-actions">
+                                    @if(config('services.ipayment.url'))
+                                        <a class="btn" href="{{ config('services.ipayment.url') }}" target="_blank" rel="noopener">{{ __('Make Payment') }}</a>
+                                    @endif
+                                </div>
+                                <label for="receipt_{{ $offense->id }}" style="font-size:13px; font-weight:600; color:#7a6555; margin-top:10px;">{{ __('Upload payment receipt') }}</label>
+                                <input id="receipt_{{ $offense->id }}" type="file" name="payment_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf" required>
+                                <div class="receipt-hint">{{ __('Pay first using iPayment, then upload the receipt here before applying for payment review.') }}</div>
                                 <button class="btn btn-primary" type="submit" style="margin-top:8px;">{{ __('Mohon Bayaran Denda') }}</button>
                             </form>
                         @endif
                     </div>
 
-                    @if(!empty($offense->evidence_photo_path))
+                    @if(($offense->evidence_count ?? 0) > 0)
                         <div class="evidence-panel">
                             <div class="evidence-title">
                                 <span>{{ __('Evidence Photo') }}</span>
-                                <a class="evidence-link" href="{{ asset('storage/' . $offense->evidence_photo_path) }}" target="_blank">{{ __('Open original') }}</a>
+                                <span>{{ $offense->evidence_count }} {{ __('image(s)') }}</span>
                             </div>
-                            <img src="{{ asset('storage/' . $offense->evidence_photo_path) }}" alt="{{ __('Bukti Gambar') }}" class="evidence-img">
+                            <div class="evidence-grid">
+                                @foreach($offense->evidence_photos as $photo)
+                                    <a class="evidence-link" href="{{ asset('storage/' . $photo->photo_path) }}" target="_blank">
+                                        <img src="{{ asset('storage/' . $photo->photo_path) }}" alt="{{ __('Bukti Gambar') }}" class="evidence-img">
+                                    </a>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -414,4 +455,3 @@
     <div style="margin-top:14px;">{{ $offenses->links() }}</div>
 </div>
 @endsection
-

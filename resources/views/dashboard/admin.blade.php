@@ -924,10 +924,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                     Senarai Kesalahan
                 </a>
-                <a href="{{ route('admin.fine-applications.index') }}" class="portal-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                    Permohonan Bayaran
-                </a>
             @endif
             @if($hasScholarshipAccess)
                 <a href="{{ route('admin.scholarships.index') }}" class="portal-link">
@@ -1154,16 +1150,16 @@
 
             <div class="data-card">
                 <div class="data-card-head">
-                    <strong>Permohonan Bayaran Terkini</strong>
-                    <a class="btn-ghost" href="{{ route('admin.fine-applications.index') }}">
-                        Semak
+                    <strong>Resit Bayaran Terkini</strong>
+                    <a class="btn-ghost" href="{{ route('admin.offenses.index', ['status' => 'applied']) }}">
+                        Buka Senarai Kesalahan
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
                 @if($recentFineApplications->isEmpty())
                     <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                        Tiada permohonan bayaran.
+                        Tiada resit bayaran terbaru.
                     </div>
                 @else
                     <div style="overflow-x:auto;">

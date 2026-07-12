@@ -18,6 +18,8 @@
     .move-note { margin:.25rem 0 0; color:var(--text-muted); }
     .move-meta { display:grid; grid-template-columns:1fr; gap:.65rem; margin-top:1rem; }
     @media (min-width: 640px) { .move-meta { grid-template-columns:repeat(3, minmax(0, 1fr)); } }
+    .move-student-grid { display:grid; grid-template-columns:1fr; gap:.65rem; }
+    @media (min-width: 640px) { .move-student-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
     .move-meta-item { border:1px solid var(--border); border-radius:10px; padding:.8rem; background:rgba(255,255,255,.55); }
     .move-meta-item span { display:block; font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin-bottom:.25rem; }
     .move-meta-item b { font-size:.85rem; color:var(--text); }
@@ -139,6 +141,10 @@
         font-weight:800;
     }
     .move-live-chip svg { width:12px; height:12px; }
+    .move-status-badge.live-out { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+    .move-field { display:grid; gap:.38rem; margin-top:1rem; }
+    .move-field label { font-size:.78rem; font-weight:800; color:var(--text); }
+    .move-field small { color:var(--text-muted); font-size:.75rem; }
     body[data-theme="dark"] .move-option,
     body[data-theme="dark"] .move-meta-item,
     body[data-theme="dark"] .move-scan-status { background:var(--surface); }
@@ -188,6 +194,8 @@
 @php
     $insideCampus = !$currentMovement;
     $checkpointValid = $checkpoint !== null;
+    $residenceStatus = $student->residence_status ?? 'inside_campus';
+    $isLiveOut = $residenceStatus === 'live_out';
 @endphp
 
 <div class="ui-shell">
@@ -207,6 +215,35 @@
     </div>
 
     <div class="move-grid">
+        <section class="ui-card">
+            <div class="ui-card-head">
+                <strong>{{ __('Detected Student Details') }}</strong>
+                <span class="move-status-badge {{ $isLiveOut ? 'live-out' : 'ok' }}">
+                    {{ $isLiveOut ? __('Live Out Student') : __('Inside Campus Resident') }}
+                </span>
+            </div>
+            <div class="ui-card-body">
+                <div class="move-student-grid">
+                    <div class="move-meta-item">
+                        <span>{{ __('Student Name') }}</span>
+                        <b>{{ $student->full_name ?? '-' }}</b>
+                    </div>
+                    <div class="move-meta-item">
+                        <span>{{ __('Matric No.') }}</span>
+                        <b>{{ $student->matric_no ?? '-' }}</b>
+                    </div>
+                    <div class="move-meta-item">
+                        <span>{{ __('Programme') }}</span>
+                        <b>{{ $student->program ?? '-' }}</b>
+                    </div>
+                    <div class="move-meta-item">
+                        <span>{{ __('Room Number') }}</span>
+                        <b>{{ $isLiveOut ? __('Live Out / Outside Campus') : ($student->room_number ?: '-') }}</b>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="ui-card">
             <div class="ui-card-head">
                 <strong>{{ __('Current Status') }}</strong>
@@ -301,7 +338,7 @@
                                         : $type->direction === 'return';
                                 @endphp
                                 <label class="move-option" style="{{ $disabled ? 'opacity:.48;' : '' }}">
-                                    <input type="radio" name="movement_type_id" value="{{ $type->id }}" {{ $disabled ? 'disabled' : '' }} required>
+                                    <input type="radio" name="movement_type_id" value="{{ $type->id }}" data-direction="{{ $type->direction }}" {{ $disabled ? 'disabled' : '' }} required>
                                     <span>
                                         <span class="move-option-title">{{ __($type->name) }}</span>
                                         <span class="move-option-hint">
@@ -310,6 +347,12 @@
                                     </span>
                                 </label>
                             @endforeach
+                        </div>
+
+                        <div class="move-field">
+                            <label for="vehiclePlateNo">{{ __('Vehicle Plate Number') }}</label>
+                            <input id="vehiclePlateNo" type="text" name="vehicle_plate_no" value="{{ old('vehicle_plate_no') }}" placeholder="{{ __('Example: TBA1234') }}">
+                            <small>{{ __('Every student check-out must include a vehicle plate number before confirmation. Return scans do not need it.') }}</small>
                         </div>
 
                         <div class="ui-actions" style="margin-top:1rem;">
@@ -331,6 +374,7 @@
                 <thead>
                     <tr>
                         <th>{{ __('Type') }}</th>
+                        <th>{{ __('Plate No.') }}</th>
                         <th>{{ __('Check-Out') }}</th>
                         <th>{{ __('Return') }}</th>
                         <th>{{ __('Rule') }}</th>
@@ -341,13 +385,14 @@
                     @forelse($records as $record)
                         <tr>
                             <td>{{ __($record->movement_type_name) }}</td>
+                            <td>{{ $record->vehicle_plate_no ?: '-' }}</td>
                             <td>{{ \Illuminate\Support\Carbon::parse($record->checkout_at)->format('d M Y, h:i A') }}</td>
                             <td>{{ $record->return_at ? \Illuminate\Support\Carbon::parse($record->return_at)->format('d M Y, h:i A') : '-' }}</td>
                             <td><span class="ui-status status-{{ $record->rule_status === 'late' ? 'rejected' : ($record->rule_status === 'pending' ? 'pending' : 'confirmed') }}">{{ __($record->rule_status) }}</span></td>
                             <td>{{ (int) $record->late_minutes }} {{ __('min') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="move-empty">{{ __('No movement records yet.') }}</td></tr>
+                        <tr><td colspan="6" class="move-empty">{{ __('No movement records yet.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -382,11 +427,37 @@
     const overlay = document.getElementById('moveScannerOverlay');
     const statusNode = document.getElementById('moveScanStatus');
     const expiryNode = document.getElementById('moveScanExpiry');
+    const plateField = document.getElementById('vehiclePlateNo');
+    const movementTypeRadios = Array.from(document.querySelectorAll('input[name="movement_type_id"]'));
     const currentUrl = new URL(window.location.href);
 
     if (!startBtn || !stopBtn || !video || !canvas || !scanner || !placeholder || !overlay || !statusNode) {
         return;
     }
+
+    const syncPlateRequirement = () => {
+        if (!plateField || movementTypeRadios.length === 0) {
+            return;
+        }
+
+        const selected = movementTypeRadios.find((radio) => radio.checked && !radio.disabled);
+        const isReturn = selected?.dataset.direction === 'return';
+
+        plateField.required = !isReturn;
+        plateField.disabled = !!isReturn;
+
+        if (isReturn) {
+            plateField.value = '';
+            plateField.placeholder = @json(__('Not required for return scan'));
+        } else {
+            plateField.placeholder = @json(__('Example: TBA1234'));
+        }
+    };
+
+    movementTypeRadios.forEach((radio) => {
+        radio.addEventListener('change', syncPlateRequirement);
+    });
+    syncPlateRequirement();
 
     let stream = null;
     let detector = null;

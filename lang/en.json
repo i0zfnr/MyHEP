@@ -520,5 +520,18 @@
     "Double-check important dates, amounts, and status changes in the actual module page.": "Double-check important dates, amounts, and status changes in the actual module page.",
     "Use the official scholarship, offense, or settings page for final actions.": "Use the official scholarship, offense, or settings page for final actions.",
     "QR scanning is unavailable on this device. Allow camera access and make sure the page is opened over HTTPS.": "QR scanning is unavailable on this device. Allow camera access and make sure the page is opened over HTTPS.",
+    "Make Payment": "Make Payment",
+    "Upload payment receipt": "Upload payment receipt",
+    "Pay first using iPayment, then upload the receipt here before applying for payment review.": "Pay first using iPayment, then upload the receipt here before applying for payment review.",
+    "View uploaded receipt": "View uploaded receipt",
+    "Receipt": "Receipt",
+    "View Receipt": "View Receipt",
+    "Mark Paid": "Mark Paid",
+    "Reject": "Reject",
+    "Notifications": "Notifications",
+    "Turn on push notifications": "Turn on push notifications",
+    "Get instant alerts when fines, stickers, and important account updates happen.": "Get instant alerts when fines, stickers, and important account updates happen.",
+    "Enable notifications": "Enable notifications",
+    "Maybe later": "Maybe later",
     "Unavailable": "Unavailable"
 }

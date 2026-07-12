@@ -298,7 +298,9 @@
                     <tr>
                         <th>{{ __('Student') }}</th>
                         <th>{{ __('Programme') }}</th>
+                        <th>{{ __('Residence') }}</th>
                         <th>{{ __('Type') }}</th>
+                        <th>{{ __('Plate No.') }}</th>
                         <th>{{ __('Check-Out') }}</th>
                         <th>{{ __('Return') }}</th>
                         <th>{{ __('Status') }}</th>
@@ -310,7 +312,13 @@
                         <tr>
                             <td><span class="mv-student">{{ $record->student_name }}</span><br><span class="mv-sub">{{ $record->matric_no }}</span></td>
                             <td>{{ $record->program }}<br><span class="mv-sub">{{ $record->checkpoint_name }}</span></td>
+                            <td>
+                                {{ ($record->residence_status ?? 'inside_campus') === 'live_out' ? __('Live Out') : __('Inside Campus') }}
+                                <br>
+                                <span class="mv-sub">{{ $record->room_number ?: '-' }}</span>
+                            </td>
                             <td><span class="mv-type-badge">{{ __($record->movement_type_name) }}</span></td>
+                            <td>{{ $record->vehicle_plate_no ?: '-' }}</td>
                             <td>
                                 <div class="mv-time">
                                     <strong>{{ \Illuminate\Support\Carbon::parse($record->checkout_at)->format('d M Y') }}</strong>

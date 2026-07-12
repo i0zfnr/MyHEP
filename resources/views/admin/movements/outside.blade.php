@@ -55,7 +55,9 @@
                 <thead>
                     <tr>
                         <th>{{ __('Student') }}</th>
+                        <th>{{ __('Residence') }}</th>
                         <th>{{ __('Type') }}</th>
+                        <th>{{ __('Plate No.') }}</th>
                         <th>{{ __('Check-Out') }}</th>
                         <th>{{ __('Expected Return') }}</th>
                         <th>{{ __('Duration') }}</th>
@@ -66,13 +68,15 @@
                         @php $checkout = \Illuminate\Support\Carbon::parse($record->checkout_at); @endphp
                         <tr>
                             <td><strong>{{ $record->student_name }}</strong><br><span class="muted">{{ $record->matric_no }} | {{ $record->program }}</span></td>
+                            <td>{{ ($record->residence_status ?? 'inside_campus') === 'live_out' ? __('Live Out') : ($record->room_number ?: __('Inside Campus')) }}</td>
                             <td>{{ __($record->movement_type_name) }}</td>
+                            <td>{{ $record->vehicle_plate_no ?: '-' }}</td>
                             <td>{{ $checkout->format('d M Y, h:i A') }}</td>
                             <td>{{ $record->expected_return_at ? \Illuminate\Support\Carbon::parse($record->expected_return_at)->format('d M Y, h:i A') : '-' }}</td>
                             <td>{{ $checkout->diffForHumans(now(), true) }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="mv-live-empty">{{ __('No students are currently recorded outside campus.') }}</td></tr>
+                        <tr><td colspan="7" class="mv-live-empty">{{ __('No students are currently recorded outside campus.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -38,6 +38,10 @@ class MovementController extends Controller
         }
 
         $checkpoint = $this->activeScanCheckpoint($request);
+        $student = DB::table('students')
+            ->select('id', 'full_name', 'matric_no', 'program', 'residence_status', 'room_number')
+            ->where('id', $studentId)
+            ->first();
 
         $currentMovement = $this->currentMovement($studentId);
         $movementTypes = DB::table('movement_types')
@@ -60,6 +64,7 @@ class MovementController extends Controller
             ->withQueryString();
 
         return view('student.movements.index', [
+            'student' => $student,
             'checkpoint' => $checkpoint,
             'currentMovement' => $currentMovement,
             'movementTypes' => $movementTypes,
@@ -82,6 +87,7 @@ class MovementController extends Controller
         $validated = $request->validate([
             'checkpoint_id' => ['required', 'integer', 'exists:movement_checkpoints,id'],
             'movement_type_id' => ['required', 'integer', 'exists:movement_types,id'],
+            'vehicle_plate_no' => ['nullable', 'string', 'max:30'],
             'gps_latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'gps_longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
@@ -99,6 +105,13 @@ class MovementController extends Controller
         if (!$type) {
             return redirect()->route('student.movements.index')
                 ->withErrors(['movement_type_id' => __('Jenis pergerakan tidak sah.')]);
+        }
+
+        $plateNumber = strtoupper(trim((string) ($validated['vehicle_plate_no'] ?? '')));
+        if ($type->direction !== 'return' && $plateNumber === '') {
+            return redirect()->route('student.movements.index')
+                ->withErrors(['vehicle_plate_no' => __('Please enter the vehicle plate number before confirming check-out.')])
+                ->withInput();
         }
 
         if (!$this->passesGpsValidation($checkpoint, $validated['gps_latitude'] ?? null, $validated['gps_longitude'] ?? null)) {
@@ -136,6 +149,24 @@ class MovementController extends Controller
             auditLog('student_movement.return', 'student_movements', (int) $currentMovement->id, 'Student returned to campus');
             $request->session()->forget(self::SCAN_SESSION_KEY);
 
+            if ($lateMinutes > 0) {
+                myhepSendPushNotification('student', $studentId, [
+                    'title' => 'Late return recorded',
+                    'body' => 'Your return to campus was recorded late. Please review your movement record.',
+                    'url' => route('student.movements.index'),
+                    'tag' => 'student-movement-late-' . $currentMovement->id,
+                    'requireInteraction' => true,
+                ]);
+
+                myhepSendPushToAdminsByScope('movement', [
+                    'title' => 'Movement violation detected',
+                    'body' => 'A student return was recorded late and needs admin visibility.',
+                    'url' => route('admin.movements.violations'),
+                    'tag' => 'movement-violation-' . $currentMovement->id,
+                    'requireInteraction' => true,
+                ]);
+            }
+
             return redirect()->route('student.movements.index')
                 ->with('success', __('Return to campus recorded successfully.'));
         }
@@ -154,6 +185,7 @@ class MovementController extends Controller
             'expected_return_at' => $expectedReturn,
             'return_at' => null,
             'movement_status' => 'outside',
+            'vehicle_plate_no' => $plateNumber,
             'rule_status' => 'pending',
             'late_minutes' => 0,
             'gps_latitude' => $validated['gps_latitude'] ?? null,

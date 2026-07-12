@@ -226,6 +226,19 @@
                         <textarea id="address" name="address" rows="3">{{ old('address') }}</textarea>
                     </div>
                 </div>
+                <div class="grid grid-2" style="margin-top:12px;">
+                    <div>
+                        <label for="residence_status">Status Kediaman</label>
+                        <select id="residence_status" name="residence_status" required>
+                            <option value="inside_campus" @selected(old('residence_status', 'inside_campus') === 'inside_campus')>Dalam Kampus</option>
+                            <option value="live_out" @selected(old('residence_status') === 'live_out')>Live Out / Luar Kampus</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="room_number">No. Bilik / Kolej Kediaman</label>
+                        <input id="room_number" type="text" name="room_number" value="{{ old('room_number') }}" placeholder="Contoh: AL306">
+                    </div>
+                </div>
             </div>
         </div>
 

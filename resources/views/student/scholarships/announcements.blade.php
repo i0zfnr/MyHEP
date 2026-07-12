@@ -158,14 +158,10 @@
     }
 
     .ann-content {
-        display: grid;
-        grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
-        gap: 14px;
-        align-items: start;
+        display: block;
     }
 
-    .ann-list-card,
-    .ann-side-card {
+    .ann-list-card {
         border: 1px solid #eadfce;
         border-radius: 18px;
         background: linear-gradient(180deg, #fff 0%, #fffdfa 100%);
@@ -328,54 +324,6 @@
         background: #f7efe7;
     }
 
-    .ann-side-body {
-        padding: 14px;
-        display: grid;
-        gap: 12px;
-    }
-
-    .ann-side-note {
-        border: 1px dashed #dcc6ae;
-        border-radius: 14px;
-        padding: 13px 14px;
-        background: #fffaf5;
-        color: #5a4535;
-        font-size: 13px;
-        line-height: 1.7;
-    }
-
-    .ann-side-note strong {
-        display: block;
-        margin-bottom: 4px;
-        color: #2d221a;
-        font-size: 13px;
-    }
-
-    .ann-side-list {
-        display: grid;
-        gap: 10px;
-    }
-
-    .ann-side-mini {
-        border: 1px solid #eee1d3;
-        border-radius: 14px;
-        padding: 12px;
-        background: #fffdfa;
-    }
-
-    .ann-side-mini strong {
-        display: block;
-        color: #2d221a;
-        font-size: 13px;
-        margin-bottom: 4px;
-    }
-
-    .ann-side-mini span {
-        color: #7c6859;
-        font-size: 12px;
-        line-height: 1.6;
-    }
-
     .ann-empty {
         padding: 26px 18px;
         text-align: center;
@@ -426,10 +374,7 @@
 
     body[data-theme="dark"] .ann-stat,
     body[data-theme="dark"] .ann-list-card,
-    body[data-theme="dark"] .ann-side-card,
-    body[data-theme="dark"] .ann-item,
-    body[data-theme="dark"] .ann-side-mini,
-    body[data-theme="dark"] .ann-side-note {
+    body[data-theme="dark"] .ann-item {
         background:
             linear-gradient(145deg, rgba(31, 27, 23, .88), rgba(14, 13, 12, .80)),
             radial-gradient(circle at 10% 0%, rgba(255,255,255,.06), transparent 36%) !important;
@@ -439,9 +384,7 @@
 
     body[data-theme="dark"] .ann-stat-value,
     body[data-theme="dark"] .ann-item-title,
-    body[data-theme="dark"] .ann-section-head strong,
-    body[data-theme="dark"] .ann-side-note strong,
-    body[data-theme="dark"] .ann-side-mini strong {
+    body[data-theme="dark"] .ann-section-head strong {
         color: #fff7ef !important;
     }
 
@@ -468,10 +411,6 @@
     @media (max-width: 980px) {
         .ann-stats {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .ann-content {
-            grid-template-columns: 1fr;
         }
     }
 
@@ -601,33 +540,6 @@
             @endif
         </section>
 
-        <aside class="ann-side-card">
-            <div class="ann-section-head">
-                <strong>{{ __('Panduan Ringkas') }}</strong>
-                <span>{{ __('Cara menggunakan halaman ini dengan lebih cepat.') }}</span>
-            </div>
-            <div class="ann-side-body">
-                <div class="ann-side-note">
-                    <strong>{{ __('Apa yang boleh anda buat di sini') }}</strong>
-                    {{ __('Semak peluang biasiswa yang tersedia, baca syarat atau ringkasan ringkas, dan buka pautan luar yang disediakan oleh pihak pentadbiran.') }}
-                </div>
-
-                <div class="ann-side-list">
-                    <div class="ann-side-mini">
-                        <strong>{{ __('Biasiswa') }}</strong>
-                        <span>{{ __('Sesuai untuk makluman tajaan, pinjaman pendidikan, atau peluang pembiayaan pengajian.') }}</span>
-                    </div>
-                    <div class="ann-side-mini">
-                        <strong>{{ __('Bantuan / Kebajikan') }}</strong>
-                        <span>{{ __('Sesuai untuk bantuan kewangan tambahan, sokongan kebajikan, atau bantuan khas pelajar.') }}</span>
-                    </div>
-                    <div class="ann-side-mini">
-                        <strong>{{ __('Umum') }}</strong>
-                        <span>{{ __('Digunakan untuk hebahan berkaitan maklumat tajaan umum, panduan, atau pengumuman tambahan.') }}</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
     </div>
 
     <div class="ann-pagination">{{ $announcements->links() }}</div>

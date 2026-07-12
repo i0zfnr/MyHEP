@@ -28,6 +28,11 @@
     .camera-msg { margin-top:8px; color:#7a6555; font-size:12px; }
     .camera-msg.err { color:#991b1b; background:#fff; border:none; margin-bottom:0; padding:0; }
     .preview-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:10px; }
+    .evidence-card { position:relative; border:1px solid #e7daca; border-radius:10px; background:#fffdfb; padding:8px; }
+    .evidence-card img { width:100%; aspect-ratio:4 / 3; object-fit:cover; border-radius:8px; display:block; }
+    .evidence-card button { margin-top:8px; width:100%; }
+    .evidence-card small { display:block; margin-top:6px; color:#7a6555; text-align:center; }
     .btn-danger-soft {
         border-color:#f3b0b7 !important;
         background:linear-gradient(180deg, #fff5f5 0%, #fdeaea 100%) !important;
@@ -259,20 +264,21 @@
                 </div>
                 <div style="margin-top:12px;">
                     <label for="evidence_photo">{{ __('Gambar Bukti (Opsyenal)') }}</label>
-                    <input type="file" id="evidence_photo" name="evidence_photo" accept="image/jpeg,image/png,image/webp" capture="environment">
-                    <small style="display:block; margin-top:6px; color:#7a6555;">{{ __('Ambil gambar terus dari kamera atau upload fail (JPG/PNG/WEBP, max 5MB).') }}</small>
+                    <input type="file" id="evidence_photo" name="evidence_photos[]" accept="image/jpeg,image/png,image/webp" capture="environment" multiple>
+                    <small style="display:block; margin-top:6px; color:#7a6555;">{{ __('You can upload up to 3 evidence images (JPG/PNG/WEBP, max 5MB each).') }}</small>
                     <div class="camera-panel">
                         <div class="camera-actions">
                             <button class="btn" type="button" id="open_camera_btn">{{ __('Guna Kamera') }}</button>
                             <button class="btn" type="button" id="capture_camera_btn" style="display:none;">{{ __('Tangkap Gambar') }}</button>
                             <button class="btn" type="button" id="close_camera_btn" style="display:none;">{{ __('Tutup Kamera') }}</button>
-                            <button class="btn btn-danger-soft" type="button" id="remove_evidence_btn" style="display:none;">{{ __('Buang Gambar') }}</button>
+                            <button class="btn btn-danger-soft" type="button" id="remove_evidence_btn" style="display:none;">{{ __('Remove selected images') }}</button>
                         </div>
                         <video id="camera_live" class="camera-live" autoplay playsinline></video>
                         <canvas id="camera_canvas" style="display:none;"></canvas>
                         <div id="camera_msg" class="camera-msg">{{ __('Tekan "Guna Kamera" untuk benarkan akses kamera.') }}</div>
                     </div>
-                    <img id="evidence_preview" alt="{{ __('Preview gambar bukti') }}" style="display:none; margin-top:10px; max-width:220px; border-radius:8px; border:1px solid #ede4d9;">
+                    <div id="evidence_preview_grid" class="evidence-grid"></div>
+                    <div id="evidence_count_hint" class="hint">{{ __('Selected :count / 3 images.', ['count' => 0]) }}</div>
                 </div>
             </div>
         </div>
@@ -317,7 +323,8 @@
 @push('scripts')
 <script>
     const evidenceInput = document.getElementById('evidence_photo');
-    const evidencePreview = document.getElementById('evidence_preview');
+    const evidencePreviewGrid = document.getElementById('evidence_preview_grid');
+    const evidenceCountHint = document.getElementById('evidence_count_hint');
     const studentSearch = document.getElementById('student_search');
     const studentSelect = document.getElementById('student_id');
     const offenseForm = document.getElementById('offense_form');
@@ -330,41 +337,89 @@
     const cameraCanvas = document.getElementById('camera_canvas');
     const cameraMsg = document.getElementById('camera_msg');
     let cameraStream = null;
-    let evidenceObjectUrl = null;
+    const maxEvidenceFiles = 3;
+    let selectedEvidenceFiles = [];
+    let evidenceObjectUrls = [];
 
-    const resetEvidencePreview = () => {
-        if (evidenceObjectUrl) {
-            URL.revokeObjectURL(evidenceObjectUrl);
-            evidenceObjectUrl = null;
+    const syncEvidenceInput = () => {
+        if (!evidenceInput) return;
+        const dt = new DataTransfer();
+        selectedEvidenceFiles.forEach((file) => dt.items.add(file));
+        evidenceInput.files = dt.files;
+    };
+
+    const updateEvidenceCount = () => {
+        if (evidenceCountHint) {
+            evidenceCountHint.textContent = @json(__('Selected :count / 3 images.', ['count' => '__COUNT__'])).replace('__COUNT__', String(selectedEvidenceFiles.length));
         }
-        evidencePreview.style.display = 'none';
-        evidencePreview.removeAttribute('src');
-        if (removeEvidenceBtn) removeEvidenceBtn.style.display = 'none';
+    };
+
+    const renderEvidencePreviews = () => {
+        evidenceObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+        evidenceObjectUrls = [];
+
+        if (!evidencePreviewGrid) return;
+        evidencePreviewGrid.innerHTML = '';
+
+        selectedEvidenceFiles.forEach((file, index) => {
+            const objectUrl = URL.createObjectURL(file);
+            evidenceObjectUrls.push(objectUrl);
+
+            const card = document.createElement('div');
+            card.className = 'evidence-card';
+            card.innerHTML = `
+                <img src="${objectUrl}" alt="Evidence ${index + 1}">
+                <small>${@json(__('Image :number', ['number' => '__NUM__'])).replace('__NUM__', String(index + 1))}</small>
+                <button type="button" class="btn btn-danger-soft" data-remove-evidence-index="${index}">${@json(__('Remove this image'))}</button>
+            `;
+            evidencePreviewGrid.appendChild(card);
+        });
+
+        if (removeEvidenceBtn) {
+            removeEvidenceBtn.style.display = selectedEvidenceFiles.length ? 'inline-block' : 'none';
+        }
+        updateEvidenceCount();
     };
 
     const clearSelectedEvidence = () => {
-        if (evidenceInput) {
-            evidenceInput.value = '';
-        }
-        resetEvidencePreview();
+        selectedEvidenceFiles = [];
+        syncEvidenceInput();
+        renderEvidencePreviews();
         cameraMsg.textContent = @json(__('Gambar bukti dibuang. Anda boleh pilih atau tangkap semula.'));
         cameraMsg.classList.remove('err');
     };
 
-    if (evidenceInput && evidencePreview) {
+    const mergeEvidenceFiles = (incomingFiles, replaceExisting = false) => {
+        const nextFiles = replaceExisting ? [] : [...selectedEvidenceFiles];
+        let trimmed = false;
+
+        incomingFiles.forEach((file) => {
+            if (nextFiles.length < maxEvidenceFiles) {
+                nextFiles.push(file);
+            } else {
+                trimmed = true;
+            }
+        });
+
+        selectedEvidenceFiles = nextFiles;
+        syncEvidenceInput();
+        renderEvidencePreviews();
+
+        if (trimmed) {
+            cameraMsg.textContent = @json(__('Only the first 3 images were kept.'));
+            cameraMsg.classList.remove('err');
+        }
+    };
+
+    if (evidenceInput) {
         evidenceInput.addEventListener('change', () => {
-            const file = evidenceInput.files && evidenceInput.files[0] ? evidenceInput.files[0] : null;
-            if (!file) {
-                resetEvidencePreview();
+            const files = Array.from(evidenceInput.files || []);
+            if (!files.length) {
+                selectedEvidenceFiles = [];
+                renderEvidencePreviews();
                 return;
             }
-            if (evidenceObjectUrl) {
-                URL.revokeObjectURL(evidenceObjectUrl);
-            }
-            evidenceObjectUrl = URL.createObjectURL(file);
-            evidencePreview.src = evidenceObjectUrl;
-            evidencePreview.style.display = 'block';
-            if (removeEvidenceBtn) removeEvidenceBtn.style.display = 'inline-block';
+            mergeEvidenceFiles(files, true);
         });
     }
 
@@ -372,6 +427,20 @@
         removeEvidenceBtn.addEventListener('click', () => {
             stopCamera();
             clearSelectedEvidence();
+        });
+    }
+
+    if (evidencePreviewGrid) {
+        evidencePreviewGrid.addEventListener('click', (event) => {
+            const trigger = event.target.closest('[data-remove-evidence-index]');
+            if (!trigger) return;
+
+            const index = Number(trigger.getAttribute('data-remove-evidence-index'));
+            if (Number.isNaN(index)) return;
+
+            selectedEvidenceFiles = selectedEvidenceFiles.filter((_, fileIndex) => fileIndex !== index);
+            syncEvidenceInput();
+            renderEvidencePreviews();
         });
     }
 
@@ -520,12 +589,9 @@
                 }
 
                 const file = new File([blob], `offense-${Date.now()}.jpg`, { type: 'image/jpeg' });
-                const dt = new DataTransfer();
-                dt.items.add(file);
-                evidenceInput.files = dt.files;
-                evidenceInput.dispatchEvent(new Event('change'));
+                mergeEvidenceFiles([file], false);
 
-                cameraMsg.textContent = @json(__('Gambar berjaya ditangkap dan dipilih.'));
+                cameraMsg.textContent = @json(__('Camera photo added to evidence list.'));
                 cameraMsg.classList.remove('err');
                 stopCamera();
             }, 'image/jpeg', 0.92);
@@ -539,6 +605,8 @@
 
         window.addEventListener('beforeunload', stopCamera);
     }
+
+    renderEvidencePreviews();
 
     const ruleRows = Array.from(document.querySelectorAll('.rule-row'));
     const ruleSearch = document.getElementById('rule_search');

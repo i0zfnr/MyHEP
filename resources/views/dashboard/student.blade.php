@@ -24,6 +24,8 @@
     --gold-dim: #e8d49a;
     --danger:   #c0392b;
     --danger-bg:#fff1f0;
+    --danger-soft:#f7c6bf;
+    --danger-deep:#5f231c;
     --warn:     #b45309;
     --warn-bg:  #fffbeb;
     --success:  #166534;
@@ -58,6 +60,7 @@
     border-radius: var(--radius-md);
     border: 1px solid transparent;
     animation: slideDown .3s ease both;
+    box-shadow: var(--shadow-card);
 }
 .alert-icon {
     width: 36px;
@@ -74,12 +77,35 @@
 .alert-success { background: var(--success-bg); border-color: #bbf7d0; }
 .alert-success .alert-icon { background: #dcfce7; color: var(--success); }
 .alert-success strong, .alert-success p { color: var(--success); }
-.alert-danger { background: var(--danger-bg); border-color: #fecaca; }
-.alert-danger .alert-icon { background: #fee2e2; color: var(--danger); }
-.alert-danger strong, .alert-danger p { color: var(--danger); }
+.alert-danger {
+    background: linear-gradient(135deg, rgba(95, 35, 28, .18) 0%, rgba(192, 57, 43, .10) 100%);
+    border-color: rgba(247, 198, 191, .28);
+}
+.alert-danger .alert-icon {
+    background: rgba(247, 198, 191, .14);
+    color: #f3b2a8;
+    border: 1px solid rgba(247, 198, 191, .18);
+}
+.alert-danger strong { color: #ffd1c9; }
+.alert-danger p { color: rgba(255, 232, 226, .82); }
 .alert-warn { background: var(--warn-bg); border-color: #fde68a; }
 .alert-warn .alert-icon { background: #fef3c7; color: var(--warn); }
 .alert-warn strong, .alert-warn p { color: var(--warn); }
+.alert-action {
+    flex-shrink: 0;
+    align-self: center;
+}
+.alert-danger .alert-action {
+    background: linear-gradient(135deg, #d7bfa8 0%, #e8d4c1 100%) !important;
+    border-color: rgba(255,255,255,.08) !important;
+    color: #2d1e16 !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,.16);
+}
+.alert-danger .alert-action:hover {
+    background: linear-gradient(135deg, #e0ccb8 0%, #f2dfca 100%) !important;
+    border-color: rgba(255,255,255,.14) !important;
+    color: #1c130e !important;
+}
 
 /* â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .hero {
@@ -677,6 +703,30 @@
         border-color: rgba(255,255,255,.10) !important;
         color: #17110d !important;
     }
+    body[data-theme="dark"] .sdash .alert {
+        box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    }
+    body[data-theme="dark"] .sdash .alert-danger {
+        background:
+            linear-gradient(135deg, rgba(118, 42, 33, .34) 0%, rgba(75, 27, 21, .56) 100%) !important;
+        border-color: rgba(247, 198, 191, .18) !important;
+    }
+    body[data-theme="dark"] .sdash .alert-danger .alert-icon {
+        background: rgba(255, 209, 201, .10) !important;
+        color: #ffc1b7 !important;
+        border: 1px solid rgba(255, 209, 201, .14);
+    }
+    body[data-theme="dark"] .sdash .alert-danger strong {
+        color: #ffe2dc !important;
+    }
+    body[data-theme="dark"] .sdash .alert-danger p {
+        color: rgba(255, 232, 226, .78) !important;
+    }
+    body[data-theme="dark"] .sdash .alert-danger .alert-action {
+        background: linear-gradient(135deg, #c6a98e 0%, #ead6c1 100%) !important;
+        border-color: rgba(255,255,255,.08) !important;
+        color: #20150f !important;
+    }
     @media (max-width: 980px) {
         .head,
         .toolbar,
@@ -744,7 +794,7 @@
             <strong>{{ __('Anda mempunyai denda yang belum dibayar') }}</strong>
             <p>{{ __('Sila semak rekod kesalahan dan hantar permohonan bayaran dengan segera untuk mengelakkan tindakan lanjut.') }}</p>
         </div>
-        <a href="{{ route('student.offenses.index') }}" class="action-btn primary" style="flex-shrink:0;align-self:center;">
+        <a href="{{ route('student.offenses.index') }}" class="action-btn primary alert-action">
             {{ __('Bayar Sekarang') }}
         </a>
     </div>
@@ -760,7 +810,7 @@
             <strong>{{ __('Lengkapkan Borang Data Biasiswa') }}</strong>
             <p>{{ __('Sila hantar status biasiswa anda untuk tujuan pengumpulan data pelajar Politeknik Besut.') }}</p>
         </div>
-        <a href="{{ route('student.scholarship-status.form') }}" class="action-btn" style="flex-shrink:0;align-self:center;">
+        <a href="{{ route('student.scholarship-status.form') }}" class="action-btn alert-action">
             {{ __('Isi Borang') }}
         </a>
     </div>

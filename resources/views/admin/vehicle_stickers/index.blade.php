@@ -26,6 +26,7 @@
     .msg-ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
     .msg-err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .decision { display:flex; gap:6px; flex-wrap:wrap; }
+    .actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
     .doc-link { font-size:12px; color:#8a7362; text-decoration:underline; }
     .doc-thumb { margin-top:6px; width:130px; height:92px; border:1px solid #ede4d9; border-radius:8px; object-fit:cover; display:block; }
         /* Admin UX Identity v2 */
@@ -250,6 +251,7 @@
                             <td>{{ $app->approved_by_name ?: '-' }}</td>
                             <td>{{ $app->created_at ? \Illuminate\Support\Carbon::parse($app->created_at)->format('Y-m-d') : '-' }}</td>
                             <td>
+                                <div class="actions-cell">
                                 @if($app->status === 'pending')
                                     <div class="decision">
                                         <form method="POST" action="{{ route('admin.vehicle-stickers.decision', $app->id) }}">
@@ -263,9 +265,17 @@
                                             <button class="btn btn-danger" type="submit">Tolak</button>
                                         </form>
                                     </div>
-                                @else
-                                    -
                                 @endif
+                                    <form method="POST" action="{{ route('admin.vehicle-stickers.destroy', $app->id) }}" style="margin:0;"
+                                        data-confirm-title="{{ __('Delete application') }}"
+                                        data-confirm-message="{{ __('Delete this vehicle sticker application?') }}"
+                                        data-confirm-action="{{ __('Delete') }}"
+                                        data-confirm-tone="danger">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-danger" type="submit">Delete</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
