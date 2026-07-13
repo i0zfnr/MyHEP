@@ -205,7 +205,7 @@
             </div>
         </div>
 
-        <div class="filters">
+        <div class="filters" data-filter-sheet data-filter-title="{{ __('Scholarship filters') }}">
             <form method="GET" action="{{ route('admin.scholarships.index') }}">
                 <div class="filter-grid">
                     <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari nama/matrik/penyedia"></div>

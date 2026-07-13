@@ -24,4 +24,46 @@ class ExampleTest extends TestCase
         $response->assertRedirect('/login');
         $response->assertStatus(302);
     }
+
+    public function test_theme_preference_is_saved_in_the_session(): void
+    {
+        $response = $this->post('/theme', ['theme' => 'dark']);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('theme', 'dark');
+    }
+
+    public function test_invalid_theme_preference_is_rejected(): void
+    {
+        $response = $this->from('/')->post('/theme', ['theme' => 'neon']);
+
+        $response->assertRedirect('/');
+        $response->assertSessionHasErrors('theme');
+    }
+
+    public function test_notification_feed_requires_authentication(): void
+    {
+        $response = $this->get('/notifications/feed');
+
+        $response->assertRedirect('/login');
+    }
+
+    public function test_authenticated_admin_can_load_notification_feed(): void
+    {
+        $response = $this
+            ->withSession([
+                'auth_user' => [
+                    'id' => 1,
+                    'role' => 'admin',
+                    'admin_role' => 'scholarship_admin',
+                ],
+            ])
+            ->getJson('/notifications/feed');
+
+        $response
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertJsonPath('count', 0)
+            ->assertJsonPath('items.0.id', 'all-clear');
+    }
 }

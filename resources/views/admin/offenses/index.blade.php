@@ -208,7 +208,7 @@
                 <a class="btn" href="{{ route('admin.offenses.create') }}">{{ __('Daftar Kesalahan') }}</a>
             </div>
         </div>
-        <div class="filters">
+        <div class="filters" data-filter-sheet data-filter-title="{{ __('Offense filters') }}">
             <form method="GET" action="{{ route('admin.offenses.index') }}">
                 <div class="filter-grid">
                     <div>
@@ -248,10 +248,10 @@
                             <td>{{ $offense->place }}</td>
                             <td>
                                 @if(($offense->evidence_count ?? 0) > 0)
-                                    <a class="btn" href="{{ asset('storage/' . $offense->evidence_photos[0]->photo_path) }}" target="_blank" style="padding:6px 10px; font-size:12px;">{{ __('Lihat') }} ({{ $offense->evidence_count }})</a>
+                                    <a class="btn" href="{{ asset('storage/' . $offense->evidence_photos[0]->photo_path) }}" target="_blank" data-media-viewer data-media-title="{{ __('Evidence Photo') }}" style="padding:6px 10px; font-size:12px;">{{ __('Lihat') }} ({{ $offense->evidence_count }})</a>
                                 @endif
                                 @if(!empty($offense->payment_receipt?->receipt_path))
-                                    <a class="btn" href="{{ asset('storage/' . $offense->payment_receipt->receipt_path) }}" target="_blank" style="padding:6px 10px; font-size:12px;">{{ __('View Receipt') }}</a>
+                                    <a class="btn" href="{{ asset('storage/' . $offense->payment_receipt->receipt_path) }}" target="_blank" data-media-viewer data-media-title="{{ __('Payment Receipt') }}" style="padding:6px 10px; font-size:12px;">{{ __('View Receipt') }}</a>
                                 @endif
                                 @if(($offense->evidence_count ?? 0) === 0 && empty($offense->payment_receipt?->receipt_path))
                                     <span style="color:#7a6555;">-</span>

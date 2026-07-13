@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @include('partials.theme_bootstrap')
     <meta name="theme-color" content="#171412">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,9 +33,26 @@
                 'later' => __('Maybe later'),
             ],
         ];
+        $studentEdgeUiConfig = [
+            'authenticated' => session()->has('auth_user'),
+            'notificationUrl' => route('notifications.feed'),
+            'labels' => [
+                'notifications' => __('Notifications'),
+                'notificationEmpty' => __('There are no notifications to show.'),
+                'notificationError' => __('Notifications could not be loaded. Try again.'),
+                'filters' => __('Filters'),
+                'closeFilters' => __('Close filters'),
+                'mediaPreview' => __('File preview'),
+                'openOriginal' => __('Open original'),
+                'download' => __('Download'),
+                'close' => __('Close'),
+                'loading' => __('Loading'),
+            ],
+        ];
     @endphp
     <script>
         window.studentEdgePush = {!! json_encode($studentEdgePushConfig, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!};
+        window.studentEdgeUi = {!! json_encode($studentEdgeUiConfig, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!};
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -1585,6 +1603,7 @@
             }
         }
     </style>
+    @vite('resources/css/design-system.css')
 </head>
 <body data-theme="{{ session('theme', 'light') }}">
 @php
@@ -1933,6 +1952,7 @@
         </div>
 
         <div class="sb-footer">
+            @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--wide'])
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="btn-logout">
@@ -1946,7 +1966,7 @@
     <div class="sb-overlay" id="sbOverlay" aria-hidden="true"></div>
     @endif
 
-    <div class="main-wrap">
+    <div class="main-wrap {{ $showSidebar ? 'has-sidebar' : 'no-sidebar' }}">
         @if($showSidebar)
         <div class="topbar">
             <button class="btn-ham" id="sbToggle" aria-label="{{ __('Buka sidebar') }}" aria-expanded="false" aria-controls="appSidebar">
@@ -1961,6 +1981,8 @@
                     <span class="topbar-subtitle">{{ __('Student Affairs') }}</span>
                 </span>
             </div>
+            @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--topbar'])
+            @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--compact'])
         </div>
         @endif
 
@@ -1968,31 +1990,47 @@
             <div class="page-header{{ $showHeaderUserMenu ? ' has-user-menu' : '' }}">
                 <div class="page-header-inner">
                     <div class="page-header-left">@yield('header')</div>
-                    @if($showHeaderUserMenu)
+                    @if($authUser)
                         <div class="page-header-right">
-                            <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-support">
-                                {{ __('Support') }}
-                            </a>
-                            <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu">
-                                <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
-                                <span class="header-user-meta">
-                                    <span class="header-user-name">{{ $authUser['name'] ?? __('User') }}</span>
-                                    <span class="header-user-role">{{ $authUser['role'] ?? '-' }}</span>
-                                </span>
-                            </button>
-                            <div class="header-user-menu" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
-                                <div class="header-menu-head">
-                                    <div class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</div>
-                                    <div class="header-menu-role">{{ $authUser['role'] ?? '-' }}</div>
+                            @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--header'])
+                            @if($showHeaderUserMenu)
+                                @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--compact'])
+                                <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-support">
+                                    {{ __('Support') }}
+                                </a>
+                                <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu">
+                                    <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+                                    <span class="header-user-meta">
+                                        <span class="header-user-name">{{ $authUser['name'] ?? __('User') }}</span>
+                                        <span class="header-user-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                                    </span>
+                                </button>
+                                <div class="header-user-menu" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
+                                    <div class="header-menu-head">
+                                        <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+                                        <span>
+                                            <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
+                                            <span class="header-menu-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                                        </span>
+                                    </div>
+                                    @if($isStudent)
+                                        <a href="{{ route('student.profile') }}" class="header-menu-link">
+                                            <span aria-hidden="true">&#9786;</span>{{ __('Profile') }}
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('settings.show') }}" class="header-menu-link">
+                                        <span aria-hidden="true">&#9881;</span>{{ __('Settings') }}
+                                    </a>
+                                    <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">
+                                        <span aria-hidden="true">?</span>{{ __('Support') }}
+                                    </a>
+                                    <div class="header-menu-sep"></div>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="header-menu-btn logout">{{ __('Log Out') }}</button>
+                                    </form>
                                 </div>
-                                <a href="{{ route('settings.show') }}" class="header-menu-link">{{ __('Settings') }}</a>
-                                <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">{{ __('Support') }}</a>
-                                <div class="header-menu-sep"></div>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="header-menu-btn logout">{{ __('Log Out') }}</button>
-                                </form>
-                            </div>
+                            @endif
                         </div>
                     @endif
                 </div>
@@ -2004,10 +2042,52 @@
     </div>
 </div>
 
+@if($authUser)
+<div class="se-notification-center" id="notificationCenter" aria-hidden="true">
+    <div class="se-notification-panel" role="dialog" aria-modal="false" aria-labelledby="notificationCenterTitle">
+        <div class="se-notification-head">
+            <div>
+                <span class="se-notification-kicker">StudentEdge</span>
+                <h2 id="notificationCenterTitle">{{ __('Notifications') }}</h2>
+            </div>
+            <button type="button" class="se-icon-button" data-notification-close aria-label="{{ __('Close') }}">&times;</button>
+        </div>
+        <div class="se-notification-list" data-notification-list>
+            <div class="se-skeleton-notification"></div>
+            <div class="se-skeleton-notification"></div>
+            <div class="se-skeleton-notification"></div>
+        </div>
+    </div>
+</div>
+@endif
+
+<div class="se-media-modal" id="mediaPreviewModal" aria-hidden="true">
+    <div class="se-media-dialog" role="dialog" aria-modal="true" aria-labelledby="mediaPreviewTitle">
+        <div class="se-media-toolbar">
+            <div>
+                <span class="se-media-kicker">{{ __('Preview') }}</span>
+                <h2 id="mediaPreviewTitle">{{ __('File preview') }}</h2>
+            </div>
+            <div class="se-media-actions">
+                <a class="se-media-action" data-media-open target="_blank" rel="noopener">{{ __('Open original') }}</a>
+                <a class="se-media-action" data-media-download download>{{ __('Download') }}</a>
+                <button type="button" class="se-icon-button" data-media-close aria-label="{{ __('Close') }}">&times;</button>
+            </div>
+        </div>
+        <div class="se-media-stage" data-media-stage></div>
+    </div>
+</div>
+
+<div class="se-page-progress" aria-hidden="true"><span></span></div>
+
 <div class="confirm-modal" id="confirmModal" aria-hidden="true">
-    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+    <div class="confirm-dialog" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
         <div class="confirm-head">
-            <h2 class="confirm-title" id="confirmTitle">{{ __('Confirm action') }}</h2>
+            <span class="confirm-icon" aria-hidden="true">!</span>
+            <div>
+                <span class="confirm-kicker">{{ __('Please confirm') }}</span>
+                <h2 class="confirm-title" id="confirmTitle">{{ __('Confirm action') }}</h2>
+            </div>
         </div>
         <div class="confirm-body" id="confirmMessage">{{ __('Are you sure you want to continue?') }}</div>
         <div class="confirm-actions">
@@ -2079,6 +2159,7 @@
     }
 
     var confirmModal = document.getElementById('confirmModal');
+    var confirmDialog = document.getElementById('confirmDialog');
     var confirmTitle = document.getElementById('confirmTitle');
     var confirmMessage = document.getElementById('confirmMessage');
     var confirmCancelBtn = document.getElementById('confirmCancelBtn');
@@ -2086,6 +2167,7 @@
     var pendingForm = null;
     var pendingSubmitter = null;
     var confirmedForm = null;
+    var confirmReturnFocus = null;
 
     function closeConfirmModal() {
         if (!confirmModal) return;
@@ -2093,12 +2175,15 @@
         confirmModal.setAttribute('aria-hidden', 'true');
         pendingForm = null;
         pendingSubmitter = null;
+        if (confirmReturnFocus && document.contains(confirmReturnFocus)) confirmReturnFocus.focus();
+        confirmReturnFocus = null;
     }
 
     function openConfirmModal(form, submitter) {
         if (!confirmModal || !confirmMessage || !confirmProceedBtn) return false;
         pendingForm = form;
         pendingSubmitter = submitter || null;
+        confirmReturnFocus = submitter || document.activeElement;
         var message = form.getAttribute('data-confirm-message') || @json(__('Are you sure you want to continue?'));
         var title = form.getAttribute('data-confirm-title') || @json(__('Confirm action'));
         var action = (submitter && submitter.getAttribute('data-confirm-action'))
@@ -2113,6 +2198,7 @@
         confirmProceedBtn.textContent = action;
         confirmProceedBtn.classList.toggle('danger', tone === 'danger');
         confirmProceedBtn.classList.toggle('primary', tone !== 'danger');
+        if (confirmDialog) confirmDialog.dataset.tone = tone;
         confirmModal.classList.add('is-open');
         confirmModal.setAttribute('aria-hidden', 'false');
         confirmCancelBtn && confirmCancelBtn.focus();
@@ -2132,6 +2218,9 @@
         if (!(form instanceof HTMLFormElement) || !form.hasAttribute('data-confirm-message')) return;
         if (confirmedForm === form) {
             confirmedForm = null;
+            if (typeof window.studentEdgeSetLoading === 'function') {
+                window.studentEdgeSetLoading(form, event.submitter || pendingSubmitter);
+            }
             return;
         }
         event.preventDefault();

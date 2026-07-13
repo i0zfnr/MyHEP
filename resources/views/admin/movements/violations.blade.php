@@ -20,7 +20,7 @@
         <p>{{ __('Focus on curfew breaches so discipline review can move faster and with cleaner supporting data.') }}</p>
     </div>
 
-    <section class="ui-card">
+    <section class="ui-card" data-filter-sheet data-filter-title="{{ __('Violation filters') }}">
         <div class="ui-card-head">
             <div>
                 <strong>{{ __('Filter Violations') }}</strong>
@@ -57,7 +57,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui-card-body">{{ $records->links() }}</div>
+        <div class="ui-card-body mv-pagination-wrap">
+            {{ $records->onEachSide(1)->links('vendor.pagination.studentedge') }}
+        </div>
     </section>
 </div>
 @endsection

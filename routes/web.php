@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BugReportController;
+use App\Http\Controllers\NotificationFeedController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\MovementController as StudentMovementController;
@@ -143,6 +144,7 @@ Route::post('/locale', function (Request $request) {
 
     return redirect()->back();
 })->name('locale.update');
+Route::post('/theme', [SettingController::class, 'updateTheme'])->name('theme.update');
 
 Route::get('/report-problem', [BugReportController::class, 'create'])->name('bug-reports.create');
 Route::post('/report-problem', [BugReportController::class, 'store'])
@@ -165,6 +167,9 @@ Route::get('/settings', [SettingController::class, 'show'])
 Route::post('/settings', [SettingController::class, 'update'])
     ->middleware('auth.session.any')
     ->name('settings.update');
+Route::get('/notifications/feed', NotificationFeedController::class)
+    ->middleware('auth.session.any')
+    ->name('notifications.feed');
 Route::post('/push/subscribe', function (Request $request) {
     $validated = $request->validate([
         'endpoint' => ['required', 'string', 'max:2048'],

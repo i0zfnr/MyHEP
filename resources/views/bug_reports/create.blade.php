@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    @include('partials.theme_bootstrap')
     <meta name="theme-color" content="#171412">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,6 +34,11 @@
         }
 
         * { box-sizing: border-box; }
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
         body {
             margin: 0;
             min-height: 100vh;
@@ -44,6 +51,7 @@
         }
         .shell {
             width: min(1120px, calc(100% - 32px));
+            min-width: 0;
             margin: 0 auto;
             padding: 36px 0 56px;
         }
@@ -88,9 +96,11 @@
             grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
             gap: 24px;
             align-items: stretch;
+            min-width: 0;
         }
         .panel,
         .info-card {
+            min-width: 0;
             border: 1px solid var(--border);
             border-radius: 28px;
             background: var(--surface);
@@ -132,6 +142,7 @@
             color: var(--muted);
             line-height: 1.75;
             font-size: 1rem;
+            overflow-wrap: anywhere;
         }
         .panel-body {
             padding: 28px;
@@ -143,6 +154,7 @@
         }
         .field {
             display: grid;
+            min-width: 0;
             gap: 10px;
         }
         .field.full {
@@ -259,13 +271,25 @@
         }
         @media (max-width: 640px) {
             .shell {
-                width: min(100% - 20px, 1120px);
+                width: min(calc(100% - 20px), 1120px);
                 padding-top: 20px;
                 padding-bottom: 32px;
             }
             .topbar {
-                flex-direction: column;
-                align-items: stretch;
+                gap: 10px;
+                margin-bottom: 18px;
+            }
+            .brand {
+                min-width: 0;
+            }
+            .brand img {
+                width: 38px;
+                height: 38px;
+            }
+            .back-link {
+                flex: 0 0 auto;
+                padding: 10px 13px;
+                white-space: nowrap;
             }
             .grid {
                 grid-template-columns: 1fr;
@@ -273,12 +297,21 @@
             .panel-head,
             .panel-body,
             .info-card {
-                padding: 20px;
+                padding: 18px;
+            }
+            h1 {
+                font-size: clamp(1.65rem, 8vw, 2rem);
+            }
+            .lead {
+                font-size: .92rem;
+                line-height: 1.65;
             }
         }
     </style>
+    @vite('resources/css/design-system.css')
 </head>
-<body>
+<body data-theme="{{ session('theme', 'light') }}">
+@include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
     <div class="shell">
         <div class="topbar">
             <a href="{{ route('home') }}" class="brand">

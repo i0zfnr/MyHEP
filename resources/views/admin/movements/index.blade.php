@@ -208,7 +208,7 @@
         <div class="mv-kpi"><div class="mv-kpi-label">{{ __('Late Returns') }}</div><div class="mv-kpi-value">{{ $summary['late_returns'] }}</div></div>
     </div>
 
-    <section class="ui-card">
+    <section class="ui-card" data-filter-sheet data-filter-title="{{ __('Movement filters') }}">
         <div class="ui-card-head mv-toolbar">
             <div>
                 <strong>{{ __('Search & Filter') }}</strong>
@@ -344,7 +344,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui-card-body">{{ $records->links() }}</div>
+        <div class="ui-card-body mv-pagination-wrap">
+            {{ $records->onEachSide(1)->links('vendor.pagination.studentedge') }}
+        </div>
     </section>
 </div>
 @endsection

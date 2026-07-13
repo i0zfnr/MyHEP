@@ -892,7 +892,7 @@
     </div>
 
     {{-- ── Portal Utama ── --}}
-    <div class="portal-card">
+    <div class="portal-card liquid-command-bar">
         <div class="portal-card-head">Portal Utama</div>
         <div class="portal-links">
             @if((session('auth_user.admin_role') ?? null) !== 'guard')

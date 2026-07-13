@@ -411,7 +411,7 @@
                                 @if($app->meeting_date)<span>| {{ __('Date') }}: {{ $app->meeting_date }}</span>@endif
                             </div>
                             @if(!empty($app->receipt_path))
-                                <a class="receipt-link" href="{{ asset('storage/' . $app->receipt_path) }}" target="_blank">{{ __('View uploaded receipt') }}</a>
+                                <a class="receipt-link" href="{{ asset('storage/' . $app->receipt_path) }}" target="_blank" data-media-viewer data-media-title="{{ __('Payment Receipt') }}">{{ __('View uploaded receipt') }}</a>
                             @endif
                         @elseif($offense->status !== 'paid')
                             <form method="POST" action="{{ route('student.fine-applications.store') }}" style="margin-top:12px;" enctype="multipart/form-data">
@@ -438,7 +438,7 @@
                             </div>
                             <div class="evidence-grid">
                                 @foreach($offense->evidence_photos as $photo)
-                                    <a class="evidence-link" href="{{ asset('storage/' . $photo->photo_path) }}" target="_blank">
+                                    <a class="evidence-link" href="{{ asset('storage/' . $photo->photo_path) }}" target="_blank" data-media-viewer data-media-title="{{ __('Evidence Photo') }}">
                                         <img src="{{ asset('storage/' . $photo->photo_path) }}" alt="{{ __('Bukti Gambar') }}" class="evidence-img">
                                     </a>
                                 @endforeach

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,5 +35,20 @@ class SettingController extends Controller
         app()->setLocale($validated['locale']);
 
         return redirect()->route('settings.show')->with('success', __('ui.settings_saved'));
+    }
+
+    public function updateTheme(Request $request): JsonResponse|RedirectResponse
+    {
+        $validated = $request->validate([
+            'theme' => ['required', 'in:light,dark'],
+        ]);
+
+        $request->session()->put('theme', $validated['theme']);
+
+        if ($request->expectsJson()) {
+            return response()->json(['theme' => $validated['theme']]);
+        }
+
+        return redirect()->back();
     }
 }

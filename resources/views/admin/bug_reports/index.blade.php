@@ -248,7 +248,7 @@
             </div>
         </div>
 
-        <form method="GET" action="{{ route('admin.bug-reports.index') }}" class="bugs-filters">
+        <form method="GET" action="{{ route('admin.bug-reports.index') }}" class="bugs-filters" data-filter-sheet data-filter-title="{{ __('Bug report filters') }}">
             <input class="bugs-input" type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('bug_reports.search_placeholder') }}">
             <select class="bugs-select" name="status">
                 <option value="all">{{ __('bug_reports.status_all') }}</option>
@@ -293,7 +293,9 @@
 
                             @if($bugReport->screenshot_path)
                                 <div class="bug-shot">
-                                    <img src="{{ asset('storage/' . $bugReport->screenshot_path) }}" alt="{{ $bugReport->subject }}">
+                                    <a href="{{ asset('storage/' . $bugReport->screenshot_path) }}" target="_blank" data-media-viewer data-media-title="{{ __('Bug report screenshot') }}">
+                                        <img src="{{ asset('storage/' . $bugReport->screenshot_path) }}" alt="{{ $bugReport->subject }}">
+                                    </a>
                                 </div>
                             @endif
                         </div>

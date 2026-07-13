@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    @include('partials.theme_bootstrap')
     <meta name="theme-color" content="#171412">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -760,8 +762,10 @@
             .brand-text p { font-size: .78rem; }
         }
     </style>
+    @vite('resources/css/design-system.css')
 </head>
 <body data-theme="{{ session('theme', 'light') }}">
+@include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
 @php
     $homeStats = $homeStats ?? [
         'students_managed' => 0,

@@ -201,7 +201,7 @@
             </div>
         </div>
 
-        <div class="filters">
+        <div class="filters" data-filter-sheet data-filter-title="{{ __('Rule filters') }}">
             <form method="GET" action="{{ route('admin.rules.index') }}">
                 <div class="filter-grid">
                     <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari tajuk / penerangan"></div>

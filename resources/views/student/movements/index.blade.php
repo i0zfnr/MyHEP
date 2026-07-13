@@ -34,20 +34,102 @@
     .move-empty { padding:2rem 1rem; text-align:center; color:var(--text-muted); }
     .move-scan-card { display:flex; flex-direction:column; gap:1rem; }
     .move-scan-head { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
-    .move-scan-actions { display:flex; gap:.6rem; flex-wrap:wrap; }
+    .move-scan-actions { display:flex; gap:.45rem; flex-wrap:wrap; }
     .move-scanner {
         position:relative;
-        border:1px dashed var(--border);
+        isolation:isolate;
+        border:1px solid rgba(188, 151, 112, .38);
         border-radius:18px;
         overflow:hidden;
         min-height:320px;
         height:clamp(320px, 54vw, 420px);
         background:
-            radial-gradient(circle at 50% 50%, rgba(164,141,120,.08), transparent 58%),
-            rgba(255,255,255,.62);
+            radial-gradient(circle at 50% 44%, rgba(214,173,115,.20), transparent 30%),
+            radial-gradient(circle at 12% 8%, rgba(255,255,255,.08), transparent 24%),
+            linear-gradient(145deg, #1c1713 0%, #0e0c0a 72%);
+        box-shadow:
+            0 22px 52px rgba(34, 24, 16, .24),
+            inset 0 1px 0 rgba(255,255,255,.12),
+            inset 0 -1px 0 rgba(0,0,0,.36);
+    }
+    .move-scanner::after {
+        content:'';
+        position:absolute;
+        inset:0;
+        z-index:2;
+        pointer-events:none;
+        background:
+            linear-gradient(180deg, rgba(0,0,0,.24), transparent 25%, transparent 72%, rgba(0,0,0,.38)),
+            radial-gradient(circle at center, transparent 44%, rgba(0,0,0,.34) 100%);
     }
     .move-scanner.is-live {
         border-color: transparent;
+        box-shadow:0 26px 60px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .move-scanner-toolbar {
+        position:absolute;
+        top:.75rem;
+        left:.75rem;
+        right:.75rem;
+        z-index:6;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:.6rem;
+        padding:.55rem;
+        border:1px solid rgba(255,244,226,.20);
+        border-radius:16px;
+        background:
+            linear-gradient(145deg, rgba(255,255,255,.13), transparent 48%),
+            rgba(18,14,11,.48);
+        box-shadow:0 16px 38px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.14);
+        backdrop-filter:blur(24px) saturate(165%);
+        -webkit-backdrop-filter:blur(24px) saturate(165%);
+    }
+    .move-scanner-state {
+        display:inline-flex;
+        align-items:center;
+        gap:.4rem;
+        min-width:0;
+        color:#fff7ef;
+        font-size:.7rem;
+        font-weight:850;
+        letter-spacing:.025em;
+        white-space:nowrap;
+    }
+    .move-scanner-state::before {
+        content:'';
+        width:8px;
+        height:8px;
+        flex:0 0 8px;
+        border-radius:50%;
+        background:#d7bfa8;
+        box-shadow:0 0 0 4px rgba(215,191,168,.13);
+    }
+    .move-scanner-state[data-state="live"]::before,
+    .move-scanner-state[data-state="verified"]::before {
+        background:#6ee7a4;
+        box-shadow:0 0 0 4px rgba(110,231,164,.14), 0 0 14px rgba(110,231,164,.46);
+        animation:moveScannerPulse 1.8s ease-in-out infinite;
+    }
+    .move-scanner-state[data-state="error"]::before {
+        background:#fca5a5;
+        box-shadow:0 0 0 4px rgba(252,165,165,.14);
+    }
+    .move-scanner-toolbar .ui-btn {
+        min-height:38px;
+        gap:.38rem;
+        padding:.48rem .72rem;
+        color:#fff7ef;
+    }
+    .move-scanner-toolbar .ui-btn svg {
+        width:15px;
+        height:15px;
+        flex:0 0 15px;
+    }
+    .move-scanner-toolbar .ui-btn:disabled {
+        opacity:.42;
+        cursor:not-allowed;
     }
     .move-scanner video {
         position:absolute;
@@ -57,37 +139,13 @@
         object-fit:cover;
         background:#000;
         opacity:0;
-        transition:opacity .18s ease;
+        filter:saturate(1.06) contrast(1.03);
+        transition:opacity .24s ease;
         z-index:1;
     }
     .move-scanner.is-live video { opacity:1; }
     .move-scanner-overlay {
-        position:absolute;
-        inset:0;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:1.25rem;
-        pointer-events:none;
-        z-index:3;
-    }
-    .move-scanner.is-live .move-scanner-overlay { display:none; }
-    .move-scan-frame {
-        width:min(72vw, 280px);
-        max-width:78%;
-        aspect-ratio:1;
-        border:2px solid rgba(255,255,255,.92);
-        border-radius:22px;
-        box-shadow:0 0 0 999px rgba(0,0,0,.28);
-        position:relative;
-    }
-    .move-scan-frame::before,
-    .move-scan-frame::after {
-        content:'';
-        position:absolute;
-        inset:14px;
-        border:2px solid rgba(255,255,255,.14);
-        border-radius:16px;
+        display:none !important;
     }
     .move-scan-placeholder {
         position:absolute;
@@ -96,10 +154,10 @@
         flex-direction:column;
         align-items:center;
         justify-content:center;
-        padding:1.5rem;
+        padding:5.5rem 1.5rem 6rem;
         text-align:center;
-        color:var(--text-muted);
-        z-index:2;
+        color:#d9c9ba;
+        z-index:3;
     }
     .move-scan-placeholder-copy {
         display:flex;
@@ -108,11 +166,16 @@
         gap:.7rem;
         width:min(100%, 420px);
         padding:1.25rem;
+        border:1px solid rgba(255,244,226,.12);
         border-radius:20px;
-        background:rgba(20,17,14,.42);
-        backdrop-filter:blur(8px);
+        background:
+            linear-gradient(145deg, rgba(255,255,255,.10), transparent 46%),
+            rgba(22,17,13,.42);
+        box-shadow:0 20px 44px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.09);
+        backdrop-filter:blur(18px) saturate(145%);
+        -webkit-backdrop-filter:blur(18px) saturate(145%);
     }
-    .move-scan-placeholder strong { color:var(--text); font-size:1rem; }
+    .move-scan-placeholder strong { color:#fff7ef; font-size:1.02rem; }
     .move-scan-placeholder span {
         max-width:24rem;
         line-height:1.55;
@@ -124,6 +187,41 @@
         background:rgba(255,255,255,.58);
         color:var(--text-muted);
         font-size:.84rem;
+    }
+    .move-scanner-feedback {
+        position:absolute;
+        left:.75rem;
+        right:.75rem;
+        bottom:.75rem;
+        z-index:6;
+        display:grid;
+        gap:.35rem;
+    }
+    .move-scanner-feedback .move-scan-status {
+        border-color:rgba(255,244,226,.18);
+        border-radius:16px;
+        background:
+            linear-gradient(145deg, rgba(255,255,255,.10), transparent 48%),
+            rgba(18,14,11,.58);
+        color:#eadfd5;
+        box-shadow:0 16px 38px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.11);
+        backdrop-filter:blur(24px) saturate(165%);
+        -webkit-backdrop-filter:blur(24px) saturate(165%);
+    }
+    .move-scanner-feedback .move-scan-status.ok { border-color:rgba(110,231,164,.42); color:#c9f7dd; }
+    .move-scanner-feedback .move-scan-status.warn { border-color:rgba(251,191,36,.38); color:#fde7a8; }
+    .move-scanner-feedback .move-scan-status.danger { border-color:rgba(252,165,165,.4); color:#fecaca; }
+    .move-scan-expiry {
+        width:max-content;
+        max-width:100%;
+        margin:0 .35rem;
+        color:rgba(255,247,239,.78);
+        font-size:.7rem;
+        font-weight:700;
+    }
+    @keyframes moveScannerPulse {
+        0%, 100% { transform:scale(1); }
+        50% { transform:scale(1.18); }
     }
     .move-scan-status.ok { border-color:#bbf7d0; background:#f0fdf4; color:#166534; }
     .move-scan-status.warn { border-color:#fed7aa; background:#fff7ed; color:#9a3412; }
@@ -148,32 +246,23 @@
     body[data-theme="dark"] .move-option,
     body[data-theme="dark"] .move-meta-item,
     body[data-theme="dark"] .move-scan-status { background:var(--surface); }
-    body[data-theme="dark"] .move-scan-placeholder-copy { background:rgba(14,12,10,.62); }
     body[data-theme="dark"] .move-scanner {
         background:
-            radial-gradient(circle at 50% 50%, rgba(215,191,168,.08), transparent 58%),
-            rgba(24,21,18,.72);
+            radial-gradient(circle at 50% 44%, rgba(214,173,115,.18), transparent 30%),
+            radial-gradient(circle at 12% 8%, rgba(255,255,255,.06), transparent 24%),
+            linear-gradient(145deg, #17130f 0%, #080706 74%);
     }
     #moveScannerOverlay[hidden],
     #moveScannerPlaceholder[hidden] { display:none !important; }
     @media (max-width: 640px) {
         .move-scan-head { gap:.85rem; }
-        .move-scan-actions { width:100%; }
+        .move-scan-actions { margin-left:auto; }
         .move-scan-actions .ui-btn { flex:1 1 0; justify-content:center; }
         .move-scanner {
             min-height:250px;
             height:clamp(250px, 78vw, 360px);
         }
-        .move-scan-frame {
-            width:min(62vw, 220px);
-            border-radius:18px;
-        }
-        .move-scan-frame::before,
-        .move-scan-frame::after {
-            inset:11px;
-            border-radius:12px;
-        }
-        .move-scan-placeholder { padding:1rem; }
+        .move-scan-placeholder { padding:5rem 1rem 6.2rem; }
         .move-scan-placeholder-copy {
             padding:1rem .9rem;
             border-radius:16px;
@@ -181,11 +270,30 @@
         .move-scan-placeholder strong { font-size:.96rem; }
         .move-scan-placeholder span,
         .move-scan-status { font-size:.78rem; }
+        .move-scanner-toolbar {
+            top:.6rem;
+            left:.6rem;
+            right:.6rem;
+            padding:.45rem;
+        }
+        .move-scanner-toolbar .ui-btn {
+            min-height:36px;
+            padding:.42rem .55rem;
+            font-size:.7rem;
+        }
+        .move-scanner-feedback {
+            left:.6rem;
+            right:.6rem;
+            bottom:.6rem;
+        }
         .ui-table th,
         .ui-table td {
             font-size:.74rem;
             white-space:normal;
         }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .move-scanner-state::before { animation:none !important; }
     }
 </style>
 @endpush
@@ -292,15 +400,24 @@
                     <div>
                         <p class="move-note" style="margin-top:0;">{{ __('Use the device camera to scan the active QR code at the guard house. Each QR scan is single-use and expires quickly.') }}</p>
                     </div>
-                    <div class="move-scan-actions">
-                        <button type="button" class="ui-btn primary" id="scanStartBtn">{{ __('Start Scanner') }}</button>
-                        <button type="button" class="ui-btn" id="scanStopBtn">{{ __('Stop Scanner') }}</button>
-                    </div>
                 </div>
 
                 <div class="move-scanner" id="moveScanner">
-                    <video id="moveScannerVideo" playsinline muted></video>
+                    <video id="moveScannerVideo" playsinline muted aria-label="{{ __('QR scanner camera preview') }}"></video>
                     <canvas id="moveScannerCanvas" hidden></canvas>
+                    <div class="move-scanner-toolbar">
+                        <span class="move-scanner-state" id="moveScannerState" data-state="{{ $checkpointValid ? 'verified' : 'idle' }}" role="status" aria-live="polite">
+                            {{ $checkpointValid ? __('QR Verified') : __('Scanner Idle') }}
+                        </span>
+                        <div class="move-scan-actions">
+                            <button type="button" class="ui-btn se-liquid-button se-liquid-button--accent" id="scanStartBtn">
+                                <span>{{ __('Start') }}</span>
+                            </button>
+                            <button type="button" class="ui-btn se-liquid-button" id="scanStopBtn" disabled>
+                                <span>{{ __('Stop') }}</span>
+                            </button>
+                        </div>
+                    </div>
                     <div class="move-scan-placeholder" id="moveScannerPlaceholder">
                         <div class="move-scan-placeholder-copy">
                             <strong>{{ __('Camera scanner is idle') }}</strong>
@@ -310,20 +427,21 @@
                     <div class="move-scanner-overlay" id="moveScannerOverlay" hidden>
                         <div class="move-scan-frame"></div>
                     </div>
-                </div>
-
-                <div class="move-scan-status {{ $checkpointValid ? 'ok' : 'warn' }}" id="moveScanStatus">
-                    {{ $checkpointValid
-                        ? __('Latest QR verified. Complete the movement before this one-time pass expires.')
-                        : __('Waiting for a valid QR scan from the live guard house checkpoint.') }}
+                    <div class="move-scanner-feedback">
+                        <div class="move-scan-status {{ $checkpointValid ? 'ok' : 'warn' }}" id="moveScanStatus" role="status" aria-live="polite">
+                            {{ $checkpointValid
+                                ? __('Latest QR verified. Complete the movement before this one-time pass expires.')
+                                : __('Waiting for a valid QR scan from the live guard house checkpoint.') }}
+                        </div>
+                        @if($checkpointValid && $scanExpiresAt)
+                            <div class="move-scan-expiry" id="moveScanExpiry" data-expiry="{{ $scanExpiresAt->toIso8601String() }}">
+                                {{ __('Scan pass expires at :time.', ['time' => $scanExpiresAt->format('d M Y, h:i:s A')]) }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 @if($checkpointValid)
-                    @if($scanExpiresAt)
-                        <div class="move-note" id="moveScanExpiry" data-expiry="{{ $scanExpiresAt->toIso8601String() }}">
-                            {{ __('Scan pass expires at :time.', ['time' => $scanExpiresAt->format('d M Y, h:i:s A')]) }}
-                        </div>
-                    @endif
                     <form method="POST" action="{{ route('student.movements.store') }}" data-confirm-message="{{ __('Confirm this movement record?') }}" data-confirm-action="{{ __('Confirm Movement') }}">
                         @csrf
                         <input type="hidden" name="checkpoint_id" value="{{ $checkpoint->id }}">
@@ -397,7 +515,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui-card-body">{{ $records->links() }}</div>
+        <div class="ui-card-body mv-pagination-wrap">
+            {{ $records->onEachSide(1)->links('vendor.pagination.studentedge') }}
+        </div>
     </section>
 </div>
 @endsection
@@ -426,6 +546,7 @@
     const placeholder = document.getElementById('moveScannerPlaceholder');
     const overlay = document.getElementById('moveScannerOverlay');
     const statusNode = document.getElementById('moveScanStatus');
+    const stateNode = document.getElementById('moveScannerState');
     const expiryNode = document.getElementById('moveScanExpiry');
     const plateField = document.getElementById('vehiclePlateNo');
     const movementTypeRadios = Array.from(document.querySelectorAll('input[name="movement_type_id"]'));
@@ -478,6 +599,12 @@
         statusNode.className = 'move-scan-status' + (tone ? ' ' + tone : '');
     };
 
+    const setScannerState = (label, state) => {
+        if (!stateNode) return;
+        stateNode.textContent = label;
+        stateNode.dataset.state = state;
+    };
+
     const extractToken = (rawValue) => {
         const value = String(rawValue || '').trim();
         if (!value) return null;
@@ -504,6 +631,9 @@
         placeholder.hidden = false;
         overlay.hidden = true;
         isScanning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        setScannerState(@json($checkpointValid ? __('QR Verified') : __('Scanner Idle')), @json($checkpointValid ? 'verified' : 'idle'));
     };
 
     const handleDetectedValue = (rawValue) => {
@@ -586,6 +716,8 @@
 
         try {
             stopScanner();
+            startBtn.disabled = true;
+            setScannerState(@json(__('Starting Camera')), 'starting');
             stream = await requestCameraStream();
             video.srcObject = stream;
             video.setAttribute('playsinline', 'true');
@@ -595,9 +727,13 @@
             placeholder.hidden = true;
             overlay.hidden = false;
             isScanning = true;
+            stopBtn.disabled = false;
+            setScannerState(@json(__('Scanner Live')), 'live');
             setStatus(@json(__('Scanner is live. Point the camera at the guard house QR code.')), 'ok');
             scanTimer = window.setInterval(scanFrame, 450);
         } catch (error) {
+            stopScanner();
+            setScannerState(@json(__('Camera Error')), 'error');
             setStatus(@json(__('Camera access failed. Please allow camera permission and try again.')), 'danger');
         }
     });

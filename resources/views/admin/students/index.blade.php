@@ -230,7 +230,7 @@
             </div>
         </div>
 
-        <div class="filters">
+        <div class="filters" data-filter-sheet data-filter-title="{{ __('Student filters') }}">
             <form method="GET" action="{{ route('admin.students.index') }}">
                 <div class="filter-grid">
                     <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama / matrik / IC') }}"></div>

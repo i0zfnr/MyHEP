@@ -81,7 +81,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui-card-body">{{ $records->links() }}</div>
+        <div class="ui-card-body mv-pagination-wrap">
+            {{ $records->onEachSide(1)->links('vendor.pagination.studentedge') }}
+        </div>
     </section>
 </div>
 @endsection
