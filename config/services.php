@@ -49,4 +49,9 @@ return [
         'ca_bundle' => env('WEBPUSH_CA_BUNDLE'),
     ],
 
+    'deepseek' => [
+        'key' => env('DEEPSEEK_API_KEY'),
+        'url' => env('DEEPSEEK_API_URL'),
+    ],
+
 ];

@@ -42,6 +42,11 @@ html[data-theme="light"] {
     --liquid-highlight: rgba(255, 255, 255, .72);
     --liquid-glow: rgba(237, 205, 160, .22);
     --liquid-shadow: 0 18px 44px rgba(73, 50, 29, .12), inset 0 1px 0 rgba(255, 255, 255, .82), inset 0 -1px 0 rgba(116, 82, 47, .06);
+    --liquid-shell: rgba(255, 252, 247, .56);
+    --liquid-shell-strong: rgba(255, 255, 255, .68);
+    --liquid-popup: rgba(255, 252, 248, .88);
+    --liquid-rim: rgba(255, 255, 255, .94);
+    --liquid-depth: rgba(85, 58, 34, .18);
 
     /* Compatibility with existing page tokens. */
     --primary: var(--se-primary);
@@ -135,6 +140,11 @@ body[data-theme="dark"] {
     --liquid-highlight: rgba(255, 255, 255, .11);
     --liquid-glow: rgba(228, 188, 128, .15);
     --liquid-shadow: 0 20px 50px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 -1px 0 rgba(0, 0, 0, .24);
+    --liquid-shell: rgba(20, 17, 14, .58);
+    --liquid-shell-strong: rgba(31, 27, 23, .70);
+    --liquid-popup: rgba(20, 17, 14, .88);
+    --liquid-rim: rgba(255, 239, 215, .22);
+    --liquid-depth: rgba(0, 0, 0, .52);
 
     --primary: var(--se-primary);
     --primary-dark: var(--se-primary-strong);
@@ -1784,7 +1794,7 @@ body > .card {
     border: 1px solid var(--liquid-stroke-soft);
     border-radius: 24px;
     background:
-        radial-gradient(320px circle at 90% 0%, var(--liquid-glow), transparent 72%),
+        radial-gradient(140px circle at 90% 0%, var(--liquid-glow), transparent 50%),
         linear-gradient(145deg, var(--liquid-highlight), transparent 42%),
         color-mix(in srgb, var(--se-surface) 94%, transparent);
     box-shadow: 0 28px 72px rgba(31, 22, 15, .24), inset 0 1px 0 var(--liquid-stroke);
@@ -2634,5 +2644,844 @@ html:not([data-theme="dark"]) body:not([data-theme="dark"]) .page-body :is(.rule
 
     .se-liquid-button--accent {
         background:var(--se-primary-strong) !important;
+    }
+}
+
+/* Frosted shell for navigation and every transient popup surface. */
+.app-layout .sidebar {
+    isolation: isolate;
+    background:
+        radial-gradient(140% 85% at -12% -4%, rgba(255, 255, 255, .88), transparent 50%),
+        radial-gradient(90% 65% at 108% 4%, var(--liquid-glow), transparent 64%),
+        linear-gradient(145deg, var(--liquid-shell-strong), var(--liquid-shell)) !important;
+    border-right-color: color-mix(in srgb, var(--liquid-rim) 72%, var(--se-primary-muted)) !important;
+    box-shadow:
+        18px 0 60px rgba(73, 50, 29, .14),
+        inset -1px 0 0 rgba(255, 255, 255, .46),
+        inset 0 1px 0 var(--liquid-rim) !important;
+    backdrop-filter: blur(34px) saturate(185%) contrast(104%) !important;
+    -webkit-backdrop-filter: blur(34px) saturate(185%) contrast(104%) !important;
+}
+
+.app-layout .sidebar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(112deg, rgba(255, 255, 255, .34), transparent 28%, transparent 72%, rgba(255, 255, 255, .12)),
+        radial-gradient(340px 220px at 20% 12%, var(--liquid-glow), transparent 72%);
+}
+
+.app-layout .sidebar > * {
+    position: relative;
+    z-index: 1;
+}
+
+.app-layout .sidebar::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: 0;
+    bottom: 14px;
+    width: 1px;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, var(--liquid-rim) 12%, var(--liquid-rim) 88%, transparent);
+    opacity: .82;
+}
+
+.app-layout .sidebar :is(.sb-header, .sb-footer) {
+    background: color-mix(in srgb, var(--liquid-shell-strong) 42%, transparent) !important;
+    border-color: color-mix(in srgb, var(--liquid-rim) 54%, transparent) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--liquid-rim) 62%, transparent) !important;
+    backdrop-filter: blur(22px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(165%) !important;
+}
+
+.app-layout .sidebar .sb-user {
+    background:
+        radial-gradient(180px circle at 92% 0%, var(--liquid-glow), transparent 70%),
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-rim) 38%, transparent), transparent 48%),
+        color-mix(in srgb, var(--liquid-shell-strong) 66%, transparent) !important;
+    border-color: color-mix(in srgb, var(--liquid-rim) 66%, var(--se-primary-muted)) !important;
+    box-shadow:
+        0 14px 34px rgba(73, 50, 29, .12),
+        inset 0 1px 0 var(--liquid-rim),
+        inset 0 -1px 0 rgba(105, 74, 43, .08) !important;
+    backdrop-filter: blur(24px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
+}
+
+.app-layout .sidebar .nav-link:hover,
+.app-layout .sidebar .nav-group:hover > .nav-group-toggle,
+.app-layout .sidebar .nav-group[open] > .nav-group-toggle {
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-rim) 40%, transparent), transparent 52%),
+        color-mix(in srgb, var(--se-primary-soft) 68%, transparent) !important;
+    border-color: color-mix(in srgb, var(--se-primary) 42%, var(--liquid-rim)) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--liquid-rim) 68%, transparent), 0 9px 22px rgba(73, 50, 29, .08) !important;
+}
+
+.app-layout .sidebar .nav-link.active {
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-rim) 48%, transparent), transparent 48%),
+        color-mix(in srgb, var(--se-primary-muted) 42%, var(--liquid-shell-strong)) !important;
+    border-color: color-mix(in srgb, var(--se-primary) 58%, var(--liquid-rim)) !important;
+    box-shadow: 0 12px 28px rgba(73, 50, 29, .11), inset 0 1px 0 var(--liquid-rim) !important;
+}
+
+.app-layout .sidebar :is(.se-theme-toggle, .btn-logout) {
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-rim) 38%, transparent), transparent 52%),
+        color-mix(in srgb, var(--liquid-shell-strong) 64%, transparent) !important;
+    backdrop-filter: blur(22px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
+}
+
+.app-layout .sb-overlay {
+    background: rgba(18, 13, 9, .28) !important;
+    backdrop-filter: blur(14px) saturate(115%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+}
+
+:is(.confirm-modal, .se-media-modal) {
+    background: rgba(15, 11, 8, .34) !important;
+    backdrop-filter: blur(18px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+}
+
+.se-notification-center::before,
+.se-filter-backdrop {
+    background: rgba(15, 11, 8, .28) !important;
+    backdrop-filter: blur(14px) saturate(115%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+}
+
+:is(
+    .confirm-dialog,
+    .se-notification-panel,
+    .se-media-dialog,
+    .se-filter-sheet,
+    .app-layout .header-user-menu,
+    .pwa-prompt
+) {
+    isolation: isolate;
+    overflow: hidden;
+    color: var(--se-text) !important;
+    border: 1px solid color-mix(in srgb, var(--liquid-rim) 76%, var(--se-primary-muted)) !important;
+    background:
+        radial-gradient(130% 95% at 5% -10%, rgba(255, 255, 255, .88), transparent 48%),
+        radial-gradient(75% 62% at 108% 0%, var(--liquid-glow), transparent 68%),
+        linear-gradient(145deg, var(--liquid-shell-strong), var(--liquid-shell)) !important;
+    box-shadow:
+        0 34px 86px var(--liquid-depth),
+        inset 0 1px 0 var(--liquid-rim),
+        inset 0 -1px 0 rgba(91, 62, 35, .10) !important;
+    backdrop-filter: blur(42px) saturate(195%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(42px) saturate(195%) contrast(105%) !important;
+    background-clip: padding-box !important;
+}
+
+:is(
+    .confirm-dialog,
+    .se-notification-panel,
+    .se-media-dialog,
+    .se-filter-sheet,
+    .app-layout .header-user-menu,
+    .pwa-prompt
+)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 9%;
+    left: 9%;
+    z-index: 2;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--liquid-rim), transparent);
+    opacity: .96;
+}
+
+:is(
+    .confirm-dialog,
+    .se-notification-panel,
+    .se-media-dialog,
+    .se-filter-sheet,
+    .app-layout .header-user-menu,
+    .pwa-prompt
+) > * {
+    position: relative;
+    z-index: 1;
+}
+
+:is(.confirm-dialog, .se-media-dialog) {
+    position: relative;
+}
+
+.confirm-dialog {
+    border-radius: 26px !important;
+}
+
+.confirm-dialog .confirm-head {
+    padding: 1.15rem 1.2rem .45rem !important;
+}
+
+.confirm-dialog .confirm-actions {
+    border-top: 1px solid color-mix(in srgb, var(--liquid-rim) 48%, transparent);
+    background: color-mix(in srgb, var(--liquid-shell-strong) 38%, transparent);
+}
+
+html[data-theme="dark"] .app-layout .sidebar,
+body[data-theme="dark"] .app-layout .sidebar {
+    background:
+        radial-gradient(120% 78% at -12% -4%, rgba(255, 255, 255, .11), transparent 48%),
+        radial-gradient(90% 65% at 108% 4%, var(--liquid-glow), transparent 64%),
+        linear-gradient(145deg, var(--liquid-shell-strong), var(--liquid-shell)) !important;
+    box-shadow:
+        18px 0 64px rgba(0, 0, 0, .46),
+        inset -1px 0 0 rgba(255, 239, 215, .08),
+        inset 0 1px 0 var(--liquid-rim) !important;
+}
+
+html[data-theme="dark"] :is(
+    .confirm-dialog,
+    .se-notification-panel,
+    .se-media-dialog,
+    .se-filter-sheet,
+    .app-layout .header-user-menu,
+    .pwa-prompt
+),
+body[data-theme="dark"] :is(
+    .confirm-dialog,
+    .se-notification-panel,
+    .se-media-dialog,
+    .se-filter-sheet,
+    .app-layout .header-user-menu,
+    .pwa-prompt
+) {
+    background:
+        radial-gradient(120% 88% at 4% -8%, rgba(255, 255, 255, .12), transparent 48%),
+        radial-gradient(75% 62% at 108% 0%, var(--liquid-glow), transparent 68%),
+        linear-gradient(145deg, var(--liquid-shell-strong), var(--liquid-shell)) !important;
+}
+
+@media (max-width: 1023px) {
+    .app-layout .sidebar {
+        width: min(278px, 78vw) !important;
+        box-shadow:
+            22px 0 70px rgba(42, 28, 17, .24),
+            inset -1px 0 0 rgba(255, 255, 255, .46),
+            inset 0 1px 0 var(--liquid-rim) !important;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    .app-layout .sidebar,
+    :is(
+        .confirm-dialog,
+        .se-notification-panel,
+        .se-media-dialog,
+        .se-filter-sheet,
+        .app-layout .header-user-menu,
+        .pwa-prompt
+    ) {
+        background: var(--se-surface) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .app-layout .sidebar,
+    :is(
+        .confirm-dialog,
+        .se-notification-panel,
+        .se-media-dialog,
+        .se-filter-sheet,
+        .app-layout .header-user-menu,
+        .pwa-prompt
+    ) {
+        background: var(--se-surface) !important;
+    }
+}
+
+/* Modal backdrops and compact mobile header controls. */
+.se-notification-center::before {
+    background: rgba(17, 13, 10, .30) !important;
+    backdrop-filter: blur(42px) saturate(62%) brightness(.90) !important;
+    -webkit-backdrop-filter: blur(42px) saturate(62%) brightness(.90) !important;
+}
+
+.se-notification-panel {
+    border-color: color-mix(in srgb, var(--liquid-rim) 82%, var(--se-primary-muted)) !important;
+    background:
+        radial-gradient(120% 90% at 4% -12%, rgba(255, 255, 255, .86), transparent 48%),
+        radial-gradient(78% 70% at 108% 0%, var(--liquid-glow), transparent 70%),
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-popup) 96%, white), var(--liquid-popup)) !important;
+    box-shadow:
+        0 30px 84px var(--liquid-depth),
+        inset 0 1px 0 var(--liquid-rim),
+        inset 0 -1px 0 rgba(91, 62, 35, .08) !important;
+    backdrop-filter: blur(10px) saturate(170%) contrast(104%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(170%) contrast(104%) !important;
+}
+
+.se-notification-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(112deg, rgba(255, 255, 255, .32), transparent 32%, transparent 70%, rgba(255, 255, 255, .10)),
+        radial-gradient(240px 140px at 18% 0%, var(--liquid-glow), transparent 74%);
+}
+
+.se-notification-head {
+    background: color-mix(in srgb, var(--liquid-shell-strong) 42%, transparent) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--liquid-rim) 58%, transparent);
+}
+
+.se-notification-item {
+    border-color: color-mix(in srgb, var(--liquid-rim) 46%, transparent);
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-rim) 26%, transparent), transparent 54%),
+        color-mix(in srgb, var(--liquid-shell-strong) 38%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--liquid-rim) 42%, transparent);
+}
+
+html[data-theme="dark"] .se-notification-panel,
+body[data-theme="dark"] .se-notification-panel {
+    background:
+        radial-gradient(120% 88% at 4% -8%, rgba(255, 255, 255, .12), transparent 48%),
+        radial-gradient(78% 70% at 108% 0%, var(--liquid-glow), transparent 70%),
+        linear-gradient(145deg, color-mix(in srgb, var(--liquid-popup) 95%, #34291f), var(--liquid-popup)) !important;
+}
+
+.se-filter-backdrop.is-open {
+    background: rgba(17, 13, 10, .30) !important;
+    backdrop-filter: blur(36px) saturate(70%) brightness(.92) !important;
+    -webkit-backdrop-filter: blur(36px) saturate(70%) brightness(.92) !important;
+}
+
+.se-filter-sheet {
+    background:
+        radial-gradient(110% 76% at 4% -8%, rgba(255, 255, 255, .76), transparent 46%),
+        radial-gradient(72% 56% at 106% 0%, var(--liquid-glow), transparent 72%),
+        var(--liquid-popup) !important;
+    backdrop-filter: blur(10px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(165%) !important;
+}
+
+.se-filter-sheet-body {
+    overscroll-behavior: contain;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.header-user-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 490;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    appearance: none;
+    background: rgba(17, 13, 10, .20);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    cursor: default;
+    transition: opacity .22s ease, visibility 0s linear .22s;
+    backdrop-filter: blur(24px) saturate(92%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(92%) !important;
+}
+
+.header-user-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
+}
+
+.app-layout .page-header.is-user-menu-open {
+    z-index: 500;
+}
+
+@media (max-width: 1023px) {
+    .app-layout .page-header-right > .se-theme-toggle--compact {
+        display: none !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .se-notification-panel {
+        top: var(--se-notification-top, calc(var(--topbar-h, 72px) + 66px)) !important;
+        right: 10px !important;
+        bottom: auto !important;
+        left: 10px !important;
+        width: auto !important;
+        max-height: calc(100dvh - var(--se-notification-top, 138px) - 10px - env(safe-area-inset-bottom, 0px)) !important;
+        border-radius: 24px !important;
+        transform: translateY(-18px) scale(.99) !important;
+    }
+
+    .se-notification-center.is-open .se-notification-panel {
+        transform: translateY(0) scale(1) !important;
+    }
+
+    .se-notification-list {
+        max-height: calc(100dvh - var(--se-notification-top, 138px) - 82px - env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    .se-notification-center::before,
+    .header-user-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(17, 13, 10, .58) !important;
+    }
+
+    .se-notification-panel {
+        background: var(--se-surface) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .se-filter-sheet {
+        background: var(--se-surface) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+/* Keep mobile popups as dense as the maintenance confirmation dialog. */
+@media (max-width: 767px) {
+    .se-notification-center.is-open {
+        background: rgba(17, 13, 10, .28);
+        backdrop-filter: blur(30px) saturate(72%) brightness(.92);
+        -webkit-backdrop-filter: blur(30px) saturate(72%) brightness(.92);
+    }
+
+    .se-notification-center.is-open::before {
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .se-filter-backdrop.is-open,
+    .header-user-backdrop.is-open {
+        background: rgba(17, 13, 10, .30) !important;
+        backdrop-filter: blur(30px) saturate(72%) brightness(.92) !important;
+        -webkit-backdrop-filter: blur(30px) saturate(72%) brightness(.92) !important;
+    }
+
+    :is(
+        .se-notification-panel,
+        .se-filter-sheet,
+        .app-layout .header-user-menu
+    ) {
+        border-color: color-mix(in srgb, var(--liquid-rim) 80%, var(--se-primary-muted)) !important;
+        background:
+            radial-gradient(260px circle at 90% 0%, var(--liquid-glow), transparent 72%),
+            linear-gradient(145deg, var(--liquid-highlight), transparent 45%),
+            color-mix(in srgb, var(--se-surface) 96%, transparent) !important;
+        box-shadow:
+            0 32px 80px rgba(24, 16, 10, .28),
+            inset 0 1px 0 var(--liquid-rim),
+            inset 0 -1px 0 rgba(91, 62, 35, .09) !important;
+        backdrop-filter: blur(20px) saturate(155%) contrast(104%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(155%) contrast(104%) !important;
+    }
+
+    .se-notification-panel::before {
+        background:
+            linear-gradient(112deg, rgba(255, 255, 255, .16), transparent 34%, transparent 70%, rgba(255, 255, 255, .05)),
+            radial-gradient(240px 140px at 18% 0%, var(--liquid-glow), transparent 74%) !important;
+    }
+
+    :is(.se-notification-head, .se-filter-sheet-head) {
+        background: color-mix(in srgb, var(--se-surface) 90%, transparent) !important;
+        box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--liquid-rim) 58%, transparent) !important;
+    }
+
+    .se-notification-item {
+        border-color: color-mix(in srgb, var(--liquid-rim) 62%, transparent) !important;
+        background:
+            linear-gradient(145deg, color-mix(in srgb, var(--liquid-rim) 28%, transparent), transparent 54%),
+            color-mix(in srgb, var(--se-surface) 90%, transparent) !important;
+        box-shadow: inset 0 1px 0 color-mix(in srgb, var(--liquid-rim) 54%, transparent) !important;
+    }
+
+    html[data-theme="dark"] :is(
+        .se-notification-panel,
+        .se-filter-sheet,
+        .app-layout .header-user-menu
+    ),
+    body[data-theme="dark"] :is(
+        .se-notification-panel,
+        .se-filter-sheet,
+        .app-layout .header-user-menu
+    ) {
+        background:
+            radial-gradient(260px circle at 90% 0%, var(--liquid-glow), transparent 72%),
+            linear-gradient(145deg, var(--liquid-highlight), transparent 45%),
+            color-mix(in srgb, var(--se-surface) 96%, transparent) !important;
+        box-shadow:
+            0 32px 80px rgba(0, 0, 0, .60),
+            inset 0 1px 0 var(--liquid-rim),
+            inset 0 -1px 0 rgba(255, 239, 215, .06) !important;
+    }
+}
+
+@media (max-width: 767px) and (prefers-reduced-transparency: reduce),
+       (max-width: 767px) and (prefers-contrast: more) {
+    .se-notification-center.is-open,
+    .se-filter-backdrop.is-open,
+    .header-user-backdrop.is-open {
+        background: rgba(17, 13, 10, .62) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    :is(
+        .se-notification-panel,
+        .se-filter-sheet,
+        .app-layout .header-user-menu
+    ) {
+        background: var(--se-surface) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+/* Filter content is moved outside .page-body on phones, so it needs its own layout. */
+@media (max-width: 767px) {
+    .se-filter-sheet {
+        display: flex !important;
+        flex-direction: column;
+        max-height: calc(100dvh - 142px) !important;
+        min-height: 0;
+    }
+
+    .se-filter-sheet-head {
+        flex: 0 0 auto;
+        padding: .9rem 1rem !important;
+    }
+
+    .se-filter-sheet-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none !important;
+        padding: .75rem !important;
+        overscroll-behavior: contain;
+    }
+
+    .se-filter-sheet-body > [data-filter-sheet] {
+        display: flex !important;
+        flex-direction: column;
+        gap: .75rem;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    .se-filter-sheet .ui-card-head {
+        padding: .9rem !important;
+        border: 1px solid color-mix(in srgb, var(--liquid-rim) 58%, var(--se-primary-muted)) !important;
+        border-radius: 16px !important;
+        background:
+            linear-gradient(145deg, color-mix(in srgb, var(--liquid-highlight) 76%, transparent), transparent 52%),
+            color-mix(in srgb, var(--se-surface) 93%, transparent) !important;
+        box-shadow: inset 0 1px 0 var(--liquid-rim) !important;
+    }
+
+    .se-filter-sheet .ui-card-body {
+        padding: 0 .1rem !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .se-filter-sheet .mv-toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: .7rem;
+    }
+
+    .se-filter-sheet .mv-toolbar strong {
+        color: var(--se-text) !important;
+    }
+
+    .se-filter-sheet .mv-table-note {
+        color: var(--se-text-soft) !important;
+        line-height: 1.45;
+    }
+
+    .se-filter-sheet .mv-actions {
+        justify-content: flex-start;
+        gap: .45rem;
+    }
+
+    .se-filter-sheet .mv-actions .ui-btn {
+        min-height: 36px;
+        padding: .45rem .68rem;
+        border-color: var(--se-border-strong) !important;
+        background: color-mix(in srgb, var(--se-surface) 92%, transparent) !important;
+        color: var(--se-text) !important;
+        font-size: .74rem;
+    }
+
+    .se-filter-sheet .mv-actions .ui-btn.active {
+        border-color: color-mix(in srgb, var(--se-primary) 62%, var(--liquid-rim)) !important;
+        background: color-mix(in srgb, var(--se-primary-soft) 76%, var(--se-surface)) !important;
+        color: var(--se-primary-strong) !important;
+        box-shadow: inset 0 1px 0 var(--liquid-rim) !important;
+    }
+
+    .se-filter-sheet .mv-filter-grid {
+        grid-template-columns: 1fr;
+        gap: .72rem;
+    }
+
+    .se-filter-sheet .mv-field {
+        gap: .34rem;
+    }
+
+    .se-filter-sheet .mv-field span {
+        color: var(--se-text-soft) !important;
+        font-size: .7rem;
+    }
+
+    .se-filter-sheet .mv-field :is(input, select) {
+        min-height: 44px;
+        border-color: var(--se-border-strong) !important;
+        background: color-mix(in srgb, var(--se-surface) 92%, transparent) !important;
+        color: var(--se-text) !important;
+    }
+
+    .se-filter-sheet .mv-filter-actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        margin-top: .8rem !important;
+        padding: .8rem 0 calc(.2rem + env(safe-area-inset-bottom, 0px));
+        background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--se-surface) 96%, transparent) 30%);
+    }
+
+    .se-filter-sheet .mv-filter-meta {
+        width: 100%;
+    }
+
+    .se-filter-sheet .mv-results-badge {
+        border-color: var(--se-border-strong) !important;
+        background: color-mix(in srgb, var(--se-surface) 90%, transparent) !important;
+        color: var(--se-text-soft) !important;
+    }
+
+    .se-filter-sheet .mv-results-badge strong {
+        color: var(--se-text) !important;
+    }
+
+    .se-filter-sheet .mv-filter-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        gap: .5rem;
+    }
+
+    .se-filter-sheet .mv-filter-buttons .ui-btn {
+        min-width: 0;
+        min-height: 40px;
+        padding: .5rem .35rem;
+        font-size: .74rem;
+        white-space: nowrap;
+    }
+}
+
+/* Keep mobile glass sheets responsive on lower-power phones. */
+@media (max-width: 767px) {
+    .se-filter-backdrop.is-open {
+        backdrop-filter: blur(16px) saturate(82%) brightness(.92) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(82%) brightness(.92) !important;
+    }
+
+    .se-filter-sheet {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0) scale(.985) !important;
+        transition:
+            opacity .18s ease-out,
+            transform .24s cubic-bezier(.2, .8, .2, 1),
+            visibility 0s linear .24s !important;
+        will-change: transform, opacity;
+        backdrop-filter: blur(8px) saturate(130%) contrast(103%) !important;
+        -webkit-backdrop-filter: blur(8px) saturate(130%) contrast(103%) !important;
+    }
+
+    .se-filter-sheet.is-open {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1) !important;
+        transition-delay: 0s !important;
+    }
+
+    .se-filter-sheet.is-open :is(.se-filter-sheet-head, .ui-card-head, .mv-filter-grid) {
+        animation: se-filter-content-in .2s .04s ease-out both;
+    }
+
+    .se-filter-sheet :is(.ui-btn, .se-icon-button) {
+        transition:
+            transform .16s ease,
+            border-color .16s ease,
+            background-color .16s ease,
+            box-shadow .16s ease !important;
+    }
+
+    .se-filter-sheet :is(.ui-btn, .se-icon-button):active {
+        transform: scale(.97);
+    }
+}
+
+@keyframes se-filter-content-in {
+    from {
+        opacity: .01;
+        transform: translate3d(0, 6px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .se-filter-sheet,
+    .se-filter-sheet.is-open,
+    .se-filter-sheet :is(.ui-btn, .se-icon-button) {
+        transition: none !important;
+    }
+
+    .se-filter-sheet.is-open :is(.se-filter-sheet-head, .ui-card-head, .mv-filter-grid) {
+        animation: none !important;
+    }
+}
+
+/* Keep the compact page header and account menu stable on narrow screens. */
+@media (max-width: 767px) {
+    .app-layout .page-header {
+        min-height: 64px;
+        padding: .7rem 1rem !important;
+    }
+
+    .app-layout .page-header-inner {
+        align-items: center !important;
+        gap: .65rem !important;
+    }
+
+    .app-layout .page-header-left {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .app-layout .page-header-left :where(h1, h2, h3) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .app-layout .page-header-right {
+        gap: .35rem !important;
+        min-width: 0;
+    }
+
+    .app-layout .header-user {
+        min-height: 42px;
+        padding: .26rem .5rem .26rem .26rem !important;
+        gap: .42rem;
+    }
+
+    .app-layout .header-user-avatar {
+        width: 29px;
+        height: 29px;
+    }
+
+    .app-layout .header-user-name {
+        max-width: min(22vw, 82px) !important;
+        font-size: .76rem;
+    }
+
+    .app-layout .header-user-menu {
+        top: calc(100% + 8px) !important;
+        right: 0 !important;
+        left: auto !important;
+        width: min(248px, calc(100vw - 2rem));
+        min-width: 0 !important;
+        padding: .55rem !important;
+        border-radius: 19px !important;
+        transform-origin: top right;
+    }
+
+    .app-layout .header-user-menu.is-open {
+        display: block;
+        animation: se-header-menu-in .18s cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    .app-layout .header-menu-head {
+        display: flex;
+        align-items: center;
+        gap: .58rem;
+        padding: .48rem .45rem .65rem !important;
+    }
+
+    .app-layout .header-menu-head > span:last-child {
+        display: grid;
+        min-width: 0;
+        gap: .08rem;
+    }
+
+    .app-layout .header-menu-name,
+    .app-layout .header-menu-role {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .app-layout .header-menu-link,
+    .app-layout .header-menu-btn {
+        min-height: 42px;
+        padding: .58rem .62rem !important;
+        border-radius: 12px;
+    }
+
+    .app-layout .header-menu-btn.logout {
+        min-height: 42px;
+        margin-top: .35rem;
+    }
+}
+
+@keyframes se-header-menu-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -7px, 0) scale(.975);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-layout .header-user-menu.is-open {
+        animation: none;
     }
 }

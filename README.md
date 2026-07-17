@@ -9,6 +9,14 @@ The system helps administrators efficiently manage scholarship applications, mon
 
 ---
 
+# Documentation
+
+Full system documentation is available at [`docs/SYSTEM_DOCUMENTATION.md`](docs/SYSTEM_DOCUMENTATION.md).
+
+Existing operational checklists are available in the [`docs`](docs) directory.
+
+---
+
 #  Features
 
 ##  Scholarship Module

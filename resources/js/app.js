@@ -597,6 +597,22 @@ const registerNotificationCenter = () => {
     let loading = false;
     let loaded = false;
 
+    const positionForMobile = () => {
+        if (window.innerWidth > 767) {
+            center.style.removeProperty('--se-notification-top');
+            return;
+        }
+
+        const visibleHeaders = Array.from(document.querySelectorAll('.app-layout .topbar, .app-layout .page-header'))
+            .filter((element) => window.getComputedStyle(element).display !== 'none')
+            .map((element) => element.getBoundingClientRect())
+            .filter((rect) => rect.bottom > 0 && rect.top < window.innerHeight);
+        const lowerEdge = visibleHeaders.reduce((maximum, rect) => Math.max(maximum, rect.bottom), 0);
+        const safeTop = Math.max(10, Math.min(window.innerHeight - 120, Math.round(lowerEdge + 10)));
+
+        center.style.setProperty('--se-notification-top', `${safeTop}px`);
+    };
+
     const setCount = (count) => {
         document.querySelectorAll('[data-notification-count]').forEach((badge) => {
             const safeCount = Math.max(0, Number(count) || 0);
@@ -682,6 +698,7 @@ const registerNotificationCenter = () => {
     };
 
     const open = () => {
+        positionForMobile();
         center.classList.add('is-open');
         center.setAttribute('aria-hidden', 'false');
         triggers.forEach((trigger) => trigger.setAttribute('aria-expanded', 'true'));
@@ -702,6 +719,9 @@ const registerNotificationCenter = () => {
     });
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && center.classList.contains('is-open')) close();
+    });
+    window.addEventListener('resize', () => {
+        if (center.classList.contains('is-open')) positionForMobile();
     });
 
     load();
@@ -841,7 +861,16 @@ const registerLiquidFilterSheets = () => {
             backdrop.setAttribute('aria-hidden', 'false');
             trigger.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
-            sheet.querySelector('input, select, button:not([data-filter-close])')?.focus();
+            requestAnimationFrame(() => {
+                if (!sheet.classList.contains('is-open')) return;
+                const focusTarget = sheet.querySelector('input, select, button:not([data-filter-close])');
+
+                try {
+                    focusTarget?.focus({ preventScroll: true });
+                } catch {
+                    focusTarget?.focus();
+                }
+            });
         };
 
         const sync = () => {

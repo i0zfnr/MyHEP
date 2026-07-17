@@ -2035,6 +2035,9 @@
                     @endif
                 </div>
             </div>
+            @if($showHeaderUserMenu)
+                <button type="button" class="header-user-backdrop" id="headerUserBackdrop" aria-label="{{ __('Close user menu') }}" aria-hidden="true" tabindex="-1"></button>
+            @endif
         @endif
 
         <main class="page-body">@yield('content')</main>
@@ -2107,6 +2110,29 @@
     var hamBox = document.getElementById('hamBox');
     var headerUserBtn = document.getElementById('headerUserBtn');
     var headerUserMenu = document.getElementById('headerUserMenu');
+    var headerUserBackdrop = document.getElementById('headerUserBackdrop');
+    var headerUserPageHeader = headerUserBtn ? headerUserBtn.closest('.page-header') : null;
+
+    function closeHeaderUserMenu() {
+        if (headerUserMenu) headerUserMenu.classList.remove('is-open');
+        if (headerUserBackdrop) {
+            headerUserBackdrop.classList.remove('is-open');
+            headerUserBackdrop.setAttribute('aria-hidden', 'true');
+        }
+        if (headerUserBtn) headerUserBtn.setAttribute('aria-expanded', 'false');
+        if (headerUserPageHeader) headerUserPageHeader.classList.remove('is-user-menu-open');
+    }
+
+    function setHeaderUserMenu(open) {
+        if (!headerUserMenu || !headerUserBtn) return;
+        headerUserMenu.classList.toggle('is-open', open);
+        headerUserBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (headerUserPageHeader) headerUserPageHeader.classList.toggle('is-user-menu-open', open);
+        if (headerUserBackdrop) {
+            headerUserBackdrop.classList.toggle('is-open', open);
+            headerUserBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+        }
+    }
 
     function openSidebar() {
         if (!sidebar) return;
@@ -2136,8 +2162,7 @@
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             if (sidebar) closeSidebar();
-            if (headerUserMenu) headerUserMenu.classList.remove('is-open');
-            if (headerUserBtn) headerUserBtn.setAttribute('aria-expanded', 'false');
+            closeHeaderUserMenu();
         }
     });
     if (sidebar) {
@@ -2147,15 +2172,14 @@
     if (headerUserBtn && headerUserMenu) {
         headerUserBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            var open = headerUserMenu.classList.toggle('is-open');
-            headerUserBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            setHeaderUserMenu(!headerUserMenu.classList.contains('is-open'));
         });
         document.addEventListener('click', function (e) {
             if (!headerUserMenu.contains(e.target) && !headerUserBtn.contains(e.target)) {
-                headerUserMenu.classList.remove('is-open');
-                headerUserBtn.setAttribute('aria-expanded', 'false');
+                closeHeaderUserMenu();
             }
         });
+        if (headerUserBackdrop) headerUserBackdrop.addEventListener('click', closeHeaderUserMenu);
     }
 
     var confirmModal = document.getElementById('confirmModal');

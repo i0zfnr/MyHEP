@@ -23,6 +23,8 @@
     .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
+    .ann-head-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .ann-table-wrap { overflow-x:auto; }
         /* Admin UX Identity v2 */
     :root {
         --admin-ink: #241a12;
@@ -183,6 +185,128 @@
             font-size: 12px !important;
             padding: 9px 10px !important;
         }
+    }
+    @media (max-width: 720px) {
+        .card {
+            overflow: visible;
+            border-radius: 18px;
+        }
+        .head {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 14px;
+        }
+        .head h1 {
+            font-size: 1rem !important;
+            line-height: 1.35;
+        }
+        .ann-head-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            width: 100%;
+        }
+        .ann-head-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: .65rem .55rem;
+            text-align: center;
+        }
+        .ann-head-actions .btn:first-child {
+            grid-column: 1 / -1;
+        }
+        .ann-table-wrap {
+            overflow: visible;
+            padding: 10px;
+        }
+        .announcement-table,
+        .announcement-table tbody {
+            display: block;
+            width: 100%;
+        }
+        .announcement-table thead {
+            display: none;
+        }
+        .announcement-table tr {
+            display: grid;
+            gap: 0;
+            width: 100%;
+            margin-bottom: 10px;
+            overflow: hidden;
+            border: 1px solid var(--liquid-stroke-soft, #dfceb9);
+            border-radius: 16px;
+            background:
+                linear-gradient(145deg, rgba(255,255,255,.62), transparent 48%),
+                var(--liquid-surface, rgba(255,255,255,.54));
+            box-shadow: 0 12px 28px rgba(73, 50, 29, .09), inset 0 1px 0 rgba(255,255,255,.78);
+        }
+        .announcement-table tr:last-child {
+            margin-bottom: 0;
+        }
+        .announcement-table td {
+            display: grid;
+            grid-template-columns: 88px minmax(0, 1fr);
+            align-items: start;
+            gap: 10px;
+            width: 100%;
+            max-width: none !important;
+            padding: 10px 12px !important;
+            border: 0 !important;
+            border-bottom: 1px solid color-mix(in srgb, var(--se-border, #eadfce) 72%, transparent) !important;
+            color: var(--se-text, #241a12);
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+        .announcement-table td:last-child {
+            border-bottom: 0 !important;
+        }
+        .announcement-table td::before {
+            content: attr(data-label);
+            color: var(--se-text-muted, #8b7c6f);
+            font-size: .64rem;
+            font-weight: 850;
+            letter-spacing: .08em;
+            line-height: 1.4;
+            text-transform: uppercase;
+        }
+        .announcement-table .ann-description,
+        .announcement-table .ann-actions {
+            grid-template-columns: 1fr;
+        }
+        .announcement-table .ann-description::before,
+        .announcement-table .ann-actions::before {
+            margin-bottom: 2px;
+        }
+        .announcement-table .ann-title {
+            font-weight: 800;
+        }
+        .announcement-table .ann-link a {
+            color: var(--se-primary-strong, #7d582f);
+            font-weight: 750;
+            text-underline-offset: 3px;
+        }
+        .announcement-table .actions-cell {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            width: 100%;
+        }
+        .announcement-table .actions-cell form,
+        .announcement-table .actions-cell .btn {
+            width: 100%;
+        }
+        .announcement-table .actions-cell .btn {
+            min-height: 42px;
+            text-align: center;
+        }
+        .announcement-table .ann-empty {
+            display: block;
+            padding: 1.4rem !important;
+            text-align: center !important;
+        }
+        .announcement-table .ann-empty::before {
+            content: none;
+        }
     }</style>
 @endpush
 
@@ -198,7 +322,7 @@
     <div class="card">
         <div class="head">
             <h1 style="margin:0;font-size:20px;">Pengurusan Pengumuman Scholarship</h1>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <div class="ann-head-actions">
                 <a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a>
                 <a class="btn" href="{{ route('admin.scholarship-announcements.export', request()->query()) }}">Export CSV</a>
                 <a class="btn" href="{{ route('admin.scholarship-announcements.create') }}">Tambah Pengumuman</a>
@@ -225,8 +349,8 @@
             </form>
         </div>
 
-        <div style="overflow-x:auto;">
-            <table>
+        <div class="ann-table-wrap">
+            <table class="announcement-table">
                 <thead>
                     <tr>
                         <th>Tajuk</th>
@@ -240,18 +364,18 @@
                 <tbody>
                     @forelse($announcements as $item)
                         <tr>
-                            <td>{{ $item->title }}</td>
-                            <td><span class="pill {{ $item->type }}">{{ $item->type }}</span></td>
-                            <td style="max-width:360px;">{{ $item->body }}</td>
-                            <td>
+                            <td class="ann-title" data-label="Tajuk">{{ $item->title }}</td>
+                            <td data-label="Jenis"><span class="pill {{ $item->type }}">{{ $item->type }}</span></td>
+                            <td class="ann-description" data-label="Penerangan">{{ $item->body }}</td>
+                            <td class="ann-link" data-label="Link">
                                 @if($item->link_url)
                                     <a href="{{ $item->link_url }}" target="_blank" rel="noopener">{{ $item->link_label ?: 'Buka Link' }}</a>
                                 @else
                                     -
                                 @endif
                             </td>
-                            <td>{{ $item->admin_name }}</td>
-                            <td>
+                            <td data-label="Dicipta Oleh">{{ $item->admin_name }}</td>
+                            <td class="ann-actions" data-label="Tindakan">
                                 <div class="actions-cell">
                                     <a class="btn" href="{{ route('admin.scholarship-announcements.edit', $item->id) }}">Edit</a>
                                     <form method="POST" action="{{ route('admin.scholarship-announcements.destroy', $item->id) }}" style="margin:0;"
@@ -267,7 +391,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" style="text-align:center;color:#7a6555;">Tiada pengumuman scholarship.</td></tr>
+                        <tr><td class="ann-empty" colspan="6">Tiada pengumuman scholarship.</td></tr>
                     @endforelse
                 </tbody>
             </table>
