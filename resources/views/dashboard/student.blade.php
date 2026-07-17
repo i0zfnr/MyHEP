@@ -750,6 +750,92 @@
             padding: 9px 10px !important;
         }
     }
+
+    @media (max-width: 767px) {
+        .sdash {
+            padding: .95rem .85rem 1.25rem;
+            gap: 1rem;
+        }
+
+        .alert {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: .75rem;
+            padding: .95rem;
+            border-radius: 16px;
+        }
+
+        .alert-action {
+            grid-column: 1 / -1;
+            width: 100%;
+            min-height: 44px;
+        }
+
+        .hero {
+            min-height: 0;
+            padding: 1.35rem;
+            border-radius: 18px;
+        }
+
+        .hero-name {
+            font-size: 1.75rem;
+        }
+
+        .hero-sub {
+            font-size: .82rem;
+            line-height: 1.45;
+        }
+
+        .hero-right {
+            gap: .55rem;
+        }
+
+        .hero-badge {
+            padding: .55rem .7rem;
+        }
+
+        .hero-meta-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .5rem;
+        }
+
+        .hero-meta-item {
+            min-height: 58px;
+            padding: .52rem .62rem;
+        }
+
+        .hero-meta-item:nth-child(n+3) {
+            display: none;
+        }
+
+        .student-stats-section .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .75rem;
+        }
+
+        .student-stats-section .stat-card {
+            min-height: 112px;
+            padding: .9rem;
+        }
+
+        .student-stats-section .stat-card:nth-child(1),
+        .student-stats-section .stat-card:nth-child(4) {
+            display: none;
+        }
+
+        .student-stats-section .stat-value {
+            font-size: 1.45rem;
+        }
+
+        .student-stats-section .stat-value.sm {
+            font-size: .92rem;
+            line-height: 1.25;
+        }
+
+        .student-portal-section {
+            display: none;
+        }
+    }
 </style>
 @endpush
 
@@ -854,7 +940,7 @@
     </div>
 
     {{-- â”€â”€ STATS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
-    <div>
+    <div class="student-stats-section">
         <p class="section-label">{{ __('Ringkasan Akaun') }}</p>
         <div class="stats-grid">
 
@@ -914,7 +1000,7 @@
     </div>
 
     {{-- â”€â”€ PORTAL CARDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
-    <div>
+    <div class="student-portal-section">
         <p class="section-label">{{ __('Portal Utama') }}</p>
         <div class="portal-grid">
 

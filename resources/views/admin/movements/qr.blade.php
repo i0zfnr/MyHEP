@@ -27,7 +27,7 @@
     }
     .qr-box img { width:min(280px, 100%); height:auto; }
     .qr-url { width:100%; font-size:.78rem; word-break:break-all; border:1px solid var(--border); border-radius:10px; padding:.75rem; color:var(--text-muted); background:rgba(255,255,255,.62); }
-    .qr-meta { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:.8rem; margin-top:1rem; }
+    .qr-meta { display:grid; grid-template-columns:1fr; gap:.8rem; margin-top:1rem; }
     .qr-card-actions { display:flex; gap:.65rem; flex-wrap:wrap; margin-bottom:.9rem; }
     .qr-help { color:var(--text-muted); font-size:.8rem; line-height:1.55; }
     .qr-stamp { color:var(--text-muted); font-size:.76rem; }
@@ -48,10 +48,7 @@
 
 @section('content')
 @php
-    $isValid = $checkpoint
-        && $checkpoint->is_active
-        && (!$checkpoint->valid_from || \Illuminate\Support\Carbon::parse($checkpoint->valid_from)->lte(now()))
-        && (!$checkpoint->valid_until || \Illuminate\Support\Carbon::parse($checkpoint->valid_until)->gte(now()));
+    $isValid = $checkpoint && $checkpoint->is_active;
 @endphp
 <div class="ui-shell">
     @if(session('success'))
@@ -74,7 +71,7 @@
         <section class="ui-card">
             <div class="ui-card-head">
                 <strong id="qrCheckpointName">{{ $checkpoint->name ?? __('Checkpoint') }}</strong>
-                <span class="ui-status {{ $isValid ? 'status-confirmed' : 'status-rejected' }}" id="qrCheckpointStatus">{{ $isValid ? __('Active') : __('Inactive / Expired') }}</span>
+                <span class="ui-status {{ $isValid ? 'status-confirmed' : 'status-rejected' }}" id="qrCheckpointStatus">{{ $isValid ? __('Active') : __('Inactive') }}</span>
             </div>
             <div class="ui-card-body qr-print-sheet">
                 @if($scanUrl)
@@ -84,7 +81,7 @@
                     <div class="qr-box" id="qrBox">
                         <img id="qrImage" alt="{{ __('Movement QR Code') }}" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ urlencode($scanUrl) }}">
                     </div>
-                    <p class="qr-help">{{ __('Students can scan this code at the checkpoint or open the URL manually if camera scanning is unavailable. The QR panel updates automatically when the token changes.') }}</p>
+                    <p class="qr-help">{{ __('This QR remains active at all times while the checkpoint is active. It automatically regenerates after every successful student scan.') }}</p>
                     <p class="qr-url" id="qrUrl">{{ $scanUrl }}</p>
                     <p class="qr-stamp" id="qrLastUpdated">{{ __('Waiting for latest QR sync...') }}</p>
                 @else
@@ -101,19 +98,13 @@
             <div class="ui-card-body">
                 <form method="POST" action="{{ route('admin.movements.qr.update') }}" class="ui-actions" style="align-items:end;" data-confirm-message="{{ __('Update the movement QR checkpoint?') }}">
                     @csrf
-                    <label>
-                        <span class="muted" style="display:block;font-size:.75rem;margin-bottom:.25rem;">{{ __('Validity Minutes') }}</span>
-                        <input type="number" name="valid_minutes" min="5" max="10080" value="{{ $settings['default_qr_valid_minutes'] ?? 1440 }}">
-                    </label>
                     <button class="ui-btn primary" name="action" value="rotate" type="submit">{{ __('Rotate QR') }}</button>
-                    <button class="ui-btn" name="action" value="extend" type="submit">{{ __('Extend') }}</button>
                     <button class="ui-btn" name="action" value="activate" type="submit">{{ __('Activate') }}</button>
                     <button class="ui-btn" name="action" value="deactivate" type="submit">{{ __('Deactivate') }}</button>
                 </form>
 
                 <div class="qr-meta">
-                    <div class="ui-stat-card"><div class="ui-stat-label">{{ __('Valid From') }}</div><div style="font-weight:700;" id="qrValidFrom">{{ $checkpoint?->valid_from ? \Illuminate\Support\Carbon::parse($checkpoint->valid_from)->format('d M Y, h:i A') : '-' }}</div></div>
-                    <div class="ui-stat-card"><div class="ui-stat-label">{{ __('Valid Until') }}</div><div style="font-weight:700;" id="qrValidUntil">{{ $checkpoint?->valid_until ? \Illuminate\Support\Carbon::parse($checkpoint->valid_until)->format('d M Y, h:i A') : '-' }}</div></div>
+                    <div class="ui-stat-card"><div class="ui-stat-label">{{ __('Validity') }}</div><div style="font-weight:700;" id="qrValidityMode">{{ __('Always active while checkpoint is active') }}</div></div>
                 </div>
             </div>
         </section>
@@ -130,37 +121,19 @@
     const qrUrl = document.getElementById('qrUrl');
     const qrStatus = document.getElementById('qrCheckpointStatus');
     const qrName = document.getElementById('qrCheckpointName');
-    const qrValidFrom = document.getElementById('qrValidFrom');
-    const qrValidUntil = document.getElementById('qrValidUntil');
     const qrLastUpdated = document.getElementById('qrLastUpdated');
     let lastScanUrl = qrUrl ? qrUrl.textContent.trim() : '';
-
-    const formatTimestamp = (value) => {
-        if (!value) return '-';
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return '-';
-
-        return new Intl.DateTimeFormat(undefined, {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        }).format(date);
-    };
 
     const updateQrPanel = (payload) => {
         const checkpoint = payload?.checkpoint;
         const scanUrl = payload?.scan_url || '';
-        if (!checkpoint || !qrStatus || !qrName || !qrValidFrom || !qrValidUntil) {
+        if (!checkpoint || !qrStatus || !qrName) {
             return;
         }
 
         qrName.textContent = checkpoint.name || @json(__('Checkpoint'));
-        qrStatus.textContent = checkpoint.is_valid ? @json(__('Active')) : @json(__('Inactive / Expired'));
+        qrStatus.textContent = checkpoint.is_valid ? @json(__('Active')) : @json(__('Inactive'));
         qrStatus.className = 'ui-status ' + (checkpoint.is_valid ? 'status-confirmed' : 'status-rejected');
-        qrValidFrom.textContent = formatTimestamp(checkpoint.valid_from);
-        qrValidUntil.textContent = formatTimestamp(checkpoint.valid_until);
 
         if (scanUrl && qrImage && qrUrl && scanUrl !== lastScanUrl) {
             qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(scanUrl);

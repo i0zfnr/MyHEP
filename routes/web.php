@@ -325,6 +325,9 @@ Route::get('/student/ai-helper', function () {
 Route::get('/student/movements', [StudentMovementController::class, 'index'])
     ->middleware('auth.session:student')
     ->name('student.movements.index');
+Route::get('/student/movements/scan', [StudentMovementController::class, 'scan'])
+    ->middleware('auth.session:student')
+    ->name('student.movements.scan');
 Route::post('/student/movements', [StudentMovementController::class, 'store'])
     ->middleware('auth.session:student')
     ->name('student.movements.store');

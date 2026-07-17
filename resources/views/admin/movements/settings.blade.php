@@ -48,10 +48,6 @@
                     <span class="muted">{{ __('Friday - Saturday Curfew') }}</span>
                     <input type="time" name="curfew_weekend" value="{{ $settings['curfew_weekend'] ?? '23:00' }}" required>
                 </label>
-                <label>
-                    <span class="muted">{{ __('Default QR Valid Minutes') }}</span>
-                    <input type="number" name="default_qr_valid_minutes" min="5" max="10080" value="{{ $settings['default_qr_valid_minutes'] ?? 1440 }}" required>
-                </label>
                 <label style="display:flex;align-items:center;gap:.5rem;margin-top:1.25rem;">
                     <input type="checkbox" name="gps_validation_enabled" value="1" @checked(($settings['gps_validation_enabled'] ?? '0') === '1')>
                     <span>{{ __('Enable GPS Radius Validation') }}</span>

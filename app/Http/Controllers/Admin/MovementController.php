@@ -110,7 +110,7 @@ class MovementController extends Controller
 
         return view('admin.movements.qr', [
             'checkpoint' => $checkpoint,
-            'scanUrl' => $checkpoint ? route('student.movements.index', ['token' => $checkpoint->qr_token]) : null,
+            'scanUrl' => $checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null,
             'settings' => $this->getSettings(),
         ]);
     }
@@ -118,19 +118,14 @@ class MovementController extends Controller
     public function qrStatus()
     {
         $checkpoint = DB::table('movement_checkpoints')->orderBy('id')->first();
-        $scanUrl = $checkpoint ? route('student.movements.index', ['token' => $checkpoint->qr_token]) : null;
-        $isValid = $checkpoint
-            && $checkpoint->is_active
-            && (!$checkpoint->valid_from || now()->gte($checkpoint->valid_from))
-            && (!$checkpoint->valid_until || now()->lte($checkpoint->valid_until));
+        $scanUrl = $checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null;
+        $isValid = $checkpoint && $checkpoint->is_active;
 
         return response()->json([
             'checkpoint' => $checkpoint ? [
                 'id' => (int) $checkpoint->id,
                 'name' => $checkpoint->name,
                 'is_active' => (bool) $checkpoint->is_active,
-                'valid_from' => $checkpoint->valid_from,
-                'valid_until' => $checkpoint->valid_until,
                 'is_valid' => $isValid,
             ] : null,
             'scan_url' => $scanUrl,
@@ -143,7 +138,7 @@ class MovementController extends Controller
 
         return view('admin.movements.qr_display', [
             'checkpoint' => $checkpoint,
-            'scanUrl' => $checkpoint ? route('student.movements.index', ['token' => $checkpoint->qr_token]) : null,
+            'scanUrl' => $checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null,
         ]);
     }
 
@@ -166,19 +161,20 @@ class MovementController extends Controller
         ];
 
         if ($validated['action'] === 'rotate') {
-            $minutes = (int) ($validated['valid_minutes'] ?? $this->getSettings()['default_qr_valid_minutes']);
             $payload['qr_token'] = Str::random(48);
             $payload['is_active'] = true;
-            $payload['valid_from'] = now();
-            $payload['valid_until'] = now()->addMinutes($minutes);
+            $payload['valid_from'] = null;
+            $payload['valid_until'] = null;
         } elseif ($validated['action'] === 'activate') {
             $payload['is_active'] = true;
-            $payload['valid_from'] = now();
-            $payload['valid_until'] = now()->addMinutes((int) ($validated['valid_minutes'] ?? $this->getSettings()['default_qr_valid_minutes']));
+            $payload['valid_from'] = null;
+            $payload['valid_until'] = null;
         } elseif ($validated['action'] === 'deactivate') {
             $payload['is_active'] = false;
         } elseif ($validated['action'] === 'extend') {
-            $payload['valid_until'] = now()->addMinutes((int) ($validated['valid_minutes'] ?? $this->getSettings()['default_qr_valid_minutes']));
+            $payload['is_active'] = true;
+            $payload['valid_from'] = null;
+            $payload['valid_until'] = null;
         }
 
         DB::table('movement_checkpoints')->where('id', $checkpoint->id)->update($payload);
@@ -203,7 +199,6 @@ class MovementController extends Controller
             'curfew_weekday' => ['required', 'date_format:H:i'],
             'curfew_weekend' => ['required', 'date_format:H:i'],
             'gps_validation_enabled' => ['nullable', 'boolean'],
-            'default_qr_valid_minutes' => ['required', 'integer', 'min:5', 'max:10080'],
             'checkpoint_name' => ['required', 'string', 'max:120'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
@@ -215,7 +210,6 @@ class MovementController extends Controller
         foreach ([
             'curfew_weekday',
             'curfew_weekend',
-            'default_qr_valid_minutes',
         ] as $key) {
             DB::table('movement_settings')->updateOrInsert(
                 ['key' => $key],
@@ -324,7 +318,6 @@ class MovementController extends Controller
             'curfew_weekday' => '19:00',
             'curfew_weekend' => '23:00',
             'gps_validation_enabled' => '0',
-            'default_qr_valid_minutes' => '1440',
         ];
     }
 }

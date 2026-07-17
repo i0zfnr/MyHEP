@@ -255,6 +255,129 @@
     #moveScannerOverlay[hidden],
     #moveScannerPlaceholder[hidden] { display:none !important; }
     @media (max-width: 640px) {
+        .move-page {
+            gap: .75rem;
+        }
+
+        .move-page .ui-hero {
+            min-height: 0;
+            padding: 1rem;
+            border-radius: 16px;
+        }
+
+        .move-page .ui-hero h3 {
+            font-size: 1.35rem;
+            margin-bottom: .35rem;
+        }
+
+        .move-page .ui-hero p {
+            font-size: .86rem;
+            line-height: 1.35;
+            max-width: 100%;
+        }
+
+        .move-page .ui-card {
+            border-radius: 14px;
+        }
+
+        .move-page .ui-card-head,
+        .move-page .ui-card-body {
+            padding: .8rem .9rem;
+        }
+
+        .move-page .ui-card-head {
+            min-height: auto;
+            gap: .5rem;
+        }
+
+        .move-page .ui-card-head strong {
+            font-size: .95rem;
+        }
+
+        .move-grid,
+        .move-student-grid,
+        .move-meta {
+            gap: .55rem;
+        }
+
+        .move-student-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .move-meta {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: .7rem;
+        }
+
+        .move-meta-item {
+            min-width: 0;
+            padding: .62rem;
+            border-radius: 10px;
+        }
+
+        .move-meta-item span {
+            font-size: .6rem;
+            line-height: 1.2;
+            letter-spacing: .035em;
+        }
+
+        .move-meta-item b {
+            display: block;
+            font-size: .76rem;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+
+        .move-status {
+            gap: .6rem;
+        }
+
+        .move-status strong {
+            font-size: 1.22rem;
+        }
+
+        .move-note {
+            font-size: .86rem;
+            line-height: 1.4;
+        }
+
+        .move-status-badge,
+        .move-live-chip {
+            padding: .32rem .58rem;
+            font-size: .66rem;
+        }
+
+        .move-page .ui-table th,
+        .move-page .ui-table td {
+            padding: .62rem .5rem;
+            font-size: .69rem;
+            line-height: 1.25;
+        }
+
+        .move-page .ui-table th:nth-child(6),
+        .move-page .ui-table td:nth-child(6) {
+            display: none;
+        }
+
+        .move-history-scroll {
+            max-height: 42vh;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .move-history-scroll .ui-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: rgba(255, 252, 247, .96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        body[data-theme="dark"] .move-history-scroll .ui-table thead th {
+            background: rgba(23, 20, 18, .96);
+        }
+
         .move-scan-head { gap:.85rem; }
         .move-scan-actions { margin-left:auto; }
         .move-scan-actions .ui-btn { flex:1 1 0; justify-content:center; }
@@ -287,10 +410,7 @@
             bottom:.6rem;
         }
         .ui-table th,
-        .ui-table td {
-            font-size:.74rem;
-            white-space:normal;
-        }
+        .ui-table td { white-space:normal; }
     }
     @media (prefers-reduced-motion: reduce) {
         .move-scanner-state::before { animation:none !important; }
@@ -306,7 +426,7 @@
     $isLiveOut = $residenceStatus === 'live_out';
 @endphp
 
-<div class="ui-shell">
+<div class="ui-shell move-page">
     @if(session('success'))
         <div class="move-alert">{{ session('success') }}</div>
     @endif
@@ -319,7 +439,7 @@
 
     <div class="ui-hero">
         <h3>{{ __('Campus Movement') }}</h3>
-        <p>{{ __('Students must scan the latest guard house QR first. Each scan opens a short one-time pass before the movement options unlock.') }}</p>
+        <p>{{ __('Scan the guard house QR to open a short one-time pass for check-out or return.') }}</p>
     </div>
 
     <div class="move-grid">
@@ -368,26 +488,28 @@
                     <span class="move-status-badge {{ $insideCampus ? 'ok' : 'warn' }}">{{ $insideCampus ? __('Ready to Check Out') : __('Awaiting Return Scan') }}</span>
                 </div>
 
-                <div class="move-meta">
-                    <div class="move-meta-item">
-                        <span>{{ __('Last Check-Out') }}</span>
-                        <b>{{ $currentMovement?->checkout_at ? \Illuminate\Support\Carbon::parse($currentMovement->checkout_at)->format('d M Y, h:i A') : '-' }}</b>
+                @if($currentMovement)
+                    <div class="move-meta">
+                        <div class="move-meta-item">
+                            <span>{{ __('Last Check-Out') }}</span>
+                            <b>{{ \Illuminate\Support\Carbon::parse($currentMovement->checkout_at)->format('d M Y, h:i A') }}</b>
+                        </div>
+                        <div class="move-meta-item">
+                            <span>{{ __('Expected Return') }}</span>
+                            <b>{{ $currentMovement->expected_return_at ? \Illuminate\Support\Carbon::parse($currentMovement->expected_return_at)->format('d M Y, h:i A') : '-' }}</b>
+                        </div>
+                        <div class="move-meta-item">
+                            <span>{{ __('Checkpoint') }}</span>
+                            <b>{{ $currentMovement->checkpoint_name ?? '-' }}</b>
+                        </div>
                     </div>
-                    <div class="move-meta-item">
-                        <span>{{ __('Expected Return') }}</span>
-                        <b>{{ $currentMovement?->expected_return_at ? \Illuminate\Support\Carbon::parse($currentMovement->expected_return_at)->format('d M Y, h:i A') : '-' }}</b>
-                    </div>
-                    <div class="move-meta-item">
-                        <span>{{ __('Checkpoint') }}</span>
-                        <b>{{ $currentMovement->checkpoint_name ?? ($checkpointValid ? $checkpoint->name : '-') }}</b>
-                    </div>
-                </div>
+                @endif
             </div>
         </section>
 
         <section class="ui-card">
             <div class="ui-card-head">
-                <strong>{{ __('Scan Guard House QR') }}</strong>
+                <strong>{{ $checkpointValid ? __('Confirm Movement') : __('Movement Information') }}</strong>
                 @if($checkpointValid)
                     <span class="move-live-chip">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -395,60 +517,24 @@
                     </span>
                 @endif
             </div>
-            <div class="ui-card-body move-scan-card">
-                <div class="move-scan-head">
-                    <div>
-                        <p class="move-note" style="margin-top:0;">{{ __('Use the device camera to scan the active QR code at the guard house. Each QR scan is single-use and expires quickly.') }}</p>
-                    </div>
-                </div>
-
-                <div class="move-scanner" id="moveScanner">
-                    <video id="moveScannerVideo" playsinline muted aria-label="{{ __('QR scanner camera preview') }}"></video>
-                    <canvas id="moveScannerCanvas" hidden></canvas>
-                    <div class="move-scanner-toolbar">
-                        <span class="move-scanner-state" id="moveScannerState" data-state="{{ $checkpointValid ? 'verified' : 'idle' }}" role="status" aria-live="polite">
-                            {{ $checkpointValid ? __('QR Verified') : __('Scanner Idle') }}
-                        </span>
-                        <div class="move-scan-actions">
-                            <button type="button" class="ui-btn se-liquid-button se-liquid-button--accent" id="scanStartBtn">
-                                <span>{{ __('Start') }}</span>
-                            </button>
-                            <button type="button" class="ui-btn se-liquid-button" id="scanStopBtn" disabled>
-                                <span>{{ __('Stop') }}</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="move-scan-placeholder" id="moveScannerPlaceholder">
-                        <div class="move-scan-placeholder-copy">
-                            <strong>{{ __('Camera scanner is idle') }}</strong>
-                            <span>{{ __('Point the camera at the guard house QR code to continue.') }}</span>
-                        </div>
-                    </div>
-                    <div class="move-scanner-overlay" id="moveScannerOverlay" hidden>
-                        <div class="move-scan-frame"></div>
-                    </div>
-                    <div class="move-scanner-feedback">
-                        <div class="move-scan-status {{ $checkpointValid ? 'ok' : 'warn' }}" id="moveScanStatus" role="status" aria-live="polite">
-                            {{ $checkpointValid
-                                ? __('Latest QR verified. Complete the movement before this one-time pass expires.')
-                                : __('Waiting for a valid QR scan from the live guard house checkpoint.') }}
-                        </div>
-                        @if($checkpointValid && $scanExpiresAt)
-                            <div class="move-scan-expiry" id="moveScanExpiry" data-expiry="{{ $scanExpiresAt->toIso8601String() }}">
-                                {{ __('Scan pass expires at :time.', ['time' => $scanExpiresAt->format('d M Y, h:i:s A')]) }}
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
+            <div class="ui-card-body">
                 @if($checkpointValid)
+                    <div class="move-scan-status ok" id="moveScanStatus" role="status" aria-live="polite">
+                        {{ __('Latest QR verified. Complete the movement before this one-time pass expires.') }}
+                    </div>
+                    @if($scanExpiresAt)
+                        <div class="move-scan-expiry" id="moveScanExpiry" data-expiry="{{ $scanExpiresAt->toIso8601String() }}">
+                            {{ __('Scan pass expires at :time.', ['time' => $scanExpiresAt->format('d M Y, h:i:s A')]) }}
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('student.movements.store') }}" data-confirm-message="{{ __('Confirm this movement record?') }}" data-confirm-action="{{ __('Confirm Movement') }}">
                         @csrf
                         <input type="hidden" name="checkpoint_id" value="{{ $checkpoint->id }}">
                         <input type="hidden" name="gps_latitude" id="gpsLatitude">
                         <input type="hidden" name="gps_longitude" id="gpsLongitude">
 
-                        <div class="move-options">
+                        <div class="move-options" style="margin-top:1rem;">
                             @foreach($movementTypes as $type)
                                 @php
                                     $disabled = $currentMovement
@@ -478,6 +564,22 @@
                             <a href="{{ route('student.movements.index', ['reset_scan' => 1]) }}" class="ui-btn">{{ __('Reset Scan') }}</a>
                         </div>
                     </form>
+                @else
+                    <p class="move-note" style="margin-top:0;">{{ __('Use Scan QR at the guard house to create or close a movement record.') }}</p>
+                    <div class="move-meta">
+                        <div class="move-meta-item">
+                            <span>{{ __('QR Requirement') }}</span>
+                            <b>{{ __('Required before any movement confirmation') }}</b>
+                        </div>
+                        <div class="move-meta-item">
+                            <span>{{ __('Pass Duration') }}</span>
+                            <b>{{ __('2 minutes after scan') }}</b>
+                        </div>
+                        <div class="move-meta-item">
+                            <span>{{ __('Record Source') }}</span>
+                            <b>{{ __('Guard house checkpoint') }}</b>
+                        </div>
+                    </div>
                 @endif
             </div>
         </section>
@@ -487,7 +589,7 @@
         <div class="ui-card-head">
             <strong>{{ __('Movement History') }}</strong>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="move-history-scroll" style="overflow-x:auto;">
             <table class="ui-table">
                 <thead>
                     <tr>
@@ -523,10 +625,6 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-@endpush
-
-@push('scripts')
 <script>
 (() => {
     const lat = document.getElementById('gpsLatitude');
@@ -538,23 +636,9 @@
         }, () => {}, { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 });
     }
 
-    const startBtn = document.getElementById('scanStartBtn');
-    const stopBtn = document.getElementById('scanStopBtn');
-    const video = document.getElementById('moveScannerVideo');
-    const canvas = document.getElementById('moveScannerCanvas');
-    const scanner = document.getElementById('moveScanner');
-    const placeholder = document.getElementById('moveScannerPlaceholder');
-    const overlay = document.getElementById('moveScannerOverlay');
-    const statusNode = document.getElementById('moveScanStatus');
-    const stateNode = document.getElementById('moveScannerState');
     const expiryNode = document.getElementById('moveScanExpiry');
     const plateField = document.getElementById('vehiclePlateNo');
     const movementTypeRadios = Array.from(document.querySelectorAll('input[name="movement_type_id"]'));
-    const currentUrl = new URL(window.location.href);
-
-    if (!startBtn || !stopBtn || !video || !canvas || !scanner || !placeholder || !overlay || !statusNode) {
-        return;
-    }
 
     const syncPlateRequirement = () => {
         if (!plateField || movementTypeRadios.length === 0) {
@@ -580,169 +664,6 @@
     });
     syncPlateRequirement();
 
-    let stream = null;
-    let detector = null;
-    let scanTimer = null;
-    let isScanning = false;
-    const jsQr = window.jsQR || null;
-    const canvasContext = canvas.getContext('2d', { willReadFrequently: true });
-
-    const supportsDetector = 'BarcodeDetector' in window;
-    if (supportsDetector) {
-        detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-    }
-    const supportsFallbackQr = typeof jsQr === 'function' && !!canvasContext;
-    const supportsAnyQrScanner = supportsDetector || supportsFallbackQr;
-
-    const setStatus = (message, tone) => {
-        statusNode.textContent = message;
-        statusNode.className = 'move-scan-status' + (tone ? ' ' + tone : '');
-    };
-
-    const setScannerState = (label, state) => {
-        if (!stateNode) return;
-        stateNode.textContent = label;
-        stateNode.dataset.state = state;
-    };
-
-    const extractToken = (rawValue) => {
-        const value = String(rawValue || '').trim();
-        if (!value) return null;
-
-        try {
-            const parsed = new URL(value, window.location.origin);
-            return parsed.searchParams.get('token');
-        } catch (error) {
-            return value.length >= 12 ? value : null;
-        }
-    };
-
-    const stopScanner = () => {
-        if (scanTimer) {
-            clearInterval(scanTimer);
-            scanTimer = null;
-        }
-        if (stream) {
-            stream.getTracks().forEach((track) => track.stop());
-            stream = null;
-        }
-        video.srcObject = null;
-        scanner.classList.remove('is-live');
-        placeholder.hidden = false;
-        overlay.hidden = true;
-        isScanning = false;
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
-        setScannerState(@json($checkpointValid ? __('QR Verified') : __('Scanner Idle')), @json($checkpointValid ? 'verified' : 'idle'));
-    };
-
-    const handleDetectedValue = (rawValue) => {
-        const token = extractToken(rawValue);
-        if (!token) {
-            setStatus(@json(__('QR code detected, but it does not contain a valid movement token.')), 'danger');
-            return;
-        }
-
-        stopScanner();
-        currentUrl.searchParams.set('token', token);
-        window.location.assign(currentUrl.toString());
-    };
-
-    const scanFrame = async () => {
-        if (!isScanning || video.readyState < 2) {
-            return;
-        }
-
-        try {
-            if (detector) {
-                const barcodes = await detector.detect(video);
-                if (barcodes.length > 0) {
-                    handleDetectedValue(barcodes[0].rawValue);
-                }
-                return;
-            }
-
-            if (supportsFallbackQr) {
-                const width = video.videoWidth || 0;
-                const height = video.videoHeight || 0;
-                if (!width || !height) {
-                    return;
-                }
-
-                if (canvas.width !== width || canvas.height !== height) {
-                    canvas.width = width;
-                    canvas.height = height;
-                }
-
-                canvasContext.drawImage(video, 0, 0, width, height);
-                const imageData = canvasContext.getImageData(0, 0, width, height);
-                const qrCode = jsQr(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: 'dontInvert',
-                });
-
-                if (qrCode?.data) {
-                    handleDetectedValue(qrCode.data);
-                }
-            }
-        } catch (error) {
-            setStatus(@json(__('Unable to read the QR frame right now. Keep the camera steady and try again.')), 'danger');
-        }
-    };
-
-    const requestCameraStream = async () => {
-        const attempts = [
-            { video: { facingMode: { exact: 'environment' } }, audio: false },
-            { video: { facingMode: { ideal: 'environment' } }, audio: false },
-            { video: true, audio: false },
-        ];
-
-        let lastError = null;
-        for (const constraints of attempts) {
-            try {
-                return await navigator.mediaDevices.getUserMedia(constraints);
-            } catch (error) {
-                lastError = error;
-            }
-        }
-
-        throw lastError;
-    };
-
-    startBtn.addEventListener('click', async () => {
-        if (!supportsAnyQrScanner || !navigator.mediaDevices?.getUserMedia) {
-            setStatus(@json(__('QR scanning is unavailable on this device. Allow camera access and make sure the page is opened over HTTPS.')), 'danger');
-            return;
-        }
-
-        try {
-            stopScanner();
-            startBtn.disabled = true;
-            setScannerState(@json(__('Starting Camera')), 'starting');
-            stream = await requestCameraStream();
-            video.srcObject = stream;
-            video.setAttribute('playsinline', 'true');
-            video.setAttribute('autoplay', 'true');
-            await video.play();
-            scanner.classList.add('is-live');
-            placeholder.hidden = true;
-            overlay.hidden = false;
-            isScanning = true;
-            stopBtn.disabled = false;
-            setScannerState(@json(__('Scanner Live')), 'live');
-            setStatus(@json(__('Scanner is live. Point the camera at the guard house QR code.')), 'ok');
-            scanTimer = window.setInterval(scanFrame, 450);
-        } catch (error) {
-            stopScanner();
-            setScannerState(@json(__('Camera Error')), 'error');
-            setStatus(@json(__('Camera access failed. Please allow camera permission and try again.')), 'danger');
-        }
-    });
-
-    stopBtn.addEventListener('click', () => {
-        stopScanner();
-        setStatus(@json(__('Scanner stopped. Start it again when you are ready to scan the guard house QR code.')), 'warn');
-    });
-
     if (expiryNode?.dataset.expiry) {
         const expiry = new Date(expiryNode.dataset.expiry);
         const timer = window.setInterval(() => {
@@ -758,8 +679,6 @@
             expiryNode.textContent = @json(__('Scan pass expires in :time.')).replace(':time', `${minutes}:${String(seconds).padStart(2, '0')}`);
         }, 1000);
     }
-
-    window.addEventListener('beforeunload', stopScanner);
 })();
 </script>
 @endpush

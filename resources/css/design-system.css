@@ -1759,7 +1759,7 @@ body > .card {
 .se-notification-center {
     position: fixed;
     inset: 0;
-    z-index: 520;
+    z-index: 980;
     visibility: hidden;
     pointer-events: none;
 }
@@ -2235,13 +2235,14 @@ body.is-navigating .se-page-progress span {
         right: 8px;
         bottom: calc(8px + env(safe-area-inset-bottom, 0px));
         width: auto;
-        max-height: min(78dvh, 660px);
+        max-height: min(82dvh, 660px);
         border-radius: 24px;
         transform: translateY(24px) scale(.99);
     }
 
     .se-notification-list {
-        max-height: calc(78dvh - 78px);
+        max-height: calc(82dvh - 78px);
+        padding-bottom: calc(5.8rem + env(safe-area-inset-bottom, 0px));
     }
 
     .se-media-modal {

@@ -641,6 +641,7 @@ const registerNotificationCenter = () => {
             link.className = 'se-notification-item';
             link.href = item.url || '#';
             link.dataset.tone = item.tone || 'info';
+            link.addEventListener('click', () => close());
 
             const icon = document.createElement('span');
             icon.className = 'se-notification-item-icon';

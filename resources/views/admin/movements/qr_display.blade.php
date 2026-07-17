@@ -157,10 +157,7 @@
 </head>
 <body>
 @php
-    $isValid = $checkpoint
-        && $checkpoint->is_active
-        && (!$checkpoint->valid_from || \Illuminate\Support\Carbon::parse($checkpoint->valid_from)->lte(now()))
-        && (!$checkpoint->valid_until || \Illuminate\Support\Carbon::parse($checkpoint->valid_until)->gte(now()));
+    $isValid = $checkpoint && $checkpoint->is_active;
 @endphp
     <main class="display">
         <section class="panel">
@@ -170,7 +167,7 @@
                     <p>{{ __('Students can scan this code at the checkpoint or open the URL manually if camera scanning is unavailable.') }}</p>
                 </div>
                 <div class="status {{ $isValid ? '' : 'off' }}" id="qrCheckpointStatus">
-                    {{ $isValid ? __('Active') : __('Inactive / Expired') }}
+                    {{ $isValid ? __('Active') : __('Inactive') }}
                 </div>
             </div>
             <div class="body">
@@ -180,7 +177,7 @@
                     <div class="qr-box">
                         <img id="qrImage" alt="{{ __('Movement QR Code') }}" src="https://api.qrserver.com/v1/create-qr-code/?size=720x720&data={{ urlencode($scanUrl) }}">
                     </div>
-                    <p class="help">{{ __('This QR now rotates immediately after each successful scan. Display it on a live guard-house screen and avoid relying on a static printout.') }}</p>
+                    <p class="help">{{ __('This QR remains active while the checkpoint is active and regenerates after every successful student scan.') }}</p>
                     <p class="stamp" id="qrLastUpdated">{{ __('Waiting for latest QR sync...') }}</p>
                     <p class="url" id="qrUrl">{{ $scanUrl }}</p>
                 @else
@@ -210,7 +207,7 @@
             }
 
             qrName.textContent = checkpoint.name || @json(__('Checkpoint'));
-            qrStatus.textContent = checkpoint.is_valid ? @json(__('Active')) : @json(__('Inactive / Expired'));
+            qrStatus.textContent = checkpoint.is_valid ? @json(__('Active')) : @json(__('Inactive'));
             qrStatus.className = 'status ' + (checkpoint.is_valid ? '' : 'off');
 
             if (scanUrl && qrImage && qrUrl && scanUrl !== lastScanUrl) {

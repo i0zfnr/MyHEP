@@ -835,6 +835,20 @@
             flex: 1;
             padding-block: .45rem;
         }
+        .topbar-actions {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+            flex-shrink: 0;
+        }
+        .topbar-actions .header-user {
+            min-height: 42px;
+        }
+        .topbar-actions .header-user-menu {
+            top: calc(100% + 10px);
+            right: 0;
+        }
         .topbar-brand-mark {
             width: 42px;
             height: 42px;
@@ -898,6 +912,22 @@
             .topbar-brand-mark img {
                 width: 25px;
                 height: 25px;
+            }
+            .topbar-actions {
+                gap: .38rem;
+            }
+            .topbar-actions .header-user {
+                padding: .24rem .58rem .24rem .24rem;
+            }
+            .topbar-actions .header-user-avatar {
+                width: 30px;
+                height: 30px;
+            }
+            .topbar-actions .header-user-name {
+                max-width: 64px;
+            }
+            .topbar-actions .header-user-role {
+                display: none;
             }
         }
         .btn-ham { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-right: .12rem; border: 1px solid var(--border); border-radius: 12px; background: none; cursor: pointer; color: var(--text-muted); flex-shrink: 0; }
@@ -1602,10 +1632,344 @@
                 background: #fff;
             }
         }
+
+        .mobile-bottom-nav,
+        .mobile-more-sheet,
+        .mobile-more-backdrop {
+            display: none;
+        }
+
+        body.student-scan-mode .page-header,
+        body.student-scan-mode .app-footer {
+            display: none !important;
+        }
+
+        body.student-scan-mode .page-body {
+            padding: 0 !important;
+        }
+
+        @media (max-width: 767px) {
+            body.student-mobile-shell .page-header,
+            body.has-student-bottom-nav .page-header {
+                display: none !important;
+            }
+
+            body.has-student-bottom-nav .page-body {
+                padding-bottom: calc(7.4rem + env(safe-area-inset-bottom, 0px)) !important;
+            }
+
+            body.has-student-bottom-nav .app-footer {
+                display: none !important;
+            }
+
+            body.student-mobile-shell .page-body {
+                padding-top: .75rem !important;
+            }
+
+            body.student-mobile-shell :is(.ui-shell, .settings-shell, .disc-page, .rules-page, .sch-page) {
+                gap: .75rem !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.ui-hero, .disc-hero, .rules-hero, .settings-intro) {
+                min-height: 0 !important;
+                padding: 1rem !important;
+                border-radius: 16px !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.ui-hero h3, .disc-hero h1, .rules-hero h1, .settings-intro h2) {
+                margin-bottom: .35rem !important;
+                font-size: 1.35rem !important;
+                line-height: 1.08 !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.ui-hero p, .disc-hero p, .rules-hero p, .settings-intro p) {
+                font-size: .86rem !important;
+                line-height: 1.4 !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.ui-card, .card, .rules-panel, .disc-card, .settings-panel, .settings-section) {
+                border-radius: 14px !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.ui-card-head, .ui-card-body, .card, .rules-panel-head, .rules-panel-body, .disc-head, .disc-body, .settings-section) {
+                padding: .8rem .9rem !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.ui-card-head strong, .card h2, .card h3, .rules-title, .disc-title, .settings-section-title) {
+                font-size: .98rem !important;
+                line-height: 1.2 !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.btn, .ui-btn, .rules-btn, .rules-chip, .disc-chip, .sch-chip, .action-btn) {
+                min-height: 40px !important;
+                padding: .55rem .75rem !important;
+                border-radius: 12px !important;
+                font-size: .8rem !important;
+            }
+
+            body.student-mobile-shell .page-body :is(input, select, textarea) {
+                min-height: 42px !important;
+                padding: .58rem .75rem !important;
+                border-radius: 10px !important;
+                font-size: .9rem !important;
+            }
+
+            body.student-mobile-shell .page-body :is(label, .muted, small, .help, .hint) {
+                font-size: .76rem !important;
+                line-height: 1.35 !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.settings-option, .rules-item, .disc-item, .move-meta-item, .stat-card, .portal-card) {
+                padding: .75rem !important;
+                border-radius: 12px !important;
+            }
+
+            body.student-mobile-shell .page-body :is(.settings-preview, .theme-preview) {
+                display: none !important;
+            }
+
+            .mobile-bottom-nav {
+                position: fixed;
+                left: 50%;
+                bottom: max(.85rem, env(safe-area-inset-bottom));
+                z-index: 720;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                align-items: center;
+                gap: .1rem;
+                width: min(calc(100vw - 1.9rem), 390px);
+                padding: .38rem .46rem;
+                border: 1px solid rgba(255, 255, 255, .74);
+                border-radius: 999px;
+                background:
+                    linear-gradient(135deg, rgba(255,255,255,.58), rgba(255,250,244,.32)),
+                    rgba(255,255,255,.42);
+                box-shadow:
+                    0 18px 48px rgba(45, 31, 20, .18),
+                    inset 0 1px 0 rgba(255,255,255,.92),
+                    inset 0 -1px 0 rgba(139,102,72,.08);
+                transform: translateX(-50%);
+                backdrop-filter: blur(26px) saturate(175%);
+                -webkit-backdrop-filter: blur(26px) saturate(175%);
+            }
+
+            .mobile-bottom-nav :is(a, button) {
+                appearance: none;
+                min-width: 0;
+                min-height: 54px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: .24rem;
+                border: 0;
+                border-radius: 999px;
+                background: transparent;
+                color: var(--text-muted);
+                text-decoration: none;
+                font: inherit;
+                font-size: .63rem;
+                font-weight: 800;
+                line-height: 1.1;
+                cursor: pointer;
+                transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
+            }
+
+            .mobile-bottom-nav :is(a, button):active {
+                transform: scale(.96);
+            }
+
+            .mobile-bottom-nav .mobile-nav-icon {
+                width: 26px;
+                height: 26px;
+                display: grid;
+                place-items: center;
+                border: 1px solid rgba(255,255,255,.64);
+                border-radius: 999px;
+                background:
+                    linear-gradient(145deg, rgba(255,255,255,.58), rgba(245,233,221,.62)),
+                    rgba(245,233,221,.46);
+                color: var(--primary-dark);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+            }
+
+            .mobile-bottom-nav .mobile-scan-tab {
+                min-height: 68px;
+                margin-top: -1.2rem;
+                border: 1px solid rgba(255,255,255,.48);
+                border-radius: 24px;
+                color: #fff;
+                background:
+                    linear-gradient(145deg, rgba(255,255,255,.18), transparent 42%),
+                    linear-gradient(135deg, var(--primary-dark), var(--primary));
+                box-shadow:
+                    0 16px 34px rgba(139, 102, 72, .30),
+                    inset 0 1px 0 rgba(255,255,255,.28);
+            }
+
+            .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon {
+                width: 34px;
+                height: 34px;
+                border-color: rgba(255,255,255,.22);
+                background: rgba(255,255,255,.13);
+                color: #fff;
+            }
+
+            .mobile-bottom-nav svg,
+            .mobile-more-sheet svg {
+                width: 16px;
+                height: 16px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+
+            .mobile-bottom-nav :is(a, button).active {
+                background:
+                    linear-gradient(145deg, rgba(255,255,255,.66), rgba(245,233,221,.72)),
+                    rgba(245,233,221,.56);
+                color: var(--primary-dark);
+            }
+
+            .mobile-bottom-nav :is(a, button).active .mobile-nav-icon {
+                background: rgba(255,255,255,.42);
+                border-color: rgba(139, 102, 72, .16);
+            }
+
+            .mobile-bottom-nav .mobile-scan-tab.active {
+                color: #fff;
+                background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            }
+
+            .mobile-bottom-nav .mobile-scan-tab.active .mobile-nav-icon {
+                background: rgba(255,255,255,.14);
+                color: #fff;
+            }
+
+            .mobile-more-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 710;
+                background: rgba(17, 13, 10, .22);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+            }
+
+            .mobile-more-backdrop.is-open {
+                display: block;
+            }
+
+            .mobile-more-sheet {
+                position: fixed;
+                left: max(1rem, env(safe-area-inset-left));
+                right: max(1rem, env(safe-area-inset-right));
+                bottom: calc(6.95rem + env(safe-area-inset-bottom, 0px));
+                z-index: 730;
+                padding: .75rem;
+                border: 1px solid rgba(255, 255, 255, .86);
+                border-radius: 22px;
+                background:
+                    linear-gradient(145deg, rgba(255,255,255,.94), rgba(250,247,242,.82)),
+                    rgba(255,255,255,.88);
+                box-shadow: 0 24px 64px rgba(15,23,42,.20), inset 0 1px 0 rgba(255,255,255,.90);
+                backdrop-filter: blur(22px) saturate(160%);
+                -webkit-backdrop-filter: blur(22px) saturate(160%);
+            }
+
+            .mobile-more-sheet.is-open {
+                display: grid;
+                gap: .45rem;
+                animation: mobileMoreIn 180ms ease both;
+            }
+
+            .mobile-more-link {
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+                gap: .65rem;
+                padding: .7rem .75rem;
+                border-radius: 14px;
+                color: var(--text);
+                text-decoration: none;
+                font-size: .84rem;
+                font-weight: 800;
+            }
+
+            .mobile-more-link:hover {
+                background: rgba(177, 132, 82, .12);
+                color: var(--primary-dark);
+            }
+
+            .mobile-more-link span {
+                width: 32px;
+                height: 32px;
+                display: grid;
+                place-items: center;
+                border-radius: 11px;
+                background: var(--primary-hover);
+                color: var(--primary-dark);
+            }
+
+            body[data-theme="dark"] .mobile-bottom-nav,
+            body[data-theme="dark"] .mobile-more-sheet {
+                border-color: rgba(226, 209, 192, .20);
+                background:
+                    linear-gradient(145deg, rgba(255,255,255,.08), transparent 48%),
+                    rgba(31, 27, 23, .58);
+                box-shadow:
+                    0 22px 60px rgba(0, 0, 0, .42),
+                    inset 0 1px 0 rgba(255,255,255,.08);
+            }
+
+            body[data-theme="dark"] .mobile-bottom-nav :is(a, button) {
+                color: #c8b8a9;
+            }
+
+            body[data-theme="dark"] .mobile-bottom-nav .mobile-nav-icon {
+                border-color: rgba(215, 191, 168, .18);
+                background:
+                    linear-gradient(145deg, rgba(255,255,255,.09), transparent 48%),
+                    rgba(215, 191, 168, .12);
+                color: #d7bfa8;
+            }
+
+            body[data-theme="dark"] .mobile-bottom-nav :is(a, button).active {
+                background: rgba(215, 191, 168, .18);
+                color: #fff7ef;
+            }
+
+            body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab,
+            body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab.active {
+                color: #22160d;
+                background:
+                    linear-gradient(145deg, rgba(255,255,255,.30), transparent 45%),
+                    linear-gradient(135deg, #f0cf98, #d6ad73);
+                box-shadow:
+                    0 16px 34px rgba(214, 173, 115, .24),
+                    inset 0 1px 0 rgba(255,255,255,.32);
+            }
+
+            body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon,
+            body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab.active .mobile-nav-icon {
+                border-color: rgba(34, 22, 13, .16);
+                background: rgba(34, 22, 13, .10);
+                color: #22160d;
+            }
+
+            body[data-theme="dark"] .mobile-more-link {
+                color: #fff7ef;
+            }
+        }
+
+        @keyframes mobileMoreIn {
+            from { opacity: 0; transform: translateY(10px) scale(.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
     </style>
     @vite('resources/css/design-system.css')
 </head>
-<body data-theme="{{ session('theme', 'light') }}">
 @php
     $authUser = session('auth_user');
     $isStudent = ($authUser['role'] ?? null) === 'student';
@@ -1635,8 +1999,15 @@
         || request()->routeIs('admin.student-scholarship-status.*')
         || request()->routeIs('admin.scholarship-announcements.*');
     $showSidebar = (bool) $authUser && !($isStudent && $studentOnDashboard);
-    $showHeaderUserMenu = (bool) $authUser && ($studentOnDashboard || $adminOnDashboard);
+    $showHeaderUserMenu = (bool) $authUser && ($isStudent || $adminOnDashboard);
+    $showStudentBottomNav = $isStudent && request()->routeIs('student.dashboard');
+    $bodyClasses = trim(
+        ($isStudent ? 'student-mobile-shell' : '') . ' ' .
+        ($showStudentBottomNav ? 'has-student-bottom-nav' : '') . ' ' .
+        (request()->routeIs('student.movements.scan') ? 'student-scan-mode' : '')
+    );
 @endphp
+<body data-theme="{{ session('theme', 'light') }}" class="{{ $bodyClasses }}">
 <div class="app-layout">
 
     @if($showSidebar)
@@ -1981,8 +2352,43 @@
                     <span class="topbar-subtitle">{{ __('Student Affairs') }}</span>
                 </span>
             </div>
-            @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--topbar'])
-            @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--compact'])
+            <div class="topbar-actions">
+                @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--topbar'])
+                @if($showHeaderUserMenu && $isStudent)
+                    <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu">
+                        <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+                        <span class="header-user-meta">
+                            <span class="header-user-name">{{ $authUser['name'] ?? __('User') }}</span>
+                            <span class="header-user-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                        </span>
+                    </button>
+                    <div class="header-user-menu" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
+                        <div class="header-menu-head">
+                            <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+                            <span>
+                                <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
+                                <span class="header-menu-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                            </span>
+                        </div>
+                        @if($isStudent)
+                            <a href="{{ route('student.profile') }}" class="header-menu-link">
+                                <span aria-hidden="true">&#9786;</span>{{ __('Profile') }}
+                            </a>
+                        @endif
+                        <a href="{{ route('settings.show') }}" class="header-menu-link">
+                            <span aria-hidden="true">&#9881;</span>{{ __('Settings') }}
+                        </a>
+                        <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">
+                            <span aria-hidden="true">?</span>{{ __('Support') }}
+                        </a>
+                        <div class="header-menu-sep"></div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="header-menu-btn logout">{{ __('Log Out') }}</button>
+                        </form>
+                    </div>
+                @endif
+            </div>
         </div>
         @endif
 
@@ -1993,8 +2399,7 @@
                     @if($authUser)
                         <div class="page-header-right">
                             @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--header'])
-                            @if($showHeaderUserMenu)
-                                @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--compact'])
+                            @if($showHeaderUserMenu && !$isStudent)
                                 <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-support">
                                     {{ __('Support') }}
                                 </a>
@@ -2044,6 +2449,65 @@
         @include('partials.app_footer')
     </div>
 </div>
+
+@if($showStudentBottomNav)
+    <button type="button" class="mobile-more-backdrop" id="mobileMoreBackdrop" aria-label="Close menu" aria-hidden="true" tabindex="-1"></button>
+    <div class="mobile-more-sheet" id="mobileMoreSheet" aria-hidden="true">
+        <a href="{{ route('student.movements.index') }}" class="mobile-more-link">
+            <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 0 0-14 0c0 6.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+            Campus Movement
+        </a>
+        <a href="{{ route('student.vehicle-stickers.index') }}" class="mobile-more-link">
+            <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17h14l-1.5-6h-11z"/><path d="M7 17v2"/><path d="M17 17v2"/><path d="M7 11l1.5-4h7L17 11"/></svg></span>
+            Vehicle Sticker
+        </a>
+        <a href="{{ route('student.rules.index') }}" class="mobile-more-link">
+            <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
+            Rules
+        </a>
+        <a href="{{ route('student.discipline-announcements.index') }}" class="mobile-more-link">
+            <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 13z"/><path d="M11 14v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6"/></svg></span>
+            Announcements
+        </a>
+        <a href="{{ route('settings.show') }}" class="mobile-more-link">
+            <span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2 2 0 1 1-2.83 2.83l-.04-.04A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1 .6 1.8 1.8 0 0 0-.4 1.4V21a2 2 0 1 1-4 0v-.06a1.8 1.8 0 0 0-.4-1.4 1.8 1.8 0 0 0-1-.6 1.8 1.8 0 0 0-1.98.36l-.04.04a2 2 0 1 1-2.83-2.83l.04-.04A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-.6-1 1.8 1.8 0 0 0-1.4-.4H2a2 2 0 1 1 0-4h.06a1.8 1.8 0 0 0 1.4-.4 1.8 1.8 0 0 0 .6-1 1.8 1.8 0 0 0-.36-1.98l-.04-.04a2 2 0 1 1 2.83-2.83l.04.04A1.8 1.8 0 0 0 9 4.6a1.8 1.8 0 0 0 1-.6 1.8 1.8 0 0 0 .4-1.4V2a2 2 0 1 1 4 0v.06a1.8 1.8 0 0 0 .4 1.4 1.8 1.8 0 0 0 1 .6 1.8 1.8 0 0 0 1.98-.36l.04-.04a2 2 0 1 1 2.83 2.83l-.04.04A1.8 1.8 0 0 0 19.4 9c.25.36.6.66 1 .8.42.13.9.13 1.4 0H22a2 2 0 1 1 0 4h-.06a1.8 1.8 0 0 0-1.4.4c-.4.34-.66.7-.8 1Z"/></svg></span>
+            Settings
+        </a>
+    </div>
+
+    <nav class="mobile-bottom-nav" aria-label="Student mobile navigation">
+        <a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
+            <span class="mobile-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+            </span>
+            <span>Home</span>
+        </a>
+        <a href="{{ route('student.offenses.index') }}" class="{{ request()->routeIs('student.offenses.*') ? 'active' : '' }}">
+            <span class="mobile-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
+            </span>
+            <span>Fines</span>
+        </a>
+        <a href="{{ route('student.movements.scan') }}" class="mobile-scan-tab {{ request()->routeIs('student.movements.scan') ? 'active' : '' }}">
+            <span class="mobile-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2"/><path d="M18 14h2"/><path d="M14 18h6"/></svg>
+            </span>
+            <span>Scan QR</span>
+        </a>
+        <a href="{{ route('student.scholarships.index') }}" class="{{ $studentOnScholarship ? 'active' : '' }}">
+            <span class="mobile-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M19 7V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v2"/><path d="M3 6v12a2 2 0 0 0 2 2h16v-6h-5a2 2 0 0 1 0-4h5V8"/><path d="M16 14h.01"/></svg>
+            </span>
+            <span>Aid</span>
+        </a>
+        <button type="button" id="mobileMoreToggle" aria-expanded="false" aria-controls="mobileMoreSheet">
+            <span class="mobile-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 12h.01"/><path d="M12 12h.01"/><path d="M19 12h.01"/></svg>
+            </span>
+            <span>More</span>
+        </button>
+    </nav>
+@endif
 
 @if($authUser)
 <div class="se-notification-center" id="notificationCenter" aria-hidden="true">
@@ -2112,6 +2576,9 @@
     var headerUserMenu = document.getElementById('headerUserMenu');
     var headerUserBackdrop = document.getElementById('headerUserBackdrop');
     var headerUserPageHeader = headerUserBtn ? headerUserBtn.closest('.page-header') : null;
+    var mobileMoreToggle = document.getElementById('mobileMoreToggle');
+    var mobileMoreSheet = document.getElementById('mobileMoreSheet');
+    var mobileMoreBackdrop = document.getElementById('mobileMoreBackdrop');
 
     function closeHeaderUserMenu() {
         if (headerUserMenu) headerUserMenu.classList.remove('is-open');
@@ -2132,6 +2599,33 @@
             headerUserBackdrop.classList.toggle('is-open', open);
             headerUserBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
         }
+    }
+
+    function closeMobileMore() {
+        if (mobileMoreSheet) {
+            mobileMoreSheet.classList.remove('is-open');
+            mobileMoreSheet.setAttribute('aria-hidden', 'true');
+        }
+        if (mobileMoreBackdrop) {
+            mobileMoreBackdrop.classList.remove('is-open');
+            mobileMoreBackdrop.setAttribute('aria-hidden', 'true');
+        }
+        if (mobileMoreToggle) mobileMoreToggle.setAttribute('aria-expanded', 'false');
+        if (!document.querySelector('.se-notification-center.is-open, .se-media-modal.is-open, .se-filter-sheet.is-open')) {
+            document.body.style.overflow = '';
+        }
+    }
+
+    function setMobileMore(open) {
+        if (!mobileMoreSheet || !mobileMoreToggle) return;
+        mobileMoreSheet.classList.toggle('is-open', open);
+        mobileMoreSheet.setAttribute('aria-hidden', open ? 'false' : 'true');
+        mobileMoreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (mobileMoreBackdrop) {
+            mobileMoreBackdrop.classList.toggle('is-open', open);
+            mobileMoreBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+        }
+        if (window.innerWidth <= 767) document.body.style.overflow = open ? 'hidden' : '';
     }
 
     function openSidebar() {
@@ -2163,6 +2657,7 @@
         if (e.key === 'Escape') {
             if (sidebar) closeSidebar();
             closeHeaderUserMenu();
+            closeMobileMore();
         }
     });
     if (sidebar) {
@@ -2180,6 +2675,20 @@
             }
         });
         if (headerUserBackdrop) headerUserBackdrop.addEventListener('click', closeHeaderUserMenu);
+    }
+
+    if (mobileMoreToggle && mobileMoreSheet) {
+        mobileMoreToggle.addEventListener('click', function (event) {
+            event.stopPropagation();
+            setMobileMore(!mobileMoreSheet.classList.contains('is-open'));
+        });
+        if (mobileMoreBackdrop) mobileMoreBackdrop.addEventListener('click', closeMobileMore);
+        mobileMoreSheet.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', closeMobileMore);
+        });
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 768) closeMobileMore();
+        });
     }
 
     var confirmModal = document.getElementById('confirmModal');

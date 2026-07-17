@@ -1,5 +1,5 @@
 PROJECT HANDOFF - StudentEdge / e-biasiswa
-Date: 2026-07-12
+Date: 2026-07-17
 Path: C:\laragon\www\e-biasiswa
 
 Summary
@@ -11,20 +11,46 @@ admin management, and guard-house student movement tracking.
 Current Git State
 -----------------
 - Branch: main
-- HEAD: e9f3e35 Add guard role to admins enum
-- At the last check, main matched origin/main.
-- The working tree is NOT clean. There are uncommitted changes across controllers,
-  middleware, routes, translations, tests, and many Blade views.
+- HEAD: Add mobile student QR scan flow
+- At the last check, main was ready to push to origin/main.
+- Restore checkpoint before the mobile/PWA navigation redesign: 0ecaf9c.
 - Do not reset, discard, or overwrite these changes. Inspect git status and diff
   before staging or committing anything.
 
+Current Mobile/PWA Design Direction
+-----------------------------------
+- Preserve the current StudentEdge color palette and visual identity.
+- Do not redesign desktop/tablet views while working on the student PWA experience.
+- Student mobile/PWA navigation target:
+  Home -> Fines -> Scan QR -> Aid -> More
+- Profile should not be a bottom navigation tab. Students should access profile
+  from the top-right header user/avatar menu.
+- The Scan QR tab should be visually emphasized as the central primary action.
+- The More tab can expose secondary student destinations such as Campus Movement,
+  Vehicle Sticker, Rules, Announcements, and Settings.
+- Student Dashboard mobile view should behave as a lightweight app home screen:
+  keep urgent alerts, compact welcome/status information, and key actions; avoid
+  repeating the full module directory because the bottom navigation handles access.
+- Other student pages should be improved one page at a time with mobile-only CSS:
+  offense/fine records first, then movement/QR, scholarship/aid, and profile if
+  spacing is still poor.
+- Keep routes, controllers, validation, database structure, permissions, and
+  business workflows unchanged unless the user explicitly requests backend work.
+
 Recent Completed Work
 ---------------------
+- 2026-07-17: Pushed checkpoint commit 0ecaf9c before further student PWA/mobile
+  design experiments.
+- 2026-07-17: Added a dedicated student Scan QR route/page for the mobile/PWA
+  bottom nav. Guard QR links now point to /student/movements/scan?token=...,
+  QR tokens remain usable while the checkpoint is active, and the student still
+  receives a short one-time movement pass after each successful scan.
 - Added the guard admin role and migration:
   database/migrations/2026_07_11_000011_add_guard_role_to_admins_table.php
 - Added admin and student movement management, QR generation, scanning, history,
   reporting, guard access, and related navigation.
 - Added a Safari-compatible QR scanner fallback using jsQR and device camera video.
+  The active scanner now lives on resources/views/student/movements/scan.blade.php.
 - Improved responsive login, dashboard, sidebar, header, footer, and dark theme UI.
 - Fixed the application shell so the sidebar and header begin at the viewport top.
 - Standardized the Admin Dashboard header spacing with other admin pages.
@@ -131,22 +157,27 @@ Recommended Next Execution Order
    git status --short --branch
    git diff --stat
 
-2. Complete and verify the QR/movement transaction fixes.
+2. If continuing the student PWA/mobile redesign, first verify the current
+   uncommitted Blade changes on a real mobile viewport or installed PWA context.
+   If the result is poor, restore to checkpoint 0ecaf9c or selectively revert the
+   two changed Blade files.
 
-3. Add password reset throttling and live account/role session validation.
+3. Complete and verify the QR/movement transaction fixes.
 
-4. Add focused feature tests for the above security behavior.
+4. Add password reset throttling and live account/role session validation.
 
-5. Commit the current application changes before attempting dependency updates.
+5. Add focused feature tests for the above security behavior.
 
-6. Update Composer dependencies in a separate commit and rerun:
+6. Commit the current application changes before attempting dependency updates.
+
+7. Update Composer dependencies in a separate commit and rerun:
    composer audit
    php artisan test
    php artisan route:list --except-vendor
    npm run build
    php artisan migrate:status
 
-7. Manually verify desktop and mobile workflows:
+8. Manually verify desktop and mobile workflows:
    - Login/logout and forgot-password flow.
    - Admin/student dashboards and language switching.
    - Guard QR generation, Safari/Chrome scanning, checkout, and return.

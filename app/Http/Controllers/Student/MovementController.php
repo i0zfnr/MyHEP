@@ -73,6 +73,25 @@ class MovementController extends Controller
         ]);
     }
 
+    public function scan(Request $request): View|RedirectResponse
+    {
+        $token = (string) $request->query('token', '');
+        if ($token !== '') {
+            $checkpoint = $this->checkpointByToken($token);
+            if ($this->checkpointIsUsable($checkpoint)) {
+                $this->issueScanPass($request, $checkpoint);
+
+                return redirect()->route('student.movements.index')
+                    ->with('scan_ready', __('QR scan verified. Complete your movement within the next 2 minutes.'));
+            }
+
+            return redirect()->route('student.movements.scan')
+                ->withErrors(['checkpoint' => __('The scanned QR pass is no longer valid. Please scan the latest guard house QR code again.')]);
+        }
+
+        return view('student.movements.scan');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $studentId = (int) session('auth_user.id');
@@ -292,16 +311,7 @@ class MovementController extends Controller
 
     private function checkpointIsUsable(?object $checkpoint): bool
     {
-        if (!$checkpoint || !$checkpoint->is_active) {
-            return false;
-        }
-
-        $now = now();
-        if ($checkpoint->valid_from && Carbon::parse($checkpoint->valid_from)->greaterThan($now)) {
-            return false;
-        }
-
-        return !$checkpoint->valid_until || Carbon::parse($checkpoint->valid_until)->greaterThanOrEqualTo($now);
+        return (bool) ($checkpoint && $checkpoint->is_active);
     }
 
     private function expectedReturnAt(Carbon $checkoutAt, int $returnDays): Carbon

@@ -1,6 +1,6 @@
 # StudentEdge / e-Biasiswa System Documentation
 
-Last updated: 2026-07-16
+Last updated: 2026-07-17
 
 ## 1. System Overview
 
@@ -239,12 +239,14 @@ The movement module records students checking out from and returning to campus.
 Flow:
 
 1. Admin or guard displays the active checkpoint QR code.
-2. Student scans the QR code.
-3. The QR token is validated and rotated.
+2. Student opens the dedicated student Scan QR page and scans the guard-house code.
+3. The QR token is validated against the active checkpoint and rotated immediately after a successful scan.
 4. A short-lived scan pass is stored in the student session.
 5. Student records checkout or return within the scan pass time window.
 6. The system calculates expected return time using movement settings.
 7. Late returns are marked and can trigger push notifications.
+
+The checkpoint QR itself remains usable while the checkpoint is active. Time limits apply to the student session scan pass, not to the displayed checkpoint QR token.
 
 Movement types seeded by default:
 
@@ -260,12 +262,13 @@ Admin functions:
 - Export movement records.
 - View students currently outside campus.
 - View late-return violations.
-- Manage QR status, rotation, activation, deactivation, and extension.
+- Manage QR status, rotation, activation, and deactivation.
 - Manage curfew, GPS validation, checkpoint, and movement type settings.
 
 Important routes:
 
 - `GET|POST /student/movements`
+- `GET /student/movements/scan`
 - `GET /admin/movements`
 - `GET /admin/movements/export`
 - `GET /admin/movements/outside`
@@ -345,7 +348,7 @@ Core tables:
 | `discipline_announcements` | Discipline-related announcements |
 | `movement_checkpoints` | QR checkpoint configuration |
 | `movement_types` | Checkout/return movement type definitions |
-| `movement_settings` | Curfew, QR validity, GPS validation, and related settings |
+| `movement_settings` | Curfew, GPS validation, and related movement settings |
 | `student_movements` | Checkout, return, status, late return, GPS, and vehicle plate records |
 | `password_reset_codes` | Password reset code, verification, expiry, and usage tracking |
 | `push_subscriptions` | Browser push subscription data |
@@ -394,6 +397,37 @@ Push notifications are used for workflows such as:
 - Admin movement violation alert.
 
 Required environment variables depend on `config/services.php`, including Web Push VAPID subject, public key, and private key.
+
+### 8.1 Student Mobile/PWA Interface Direction
+
+The student-facing mobile/PWA experience should be treated as a presentation layer on top of the existing student routes and workflows. Desktop and tablet layouts should remain stable unless a task explicitly requests a broader redesign.
+
+Current design direction:
+
+- Keep the existing StudentEdge color palette and glass/warm SaaS visual language.
+- Use a mobile-only bottom navigation for student accounts.
+- Target bottom navigation order:
+  - Home
+  - Fines
+  - Scan QR
+  - Aid
+  - More
+- Do not include Profile as a bottom navigation tab. Student profile access should come from the top-right header user/avatar menu.
+- Make Scan QR the central primary action in the bottom navigation.
+- Use More for secondary destinations such as Campus Movement, Vehicle Sticker, Rules, Announcements, and Settings.
+- Keep the mobile Student Dashboard lightweight. It should show urgent alerts, compact welcome/status information, and key actions instead of repeating every module card.
+- Improve student content pages incrementally with mobile-only CSS where needed:
+  - Offense and fine records.
+  - Campus movement and QR scanning.
+  - Scholarship and aid.
+  - Profile and settings if mobile spacing is poor.
+
+Implementation constraints:
+
+- Do not change student routes, controllers, validation rules, database schema, permissions, or business logic for presentation-only mobile/PWA work.
+- Use responsive CSS and existing Blade route names.
+- Preserve desktop behavior while applying mobile-only changes with media queries.
+- Test with `php artisan view:cache`, `npm run build`, and manual mobile viewport/PWA checks before committing.
 
 ## 9. Localization and Theme
 
@@ -536,4 +570,5 @@ The current project is functional, but several areas should be handled before pr
 - Improve password reset attempt throttling and reset transaction atomicity.
 - Add audit log viewer for system admins if operational review is required.
 - Add scheduled cleanup for expired password reset codes and stale push subscriptions.
-
+- Finish the student mobile/PWA app shell after visual approval, then tune each
+  student content page for mobile without altering desktop workflows.
