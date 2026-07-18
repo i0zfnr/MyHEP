@@ -569,7 +569,10 @@
     const initialMessage = root.dataset.aiEnabled === '1'
         ? @json(__('Ready. Choose a task template or enter a custom request.'))
         : @json(__('AI API key is not configured. Add an API key in .env, then clear config cache if needed.'));
-    const metaText = `${@json(__('Scope: students, scholarships, offenses, applications'))} · ${root.dataset.aiProvider?.toUpperCase() || 'AI'} / ${root.dataset.aiModel || '-'}`;
+    const scopeText = @json(__('Scope: students, scholarships, offenses, applications'));
+    const providerText = root.dataset.aiProvider?.toUpperCase() || 'AI';
+    const modelText = root.dataset.aiModel || '-';
+    const metaText = `${scopeText} · ${providerText} / ${modelText}`;
 
     const scrollChat = () => {
         chatLog.scrollTop = chatLog.scrollHeight;
