@@ -55,6 +55,12 @@ return [
         'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
     ],
 
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'url' => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+    ],
+
     'openai' => [
         'key' => env('OPENAI_API_KEY'),
         'url' => env('OPENAI_API_URL', 'https://api.openai.com/v1/responses'),

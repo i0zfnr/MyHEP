@@ -40,9 +40,11 @@ class AiHelperController extends Controller
         $prompt = $this->buildPrompt($validated);
 
         try {
-            $answer = $this->providerName() === 'openai'
-                ? $this->askOpenAi($prompt)
-                : $this->askDeepSeek($prompt);
+            $answer = match ($this->providerName()) {
+                'gemini' => $this->askGemini($prompt),
+                'openai' => $this->askOpenAi($prompt),
+                default => $this->askDeepSeek($prompt),
+            };
         } catch (\Throwable $e) {
             report($e);
 
@@ -61,6 +63,10 @@ class AiHelperController extends Controller
 
     private function providerName(): string
     {
+        if (config('services.gemini.key')) {
+            return 'gemini';
+        }
+
         if (config('services.openai.key')) {
             return 'openai';
         }
@@ -70,16 +76,12 @@ class AiHelperController extends Controller
 
     private function hasApiKey(): bool
     {
-        return (bool) ($this->providerName() === 'openai'
-            ? config('services.openai.key')
-            : config('services.deepseek.key'));
+        return (bool) config("services.{$this->providerName()}.key");
     }
 
     private function modelName(): string
     {
-        return (string) ($this->providerName() === 'openai'
-            ? config('services.openai.model')
-            : config('services.deepseek.model'));
+        return (string) config("services.{$this->providerName()}.model");
     }
 
     private function buildPrompt(array $validated): string
@@ -191,6 +193,41 @@ class AiHelperController extends Controller
             ->json();
 
         return trim((string) data_get($response, 'choices.0.message.content', ''));
+    }
+
+    private function askGemini(string $prompt): string
+    {
+        $baseUrl = rtrim((string) config('services.gemini.url'), '/');
+        $model = $this->modelName();
+        $url = "{$baseUrl}/models/{$model}:generateContent";
+
+        $response = Http::acceptJson()
+            ->timeout(45)
+            ->post($url . '?key=' . urlencode((string) config('services.gemini.key')), [
+                'systemInstruction' => [
+                    'parts' => [
+                        ['text' => 'You are a careful admin operations assistant.'],
+                    ],
+                ],
+                'contents' => [
+                    [
+                        'role' => 'user',
+                        'parts' => [
+                            ['text' => $prompt],
+                        ],
+                    ],
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.2,
+                ],
+            ])
+            ->throw()
+            ->json();
+
+        return trim(collect(data_get($response, 'candidates.0.content.parts', []))
+            ->pluck('text')
+            ->filter()
+            ->implode("\n"));
     }
 
     private function askOpenAi(string $prompt): string

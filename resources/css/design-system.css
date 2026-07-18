@@ -1825,10 +1825,13 @@ body > .card {
     }
 
     .app-layout .page-header {
-        min-height: 46px;
-        padding: .58rem .95rem .62rem !important;
-        border-top: 1px solid color-mix(in srgb, var(--se-border) 72%, transparent) !important;
-        box-shadow: 0 7px 16px rgba(73, 50, 29, .045) !important;
+        min-height: 0;
+        padding: .82rem .95rem !important;
+        width: calc(100% - 1rem) !important;
+        margin: .6rem auto 0 !important;
+        border: 1px solid color-mix(in srgb, var(--se-border) 72%, transparent) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 22px rgba(73, 50, 29, .07) !important;
     }
 
     .app-layout .page-header::after {
@@ -1842,15 +1845,25 @@ body > .card {
     }
 
     .app-layout .page-header-left {
-        display: block !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: .08rem !important;
         width: 100%;
         min-width: 0;
     }
 
+    .app-layout .page-header-title {
+        display: block;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .app-layout .page-header-title :where(h1, h2, h3),
     .app-layout .page-header-left :where(h1, h2, h3) {
         max-width: 100%;
         font-size: .98rem !important;
-        line-height: 1.18 !important;
+        line-height: 1.1 !important;
         font-weight: 800 !important;
         white-space: nowrap;
         overflow: hidden;
@@ -3504,13 +3517,16 @@ body[data-theme="dark"] .se-notification-panel {
 /* Keep the compact page header and account menu stable on narrow screens. */
 @media (max-width: 767px) {
     .app-layout .page-header {
-        min-height: 64px;
-        padding: .7rem 1rem !important;
+        min-height: 0;
+        padding: .72rem .95rem !important;
+        width: calc(100% - 1rem) !important;
+        margin: .6rem auto 0 !important;
+        border-radius: 16px !important;
     }
 
     .app-layout .page-header-inner {
-        align-items: center !important;
-        gap: .65rem !important;
+        align-items: flex-start !important;
+        gap: .45rem !important;
     }
 
     .app-layout .page-header-left {
@@ -3518,10 +3534,12 @@ body[data-theme="dark"] .se-notification-panel {
         overflow: hidden;
     }
 
+    .app-layout .page-header-title :where(h1, h2, h3),
     .app-layout .page-header-left :where(h1, h2, h3) {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        line-height: 1.1 !important;
     }
 
     .app-layout .page-header-right {

@@ -959,9 +959,12 @@
                 linear-gradient(180deg, rgba(255,253,250,.90), rgba(255,247,239,.76)),
                 radial-gradient(circle at 100% 0%, rgba(214,180,146,.20), transparent 34%),
                 radial-gradient(circle at 8% 0%, rgba(214,229,214,.12), transparent 28%);
-            border-bottom: 1px solid var(--glass-border);
-            box-shadow: 0 12px 30px rgba(76, 57, 41, .09), inset 0 1px 0 rgba(255,255,255,.76);
-            padding: 1rem 1.25rem;
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            box-shadow: 0 16px 34px rgba(76, 57, 41, .10), inset 0 1px 0 rgba(255,255,255,.76);
+            padding: .78rem 1.05rem;
+            width: min(calc(100% - 1.5rem), 1200px);
+            margin: .75rem auto 0;
             backdrop-filter: blur(var(--glass-blur)) saturate(125%);
             -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(125%);
         }
@@ -975,24 +978,49 @@
             background: linear-gradient(90deg, transparent, rgba(164,141,120,.32), transparent);
             pointer-events: none;
         }
-        @media (min-width: 640px) { .page-header { padding: 1.125rem 1.5rem; } }
+        @media (min-width: 640px) { .page-header { padding: .82rem 1.25rem; width: min(calc(100% - 2rem), 1200px); } }
         @media (min-width: 1024px) {
-            .page-header { padding: 1.05rem 2rem; }
+            .page-header {
+                width: 100%;
+                margin-top: 0;
+                border-top: 0;
+                border-left: 0;
+                border-right: 0;
+                border-radius: 0;
+                padding: 1rem 2rem;
+                box-shadow: 0 12px 30px rgba(76, 57, 41, .09), inset 0 1px 0 rgba(255,255,255,.76);
+            }
             .page-header::after { left: 2rem; right: 2rem; }
         }
         .page-header-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; flex-wrap: wrap; position: relative; }
         .page-header-left {
             min-width: 0;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            flex-direction: column;
+            gap: .08rem;
             flex: 1 1 100%;
         }
-        .page-header-left h1,
-        .page-header-left h2,
-        .page-header-left h3 {
+        .page-header-kicker {
+            display: block;
+            font-size: .66rem;
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--text-light);
+        }
+        .page-header-title {
+            display: block;
+            width: 100%;
+            min-width: 0;
+        }
+        .page-header-title h1,
+        .page-header-title h2,
+        .page-header-title h3 {
             margin: 0 !important;
             font-size: clamp(1rem, 1.5vw, 1.15rem) !important;
-            line-height: 1.25 !important;
+            line-height: 1.1 !important;
             font-weight: 800 !important;
             letter-spacing: 0 !important;
             color: var(--text) !important;
@@ -1030,6 +1058,7 @@
             .page-header-left {
                 padding-right: 15rem;
                 flex: 1 1 auto;
+                gap: .12rem;
             }
             .page-header-right {
                 position: absolute;
@@ -1662,9 +1691,11 @@
         }
 
         @media (max-width: 767px) {
-            body.student-mobile-shell .page-header,
-            body.has-student-bottom-nav .page-header {
-                display: none !important;
+            .page-header {
+                width: calc(100% - 1rem);
+                margin-top: .6rem;
+                border-radius: 16px;
+                padding: .82rem .95rem;
             }
 
             body.has-student-bottom-nav .page-body {
@@ -2413,7 +2444,10 @@
         @hasSection('header')
             <div class="page-header{{ $showHeaderUserMenu ? ' has-user-menu' : '' }}">
                 <div class="page-header-inner">
-                    <div class="page-header-left">@yield('header')</div>
+                    <div class="page-header-left">
+                        <span class="page-header-kicker">{{ __('Current page') }}</span>
+                        <div class="page-header-title">@yield('header')</div>
+                    </div>
                     @if($authUser)
                         <div class="page-header-right">
                             @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--header'])
