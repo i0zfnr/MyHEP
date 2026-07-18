@@ -524,6 +524,18 @@
 @endsection
 
 @push('scripts')
+@php
+    $aiScriptText = [
+        'ready' => __('Ready. Choose a task template or enter a custom request.'),
+        'missingKey' => __('AI API key is not configured. Add an API key in .env, then clear config cache if needed.'),
+        'scope' => __('Scope: students, scholarships, offenses, applications'),
+        'thinking' => __('Thinking...'),
+        'failed' => __('AI request failed.'),
+        'empty' => __('No answer was returned.'),
+        'unreachable' => __('AI service could not be reached.'),
+        'draftPrompt' => __('Draft a short announcement for students based on the latest issue or pending action. Include title and body.'),
+    ];
+@endphp
 <script>
 (() => {
     const root = document.querySelector('.ai-admin');
@@ -566,10 +578,11 @@
 
     if (!root || !chatLog || !input || !sendBtn) return;
 
+    const aiText = {!! json_encode($aiScriptText, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
     const initialMessage = root.dataset.aiEnabled === '1'
-        ? @json(__('Ready. Choose a task template or enter a custom request.'))
-        : @json(__('AI API key is not configured. Add an API key in .env, then clear config cache if needed.'));
-    const scopeText = @json(__('Scope: students, scholarships, offenses, applications'));
+        ? aiText.ready
+        : aiText.missingKey;
+    const scopeText = aiText.scope;
     const providerText = root.dataset.aiProvider?.toUpperCase() || 'AI';
     const modelText = root.dataset.aiModel || '-';
     const metaText = `${scopeText} · ${providerText} / ${modelText}`;
@@ -619,7 +632,7 @@
         addMessage('user', message);
         input.value = '';
         setBusy(true);
-        const loading = addMessage('ai loading', @json(__('Thinking...')));
+        const loading = addMessage('ai loading', aiText.thinking);
 
         try {
             const response = await fetch(root.dataset.aiUrl, {
@@ -637,14 +650,14 @@
             loading.remove();
 
             if (!response.ok) {
-                throw new Error(payload.message || @json(__('AI request failed.')));
+                throw new Error(payload.message || aiText.failed);
             }
 
             lastAnswer = payload.answer || '';
-            addMessage('ai', lastAnswer || @json(__('No answer was returned.')), `${(payload.provider || 'ai').toUpperCase()} / ${payload.model || ''} · ${payload.generated_at || ''}`);
+            addMessage('ai', lastAnswer || aiText.empty, `${(payload.provider || 'ai').toUpperCase()} / ${payload.model || ''} - ${payload.generated_at || ''}`);
         } catch (error) {
             loading.remove();
-            addMessage('error', error.message || @json(__('AI service could not be reached.')));
+            addMessage('error', error.message || aiText.unreachable);
         } finally {
             setBusy(false);
             input.focus();
@@ -681,7 +694,7 @@
     });
 
     draftBtn?.addEventListener('click', () => {
-        input.value = @json(__('Draft a short announcement for students based on the latest issue or pending action. Include title and body.'));
+        input.value = aiText.draftPrompt;
         input.focus();
     });
 })();
