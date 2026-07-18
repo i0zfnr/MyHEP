@@ -1756,6 +1756,127 @@ body > .card {
     text-align: center;
 }
 
+/* Mobile header polish */
+@media (max-width: 1023px) {
+    :root {
+        --topbar-h: 64px;
+    }
+
+    .app-layout .topbar {
+        height: var(--topbar-h) !important;
+        min-height: var(--topbar-h) !important;
+        gap: .75rem !important;
+        padding: 0 .875rem !important;
+        border-bottom: 0 !important;
+        box-shadow: 0 6px 18px rgba(73, 50, 29, .07) !important;
+    }
+
+    .app-layout .btn-ham {
+        width: 42px !important;
+        height: 42px !important;
+        border-radius: 12px !important;
+        margin-right: 0 !important;
+    }
+
+    .app-layout .topbar-brand {
+        flex: 1 1 auto;
+        gap: .65rem !important;
+        min-width: 0;
+        padding-block: 0 !important;
+    }
+
+    .app-layout .topbar-brand-mark {
+        width: 34px !important;
+        height: 34px !important;
+        border-radius: 10px !important;
+        background: var(--se-surface) !important;
+        border-color: var(--se-border) !important;
+        box-shadow: none !important;
+    }
+
+    .app-layout .topbar-brand-mark img {
+        width: 25px !important;
+        height: 25px !important;
+    }
+
+    .app-layout .topbar-title {
+        font-size: 1rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: 0 !important;
+    }
+
+    .app-layout .topbar-subtitle {
+        display: none !important;
+    }
+
+    .app-layout .topbar-actions {
+        gap: .4rem !important;
+    }
+
+    .app-layout .topbar-actions .se-notification-trigger {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        border-radius: 14px;
+    }
+
+    .main-wrap.has-sidebar .page-header {
+        top: var(--topbar-h) !important;
+    }
+
+    .app-layout .page-header {
+        min-height: 46px;
+        padding: .58rem .95rem .62rem !important;
+        border-top: 1px solid color-mix(in srgb, var(--se-border) 72%, transparent) !important;
+        box-shadow: 0 7px 16px rgba(73, 50, 29, .045) !important;
+    }
+
+    .app-layout .page-header::after {
+        left: .95rem !important;
+        right: .95rem !important;
+        opacity: .28;
+    }
+
+    .app-layout .page-header-inner {
+        display: block !important;
+    }
+
+    .app-layout .page-header-left {
+        display: block !important;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .app-layout .page-header-left :where(h1, h2, h3) {
+        max-width: 100%;
+        font-size: .98rem !important;
+        line-height: 1.18 !important;
+        font-weight: 800 !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .app-layout .page-header-right {
+        display: none !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .app-layout .topbar {
+        gap: .6rem !important;
+        padding-inline: .75rem !important;
+    }
+
+    .app-layout .topbar-brand-mark {
+        display: none !important;
+    }
+
+    .app-layout .topbar-title {
+        font-size: .96rem !important;
+    }
+}
+
 .se-notification-center {
     position: fixed;
     inset: 0;
@@ -3008,8 +3129,13 @@ body[data-theme="dark"] .se-notification-panel {
     transition-delay: 0s;
 }
 
+.app-layout .topbar.is-user-menu-open,
 .app-layout .page-header.is-user-menu-open {
-    z-index: 500;
+    z-index: 520 !important;
+}
+
+.app-layout .header-user-menu.is-open {
+    z-index: 530 !important;
 }
 
 @media (max-width: 1023px) {

@@ -51,7 +51,14 @@ return [
 
     'deepseek' => [
         'key' => env('DEEPSEEK_API_KEY'),
-        'url' => env('DEEPSEEK_API_URL'),
+        'url' => env('DEEPSEEK_API_URL', 'https://api.deepseek.com/chat/completions'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
+    ],
+
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'url' => env('OPENAI_API_URL', 'https://api.openai.com/v1/responses'),
+        'model' => env('OPENAI_MODEL', 'gpt-5.6-mini'),
     ],
 
 ];

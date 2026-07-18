@@ -239,6 +239,10 @@
         background: var(--ai-input-bg);
         color: var(--ai-input-text);
         font-size: .9rem;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 46px;
+        max-height: 160px;
     }
 
     .ai-input::placeholder {
@@ -254,6 +258,38 @@
         font-weight: 800;
         font-size: .86rem;
         box-shadow: 0 10px 18px rgba(182, 139, 96, .20);
+        cursor: pointer;
+    }
+
+    .ai-send:disabled,
+    .ai-btn:disabled,
+    .task-btn:disabled {
+        cursor: not-allowed;
+        opacity: .62;
+        transform: none;
+    }
+
+    .msg.error {
+        margin-right: auto;
+        background: rgba(185, 28, 28, .10);
+        border: 1px solid rgba(185, 28, 28, .28);
+        color: #991b1b;
+    }
+
+    body[data-theme="dark"] .msg.error {
+        background: rgba(127, 29, 29, .22);
+        border-color: rgba(252, 165, 165, .34);
+        color: #fecaca;
+    }
+
+    .msg.loading {
+        opacity: .78;
+    }
+
+    .msg pre {
+        margin: .5rem 0 0;
+        white-space: pre-wrap;
+        font: inherit;
     }
 
     .ai-hint {
@@ -382,7 +418,11 @@
 @endsection
 
 @section('content')
-<div class="ai-admin">
+<div class="ai-admin"
+     data-ai-url="{{ route('admin.ai-helper.ask') }}"
+     data-ai-enabled="{{ $aiEnabled ? '1' : '0' }}"
+     data-ai-provider="{{ $aiProvider }}"
+     data-ai-model="{{ $aiModel }}">
     <section class="ai-panel">
         <div class="ai-head">
             <div>
@@ -391,11 +431,12 @@
             </div>
             <div class="ai-badges">
                 <span class="ai-badge">BETA</span>
+                <span class="ai-badge">{{ strtoupper($aiProvider) }}</span>
                 <span class="ai-badge" id="aiClock">--:--</span>
             </div>
         </div>
 
-        <div class="ai-chat-log" aria-live="polite">
+        <div class="ai-chat-log" id="aiChatLog" aria-live="polite">
             <article class="msg ai">
                 {{ __('Ready. Choose a task template or enter a custom request.') }}
                 <span class="msg-meta">{{ __('Scope: students, scholarships, offenses, applications') }} · <span id="aiStamp">{{ now()->format('Y-m-d H:i') }}</span></span>
@@ -409,17 +450,16 @@
         </div>
 
         <div class="ai-toolbar">
-            <button type="button" class="ai-btn">{{ __('Copy') }}</button>
-            <button type="button" class="ai-btn">{{ __('Export CSV') }}</button>
-            <button type="button" class="ai-btn">{{ __('Export PDF') }}</button>
-            <button type="button" class="ai-btn">{{ __('Create Draft Announcement') }}</button>
-            <button type="button" class="ai-btn">{{ __('Regenerate') }}</button>
+            <button type="button" class="ai-btn" id="aiCopyBtn">{{ __('Copy') }}</button>
+            <button type="button" class="ai-btn" id="aiClearBtn">{{ __('Clear') }}</button>
+            <button type="button" class="ai-btn" id="aiDraftAnnouncementBtn">{{ __('Create Draft Announcement') }}</button>
+            <button type="button" class="ai-btn" id="aiRegenerateBtn">{{ __('Regenerate') }}</button>
         </div>
 
         <div class="ai-compose">
             <div class="ai-compose-row">
-                <input class="ai-input" type="text" placeholder="{{ __('Type admin instruction...') }}">
-                <button type="button" class="ai-send">{{ __('Send') }}</button>
+                <textarea class="ai-input" id="aiInput" rows="1" placeholder="{{ __('Type admin instruction...') }}"></textarea>
+                <button type="button" class="ai-send" id="aiSendBtn" @disabled(!$aiEnabled)>{{ __('Send') }}</button>
             </div>
             <p class="ai-hint">{{ __('Enter sends. Shift+Enter adds newline. Independently verify AI-generated conclusions.') }}</p>
         </div>
@@ -438,10 +478,10 @@
             <section class="ops-card">
                 <h4 class="ops-title">{{ __('Task Templates') }}</h4>
                 <div class="task-list">
-                    <button type="button" class="task-btn">{{ __('Generate Monthly Report') }}</button>
-                    <button type="button" class="task-btn">{{ __('Review Pending Fine Applications') }}</button>
-                    <button type="button" class="task-btn">{{ __('Find Student by Matric No') }}</button>
-                    <button type="button" class="task-btn">{{ __('Summarize Scholarship Status') }}</button>
+                    <button type="button" class="task-btn" data-template="{{ __('Generate Monthly Report') }}">{{ __('Generate Monthly Report') }}</button>
+                    <button type="button" class="task-btn" data-template="{{ __('Review Pending Fine Applications') }}">{{ __('Review Pending Fine Applications') }}</button>
+                    <button type="button" class="task-btn" data-template="{{ __('Find Student by Matric No') }}">{{ __('Find Student by Matric No') }}</button>
+                    <button type="button" class="task-btn" data-template="{{ __('Summarize Scholarship Status') }}">{{ __('Summarize Scholarship Status') }}</button>
                 </div>
             </section>
 
@@ -454,10 +494,13 @@
                 <div class="ops-field">
                     <label for="statusFilter">{{ __('Status Filter') }}</label>
                     <select id="statusFilter">
-                        <option>{{ __('All') }}</option>
-                        <option>{{ __('Pending') }}</option>
-                        <option>{{ __('Approved') }}</option>
-                        <option>{{ __('Rejected') }}</option>
+                        <option value="all">{{ __('All') }}</option>
+                        <option value="pending">{{ __('Pending') }}</option>
+                        <option value="approved">{{ __('Approved') }}</option>
+                        <option value="rejected">{{ __('Rejected') }}</option>
+                        <option value="unpaid">{{ __('Unpaid') }}</option>
+                        <option value="applied">{{ __('Applied') }}</option>
+                        <option value="paid">{{ __('Paid') }}</option>
                     </select>
                 </div>
                 <div class="ops-field">
@@ -483,13 +526,26 @@
 @push('scripts')
 <script>
 (() => {
+    const root = document.querySelector('.ai-admin');
     const clockNode = document.getElementById('aiClock');
     const stampNode = document.getElementById('aiStamp');
-    if (!clockNode) return;
+    const chatLog = document.getElementById('aiChatLog');
+    const input = document.getElementById('aiInput');
+    const sendBtn = document.getElementById('aiSendBtn');
+    const copyBtn = document.getElementById('aiCopyBtn');
+    const clearBtn = document.getElementById('aiClearBtn');
+    const regenerateBtn = document.getElementById('aiRegenerateBtn');
+    const draftBtn = document.getElementById('aiDraftAnnouncementBtn');
+    const reportMonth = document.getElementById('reportMonth');
+    const statusFilter = document.getElementById('statusFilter');
+    const matricFilter = document.getElementById('matricFilter');
     const locale = @json(app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB');
+    let lastRequest = null;
+    let lastAnswer = '';
+
     const tick = () => {
         const now = new Date();
-        clockNode.textContent = now.toLocaleTimeString(locale, {
+        if (clockNode) clockNode.textContent = now.toLocaleTimeString(locale, {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false
@@ -507,6 +563,124 @@
     };
     tick();
     setInterval(tick, 1000);
+
+    if (!root || !chatLog || !input || !sendBtn) return;
+
+    const initialMessage = root.dataset.aiEnabled === '1'
+        ? @json(__('Ready. Choose a task template or enter a custom request.'))
+        : @json(__('AI API key is not configured. Add an API key in .env, then clear config cache if needed.'));
+    const metaText = `${@json(__('Scope: students, scholarships, offenses, applications'))} · ${root.dataset.aiProvider?.toUpperCase() || 'AI'} / ${root.dataset.aiModel || '-'}`;
+
+    const scrollChat = () => {
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    const addMessage = (type, text, meta = '') => {
+        const article = document.createElement('article');
+        article.className = `msg ${type}`;
+        const pre = document.createElement('pre');
+        pre.textContent = text;
+        article.appendChild(pre);
+        if (meta) {
+            const metaNode = document.createElement('span');
+            metaNode.className = 'msg-meta';
+            metaNode.textContent = meta;
+            article.appendChild(metaNode);
+        }
+        chatLog.appendChild(article);
+        scrollChat();
+        return article;
+    };
+
+    const resetChat = () => {
+        chatLog.innerHTML = '';
+        addMessage(root.dataset.aiEnabled === '1' ? 'ai' : 'error', initialMessage, metaText);
+    };
+
+    const filters = () => ({
+        report_month: reportMonth?.value || '',
+        status: statusFilter?.value || 'all',
+        matric_no: matricFilter?.value || '',
+    });
+
+    const setBusy = (busy) => {
+        sendBtn.disabled = busy || root.dataset.aiEnabled !== '1';
+        document.querySelectorAll('.task-btn').forEach((button) => button.disabled = busy);
+        input.disabled = busy;
+    };
+
+    const send = async (message = input.value.trim(), template = null) => {
+        if (!message || root.dataset.aiEnabled !== '1') return;
+
+        lastRequest = { message, template, filters: filters() };
+        addMessage('user', message);
+        input.value = '';
+        setBusy(true);
+        const loading = addMessage('ai loading', @json(__('Thinking...')));
+
+        try {
+            const response = await fetch(root.dataset.aiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(lastRequest),
+            });
+
+            const payload = await response.json().catch(() => ({}));
+            loading.remove();
+
+            if (!response.ok) {
+                throw new Error(payload.message || @json(__('AI request failed.')));
+            }
+
+            lastAnswer = payload.answer || '';
+            addMessage('ai', lastAnswer || @json(__('No answer was returned.')), `${(payload.provider || 'ai').toUpperCase()} / ${payload.model || ''} · ${payload.generated_at || ''}`);
+        } catch (error) {
+            loading.remove();
+            addMessage('error', error.message || @json(__('AI service could not be reached.')));
+        } finally {
+            setBusy(false);
+            input.focus();
+        }
+    };
+
+    resetChat();
+
+    sendBtn.addEventListener('click', () => send());
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            send();
+        }
+    });
+
+    document.querySelectorAll('.task-btn[data-template]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const template = button.dataset.template;
+            input.value = template;
+            send(template, template);
+        });
+    });
+
+    copyBtn?.addEventListener('click', async () => {
+        if (!lastAnswer) return;
+        await navigator.clipboard?.writeText(lastAnswer).catch(() => {});
+    });
+
+    clearBtn?.addEventListener('click', resetChat);
+
+    regenerateBtn?.addEventListener('click', () => {
+        if (lastRequest) send(lastRequest.message, lastRequest.template);
+    });
+
+    draftBtn?.addEventListener('click', () => {
+        input.value = @json(__('Draft a short announcement for students based on the latest issue or pending action. Include title and body.'));
+        input.focus();
+    });
 })();
 </script>
 @endpush

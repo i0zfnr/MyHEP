@@ -6,6 +6,97 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
+if (!function_exists('myhepCountTable')) {
+    function myhepCountTable(string $table, ?callable $scope = null): int
+    {
+        if (!Schema::hasTable($table)) {
+            return 0;
+        }
+
+        try {
+            $query = DB::table($table);
+            if ($scope) {
+                $scope($query);
+            }
+
+            return (int) $query->count();
+        } catch (Throwable $e) {
+            return 0;
+        }
+    }
+}
+
+if (!function_exists('myhepHomeStatCounts')) {
+    function myhepHomeStatCounts(): array
+    {
+        return systemCacheRemember('myhep.home_stats.counts', 120, function () {
+            return [
+                'students_managed' => myhepCountTable('students'),
+                'open_actions' => myhepCountTable('scholarships', fn ($query) => $query->where('status', 'pending'))
+                    + myhepCountTable('fine_payment_applications', fn ($query) => $query->where('status', 'pending'))
+                    + myhepCountTable('vehicle_sticker_applications', fn ($query) => $query->where('status', 'pending')),
+                'digital_records' => myhepCountTable('students')
+                    + myhepCountTable('scholarships')
+                    + myhepCountTable('offenses')
+                    + myhepCountTable('student_scholarship_status_forms')
+                    + myhepCountTable('fine_payment_applications')
+                    + myhepCountTable('vehicle_sticker_applications'),
+            ];
+        });
+    }
+}
+
+if (!function_exists('myhepAttachOffenseEvidence')) {
+    function myhepAttachOffenseEvidence(iterable $offenses): void
+    {
+        $items = [];
+        foreach ($offenses as $offense) {
+            if (is_object($offense) && !empty($offense->id)) {
+                $items[] = $offense;
+            }
+        }
+
+        if ($items === []) {
+            return;
+        }
+
+        $offenseIds = array_values(array_unique(array_map(fn ($offense) => (int) $offense->id, $items)));
+        $extrasByOffense = collect();
+
+        if (Schema::hasTable('offense_evidence_photos')) {
+            $extrasByOffense = DB::table('offense_evidence_photos')
+                ->whereIn('offense_id', $offenseIds)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get()
+                ->groupBy('offense_id');
+        }
+
+        foreach ($items as $offense) {
+            $evidence = collect();
+
+            if (!empty($offense->evidence_photo_path)) {
+                $evidence->push((object) [
+                    'id' => null,
+                    'photo_path' => $offense->evidence_photo_path,
+                    'is_primary' => true,
+                ]);
+            }
+
+            foreach ($extrasByOffense->get((int) $offense->id, collect()) as $extra) {
+                $evidence->push((object) [
+                    'id' => (int) $extra->id,
+                    'photo_path' => $extra->photo_path,
+                    'is_primary' => false,
+                ]);
+            }
+
+            $offense->evidence_photos = $evidence->values();
+            $offense->evidence_count = $evidence->count();
+        }
+    }
+}
+
 if (!function_exists('isStudentAuthenticated')) {
     function isStudentAuthenticated(): bool
     {

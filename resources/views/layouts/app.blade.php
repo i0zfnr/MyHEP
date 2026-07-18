@@ -801,6 +801,19 @@
         .sb-overlay { display: none; position: fixed; inset: 0; z-index: 150; background: rgba(45,31,20,.45); opacity: 0; pointer-events: none; transition: opacity var(--dur) var(--ease); }
         .sb-overlay.is-visible { opacity: 1; pointer-events: auto; }
         @media (max-width: 1023px) { .sb-overlay { display: block; } }
+        @media (max-width: 1023px) {
+            .sidebar {
+                z-index: 900;
+            }
+            .sb-overlay {
+                z-index: 850;
+            }
+            body.sidebar-open .mobile-bottom-nav,
+            body.sidebar-open .mobile-more-sheet,
+            body.sidebar-open .mobile-more-backdrop {
+                display: none !important;
+            }
+        }
 
         .main-wrap {
             flex: 1;
@@ -1998,9 +2011,14 @@
     $adminOnScholarship = request()->routeIs('admin.scholarships.*')
         || request()->routeIs('admin.student-scholarship-status.*')
         || request()->routeIs('admin.scholarship-announcements.*');
-    $showSidebar = (bool) $authUser && !($isStudent && $studentOnDashboard);
+    $showSidebar = (bool) $authUser;
     $showHeaderUserMenu = (bool) $authUser && ($isStudent || $adminOnDashboard);
-    $showStudentBottomNav = $isStudent && request()->routeIs('student.dashboard');
+    $showStudentBottomNav = $isStudent;
+    $studentMoreActive = request()->routeIs('student.movements.index')
+        || request()->routeIs('student.vehicle-stickers.*')
+        || request()->routeIs('student.rules.*')
+        || request()->routeIs('student.discipline-announcements.*')
+        || request()->routeIs('settings.*');
     $bodyClasses = trim(
         ($isStudent ? 'student-mobile-shell' : '') . ' ' .
         ($showStudentBottomNav ? 'has-student-bottom-nav' : '') . ' ' .
@@ -2500,7 +2518,7 @@
             </span>
             <span>Aid</span>
         </a>
-        <button type="button" id="mobileMoreToggle" aria-expanded="false" aria-controls="mobileMoreSheet">
+        <button type="button" id="mobileMoreToggle" class="{{ $studentMoreActive ? 'active' : '' }}" aria-expanded="false" aria-controls="mobileMoreSheet">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M5 12h.01"/><path d="M12 12h.01"/><path d="M19 12h.01"/></svg>
             </span>
@@ -2575,7 +2593,7 @@
     var headerUserBtn = document.getElementById('headerUserBtn');
     var headerUserMenu = document.getElementById('headerUserMenu');
     var headerUserBackdrop = document.getElementById('headerUserBackdrop');
-    var headerUserPageHeader = headerUserBtn ? headerUserBtn.closest('.page-header') : null;
+    var headerUserShell = headerUserBtn ? headerUserBtn.closest('.page-header, .topbar') : null;
     var mobileMoreToggle = document.getElementById('mobileMoreToggle');
     var mobileMoreSheet = document.getElementById('mobileMoreSheet');
     var mobileMoreBackdrop = document.getElementById('mobileMoreBackdrop');
@@ -2587,14 +2605,14 @@
             headerUserBackdrop.setAttribute('aria-hidden', 'true');
         }
         if (headerUserBtn) headerUserBtn.setAttribute('aria-expanded', 'false');
-        if (headerUserPageHeader) headerUserPageHeader.classList.remove('is-user-menu-open');
+        if (headerUserShell) headerUserShell.classList.remove('is-user-menu-open');
     }
 
     function setHeaderUserMenu(open) {
         if (!headerUserMenu || !headerUserBtn) return;
         headerUserMenu.classList.toggle('is-open', open);
         headerUserBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        if (headerUserPageHeader) headerUserPageHeader.classList.toggle('is-user-menu-open', open);
+        if (headerUserShell) headerUserShell.classList.toggle('is-user-menu-open', open);
         if (headerUserBackdrop) {
             headerUserBackdrop.classList.toggle('is-open', open);
             headerUserBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
@@ -2631,6 +2649,7 @@
     function openSidebar() {
         if (!sidebar) return;
         sidebar.classList.add('is-open');
+        document.body.classList.add('sidebar-open');
         if (overlay) overlay.classList.add('is-visible');
         if (hamBox) hamBox.classList.add('is-open-ham');
         if (toggle) toggle.setAttribute('aria-expanded', 'true');
@@ -2640,6 +2659,7 @@
     function closeSidebar() {
         if (!sidebar) return;
         sidebar.classList.remove('is-open');
+        document.body.classList.remove('sidebar-open');
         if (overlay) overlay.classList.remove('is-visible');
         if (hamBox) hamBox.classList.remove('is-open-ham');
         if (toggle) toggle.setAttribute('aria-expanded', 'false');

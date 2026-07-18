@@ -2,20 +2,28 @@
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AiHelperController as AdminAiHelperController;
 use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
+use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\StudentScholarshipStatusController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BugReportController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NotificationFeedController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\Student\AiHelperController as StudentAiHelperController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\MovementController as StudentMovementController;
 use App\Http\Controllers\Student\ProfileController;
+use App\Http\Controllers\Student\ScholarshipStatusController;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,126 +32,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-if (! function_exists('myhepCountTable')) {
-    function myhepCountTable(string $table, ?callable $scope = null): int
-    {
-        if (!Schema::hasTable($table)) {
-            return 0;
-        }
-
-        try {
-            $query = DB::table($table);
-            if ($scope) {
-                $scope($query);
-            }
-
-            return (int) $query->count();
-        } catch (Throwable $e) {
-            return 0;
-        }
-    }
-}
-
-if (! function_exists('myhepHomeStatCounts')) {
-    function myhepHomeStatCounts(): array
-    {
-        return systemCacheRemember('myhep.home_stats.counts', 120, function () {
-            return [
-                'students_managed' => myhepCountTable('students'),
-                'open_actions' => myhepCountTable('scholarships', fn ($query) => $query->where('status', 'pending'))
-                    + myhepCountTable('fine_payment_applications', fn ($query) => $query->where('status', 'pending'))
-                    + myhepCountTable('vehicle_sticker_applications', fn ($query) => $query->where('status', 'pending')),
-                'digital_records' => myhepCountTable('students')
-                    + myhepCountTable('scholarships')
-                    + myhepCountTable('offenses')
-                    + myhepCountTable('student_scholarship_status_forms')
-                    + myhepCountTable('fine_payment_applications')
-                    + myhepCountTable('vehicle_sticker_applications'),
-            ];
-        });
-    }
-}
-
-if (! function_exists('myhepAttachOffenseEvidence')) {
-    function myhepAttachOffenseEvidence(iterable $offenses): void
-    {
-        $items = [];
-        foreach ($offenses as $offense) {
-            if (is_object($offense) && !empty($offense->id)) {
-                $items[] = $offense;
-            }
-        }
-
-        if ($items === []) {
-            return;
-        }
-
-        $offenseIds = array_values(array_unique(array_map(fn ($offense) => (int) $offense->id, $items)));
-        $extrasByOffense = collect();
-
-        if (Schema::hasTable('offense_evidence_photos')) {
-            $extrasByOffense = DB::table('offense_evidence_photos')
-                ->whereIn('offense_id', $offenseIds)
-                ->orderBy('sort_order')
-                ->orderBy('id')
-                ->get()
-                ->groupBy('offense_id');
-        }
-
-        foreach ($items as $offense) {
-            $evidence = collect();
-
-            if (!empty($offense->evidence_photo_path)) {
-                $evidence->push((object) [
-                    'id' => null,
-                    'photo_path' => $offense->evidence_photo_path,
-                    'is_primary' => true,
-                ]);
-            }
-
-            foreach ($extrasByOffense->get((int) $offense->id, collect()) as $extra) {
-                $evidence->push((object) [
-                    'id' => (int) $extra->id,
-                    'photo_path' => $extra->photo_path,
-                    'is_primary' => false,
-                ]);
-            }
-
-            $offense->evidence_photos = $evidence->values();
-            $offense->evidence_count = $evidence->count();
-        }
-    }
-}
-
-Route::get('/', function () {
-    $counts = myhepHomeStatCounts();
-
-    $homeStats = array_merge($counts, [
-        'server_time' => now()->format('Y-m-d H:i:s'),
-        'system_online' => true,
-    ]);
-
-    return view('welcome', compact('homeStats'));
-})->name('home');
-Route::get('/system-overview/live', function () {
-    $counts = myhepHomeStatCounts();
-
-    return response()->json([
-        'data' => array_merge($counts, [
-            'server_time' => now()->format('Y-m-d H:i:s'),
-            'system_online' => true,
-        ]),
-    ]);
-})->name('system-overview.live');
-Route::post('/locale', function (Request $request) {
-    $validated = $request->validate([
-        'locale' => ['required', 'in:en,ms'],
-    ]);
-
-    $request->session()->put('locale', $validated['locale']);
-
-    return redirect()->back();
-})->name('locale.update');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/system-overview/live', [HomeController::class, 'live'])->name('system-overview.live');
+Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
 Route::post('/theme', [SettingController::class, 'updateTheme'])->name('theme.update');
 
 Route::get('/report-problem', [BugReportController::class, 'create'])->name('bug-reports.create');
@@ -170,145 +61,22 @@ Route::post('/settings', [SettingController::class, 'update'])
 Route::get('/notifications/feed', NotificationFeedController::class)
     ->middleware('auth.session.any')
     ->name('notifications.feed');
-Route::post('/push/subscribe', function (Request $request) {
-    $validated = $request->validate([
-        'endpoint' => ['required', 'string', 'max:2048'],
-        'keys.p256dh' => ['required', 'string', 'max:255'],
-        'keys.auth' => ['required', 'string', 'max:255'],
-        'contentEncoding' => ['nullable', 'string', 'max:32'],
-    ]);
-
-    $authUser = session('auth_user');
-    $endpointHash = hash('sha256', $validated['endpoint']);
-    $existingCreatedAt = DB::table('push_subscriptions')
-        ->where('endpoint_hash', $endpointHash)
-        ->value('created_at');
-
-    DB::table('push_subscriptions')->updateOrInsert(
-        ['endpoint_hash' => $endpointHash],
-        [
-            'user_type' => $authUser['role'],
-            'user_id' => (int) $authUser['id'],
-            'endpoint' => $validated['endpoint'],
-            'public_key' => $validated['keys']['p256dh'],
-            'auth_token' => $validated['keys']['auth'],
-            'content_encoding' => $validated['contentEncoding'] ?? 'aes128gcm',
-            'locale' => app()->getLocale(),
-            'user_agent' => Str::limit((string) $request->userAgent(), 255, ''),
-            'last_seen_at' => now(),
-            'updated_at' => now(),
-            'created_at' => $existingCreatedAt ?: now(),
-        ]
-    );
-
-    return response()->json(['ok' => true]);
-})->middleware('auth.session.any')->name('push.subscribe');
-Route::post('/push/unsubscribe', function (Request $request) {
-    $validated = $request->validate([
-        'endpoint' => ['required', 'string', 'max:2048'],
-    ]);
-
-    DB::table('push_subscriptions')
-        ->where('endpoint_hash', hash('sha256', $validated['endpoint']))
-        ->where('user_type', session('auth_user.role'))
-        ->where('user_id', (int) session('auth_user.id'))
-        ->delete();
-
-    return response()->json(['ok' => true]);
-})->middleware('auth.session.any')->name('push.unsubscribe');
+Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])
+    ->middleware('auth.session.any')
+    ->name('push.subscribe');
+Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'destroy'])
+    ->middleware('auth.session.any')
+    ->name('push.unsubscribe');
 
 Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
     ->middleware('auth.session:student')
     ->name('student.dashboard');
-Route::get('/student/scholarship-status', function () {
-    $studentId = (int) session('auth_user.id');
-    $student = DB::table('students')
-        ->select('id', 'full_name', 'matric_no', 'program')
-        ->where('id', $studentId)
-        ->first();
-
-    if (!$student) {
-        return redirect()->route('student.dashboard')
-            ->withErrors(['student' => __('Rekod pelajar tidak dijumpai.')]);
-    }
-
-    $submission = DB::table('student_scholarship_status_forms')
-        ->where('student_id', $studentId)
-        ->first();
-
-    return view('student.scholarship_status.form', compact('student', 'submission'));
-})->middleware('auth.session:student')->name('student.scholarship-status.form');
-Route::post('/student/scholarship-status', function (Request $request) {
-    $studentId = (int) session('auth_user.id');
-    $validated = $request->validate([
-        'has_scholarship' => ['required', Rule::in(['yes', 'no'])],
-        'sponsor_name' => ['nullable', 'string', 'max:150', 'required_if:has_scholarship,yes'],
-        'monthly_amount' => ['nullable', 'numeric', 'min:0', 'required_if:has_scholarship,yes'],
-        'notes' => ['nullable', 'string', 'max:500'],
-    ]);
-
-    $payload = [
-        'has_scholarship' => $validated['has_scholarship'],
-        'sponsor_name' => $validated['has_scholarship'] === 'yes' ? trim((string) ($validated['sponsor_name'] ?? '')) : null,
-        'monthly_amount' => $validated['has_scholarship'] === 'yes' ? $validated['monthly_amount'] : null,
-        'notes' => !empty($validated['notes']) ? trim($validated['notes']) : null,
-        'submitted_at' => now(),
-        'updated_at' => now(),
-    ];
-
-    DB::transaction(function () use ($studentId, $payload, $validated) {
-        $existing = DB::table('student_scholarship_status_forms')
-            ->where('student_id', $studentId)
-            ->first();
-
-        if ($existing) {
-            DB::table('student_scholarship_status_forms')
-                ->where('student_id', $studentId)
-                ->update($payload);
-        } else {
-            DB::table('student_scholarship_status_forms')
-                ->insert(array_merge($payload, [
-                    'student_id' => $studentId,
-                    'created_at' => now(),
-                ]));
-        }
-
-        // Sync student self-submitted scholarship status into scholarship records.
-        // We keep one managed row per student using a fixed marker in proof_file.
-        $scholarshipPayload = [
-            'student_id' => $studentId,
-            'type' => $validated['has_scholarship'] === 'yes' ? 'scholarship' : 'none',
-            'provider_name' => $validated['has_scholarship'] === 'yes'
-                ? trim((string) ($validated['sponsor_name'] ?? ''))
-                : null,
-            'amount' => $validated['has_scholarship'] === 'yes'
-                ? $validated['monthly_amount']
-                : null,
-            // Student self-report should be reviewed by admin before treated as active.
-            'status' => $validated['has_scholarship'] === 'yes' ? 'pending' : 'confirmed',
-            'proof_file' => 'student_status_form',
-            'updated_at' => now(),
-        ];
-
-        $managedScholarship = DB::table('scholarships')
-            ->where('student_id', $studentId)
-            ->where('proof_file', 'student_status_form')
-            ->first();
-
-        if ($managedScholarship) {
-            DB::table('scholarships')
-                ->where('id', $managedScholarship->id)
-                ->update($scholarshipPayload);
-        } else {
-            DB::table('scholarships')->insert(array_merge($scholarshipPayload, [
-                'created_at' => now(),
-            ]));
-        }
-    });
-
-    return redirect()->route('student.scholarships.index')
-        ->with('success', __('Status biasiswa anda berjaya dihantar dan direkodkan.'));
-})->middleware('auth.session:student')->name('student.scholarship-status.submit');
+Route::get('/student/scholarship-status', [ScholarshipStatusController::class, 'edit'])
+    ->middleware('auth.session:student')
+    ->name('student.scholarship-status.form');
+Route::post('/student/scholarship-status', [ScholarshipStatusController::class, 'update'])
+    ->middleware('auth.session:student')
+    ->name('student.scholarship-status.submit');
 Route::get('/student/profile', [ProfileController::class, 'show'])
     ->middleware('auth.session:student')
     ->name('student.profile');
@@ -318,10 +86,9 @@ Route::post('/student/profile', [ProfileController::class, 'update'])
 Route::post('/student/profile/password', [ProfileController::class, 'updatePassword'])
     ->middleware('auth.session:student')
     ->name('student.profile.password.update');
-Route::get('/student/ai-helper', function () {
-    return redirect()->route('student.dashboard')
-        ->withErrors(['ai_helper' => __('AI Helper is currently unavailable for students.')]);
-})->middleware('auth.session:student')->name('student.ai-helper.index');
+Route::get('/student/ai-helper', [StudentAiHelperController::class, 'index'])
+    ->middleware('auth.session:student')
+    ->name('student.ai-helper.index');
 Route::get('/student/movements', [StudentMovementController::class, 'index'])
     ->middleware('auth.session:student')
     ->name('student.movements.index');
@@ -341,58 +108,15 @@ Route::get('/admin/system-monitoring/live', [AdminDashboardController::class, 'l
 Route::get('/admin/reports/monthly', [AdminReportController::class, 'monthly'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice'])
     ->name('admin.reports.monthly');
-Route::get('/admin/student-scholarship-status', function (Request $request) {
-    $filters = $request->validate([
-        'q' => ['nullable', 'string', 'max:150'],
-        'has_scholarship' => ['nullable', Rule::in(['yes', 'no', 'all'])],
-    ]);
-
-    $query = DB::table('students')
-        ->leftJoin('student_scholarship_status_forms as forms', 'forms.student_id', '=', 'students.id')
-        ->select(
-            'students.id as student_id',
-            'students.full_name',
-            'students.matric_no',
-            'students.program',
-            'forms.has_scholarship',
-            'forms.sponsor_name',
-            'forms.monthly_amount',
-            'forms.notes',
-            'forms.submitted_at'
-        );
-
-    if (!empty($filters['q'])) {
-        $q = trim($filters['q']);
-        $query->where(function ($sub) use ($q) {
-            $sub->where('students.full_name', 'like', "%{$q}%")
-                ->orWhere('students.matric_no', 'like', "%{$q}%")
-                ->orWhere('students.program', 'like', "%{$q}%");
-        });
-    }
-
-    $statusFilter = $filters['has_scholarship'] ?? 'all';
-    if ($statusFilter !== 'all') {
-        $query->where('forms.has_scholarship', $statusFilter);
-    }
-
-    $records = $query
-        ->orderByDesc(DB::raw('forms.submitted_at IS NOT NULL'))
-        ->orderBy('students.full_name')
-        ->paginate(20)
-        ->withQueryString();
-
-    $summary = [
-        'total_students' => DB::table('students')->count(),
-        'submitted' => DB::table('student_scholarship_status_forms')->count(),
-        'has_scholarship' => DB::table('student_scholarship_status_forms')->where('has_scholarship', 'yes')->count(),
-        'no_scholarship' => DB::table('student_scholarship_status_forms')->where('has_scholarship', 'no')->count(),
-    ];
-
-    return view('admin.student_scholarship_status.index', compact('records', 'filters', 'summary'));
-})->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.student-scholarship-status.index');
-Route::get('/admin/ai-helper', function () {
-    return view('admin.ai_helper.index');
-})->middleware(['auth.session:admin', 'admin.scope:backoffice'])->name('admin.ai-helper.index');
+Route::get('/admin/student-scholarship-status', [StudentScholarshipStatusController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.student-scholarship-status.index');
+Route::get('/admin/ai-helper', [AdminAiHelperController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice'])
+    ->name('admin.ai-helper.index');
+Route::post('/admin/ai-helper', [AdminAiHelperController::class, 'ask'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice'])
+    ->name('admin.ai-helper.ask');
 Route::get('/admin/movements', [AdminMovementController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.index');
@@ -428,75 +152,13 @@ Route::get('/admin/admin-users', [AdminUserController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.index');
 
-Route::get('/admin/maintenance', function () {
-    $downFile = storage_path('framework/down');
-    $downPayload = is_file($downFile)
-        ? json_decode((string) file_get_contents($downFile), true)
-        : [];
+Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.maintenance.index');
 
-    $cacheMeta = systemCacheMeta();
-    $maintenance = [
-        'enabled' => app()->isDownForMaintenance(),
-        'cache_enabled' => isSystemCacheEnabled(),
-        'cache_last_cleared_at' => $cacheMeta['last_cleared_at'] ?? null,
-        'cache_updated_at' => $cacheMeta['updated_at'] ?? null,
-        'cache_key_count' => count(systemCacheKeys()),
-        'secret' => is_array($downPayload) ? ($downPayload['secret'] ?? null) : null,
-        'retry' => is_array($downPayload) ? ($downPayload['retry'] ?? null) : null,
-        'refresh' => is_array($downPayload) ? ($downPayload['refresh'] ?? null) : null,
-        'redirect' => is_array($downPayload) ? ($downPayload['redirect'] ?? null) : null,
-        'bypass_url' => null,
-        'server_time' => now()->format('Y-m-d H:i:s'),
-    ];
-
-    if (!empty($maintenance['secret'])) {
-        $maintenance['bypass_url'] = url($maintenance['secret']);
-    }
-
-    return view('admin.maintenance.index', compact('maintenance'));
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.maintenance.index');
-
-Route::post('/admin/maintenance', function (Request $request) {
-    $validated = $request->validate([
-        'action' => ['required', Rule::in(['enable', 'disable', 'cache_enable', 'cache_disable'])],
-    ]);
-
-    if ($validated['action'] === 'enable') {
-        $secret = 'myhep-maintenance-' . Str::lower(Str::random(24));
-        Artisan::call('down', [
-            '--secret' => $secret,
-            '--retry' => 60,
-        ]);
-        auditLog('maintenance.enable', 'system', null, 'Enable maintenance mode');
-
-        return redirect()->route('admin.maintenance.index')
-            ->with('success', 'Maintenance mode enabled. Use the bypass URL to continue admin access.');
-    }
-
-    if ($validated['action'] === 'cache_enable') {
-        setSystemCacheEnabled(true);
-        clearSystemCaches();
-        auditLog('cache.enable', 'system', null, 'Enable system cache');
-
-        return redirect()->route('admin.maintenance.index')
-            ->with('success', 'System cache enabled.');
-    }
-
-    if ($validated['action'] === 'cache_disable') {
-        setSystemCacheEnabled(false);
-        clearSystemCaches();
-        auditLog('cache.disable', 'system', null, 'Disable system cache');
-
-        return redirect()->route('admin.maintenance.index')
-            ->with('success', 'System cache disabled.');
-    }
-
-    Artisan::call('up');
-    auditLog('maintenance.disable', 'system', null, 'Disable maintenance mode');
-
-    return redirect()->route('admin.maintenance.index')
-        ->with('success', 'Maintenance mode disabled. The system is public again.');
-})->middleware(['auth.session:admin', 'admin.scope:system'])->name('admin.maintenance.update');
+Route::post('/admin/maintenance', [MaintenanceController::class, 'update'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.maintenance.update');
 
 Route::get('/admin/admin-users/create', [AdminUserController::class, 'create'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
@@ -554,199 +216,27 @@ Route::post('/admin/students/{id}/reset-password', [StudentController::class, 'r
     ->middleware(['auth.session:admin', 'admin.scope:discipline'])
     ->name('admin.students.reset-password');
 
-Route::get('/admin/scholarships', function (Request $request) {
-    $filters = $request->validate([
-        'q' => ['nullable', 'string', 'max:150'],
-        'type' => ['nullable', Rule::in(['scholarship', 'welfare', 'sponsorship', 'none'])],
-        'status' => ['nullable', Rule::in(['pending', 'confirmed', 'rejected'])],
-    ]);
-
-    $query = DB::table('scholarships')
-        ->join('students', 'students.id', '=', 'scholarships.student_id')
-        ->select(
-            'scholarships.id',
-            'scholarships.type',
-            'scholarships.provider_name',
-            'scholarships.amount',
-            'scholarships.status',
-            'scholarships.proof_file',
-            'scholarships.created_at',
-            'students.full_name as student_name',
-            'students.matric_no'
-        );
-
-    if (!empty($filters['q'])) {
-        $q = trim($filters['q']);
-        $query->where(function ($sub) use ($q) {
-            $sub->where('students.full_name', 'like', "%{$q}%")
-                ->orWhere('students.matric_no', 'like', "%{$q}%")
-                ->orWhere('scholarships.provider_name', 'like', "%{$q}%");
-        });
-    }
-
-    if (!empty($filters['type'])) {
-        $query->where('scholarships.type', $filters['type']);
-    }
-
-    if (!empty($filters['status'])) {
-        $query->where('scholarships.status', $filters['status']);
-    }
-
-    $records = $query
-        ->orderByDesc('scholarships.created_at')
-        ->paginate(15)
-        ->withQueryString();
-
-    return view('admin.scholarships.index', compact('records', 'filters'));
-})->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.index');
-
-Route::get('/admin/scholarships/export', function (Request $request) {
-    $filters = $request->validate([
-        'q' => ['nullable', 'string', 'max:150'],
-        'type' => ['nullable', Rule::in(['scholarship', 'welfare', 'sponsorship', 'none'])],
-        'status' => ['nullable', Rule::in(['pending', 'confirmed', 'rejected'])],
-    ]);
-
-    $query = DB::table('scholarships')
-        ->join('students', 'students.id', '=', 'scholarships.student_id')
-        ->select(
-            'scholarships.id',
-            'students.full_name as student_name',
-            'students.matric_no',
-            'scholarships.type',
-            'scholarships.provider_name',
-            'scholarships.amount',
-            'scholarships.status',
-            'scholarships.created_at'
-        );
-
-    if (!empty($filters['q'])) {
-        $q = trim($filters['q']);
-        $query->where(function ($sub) use ($q) {
-            $sub->where('students.full_name', 'like', "%{$q}%")
-                ->orWhere('students.matric_no', 'like', "%{$q}%")
-                ->orWhere('scholarships.provider_name', 'like', "%{$q}%");
-        });
-    }
-
-    if (!empty($filters['type'])) {
-        $query->where('scholarships.type', $filters['type']);
-    }
-
-    if (!empty($filters['status'])) {
-        $query->where('scholarships.status', $filters['status']);
-    }
-
-    $rows = $query
-        ->orderByDesc('scholarships.created_at')
-        ->get()
-        ->map(function ($record) {
-            return [
-                $record->id,
-                $record->student_name,
-                $record->matric_no,
-                $record->type,
-                $record->provider_name ?? '',
-                $record->amount !== null ? number_format((float) $record->amount, 2, '.', '') : '',
-                $record->status,
-                $record->created_at,
-            ];
-        });
-
-    return downloadCsv(
-        'scholarships_' . now()->format('Ymd_His') . '.csv',
-        ['ID', 'Pelajar', 'No Matrik', 'Jenis', 'Penyedia', 'Jumlah (RM)', 'Status', 'Tarikh Rekod'],
-        $rows
-    );
-})->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.export');
-
-Route::get('/admin/scholarships/create', function () {
-    return redirect()->route('admin.scholarships.index')
-        ->withErrors(['scholarship' => 'Add Record is unavailable for this module.']);
-})->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.create');
-
-Route::post('/admin/scholarships', function (Request $request) {
-    $validated = $request->validate([
-        'student_id' => ['required', 'integer', 'exists:students,id'],
-        'type' => ['required', Rule::in(['scholarship', 'welfare', 'sponsorship', 'none'])],
-        'provider_name' => ['nullable', 'string', 'max:150'],
-        'amount' => ['nullable', 'numeric', 'min:0'],
-        'status' => ['required', Rule::in(['pending', 'confirmed', 'rejected'])],
-        'proof_file' => ['nullable', 'string', 'max:255'],
-    ]);
-
-    DB::table('scholarships')->insert([
-        'student_id' => $validated['student_id'],
-        'type' => $validated['type'],
-        'provider_name' => $validated['provider_name'] ?? null,
-        'amount' => $validated['amount'] ?? null,
-        'status' => $validated['status'],
-        'proof_file' => $validated['proof_file'] ?? null,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    return redirect()->route('admin.scholarships.index')
-        ->with('success', __('Rekod scholarship berjaya ditambah.'));
-})->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.store');
-
-Route::get('/admin/scholarships/{id}/edit', function (int $id) {
-    $record = DB::table('scholarships')->where('id', $id)->first();
-    if (!$record) {
-        return redirect()->route('admin.scholarships.index')
-            ->withErrors(['scholarship' => 'Rekod scholarship tidak dijumpai.']);
-    }
-
-    $selectedStudent = DB::table('students')
-        ->select('id', 'full_name', 'matric_no')
-        ->where('id', (int) old('student_id', $record->student_id))
-        ->first();
-
-    return view('admin.scholarships.edit', compact('record', 'selectedStudent'));
-})->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.edit');
-
-Route::put('/admin/scholarships/{id}', function (Request $request, int $id) {
-    $record = DB::table('scholarships')->where('id', $id)->first();
-    if (!$record) {
-        return redirect()->route('admin.scholarships.index')
-            ->withErrors(['scholarship' => 'Rekod scholarship tidak dijumpai.']);
-    }
-
-    $validated = $request->validate([
-        'student_id' => ['required', 'integer', 'exists:students,id'],
-        'type' => ['required', Rule::in(['scholarship', 'welfare', 'sponsorship', 'none'])],
-        'provider_name' => ['nullable', 'string', 'max:150'],
-        'amount' => ['nullable', 'numeric', 'min:0'],
-        'status' => ['required', Rule::in(['pending', 'confirmed', 'rejected'])],
-        'proof_file' => ['nullable', 'string', 'max:255'],
-    ]);
-
-    DB::table('scholarships')
-        ->where('id', $id)
-        ->update([
-            'student_id' => $validated['student_id'],
-            'type' => $validated['type'],
-            'provider_name' => $validated['provider_name'] ?? null,
-            'amount' => $validated['amount'] ?? null,
-            'status' => $validated['status'],
-            'proof_file' => $validated['proof_file'] ?? null,
-            'updated_at' => now(),
-        ]);
-
-    return redirect()->route('admin.scholarships.index')
-        ->with('success', __('Rekod scholarship berjaya dikemaskini.'));
-})->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.update');
-
-Route::delete('/admin/scholarships/{id}', function (int $id) {
-    $deleted = DB::table('scholarships')->where('id', $id)->delete();
-    if (!$deleted) {
-        return redirect()->route('admin.scholarships.index')
-            ->withErrors(['scholarship' => 'Rekod scholarship tidak dijumpai.']);
-    }
-
-    return redirect()->route('admin.scholarships.index')
-        ->with('success', __('Rekod scholarship berjaya dipadam.'));
-})->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarships.destroy');
+Route::get('/admin/scholarships', [ScholarshipController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.index');
+Route::get('/admin/scholarships/export', [ScholarshipController::class, 'export'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.export');
+Route::get('/admin/scholarships/create', [ScholarshipController::class, 'create'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.create');
+Route::post('/admin/scholarships', [ScholarshipController::class, 'store'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.store');
+Route::get('/admin/scholarships/{id}/edit', [ScholarshipController::class, 'edit'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.edit');
+Route::put('/admin/scholarships/{id}', [ScholarshipController::class, 'update'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.update');
+Route::delete('/admin/scholarships/{id}', [ScholarshipController::class, 'destroy'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.destroy');
 
 Route::get('/admin/scholarship-announcements', function (Request $request) {
     $filters = $request->validate([

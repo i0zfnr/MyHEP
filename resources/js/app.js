@@ -286,6 +286,10 @@ const createPromptShell = () => {
                 overflow-y: auto;
                 border-radius: 20px;
             }
+            body.has-student-bottom-nav .pwa-prompt {
+                bottom: calc(6.65rem + env(safe-area-inset-bottom, 0px));
+                max-height: min(36vh, 260px);
+            }
             .pwa-prompt-body {
                 min-width: 0;
                 padding: 13px;
@@ -303,10 +307,28 @@ const createPromptShell = () => {
                 font-size: .78rem;
                 line-height: 1.45;
             }
+            body.has-student-bottom-nav .pwa-prompt-copy {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            body.has-student-bottom-nav .pwa-prompt-actions {
+                gap: 6px;
+            }
             .pwa-prompt-btn {
                 padding: 9px 12px;
                 border-radius: 12px;
                 font-size: .8rem;
+            }
+            body.has-student-bottom-nav .pwa-prompt-btn {
+                flex: 1 1 auto;
+                min-height: 40px;
+                text-align: center;
+            }
+            body.has-student-bottom-nav .pwa-prompt-btn.link {
+                flex: 0 0 auto;
+                padding-inline: 8px;
             }
         }
     `;
