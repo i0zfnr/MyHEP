@@ -99,13 +99,6 @@ const registerLiquidGlassUi = () => {
     }
 
     const selector = [
-        '.page-body .ui-card',
-        '.page-body .card',
-        '.page-body .portal-card',
-        '.page-body .stat-card',
-        '.page-body .data-card',
-        '.page-body .monitor-card',
-        '.page-body .monitor-kpi',
         '.settings-intro',
         '.settings-panel',
         '.settings-option',
@@ -606,10 +599,23 @@ const registerLogoutPushCleanup = () => {
 
 const getUiConfig = () => window.studentEdgeUi || { labels: {} };
 
+const setSurfaceOrigin = (surface, trigger, prefix = 'se-popup-origin') => {
+    if (!surface || !trigger) return;
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const surfaceRect = surface.getBoundingClientRect();
+    const x = Math.max(0, Math.min(surfaceRect.width, triggerRect.left + (triggerRect.width / 2) - surfaceRect.left));
+    const y = Math.max(0, Math.min(surfaceRect.height, triggerRect.top + (triggerRect.height / 2) - surfaceRect.top));
+
+    surface.style.setProperty(`--${prefix}-x`, `${x}px`);
+    surface.style.setProperty(`--${prefix}-y`, `${y}px`);
+};
+
 const registerNotificationCenter = () => {
     const config = getUiConfig();
     const center = document.getElementById('notificationCenter');
     const list = center?.querySelector('[data-notification-list]');
+    const panel = center?.querySelector('.se-notification-panel');
     const triggers = Array.from(document.querySelectorAll('[data-notification-trigger]'));
 
     if (!config.authenticated || !config.notificationUrl || !center || !list || triggers.length === 0) {
@@ -660,7 +666,7 @@ const registerNotificationCenter = () => {
 
         items.forEach((item) => {
             const link = document.createElement('a');
-            link.className = 'se-notification-item';
+            link.className = 'se-notification-item is-entering';
             link.href = item.url || '#';
             link.dataset.tone = item.tone || 'info';
             link.addEventListener('click', () => close());
@@ -687,6 +693,11 @@ const registerNotificationCenter = () => {
         });
 
         list.replaceChildren(fragment);
+        window.requestAnimationFrame(() => {
+            list.querySelectorAll('.se-notification-item.is-entering').forEach((item) => {
+                item.classList.remove('is-entering');
+            });
+        });
     };
 
     const load = async () => {
@@ -720,8 +731,9 @@ const registerNotificationCenter = () => {
         }
     };
 
-    const open = () => {
+    const open = (trigger) => {
         positionForMobile();
+        setSurfaceOrigin(panel, trigger, 'se-notification-origin');
         center.classList.add('is-open');
         center.setAttribute('aria-hidden', 'false');
         triggers.forEach((trigger) => trigger.setAttribute('aria-expanded', 'true'));
@@ -732,7 +744,7 @@ const registerNotificationCenter = () => {
     triggers.forEach((trigger) => {
         trigger.addEventListener('click', (event) => {
             event.stopPropagation();
-            center.classList.contains('is-open') ? close() : open();
+            center.classList.contains('is-open') ? close() : open(trigger);
         });
     });
 
@@ -753,6 +765,7 @@ const registerNotificationCenter = () => {
 const registerMediaViewer = () => {
     const config = getUiConfig();
     const modal = document.getElementById('mediaPreviewModal');
+    const dialog = modal?.querySelector('.se-media-dialog');
     const stage = modal?.querySelector('[data-media-stage]');
     const title = document.getElementById('mediaPreviewTitle');
     const openLink = modal?.querySelector('[data-media-open]');
@@ -766,7 +779,11 @@ const registerMediaViewer = () => {
     const close = () => {
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
-        stage.replaceChildren();
+        window.setTimeout(() => {
+            if (!modal.classList.contains('is-open')) {
+                stage.replaceChildren();
+            }
+        }, 420);
         if (!document.querySelector('.se-notification-center.is-open, .se-filter-sheet.is-open')) {
             document.body.style.overflow = '';
         }
@@ -796,6 +813,7 @@ const registerMediaViewer = () => {
         downloadLink.href = url.href;
         stage.replaceChildren(media);
         returnFocus = anchor;
+        setSurfaceOrigin(dialog, anchor);
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
@@ -878,6 +896,7 @@ const registerLiquidFilterSheets = () => {
         };
 
         const open = () => {
+            setSurfaceOrigin(sheet, trigger);
             sheet.classList.add('is-open');
             sheet.setAttribute('aria-hidden', 'false');
             backdrop.classList.add('is-open');
@@ -964,6 +983,39 @@ const registerLoadingUi = () => {
     });
 };
 
+const registerTabMotionUi = () => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
+    const fadePanel = (panel) => {
+        if (!panel) return;
+        panel.classList.add('se-tab-panel-fading');
+        window.setTimeout(() => panel.classList.remove('se-tab-panel-fading'), 150);
+    };
+
+    document.addEventListener('click', (event) => {
+        const tab = event.target instanceof Element
+            ? event.target.closest('[role="tab"], [data-tab-target], [data-bs-toggle="tab"]')
+            : null;
+
+        if (!tab) return;
+
+        const targetSelector = tab.getAttribute('aria-controls')
+            ? `#${CSS.escape(tab.getAttribute('aria-controls'))}`
+            : tab.getAttribute('data-tab-target')
+                || tab.getAttribute('data-bs-target')
+                || tab.getAttribute('href');
+
+        if (!targetSelector || targetSelector === '#') return;
+
+        try {
+            fadePanel(document.querySelector(targetSelector));
+        } catch {
+            // Ignore non-selector hrefs.
+        }
+    }, true);
+};
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
@@ -986,6 +1038,7 @@ window.addEventListener('DOMContentLoaded', () => {
     registerMediaViewer();
     registerLiquidFilterSheets();
     registerLoadingUi();
+    registerTabMotionUi();
     registerPwaPromptUi();
     registerPushPromptUi();
     registerLogoutPushCleanup();

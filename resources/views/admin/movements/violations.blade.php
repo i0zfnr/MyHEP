@@ -10,6 +10,11 @@
 <style>
     .mv-violation-note { color:var(--text-muted); font-size:.78rem; margin-top:.15rem; }
     .mv-violation-empty { padding:2rem 1rem; text-align:center; color:var(--text-muted); }
+    .mv-student-card { display:flex; align-items:center; gap:.7rem; min-width:220px; }
+    .mv-avatar { width:48px; height:48px; border-radius:10px; object-fit:cover; border:1px solid rgba(226,209,192,.24); background:rgba(255,255,255,.06); flex:0 0 48px; }
+    .mv-avatar-empty { display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-weight:800; }
+    .mv-mini-btn { display:inline-flex; align-items:center; margin-top:.35rem; padding:.28rem .5rem; border-radius:8px; border:1px solid rgba(226,209,192,.18); color:var(--text); text-decoration:none; font-size:.7rem; font-weight:750; }
+    .mv-explanation { max-width:320px; color:var(--text-muted); line-height:1.45; }
 </style>
 @endpush
 
@@ -41,18 +46,32 @@
     <section class="ui-card">
         <div style="overflow-x:auto;">
             <table class="ui-table">
-                <thead><tr><th>{{ __('Student') }}</th><th>{{ __('Check-Out') }}</th><th>{{ __('Return') }}</th><th>{{ __('Late Duration') }}</th><th>{{ __('Rule') }}</th></tr></thead>
+                <thead><tr><th>{{ __('Student') }}</th><th>{{ __('Check-Out') }}</th><th>{{ __('Return') }}</th><th>{{ __('Late Duration') }}</th><th>{{ __('Explanation') }}</th><th>{{ __('Rule') }}</th></tr></thead>
                 <tbody>
                     @forelse($records as $record)
                         <tr>
-                            <td><strong>{{ $record->student_name }}</strong><br><span class="muted">{{ $record->matric_no }}</span></td>
+                            <td>
+                                <div class="mv-student-card">
+                                    @if(!empty($record->student_photo))
+                                        <img class="mv-avatar" src="{{ asset('storage/' . $record->student_photo) }}" alt="{{ __('Profile photo') }}">
+                                    @else
+                                        <div class="mv-avatar mv-avatar-empty">{{ strtoupper(substr($record->student_name ?? 'S', 0, 1)) }}</div>
+                                    @endif
+                                    <div>
+                                        <strong>{{ $record->student_name }}</strong><br>
+                                        <span class="muted">{{ $record->matric_no }}</span><br>
+                                        <a class="mv-mini-btn" href="{{ route('admin.students.show', $record->student_id) }}">{{ __('View Profile') }}</a>
+                                    </div>
+                                </div>
+                            </td>
                             <td>{{ \Illuminate\Support\Carbon::parse($record->checkout_at)->format('d M Y, h:i A') }}</td>
                             <td>{{ $record->return_at ? \Illuminate\Support\Carbon::parse($record->return_at)->format('d M Y, h:i A') : '-' }}</td>
                             <td>{{ (int) $record->late_minutes }} {{ __('minutes') }}</td>
+                            <td><div class="mv-explanation">{{ $record->late_explanation ?: '-' }}</div></td>
                             <td><span class="ui-status status-rejected">{{ __('Late Return') }}</span></td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="mv-violation-empty">{{ __('No late return violations found.') }}</td></tr>
+                        <tr><td colspan="6" class="mv-violation-empty">{{ __('No late return violations found.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "studentedge/studentedge",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "StudentEdge student affairs management system.",
+    "keywords": ["studentedge", "student-affairs", "laravel"],
     "license": "MIT",
     "require": {
         "php": "^8.3",

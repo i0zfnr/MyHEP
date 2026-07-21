@@ -16,12 +16,12 @@
     .head { padding:12px 16px; border-bottom:1px solid #ede4d9; display:flex; justify-content:space-between; align-items:center; gap:10px; }
     .filters { padding: 12px 16px; border-bottom:1px solid #ede4d9; background:#fcfaf8; }
     .filter-grid { display:grid; grid-template-columns:1fr; gap:8px; }
-    @media (min-width: 900px) { .filter-grid { grid-template-columns: 2fr 1.5fr 1fr auto; } }
+    @media (min-width: 900px) { .filter-grid { grid-template-columns: 1.4fr 1fr 1.2fr 1fr auto; } }
     .filters input, .filters select { width:100%; border:1px solid #e5d8c8; border-radius:8px; padding:8px 10px; font-size:13px; background:#fff; }
     table { width:100%; border-collapse:collapse; }
-    th, td { padding:10px 12px; border-bottom:1px solid #f0e7dc; font-size:13px; text-align:left; }
+    th, td { padding:8px 10px; border-bottom:1px solid #f0e7dc; font-size:12px; text-align:left; vertical-align:middle; }
     th { font-size:11px; text-transform:uppercase; color:#7a6555; letter-spacing:.05em; background:#faf7f4; }
-    .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:8px 12px; text-decoration:none; font-weight:600; font-size:13px; cursor:pointer; }
+    .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:7px 10px; text-decoration:none; font-weight:600; font-size:12px; cursor:pointer; }
     .btn-danger { border-color:#fecaca; color:#b91c1c; background:#fef2f2; }
     .btn-warn { border-color:#fed7aa; color:#b45309; background:#fff7ed; }
     .pwd-badge { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; border:1px solid #ede4d9; }
@@ -30,6 +30,21 @@
     .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
+    .import-panel { margin-bottom:12px; padding:14px 16px; }
+    .import-grid { display:grid; grid-template-columns:1fr; gap:10px; align-items:end; }
+    @media (min-width: 900px) { .import-grid { grid-template-columns:1.5fr auto; } }
+    .import-panel label { display:block; margin-bottom:6px; font-size:13px; font-weight:700; color:#7a6555; }
+    .import-panel input[type=file] { width:100%; border:1px solid #e5d8c8; border-radius:10px; padding:8px; background:#fffdfb; }
+    .import-hint { margin-top:8px; color:#7a6555; font-size:12px; line-height:1.55; }
+    .import-summary { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; margin-top:12px; }
+    @media (min-width: 760px) { .import-summary { grid-template-columns:repeat(4, minmax(0,1fr)); } }
+    .import-summary div { border:1px solid #eadfce; border-radius:10px; padding:10px; background:#fcfaf8; }
+    .import-summary span { display:block; font-size:11px; text-transform:uppercase; font-weight:800; color:#7a6555; }
+    .import-summary strong { display:block; margin-top:3px; font-size:18px; color:#2d1f14; }
+    .error-list { margin:10px 0 0; padding-left:18px; color:#991b1b; font-size:12px; line-height:1.5; }
+    .student-name { font-weight:700; color:#2d1f14; }
+    .student-sub { display:none; margin-top:3px; color:#7a6555; font-size:11px; line-height:1.35; }
+    .matric-cell { white-space:nowrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
         /* Admin UX Identity v2 */
     :root {
         --admin-ink: #241a12;
@@ -182,15 +197,41 @@
         .head .btn {
             width: auto;
         }
-        .stats {
-            grid-template-columns: 1fr !important;
-        }
-        th,
-        td {
-            font-size: 12px !important;
-            padding: 9px 10px !important;
-        }
-    }</style>
+    }
+    @media (max-width: 760px) {
+        .wrap { width:100%; }
+        .stats { grid-template-columns:repeat(3, minmax(0,1fr)) !important; gap:6px; margin-bottom:8px; }
+        .stat { padding:8px 9px; border-radius:10px; }
+        .stat-label { font-size:9px; line-height:1.2; }
+        .stat-value { font-size:18px; }
+        .import-panel { padding:10px; margin-bottom:8px; }
+        .import-hint { display:none; }
+        .head { padding:9px 10px; }
+        .head h1 { font-size:16px !important; }
+        .head .btn { padding:7px 9px; }
+        .filters { padding:9px 10px; }
+        .filter-grid { gap:7px; }
+        .filters input, .filters select { padding:7px 9px; font-size:12px; }
+        .student-table-wrap { overflow-x:hidden !important; }
+        .students-table { table-layout:fixed; min-width:0; }
+        .students-table th, .students-table td { padding:8px 9px !important; font-size:12px !important; }
+        .students-table th:nth-child(1), .students-table td:nth-child(1) { width:48%; }
+        .students-table th:nth-child(2), .students-table td:nth-child(2) { width:32%; }
+        .students-table th:nth-child(7), .students-table td:nth-child(7) { width:20%; }
+        .student-sub { display:block; }
+        .col-ic, .col-phone, .col-password, .col-program { display:none; }
+        .matric-cell { white-space:normal; overflow-wrap:anywhere; font-size:11px !important; }
+        .actions-cell { justify-content:flex-end; }
+        .actions-cell .btn { padding:6px 8px; font-size:11px; }
+        .actions-cell form, .actions-cell .manage-action { display:none; }
+        .student-pagination { margin-top:8px !important; }
+        .student-pagination .se-pagination { padding:8px 9px; }
+        .student-pagination .se-pagination-summary { display:none; }
+        .student-pagination .se-pagination-controls { justify-content:space-between; width:100%; }
+        .student-pagination .se-pagination-pages { display:none; }
+        .student-pagination .se-page-nav { min-height:34px; padding:7px 10px; font-size:12px; }
+    }
+</style>
 @endpush
 
 @section('header')
@@ -199,9 +240,46 @@
 
 @section('content')
 <div class="wrap">
-    @php($isGuardAdmin = (session('auth_user.admin_role') ?? null) === 'guard')
+    @php($adminRole = session('auth_user.admin_role') ?? null)
+    @php($canManageStudents = in_array($adminRole, ['discipline_admin', 'system_admin'], true))
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+
+    @if($canManageStudents)
+        <div class="card import-panel">
+            <form method="POST" action="{{ route('admin.students.import') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="import-grid">
+                    <div>
+                        <label for="student_file">{{ __('Import Data Pelajar') }}</label>
+                        <input id="student_file" type="file" name="student_file" accept=".csv,.txt,.xlsx" required>
+                        <div class="import-hint">
+                            Upload CSV atau Excel. Header yang disokong termasuk Nama Pelajar, No Kad Pengenalan, No Matrik, Nama Program, Telefon, Email, Semester dan Sesi Akademik.
+                            Jika No Matrik kosong, sistem akan simpan sebagai kosong. Pelajar boleh lengkapkan No. Bilik sendiri di profil pelajar.
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit">{{ __('Import Pelajar') }}</button>
+                </div>
+            </form>
+
+            @if(session('import_result'))
+                @php($result = session('import_result'))
+                <div class="import-summary">
+                    <div><span>Total rows</span><strong>{{ $result['total_rows'] ?? 0 }}</strong></div>
+                    <div><span>Created</span><strong>{{ $result['students_created'] ?? 0 }}</strong></div>
+                    <div><span>Updated</span><strong>{{ $result['students_updated'] ?? 0 }}</strong></div>
+                    <div><span>Skipped</span><strong>{{ $result['skipped'] ?? 0 }}</strong></div>
+                </div>
+                @if(!empty($result['errors']))
+                    <ul class="error-list">
+                        @foreach($result['errors'] as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            @endif
+        </div>
+    @endif
 
     <div class="stats">
         <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page', 'password_status'), ['password_status' => ''])) }}">
@@ -223,17 +301,18 @@
             <h1 style="margin:0;font-size:20px;">{{ __('Senarai Pelajar') }}</h1>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
-                @unless($isGuardAdmin)
-                    <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                @if($canManageStudents)
                     <a class="btn" href="{{ route('admin.students.create') }}">{{ __('Tambah Pelajar') }}</a>
-                @endunless
+                @endif
             </div>
         </div>
 
         <div class="filters" data-filter-sheet data-filter-title="{{ __('Student filters') }}">
             <form method="GET" action="{{ route('admin.students.index') }}">
                 <div class="filter-grid">
-                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama / matrik / IC') }}"></div>
+                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama / IC') }}"></div>
+                    <div><input type="text" name="matric_no" value="{{ $filters['matric_no'] ?? '' }}" placeholder="{{ __('Cari no matrik') }}"></div>
                     <div><input type="text" name="program" value="{{ $filters['program'] ?? '' }}" placeholder="{{ __('Cari program') }}"></div>
                     <div>
                         <select name="password_status">
@@ -250,28 +329,31 @@
             </form>
         </div>
 
-        <div style="overflow-x:auto;">
-            <table>
+        <div class="student-table-wrap" style="overflow-x:auto;">
+            <table class="students-table">
                 <thead>
                     <tr>
                         <th>Nama</th>
                         <th>No Matrik</th>
-                        <th>IC</th>
-                        <th>Program</th>
-                        <th>Telefon</th>
-                        <th>Status Kata Laluan</th>
+                        <th class="col-ic">IC</th>
+                        <th class="col-program">Program</th>
+                        <th class="col-phone">Telefon</th>
+                        <th class="col-password">Status Kata Laluan</th>
                         <th>Tindakan</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($students as $student)
                         <tr>
-                            <td>{{ $student->full_name }}</td>
-                            <td>{{ $student->matric_no }}</td>
-                            <td>{{ $student->ic_no }}</td>
-                            <td>{{ $student->program }}</td>
-                            <td>{{ $student->phone ?: '-' }}</td>
                             <td>
+                                <span class="student-name">{{ $student->full_name }}</span>
+                                <span class="student-sub">{{ $student->program }}<br>{{ $student->ic_no }}</span>
+                            </td>
+                            <td class="matric-cell">{{ $student->matric_no ?: '-' }}</td>
+                            <td class="col-ic">{{ $student->ic_no }}</td>
+                            <td class="col-program">{{ $student->program }}</td>
+                            <td class="col-phone">{{ $student->phone ?: '-' }}</td>
+                            <td class="col-password">
                                 @if((int) $student->has_custom_password === 1)
                                     <span class="pwd-badge pwd-custom">Custom Password</span>
                                 @else
@@ -279,11 +361,10 @@
                                 @endif
                             </td>
                             <td>
-                                @if($isGuardAdmin)
-                                    <span class="muted">Read only</span>
-                                @else
-                                    <div class="actions-cell">
-                                        <a class="btn" href="{{ route('admin.students.edit', $student->id) }}">Edit</a>
+                                <div class="actions-cell">
+                                    <a class="btn" href="{{ route('admin.students.show', $student->id) }}">View Profile</a>
+                                    @if($canManageStudents)
+                                        <a class="btn manage-action" href="{{ route('admin.students.edit', $student->id) }}">Edit</a>
                                         <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;"
                                             data-confirm-title="{{ __('Reset password') }}"
                                             data-confirm-message="{{ __('Reset this student password to NRIC?') }}"
@@ -300,8 +381,8 @@
                                             @method('DELETE')
                                             <button class="btn btn-danger" type="submit">Delete</button>
                                         </form>
-                                    </div>
-                                @endif
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -312,7 +393,7 @@
         </div>
     </div>
 
-    <div style="margin-top:14px;">{{ $students->links() }}</div>
+    <div class="student-pagination" style="margin-top:14px;">{{ $students->onEachSide(1)->links('vendor.pagination.studentedge') }}</div>
 </div>
 @endsection
 

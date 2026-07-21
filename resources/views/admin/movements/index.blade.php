@@ -89,7 +89,7 @@
     }
     .mv-results-badge strong { color:var(--text); font-size:.95rem; }
     .mv-filter-grid { display:grid; grid-template-columns:1fr; gap:.8rem; }
-    @media (min-width: 880px) { .mv-filter-grid { grid-template-columns:1.45fr repeat(5, minmax(0, 1fr)); } }
+    @media (min-width: 880px) { .mv-filter-grid { grid-template-columns:1.35fr repeat(6, minmax(0, 1fr)); } }
     .mv-field { display:flex; flex-direction:column; gap:.3rem; }
     .mv-field span { font-size:.72rem; font-weight:700; color:var(--text-muted); }
     .mv-field input,
@@ -128,6 +128,11 @@
     .mv-table-note { color:var(--text-muted); font-size:.78rem; margin-top:.15rem; }
     .mv-student { font-weight:700; color:var(--text); }
     .mv-sub { color:var(--text-muted); font-size:.76rem; }
+    .mv-student-card { display:flex; align-items:center; gap:.7rem; min-width:220px; }
+    .mv-avatar { width:48px; height:48px; border-radius:10px; object-fit:cover; border:1px solid rgba(226,209,192,.24); background:rgba(255,255,255,.06); flex:0 0 48px; }
+    .mv-avatar-empty { display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-weight:800; }
+    .mv-student-actions { margin-top:.35rem; display:flex; gap:.35rem; flex-wrap:wrap; }
+    .mv-mini-btn { display:inline-flex; align-items:center; padding:.28rem .5rem; border-radius:8px; border:1px solid rgba(226,209,192,.18); color:var(--text); text-decoration:none; font-size:.7rem; font-weight:750; }
     .mv-type-badge {
         display:inline-flex;
         align-items:center;
@@ -158,6 +163,31 @@
     }
     .mv-table-head strong { color:var(--text); font-size:.96rem; }
     .mv-table-head span { color:var(--text-muted); font-size:.78rem; }
+    .mv-page-controls {
+        display:flex;
+        align-items:center;
+        gap:.55rem;
+        flex-wrap:wrap;
+    }
+    .mv-page-link {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        min-height:36px;
+        padding:.5rem .75rem;
+        border-radius:10px;
+        border:1px solid rgba(203,185,164,.8);
+        background:linear-gradient(180deg, #fff 0%, #f9f3ec 100%);
+        color:#6e5745;
+        text-decoration:none;
+        font-size:.78rem;
+        font-weight:800;
+        white-space:nowrap;
+    }
+    .mv-page-link.is-disabled {
+        opacity:.45;
+        pointer-events:none;
+    }
     body[data-theme="dark"] .mv-kpi {
         border-color:rgba(226,209,192,.16);
         background:
@@ -189,6 +219,7 @@
         'type' => collect($movementTypes)->firstWhere('id', (int) ($filters['movement_type_id'] ?? 0))?->name,
         'status' => $filters['movement_status'] ?? null,
         'rule' => $filters['rule_status'] ?? null,
+        'rows' => !empty($filters['per_page']) ? ($filters['per_page'] . ' per page') : null,
     ], fn ($value) => filled($value));
 @endphp
 <div class="ui-shell mv-admin">
@@ -264,6 +295,13 @@
                         <option value="late" @selected(($filters['rule_status'] ?? '') === 'late')>{{ __('Late Return') }}</option>
                     </select>
                 </label>
+                <label class="mv-field">
+                    <span>{{ __('Rows') }}</span>
+                    <select name="per_page">
+                        <option value="5" @selected(($filters['per_page'] ?? '10') === '5')>5</option>
+                        <option value="10" @selected(($filters['per_page'] ?? '10') === '10')>10</option>
+                    </select>
+                </label>
             </form>
             <div class="mv-filter-actions" style="margin-top:1rem;">
                 <div class="mv-filter-meta">
@@ -290,7 +328,19 @@
                 <strong>{{ __('Movement Timeline') }}</strong>
                 <span>{{ __('Latest check-out and return activity for students.') }}</span>
             </div>
-            <span class="mv-row-quiet">{{ __('Page') }} {{ $records->currentPage() }} / {{ $records->lastPage() }}</span>
+            <div class="mv-page-controls">
+                @if($records->onFirstPage())
+                    <span class="mv-page-link is-disabled">{{ __('Previous') }}</span>
+                @else
+                    <a class="mv-page-link" href="{{ $records->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>
+                @endif
+                <span class="mv-row-quiet">{{ __('Page') }} {{ $records->currentPage() }} / {{ $records->lastPage() }}</span>
+                @if($records->hasMorePages())
+                    <a class="mv-page-link" href="{{ $records->nextPageUrl() }}" rel="next">{{ __('Next') }}</a>
+                @else
+                    <span class="mv-page-link is-disabled">{{ __('Next') }}</span>
+                @endif
+            </div>
         </div>
         <div style="overflow-x:auto;">
             <table class="ui-table">
@@ -305,12 +355,28 @@
                         <th>{{ __('Return') }}</th>
                         <th>{{ __('Status') }}</th>
                         <th>{{ __('Rule') }}</th>
+                        <th>{{ __('Explanation') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($records as $record)
                         <tr>
-                            <td><span class="mv-student">{{ $record->student_name }}</span><br><span class="mv-sub">{{ $record->matric_no }}</span></td>
+                            <td>
+                                <div class="mv-student-card">
+                                    @if(!empty($record->student_photo))
+                                        <img class="mv-avatar" src="{{ asset('storage/' . $record->student_photo) }}" alt="{{ __('Profile photo') }}">
+                                    @else
+                                        <div class="mv-avatar mv-avatar-empty">{{ strtoupper(substr($record->student_name ?? 'S', 0, 1)) }}</div>
+                                    @endif
+                                    <div>
+                                        <span class="mv-student">{{ $record->student_name }}</span><br>
+                                        <span class="mv-sub">{{ $record->matric_no }}</span>
+                                        <div class="mv-student-actions">
+                                            <a class="mv-mini-btn" href="{{ route('admin.students.show', $record->student_id) }}">{{ __('View Profile') }}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
                             <td>{{ $record->program }}<br><span class="mv-sub">{{ $record->checkpoint_name }}</span></td>
                             <td>
                                 {{ ($record->residence_status ?? 'inside_campus') === 'live_out' ? __('Live Out') : __('Inside Campus') }}
@@ -337,9 +403,10 @@
                             </td>
                             <td><span class="ui-status status-{{ $record->movement_status === 'outside' ? 'pending' : 'confirmed' }}">{{ __($record->movement_status) }}</span></td>
                             <td><span class="ui-status status-{{ $record->rule_status === 'late' ? 'rejected' : ($record->rule_status === 'pending' ? 'pending' : 'confirmed') }}">{{ __($record->rule_status) }}</span></td>
+                            <td><span class="mv-row-quiet">{{ $record->late_explanation ?: '-' }}</span></td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="mv-empty">{{ __('No movement records found.') }}</td></tr>
+                        <tr><td colspan="10" class="mv-empty">{{ __('No movement records found.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

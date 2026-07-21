@@ -1,10 +1,10 @@
 # StudentEdge / e-Biasiswa System Documentation
 
-Last updated: 2026-07-17
+Last updated: 2026-07-21
 
 ## 1. System Overview
 
-StudentEdge, also referred to in the project directory as `e-biasiswa`, is a Laravel-based student affairs management system for scholarship, discipline, student profile, vehicle sticker, fine payment, announcement, reporting, and guard-house movement operations.
+StudentEdge is a Laravel-based student affairs management system for scholarship, discipline, student profile, vehicle sticker, fine payment, announcement, reporting, and guard-house movement operations.
 
 The system is intended for use by students, scholarship administrators, discipline administrators, system administrators, and guard-house users. It centralizes student affairs records and gives each role access to the workflows they need.
 
@@ -324,9 +324,50 @@ Important routes:
 - `GET /admin/reports/monthly`
 - `GET|POST /admin/maintenance`
 
+### 5.9 AI Helper / Agent Integration
+
+The application currently contains an admin-facing AI Helper and a disabled student AI Helper entry point.
+
+Current behavior:
+
+- Student route `GET /student/ai-helper` redirects back to the student dashboard with an unavailable message.
+- Student sidebar navigation shows AI Helper as unavailable instead of linking to a working tool.
+- Admin route `GET /admin/ai-helper` shows the admin helper page.
+- Admin route `POST /admin/ai-helper` sends a validated prompt plus limited system context to the configured AI provider.
+- Admin AI access is protected by `auth.session:admin` and `admin.scope:backoffice`.
+
+Provider selection is controlled by configured API keys in this priority order:
+
+1. Gemini, when `GEMINI_API_KEY` is set.
+2. OpenAI, when `OPENAI_API_KEY` is set and Gemini is not configured.
+3. DeepSeek, when `DEEPSEEK_API_KEY` is set and neither Gemini nor OpenAI is configured.
+
+Relevant configuration keys:
+
+- `GEMINI_API_KEY`, `GEMINI_API_URL`, `GEMINI_MODEL`
+- `OPENAI_API_KEY`, `OPENAI_API_URL`, `OPENAI_MODEL`
+- `DEEPSEEK_API_KEY`, `DEEPSEEK_API_URL`, `DEEPSEEK_MODEL`
+
+Relevant files:
+
+- `app/Http/Controllers/Admin/AiHelperController.php`
+- `app/Http/Controllers/Student/AiHelperController.php`
+- `resources/views/admin/ai_helper/index.blade.php`
+- `resources/views/layouts/app.blade.php`
+- `config/services.php`
+- `routes/web.php`
+
+Agent change constraints:
+
+- Do not expose student AI features until the data boundaries, prompt behavior, safety messages, and permission model are explicitly defined.
+- Keep admin AI context read-only unless a future task adds a reviewed action/approval workflow.
+- Do not send secrets, raw session payloads, uploaded files, or full student datasets to an external AI provider.
+- Keep provider-specific request code isolated in the admin helper controller or move it into a dedicated service before expanding the feature.
+- Add feature tests before enabling any new student-facing agent or any AI-assisted write action.
+
 ## 6. Data Model Summary
 
-The root SQL dump `e-biasiswa.sql` contains the original schema and seed data. Laravel migrations add newer tables and columns.
+The root SQL dump `StudentEdge.sql` contains the original schema and seed data. Laravel migrations add newer tables and columns.
 
 Core tables:
 
@@ -367,8 +408,9 @@ Security-related behavior:
 - Login attempts are rate limited by role, username, and IP.
 - Student default login falls back to IC number only when no custom password exists.
 - Admin passwords are stored as hashes.
-- Password reset uses email verification code records with expiry and single-use marking.
-- Role access is checked with session middleware and admin scope middleware.
+- Password reset requests are limited to three per role/identifier/email/IP combination per 15 minutes; verification codes are limited to five attempts per reset reference/IP combination per 15 minutes.
+- Password reset consumption uses a database transaction and row lock so a verified code is consumed only once.
+- Session middleware verifies that the student/admin account still exists on every protected request. Admin scope middleware also verifies the current database role and invalidates stale sessions.
 - Critical create, delete, reset, payment decision, QR, and movement actions write audit logs.
 - Push subscriptions are keyed by endpoint hash.
 - Upload validation limits file type and size for receipt, sticker, and evidence files.
@@ -428,6 +470,34 @@ Implementation constraints:
 - Use responsive CSS and existing Blade route names.
 - Preserve desktop behavior while applying mobile-only changes with media queries.
 - Test with `php artisan view:cache`, `npm run build`, and manual mobile viewport/PWA checks before committing.
+
+### 8.2 Shared UI Shell and Motion
+
+The shared application shell is implemented in `resources/views/layouts/app.blade.php`, with visual rules in `resources/css/design-system.css` and interactive behavior in `resources/js/app.js`.
+
+Desktop student navigation:
+
+- The student dashboard does not render the sidebar and uses the full workspace.
+- Student module pages retain the normal sticky sidebar on desktop for frequent module navigation.
+- Admin desktop navigation retains the shared sidebar.
+
+Mobile navigation:
+
+- The student bottom navigation and More sheet remain the primary mobile navigation controls.
+- Student module pages retain the sidebar as an overlay drawer on smaller screens; it is hidden from assistive technology until opened.
+
+Popup and card behavior:
+
+- Notifications, confirmation dialogs, media previews, filter sheets, account menus, and the mobile More sheet use reversible opacity and transform transitions.
+- Notification, media, and filter surfaces calculate their transform origin from the trigger where available.
+- Content cards are intentionally lightweight. They do not use pointer-tracked lighting, reflection sweeps, entrance pop animations, or mobile backdrop filters.
+- Desktop cards have only a small reversible hover elevation. Rich depth and blur are reserved for transient overlays.
+
+Accessibility and performance constraints:
+
+- Touch-oriented controls use a 44px minimum target where applicable.
+- Reduced-motion and reduced-transparency preferences disable or simplify visual effects.
+- Do not add per-card pointer listeners, heavy backdrop filters, or large scale animations to scrolling content without profiling the result on a mobile device.
 
 ## 9. Localization and Theme
 
@@ -494,7 +564,7 @@ npm run dev
 If restoring from the SQL dump instead of migrations:
 
 ```bash
-mysql -u root -p e_biasiswa < e-biasiswa.sql
+mysql -u root -p StudentEdge < StudentEdge.sql
 php artisan migrate
 ```
 
@@ -552,13 +622,12 @@ npm run build
 The current project is functional, but several areas should be handled before production hardening:
 
 - `routes/web.php` contains substantial inline business logic and is difficult to maintain safely.
-- Password verification code attempts are not throttled as strongly as login attempts.
-- Admin authorization trusts role data stored in session and should revalidate current database role for high-risk routes.
 - Movement QR token validation and rotation should be made atomic to prevent concurrent reuse.
 - Active movement creation should use transaction or locking protection to avoid duplicate active checkout records.
 - Test coverage is minimal and should be expanded for real business workflows.
 - Composer dependency advisories should be reviewed and fixed in a dedicated dependency update.
 - `.env` must not be committed or exposed, and debug mode must not be enabled in production.
+- AI provider keys must remain environment-only. Agent changes should be reviewed for privacy, authorization, and prompt-injection risks before public use.
 
 ## 15. Suggested Future Improvements
 
@@ -567,8 +636,9 @@ The current project is functional, but several areas should be handled before pr
 - Add service classes for scholarship, offense, fine payment, sticker, and movement workflows.
 - Add feature tests for authentication, admin scopes, uploads, exports, QR scanning, and payment decisions.
 - Add database constraints where business rules require uniqueness or single active records.
-- Improve password reset attempt throttling and reset transaction atomicity.
 - Add audit log viewer for system admins if operational review is required.
 - Add scheduled cleanup for expired password reset codes and stale push subscriptions.
 - Finish the student mobile/PWA app shell after visual approval, then tune each
   student content page for mobile without altering desktop workflows.
+- Move AI provider calls into a service layer and define a formal agent policy before
+  re-enabling student AI helper functionality.

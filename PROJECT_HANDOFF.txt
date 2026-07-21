@@ -1,6 +1,6 @@
-PROJECT HANDOFF - StudentEdge / e-biasiswa
-Date: 2026-07-17
-Path: C:\laragon\www\e-biasiswa
+PROJECT HANDOFF - StudentEdge
+Date: 2026-07-21
+Path: C:\laragon\www\StudentEdge
 
 Summary
 -------
@@ -39,6 +39,22 @@ Current Mobile/PWA Design Direction
 
 Recent Completed Work
 ---------------------
+- 2026-07-21: Hardened authentication without removing the temporary student IC-number
+  fallback. Password-reset requests and verification attempts are rate limited; reset
+  consumption is transactional with a row lock; protected routes revalidate the live
+  student/admin account and current admin role before proceeding.
+- 2026-07-21: Updated the shared frontend shell and documented the result. The
+  student dashboard uses the full workspace without a sidebar. Student module pages
+  retain the normal sticky desktop sidebar and mobile drawer; mobile bottom navigation
+  remains in use.
+- 2026-07-21: Reworked shared popup motion for notifications, confirmation dialogs,
+  media previews, filter sheets, account menus, and the mobile More sheet. Popups
+  now retain their exit state, use reversible opacity/transform motion, and media/
+  filter/notification surfaces use the trigger as their transform origin where
+  available.
+- 2026-07-21: Reduced scrolling cost on content pages. Cards no longer use
+  pointer-tracked lighting, reflection sweeps, entrance-pop animations, or mobile
+  backdrop filters; desktop hover is limited to a small elevation response.
 - 2026-07-17: Pushed checkpoint commit 0ecaf9c before further student PWA/mobile
   design experiments.
 - 2026-07-17: Added a dedicated student Scan QR route/page for the mobile/PWA
@@ -57,6 +73,9 @@ Recent Completed Work
 - Updated English and Malay frontend translations across multiple admin/student pages.
 - Fixed discipline announcement sidebar active states so only the current item is active.
 - Marked the student AI helper as unavailable and removed its quick-action content.
+- 2026-07-20: Documented current AI Helper / agent integration before further
+  agent changes. Admin AI remains enabled only for backoffice-scoped admins when
+  an API key is configured; student AI remains unavailable.
 - Fixed redirect translation handling: TranslateFrontendContent now ignores redirects
   and error responses so Laravel redirect headers remain unchanged.
 - Added a regression test for unauthenticated Admin Dashboard redirects to /login.
@@ -66,9 +85,11 @@ Recent Completed Work
 Current Verification Results
 ----------------------------
 - php artisan test: PASS
-  - 3 tests, 5 assertions.
+  - 7 tests, 18 assertions.
   - Coverage is still minimal and does not validate real business workflows.
 - npm run build: PASS with Vite 8.0.9.
+- npm run build: PASS after the 2026-07-21 UI shell, popup-motion, and card
+  performance changes.
 - php artisan route:list --except-vendor: PASS, 108 routes.
 - php artisan migrate:status: PASS, all 11 migrations marked Ran.
 - php artisan view:cache: PASS after the latest layout changes.
@@ -102,29 +123,36 @@ Outstanding Priority Work
    - Concurrent submissions could create multiple active checkout records.
    - Add transaction/locking protection and, if practical, a database-level invariant.
 
-5. Password reset throttling
-   - File: app/Http/Controllers/Auth/LoginController.php
-   - Login attempts are throttled, but six-digit verification attempts are not.
-   - Add per-reference/IP throttling, failed-attempt counting, and invalidation after a
-     small number of failures. Reset completion should remain single-use and atomic.
-
-6. Stale session authorization
-   - Files: app/Http/Middleware/RequireSessionRole.php and EnsureAdminScope.php
-   - Authorization currently trusts role/scope data stored in the login session.
-   - Revalidate that the account still exists and that its current database role matches
-     the required scope, especially for system-admin routes.
-
-7. Real feature test coverage
+5. Real feature test coverage
    - Existing tests only cover the homepage and a guest redirect.
    - Add tests for login throttling, admin scopes, stale/deleted accounts, password reset
      attempts, QR single use, concurrent movement submissions, CRUD authorization,
      uploads, exports, and EN/MS locale switching.
 
-8. routes/web.php maintainability
+6. routes/web.php maintainability
    - routes/web.php is approximately 1,858 lines and contains substantial CRUD/business
      logic in closures.
    - Move scholarship, discipline, announcements, fines, stickers, and exports into
      controllers, Form Requests, and focused service classes in small verified stages.
+
+7. AI Helper / agent redesign
+   - Current files:
+     app/Http/Controllers/Admin/AiHelperController.php
+     app/Http/Controllers/Student/AiHelperController.php
+     resources/views/admin/ai_helper/index.blade.php
+     resources/views/layouts/app.blade.php
+     config/services.php
+     routes/web.php
+   - Current provider priority is Gemini, then OpenAI, then DeepSeek, based on
+     configured API keys.
+   - Student AI currently redirects to the dashboard with an unavailable message.
+   - Keep student AI disabled until privacy boundaries, prompt behavior, safety
+     messages, and permissions are defined.
+   - Keep admin AI read-only unless a future task adds a reviewed action/approval
+     workflow.
+   - Do not send secrets, raw session payloads, uploaded files, or full student
+     datasets to external AI providers.
+   - Add feature tests before enabling student-facing agents or AI-assisted writes.
 
 Architecture / Important Files
 ------------------------------
@@ -141,14 +169,21 @@ Architecture / Important Files
 - app/Http/Middleware/TranslateFrontendContent.php
   Legacy frontend text replacement for successful English HTML responses only.
 - resources/views/layouts/app.blade.php
-  Shared responsive application shell, sidebar, header, footer, theme, and navigation.
+  Shared responsive application shell, desktop/mobile sidebar behavior, header,
+  footer, theme, navigation, confirmation modal, and account menu state.
+- resources/css/design-system.css
+  Shared material system, responsive UI shell, popup transitions, card performance
+  constraints, and accessibility/reduced-motion fallbacks.
+- resources/js/app.js
+  Theme behavior, notification center, media preview, mobile filter sheets, popup
+  transform-origin calculation, and PWA/push prompt behavior.
 - lang/en.json and lang/ms.json
   Primary JSON translation dictionaries.
 - lang/en/frontend_replace.php
   Compatibility replacement map for remaining hardcoded Malay frontend content.
 - app/Support/helpers.php
   Shared audit, CSV, cache, and option helpers.
-- e-biasiswa.sql
+- StudentEdge.sql
   Root SQL dump. Migrations may not fully recreate all legacy schema/data.
 
 Recommended Next Execution Order
@@ -166,23 +201,29 @@ Recommended Next Execution Order
 
 4. Add password reset throttling and live account/role session validation.
 
-5. Add focused feature tests for the above security behavior.
+5. If changing agents, keep the current documentation in docs/SYSTEM_DOCUMENTATION.md
+   as the baseline and update it again with the new design before implementation.
 
-6. Commit the current application changes before attempting dependency updates.
+6. Add focused feature tests for the above security behavior.
 
-7. Update Composer dependencies in a separate commit and rerun:
+7. Commit the current application changes before attempting dependency updates.
+
+8. Update Composer dependencies in a separate commit and rerun:
    composer audit
    php artisan test
    php artisan route:list --except-vendor
    npm run build
    php artisan migrate:status
 
-8. Manually verify desktop and mobile workflows:
+9. Manually verify desktop and mobile workflows:
    - Login/logout and forgot-password flow.
    - Admin/student dashboards and language switching.
    - Guard QR generation, Safari/Chrome scanning, checkout, and return.
    - Student scholarship, offense, fine, and sticker workflows.
    - Admin CRUD, approvals, CSV exports, PDF/print, and uploaded files.
+   - Student full-width dashboard, sticky desktop module sidebar, mobile module drawer/
+     bottom navigation, plus notification, confirmation, media, filter, account-menu,
+     and More-sheet motion.
 
 Operational Notes
 -----------------

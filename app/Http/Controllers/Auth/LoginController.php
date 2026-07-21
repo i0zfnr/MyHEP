@@ -117,6 +117,14 @@ class LoginController extends Controller
             'email' => ['required', 'email', 'max:150'],
         ]);
 
+        $requestKey = $this->resetRequestThrottleKey($validated, $request);
+        if (RateLimiter::tooManyAttempts($requestKey, 3)) {
+            return redirect()->route('password.forgot')
+                ->withErrors(['identifier' => 'Terlalu banyak permintaan reset. Sila cuba lagi kemudian.'])
+                ->withInput();
+        }
+        RateLimiter::hit($requestKey, 900);
+
         $account = $this->findAccount($validated['role'], trim($validated['identifier']));
         $email = strtolower(trim($validated['email']));
 
@@ -198,7 +206,14 @@ class LoginController extends Controller
                 ->withErrors(['identifier' => 'Sesi verifikasi tidak sah atau telah tamat.']);
         }
 
+        $verifyKey = $this->resetVerifyThrottleKey($validated['ref'], $request);
+        if (RateLimiter::tooManyAttempts($verifyKey, 5)) {
+            return redirect()->route('password.verify', ['ref' => $validated['ref']])
+                ->withErrors(['code' => 'Terlalu banyak percubaan. Sila minta kod reset baharu.']);
+        }
+
         if (!Hash::check($validated['code'], $reset->code_hash)) {
+            RateLimiter::hit($verifyKey, 900);
             return redirect()->route('password.verify', ['ref' => $validated['ref']])
                 ->withErrors(['code' => 'Kod verifikasi tidak sah.'])
                 ->withInput();
@@ -206,10 +221,14 @@ class LoginController extends Controller
 
         DB::table('password_reset_codes')
             ->where('id', $reset->id)
+            ->whereNull('verified_at')
+            ->whereNull('used_at')
             ->update([
                 'verified_at' => now(),
                 'updated_at' => now(),
             ]);
+
+        RateLimiter::clear($verifyKey);
 
         return redirect()->route('password.reset', ['ref' => $validated['ref']])
             ->with('success', 'Kod verifikasi berjaya disahkan. Sila tetapkan kata laluan baharu.');
@@ -241,33 +260,46 @@ class LoginController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $reset = DB::table('password_reset_codes')
-            ->where('ref', $validated['ref'])
-            ->whereNull('used_at')
-            ->whereNotNull('verified_at')
-            ->where('expires_at', '>', now())
-            ->first();
+        $reset = DB::transaction(function () use ($validated) {
+            $reset = DB::table('password_reset_codes')
+                ->where('ref', $validated['ref'])
+                ->whereNull('used_at')
+                ->whereNotNull('verified_at')
+                ->where('expires_at', '>', now())
+                ->lockForUpdate()
+                ->first();
+
+            if (!$reset) {
+                return null;
+            }
+
+            $table = $reset->role === 'admin' ? 'admins' : 'students';
+            $updated = DB::table($table)
+                ->where('id', $reset->target_id)
+                ->update([
+                    'password' => Hash::make($validated['password']),
+                    'updated_at' => now(),
+                ]);
+
+            if ($updated !== 1) {
+                return null;
+            }
+
+            DB::table('password_reset_codes')
+                ->where('id', $reset->id)
+                ->whereNull('used_at')
+                ->update([
+                    'used_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            return $reset;
+        });
 
         if (!$reset) {
             return redirect()->route('password.forgot')
                 ->withErrors(['identifier' => 'Sesi reset kata laluan tidak sah atau telah tamat.']);
         }
-
-        $table = $reset->role === 'admin' ? 'admins' : 'students';
-
-        DB::table($table)
-            ->where('id', $reset->target_id)
-            ->update([
-                'password' => Hash::make($validated['password']),
-                'updated_at' => now(),
-            ]);
-
-        DB::table('password_reset_codes')
-            ->where('id', $reset->id)
-            ->update([
-                'used_at' => now(),
-                'updated_at' => now(),
-            ]);
 
         auditLog('auth.password_reset', $reset->role, (int) $reset->target_id, 'Reset kata laluan berjaya');
 
@@ -334,5 +366,20 @@ class LoginController extends Controller
         $localMasked = substr($local, 0, 2) . str_repeat('*', max(1, strlen($local) - 2));
 
         return $localMasked . '@' . $domain;
+    }
+
+    private function resetRequestThrottleKey(array $validated, Request $request): string
+    {
+        return 'password-reset:request:' . hash('sha256', implode('|', [
+            $validated['role'],
+            strtolower(trim($validated['identifier'])),
+            strtolower(trim($validated['email'])),
+            $request->ip(),
+        ]));
+    }
+
+    private function resetVerifyThrottleKey(string $ref, Request $request): string
+    {
+        return 'password-reset:verify:' . hash('sha256', $ref . '|' . $request->ip());
     }
 }

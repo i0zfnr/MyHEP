@@ -21,11 +21,13 @@ class MovementController extends Controller
             'movement_type_id' => ['nullable', 'integer'],
             'movement_status' => ['nullable', Rule::in(['outside', 'returned'])],
             'rule_status' => ['nullable', Rule::in(['pending', 'compliant', 'late'])],
+            'per_page' => ['nullable', Rule::in(['5', '10'])],
         ]);
 
+        $perPage = (int) ($filters['per_page'] ?? 10);
         $records = $this->movementQuery($filters)
             ->orderByDesc('student_movements.checkout_at')
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('admin.movements.index', [
@@ -57,6 +59,7 @@ class MovementController extends Controller
                 $record->program,
                 $record->residence_status,
                 $record->room_number,
+                $record->student_photo ?? '',
                 $record->movement_type_name,
                 $record->vehicle_plate_no ?? '',
                 $record->checkpoint_name,
@@ -66,11 +69,12 @@ class MovementController extends Controller
                 $record->movement_status,
                 $record->rule_status,
                 $record->late_minutes,
+                $record->late_explanation ?? '',
             ]);
 
         return downloadCsv(
             'student_movements_' . now()->format('Ymd_His') . '.csv',
-            ['ID', 'Pelajar', 'No Matrik', 'Program', 'Status Kediaman', 'No Bilik', 'Jenis', 'No Plat', 'Checkpoint', 'Keluar', 'Jangka Pulang', 'Pulang', 'Status', 'Rule Status', 'Lewat (min)'],
+            ['ID', 'Pelajar', 'No Matrik', 'Program', 'Status Kediaman', 'No Bilik', 'Gambar Profil', 'Jenis', 'No Plat', 'Checkpoint', 'Keluar', 'Jangka Pulang', 'Pulang', 'Status', 'Rule Status', 'Lewat (min)', 'Penjelasan Lewat'],
             $rows
         );
     }
@@ -254,8 +258,10 @@ class MovementController extends Controller
             ->join('movement_checkpoints', 'movement_checkpoints.id', '=', 'student_movements.checkpoint_id')
             ->select(
                 'student_movements.*',
+                'students.id as student_id',
                 'students.full_name as student_name',
                 'students.matric_no',
+                'students.photo as student_photo',
                 'students.program',
                 'students.residence_status',
                 'students.room_number',

@@ -39,7 +39,7 @@ class MovementController extends Controller
 
         $checkpoint = $this->activeScanCheckpoint($request);
         $student = DB::table('students')
-            ->select('id', 'full_name', 'matric_no', 'program', 'residence_status', 'room_number')
+            ->select('id', 'full_name', 'matric_no', 'program', 'residence_status', 'room_number', 'photo')
             ->where('id', $studentId)
             ->first();
 
@@ -107,6 +107,7 @@ class MovementController extends Controller
             'checkpoint_id' => ['required', 'integer', 'exists:movement_checkpoints,id'],
             'movement_type_id' => ['required', 'integer', 'exists:movement_types,id'],
             'vehicle_plate_no' => ['nullable', 'string', 'max:30'],
+            'late_explanation' => ['nullable', 'string', 'max:2000'],
             'gps_latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'gps_longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
@@ -152,6 +153,12 @@ class MovementController extends Controller
                 ? $expectedReturn->diffInMinutes($now)
                 : 0;
 
+            if ($lateMinutes > 0 && blank($validated['late_explanation'] ?? null)) {
+                return redirect()->route('student.movements.index')
+                    ->withErrors(['late_explanation' => __('Please explain why you are checking in late.')])
+                    ->withInput();
+            }
+
             DB::table('student_movements')
                 ->where('id', $currentMovement->id)
                 ->update([
@@ -159,6 +166,7 @@ class MovementController extends Controller
                     'movement_status' => 'returned',
                     'rule_status' => $lateMinutes > 0 ? 'late' : 'compliant',
                     'late_minutes' => $lateMinutes,
+                    'late_explanation' => $lateMinutes > 0 ? trim((string) $validated['late_explanation']) : null,
                     'gps_latitude' => $validated['gps_latitude'] ?? $currentMovement->gps_latitude,
                     'gps_longitude' => $validated['gps_longitude'] ?? $currentMovement->gps_longitude,
                     'device_info' => substr((string) $request->userAgent(), 0, 255),

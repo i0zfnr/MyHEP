@@ -1693,9 +1693,12 @@
         @media (max-width: 767px) {
             .page-header {
                 width: calc(100% - 1rem);
+                min-height: 54px;
+                height: auto;
                 margin-top: .6rem;
                 border-radius: 16px;
-                padding: .82rem .95rem;
+                padding: .64rem .95rem .68rem;
+                overflow: visible;
             }
 
             body.has-student-bottom-nav .page-body {
@@ -2041,8 +2044,9 @@
         || request()->routeIs('admin.rules.*');
     $adminOnScholarship = request()->routeIs('admin.scholarships.*')
         || request()->routeIs('admin.student-scholarship-status.*')
-        || request()->routeIs('admin.scholarship-announcements.*');
-    $showSidebar = (bool) $authUser;
+        || request()->routeIs('admin.scholarship-announcements.*')
+        || ($isScholarshipAdmin && request()->routeIs('admin.students.*'));
+    $showSidebar = $isAdmin || ($isStudent && !$studentOnDashboard);
     $showHeaderUserMenu = (bool) $authUser && ($isStudent || $adminOnDashboard);
     $showStudentBottomNav = $isStudent;
     $studentMoreActive = request()->routeIs('student.movements.index')
@@ -2265,13 +2269,21 @@
                         @else
                             <div>
                         @endif
-                                <a href="{{ route('admin.scholarships.index') }}" class="nav-link {{ request()->routeIs('admin.scholarships.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.scholarships.index') }}" class="nav-link {{ request()->routeIs('admin.scholarships.index') || request()->routeIs('admin.scholarships.edit') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
                                     {{ __('Rekod Scholarship') }}
+                                </a>
+                                <a href="{{ route('admin.scholarships.b40-tvet') }}" class="nav-link {{ request()->routeIs('admin.scholarships.b40-tvet*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h10"/></svg>
+                                    {{ __('SCHOLARSHIP B40 TVET') }}
                                 </a>
                                 <a href="{{ route('admin.student-scholarship-status.index') }}" class="nav-link {{ request()->routeIs('admin.student-scholarship-status.*') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
                                     {{ __('Data Status Biasiswa') }}
+                                </a>
+                                <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                                    {{ __('Pelajar') }}
                                 </a>
                                 <span class="nav-link" style="opacity:.55; cursor:not-allowed;" aria-disabled="true" title="Unavailable">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -2354,6 +2366,10 @@
                         <a href="{{ route('admin.admin-users.index') }}" class="nav-link {{ request()->routeIs('admin.admin-users.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.742-1.34 9.04 9.04 0 00-2.983-3.163m-1.358 5.663A9.035 9.035 0 0112 21a9.035 9.035 0 01-5.401-1.68m10.802 0a9.035 9.035 0 00-10.802 0M6.599 19.32a9.04 9.04 0 01-2.983-3.16A9.095 9.095 0 007.358 14.82m11.384-.44a9.05 9.05 0 00-15.484 0m15.484 0A9.03 9.03 0 0012 12c-2.305 0-4.41.867-6 2.38m12.742 0A9.03 9.03 0 0112 12m0 0a3 3 0 100-6 3 3 0 000 6z"/></svg>
                             {{ __('Pengurusan Admin') }}
+                        </a>
+                        <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                            {{ __('Student Management') }}
                         </a>
                         <a href="{{ route('admin.bug-reports.index') }}" class="nav-link {{ request()->routeIs('admin.bug-reports.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h6m-7.5-7.5h8.25L18 7.5v12.75A2.25 2.25 0 0115.75 22.5h-9A2.25 2.25 0 014.5 20.25V6A2.25 2.25 0 016.75 3.75H6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 3.75V7.5H18"/></svg>
@@ -2632,8 +2648,16 @@
     var mobileMoreSheet = document.getElementById('mobileMoreSheet');
     var mobileMoreBackdrop = document.getElementById('mobileMoreBackdrop');
 
+    if (headerUserMenu && !headerUserMenu.classList.contains('is-open')) {
+        headerUserMenu.setAttribute('aria-hidden', 'true');
+    }
+    if (sidebar) sidebar.setAttribute('aria-hidden', window.innerWidth >= 1024 ? 'false' : 'true');
+
     function closeHeaderUserMenu() {
-        if (headerUserMenu) headerUserMenu.classList.remove('is-open');
+        if (headerUserMenu) {
+            headerUserMenu.classList.remove('is-open');
+            headerUserMenu.setAttribute('aria-hidden', 'true');
+        }
         if (headerUserBackdrop) {
             headerUserBackdrop.classList.remove('is-open');
             headerUserBackdrop.setAttribute('aria-hidden', 'true');
@@ -2645,6 +2669,7 @@
     function setHeaderUserMenu(open) {
         if (!headerUserMenu || !headerUserBtn) return;
         headerUserMenu.classList.toggle('is-open', open);
+        headerUserMenu.setAttribute('aria-hidden', open ? 'false' : 'true');
         headerUserBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
         if (headerUserShell) headerUserShell.classList.toggle('is-user-menu-open', open);
         if (headerUserBackdrop) {
@@ -2682,7 +2707,12 @@
 
     function openSidebar() {
         if (!sidebar) return;
+        if (window.innerWidth >= 1024) {
+            sidebar.setAttribute('aria-hidden', document.body.classList.contains('student-mobile-shell') ? 'true' : 'false');
+            return;
+        }
         sidebar.classList.add('is-open');
+        sidebar.setAttribute('aria-hidden', 'false');
         document.body.classList.add('sidebar-open');
         if (overlay) overlay.classList.add('is-visible');
         if (hamBox) hamBox.classList.add('is-open-ham');
@@ -2692,7 +2722,12 @@
 
     function closeSidebar() {
         if (!sidebar) return;
+        if (window.innerWidth >= 1024) {
+            sidebar.setAttribute('aria-hidden', document.body.classList.contains('student-mobile-shell') ? 'true' : 'false');
+            return;
+        }
         sidebar.classList.remove('is-open');
+        sidebar.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('sidebar-open');
         if (overlay) overlay.classList.remove('is-visible');
         if (hamBox) hamBox.classList.remove('is-open-ham');

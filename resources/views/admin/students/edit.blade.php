@@ -207,7 +207,7 @@
                 <div class="grid grid-2" style="margin-top:12px;">
                     <div>
                         <label for="matric_no">No Matrik</label>
-                        <input id="matric_no" type="text" name="matric_no" value="{{ old('matric_no', $student->matric_no) }}" required>
+                        <input id="matric_no" type="text" name="matric_no" value="{{ old('matric_no', $student->matric_no) }}">
                     </div>
                     <div>
                         <label for="ic_no">No IC</label>

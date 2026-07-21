@@ -12,13 +12,17 @@
     @media (min-width:900px) { .grid-2 { grid-template-columns:1fr 1fr; } }
     .section-title { margin: 18px 0 10px; font-size: 14px; font-weight: 800; color:#6e5745; text-transform: uppercase; letter-spacing: .04em; }
     label { font-size:13px; font-weight:600; color:#7a6555; display:block; margin-bottom:6px; }
-    input, textarea { width:100%; border:1px solid #e5d8c8; border-radius:8px; padding:9px 10px; font-size:14px; }
+    input, textarea, select { width:100%; border:1px solid #e5d8c8; border-radius:8px; padding:9px 10px; font-size:14px; }
     input[readonly] { background:#faf7f4; color:#7a6555; }
     .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
     .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:9px 14px; text-decoration:none; font-weight:600; font-size:14px; cursor:pointer; }
     .btn-primary { background:linear-gradient(135deg,#A48D78,#CBB9A4); color:#fff; border:none; }
     .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
+    .photo-row { display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+    .profile-photo { width:92px; height:92px; border-radius:12px; object-fit:cover; border:1px solid #e5d8c8; background:#faf7f4; }
+    .photo-placeholder { display:flex; align-items:center; justify-content:center; color:#8a7362; font-weight:800; font-size:28px; }
+    .required-note { margin-bottom:12px; background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:8px; padding:10px; font-size:13px; }
     /* Student UX Identity v2 */
     :root {
         --stu-ink: #1f1d1a;
@@ -181,11 +185,24 @@
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
-    <form method="POST" action="{{ route('student.profile.update') }}">
+    <form method="POST" action="{{ route('student.profile.update') }}" enctype="multipart/form-data">
         @csrf
         <div class="card">
             <h2>{{ __('Maklumat Akaun') }}</h2>
             <div class="body">
+                <div class="required-note">{{ __('Upload a clear profile photo before using the system. You may complete the other details now or update them later.') }}</div>
+                <div class="photo-row">
+                    @if(!empty($student->photo))
+                        <img class="profile-photo" src="{{ asset('storage/' . $student->photo) }}" alt="{{ __('Profile photo') }}">
+                    @else
+                        <div class="profile-photo photo-placeholder">{{ strtoupper(substr($student->full_name ?? 'P', 0, 1)) }}</div>
+                    @endif
+                    <div style="flex:1; min-width:220px;">
+                        <label for="profile_photo">{{ __('Gambar Profil') }}</label>
+                        <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" {{ empty($student->photo) ? 'required' : '' }}>
+                        <small style="display:block;margin-top:6px;color:#7a6555;">{{ __('JPG, PNG, or WEBP. Maximum 50MB for testing.') }}</small>
+                    </div>
+                </div>
                 <div class="grid grid-2">
                     <div>
                         <label>{{ __('Nama Penuh') }}</label>
@@ -193,7 +210,7 @@
                     </div>
                     <div>
                         <label>{{ __('No. Matrik') }}</label>
-                        <input type="text" value="{{ $student->matric_no }}" readonly>
+                        <input type="text" value="{{ $student->matric_no ?: '-' }}" readonly>
                     </div>
                 </div>
 
@@ -306,6 +323,19 @@
                 </div>
 
                 <div class="section-title">{{ __('Maklumat Tempat Tinggal Semasa Pengajian') }}</div>
+                <div class="grid grid-2" style="margin-top:12px;">
+                    <div>
+                        <label for="residence_status">{{ __('Status Kediaman') }}</label>
+                        <select id="residence_status" name="residence_status">
+                            <option value="inside_campus" @selected(old('residence_status', $student->residence_status ?? 'inside_campus') === 'inside_campus')>{{ __('Dalam Kampus') }}</option>
+                            <option value="live_out" @selected(old('residence_status', $student->residence_status ?? 'inside_campus') === 'live_out')>{{ __('Live Out / Luar Kampus') }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="room_number">{{ __('No. Bilik') }}</label>
+                        <input id="room_number" type="text" name="room_number" value="{{ old('room_number', data_get($student, 'room_number')) }}" placeholder="{{ __('Contoh:') }} AL306">
+                    </div>
+                </div>
                 <div style="margin-top:12px;">
                     <label for="study_address">{{ __('Alamat Tempat Tinggal Semasa') }}</label>
                     <textarea id="study_address" name="study_address" rows="3" placeholder="{{ __('Alamat semasa pengajian') }}">{{ old('study_address', data_get($student, 'study_address')) }}</textarea>
@@ -351,4 +381,5 @@
     </form>
 </div>
 @endsection
+
 

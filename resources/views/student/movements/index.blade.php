@@ -243,6 +243,7 @@
     .move-field { display:grid; gap:.38rem; margin-top:1rem; }
     .move-field label { font-size:.78rem; font-weight:800; color:var(--text); }
     .move-field small { color:var(--text-muted); font-size:.75rem; }
+    .move-field[hidden] { display:none !important; }
     body[data-theme="dark"] .move-option,
     body[data-theme="dark"] .move-meta-item,
     body[data-theme="dark"] .move-scan-status { background:var(--surface); }
@@ -424,6 +425,9 @@
     $checkpointValid = $checkpoint !== null;
     $residenceStatus = $student->residence_status ?? 'inside_campus';
     $isLiveOut = $residenceStatus === 'live_out';
+    $isCurrentlyLate = $currentMovement
+        && $currentMovement->expected_return_at
+        && now()->greaterThan(\Illuminate\Support\Carbon::parse($currentMovement->expected_return_at));
 @endphp
 
 <div class="ui-shell move-page">
@@ -559,6 +563,12 @@
                             <small>{{ __('Every student check-out must include a vehicle plate number before confirmation. Return scans do not need it.') }}</small>
                         </div>
 
+                        <div class="move-field" id="lateExplanationField" {{ $isCurrentlyLate ? '' : 'hidden' }}>
+                            <label for="lateExplanation">{{ __('Late Check-In Explanation') }}</label>
+                            <textarea id="lateExplanation" name="late_explanation" rows="4" maxlength="2000" placeholder="{{ __('Explain why you returned to campus late.') }}">{{ old('late_explanation') }}</textarea>
+                            <small>{{ __('Required only when your return is after the expected return time.') }}</small>
+                        </div>
+
                         <div class="ui-actions" style="margin-top:1rem;">
                             <button type="submit" class="ui-btn primary">{{ __('Confirm') }}</button>
                             <a href="{{ route('student.movements.index', ['reset_scan' => 1]) }}" class="ui-btn">{{ __('Reset Scan') }}</a>
@@ -638,7 +648,10 @@
 
     const expiryNode = document.getElementById('moveScanExpiry');
     const plateField = document.getElementById('vehiclePlateNo');
+    const lateExplanationField = document.getElementById('lateExplanationField');
+    const lateExplanationInput = document.getElementById('lateExplanation');
     const movementTypeRadios = Array.from(document.querySelectorAll('input[name="movement_type_id"]'));
+    const currentReturnIsLate = @json($isCurrentlyLate);
 
     const syncPlateRequirement = () => {
         if (!plateField || movementTypeRadios.length === 0) {
@@ -650,6 +663,14 @@
 
         plateField.required = !isReturn;
         plateField.disabled = !!isReturn;
+        if (lateExplanationField && lateExplanationInput) {
+            const needsExplanation = !!isReturn && currentReturnIsLate;
+            lateExplanationField.hidden = !needsExplanation;
+            lateExplanationInput.required = needsExplanation;
+            if (!needsExplanation) {
+                lateExplanationInput.value = '';
+            }
+        }
 
         if (isReturn) {
             plateField.value = '';

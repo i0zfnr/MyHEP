@@ -1,13 +1,13 @@
 -- ============================================================
--- e-biasiswa DATABASE
+-- StudentEdge DATABASE
 -- MySQL | Laragon
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS e_biasiswa
+CREATE DATABASE IF NOT EXISTS StudentEdge
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE e_biasiswa;
+USE StudentEdge;
 
 -- ============================================================
 -- 1. STUDENTS
@@ -18,7 +18,7 @@ USE e_biasiswa;
 CREATE TABLE students (
   id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   full_name     VARCHAR(150)  NOT NULL,
-  matric_no     VARCHAR(20)   NOT NULL UNIQUE,
+  matric_no     VARCHAR(20)   NULL UNIQUE,
   ic_no         VARCHAR(20)   NOT NULL UNIQUE,
   password      VARCHAR(255)  NULL,
   email         VARCHAR(150)  NULL UNIQUE,
@@ -293,8 +293,8 @@ CREATE INDEX idx_audit_actor ON audit_logs (actor_type, actor_id, created_at);
 
 -- Seed: Sample students
 INSERT INTO students (full_name, matric_no, ic_no, program, phone, address, photo) VALUES
-('Irfan', '23DIT00001', '030101011111', 'Diploma Teknologi Maklumat', NULL, NULL, NULL),
-('Nuraa', '23DIT00002', '030202011112', 'Diploma Teknologi Maklumat', NULL, NULL, NULL);
+('Irfan', NULL, '030101011111', 'Diploma Teknologi Maklumat', NULL, NULL, NULL),
+('Nuraa', NULL, '030202011112', 'Diploma Teknologi Maklumat', NULL, NULL, NULL);
 
 -- Seed: Rule categories
 INSERT INTO rule_categories (name) VALUES

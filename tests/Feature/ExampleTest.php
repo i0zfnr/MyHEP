@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 // use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
@@ -50,6 +53,18 @@ class ExampleTest extends TestCase
 
     public function test_authenticated_admin_can_load_notification_feed(): void
     {
+        if (!Schema::hasTable('admins')) {
+            Schema::create('admins', function (Blueprint $table): void {
+                $table->id();
+                $table->string('role');
+            });
+        }
+
+        DB::table('admins')->updateOrInsert(
+            ['id' => 1],
+            ['role' => 'scholarship_admin']
+        );
+
         $response = $this
             ->withSession([
                 'auth_user' => [

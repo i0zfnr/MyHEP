@@ -416,7 +416,29 @@
 
     @media (max-width: 700px) {
         .ann-page {
-            gap: 12px;
+            gap: 8px;
+        }
+
+        .ann-hero {
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .ann-eyebrow {
+            margin-bottom: 7px;
+            padding: 5px 8px;
+            font-size: 9px;
+        }
+
+        .ann-hero h3 {
+            font-size: 1.35rem;
+            line-height: 1.12;
+        }
+
+        .ann-hero p {
+            margin-top: 8px;
+            font-size: .78rem;
+            line-height: 1.45;
         }
 
         .ann-toolbar {
@@ -432,10 +454,69 @@
 
         .ann-chip {
             flex: 0 0 auto;
+            min-height: 40px;
+            padding: .5rem .75rem;
+            font-size: .7rem;
         }
 
         .ann-stats {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .ann-stat {
+            min-height: 0;
+            padding: 11px 12px;
+            border-radius: 14px;
+        }
+
+        .ann-stat-label {
+            font-size: 9px;
+            line-height: 1.25;
+        }
+
+        .ann-stat-value {
+            margin-top: 4px;
+            font-size: 24px;
+        }
+
+        .ann-stat-sub {
+            display: block;
+            max-height: 2.6em;
+            margin-top: 4px;
+            overflow: hidden;
+            font-size: 10px;
+            line-height: 1.3;
+        }
+
+        .ann-helper {
+            display: none;
+        }
+
+        .ann-list-card {
+            border-radius: 14px;
+        }
+
+        .ann-section-head {
+            padding: 11px 12px 11px 15px;
+        }
+
+        .ann-section-head strong {
+            font-size: .84rem;
+        }
+
+        .ann-section-head span {
+            display: none;
+        }
+
+        .ann-list {
+            gap: 8px;
+            padding: 8px;
+        }
+
+        .ann-item {
+            padding: 11px;
+            border-radius: 13px;
         }
 
         .ann-item-top {
@@ -444,7 +525,26 @@
         }
 
         .ann-item-title {
-            font-size: 18px;
+            font-size: .95rem;
+        }
+
+        .ann-meta {
+            margin: 7px 0 8px;
+        }
+
+        .ann-body {
+            font-size: .78rem;
+            line-height: 1.55;
+        }
+
+        .ann-footer {
+            margin-top: 10px;
+        }
+
+        .ann-link {
+            min-height: 40px;
+            padding: .45rem .7rem;
+            font-size: .72rem;
         }
     }
 </style>

@@ -21,6 +21,10 @@
     .mv-live-kpi small { display:block; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#866f5e; margin-bottom:.35rem; }
     .mv-live-kpi strong { font-size:2rem; line-height:1; color:#2d1f14; }
     .mv-live-empty { padding:2rem 1rem; text-align:center; color:var(--text-muted); }
+    .mv-student-card { display:flex; align-items:center; gap:.7rem; min-width:220px; }
+    .mv-avatar { width:48px; height:48px; border-radius:10px; object-fit:cover; border:1px solid rgba(226,209,192,.24); background:rgba(255,255,255,.06); flex:0 0 48px; }
+    .mv-avatar-empty { display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-weight:800; }
+    .mv-mini-btn { display:inline-flex; align-items:center; margin-top:.35rem; padding:.28rem .5rem; border-radius:8px; border:1px solid rgba(226,209,192,.18); color:var(--text); text-decoration:none; font-size:.7rem; font-weight:750; }
     body[data-theme="dark"] .mv-live-kpi {
         border-color:rgba(226,209,192,.16);
         background:linear-gradient(180deg, rgba(33,29,26,.92), rgba(18,16,14,.86));
@@ -67,7 +71,20 @@
                     @forelse($records as $record)
                         @php $checkout = \Illuminate\Support\Carbon::parse($record->checkout_at); @endphp
                         <tr>
-                            <td><strong>{{ $record->student_name }}</strong><br><span class="muted">{{ $record->matric_no }} | {{ $record->program }}</span></td>
+                            <td>
+                                <div class="mv-student-card">
+                                    @if(!empty($record->student_photo))
+                                        <img class="mv-avatar" src="{{ asset('storage/' . $record->student_photo) }}" alt="{{ __('Profile photo') }}">
+                                    @else
+                                        <div class="mv-avatar mv-avatar-empty">{{ strtoupper(substr($record->student_name ?? 'S', 0, 1)) }}</div>
+                                    @endif
+                                    <div>
+                                        <strong>{{ $record->student_name }}</strong><br>
+                                        <span class="muted">{{ $record->matric_no }} | {{ $record->program }}</span><br>
+                                        <a class="mv-mini-btn" href="{{ route('admin.students.show', $record->student_id) }}">{{ __('View Profile') }}</a>
+                                    </div>
+                                </div>
+                            </td>
                             <td>{{ ($record->residence_status ?? 'inside_campus') === 'live_out' ? __('Live Out') : ($record->room_number ?: __('Inside Campus')) }}</td>
                             <td>{{ __($record->movement_type_name) }}</td>
                             <td>{{ $record->vehicle_plate_no ?: '-' }}</td>

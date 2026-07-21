@@ -7,6 +7,7 @@
 
 ## Deploy
 - [ ] `composer install --no-dev --optimize-autoloader`
+- [ ] `npm run build`
 - [ ] `php artisan config:cache`
 - [ ] `php artisan route:cache`
 - [ ] `php artisan view:cache`
@@ -17,6 +18,7 @@
 - [ ] Test 1 create/update/delete transaction in each major module.
 - [ ] Verify exports and monthly report.
 - [ ] Verify audit logs are created.
+- [ ] Verify the full-width student dashboard, sticky desktop module sidebar, mobile module drawer/navigation, and shared popup open/close behavior.
 
 ## Rollback
 - [ ] Restore DB backup.

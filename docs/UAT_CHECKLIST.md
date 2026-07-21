@@ -44,3 +44,12 @@
 - [ ] Reset password actions are logged.
 - [ ] Approve/reject actions are logged.
 - [ ] Delete actions are logged.
+
+## 8) Shared UI and Responsive Navigation
+- [ ] The student dashboard uses the full workspace without a sidebar.
+- [ ] Student module pages show the sticky sidebar on desktop and use it as a drawer on mobile; bottom navigation remains usable after it closes.
+- [ ] Notification, confirmation, media-preview, filter, account-menu, and More-sheet popups animate in and out without abruptly disappearing.
+- [ ] Notification, media-preview, and filter popups visually originate from their trigger where the trigger is available.
+- [ ] Student content pages scroll smoothly on a representative mobile device; content cards do not perform large lift, scale, or reflection animations.
+- [ ] Close buttons and touch-oriented navigation controls have usable 44px targets.
+- [ ] Light mode, dark mode, reduced motion, and reduced transparency remain readable and functional.

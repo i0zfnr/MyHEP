@@ -40,7 +40,8 @@ Existing operational checklists are available in the [`docs`](docs) directory.
 - User authentication & authorization
 - Admin dashboard
 - Role-based access control
-- Responsive interface
+- Responsive student interface with a full-width dashboard, sticky module sidebar, and mobile bottom navigation
+- Shared accessible overlays for notifications, confirmations, media previews, filters, and account actions
 - Database seeding for development setup
 
 ---

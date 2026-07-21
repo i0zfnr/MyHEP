@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -34,11 +35,14 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validate([
+            'profile_photo' => [blank($student->photo ?? null) ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:51200'],
             'email' => ['nullable', 'email', 'max:150', 'unique:students,email,' . $studentId],
             'semester' => ['nullable', 'string', 'max:20'],
             'academic_session' => ['nullable', 'string', 'max:30'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string'],
+            'residence_status' => ['nullable', 'in:inside_campus,live_out'],
+            'room_number' => ['nullable', 'string', 'max:30'],
             'religion' => ['nullable', 'string', 'max:50'],
             'parliament' => ['nullable', 'string', 'max:120'],
             'dun' => ['nullable', 'string', 'max:120'],
@@ -52,6 +56,11 @@ class ProfileController extends Controller
             'guardian_occupation' => ['nullable', 'string', 'max:120'],
             'family_income' => ['nullable', 'numeric', 'min:0'],
             'study_address' => ['nullable', 'string'],
+        ], [
+            'profile_photo.uploaded' => __('The profile photo is too large. Please choose a photo below 50MB.'),
+            'profile_photo.max' => __('The profile photo must be below 50MB.'),
+            'profile_photo.image' => __('The profile photo must be an image file.'),
+            'profile_photo.mimes' => __('The profile photo must be JPG, PNG, or WEBP.'),
         ]);
 
         $columnValueMap = [
@@ -60,6 +69,10 @@ class ProfileController extends Controller
             'academic_session' => $validated['academic_session'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
+            'residence_status' => $validated['residence_status'] ?? ($student->residence_status ?? 'inside_campus'),
+            'room_number' => ($validated['residence_status'] ?? ($student->residence_status ?? 'inside_campus')) === 'inside_campus'
+                ? ($validated['room_number'] ?? null)
+                : null,
             'religion' => $validated['religion'] ?? null,
             'parliament' => $validated['parliament'] ?? null,
             'dun' => $validated['dun'] ?? null,
@@ -83,11 +96,21 @@ class ProfileController extends Controller
                 $updateData[$column] = $value;
             }
         }
+
+        $oldPhotoPath = $student->photo ?? null;
+        if ($request->hasFile('profile_photo') && Schema::hasColumn('students', 'photo')) {
+            $updateData['photo'] = $request->file('profile_photo')->store('students/profile_photos', 'public');
+        }
+
         $updateData['updated_at'] = now();
 
         DB::table('students')
             ->where('id', $studentId)
             ->update($updateData);
+
+        if (!empty($updateData['photo']) && $oldPhotoPath && $oldPhotoPath !== $updateData['photo']) {
+            Storage::disk('public')->delete($oldPhotoPath);
+        }
 
         return redirect()->route('student.profile')
             ->with('success', __('Profil berjaya dikemaskini.'));

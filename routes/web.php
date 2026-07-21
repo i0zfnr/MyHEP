@@ -189,13 +189,13 @@ Route::delete('/admin/bug-reports/{id}', [AdminBugReportController::class, 'dest
     ->name('admin.bug-reports.destroy');
 
 Route::get('/admin/students', [StudentController::class, 'index'])
-    ->middleware(['auth.session:admin', 'admin.scope:movement'])
+    ->middleware(['auth.session:admin', 'admin.scope:students'])
     ->name('admin.students.index');
 Route::get('/admin/students/search', [StudentController::class, 'search'])
-    ->middleware(['auth.session:admin', 'admin.scope:movement'])
+    ->middleware(['auth.session:admin', 'admin.scope:students'])
     ->name('admin.students.search');
 Route::get('/admin/students/export', [StudentController::class, 'export'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:students'])
     ->name('admin.students.export');
 Route::get('/admin/students/create', [StudentController::class, 'create'])
     ->middleware(['auth.session:admin', 'admin.scope:discipline'])
@@ -203,6 +203,12 @@ Route::get('/admin/students/create', [StudentController::class, 'create'])
 Route::post('/admin/students', [StudentController::class, 'store'])
     ->middleware(['auth.session:admin', 'admin.scope:discipline'])
     ->name('admin.students.store');
+Route::post('/admin/students/import', [StudentController::class, 'import'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.students.import');
+Route::get('/admin/students/{id}', [StudentController::class, 'show'])
+    ->middleware(['auth.session:admin', 'admin.scope:students'])
+    ->name('admin.students.show');
 Route::get('/admin/students/{id}/edit', [StudentController::class, 'edit'])
     ->middleware(['auth.session:admin', 'admin.scope:discipline'])
     ->name('admin.students.edit');
@@ -222,6 +228,15 @@ Route::get('/admin/scholarships', [ScholarshipController::class, 'index'])
 Route::get('/admin/scholarships/export', [ScholarshipController::class, 'export'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.scholarships.export');
+Route::get('/admin/scholarships/b40-tvet', [ScholarshipController::class, 'b40Tvet'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.b40-tvet');
+Route::post('/admin/scholarships/b40-tvet/import', [ScholarshipController::class, 'importB40Tvet'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.b40-tvet.import');
+Route::get('/admin/scholarships/b40-tvet/export', [ScholarshipController::class, 'exportB40Tvet'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.b40-tvet.export');
 Route::get('/admin/scholarships/create', [ScholarshipController::class, 'create'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.scholarships.create');

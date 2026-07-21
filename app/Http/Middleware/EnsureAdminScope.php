@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureAdminScope
@@ -15,10 +16,23 @@ class EnsureAdminScope
             return redirect()->route('login');
         }
 
-        $adminRole = $authUser['admin_role'] ?? null;
+        $admin = DB::table('admins')
+            ->select('id', 'role')
+            ->where('id', $authUser['id'] ?? 0)
+            ->first();
+
+        if (!$admin || ($admin->role ?? null) !== ($authUser['admin_role'] ?? null)) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login');
+        }
+
+        $adminRole = $admin->role;
         $allowed = match ($scope) {
             'scholarship' => ['scholarship_admin', 'system_admin'],
             'discipline' => ['discipline_admin', 'system_admin'],
+            'students' => ['scholarship_admin', 'discipline_admin', 'guard', 'system_admin'],
             'movement' => ['guard', 'discipline_admin', 'system_admin'],
             'backoffice' => ['scholarship_admin', 'discipline_admin', 'system_admin'],
             default => ['system_admin'],
