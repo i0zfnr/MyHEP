@@ -4584,6 +4584,13 @@ body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile
 
 /* Mobile navigation remains available while page content scrolls. */
 @media (max-width: 1023px) {
+    .header-user-backdrop.is-open {
+        z-index: 1150 !important;
+        background: rgba(17, 13, 10, .28) !important;
+        backdrop-filter: blur(30px) saturate(72%) brightness(.92) !important;
+        -webkit-backdrop-filter: blur(30px) saturate(72%) brightness(.92) !important;
+    }
+
     .app-layout .sidebar {
         z-index: 1400 !important;
     }
@@ -4657,20 +4664,37 @@ body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile
         white-space: nowrap;
     }
 
-    .app-layout .main-wrap > .header-user-menu--mobile {
+    body > .header-user-menu--mobile {
+        display: block !important;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
         position: fixed !important;
         top: calc(var(--topbar-h) + .5rem) !important;
         right: .75rem !important;
         left: auto !important;
         width: min(248px, calc(100vw - 1.5rem)) !important;
         z-index: 1200 !important;
+        isolation: isolate;
+        overflow: hidden;
+        border-color: var(--liquid-rim) !important;
+        background: var(--liquid-popup) !important;
+        box-shadow: var(--liquid-shadow) !important;
+        backdrop-filter: blur(30px) saturate(165%) brightness(1.02) !important;
+        -webkit-backdrop-filter: blur(30px) saturate(165%) brightness(1.02) !important;
+        transform: translate3d(0, -8px, 0) scale(.97);
+        transform-origin: top right;
+        transition:
+            opacity .24s var(--se-motion-ease),
+            transform .36s var(--se-motion-ease),
+            visibility 0s linear .36s !important;
     }
 
-    .app-layout .main-wrap > .header-user-menu--mobile.is-open {
-        display: block !important;
+    body > .header-user-menu--mobile.is-open {
         visibility: visible !important;
         opacity: 1 !important;
         pointer-events: auto !important;
-        transform: none !important;
+        transform: translate3d(0, 0, 0) scale(1) !important;
+        transition-delay: 0s !important;
     }
 }

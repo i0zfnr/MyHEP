@@ -57,12 +57,20 @@ class ExampleTest extends TestCase
             Schema::create('admins', function (Blueprint $table): void {
                 $table->id();
                 $table->string('role');
+                $table->string('full_name');
+            });
+        } elseif (!Schema::hasColumn('admins', 'full_name')) {
+            Schema::table('admins', function (Blueprint $table): void {
+                $table->string('full_name')->default('Admin');
             });
         }
 
         DB::table('admins')->updateOrInsert(
             ['id' => 1],
-            ['role' => 'scholarship_admin']
+            [
+                'role' => 'scholarship_admin',
+                'full_name' => 'Renamed Admin',
+            ]
         );
 
         $response = $this
@@ -71,6 +79,7 @@ class ExampleTest extends TestCase
                     'id' => 1,
                     'role' => 'admin',
                     'admin_role' => 'scholarship_admin',
+                    'name' => 'Old Admin Name',
                 ],
             ])
             ->getJson('/notifications/feed');
@@ -80,5 +89,7 @@ class ExampleTest extends TestCase
             ->assertHeader('Cache-Control', 'no-store, private')
             ->assertJsonPath('count', 0)
             ->assertJsonPath('items.0.id', 'all-clear');
+
+        $response->assertSessionHas('auth_user.name', 'Renamed Admin');
     }
 }

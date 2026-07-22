@@ -2506,31 +2506,6 @@
                 @endif
             </div>
         </div>
-        @if($showHeaderUserMenu && $isStudent)
-            <div class="header-user-menu header-user-menu--mobile" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
-                <div class="header-menu-head">
-                    <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
-                    <span>
-                        <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
-                        <span class="header-menu-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
-                    </span>
-                </div>
-                <a href="{{ route('student.profile') }}" class="header-menu-link">
-                    <span aria-hidden="true">&#9786;</span>{{ __('Profile') }}
-                </a>
-                <a href="{{ route('settings.show') }}" class="header-menu-link">
-                    <span aria-hidden="true">&#9881;</span>{{ __('Settings') }}
-                </a>
-                <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">
-                    <span aria-hidden="true">?</span>{{ __('Support') }}
-                </a>
-                <div class="header-menu-sep"></div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="header-menu-btn logout">{{ __('Log Out') }}</button>
-                </form>
-            </div>
-        @endif
         @endif
 
         @hasSection('header')
@@ -2584,15 +2559,42 @@
                     @endif
                 </div>
             </div>
-            @if($showHeaderUserMenu)
-                <button type="button" class="header-user-backdrop" id="headerUserBackdrop" aria-label="{{ __('Close user menu') }}" aria-hidden="true" tabindex="-1"></button>
-            @endif
         @endif
 
         <main class="page-body">@yield('content')</main>
         @include('partials.app_footer')
     </div>
 </div>
+
+@if($showHeaderUserMenu && $isStudent)
+    <div class="header-user-menu header-user-menu--mobile" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
+        <div class="header-menu-head">
+            <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+            <span>
+                <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
+                <span class="header-menu-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+            </span>
+        </div>
+        <a href="{{ route('student.profile') }}" class="header-menu-link">
+            <span aria-hidden="true">&#9786;</span>{{ __('Profile') }}
+        </a>
+        <a href="{{ route('settings.show') }}" class="header-menu-link">
+            <span aria-hidden="true">&#9881;</span>{{ __('Settings') }}
+        </a>
+        <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">
+            <span aria-hidden="true">?</span>{{ __('Support') }}
+        </a>
+        <div class="header-menu-sep"></div>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="header-menu-btn logout">{{ __('Log Out') }}</button>
+        </form>
+    </div>
+@endif
+
+@if($showHeaderUserMenu)
+    <button type="button" class="header-user-backdrop" id="headerUserBackdrop" aria-label="{{ __('Close user menu') }}" aria-hidden="true" tabindex="-1"></button>
+@endif
 
 @if($showStudentBottomNav)
     <button type="button" class="mobile-more-backdrop" id="mobileMoreBackdrop" aria-label="Close menu" aria-hidden="true" tabindex="-1"></button>

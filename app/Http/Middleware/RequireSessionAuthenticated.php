@@ -18,8 +18,8 @@ class RequireSessionAuthenticated
         }
 
         $account = $authUser['role'] === 'admin'
-            ? DB::table('admins')->select('id', 'role')->where('id', $authUser['id'] ?? 0)->first()
-            : DB::table('students')->select('id')->where('id', $authUser['id'] ?? 0)->first();
+            ? DB::table('admins')->select('id', 'role', 'full_name')->where('id', $authUser['id'] ?? 0)->first()
+            : DB::table('students')->select('id', 'full_name')->where('id', $authUser['id'] ?? 0)->first();
 
         if (!$account || ($authUser['role'] === 'admin' && ($account->role ?? null) !== ($authUser['admin_role'] ?? null))) {
             $request->session()->invalidate();
@@ -33,6 +33,12 @@ class RequireSessionAuthenticated
             $request->session()->regenerateToken();
 
             return redirect()->route('login');
+        }
+
+        $currentName = trim((string) ($account->full_name ?? ''));
+        if ($currentName !== '' && ($authUser['name'] ?? null) !== $currentName) {
+            $authUser['name'] = $currentName;
+            $request->session()->put('auth_user', $authUser);
         }
 
         return $next($request);
