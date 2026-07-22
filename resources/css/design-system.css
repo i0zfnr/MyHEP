@@ -4698,3 +4698,18 @@ body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile
         transition-delay: 0s !important;
     }
 }
+
+/* Keep desktop page controls available while the workspace scrolls. */
+@media (min-width: 1024px) {
+    .app-layout .page-header,
+    .main-wrap.has-sidebar .page-header,
+    .main-wrap.no-sidebar .page-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 480 !important;
+    }
+
+    .app-layout .page-header.is-user-menu-open {
+        z-index: 520 !important;
+    }
+}

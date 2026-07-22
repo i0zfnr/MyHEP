@@ -45,8 +45,9 @@ These rules apply to future code and UI changes unless a reviewed requirement ex
 6. Long names and translated labels must truncate or wrap without overlapping controls.
 7. On student mobile pages, the topbar and Current Page header remain sticky. The sidebar, account menu, notifications, and dialogs must layer above them correctly.
 8. The desktop student dashboard has no persistent sidebar; student modules do. Admin desktop pages retain their sidebar.
-9. Preserve reduced-motion, reduced-transparency, contrast, keyboard, and focus behavior.
-10. Do not add card entrance animations, pointer-tracked effects, or expensive repeated backdrop filters without mobile performance evidence.
+9. The shared Current Page header remains sticky on desktop so its notification, support, and account controls stay available while scrolling.
+10. Preserve reduced-motion, reduced-transparency, contrast, keyboard, and focus behavior.
+11. Do not add card entrance animations, pointer-tracked effects, or expensive repeated backdrop filters without mobile performance evidence.
 
 ## Change Discipline
 

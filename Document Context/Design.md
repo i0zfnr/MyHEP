@@ -55,6 +55,7 @@ Use design tokens from `resources/css/design-system.css`; do not scatter replace
 ### Admin shell
 
 - Admin pages retain the persistent desktop sidebar.
+- The desktop Current Page header remains pinned while the workspace content scrolls.
 - Tables and filters should be dense enough for operational work without compromising touch and keyboard access.
 
 ## Typography and Content

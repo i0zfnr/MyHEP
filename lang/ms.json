@@ -630,5 +630,12 @@
     "Unavailable": "Tidak tersedia",
     "compliant": "patuh",
     "outside": "di luar",
-    "returned": "pulang"
+    "returned": "pulang",
+    "Adjust profile photo": "Laraskan gambar profil",
+    "Cancel photo crop": "Batalkan pangkasan gambar",
+    "Selected profile photo": "Gambar profil yang dipilih",
+    "Choose a JPG, PNG, or WEBP image.": "Pilih gambar JPG, PNG atau WEBP.",
+    "Rotate left": "Putar kiri",
+    "Rotate right": "Putar kanan",
+    "Use photo": "Gunakan gambar"
 }

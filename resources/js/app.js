@@ -1,3 +1,6 @@
+import Cropper from 'cropperjs';
+import 'cropperjs/dist/cropper.css';
+
 const PWA_PROMPT_KEY = 'studentedge-pwa-dismissed-v1';
 const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
 const THEME_KEY = 'studentedge-theme';
@@ -1016,6 +1019,130 @@ const registerTabMotionUi = () => {
     }, true);
 };
 
+const registerProfilePhotoCropper = () => {
+    const input = document.querySelector('[data-profile-photo-input]');
+    const modal = document.querySelector('[data-profile-crop-modal]');
+    const cropImage = modal?.querySelector('[data-profile-crop-image]');
+    const preview = document.querySelector('[data-profile-photo-preview]');
+    const placeholder = document.querySelector('[data-profile-photo-placeholder]');
+
+    if (!(input instanceof HTMLInputElement) || !modal || !(cropImage instanceof HTMLImageElement)) return;
+
+    let cropper = null;
+    let sourceUrl = null;
+    let previewUrl = null;
+    let acceptedFile = null;
+
+    const setInputFile = (file) => {
+        const transfer = new DataTransfer();
+        if (file) transfer.items.add(file);
+        input.files = transfer.files;
+    };
+
+    const closeCropper = (restoreAccepted = false) => {
+        cropper?.destroy();
+        cropper = null;
+        if (sourceUrl) URL.revokeObjectURL(sourceUrl);
+        sourceUrl = null;
+        cropImage.removeAttribute('src');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('profile-crop-open');
+        if (restoreAccepted) setInputFile(acceptedFile);
+        input.focus({ preventScroll: true });
+    };
+
+    const openCropper = (file) => {
+        sourceUrl = URL.createObjectURL(file);
+        cropImage.src = sourceUrl;
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('profile-crop-open');
+
+        cropper = new Cropper(cropImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 1,
+            background: false,
+            guides: false,
+            center: true,
+            highlight: false,
+            cropBoxMovable: false,
+            cropBoxResizable: false,
+            toggleDragModeOnDblclick: false,
+            responsive: true,
+            restore: false,
+        });
+    };
+
+    input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            input.setCustomValidity(input.dataset.invalidType || 'Choose a JPG, PNG, or WEBP image.');
+            input.reportValidity();
+            setInputFile(acceptedFile);
+            return;
+        }
+        input.setCustomValidity('');
+        openCropper(file);
+    });
+
+    modal.addEventListener('click', (event) => {
+        const action = event.target instanceof Element
+            ? event.target.closest('[data-profile-crop-action]')?.getAttribute('data-profile-crop-action')
+            : null;
+
+        if (!action || !cropper) return;
+
+        if (action === 'cancel') {
+            closeCropper(true);
+            return;
+        }
+        if (action === 'rotate-left') cropper.rotate(-90);
+        if (action === 'rotate-right') cropper.rotate(90);
+        if (action === 'reset') cropper.reset();
+
+        if (action === 'apply') {
+            const canvas = cropper.getCroppedCanvas({
+                width: 800,
+                height: 800,
+                fillColor: '#ffffff',
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                const baseName = (input.files?.[0]?.name || 'profile-photo').replace(/\.[^.]+$/, '');
+                acceptedFile = new File([blob], `${baseName}-cropped.jpg`, {
+                    type: 'image/jpeg',
+                    lastModified: Date.now(),
+                });
+                setInputFile(acceptedFile);
+
+                if (preview instanceof HTMLImageElement) {
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
+                    previewUrl = URL.createObjectURL(blob);
+                    preview.src = previewUrl;
+                    preview.hidden = false;
+                }
+                if (placeholder instanceof HTMLElement) placeholder.hidden = true;
+                closeCropper(false);
+            }, 'image/jpeg', .9);
+        }
+    });
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeCropper(true);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.classList.contains('is-open')) closeCropper(true);
+    });
+};
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
@@ -1039,6 +1166,7 @@ window.addEventListener('DOMContentLoaded', () => {
     registerLiquidFilterSheets();
     registerLoadingUi();
     registerTabMotionUi();
+    registerProfilePhotoCropper();
     registerPwaPromptUi();
     registerPushPromptUi();
     registerLogoutPushCleanup();

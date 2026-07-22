@@ -570,5 +570,12 @@
     "Lihat Resit": "View Receipt",
     "Tanda Paid": "Mark Paid",
     "Tolak": "Reject",
-    "Tidak tersedia": "Unavailable"
+    "Tidak tersedia": "Unavailable",
+    "Adjust profile photo": "Adjust profile photo",
+    "Cancel photo crop": "Cancel photo crop",
+    "Selected profile photo": "Selected profile photo",
+    "Choose a JPG, PNG, or WEBP image.": "Choose a JPG, PNG, or WEBP image.",
+    "Rotate left": "Rotate left",
+    "Rotate right": "Rotate right",
+    "Use photo": "Use photo"
 }

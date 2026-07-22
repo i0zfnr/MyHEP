@@ -21,8 +21,74 @@
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .photo-row { display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
     .profile-photo { width:92px; height:92px; border-radius:12px; object-fit:cover; border:1px solid #e5d8c8; background:#faf7f4; }
+    .profile-photo[hidden], .photo-placeholder[hidden] { display:none; }
     .photo-placeholder { display:flex; align-items:center; justify-content:center; color:#8a7362; font-weight:800; font-size:28px; }
     .required-note { margin-bottom:12px; background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:8px; padding:10px; font-size:13px; }
+    body.profile-crop-open { overflow:hidden !important; }
+    .profile-crop-modal {
+        position:fixed;
+        inset:0;
+        z-index:1800;
+        display:grid;
+        place-items:center;
+        padding:clamp(12px, 3vw, 24px);
+        background:rgba(17,13,10,.38);
+        opacity:0;
+        visibility:hidden;
+        pointer-events:none;
+        backdrop-filter:blur(24px) saturate(78%) brightness(.82);
+        -webkit-backdrop-filter:blur(24px) saturate(78%) brightness(.82);
+        transition:opacity .24s var(--se-motion-ease), visibility 0s linear .32s;
+    }
+    .profile-crop-modal.is-open { opacity:1; visibility:visible; pointer-events:auto; transition-delay:0s; }
+    .profile-crop-dialog {
+        width:min(520px, 100%);
+        max-height:calc(100dvh - 24px);
+        display:grid;
+        grid-template-rows:auto minmax(0, 1fr) auto;
+        overflow:hidden;
+        border:1px solid var(--liquid-rim);
+        border-radius:20px;
+        color:var(--se-text);
+        background:var(--liquid-popup);
+        box-shadow:var(--liquid-shadow);
+        backdrop-filter:blur(34px) saturate(165%);
+        -webkit-backdrop-filter:blur(34px) saturate(165%);
+        transform:translate3d(0, 18px, 0) scale(.97);
+        transform-origin:center;
+        transition:transform .4s var(--se-motion-ease);
+    }
+    .profile-crop-modal.is-open .profile-crop-dialog { transform:translate3d(0,0,0) scale(1); }
+    .profile-crop-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:1px solid var(--se-border); }
+    .profile-crop-head h2 { margin:0; padding:0; border:0; background:none; font-size:1rem; color:var(--se-text); }
+    .profile-crop-head h2::before { display:none; }
+    .profile-crop-close, .profile-crop-tool {
+        min-width:44px;
+        min-height:44px;
+        display:inline-grid;
+        place-items:center;
+        border:1px solid var(--se-border-strong);
+        border-radius:12px;
+        background:var(--liquid-surface-strong);
+        color:var(--se-text);
+        cursor:pointer;
+    }
+    .profile-crop-stage { min-height:280px; background:#11100f; overflow:hidden; }
+    .profile-crop-stage img { display:block; max-width:100%; }
+    .profile-crop-controls { display:grid; gap:12px; padding:14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); border-top:1px solid var(--se-border); }
+    .profile-crop-tools { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+    .profile-crop-tool { padding:0 12px; font-size:.78rem; font-weight:700; }
+    .profile-crop-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .profile-crop-actions .btn { min-height:44px; text-align:center; }
+    @media (max-width: 600px) {
+        .profile-crop-dialog { max-height:calc(100dvh - 16px); border-radius:18px; }
+        .profile-crop-stage { min-height:0; height:min(48dvh, 420px); }
+        .profile-crop-controls { gap:10px; padding:12px; }
+        .profile-crop-tool { flex:1 1 calc(33.333% - 8px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .profile-crop-modal, .profile-crop-dialog { transition:none; }
+    }
     /* Student UX Identity v2 */
     :root {
         --stu-ink: #1f1d1a;
@@ -192,14 +258,11 @@
             <div class="body">
                 <div class="required-note">{{ __('Upload a clear profile photo before using the system. You may complete the other details now or update them later.') }}</div>
                 <div class="photo-row">
-                    @if(!empty($student->photo))
-                        <img class="profile-photo" src="{{ asset('storage/' . $student->photo) }}" alt="{{ __('Profile photo') }}">
-                    @else
-                        <div class="profile-photo photo-placeholder">{{ strtoupper(substr($student->full_name ?? 'P', 0, 1)) }}</div>
-                    @endif
+                    <img class="profile-photo" data-profile-photo-preview src="{{ !empty($student->photo) ? asset('storage/' . $student->photo) : '' }}" alt="{{ __('Profile photo') }}" @if(empty($student->photo)) hidden @endif>
+                    <div class="profile-photo photo-placeholder" data-profile-photo-placeholder @if(!empty($student->photo)) hidden @endif>{{ strtoupper(substr($student->full_name ?? 'P', 0, 1)) }}</div>
                     <div style="flex:1; min-width:220px;">
                         <label for="profile_photo">{{ __('Gambar Profil') }}</label>
-                        <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" {{ empty($student->photo) ? 'required' : '' }}>
+                        <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ empty($student->photo) ? 'required' : '' }}>
                         <small style="display:block;margin-top:6px;color:#7a6555;">{{ __('JPG, PNG, or WEBP. Maximum 50MB for testing.') }}</small>
                     </div>
                 </div>
@@ -379,6 +442,29 @@
             </div>
         </div>
     </form>
+</div>
+
+<div class="profile-crop-modal" data-profile-crop-modal aria-hidden="true">
+    <section class="profile-crop-dialog" role="dialog" aria-modal="true" aria-labelledby="profileCropTitle">
+        <header class="profile-crop-head">
+            <h2 id="profileCropTitle">{{ __('Adjust profile photo') }}</h2>
+            <button type="button" class="profile-crop-close" data-profile-crop-action="cancel" aria-label="{{ __('Cancel photo crop') }}">&times;</button>
+        </header>
+        <div class="profile-crop-stage">
+            <img data-profile-crop-image alt="{{ __('Selected profile photo') }}">
+        </div>
+        <footer class="profile-crop-controls">
+            <div class="profile-crop-tools">
+                <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-left">{{ __('Rotate left') }}</button>
+                <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-right">{{ __('Rotate right') }}</button>
+                <button type="button" class="profile-crop-tool" data-profile-crop-action="reset">{{ __('Reset') }}</button>
+            </div>
+            <div class="profile-crop-actions">
+                <button type="button" class="btn" data-profile-crop-action="cancel">{{ __('Cancel') }}</button>
+                <button type="button" class="btn btn-primary" data-profile-crop-action="apply">{{ __('Use photo') }}</button>
+            </div>
+        </footer>
+    </section>
 </div>
 @endsection
 
