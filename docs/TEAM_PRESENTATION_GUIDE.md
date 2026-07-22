@@ -286,7 +286,7 @@ resources/views/layouts/app.blade.php
 
 Main layout and sidebar navigation.
 
-It also owns the responsive student shell: a full-width dashboard, a sticky sidebar for module pages, mobile bottom navigation, and shared notification, confirmation, media-preview, and filter popup behavior.
+It also owns the responsive student shell: a full-width desktop dashboard with a mobile hamburger drawer, a sticky sidebar for module pages, mobile bottom navigation, and shared notification, confirmation, media-preview, and filter popup behavior.
 
 ## 9. Database Overview
 

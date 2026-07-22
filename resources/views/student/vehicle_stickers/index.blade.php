@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', __('Permohonan Sticker Kenderaan'))
 
@@ -24,9 +24,9 @@
     th { font-size:11px; text-transform:uppercase; color:#7a6555; letter-spacing:.05em; background:#faf7f4; }
     .status-badge { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; text-transform:uppercase; border:1px solid #ede4d9; }
     .status-pending { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .status-approved, .status-confirmed { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+    .status-approved, .status-confirmed { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
     .status-rejected, .status-unpaid { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
-    .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
+    .ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     /* Student UX Identity v2 */
     :root {

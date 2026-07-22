@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', __('Pengumpulan Data Biasiswa Pelajar'))
 
@@ -19,7 +19,7 @@
     th, td { padding:10px 12px; border-bottom:1px solid #f0e7dc; font-size:13px; text-align:left; vertical-align:top; }
     th { font-size:11px; text-transform:uppercase; color:#7a6555; letter-spacing:.05em; background:#faf7f4; }
     .badge { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; text-transform:uppercase; border:1px solid #ede4d9; }
-    .badge.yes { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+    .badge.yes { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
     .badge.no { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
     .badge.none { background:#faf7f4; color:#7a6555; border-color:#ede4d9; }
         /* Admin UX Identity v2 */

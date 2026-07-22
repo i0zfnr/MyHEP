@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', __('Pengurusan Admin'))
 
@@ -13,12 +13,12 @@
     .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:8px 12px; text-decoration:none; font-weight:600; font-size:13px; cursor:pointer; }
     .btn-danger { border-color:#fecaca; color:#b91c1c; background:#fef2f2; }
     .btn-warn { border-color:#fed7aa; color:#b45309; background:#fff7ed; }
-    .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
+    .ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .role { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; text-transform:uppercase; border:1px solid #ede4d9; }
     .role.guard { background:#ede9fe; color:#6d28d9; border-color:#ddd6fe; }
     .role.system_admin { background:#e0f2fe; color:#075985; border-color:#bae6fd; }
-    .role.scholarship_admin { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+    .role.scholarship_admin { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
     .role.discipline_admin { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
     .actions { display:flex; gap:6px; flex-wrap:wrap; }
         /* Admin UX Identity v2 */

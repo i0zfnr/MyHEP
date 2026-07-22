@@ -56,7 +56,7 @@
 
     .status-badge { display:inline-block; border-radius:999px; padding:.22rem .62rem; font-size:11px; font-weight:800; text-transform:uppercase; border:1px solid #e9ddcf; }
     .status-pending { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .status-confirmed, .status-approved { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+    .status-confirmed, .status-approved { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
     .status-rejected, .status-unpaid { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
     .status-none { background:#faf7f4; color:#7a6555; border-color:#ede4d9; }
 
@@ -74,6 +74,42 @@
     .ann-link:hover { background:#f7efe7; }
 
     .sch-empty { padding:20px 12px; text-align:center; color:#7a6656; font-size:13px; }
+    .sch-empty-state {
+        display: grid;
+        justify-items: center;
+        gap: .45rem;
+        padding: 1.35rem 1rem 1.15rem;
+        text-align: center;
+        color: var(--se-text-soft);
+    }
+    .sch-empty-state-icon {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #e2cfaa;
+        border-radius: 12px;
+        background: #f8f0df;
+        color: #8b6a34;
+    }
+    .sch-empty-state-icon svg { width: 19px; height: 19px; }
+    .sch-empty-state strong { color: var(--se-text); font-size: .9rem; }
+    .sch-empty-state p { max-width: 28rem; margin: 0; font-size: .78rem; line-height: 1.5; }
+    .sch-empty-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        margin-top: .15rem;
+        padding: .5rem .8rem;
+        border: 1px solid #9f7b3d;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #c8a96a, #e7d3a8);
+        color: #211a14;
+        font-size: .76rem;
+        font-weight: 800;
+        text-decoration: none;
+    }
     .sch-pagination { margin-top: 2px; }
     .sch-pagination nav { display: flex; justify-content: center; }
 
@@ -138,6 +174,14 @@
     body[data-theme="dark"] .sch-empty {
         color: rgba(247,239,232,.66) !important;
     }
+    body[data-theme="dark"] .sch-empty-state-icon {
+        border-color: rgba(231, 211, 168, .28);
+        background: rgba(200, 169, 106, .15);
+        color: #e7d3a8;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    body[data-theme="dark"] .sch-empty-state strong { color: #fff7ef; }
+    body[data-theme="dark"] .sch-empty-action { color: #211a14; }
     body[data-theme="dark"] .sch-stat-value,
     body[data-theme="dark"] .ann-title {
         color: #fff7ef !important;
@@ -232,6 +276,17 @@
             text-transform: uppercase;
             letter-spacing: .05em;
         }
+        body[data-theme="dark"] .sch-table tr {
+            border-color: rgba(226, 209, 192, .16) !important;
+            background: rgba(255,255,255,.035) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+        }
+        body[data-theme="dark"] .sch-table td {
+            border-bottom-color: rgba(226, 209, 192, .13) !important;
+        }
+        body[data-theme="dark"] .sch-table td::before {
+            color: #b9aa9d !important;
+        }
         .ann-list { padding: 10px; }
         .ann-item { padding: 10px; }
         .ann-title { font-size: 13px; }
@@ -293,18 +348,28 @@
         <section class="sch-card">
             <div class="sch-head"><strong>{{ __('Rekod Scholarship Saya') }}</strong></div>
             <div class="sch-table-wrap">
-                <table class="sch-table">
-                    <thead>
-                        <tr>
-                            <th>{{ __('Jenis') }}</th>
-                            <th>{{ __('Penyedia') }}</th>
-                            <th>{{ __('Jumlah (RM)') }}</th>
-                            <th>{{ __('Status') }}</th>
-                            <th>{{ __('Tarikh') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($records as $record)
+                @if($records->isEmpty())
+                    <div class="sch-empty-state">
+                        <span class="sch-empty-state-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+                        </span>
+                        <strong>{{ __('Tiada rekod scholarship.') }}</strong>
+                        <p>{{ __('Rekod biasiswa anda akan dipaparkan di sini apabila tersedia.') }}</p>
+                        <a class="sch-empty-action" href="{{ route('student.scholarship-status.form') }}">{{ __('Isi Borang Status Biasiswa') }}</a>
+                    </div>
+                @else
+                    <table class="sch-table">
+                        <thead>
+                            <tr>
+                                <th>{{ __('Jenis') }}</th>
+                                <th>{{ __('Penyedia') }}</th>
+                                <th>{{ __('Jumlah (RM)') }}</th>
+                                <th>{{ __('Status') }}</th>
+                                <th>{{ __('Tarikh') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($records as $record)
                             @php($statusClass = strtolower((string) ($record->status ?? 'none')))
                             <tr>
                                 <td data-label="{{ __('Jenis') }}">{{ ucfirst((string) $record->type) }}</td>
@@ -313,11 +378,10 @@
                                 <td data-label="{{ __('Status') }}"><span class="status-badge status-{{ $statusClass }}">{{ __($record->status) }}</span></td>
                                 <td data-label="{{ __('Tarikh') }}">{{ $record->created_at ? \Illuminate\Support\Carbon::parse($record->created_at)->format('d M Y') : '-' }}</td>
                             </tr>
-                        @empty
-                            <tr><td colspan="5" class="sch-empty">{{ __('Tiada rekod scholarship.') }}</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
             </div>
         </section>
 

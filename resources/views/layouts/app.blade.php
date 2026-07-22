@@ -609,7 +609,7 @@
         .page-body .status-pending { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
         .page-body .status-paid,
         .page-body .status-approved,
-        .page-body .status-confirmed { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+        .page-body .status-confirmed { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
 
         .sidebar {
             position: fixed; top: 0; left: 0; bottom: 0;
@@ -630,6 +630,11 @@
         .sidebar.is-open { transform: translateX(0); box-shadow: 8px 0 40px rgba(164,141,120,.2); }
         @media (min-width: 1024px) {
             .sidebar { position: sticky; top: 0; height: 100vh; min-height: 100vh; transform: translateX(0) !important; box-shadow: none !important; }
+            body.student-dashboard-mobile-sidebar .sidebar,
+            body.student-dashboard-mobile-sidebar .sb-overlay,
+            .main-wrap.student-dashboard-mobile-sidebar-shell .topbar {
+                display: none !important;
+            }
         }
 
         .sb-header {
@@ -680,7 +685,7 @@
         .sb-user-name { font-size: .8125rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .sb-user-role { font-size: .72rem; color: #7e6857; margin-top: 1px; font-weight: 600; }
         .sb-role-badge { display: inline-flex; align-items: center; margin-top: .5rem; padding: .2rem .65rem; border-radius: 99px; font-size: .65rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-        .sb-role-badge.student { background: #edfaf4; color: #166534; border: 1px solid #bbf7d0; }
+        .sb-role-badge.student { background: #e5f1f1; color: #1f5559; border: 1px solid #b9ddde; }
         .sb-role-badge.admin { background: var(--primary-hover); color: var(--primary-dark); border: 1px solid var(--primary-light); }
 
         .sb-scroll {
@@ -717,6 +722,24 @@
             box-shadow: 0 10px 18px rgba(164,141,120,.12);
         }
         .nav-link.active::before { content: ''; position: absolute; left: 0; top: 16%; bottom: 16%; width: 4px; background: linear-gradient(180deg, #b68c5e, #d8b792); border-radius: 0 4px 4px 0; }
+        .nav-link.nav-system-controls {
+            margin-top: .35rem;
+            border: 1px solid rgba(200, 169, 106, .52) !important;
+            background:
+                linear-gradient(135deg, rgba(200, 169, 106, .22), rgba(139, 106, 52, .14)),
+                rgba(45, 38, 28, .72) !important;
+            color: #f6e7c8 !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 8px 18px rgba(0,0,0,.12);
+        }
+        .nav-link.nav-system-controls .nav-icon { color: #e7d3a8 !important; }
+        .nav-link.nav-system-controls:hover {
+            background:
+                linear-gradient(135deg, rgba(200, 169, 106, .32), rgba(139, 106, 52, .22)),
+                rgba(55, 45, 31, .84) !important;
+            border-color: rgba(231, 211, 168, .78) !important;
+            color: #fff8eb !important;
+            transform: translateY(-1px);
+        }
         .nav-icon { width: 15px; height: 15px; color: #b08a67; }
         .nav-group { margin-bottom: 2px; }
         .nav-group summary { list-style: none; }
@@ -833,8 +856,8 @@
             background: var(--glass-bg-strong);
             border-bottom: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
-            position: sticky;
-            top: 0;
+            position: relative;
+            top: auto;
             z-index: 100;
             backdrop-filter: blur(var(--glass-blur)) saturate(125%);
             -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(125%);
@@ -952,8 +975,8 @@
         .is-open-ham .ham-line:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
         .page-header {
-            position: sticky;
-            top: 0;
+            position: relative;
+            top: auto;
             z-index: 90;
             background:
                 linear-gradient(180deg, rgba(255,253,250,.90), rgba(255,247,239,.76)),
@@ -1899,9 +1922,9 @@
                 position: fixed;
                 inset: 0;
                 z-index: 710;
-                background: rgba(17, 13, 10, .22);
-                backdrop-filter: blur(14px);
-                -webkit-backdrop-filter: blur(14px);
+                background: rgba(12, 10, 8, .26);
+                backdrop-filter: blur(30px) saturate(165%) brightness(.78);
+                -webkit-backdrop-filter: blur(30px) saturate(165%) brightness(.78);
             }
 
             .mobile-more-backdrop.is-open {
@@ -1914,15 +1937,15 @@
                 right: max(1rem, env(safe-area-inset-right));
                 bottom: calc(6.95rem + env(safe-area-inset-bottom, 0px));
                 z-index: 730;
-                padding: .75rem;
-                border: 1px solid rgba(255, 255, 255, .86);
-                border-radius: 22px;
+                padding: .6rem;
+                border: 1px solid rgba(255, 255, 255, .2);
+                border-radius: 20px;
                 background:
                     linear-gradient(145deg, rgba(255,255,255,.94), rgba(250,247,242,.82)),
                     rgba(255,255,255,.88);
-                box-shadow: 0 24px 64px rgba(15,23,42,.20), inset 0 1px 0 rgba(255,255,255,.90);
-                backdrop-filter: blur(22px) saturate(160%);
-                -webkit-backdrop-filter: blur(22px) saturate(160%);
+                box-shadow: 0 24px 54px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.82);
+                backdrop-filter: blur(16px) saturate(135%);
+                -webkit-backdrop-filter: blur(16px) saturate(135%);
             }
 
             .mobile-more-sheet.is-open {
@@ -1949,6 +1972,37 @@
                 color: var(--primary-dark);
             }
 
+            .mobile-more-control {
+                width: 100%;
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+                gap: .65rem;
+                padding: .7rem .75rem;
+                border: 1px solid #a9803e;
+                border-radius: 14px;
+                background: linear-gradient(135deg, #c8a96a, #e7d3a8);
+                color: #251b10;
+                font: inherit;
+                font-size: .84rem;
+                font-weight: 800;
+                text-align: left;
+                cursor: pointer;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 8px 18px rgba(94,68,27,.16);
+            }
+
+            .mobile-more-control span {
+                width: 32px;
+                height: 32px;
+                display: grid;
+                place-items: center;
+                border-radius: 11px;
+                background: rgba(37,27,16,.12);
+                color: inherit;
+            }
+
+            .mobile-more-control:active { transform: scale(.98); }
+
             .mobile-more-link span {
                 width: 32px;
                 height: 32px;
@@ -1964,7 +2018,7 @@
                 border-color: rgba(226, 209, 192, .20);
                 background:
                     linear-gradient(145deg, rgba(255,255,255,.08), transparent 48%),
-                    rgba(31, 27, 23, .58);
+                    rgba(24, 22, 19, .94);
                 box-shadow:
                     0 22px 60px rgba(0, 0, 0, .42),
                     inset 0 1px 0 rgba(255,255,255,.08);
@@ -2008,6 +2062,13 @@
             body[data-theme="dark"] .mobile-more-link {
                 color: #fff7ef;
             }
+
+            body[data-theme="dark"] .mobile-more-control {
+                border-color: rgba(246, 231, 200, .34);
+                background: linear-gradient(135deg, #c8a96a, #e7d3a8);
+                color: #251b10;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 10px 22px rgba(0,0,0,.22);
+            }
         }
 
         @keyframes mobileMoreIn {
@@ -2026,6 +2087,7 @@
     $isDisciplineAdmin = $isAdmin && in_array($adminScope, ['discipline_admin', 'system_admin'], true);
     $isMovementAdmin = $isAdmin && in_array($adminScope, ['guard', 'discipline_admin', 'system_admin'], true);
     $isGuardAdmin = $isAdmin && $adminScope === 'guard';
+    $hasAdminOverride = $isStudent && (bool) ($authUser['admin_override'] ?? false) && !empty($authUser['linked_admin_id']);
     $studentOnDashboard = request()->routeIs('student.dashboard');
     $adminOnDashboard = request()->routeIs('admin.dashboard');
     $studentOnScholarship = request()->routeIs('student.scholarships.*')
@@ -2046,7 +2108,10 @@
         || request()->routeIs('admin.student-scholarship-status.*')
         || request()->routeIs('admin.scholarship-announcements.*')
         || ($isScholarshipAdmin && request()->routeIs('admin.students.*'));
-    $showSidebar = $isAdmin || ($isStudent && !$studentOnDashboard);
+    // The student dashboard keeps its desktop canvas clear, but still provides
+    // the normal sidebar drawer and hamburger control on mobile.
+    $showSidebar = $isAdmin || $isStudent;
+    $showDesktopSidebar = $isAdmin || ($isStudent && !$studentOnDashboard);
     $showHeaderUserMenu = (bool) $authUser && ($isStudent || $adminOnDashboard);
     $showStudentBottomNav = $isStudent;
     $studentMoreActive = request()->routeIs('student.movements.index')
@@ -2057,7 +2122,8 @@
     $bodyClasses = trim(
         ($isStudent ? 'student-mobile-shell' : '') . ' ' .
         ($showStudentBottomNav ? 'has-student-bottom-nav' : '') . ' ' .
-        (request()->routeIs('student.movements.scan') ? 'student-scan-mode' : '')
+        (request()->routeIs('student.movements.scan') ? 'student-scan-mode ' : '') .
+        ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar' : '')
     );
 @endphp
 <body data-theme="{{ session('theme', 'light') }}" class="{{ $bodyClasses }}">
@@ -2210,6 +2276,16 @@
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v2.25l1.5 1.5"/></svg>
                         {{ __('ui.settings') }}
                     </a>
+                    @if($hasAdminOverride)
+                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="admin">
+                            <button type="submit" class="nav-link nav-system-controls" style="width:100%;cursor:pointer;font:inherit;">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 12h2M3 12h2M12 3v2m0 14v2"/></svg>
+                                {{ __('ui.system_controls') }}
+                            </button>
+                        </form>
+                    @endif
                 </nav>
             @elseif($isAdmin)
                 <div class="nav-label">{{ __('Papan Pemuka') }}</div>
@@ -2402,7 +2478,7 @@
     <div class="sb-overlay" id="sbOverlay" aria-hidden="true"></div>
     @endif
 
-    <div class="main-wrap {{ $showSidebar ? 'has-sidebar' : 'no-sidebar' }}">
+    <div class="main-wrap {{ $showDesktopSidebar ? 'has-sidebar' : 'no-sidebar' }}{{ $isStudent && $studentOnDashboard ? ' student-dashboard-mobile-sidebar-shell' : '' }}">
         @if($showSidebar)
         <div class="topbar">
             <button class="btn-ham" id="sbToggle" aria-label="{{ __('Buka sidebar') }}" aria-expanded="false" aria-controls="appSidebar">
@@ -2420,41 +2496,41 @@
             <div class="topbar-actions">
                 @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--topbar'])
                 @if($showHeaderUserMenu && $isStudent)
-                    <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu">
+                    <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu" title="{{ $authUser['name'] ?? __('User') }}">
                         <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
                         <span class="header-user-meta">
                             <span class="header-user-name">{{ $authUser['name'] ?? __('User') }}</span>
                             <span class="header-user-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
                         </span>
                     </button>
-                    <div class="header-user-menu" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
-                        <div class="header-menu-head">
-                            <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
-                            <span>
-                                <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
-                                <span class="header-menu-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
-                            </span>
-                        </div>
-                        @if($isStudent)
-                            <a href="{{ route('student.profile') }}" class="header-menu-link">
-                                <span aria-hidden="true">&#9786;</span>{{ __('Profile') }}
-                            </a>
-                        @endif
-                        <a href="{{ route('settings.show') }}" class="header-menu-link">
-                            <span aria-hidden="true">&#9881;</span>{{ __('Settings') }}
-                        </a>
-                        <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">
-                            <span aria-hidden="true">?</span>{{ __('Support') }}
-                        </a>
-                        <div class="header-menu-sep"></div>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="header-menu-btn logout">{{ __('Log Out') }}</button>
-                        </form>
-                    </div>
                 @endif
             </div>
         </div>
+        @if($showHeaderUserMenu && $isStudent)
+            <div class="header-user-menu header-user-menu--mobile" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
+                <div class="header-menu-head">
+                    <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+                    <span>
+                        <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
+                        <span class="header-menu-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                    </span>
+                </div>
+                <a href="{{ route('student.profile') }}" class="header-menu-link">
+                    <span aria-hidden="true">&#9786;</span>{{ __('Profile') }}
+                </a>
+                <a href="{{ route('settings.show') }}" class="header-menu-link">
+                    <span aria-hidden="true">&#9881;</span>{{ __('Settings') }}
+                </a>
+                <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">
+                    <span aria-hidden="true">?</span>{{ __('Support') }}
+                </a>
+                <div class="header-menu-sep"></div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="header-menu-btn logout">{{ __('Log Out') }}</button>
+                </form>
+            </div>
+        @endif
         @endif
 
         @hasSection('header')
@@ -2541,6 +2617,16 @@
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2 2 0 1 1-2.83 2.83l-.04-.04A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1 .6 1.8 1.8 0 0 0-.4 1.4V21a2 2 0 1 1-4 0v-.06a1.8 1.8 0 0 0-.4-1.4 1.8 1.8 0 0 0-1-.6 1.8 1.8 0 0 0-1.98.36l-.04.04a2 2 0 1 1-2.83-2.83l.04-.04A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-.6-1 1.8 1.8 0 0 0-1.4-.4H2a2 2 0 1 1 0-4h.06a1.8 1.8 0 0 0 1.4-.4 1.8 1.8 0 0 0 .6-1 1.8 1.8 0 0 0-.36-1.98l-.04-.04a2 2 0 1 1 2.83-2.83l.04.04A1.8 1.8 0 0 0 9 4.6a1.8 1.8 0 0 0 1-.6 1.8 1.8 0 0 0 .4-1.4V2a2 2 0 1 1 4 0v.06a1.8 1.8 0 0 0 .4 1.4 1.8 1.8 0 0 0 1 .6 1.8 1.8 0 0 0 1.98-.36l.04-.04a2 2 0 1 1 2.83 2.83l-.04.04A1.8 1.8 0 0 0 19.4 9c.25.36.6.66 1 .8.42.13.9.13 1.4 0H22a2 2 0 1 1 0 4h-.06a1.8 1.8 0 0 0-1.4.4c-.4.34-.66.7-.8 1Z"/></svg></span>
             Settings
         </a>
+        @if($hasAdminOverride)
+            <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                @csrf
+                <input type="hidden" name="mode" value="admin">
+                <button type="submit" class="mobile-more-control">
+                    <span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12h2M3 12h2M12 3v2m0 14v2"/></svg></span>
+                    {{ __('ui.system_controls') }}
+                </button>
+            </form>
+        @endif
     </div>
 
     <nav class="mobile-bottom-nav" aria-label="Student mobile navigation">
@@ -2651,7 +2737,10 @@
     if (headerUserMenu && !headerUserMenu.classList.contains('is-open')) {
         headerUserMenu.setAttribute('aria-hidden', 'true');
     }
-    if (sidebar) sidebar.setAttribute('aria-hidden', window.innerWidth >= 1024 ? 'false' : 'true');
+    if (sidebar) {
+        var dashboardMobileSidebar = document.body.classList.contains('student-dashboard-mobile-sidebar');
+        sidebar.setAttribute('aria-hidden', window.innerWidth >= 1024 && !dashboardMobileSidebar ? 'false' : 'true');
+    }
 
     function closeHeaderUserMenu() {
         if (headerUserMenu) {

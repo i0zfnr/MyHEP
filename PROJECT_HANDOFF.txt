@@ -44,7 +44,8 @@ Recent Completed Work
   consumption is transactional with a row lock; protected routes revalidate the live
   student/admin account and current admin role before proceeding.
 - 2026-07-21: Updated the shared frontend shell and documented the result. The
-  student dashboard uses the full workspace without a sidebar. Student module pages
+  student dashboard uses the full workspace without a desktop sidebar, while its
+  mobile header keeps a hamburger-triggered sidebar drawer. Student module pages
   retain the normal sticky desktop sidebar and mobile drawer; mobile bottom navigation
   remains in use.
 - 2026-07-21: Reworked shared popup motion for notifications, confirmation dialogs,
@@ -221,8 +222,9 @@ Recommended Next Execution Order
    - Guard QR generation, Safari/Chrome scanning, checkout, and return.
    - Student scholarship, offense, fine, and sticker workflows.
    - Admin CRUD, approvals, CSV exports, PDF/print, and uploaded files.
-   - Student full-width dashboard, sticky desktop module sidebar, mobile module drawer/
-     bottom navigation, plus notification, confirmation, media, filter, account-menu,
+   - Student full-width desktop dashboard with a mobile hamburger drawer, sticky desktop
+     module sidebar, mobile module drawer/bottom navigation, plus notification, media,
+     filter, account-menu,
      and More-sheet motion.
 
 Operational Notes

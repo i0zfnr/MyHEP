@@ -26,7 +26,7 @@
         .actions { display:flex; gap:8px; margin-top:8px; }
         .btn { display:inline-block; border:1px solid #cbb9a4; background:var(--surface); color:var(--primary); border-radius:8px; padding:9px 12px; text-decoration:none; font-size:13px; font-weight:600; cursor:pointer; }
         .btn-primary { background:linear-gradient(135deg,#A48D78,#CBB9A4); color:#fff; border:none; }
-        .ok { margin-bottom:10px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:9px; font-size:13px; }
+        .ok { margin-bottom:10px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:9px; font-size:13px; }
         .err { margin-bottom:10px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:9px; font-size:13px; }
         .app-footer {
             position: fixed;

@@ -58,6 +58,9 @@ Route::get('/settings', [SettingController::class, 'show'])
 Route::post('/settings', [SettingController::class, 'update'])
     ->middleware('auth.session.any')
     ->name('settings.update');
+Route::post('/settings/role-mode', [SettingController::class, 'updateRoleMode'])
+    ->middleware('auth.session.any')
+    ->name('settings.role-mode.update');
 Route::get('/notifications/feed', NotificationFeedController::class)
     ->middleware('auth.session.any')
     ->name('notifications.feed');

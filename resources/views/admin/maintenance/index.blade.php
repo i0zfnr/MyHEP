@@ -28,7 +28,7 @@
         margin-bottom: .7rem;
     }
     .maint-eyebrow.on { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
-    .maint-eyebrow.off { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .maint-eyebrow.off { background: #e7f3f3; border: 1px solid #b9ddde; color: #1f5559; }
     .maint-eyebrow.cache-on { background: #ecfeff; border: 1px solid #a5f3fc; color: #155e75; }
     .maint-eyebrow.cache-off { background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }
     .maint-hero h3 { margin: 0; font-size: 1.55rem; color: #1f1712; letter-spacing: -.02em; }
@@ -90,7 +90,7 @@
         color: #6e5745;
     }
     .maint-btn.warn { background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
-    .maint-btn.ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+    .maint-btn.ok { background: #e7f3f3; border-color: #b9ddde; color: #1f5559; }
     .maint-note {
         border-radius: 12px;
         padding: .8rem .9rem;
@@ -100,7 +100,7 @@
         font-size: .84rem;
         line-height: 1.6;
     }
-    .msg-ok { padding: .75rem .9rem; border-radius: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: .86rem; font-weight: 700; }
+    .msg-ok { padding: .75rem .9rem; border-radius: 12px; background: #e7f3f3; border: 1px solid #b9ddde; color: #1f5559; font-size: .86rem; font-weight: 700; }
     .msg-err { padding: .75rem .9rem; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: .86rem; font-weight: 700; }
 </style>
 @endpush

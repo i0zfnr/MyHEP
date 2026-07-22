@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Pengumuman Scholarship')
 
@@ -20,7 +20,7 @@
     .general { background:#f5ede6; color:#8a7362; border-color:#cbb9a4; }
     .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:8px 12px; text-decoration:none; font-weight:600; font-size:13px; cursor:pointer; }
     .btn-danger { border-color:#fecaca; color:#b91c1c; background:#fef2f2; }
-    .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
+    .ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
     .ann-head-actions { display:flex; gap:8px; flex-wrap:wrap; }

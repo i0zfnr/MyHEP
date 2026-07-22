@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Senarai Pelajar')
 
@@ -26,8 +26,8 @@
     .btn-warn { border-color:#fed7aa; color:#b45309; background:#fff7ed; }
     .pwd-badge { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; border:1px solid #ede4d9; }
     .pwd-default { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .pwd-custom { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
-    .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
+    .pwd-custom { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
+    .ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
     .import-panel { margin-bottom:12px; padding:14px 16px; }
@@ -42,9 +42,12 @@
     .import-summary span { display:block; font-size:11px; text-transform:uppercase; font-weight:800; color:#7a6555; }
     .import-summary strong { display:block; margin-top:3px; font-size:18px; color:#2d1f14; }
     .error-list { margin:10px 0 0; padding-left:18px; color:#991b1b; font-size:12px; line-height:1.5; }
-    .student-name { font-weight:700; color:#2d1f14; }
-    .student-sub { display:none; margin-top:3px; color:#7a6555; font-size:11px; line-height:1.35; }
-    .matric-cell { white-space:nowrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .student-name { font-weight:700; color:var(--se-text); }
+    .student-sub { display:none; margin-top:3px; color:var(--se-text-soft); font-size:11px; line-height:1.35; }
+    .matric-cell { color:var(--se-text); white-space:nowrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    html[data-theme="dark"] .students-table .student-name { color:#f7f1e8 !important; }
+    html[data-theme="dark"] .students-table .student-sub { color:#cbbba9 !important; }
+    html[data-theme="dark"] .students-table .matric-cell { color:#f0e3d1 !important; }
         /* Admin UX Identity v2 */
     :root {
         --admin-ink: #241a12;
@@ -254,7 +257,7 @@
                         <label for="student_file">{{ __('Import Data Pelajar') }}</label>
                         <input id="student_file" type="file" name="student_file" accept=".csv,.txt,.xlsx" required>
                         <div class="import-hint">
-                            Upload CSV atau Excel. Header yang disokong termasuk Nama Pelajar, No Kad Pengenalan, No Matrik, Nama Program, Telefon, Email, Semester dan Sesi Akademik.
+                            Upload CSV atau Excel sehingga 50 MB. Header yang disokong termasuk Nama Pelajar, No Kad Pengenalan, No Matrik, Nama Program, Telefon, Email, Semester dan Sesi Akademik.
                             Jika No Matrik kosong, sistem akan simpan sebagai kosong. Pelajar boleh lengkapkan No. Bilik sendiri di profil pelajar.
                         </div>
                     </div>

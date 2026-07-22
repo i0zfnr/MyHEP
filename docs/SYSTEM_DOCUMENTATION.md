@@ -477,14 +477,15 @@ The shared application shell is implemented in `resources/views/layouts/app.blad
 
 Desktop student navigation:
 
-- The student dashboard does not render the sidebar and uses the full workspace.
+- The student dashboard does not show a desktop sidebar and uses the full workspace.
 - Student module pages retain the normal sticky sidebar on desktop for frequent module navigation.
 - Admin desktop navigation retains the shared sidebar.
 
 Mobile navigation:
 
 - The student bottom navigation and More sheet remain the primary mobile navigation controls.
-- Student module pages retain the sidebar as an overlay drawer on smaller screens; it is hidden from assistive technology until opened.
+- The student dashboard header includes a hamburger control that opens its sidebar as an overlay drawer on smaller screens; it is hidden from assistive technology until opened.
+- Student module pages also retain the sidebar as an overlay drawer on smaller screens.
 
 Popup and card behavior:
 

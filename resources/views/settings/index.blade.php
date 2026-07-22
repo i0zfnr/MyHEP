@@ -137,5 +137,55 @@
             </div>
         </div>
     </form>
+
+    @if($roleMode['available'])
+        <section class="settings-panel" aria-labelledby="accessModeTitle">
+            <section class="settings-section">
+                <h3 class="settings-section-title" id="accessModeTitle">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.55V20.3h-3v-.09a1.7 1.7 0 0 0-1.03-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.55-1.03H5.3v-3h.15A1.7 1.7 0 0 0 7 9.94a1.7 1.7 0 0 0-.34-1.88L6.6 8l2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.7 4.7v-.1h3v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06L19.8 8l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1.03h.15v3h-.15A1.7 1.7 0 0 0 19.4 15Z"/>
+                    </svg>
+                    {{ __('ui.access_mode') }}
+                </h3>
+                <p class="settings-section-copy">{{ __('ui.access_mode_hint') }}</p>
+
+                <div class="settings-actions" style="justify-content:flex-start;">
+                    @if($roleMode['is_student_mode'])
+                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="student">
+                            <input type="hidden" name="override" value="0">
+                            <button class="btn" type="submit">{{ __('ui.student_mode') }}</button>
+                        </form>
+                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="student">
+                            <input type="hidden" name="override" value="1">
+                            <button class="btn {{ $roleMode['override_enabled'] ? '' : 'btn-primary' }}" type="submit">{{ __('ui.enable_override') }}</button>
+                        </form>
+                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="admin">
+                            <button class="btn" type="submit">{{ __('ui.admin_mode') }}</button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="student">
+                            <input type="hidden" name="override" value="0">
+                            <button class="btn" type="submit">{{ __('ui.student_mode') }}</button>
+                        </form>
+                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="student">
+                            <input type="hidden" name="override" value="1">
+                            <button class="btn btn-primary" type="submit">{{ __('ui.enable_override') }}</button>
+                        </form>
+                    @endif
+                </div>
+            </section>
+        </section>
+    @endif
 </div>
 @endsection

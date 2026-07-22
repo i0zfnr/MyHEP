@@ -158,7 +158,7 @@
     .bug-pill.category { background: rgba(215, 191, 168, .18); border-color: rgba(215, 191, 168, .32); color: #7b614a; }
     .bug-pill.status-new { background: rgba(96, 165, 250, .14); border-color: rgba(147, 197, 253, .2); color: #bfdbfe; }
     .bug-pill.status-in_progress { background: rgba(245, 158, 11, .14); border-color: rgba(253, 186, 116, .2); color: #fdba74; }
-    .bug-pill.status-resolved { background: rgba(34, 197, 94, .14); border-color: rgba(134, 239, 172, .2); color: #bbf7d0; }
+    .bug-pill.status-resolved { background: rgba(34, 197, 94, .14); border-color: rgba(134, 239, 172, .2); color: #b9ddde; }
     .bug-pill.status-closed { background: rgba(148, 163, 184, .14); border-color: rgba(203, 213, 225, .2); color: #cbd5e1; }
     .bug-date { color: #8b715e; font-size: .85rem; white-space: nowrap; }
     .bug-item-body {

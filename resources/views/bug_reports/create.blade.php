@@ -29,8 +29,8 @@
             --danger-border: #fda4af;
             --danger-text: #b42318;
             --ok-bg: #ecfdf3;
-            --ok-border: #86efac;
-            --ok-text: #166534;
+            --ok-border: #85c2c5;
+            --ok-text: #1f5559;
         }
 
         * { box-sizing: border-box; }

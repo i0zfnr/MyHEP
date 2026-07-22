@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', __('Kesalahan Saya'))
 
@@ -12,13 +12,13 @@
     .status-badge { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; text-transform:uppercase; border:1px solid #ede4d9; }
     .status-unpaid, .status-rejected { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
     .status-applied, .status-pending { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .status-paid, .status-approved { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+    .status-paid, .status-approved { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
     ul { margin:8px 0 0 18px; }
     li { margin-bottom:4px; }
     textarea { width:100%; border:1px solid #e5d8c8; border-radius:8px; padding:8px; font-size:13px; }
     .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:8px 12px; text-decoration:none; font-weight:600; font-size:13px; cursor:pointer; }
     .btn-primary { border:none; color:#fff; background:linear-gradient(135deg,#A48D78,#CBB9A4); }
-    .msg-ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
+    .msg-ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:10px; font-size:13px; }
     .msg-err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .evidence-img { width:100%; max-width:260px; aspect-ratio:4 / 3; object-fit:cover; border:1px solid #ede4d9; border-radius:10px; display:block; }
     .evidence-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; }

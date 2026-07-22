@@ -46,7 +46,7 @@
 - [ ] Delete actions are logged.
 
 ## 8) Shared UI and Responsive Navigation
-- [ ] The student dashboard uses the full workspace without a sidebar.
+- [ ] The student dashboard uses the full workspace without a desktop sidebar; on mobile, its hamburger button opens and closes the sidebar drawer.
 - [ ] Student module pages show the sticky sidebar on desktop and use it as a drawer on mobile; bottom navigation remains usable after it closes.
 - [ ] Notification, confirmation, media-preview, filter, account-menu, and More-sheet popups animate in and out without abruptly disappearing.
 - [ ] Notification, media-preview, and filter popups visually originate from their trigger where the trigger is available.

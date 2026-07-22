@@ -22,7 +22,7 @@
     label { display:block; margin-bottom:6px; font-size:13px; font-weight:700; color:#7b6757; }
     input, select { width:100%; border:1px solid #dfceb9; border-radius:10px; padding:9px 10px; background:#fffdfb; color:#241a12; font-size:13px; }
     .hint { margin-top:8px; color:#7b6757; font-size:12px; line-height:1.55; }
-    .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:10px; padding:10px 12px; font-size:13px; }
+    .ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:10px; padding:10px 12px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:10px 12px; font-size:13px; }
     .summary { display:grid; gap:8px; grid-template-columns:repeat(2, minmax(0, 1fr)); margin-top:12px; }
     .summary div { border:1px solid #eadfce; border-radius:10px; padding:10px; background:#fcfaf8; }
@@ -36,18 +36,18 @@
     th { font-size:11px; text-transform:uppercase; color:#7b6757; letter-spacing:.06em; background:#f9f1e8; }
     .pill { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:800; text-transform:uppercase; border:1px solid #ede4d9; }
     .pending { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .confirmed { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+    .confirmed { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
     .rejected { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
     .error-list { margin:10px 0 0; padding-left:18px; color:#991b1b; font-size:12px; line-height:1.5; }
 </style>
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">SCHOLARSHIP B40 TVET</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--se-text);">SCHOLARSHIP B40 TVET</h2>
 @endsection
 
 @section('content')
-<div class="wrap">
+<div class="wrap b40-tvet-page">
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 

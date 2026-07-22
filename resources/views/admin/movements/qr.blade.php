@@ -52,7 +52,7 @@
 @endphp
 <div class="ui-shell">
     @if(session('success'))
-        <div class="ui-card"><div class="ui-card-body" style="color:#166534;">{{ session('success') }}</div></div>
+        <div class="ui-card"><div class="ui-card-body" style="color:#1f5559;">{{ session('success') }}</div></div>
     @endif
     @if($errors->any())
         <div class="ui-card"><div class="ui-card-body" style="color:#991b1b;">{{ $errors->first() }}</div></div>

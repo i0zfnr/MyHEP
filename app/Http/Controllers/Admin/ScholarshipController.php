@@ -73,7 +73,11 @@ class ScholarshipController extends Controller
     public function importB40Tvet(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'student_file' => ['required', 'file', 'max:10240', 'mimes:csv,txt,xlsx'],
+            'student_file' => ['required', 'file', 'max:51200', 'mimes:csv,txt,xlsx'],
+        ], [
+            'student_file.uploaded' => 'Fail import tidak dapat dimuat naik. Pastikan saiz fail tidak melebihi 50 MB.',
+            'student_file.max' => 'Fail import terlalu besar. Saiz maksimum ialah 50 MB.',
+            'student_file.mimes' => 'Format fail tidak disokong. Sila upload fail CSV atau XLSX.',
         ]);
 
         $uploadedFile = $validated['student_file'];

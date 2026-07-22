@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\DualRoleSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,13 @@ class SettingController extends Controller
         $currentTheme = $request->session()->get('theme', 'light');
         $backRoute = ($authUser['role'] ?? null) === 'admin' ? 'admin.dashboard' : 'student.dashboard';
 
-        return view('settings.index', compact('currentLocale', 'currentTheme', 'backRoute'));
+        $roleMode = [
+            'available' => DualRoleSession::canSwitch($request),
+            'is_student_mode' => ($authUser['role'] ?? null) === 'student',
+            'override_enabled' => (bool) ($authUser['admin_override'] ?? false),
+        ];
+
+        return view('settings.index', compact('currentLocale', 'currentTheme', 'backRoute', 'roleMode'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -50,5 +57,27 @@ class SettingController extends Controller
         }
 
         return redirect()->back();
+    }
+
+    public function updateRoleMode(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'mode' => ['required', 'in:student,admin'],
+            'override' => ['nullable', 'boolean'],
+        ]);
+
+        $switched = $validated['mode'] === 'student'
+            ? DualRoleSession::switchToStudent($request, (bool) ($validated['override'] ?? false))
+            : DualRoleSession::switchToAdmin($request);
+
+        if (!$switched) {
+            return redirect()->route('settings.show')->withErrors([
+                'role_mode' => __('ui.role_mode_unavailable'),
+            ]);
+        }
+
+        auditLog('auth.role_mode_changed', 'account', null, 'Account access mode changed to ' . $validated['mode']);
+
+        return redirect()->route($validated['mode'] === 'admin' ? 'admin.dashboard' : 'student.dashboard');
     }
 }

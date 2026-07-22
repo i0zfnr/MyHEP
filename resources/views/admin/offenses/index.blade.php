@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', __('Senarai Kesalahan'))
 
@@ -13,11 +13,11 @@
     .status { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; text-transform:uppercase; border:1px solid #ede4d9; }
     .unpaid { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
     .applied { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .paid { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+    .paid { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
     .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:8px 12px; text-decoration:none; font-weight:600; font-size:13px; cursor:pointer; }
-    .btn-success { border-color:#bbf7d0; color:#166534; background:#f0fdf4; }
+    .btn-success { border-color:#b9ddde; color:#1f5559; background:#e7f3f3; }
     .btn-danger { border-color:#fecaca; color:#b91c1c; background:#fef2f2; }
-    .ok { margin-bottom:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:10px; font-size:13px; }
+    .ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:10px; font-size:13px; }
     .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
     .actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
     .filters { padding: 12px 16px; border-bottom:1px solid #ede4d9; background:#fcfaf8; }

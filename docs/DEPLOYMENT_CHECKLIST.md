@@ -18,7 +18,7 @@
 - [ ] Test 1 create/update/delete transaction in each major module.
 - [ ] Verify exports and monthly report.
 - [ ] Verify audit logs are created.
-- [ ] Verify the full-width student dashboard, sticky desktop module sidebar, mobile module drawer/navigation, and shared popup open/close behavior.
+- [ ] Verify the full-width desktop student dashboard, its mobile hamburger drawer, sticky desktop module sidebar, mobile module drawer/navigation, and shared popup open/close behavior.
 
 ## Rollback
 - [ ] Restore DB backup.
