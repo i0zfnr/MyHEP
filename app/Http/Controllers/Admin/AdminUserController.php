@@ -10,7 +10,7 @@ use Illuminate\Validation\Rule;
 
 class AdminUserController extends Controller
 {
-    private const ADMIN_ROLES = ['guard', 'scholarship_admin', 'discipline_admin', 'system_admin'];
+    private const ADMIN_ROLES = ['guard', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'];
 
     public function index()
     {

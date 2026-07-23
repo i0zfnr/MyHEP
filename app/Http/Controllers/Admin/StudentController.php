@@ -119,9 +119,9 @@ class StudentController extends Controller
         $validated = $request->validate([
             'student_file' => ['required', 'file', 'max:51200', 'mimes:csv,txt,xlsx'],
         ], [
-            'student_file.uploaded' => 'Fail import tidak dapat dimuat naik. Pastikan saiz fail tidak melebihi 50 MB.',
-            'student_file.max' => 'Fail import terlalu besar. Saiz maksimum ialah 50 MB.',
-            'student_file.mimes' => 'Format fail tidak disokong. Sila upload fail CSV atau XLSX.',
+            'student_file.uploaded' => __('students.import.upload_failed'),
+            'student_file.max' => __('students.import.too_large'),
+            'student_file.mimes' => __('students.import.unsupported_format'),
         ]);
 
         $uploadedFile = $validated['student_file'];
@@ -131,13 +131,13 @@ class StudentController extends Controller
             $rows = $this->readImportRows($uploadedFile->getRealPath(), $extension);
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
-                'student_file' => 'Fail tidak dapat dibaca. Sila upload CSV atau XLSX yang sah.',
+                'student_file' => __('students.import.unreadable'),
             ]);
         }
 
         if ($rows === []) {
             throw ValidationException::withMessages([
-                'student_file' => 'Fail kosong atau header pelajar tidak dijumpai.',
+                'student_file' => __('students.import.empty_or_missing_headers'),
             ]);
         }
 
@@ -145,7 +145,7 @@ class StudentController extends Controller
         auditLog('students.import', 'students', null, json_encode($result));
 
         return redirect()->route('admin.students.index')
-            ->with('success', 'Import pelajar selesai.')
+            ->with('success', __('students.import.completed'))
             ->with('import_result', $result);
     }
 
@@ -415,9 +415,9 @@ class StudentController extends Controller
             foreach ($rows as $index => $row) {
                 $rowNumber = $index + 2;
                 $fullName = $this->rowValue($row, ['nama pelajar', 'nama penuh', 'nama', 'student name', 'full name', 'name']);
-                $icNo = $this->cleanIdentity($this->rowValue($row, ['no ic', 'no. ic', 'no kad pengenalan', 'nombor kad pengenalan', 'ic no', 'ic number', 'mykad', 'kad pengenalan']));
-                $program = $this->rowValue($row, ['program', 'nama program', 'kursus', 'course']) ?: 'UNKNOWN';
-                $matricNo = $this->cleanIdentity($this->rowValue($row, ['no matrik', 'no. matrik', 'nombor matrik', 'matric no', 'matric number', 'id pelajar', 'student id', 'no pendaftaran']));
+                $icNo = $this->cleanIdentity($this->rowValue($row, ['no ic', 'no. ic', 'no kp', 'no. kp', 'nombor kp', 'no kad pengenalan', 'nombor kad pengenalan', 'ic no', 'ic number', 'mykad', 'kad pengenalan']));
+                $program = $this->rowValue($row, ['program', 'nama program', 'kursus', 'kod kursus', 'course', 'course code', 'kelas']) ?: 'UNKNOWN';
+                $matricNo = $this->cleanIdentity($this->rowValue($row, ['no matrik', 'no. matrik', 'nombor matrik', 'no pend', 'no. pend', 'matric no', 'matric number', 'id pelajar', 'student id', 'no pendaftaran', 'nombor pendaftaran']));
 
                 if ($fullName === '' || $icNo === '') {
                     $result['skipped']++;
@@ -443,7 +443,7 @@ class StudentController extends Controller
                     'email' => ['email', 'emel', 'e-mail'],
                     'phone' => ['telefon', 'no telefon', 'phone', 'phone no', 'mobile'],
                     'semester' => ['semester', 'sem'],
-                    'academic_session' => ['sesi akademik', 'academic session', 'session'],
+                    'academic_session' => ['sesi akademik', 'sesi semasa', 'academic session', 'current session', 'session'],
                     'race' => ['bangsa', 'race'],
                     'religion' => ['agama', 'religion'],
                     'address' => ['alamat', 'address'],
@@ -593,7 +593,7 @@ class StudentController extends Controller
         foreach ($rows as $index => $row) {
             $headers = array_map(fn ($header) => $this->normalizeHeader((string) $header), $row);
             $hasName = $this->headerContainsAny($headers, ['nama pelajar', 'nama penuh', 'nama', 'student name', 'full name']);
-            $hasIc = $this->headerContainsAny($headers, ['no kad pengenalan', 'no ic', 'ic no', 'ic number', 'mykad']);
+            $hasIc = $this->headerContainsAny($headers, ['no kad pengenalan', 'no ic', 'no kp', 'nombor kp', 'ic no', 'ic number', 'mykad']);
 
             if ($hasName && $hasIc) {
                 return $index;

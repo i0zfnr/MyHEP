@@ -127,7 +127,7 @@ class NotificationFeedController extends Controller
             }
         }
 
-        if (in_array($scope, ['discipline_admin', 'system_admin'], true)) {
+        if (in_array($scope, ['discipline_admin', 'student_affairs_head', 'system_admin'], true)) {
             if (Schema::hasTable('fine_payment_applications')) {
                 $pendingPayments = DB::table('fine_payment_applications')->where('status', 'pending')->count();
                 if ($pendingPayments > 0) {
@@ -159,7 +159,7 @@ class NotificationFeedController extends Controller
             }
         }
 
-        if (in_array($scope, ['guard', 'discipline_admin', 'system_admin'], true) && Schema::hasTable('student_movements')) {
+        if (in_array($scope, ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'], true) && Schema::hasTable('student_movements')) {
             $lateMovements = DB::table('student_movements')
                 ->where('rule_status', 'late')
                 ->where('updated_at', '>=', now()->subDays(7))

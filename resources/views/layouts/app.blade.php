@@ -2122,9 +2122,9 @@
     $isStudent = ($authUser['role'] ?? null) === 'student';
     $isAdmin = ($authUser['role'] ?? null) === 'admin';
     $adminScope = $authUser['admin_role'] ?? null;
-    $isScholarshipAdmin = $isAdmin && in_array($adminScope, ['scholarship_admin', 'system_admin'], true);
-    $isDisciplineAdmin = $isAdmin && in_array($adminScope, ['discipline_admin', 'system_admin'], true);
-    $isMovementAdmin = $isAdmin && in_array($adminScope, ['guard', 'discipline_admin', 'system_admin'], true);
+    $isScholarshipAdmin = $isAdmin && in_array($adminScope, ['scholarship_admin', 'student_affairs_head', 'system_admin'], true);
+    $isDisciplineAdmin = $isAdmin && in_array($adminScope, ['discipline_admin', 'student_affairs_head', 'system_admin'], true);
+    $isMovementAdmin = $isAdmin && in_array($adminScope, ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'], true);
     $isGuardAdmin = $isAdmin && $adminScope === 'guard';
     $hasAdminOverride = $isStudent && (bool) ($authUser['admin_override'] ?? false) && !empty($authUser['linked_admin_id']);
     $studentOnDashboard = request()->routeIs('student.dashboard');
@@ -2185,7 +2185,7 @@
                 <div class="sb-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</div>
                 <div style="min-width:0">
                     <div class="sb-user-name">{{ $authUser['name'] ?? __('Pengguna') }}</div>
-                    <div class="sb-user-role">{{ $authUser['role'] ?? '-' }}{{ $isAdmin && $adminScope ? ' - '.$adminScope : '' }}</div>
+                    <div class="sb-user-role">{{ $authUser['role'] ?? '-' }}{{ $isAdmin && $adminScope ? ' - '.adminRoleLabel($adminScope) : '' }}</div>
                 </div>
             </div>
             @if($isStudent)
@@ -2539,7 +2539,7 @@
                         <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
                         <span class="header-user-meta">
                             <span class="header-user-name">{{ $authUser['name'] ?? __('User') }}</span>
-                            <span class="header-user-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                            <span class="header-user-role">{{ $isAdmin ? adminRoleLabel($authUser['admin_role'] ?? null) : ($authUser['role'] ?? '-') }}</span>
                         </span>
                     </button>
                 @endif
@@ -2565,7 +2565,7 @@
                                     <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
                                     <span class="header-user-meta">
                                         <span class="header-user-name">{{ $authUser['name'] ?? __('User') }}</span>
-                                        <span class="header-user-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                                        <span class="header-user-role">{{ $isAdmin ? adminRoleLabel($authUser['admin_role'] ?? null) : ($authUser['role'] ?? '-') }}</span>
                                     </span>
                                 </button>
                                 <div class="header-user-menu" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
@@ -2573,7 +2573,7 @@
                                         <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
                                         <span>
                                             <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
-                                            <span class="header-menu-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                                            <span class="header-menu-role">{{ $isAdmin ? adminRoleLabel($authUser['admin_role'] ?? null) : ($authUser['role'] ?? '-') }}</span>
                                         </span>
                                     </div>
                                     @if($isStudent)
@@ -2611,7 +2611,7 @@
             <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
             <span>
                 <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
-                <span class="header-menu-role">{{ $authUser['admin_role'] ?? $authUser['role'] ?? '-' }}</span>
+                <span class="header-menu-role">{{ $isAdmin ? adminRoleLabel($authUser['admin_role'] ?? null) : ($authUser['role'] ?? '-') }}</span>
             </span>
         </div>
         <a href="{{ route('student.profile') }}" class="header-menu-link">

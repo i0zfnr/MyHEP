@@ -244,7 +244,7 @@
 @section('content')
 <div class="wrap">
     @php($adminRole = session('auth_user.admin_role') ?? null)
-    @php($canManageStudents = in_array($adminRole, ['discipline_admin', 'system_admin'], true))
+    @php($canManageStudents = in_array($adminRole, ['discipline_admin', 'student_affairs_head', 'system_admin'], true))
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 

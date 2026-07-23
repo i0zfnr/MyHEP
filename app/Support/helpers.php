@@ -121,7 +121,7 @@ if (!function_exists('canAccessScholarshipAdmin')) {
         }
 
         $adminRole = session('auth_user.admin_role');
-        return in_array($adminRole, ['scholarship_admin', 'system_admin'], true);
+        return in_array($adminRole, ['scholarship_admin', 'student_affairs_head', 'system_admin'], true);
     }
 }
 
@@ -133,7 +133,7 @@ if (!function_exists('canAccessDisciplineAdmin')) {
         }
 
         $adminRole = session('auth_user.admin_role');
-        return in_array($adminRole, ['discipline_admin', 'system_admin'], true);
+        return in_array($adminRole, ['discipline_admin', 'student_affairs_head', 'system_admin'], true);
     }
 }
 
@@ -145,7 +145,21 @@ if (!function_exists('canAccessMovementAdmin')) {
         }
 
         $adminRole = session('auth_user.admin_role');
-        return in_array($adminRole, ['guard', 'discipline_admin', 'system_admin'], true);
+        return in_array($adminRole, ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'], true);
+    }
+}
+
+if (!function_exists('adminRoleLabel')) {
+    function adminRoleLabel(?string $role): string
+    {
+        return match ($role) {
+            'guard' => __('Guard'),
+            'scholarship_admin' => __('Scholarship Admin'),
+            'discipline_admin' => __('Discipline Admin'),
+            'student_affairs_head' => __('Ketua Hal Ehwal Pelajar'),
+            'system_admin' => __('System Admin'),
+            default => (string) $role,
+        };
     }
 }
 
@@ -589,10 +603,10 @@ if (!function_exists('myhepAdminRolesForScope')) {
     function myhepAdminRolesForScope(string $scope): array
     {
         return match ($scope) {
-            'scholarship' => ['scholarship_admin', 'system_admin'],
-            'discipline' => ['discipline_admin', 'system_admin'],
-            'movement' => ['guard', 'discipline_admin', 'system_admin'],
-            'backoffice' => ['scholarship_admin', 'discipline_admin', 'system_admin'],
+            'scholarship' => ['scholarship_admin', 'student_affairs_head', 'system_admin'],
+            'discipline' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
+            'movement' => ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'],
+            'backoffice' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
             default => ['system_admin'],
         };
     }

@@ -20,6 +20,7 @@
     .role.system_admin { background:#e0f2fe; color:#075985; border-color:#bae6fd; }
     .role.scholarship_admin { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
     .role.discipline_admin { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
+    .role.student_affairs_head { background:#f3e8ff; color:#7e22ce; border-color:#e9d5ff; }
     .actions { display:flex; gap:6px; flex-wrap:wrap; }
         /* Admin UX Identity v2 */
     :root {
@@ -218,7 +219,7 @@
                         <tr>
                             <td>{{ $admin->full_name }}</td>
                             <td>{{ $admin->ic_no }}</td>
-                            <td><span class="role {{ $admin->role }}">{{ str_replace('_', ' ', ucfirst($admin->role)) }}</span></td>
+                            <td><span class="role {{ $admin->role }}">{{ adminRoleLabel($admin->role) }}</span></td>
                             <td>{{ $admin->created_at ? \Illuminate\Support\Carbon::parse($admin->created_at)->format('Y-m-d') : '-' }}</td>
                             <td>
                                 <div class="actions">

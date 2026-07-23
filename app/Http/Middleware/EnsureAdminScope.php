@@ -30,11 +30,11 @@ class EnsureAdminScope
 
         $adminRole = $admin->role;
         $allowed = match ($scope) {
-            'scholarship' => ['scholarship_admin', 'system_admin'],
-            'discipline' => ['discipline_admin', 'system_admin'],
-            'students' => ['scholarship_admin', 'discipline_admin', 'guard', 'system_admin'],
-            'movement' => ['guard', 'discipline_admin', 'system_admin'],
-            'backoffice' => ['scholarship_admin', 'discipline_admin', 'system_admin'],
+            'scholarship' => ['scholarship_admin', 'student_affairs_head', 'system_admin'],
+            'discipline' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
+            'students' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],
+            'movement' => ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'],
+            'backoffice' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
             default => ['system_admin'],
         };
 
