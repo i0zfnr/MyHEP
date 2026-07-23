@@ -4354,21 +4354,81 @@ html[data-theme] body > .shell :where(.btn, .back-link),
     body[data-theme="dark"] .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user)::before {
         background: linear-gradient(125deg, rgba(255,255,255,.15), transparent 30%, rgba(231,211,168,.08) 62%, transparent 82%);
     }
+
+    .app-layout .mobile-bottom-nav {
+        border-color: rgba(255, 255, 255, .28) !important;
+        background:
+            linear-gradient(118deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.055) 36%, transparent 72%),
+            rgba(34, 30, 25, .70) !important;
+        box-shadow:
+            0 18px 42px rgba(0,0,0,.28),
+            inset 0 1px 0 rgba(255,255,255,.18),
+            inset 0 -1px 0 rgba(0,0,0,.18) !important;
+        backdrop-filter: blur(32px) saturate(185%) brightness(1.04) !important;
+        -webkit-backdrop-filter: blur(32px) saturate(185%) brightness(1.04) !important;
+    }
+
+    .app-layout .mobile-bottom-nav::before {
+        background: linear-gradient(125deg, rgba(255,255,255,.17), transparent 30%, rgba(231,211,168,.08) 62%, transparent 82%);
+    }
+
+    body[data-theme="dark"] .app-layout .mobile-bottom-nav {
+        border-color: rgba(246, 231, 200, .28) !important;
+        background:
+            radial-gradient(180px circle at 14% 18%, rgba(255,255,255,.13), transparent 58%),
+            linear-gradient(118deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.055) 36%, rgba(231,211,168,.05) 68%),
+            rgba(24, 21, 18, .48) !important;
+        box-shadow:
+            0 20px 48px rgba(0,0,0,.38),
+            0 1px 0 rgba(255,255,255,.08),
+            inset 0 1px 0 rgba(255,255,255,.22),
+            inset 0 -1px 0 rgba(0,0,0,.18) !important;
+    }
+
+    body[data-theme="dark"] .app-layout .mobile-bottom-nav::before {
+        background:
+            linear-gradient(125deg, rgba(255,255,255,.20), transparent 28%, rgba(231,211,168,.10) 62%, transparent 82%);
+    }
 }
 
-/* The QR action is prominent, but only gold when the scanner is the active page. */
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) {
-    color: #c8b8a9;
+/* The QR action is a restrained glass primary action, not a glowing badge. */
+.mobile-bottom-nav .mobile-scan-tab:not(.active) {
+    border-color: rgba(139, 102, 72, .34);
+    color: #fffaf3;
     background:
-        linear-gradient(145deg, rgba(255,255,255,.09), transparent 48%),
-        rgba(215, 191, 168, .12);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+        linear-gradient(145deg, rgba(255,255,255,.30), rgba(183,146,107,.32) 38%, rgba(78, 55, 38, .70)),
+        rgba(122, 91, 66, .78);
+    box-shadow:
+        0 12px 24px rgba(73, 50, 29, .24),
+        inset 0 1px 0 rgba(255,255,255,.36),
+        inset 0 -1px 0 rgba(45, 29, 18, .22);
+}
+
+.mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile-nav-icon {
+    border-color: rgba(255,255,255,.24);
+    background: rgba(255,255,255,.13);
+    color: #fffaf3;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.24),
+        inset 0 -1px 0 rgba(45, 29, 18, .18);
+}
+
+body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) {
+    border-color: rgba(255, 245, 229, .24);
+    color: #fff7ef;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.035) 48%, rgba(0,0,0,.12)),
+        rgba(58, 50, 42, .58);
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, .30),
+        inset 0 1px 0 rgba(255,255,255,.16),
+        inset 0 -1px 0 rgba(0,0,0,.20);
 }
 
 body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile-nav-icon {
-    border-color: rgba(215, 191, 168, .18);
-    background: rgba(215, 191, 168, .12);
-    color: #d7bfa8;
+    border-color: rgba(255, 245, 229, .18);
+    background: rgba(255,255,255,.08);
+    color: #fff7ef;
 }
 
 /* Content cards are lightweight surfaces; reserve deep material motion for overlays. */
