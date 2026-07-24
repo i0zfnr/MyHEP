@@ -151,9 +151,29 @@ const registerLiquidGlassUi = () => {
     });
 };
 
+const PWA_DISPLAY_MODE_QUERIES = [
+    '(display-mode: standalone)',
+    '(display-mode: fullscreen)',
+    '(display-mode: minimal-ui)',
+    '(display-mode: window-controls-overlay)',
+];
+
 const isStandaloneMode = () =>
-    window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true;
+    PWA_DISPLAY_MODE_QUERIES.some((query) => window.matchMedia(query).matches)
+    || window.navigator.standalone === true
+    || document.referrer.startsWith('android-app://');
+
+const syncPwaDisplayMode = () => {
+    const body = document.body;
+    if (!body) return;
+
+    const standalone = isStandaloneMode();
+    body.classList.toggle('pwa-standalone', standalone);
+    body.classList.toggle(
+        'has-student-bottom-nav',
+        standalone && body.classList.contains('student-bottom-nav-eligible'),
+    );
+};
 
 const isIosSafari = () => {
     const ua = window.navigator.userAgent;
@@ -1152,13 +1172,14 @@ if ('serviceWorker' in navigator) {
             return;
         }
 
-        navigator.serviceWorker.register('/sw.js?v=3').catch(() => {
+        navigator.serviceWorker.register('/sw.js?v=4').catch(() => {
             // Keep the app usable even if PWA registration fails.
         });
     });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    syncPwaDisplayMode();
     registerThemeUi();
     registerLiquidGlassUi();
     registerNotificationCenter();
@@ -1170,4 +1191,8 @@ window.addEventListener('DOMContentLoaded', () => {
     registerPwaPromptUi();
     registerPushPromptUi();
     registerLogoutPushCleanup();
+});
+
+PWA_DISPLAY_MODE_QUERIES.forEach((query) => {
+    window.matchMedia(query).addEventListener?.('change', syncPwaDisplayMode);
 });

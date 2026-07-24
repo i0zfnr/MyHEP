@@ -1704,12 +1704,12 @@
             display: none;
         }
 
-        body.student-scan-mode .page-header,
-        body.student-scan-mode .app-footer {
+        body.has-student-bottom-nav.student-scan-mode .page-header,
+        body.has-student-bottom-nav.student-scan-mode .app-footer {
             display: none !important;
         }
 
-        body.student-scan-mode .page-body {
+        body.has-student-bottom-nav.student-scan-mode .page-body {
             padding: 0 !important;
         }
 
@@ -1803,7 +1803,7 @@
                 left: 50%;
                 bottom: max(.85rem, env(safe-area-inset-bottom));
                 z-index: 720;
-                display: grid;
+                display: none;
                 grid-template-columns: repeat(5, minmax(0, 1fr));
                 align-items: center;
                 gap: .1rem;
@@ -1821,6 +1821,10 @@
                 transform: translateX(-50%);
                 backdrop-filter: blur(26px) saturate(175%);
                 -webkit-backdrop-filter: blur(26px) saturate(175%);
+            }
+
+            body.has-student-bottom-nav .mobile-bottom-nav {
+                display: grid;
             }
 
             .mobile-bottom-nav :is(a, button) {
@@ -2114,6 +2118,31 @@
             from { opacity: 0; transform: translateY(10px) scale(.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @media (max-width: 767px) and (display-mode: standalone),
+               (max-width: 767px) and (display-mode: fullscreen),
+               (max-width: 767px) and (display-mode: minimal-ui),
+               (max-width: 767px) and (display-mode: window-controls-overlay) {
+            body.student-bottom-nav-eligible .page-body {
+                padding-bottom: calc(7.4rem + env(safe-area-inset-bottom, 0px)) !important;
+            }
+
+            body.student-bottom-nav-eligible .app-footer {
+                display: none !important;
+            }
+
+            body.student-bottom-nav-eligible .mobile-bottom-nav {
+                display: grid;
+            }
+
+            body.student-bottom-nav-eligible.student-scan-mode .page-header,
+            body.student-bottom-nav-eligible.student-scan-mode .app-footer {
+                display: none !important;
+            }
+
+            body.student-bottom-nav-eligible.student-scan-mode .page-body {
+                padding: 0 !important;
+            }
+        }
     </style>
     @vite('resources/css/design-system.css')
 </head>
@@ -2160,7 +2189,7 @@
         || request()->routeIs('settings.*');
     $bodyClasses = trim(
         ($isStudent ? 'student-mobile-shell' : '') . ' ' .
-        ($showStudentBottomNav ? 'has-student-bottom-nav' : '') . ' ' .
+        ($showStudentBottomNav ? 'student-bottom-nav-eligible' : '') . ' ' .
         (request()->routeIs('student.movements.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar' : '')
     );

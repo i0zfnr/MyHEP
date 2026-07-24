@@ -17,7 +17,6 @@ return [
     'Tetapan' => 'Settings',
     'Log Keluar' => 'Log Out',
     'Pelajar' => 'Student',
-    'Profil' => 'Profile',
     'Disiplin' => 'Discipline',
     'Peraturan' => 'Rules',
     'Pengumuman' => 'Announcements',

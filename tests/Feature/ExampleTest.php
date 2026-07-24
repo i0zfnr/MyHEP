@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 // use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Http\Middleware\TranslateFrontendContent;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
@@ -91,5 +94,24 @@ class ExampleTest extends TestCase
             ->assertJsonPath('items.0.id', 'all-clear');
 
         $response->assertSessionHas('auth_user.name', 'Renamed Admin');
+    }
+
+    public function test_legacy_frontend_translation_does_not_duplicate_profile_suffix(): void
+    {
+        app()->setLocale('en');
+        $middleware = app(TranslateFrontendContent::class);
+        $request = Request::create('/student/profile');
+
+        $response = $middleware->handle(
+            $request,
+            fn () => new Response(
+                '<nav>' . __('Profil') . ' | ' . __('Profile photo') . '</nav>',
+                200,
+                ['Content-Type' => 'text/html; charset=UTF-8'],
+            ),
+        );
+
+        $this->assertSame('<nav>Profile | Profile photo</nav>', $response->getContent());
+        $this->assertStringNotContainsString('Profilee', $response->getContent());
     }
 }
