@@ -682,6 +682,14 @@
         }
         .sb-user-row { display: flex; align-items: center; gap: .625rem; }
         .sb-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; color: #fff; }
+        .sb-avatar img,
+        .header-user-avatar img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: inherit;
+            object-fit: cover;
+        }
         .sb-user-name { font-size: .8125rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .sb-user-role { font-size: .72rem; color: #7e6857; margin-top: 1px; font-weight: 600; }
         .sb-role-badge { display: inline-flex; align-items: center; margin-top: .5rem; padding: .2rem .65rem; border-radius: 99px; font-size: .65rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
@@ -2151,6 +2159,20 @@
     $isStudent = ($authUser['role'] ?? null) === 'student';
     $isAdmin = ($authUser['role'] ?? null) === 'admin';
     $adminScope = $authUser['admin_role'] ?? null;
+    $authInitials = strtoupper(substr(trim((string) ($authUser['name'] ?? 'U')), 0, 2));
+    $authAvatarUrl = null;
+    $authTable = $isAdmin ? 'admins' : ($isStudent ? 'students' : null);
+    if ($authTable
+        && !empty($authUser['id'])
+        && \Illuminate\Support\Facades\Schema::hasTable($authTable)
+        && \Illuminate\Support\Facades\Schema::hasColumn($authTable, 'photo')) {
+        $authPhotoPath = trim((string) \Illuminate\Support\Facades\DB::table($authTable)
+            ->where('id', $authUser['id'])
+            ->value('photo'));
+        if ($authPhotoPath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($authPhotoPath)) {
+            $authAvatarUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($authPhotoPath);
+        }
+    }
     $isScholarshipAdmin = $isAdmin && in_array($adminScope, ['scholarship_admin', 'student_affairs_head', 'system_admin'], true);
     $isDisciplineAdmin = $isAdmin && in_array($adminScope, ['discipline_admin', 'student_affairs_head', 'system_admin'], true);
     $isMovementAdmin = $isAdmin && in_array($adminScope, ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'], true);
@@ -2211,7 +2233,7 @@
 
         <div class="sb-user">
             <div class="sb-user-row">
-                <div class="sb-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</div>
+                @include('partials.auth_avatar', ['class' => 'sb-avatar', 'url' => $authAvatarUrl, 'initials' => $authInitials])
                 <div style="min-width:0">
                     <div class="sb-user-name">{{ $authUser['name'] ?? __('Pengguna') }}</div>
                     <div class="sb-user-role">{{ $authUser['role'] ?? '-' }}{{ $isAdmin && $adminScope ? ' - '.adminRoleLabel($adminScope) : '' }}</div>
@@ -2523,6 +2545,10 @@
                 @endif
                 <div class="nav-label">{{ __('ui.sidebar_account') }}</div>
                 <nav>
+                    <a href="{{ route('admin.profile') }}" class="nav-link {{ request()->routeIs('admin.profile*') ? 'active' : '' }}">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.1a7.5 7.5 0 0115 0"/></svg>
+                        {{ __('Profile') }}
+                    </a>
                     <a href="{{ route('settings.show') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v2.25l1.5 1.5"/></svg>
                         {{ __('ui.settings') }}
@@ -2565,7 +2591,7 @@
                 @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--topbar'])
                 @if($showHeaderUserMenu && $isStudent)
                     <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu" title="{{ $authUser['name'] ?? __('User') }}">
-                        <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+                        @include('partials.auth_avatar', ['class' => 'header-user-avatar', 'url' => $authAvatarUrl, 'initials' => $authInitials])
                         <span class="header-user-meta">
                             <span class="header-user-name">{{ $authUser['name'] ?? __('User') }}</span>
                             <span class="header-user-role">{{ $isAdmin ? adminRoleLabel($authUser['admin_role'] ?? null) : ($authUser['role'] ?? '-') }}</span>
@@ -2591,7 +2617,7 @@
                                     {{ __('Support') }}
                                 </a>
                                 <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu">
-                                    <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+                                    @include('partials.auth_avatar', ['class' => 'header-user-avatar', 'url' => $authAvatarUrl, 'initials' => $authInitials])
                                     <span class="header-user-meta">
                                         <span class="header-user-name">{{ $authUser['name'] ?? __('User') }}</span>
                                         <span class="header-user-role">{{ $isAdmin ? adminRoleLabel($authUser['admin_role'] ?? null) : ($authUser['role'] ?? '-') }}</span>
@@ -2599,7 +2625,7 @@
                                 </button>
                                 <div class="header-user-menu" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
                                     <div class="header-menu-head">
-                                        <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+                                        @include('partials.auth_avatar', ['class' => 'header-user-avatar', 'url' => $authAvatarUrl, 'initials' => $authInitials])
                                         <span>
                                             <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
                                             <span class="header-menu-role">{{ $isAdmin ? adminRoleLabel($authUser['admin_role'] ?? null) : ($authUser['role'] ?? '-') }}</span>
@@ -2607,6 +2633,10 @@
                                     </div>
                                     @if($isStudent)
                                         <a href="{{ route('student.profile') }}" class="header-menu-link">
+                                            <span aria-hidden="true">&#9786;</span>{{ __('Profile') }}
+                                        </a>
+                                    @elseif($isAdmin)
+                                        <a href="{{ route('admin.profile') }}" class="header-menu-link">
                                             <span aria-hidden="true">&#9786;</span>{{ __('Profile') }}
                                         </a>
                                     @endif
@@ -2637,7 +2667,7 @@
 @if($showHeaderUserMenu && $isStudent)
     <div class="header-user-menu header-user-menu--mobile" id="headerUserMenu" role="menu" aria-label="{{ __('User menu') }}">
         <div class="header-menu-head">
-            <span class="header-user-avatar">{{ strtoupper(substr($authUser['name'] ?? 'U', 0, 2)) }}</span>
+            @include('partials.auth_avatar', ['class' => 'header-user-avatar', 'url' => $authAvatarUrl, 'initials' => $authInitials])
             <span>
                 <span class="header-menu-name">{{ $authUser['name'] ?? __('User') }}</span>
                 <span class="header-menu-role">{{ $isAdmin ? adminRoleLabel($authUser['admin_role'] ?? null) : ($authUser['role'] ?? '-') }}</span>

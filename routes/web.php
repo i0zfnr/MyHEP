@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AiHelperController as AdminAiHelperController;
 use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\StudentController;
@@ -105,6 +106,12 @@ Route::post('/student/movements', [StudentMovementController::class, 'store'])
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
     ->name('admin.dashboard');
+Route::get('/admin/profile', [AdminProfileController::class, 'show'])
+    ->middleware('auth.session:admin')
+    ->name('admin.profile');
+Route::post('/admin/profile/photo', [AdminProfileController::class, 'updatePhoto'])
+    ->middleware('auth.session:admin')
+    ->name('admin.profile.photo');
 Route::get('/admin/system-monitoring/live', [AdminDashboardController::class, 'live'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.system-monitoring.live');
