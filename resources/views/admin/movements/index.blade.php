@@ -188,6 +188,70 @@
         opacity:.45;
         pointer-events:none;
     }
+    .mv-virtual-scroll {
+        --mv-row-height: 118px;
+        position:relative;
+        min-height:360px;
+        max-height:min(68dvh, 760px);
+        overflow:auto;
+        overscroll-behavior:contain;
+        scrollbar-gutter:stable;
+        contain:layout paint;
+    }
+    .mv-virtual-scroll .ui-table { min-width:1320px; table-layout:fixed; }
+    .mv-virtual-scroll thead th {
+        position:sticky;
+        top:0;
+        z-index:4;
+        box-shadow:0 1px 0 var(--border);
+    }
+    .mv-virtual-scroll tbody tr[data-record-row] { height:var(--mv-row-height); }
+    .mv-virtual-scroll tbody tr[data-record-row] > td { height:var(--mv-row-height); }
+    .mv-virtual-spacer td {
+        height:var(--mv-spacer-height, 0);
+        padding:0 !important;
+        border:0 !important;
+        background:transparent !important;
+    }
+    .mv-explanation {
+        display:-webkit-box;
+        max-width:220px;
+        overflow:hidden;
+        -webkit-box-orient:vertical;
+        -webkit-line-clamp:3;
+        line-clamp:3;
+    }
+    .mv-lazy-status {
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:.65rem;
+        min-height:54px;
+        padding:.65rem 1rem;
+        border-top:1px solid var(--border);
+        color:var(--text-muted);
+        font-size:.78rem;
+        text-align:center;
+    }
+    .mv-lazy-status[hidden] { display:none; }
+    .mv-lazy-spinner {
+        width:18px;
+        height:18px;
+        border:2px solid var(--border);
+        border-top-color:var(--primary);
+        border-radius:50%;
+        animation:mvSpin .7s linear infinite;
+    }
+    @keyframes mvSpin { to { transform:rotate(360deg); } }
+    @media (max-width: 767px) {
+        .mv-virtual-scroll {
+            min-height:320px;
+            max-height:62dvh;
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .mv-lazy-spinner { animation:none; }
+    }
     body[data-theme="dark"] .mv-kpi {
         border-color:rgba(226,209,192,.16);
         background:
@@ -219,7 +283,7 @@
         'type' => collect($movementTypes)->firstWhere('id', (int) ($filters['movement_type_id'] ?? 0))?->name,
         'status' => $filters['movement_status'] ?? null,
         'rule' => $filters['rule_status'] ?? null,
-        'rows' => !empty($filters['per_page']) ? ($filters['per_page'] . ' per page') : null,
+        'rows' => !empty($filters['per_page']) ? ($filters['per_page'] . ' per batch') : null,
     ], fn ($value) => filled($value));
 @endphp
 <div class="ui-shell mv-admin">
@@ -298,16 +362,17 @@
                 <label class="mv-field">
                     <span>{{ __('Rows') }}</span>
                     <select name="per_page">
-                        <option value="5" @selected(($filters['per_page'] ?? '10') === '5')>5</option>
-                        <option value="10" @selected(($filters['per_page'] ?? '10') === '10')>10</option>
+                        <option value="25" @selected(($filters['per_page'] ?? '50') === '25')>25</option>
+                        <option value="50" @selected(($filters['per_page'] ?? '50') === '50')>50</option>
+                        <option value="100" @selected(($filters['per_page'] ?? '50') === '100')>100</option>
                     </select>
                 </label>
             </form>
             <div class="mv-filter-actions" style="margin-top:1rem;">
                 <div class="mv-filter-meta">
                     <div class="mv-results-badge">
-                        <strong>{{ $records->total() }}</strong>
-                        <span>{{ __('Records') }}</span>
+                        <strong data-movement-loaded-count>{{ $records->count() }}</strong>
+                        <span>{{ __('Loaded records') }}</span>
                     </div>
                     @foreach($activeFilterValues as $label => $value)
                         <span class="mv-chip"><strong>{{ ucfirst($label) }}:</strong> {{ __($value) }}</span>
@@ -329,12 +394,11 @@
                 <span>{{ __('Latest check-out and return activity for students.') }}</span>
             </div>
             <div class="mv-page-controls">
-                @if($records->onFirstPage())
-                    <span class="mv-page-link is-disabled">{{ __('Previous') }}</span>
-                @else
+                @if($records->previousPageUrl())
                     <a class="mv-page-link" href="{{ $records->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>
+                @else
+                    <span class="mv-page-link is-disabled">{{ __('Previous') }}</span>
                 @endif
-                <span class="mv-row-quiet">{{ __('Page') }} {{ $records->currentPage() }} / {{ $records->lastPage() }}</span>
                 @if($records->hasMorePages())
                     <a class="mv-page-link" href="{{ $records->nextPageUrl() }}" rel="next">{{ __('Next') }}</a>
                 @else
@@ -342,7 +406,17 @@
                 @endif
             </div>
         </div>
-        <div style="overflow-x:auto;">
+        <div
+            class="mv-virtual-scroll"
+            data-movement-virtual
+            data-lenis-prevent
+            data-endpoint="{{ route('admin.movements.index', request()->except('cursor')) }}"
+            data-empty-label="{{ __('No movement records found.') }}"
+            data-loading-label="{{ __('Loading more movement records...') }}"
+            data-ready-label="{{ __('Scroll to load older movement records.') }}"
+            data-complete-label="{{ __('All matching movement records are loaded.') }}"
+            data-error-label="{{ __('Movement records could not be loaded. Try again.') }}"
+        >
             <table class="ui-table">
                 <thead>
                     <tr>
@@ -358,13 +432,13 @@
                         <th>{{ __('Explanation') }}</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody data-movement-rows>
                     @forelse($records as $record)
                         <tr>
                             <td>
                                 <div class="mv-student-card">
                                     @if(!empty($record->student_photo))
-                                        <img class="mv-avatar" src="{{ asset('storage/' . $record->student_photo) }}" alt="{{ __('Profile photo') }}">
+                                        <img class="mv-avatar" src="{{ asset('storage/' . $record->student_photo) }}" alt="{{ __('Profile photo') }}" loading="lazy" decoding="async">
                                     @else
                                         <div class="mv-avatar mv-avatar-empty">{{ strtoupper(substr($record->student_name ?? 'S', 0, 1)) }}</div>
                                     @endif
@@ -403,7 +477,7 @@
                             </td>
                             <td><span class="ui-status status-{{ $record->movement_status === 'outside' ? 'pending' : 'confirmed' }}">{{ __($record->movement_status) }}</span></td>
                             <td><span class="ui-status status-{{ $record->rule_status === 'late' ? 'rejected' : ($record->rule_status === 'pending' ? 'pending' : 'confirmed') }}">{{ __($record->rule_status) }}</span></td>
-                            <td><span class="mv-row-quiet">{{ $record->late_explanation ?: '-' }}</span></td>
+                            <td><span class="mv-row-quiet mv-explanation">{{ $record->late_explanation ?: '-' }}</span></td>
                         </tr>
                     @empty
                         <tr><td colspan="10" class="mv-empty">{{ __('No movement records found.') }}</td></tr>
@@ -411,9 +485,199 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui-card-body mv-pagination-wrap">
-            {{ $records->onEachSide(1)->links('vendor.pagination.studentedge') }}
+        <div class="mv-lazy-status" data-movement-status aria-live="polite">
+            <span data-movement-status-text>
+                {{ $records->hasMorePages() ? __('Scroll to load older movement records.') : __('All matching movement records are loaded.') }}
+            </span>
+            <button type="button" class="ui-btn" data-movement-retry hidden>{{ __('Try Again') }}</button>
+        </div>
+        <div class="ui-card-body mv-pagination-wrap" data-movement-pagination>
+            <nav class="mv-page-controls" aria-label="{{ __('Movement record pagination') }}">
+                @if($records->previousPageUrl())
+                    <a class="mv-page-link" href="{{ $records->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</a>
+                @endif
+                @if($records->nextPageUrl())
+                    <a class="mv-page-link" href="{{ $records->nextPageUrl() }}" rel="next">{{ __('Next') }}</a>
+                @endif
+            </nav>
         </div>
     </section>
 </div>
+@php
+    $movementVirtualSeed = [
+        'records' => $recordPayload,
+        'next_cursor' => $records->nextCursor()?->encode(),
+        'has_more' => $records->hasMorePages(),
+    ];
+@endphp
+<script type="application/json" id="movementVirtualSeed">@json($movementVirtualSeed)</script>
 @endsection
+
+@push('scripts')
+<script>
+(() => {
+    const viewport = document.querySelector('[data-movement-virtual]');
+    const tbody = viewport?.querySelector('[data-movement-rows]');
+    const seedNode = document.getElementById('movementVirtualSeed');
+    const status = document.querySelector('[data-movement-status]');
+    const statusText = status?.querySelector('[data-movement-status-text]');
+    const retryButton = status?.querySelector('[data-movement-retry]');
+    const fallbackPagination = document.querySelector('[data-movement-pagination]');
+    const loadedCount = document.querySelector('[data-movement-loaded-count]');
+
+    if (!(viewport instanceof HTMLElement) || !(tbody instanceof HTMLElement) || !seedNode) return;
+
+    let seed;
+    try {
+        seed = JSON.parse(seedNode.textContent || '{}');
+    } catch {
+        return;
+    }
+
+    const rowHeight = 118;
+    const overscan = 6;
+    const records = Array.isArray(seed.records) ? seed.records : [];
+    const recordIds = new Set(records.map((record) => Number(record.id)));
+    let nextCursor = seed.next_cursor || null;
+    let hasMore = Boolean(seed.has_more && nextCursor);
+    let loading = false;
+    let renderFrame = null;
+
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+    })[character]);
+
+    const rowHtml = (record) => {
+        const photo = record.student_photo_url
+            ? `<img class="mv-avatar" src="${escapeHtml(record.student_photo_url)}" alt="${escapeHtml(record.profile_photo_label)}" loading="lazy" decoding="async">`
+            : `<div class="mv-avatar mv-avatar-empty">${escapeHtml(record.student_initial)}</div>`;
+        const returnCell = record.return_date
+            ? `<div class="mv-time"><strong>${escapeHtml(record.return_date)}</strong><span>${escapeHtml(record.return_time)}</span></div>`
+            : `<span class="mv-row-quiet">${escapeHtml(record.not_returned_label)}</span>`;
+
+        return `
+            <tr data-record-row data-record-id="${Number(record.id)}">
+                <td>
+                    <div class="mv-student-card">
+                        ${photo}
+                        <div>
+                            <span class="mv-student">${escapeHtml(record.student_name)}</span><br>
+                            <span class="mv-sub">${escapeHtml(record.matric_no)}</span>
+                            <div class="mv-student-actions">
+                                <a class="mv-mini-btn" href="${escapeHtml(record.student_profile_url)}">${escapeHtml(record.view_profile_label)}</a>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>${escapeHtml(record.program)}<br><span class="mv-sub">${escapeHtml(record.checkpoint_name)}</span></td>
+                <td>${escapeHtml(record.residence_label)}<br><span class="mv-sub">${escapeHtml(record.room_number)}</span></td>
+                <td><span class="mv-type-badge">${escapeHtml(record.movement_type_label)}</span></td>
+                <td>${escapeHtml(record.vehicle_plate_no)}</td>
+                <td><div class="mv-time"><strong>${escapeHtml(record.checkout_date)}</strong><span>${escapeHtml(record.checkout_time)}</span></div></td>
+                <td>${returnCell}</td>
+                <td><span class="ui-status status-${escapeHtml(record.movement_status_tone)}">${escapeHtml(record.movement_status_label)}</span></td>
+                <td><span class="ui-status status-${escapeHtml(record.rule_status_tone)}">${escapeHtml(record.rule_status_label)}</span></td>
+                <td><span class="mv-row-quiet mv-explanation">${escapeHtml(record.late_explanation)}</span></td>
+            </tr>
+        `;
+    };
+
+    const setStatus = (message, { busy = false, error = false } = {}) => {
+        if (!status || !statusText) return;
+        statusText.textContent = message;
+        status.querySelector('.mv-lazy-spinner')?.remove();
+        if (busy) {
+            status.insertAdjacentHTML('afterbegin', '<span class="mv-lazy-spinner" aria-hidden="true"></span>');
+        }
+        if (retryButton) retryButton.hidden = !error;
+    };
+
+    const render = () => {
+        renderFrame = null;
+
+        if (records.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" class="mv-empty">${escapeHtml(viewport.dataset.emptyLabel)}</td></tr>`;
+            if (loadedCount) loadedCount.textContent = '0';
+            return;
+        }
+
+        const start = Math.max(0, Math.floor(viewport.scrollTop / rowHeight) - overscan);
+        const visibleCount = Math.ceil(viewport.clientHeight / rowHeight) + (overscan * 2);
+        const end = Math.min(records.length, start + visibleCount);
+        const topHeight = start * rowHeight;
+        const bottomHeight = Math.max(0, (records.length - end) * rowHeight);
+
+        tbody.innerHTML = `
+            <tr class="mv-virtual-spacer" aria-hidden="true" style="--mv-spacer-height:${topHeight}px"><td colspan="10"></td></tr>
+            ${records.slice(start, end).map(rowHtml).join('')}
+            <tr class="mv-virtual-spacer" aria-hidden="true" style="--mv-spacer-height:${bottomHeight}px"><td colspan="10"></td></tr>
+        `;
+
+        if (loadedCount) loadedCount.textContent = String(records.length);
+    };
+
+    const scheduleRender = () => {
+        if (renderFrame !== null) return;
+        renderFrame = window.requestAnimationFrame(render);
+    };
+
+    const loadMore = async () => {
+        if (loading || !hasMore || !nextCursor) return;
+        loading = true;
+        setStatus(viewport.dataset.loadingLabel, { busy: true });
+
+        try {
+            const url = new URL(viewport.dataset.endpoint, window.location.origin);
+            url.searchParams.set('cursor', nextCursor);
+            const response = await fetch(url, {
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) throw new Error('Movement request failed');
+            const payload = await response.json();
+
+            (Array.isArray(payload.data) ? payload.data : []).forEach((record) => {
+                const id = Number(record.id);
+                if (recordIds.has(id)) return;
+                recordIds.add(id);
+                records.push(record);
+            });
+
+            nextCursor = payload.next_cursor || null;
+            hasMore = Boolean(payload.has_more && nextCursor);
+            scheduleRender();
+            setStatus(hasMore ? viewport.dataset.readyLabel : viewport.dataset.completeLabel);
+        } catch {
+            setStatus(viewport.dataset.errorLabel, { error: true });
+        } finally {
+            loading = false;
+        }
+    };
+
+    const maybeLoadMore = () => {
+        const remaining = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+        if (remaining < rowHeight * 8) loadMore();
+    };
+
+    viewport.addEventListener('scroll', () => {
+        scheduleRender();
+        maybeLoadMore();
+    }, { passive: true });
+    retryButton?.addEventListener('click', loadMore);
+
+    viewport.dataset.virtualReady = 'true';
+    if (fallbackPagination) fallbackPagination.hidden = true;
+    render();
+    setStatus(hasMore ? viewport.dataset.readyLabel : viewport.dataset.completeLabel);
+    maybeLoadMore();
+})();
+</script>
+@endpush

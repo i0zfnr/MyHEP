@@ -1,5 +1,7 @@
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
 
 const PWA_PROMPT_KEY = 'studentedge-pwa-dismissed-v1';
 const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
@@ -1163,6 +1165,221 @@ const registerProfilePhotoCropper = () => {
     });
 };
 
+const registerSidebarSmoothScroll = () => {
+    const wrapper = document.querySelector('[data-lenis-sidebar]');
+    const content = wrapper?.querySelector(':scope > .sb-scroll-inner');
+
+    if (!(wrapper instanceof HTMLElement) || !(content instanceof HTMLElement)) {
+        return;
+    }
+
+    const mobileViewport = window.matchMedia('(max-width: 1023px)');
+    const coarsePointer = window.matchMedia('(pointer: coarse)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let lenis = null;
+    let touchSmoothing = null;
+
+    const destroy = () => {
+        lenis?.destroy();
+        lenis = null;
+        touchSmoothing = null;
+        delete wrapper.dataset.smoothScroll;
+    };
+
+    const sync = () => {
+        if (reducedMotion.matches) {
+            destroy();
+            return;
+        }
+
+        const shouldSmoothTouch = mobileViewport.matches
+            || coarsePointer.matches
+            || isStandaloneMode();
+
+        if (lenis && touchSmoothing === shouldSmoothTouch) {
+            lenis.resize();
+            return;
+        }
+
+        destroy();
+        touchSmoothing = shouldSmoothTouch;
+        lenis = new Lenis({
+            wrapper,
+            content,
+            eventsTarget: wrapper,
+            autoRaf: true,
+            autoResize: true,
+            smoothWheel: true,
+            syncTouch: shouldSmoothTouch,
+            syncTouchLerp: 0.08,
+            touchMultiplier: 1,
+            touchInertiaExponent: 1.7,
+            lerp: 0.12,
+            wheelMultiplier: 0.9,
+            overscroll: false,
+        });
+
+        wrapper.dataset.smoothScroll = shouldSmoothTouch ? 'touch' : 'wheel';
+    };
+
+    mobileViewport.addEventListener?.('change', sync);
+    coarsePointer.addEventListener?.('change', sync);
+    reducedMotion.addEventListener?.('change', sync);
+    PWA_DISPLAY_MODE_QUERIES.forEach((query) => {
+        window.matchMedia(query).addEventListener?.('change', sync);
+    });
+    window.addEventListener('pagehide', destroy, { once: true });
+    sync();
+};
+
+const shouldKeepNativeScroll = (node) => node.matches([
+    '[data-lenis-prevent]',
+    '[data-profile-crop-modal]',
+    '.cropper-container',
+    '.move-scanner',
+    '#qr-reader',
+    '[data-qr-reader]',
+    '[role="dialog"]',
+    'input',
+    'textarea',
+    'select',
+    '[contenteditable="true"]',
+].join(','));
+
+const registerMainSmoothScroll = () => {
+    const wrapper = document.querySelector('[data-lenis-main]');
+    const content = wrapper?.querySelector(':scope > .main-scroll-inner');
+
+    if (!(wrapper instanceof HTMLElement) || !(content instanceof HTMLElement)) {
+        return;
+    }
+
+    const mobileViewport = window.matchMedia('(max-width: 1023px)');
+    const coarsePointer = window.matchMedia('(pointer: coarse)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let lenis = null;
+    let touchSmoothing = null;
+
+    const destroy = () => {
+        lenis?.destroy();
+        lenis = null;
+        touchSmoothing = null;
+        delete wrapper.dataset.smoothScroll;
+    };
+
+    const sync = () => {
+        if (reducedMotion.matches) {
+            destroy();
+            return;
+        }
+
+        const shouldSmoothTouch = mobileViewport.matches
+            || coarsePointer.matches
+            || isStandaloneMode();
+
+        if (lenis && touchSmoothing === shouldSmoothTouch) {
+            lenis.resize();
+            return;
+        }
+
+        destroy();
+        touchSmoothing = shouldSmoothTouch;
+        lenis = new Lenis({
+            wrapper,
+            content,
+            eventsTarget: wrapper,
+            autoRaf: true,
+            autoResize: true,
+            smoothWheel: true,
+            syncTouch: shouldSmoothTouch,
+            syncTouchLerp: 0.08,
+            touchMultiplier: 1,
+            touchInertiaExponent: 1.7,
+            lerp: 0.1,
+            wheelMultiplier: 0.9,
+            overscroll: false,
+            allowNestedScroll: true,
+            prevent: shouldKeepNativeScroll,
+        });
+
+        wrapper.dataset.smoothScroll = shouldSmoothTouch ? 'touch' : 'wheel';
+    };
+
+    mobileViewport.addEventListener?.('change', sync);
+    coarsePointer.addEventListener?.('change', sync);
+    reducedMotion.addEventListener?.('change', sync);
+    PWA_DISPLAY_MODE_QUERIES.forEach((query) => {
+        window.matchMedia(query).addEventListener?.('change', sync);
+    });
+    window.addEventListener('pagehide', destroy, { once: true });
+    sync();
+};
+
+const registerDocumentSmoothScroll = () => {
+    if (document.querySelector('[data-lenis-main]')) {
+        return;
+    }
+
+    const mobileViewport = window.matchMedia('(max-width: 1023px)');
+    const coarsePointer = window.matchMedia('(pointer: coarse)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let lenis = null;
+    let touchSmoothing = null;
+
+    const destroy = () => {
+        lenis?.destroy();
+        lenis = null;
+        touchSmoothing = null;
+        delete document.documentElement.dataset.smoothScroll;
+    };
+
+    const sync = () => {
+        if (reducedMotion.matches) {
+            destroy();
+            return;
+        }
+
+        const shouldSmoothTouch = mobileViewport.matches
+            || coarsePointer.matches
+            || isStandaloneMode();
+
+        if (lenis && touchSmoothing === shouldSmoothTouch) {
+            lenis.resize();
+            return;
+        }
+
+        destroy();
+        touchSmoothing = shouldSmoothTouch;
+        lenis = new Lenis({
+            autoRaf: true,
+            autoResize: true,
+            smoothWheel: true,
+            syncTouch: shouldSmoothTouch,
+            syncTouchLerp: 0.08,
+            touchMultiplier: 1,
+            touchInertiaExponent: 1.7,
+            lerp: 0.1,
+            wheelMultiplier: 0.9,
+            overscroll: true,
+            allowNestedScroll: true,
+            anchors: true,
+            stopInertiaOnNavigate: true,
+            prevent: shouldKeepNativeScroll,
+        });
+
+        document.documentElement.dataset.smoothScroll = shouldSmoothTouch ? 'touch' : 'wheel';
+    };
+
+    mobileViewport.addEventListener?.('change', sync);
+    coarsePointer.addEventListener?.('change', sync);
+    reducedMotion.addEventListener?.('change', sync);
+    PWA_DISPLAY_MODE_QUERIES.forEach((query) => {
+        window.matchMedia(query).addEventListener?.('change', sync);
+    });
+    window.addEventListener('pagehide', destroy, { once: true });
+    sync();
+};
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
@@ -1188,6 +1405,9 @@ window.addEventListener('DOMContentLoaded', () => {
     registerLoadingUi();
     registerTabMotionUi();
     registerProfilePhotoCropper();
+    registerSidebarSmoothScroll();
+    registerMainSmoothScroll();
+    registerDocumentSmoothScroll();
     registerPwaPromptUi();
     registerPushPromptUi();
     registerLogoutPushCleanup();

@@ -702,6 +702,10 @@
             overflow-x: hidden;
             padding: .625rem .875rem 1rem;
             min-height: 0;
+            overscroll-behavior: contain;
+        }
+        .sb-scroll-inner {
+            min-height: 100%;
         }
         .nav-label {
             font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em;
@@ -854,6 +858,13 @@
             flex-direction: column;
             overflow-x: hidden;
             overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+        .main-scroll-inner {
+            min-width: 0;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         .topbar {
             display: flex;
@@ -2246,7 +2257,8 @@
             @endif
         </div>
 
-        <div class="sb-scroll">
+        <div class="sb-scroll" data-lenis-sidebar tabindex="0" role="region" aria-label="{{ __('Navigasi utama') }}">
+            <div class="sb-scroll-inner">
             @if($isStudent)
                 <div class="nav-label">{{ __('ui.main_menu') }}</div>
                 <nav>
@@ -2555,6 +2567,7 @@
                     </a>
                 </nav>
             @endif
+            </div>
         </div>
 
         <div class="sb-footer">
@@ -2572,7 +2585,8 @@
     <div class="sb-overlay" id="sbOverlay" aria-hidden="true"></div>
     @endif
 
-    <div class="main-wrap {{ $showDesktopSidebar ? 'has-sidebar' : 'no-sidebar' }}{{ $isStudent && $studentOnDashboard ? ' student-dashboard-mobile-sidebar-shell' : '' }}">
+    <div class="main-wrap {{ $showDesktopSidebar ? 'has-sidebar' : 'no-sidebar' }}{{ $isStudent && $studentOnDashboard ? ' student-dashboard-mobile-sidebar-shell' : '' }}" data-lenis-main>
+        <div class="main-scroll-inner">
         @if($showSidebar)
         <div class="topbar">
             <button class="btn-ham" id="sbToggle" aria-label="{{ __('Buka sidebar') }}" aria-expanded="false" aria-controls="appSidebar">
@@ -2661,6 +2675,7 @@
 
         <main class="page-body">@yield('content')</main>
         @include('partials.app_footer')
+        </div>
     </div>
 </div>
 

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -12,7 +14,7 @@ use Illuminate\View\View;
 
 class MovementController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:150'],
@@ -21,17 +23,30 @@ class MovementController extends Controller
             'movement_type_id' => ['nullable', 'integer'],
             'movement_status' => ['nullable', Rule::in(['outside', 'returned'])],
             'rule_status' => ['nullable', Rule::in(['pending', 'compliant', 'late'])],
-            'per_page' => ['nullable', Rule::in(['5', '10'])],
+            'per_page' => ['nullable', Rule::in(['25', '50', '100'])],
         ]);
 
-        $perPage = (int) ($filters['per_page'] ?? 10);
+        $perPage = (int) ($filters['per_page'] ?? 50);
         $records = $this->movementQuery($filters)
             ->orderByDesc('student_movements.checkout_at')
-            ->paginate($perPage)
+            ->orderByDesc('student_movements.id')
+            ->cursorPaginate($perPage)
             ->withQueryString();
+        $recordPayload = $records->getCollection()
+            ->map(fn ($record) => $this->movementPayload($record))
+            ->values();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'data' => $recordPayload,
+                'next_cursor' => $records->nextCursor()?->encode(),
+                'has_more' => $records->hasMorePages(),
+            ]);
+        }
 
         return view('admin.movements.index', [
             'records' => $records,
+            'recordPayload' => $recordPayload,
             'filters' => $filters,
             'movementTypes' => DB::table('movement_types')->where('is_active', true)->orderBy('name')->get(),
             'summary' => $this->summary(),
@@ -301,21 +316,76 @@ class MovementController extends Controller
         return $query;
     }
 
-    private function summary(): array
+    private function movementPayload(object $record): array
     {
-        $today = now()->toDateString();
+        $checkoutAt = \Illuminate\Support\Carbon::parse($record->checkout_at);
+        $returnAt = $record->return_at
+            ? \Illuminate\Support\Carbon::parse($record->return_at)
+            : null;
 
         return [
-            'outside_now' => DB::table('student_movements')->whereNull('return_at')->count(),
-            'returned_today' => DB::table('student_movements')->whereDate('return_at', $today)->count(),
-            'checkouts_today' => DB::table('student_movements')->whereDate('checkout_at', $today)->count(),
-            'checkins_today' => DB::table('student_movements')->whereDate('return_at', $today)->count(),
-            'late_returns' => DB::table('student_movements')->where('rule_status', 'late')->count(),
-            'overnight_records' => DB::table('student_movements')
-                ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
-                ->where('movement_types.slug', 'overnight_stay')
-                ->count(),
+            'id' => (int) $record->id,
+            'student_name' => (string) $record->student_name,
+            'student_initial' => strtoupper(substr((string) ($record->student_name ?: 'S'), 0, 1)),
+            'matric_no' => (string) $record->matric_no,
+            'student_photo_url' => !empty($record->student_photo)
+                ? asset('storage/' . $record->student_photo)
+                : null,
+            'student_profile_url' => route('admin.students.show', $record->student_id),
+            'program' => (string) $record->program,
+            'checkpoint_name' => (string) $record->checkpoint_name,
+            'residence_label' => ($record->residence_status ?? 'inside_campus') === 'live_out'
+                ? __('Live Out')
+                : __('Inside Campus'),
+            'room_number' => (string) ($record->room_number ?: '-'),
+            'movement_type_label' => __((string) $record->movement_type_name),
+            'vehicle_plate_no' => (string) ($record->vehicle_plate_no ?: '-'),
+            'checkout_date' => $checkoutAt->format('d M Y'),
+            'checkout_time' => $checkoutAt->format('h:i A'),
+            'return_date' => $returnAt?->format('d M Y'),
+            'return_time' => $returnAt?->format('h:i A'),
+            'not_returned_label' => __('Not returned yet'),
+            'movement_status_label' => __((string) $record->movement_status),
+            'movement_status_tone' => $record->movement_status === 'outside' ? 'pending' : 'confirmed',
+            'rule_status_label' => __((string) $record->rule_status),
+            'rule_status_tone' => $record->rule_status === 'late'
+                ? 'rejected'
+                : ($record->rule_status === 'pending' ? 'pending' : 'confirmed'),
+            'late_explanation' => (string) ($record->late_explanation ?: '-'),
+            'profile_photo_label' => __('Profile photo'),
+            'view_profile_label' => __('View Profile'),
         ];
+    }
+
+    private function summary(): array
+    {
+        return Cache::remember('admin.movement.summary', now()->addSeconds(10), function () {
+            $start = now()->startOfDay();
+            $end = $start->copy()->addDay();
+            $counts = DB::table('student_movements')
+                ->selectRaw(
+                    'SUM(CASE WHEN return_at IS NULL THEN 1 ELSE 0 END) AS outside_now,
+                     SUM(CASE WHEN return_at >= ? AND return_at < ? THEN 1 ELSE 0 END) AS returned_today,
+                     SUM(CASE WHEN checkout_at >= ? AND checkout_at < ? THEN 1 ELSE 0 END) AS checkouts_today,
+                     SUM(CASE WHEN rule_status = ? THEN 1 ELSE 0 END) AS late_returns',
+                    [$start, $end, $start, $end, 'late']
+                )
+                ->first();
+
+            $returnedToday = (int) ($counts->returned_today ?? 0);
+
+            return [
+                'outside_now' => (int) ($counts->outside_now ?? 0),
+                'returned_today' => $returnedToday,
+                'checkouts_today' => (int) ($counts->checkouts_today ?? 0),
+                'checkins_today' => $returnedToday,
+                'late_returns' => (int) ($counts->late_returns ?? 0),
+                'overnight_records' => DB::table('student_movements')
+                    ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
+                    ->where('movement_types.slug', 'overnight_stay')
+                    ->count(),
+            ];
+        });
     }
 
     private function getSettings(): array
