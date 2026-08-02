@@ -38,7 +38,7 @@ class StudentAffairsHeadRoleTest extends TestCase
         $middleware = app(EnsureAdminScope::class);
         $next = fn () => new Response('allowed');
 
-        foreach (['scholarship', 'discipline', 'students', 'movement', 'backoffice'] as $scope) {
+        foreach (['scholarship', 'discipline', 'students', 'movement', 'backoffice', 'students.list', 'students.sensitive', 'students.export', 'students.manage'] as $scope) {
             $this->assertSame(200, $middleware->handle($request, $next, $scope)->getStatusCode());
         }
 

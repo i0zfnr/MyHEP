@@ -179,7 +179,7 @@
 <div class="wrap">
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
-    <form method="POST" action="{{ route('student.scholarship-status.submit') }}">
+    <form method="POST" action="{{ route('student.scholarship-status.submit') }}" enctype="multipart/form-data">
         @csrf
         <div class="card">
             <div class="head">
@@ -226,6 +226,15 @@
                             <input id="monthly_amount" type="number" step="0.01" min="0" name="monthly_amount" value="{{ old('monthly_amount', $submission->monthly_amount ?? '') }}" placeholder="{{ __('Contoh:') }} 500.00">
                         </div>
                     </div>
+                    <div style="margin-top:12px;">
+                        <label for="offer_letter">{{ __('Surat Tawaran Biasiswa') }}</label>
+                        <input id="offer_letter" type="file" name="offer_letter" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp">
+                        <p class="hint">{{ __('Upload PDF atau imej sehingga 10 MB. Dokumen ini diperlukan jika anda menerima biasiswa.') }}</p>
+                        @if($offerLetter)
+                            <a class="btn" href="{{ route('student.documents.download', $offerLetter->id) }}">{{ __('Muat Turun Surat Tawaran Semasa') }}</a>
+                            <span class="hint">{{ __('Pilih fail baharu hanya jika anda mahu menggantikannya.') }}</span>
+                        @endif
+                    </div>
                 </div>
 
                 <div style="margin-top:12px;">
@@ -250,6 +259,8 @@
     var details = document.getElementById('scholarshipDetailFields');
     var sponsor = document.getElementById('sponsor_name');
     var amount = document.getElementById('monthly_amount');
+    var offerLetter = document.getElementById('offer_letter');
+    var hasExistingOffer = @json((bool) $offerLetter);
     if (!select || !details) return;
 
     function syncFields() {
@@ -257,6 +268,7 @@
         details.style.display = isYes ? '' : 'none';
         if (sponsor) sponsor.required = isYes;
         if (amount) amount.required = isYes;
+        if (offerLetter) offerLetter.required = isYes && !hasExistingOffer;
     }
 
     select.addEventListener('change', syncFields);

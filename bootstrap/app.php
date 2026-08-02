@@ -4,9 +4,11 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EnsureAdminScope;
+use App\Http\Middleware\EnsureFeatureEnabled;
 use App\Http\Middleware\RequireSessionAuthenticated;
 use App\Http\Middleware\RequireSessionRole;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\TrackAccountSession;
 use App\Http\Middleware\TranslateFrontendContent;
 use App\Http\Middleware\UseForwardedHostForUrls;
 
@@ -23,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             SetLocale::class,
+            TrackAccountSession::class,
             TranslateFrontendContent::class,
         ]);
 
@@ -30,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.session' => RequireSessionRole::class,
             'auth.session.any' => RequireSessionAuthenticated::class,
             'admin.scope' => EnsureAdminScope::class,
+            'feature.enabled' => EnsureFeatureEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

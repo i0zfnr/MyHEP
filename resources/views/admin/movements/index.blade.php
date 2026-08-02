@@ -445,9 +445,11 @@
                                     <div>
                                         <span class="mv-student">{{ $record->student_name }}</span><br>
                                         <span class="mv-sub">{{ $record->matric_no }}</span>
-                                        <div class="mv-student-actions">
-                                            <a class="mv-mini-btn" href="{{ route('admin.students.show', $record->student_id) }}">{{ __('View Profile') }}</a>
-                                        </div>
+                                        @if(adminCan('students.sensitive'))
+                                            <div class="mv-student-actions">
+                                                <a class="mv-mini-btn" href="{{ route('admin.students.show', $record->student_id) }}">{{ __('View Profile') }}</a>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -558,6 +560,9 @@
         const returnCell = record.return_date
             ? `<div class="mv-time"><strong>${escapeHtml(record.return_date)}</strong><span>${escapeHtml(record.return_time)}</span></div>`
             : `<span class="mv-row-quiet">${escapeHtml(record.not_returned_label)}</span>`;
+        const profileAction = record.student_profile_url
+            ? `<div class="mv-student-actions"><a class="mv-mini-btn" href="${escapeHtml(record.student_profile_url)}">${escapeHtml(record.view_profile_label)}</a></div>`
+            : '';
 
         return `
             <tr data-record-row data-record-id="${Number(record.id)}">
@@ -567,9 +572,7 @@
                         <div>
                             <span class="mv-student">${escapeHtml(record.student_name)}</span><br>
                             <span class="mv-sub">${escapeHtml(record.matric_no)}</span>
-                            <div class="mv-student-actions">
-                                <a class="mv-mini-btn" href="${escapeHtml(record.student_profile_url)}">${escapeHtml(record.view_profile_label)}</a>
-                            </div>
+                            ${profileAction}
                         </div>
                     </div>
                 </td>

@@ -55,7 +55,7 @@ class DualRoleSession
             return false;
         }
 
-        $request->session()->regenerate();
+        $request->session()->regenerate(true);
         $request->session()->put('auth_user', [
             'id' => (int) $student->id,
             'role' => 'student',
@@ -75,7 +75,7 @@ class DualRoleSession
             return false;
         }
 
-        $request->session()->regenerate();
+        $request->session()->regenerate(true);
         $request->session()->put('auth_user', [
             'id' => (int) $admin->id,
             'role' => 'admin',

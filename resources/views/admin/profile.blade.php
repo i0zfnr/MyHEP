@@ -92,7 +92,7 @@
         <div class="admin-profile-body">
             <div class="admin-profile-grid">
                 <div class="admin-profile-field"><span>{{ __('Name') }}</span><strong>{{ $admin->full_name }}</strong></div>
-                <div class="admin-profile-field"><span>{{ __('NRIC') }}</span><strong>{{ $admin->ic_no }}</strong></div>
+                <div class="admin-profile-field"><span>{{ __('NRIC') }}</span><strong>{{ maskIdentityNumber($admin->ic_no) }}</strong></div>
                 <div class="admin-profile-field"><span>{{ __('Role') }}</span><strong>{{ adminRoleLabel($admin->role) }}</strong></div>
             </div>
         </div>

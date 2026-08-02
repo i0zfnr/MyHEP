@@ -2,6 +2,20 @@
 
 @section('title', __('ui.settings_title'))
 
+@push('styles')
+<style>
+    .session-list { display:grid; gap:12px; margin-top:18px; }
+    .session-item { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px; border:1px solid var(--border); border-radius:16px; background:var(--surface-soft); }
+    .session-main { min-width:0; }
+    .session-title { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:5px; }
+    .session-title strong { color:var(--text); }
+    .session-current { padding:3px 8px; border-radius:999px; background:rgba(22,163,74,.12); color:#15803d; font-size:.72rem; font-weight:800; }
+    .session-meta { color:var(--text-muted); font-size:.82rem; line-height:1.55; overflow-wrap:anywhere; }
+    body[data-theme="dark"] .session-current { background:rgba(119,215,166,.14); color:#9be6bd; }
+    @media (max-width:640px) { .session-item { align-items:flex-start; flex-direction:column; } }
+</style>
+@endpush
+
 @section('header')
     <h2>{{ __('ui.settings_title') }}</h2>
 @endsection
@@ -137,6 +151,54 @@
             </div>
         </div>
     </form>
+
+    <section class="settings-panel" aria-labelledby="activeSessionsTitle">
+        <section class="settings-section">
+            <h3 class="settings-section-title" id="activeSessionsTitle">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="13" rx="2"/>
+                    <path stroke-linecap="round" d="M8 21h8M12 17v4"/>
+                </svg>
+                {{ __('ui.active_sessions') }}
+            </h3>
+            <p class="settings-section-copy">{{ __('ui.active_sessions_hint') }}</p>
+
+            <div class="session-list">
+                @foreach($activeSessions as $accountSession)
+                    <article class="session-item">
+                        <div class="session-main">
+                            <div class="session-title">
+                                <strong>{{ $accountSession->device_label }}</strong>
+                                @if($accountSession->is_current)
+                                    <span class="session-current">{{ __('ui.current_device') }}</span>
+                                @endif
+                            </div>
+                            <div class="session-meta">
+                                {{ $accountSession->ip_address ?: '-' }}<br>
+                                {{ __('ui.last_active', ['time' => \Illuminate\Support\Carbon::parse($accountSession->last_seen_at)->diffForHumans()]) }} ·
+                                {{ __('ui.signed_in_at', ['time' => \Illuminate\Support\Carbon::parse($accountSession->authenticated_at)->diffForHumans()]) }}
+                            </div>
+                        </div>
+                        @unless($accountSession->is_current)
+                            <form method="POST" action="{{ route('settings.sessions.destroy', $accountSession->public_id) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-danger" type="submit">{{ __('ui.revoke_session') }}</button>
+                            </form>
+                        @endunless
+                    </article>
+                @endforeach
+            </div>
+
+            @if($activeSessions->where('is_current', false)->isNotEmpty())
+                <form method="POST" action="{{ route('settings.sessions.destroy-others') }}" class="settings-actions" style="justify-content:flex-start;">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-danger" type="submit">{{ __('ui.revoke_other_sessions') }}</button>
+                </form>
+            @endif
+        </section>
+    </section>
 
     @if($roleMode['available'])
         <section class="settings-panel" aria-labelledby="accessModeTitle">

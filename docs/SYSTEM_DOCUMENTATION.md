@@ -1,6 +1,6 @@
 # StudentEdge / e-Biasiswa System Documentation
 
-Last updated: 2026-07-21
+Last updated: 2026-08-02
 
 ## 1. System Overview
 
@@ -54,6 +54,8 @@ Student capabilities include:
 - Apply for vehicle sticker.
 - View rules and discipline announcements.
 - Record campus movement through QR scanning.
+- Download owned private documents and track scholarship offer-letter review.
+- View authenticated devices and revoke other sessions.
 - Manage settings such as language and theme.
 
 ### Admin
@@ -70,6 +72,7 @@ Admin role values:
 | `scholarship_admin` | Scholarship records, scholarship announcements, scholarship status review |
 | `discipline_admin` | Discipline records, rules, fines, vehicle stickers, discipline announcements, movement |
 | `guard` | Movement-related access |
+| `student_affairs_head` | Scholarship, discipline, movement, sensitive student data, exports, student management, and document review |
 | `system_admin` | Full system access, admin management, maintenance, system monitoring |
 
 Admin access control is enforced by:
@@ -80,6 +83,10 @@ Admin access control is enforced by:
 - `admin.scope:movement`
 - `admin.scope:backoffice`
 - `admin.scope:system`
+- `admin.scope:students.list`, `students.sensitive`, `students.export`, and `students.manage`
+- `admin.scope:documents`
+
+The ability-to-role map is centralized in `app/Support/AdminPermissions.php`. A menu item is never the security boundary; routes enforce every ability on the server.
 
 ## 5. Main Modules
 
@@ -107,6 +114,8 @@ Important routes:
 - `POST /locale`
 - `POST /theme`
 - `GET|POST /settings`
+- `DELETE /settings/sessions`
+- `DELETE /settings/sessions/{publicId}`
 - `GET /notifications/feed`
 - `POST /push/subscribe`
 - `POST /push/unsubscribe`
@@ -143,6 +152,7 @@ The scholarship module manages student scholarship records and announcements.
 Student functions:
 
 - Submit scholarship status form.
+- Upload a required private offer letter when declaring an active scholarship.
 - View submitted scholarship records.
 - View scholarship announcements.
 
@@ -150,6 +160,7 @@ Admin functions:
 
 - View, create, edit, delete, and export scholarship records.
 - View student scholarship status submissions.
+- Download linked offer letters through an authenticated private route.
 - Manage scholarship announcements.
 
 Important routes:
@@ -161,6 +172,7 @@ Important routes:
 - `GET /admin/scholarships/export`
 - `GET|PUT|DELETE /admin/scholarships/{id}`
 - `GET /admin/student-scholarship-status`
+- `GET /admin/student-scholarship-status/documents/{id}/download`
 - `GET|POST /admin/scholarship-announcements`
 - `GET /admin/scholarship-announcements/export`
 - `GET|PUT|DELETE /admin/scholarship-announcements/{id}`
@@ -280,13 +292,15 @@ Important routes:
 
 ### 5.7 Student and Admin User Management
 
-System admins can manage student accounts and admin accounts.
+Authorized admins can manage student accounts according to distinct abilities; system admins manage admin accounts.
 
 Student management:
 
 - List, search, filter, create, edit, delete, and export students.
 - Reset student password to IC fallback by clearing `students.password`.
 - Track whether student uses default IC login or custom password.
+- Mask IC numbers in list and print contexts for roles without sensitive-data access.
+- Restrict the guard role to student list/search; guards cannot export, open sensitive detail, or mutate students.
 
 Admin user management:
 
@@ -306,7 +320,25 @@ Important routes:
 - `GET|PUT|DELETE /admin/admin-users/{id}`
 - `POST /admin/admin-users/{id}/reset-password`
 
-### 5.8 Reports, Monitoring, and Maintenance
+### 5.8 Student Document Centre and Feature Controls
+
+The Document Centre stores private student files outside public storage. Students can list and download only their own documents. Head of Student Affairs and System Admin roles can filter, download, approve, or reject documents; a rejection requires a review note. Scholarship status submissions can create or replace a linked offer-letter document.
+
+Document categories are letters, receipts, scholarship, official notices, and other. Review states are pending, approved, and rejected. Expiry filters distinguish no-expiry, valid, expiring within 30 days, and expired records.
+
+The `document_centre` feature is enabled by default and can be changed by a System Admin. Student routes are protected by `feature.enabled:document_centre`; disabling it prevents access, not only navigation visibility.
+
+Important routes:
+
+- `GET /student/documents`
+- `GET /student/documents/{id}/download`
+- `GET /admin/documents`
+- `GET /admin/documents/{id}/download`
+- `PATCH /admin/documents/{id}/review`
+- `GET /admin/features`
+- `PATCH /admin/features/{feature}`
+
+### 5.9 Reports, Monitoring, and Maintenance
 
 The system provides:
 
@@ -324,7 +356,7 @@ Important routes:
 - `GET /admin/reports/monthly`
 - `GET|POST /admin/maintenance`
 
-### 5.9 AI Helper / Agent Integration
+### 5.10 AI Helper / Agent Integration
 
 The application currently contains an admin-facing AI Helper and a disabled student AI Helper entry point.
 
@@ -391,6 +423,9 @@ Core tables:
 | `movement_types` | Checkout/return movement type definitions |
 | `movement_settings` | Curfew, GPS validation, and related movement settings |
 | `student_movements` | Checkout, return, status, late return, GPS, and vehicle plate records |
+| `student_documents` | Private document metadata, source link, review state, expiry, and storage path |
+| `system_features` | Registered feature availability and updating admin |
+| `account_sessions` | Authenticated device/session registry used for visibility and remote revocation |
 | `password_reset_codes` | Password reset code, verification, expiry, and usage tracking |
 | `push_subscriptions` | Browser push subscription data |
 | `bug_reports` | Public problem reports |
@@ -411,9 +446,11 @@ Security-related behavior:
 - Password reset requests are limited to three per role/identifier/email/IP combination per 15 minutes; verification codes are limited to five attempts per reset reference/IP combination per 15 minutes.
 - Password reset consumption uses a database transaction and row lock so a verified code is consumed only once.
 - Session middleware verifies that the student/admin account still exists on every protected request. Admin scope middleware also verifies the current database role and invalidates stale sessions.
+- Web middleware registers authenticated devices and updates their activity at most once per minute. Settings show active devices and permit revoking another device or all other sessions.
+- Student list, sensitive identity, export, management, and document permissions are independently enforced.
 - Critical create, delete, reset, payment decision, QR, and movement actions write audit logs.
 - Push subscriptions are keyed by endpoint hash.
-- Upload validation limits file type and size for receipt, sticker, and evidence files.
+- Upload validation limits file type and size for receipts, stickers, evidence, photos, and scholarship offer letters.
 
 Known security and maintainability risks are listed in section 14.
 
@@ -518,7 +555,7 @@ Users can change locale and theme from settings. The selected values are stored 
 
 ## 10. File Uploads and Storage
 
-The system stores uploaded files on Laravel's public disk.
+General uploads use Laravel's public disk. Student documents use the private `student_documents` disk rooted at `storage/app/private/student_documents`.
 
 Examples:
 
@@ -528,6 +565,14 @@ Examples:
 - Fine payment receipts.
 - Offense evidence photos.
 - Bug report screenshots.
+- Admin profile photos, with client-side crop/rotate/zoom before upload.
+
+Private examples:
+
+- Scholarship offer letters.
+- Document Centre letters, receipts, official notices, and other reviewed documents.
+
+Private files are returned by authenticated download controllers with ownership/ability checks and `private, no-store` response headers. Never copy the private document directory into `public/storage`.
 
 Deployment must ensure the public storage link exists:
 
@@ -604,6 +649,7 @@ Before production deployment:
 - Run Composer install without dev dependencies.
 - Cache config, routes, views, and optimized files.
 - Verify storage link and upload permissions.
+- Verify the private document directory is writable but not publicly web-accessible.
 
 Typical production commands:
 
@@ -625,10 +671,11 @@ The current project is functional, but several areas should be handled before pr
 - `routes/web.php` contains substantial inline business logic and is difficult to maintain safely.
 - Movement QR token validation and rotation should be made atomic to prevent concurrent reuse.
 - Active movement creation should use transaction or locking protection to avoid duplicate active checkout records.
-- Test coverage is minimal and should be expanded for real business workflows.
+- Coverage now includes active sessions, permission boundaries, identity masking, admin profile upload, student documents, and movement-feed behavior, but many legacy workflows still need broader tests.
 - Composer dependency advisories should be reviewed and fixed in a dedicated dependency update.
 - `.env` must not be committed or exposed, and debug mode must not be enabled in production.
 - AI provider keys must remain environment-only. Agent changes should be reviewed for privacy, authorization, and prompt-injection risks before public use.
+- Receipt QR/OCR inspection is not an authenticity guarantee. Official iPayment API/QR behavior must be confirmed before any automated verification feature is described as implemented.
 
 ## 15. Suggested Future Improvements
 
@@ -639,6 +686,8 @@ The current project is functional, but several areas should be handled before pr
 - Add database constraints where business rules require uniqueness or single active records.
 - Add audit log viewer for system admins if operational review is required.
 - Add scheduled cleanup for expired password reset codes and stale push subscriptions.
+- Add scheduled cleanup for expired `account_sessions` and orphaned private document files.
+- Planned only: evaluate iPayment receipt authenticity through an approved official API or documented QR contract; retain human review until that evidence exists.
 - Finish the student mobile/PWA app shell after visual approval, then tune each
   student content page for mobile without altering desktop workflows.
 - Move AI provider calls into a service layer and define a formal agent policy before

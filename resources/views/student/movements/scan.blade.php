@@ -8,14 +8,30 @@
 
 @push('styles')
 <style>
-    body.has-student-bottom-nav .page-header,
-    body.has-student-bottom-nav .mobile-bottom-nav,
-    body.has-student-bottom-nav .app-footer {
+    body.student-scan-mode :is(
+        .topbar,
+        .page-header,
+        .sidebar,
+        .sb-overlay,
+        .app-footer
+    ),
+    body.student-scan-mode > :is(
+        .mobile-bottom-nav,
+        .mobile-more-sheet,
+        .mobile-more-backdrop,
+        .header-user-menu--mobile,
+        .header-user-backdrop
+    ) {
         display: none !important;
     }
 
-    body.has-student-bottom-nav .page-body {
+    body.student-scan-mode .page-body {
         padding: 0 !important;
+        background: #0c0907 !important;
+    }
+
+    body.student-scan-mode .main-wrap {
+        overflow: hidden !important;
     }
 
     .scan-page {
@@ -47,9 +63,9 @@
 
     .scan-topbar {
         position: absolute;
-        top: max(1rem, env(safe-area-inset-top));
-        left: max(1rem, env(safe-area-inset-left));
-        right: max(1rem, env(safe-area-inset-right));
+        top: calc(1rem + env(safe-area-inset-top, 0px));
+        left: calc(1rem + env(safe-area-inset-left, 0px));
+        right: calc(1rem + env(safe-area-inset-right, 0px));
         z-index: 4;
         display: flex;
         align-items: center;
@@ -113,9 +129,9 @@
 
     .scan-bottom {
         position: absolute;
-        left: max(1rem, env(safe-area-inset-left));
-        right: max(1rem, env(safe-area-inset-right));
-        bottom: max(1rem, env(safe-area-inset-bottom));
+        left: calc(1rem + env(safe-area-inset-left, 0px));
+        right: calc(1rem + env(safe-area-inset-right, 0px));
+        bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
         z-index: 4;
         display: grid;
         gap: .85rem;
@@ -138,14 +154,22 @@
         -webkit-backdrop-filter: blur(22px) saturate(150%);
     }
 
-    .scan-status.ok { border-color: rgba(110, 231, 164, .45); color: #cffbdd; }
-    .scan-status.danger { border-color: rgba(252, 165, 165, .48); color: #fecaca; }
+    body.student-scan-mode .page-body .scan-status.ok {
+        background: rgba(12, 9, 7, .48) !important;
+        border-color: rgba(110, 231, 164, .45) !important;
+        color: #cffbdd !important;
+    }
+    body.student-scan-mode .page-body .scan-status.danger {
+        background: rgba(12, 9, 7, .48) !important;
+        border-color: rgba(252, 165, 165, .48) !important;
+        color: #fecaca !important;
+    }
 
     .scan-mode {
         width: min(100%, 430px);
         justify-self: center;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: .35rem;
         padding: .35rem;
         border-radius: 999px;
@@ -156,6 +180,7 @@
     }
 
     .scan-mode span {
+        min-width: 0;
         min-height: 42px;
         display: inline-flex;
         align-items: center;
@@ -165,6 +190,7 @@
         color: rgba(255,255,255,.72);
         font-size: .84rem;
         font-weight: 850;
+        text-align: center;
     }
 
     .scan-mode .active {

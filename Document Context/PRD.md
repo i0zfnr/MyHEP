@@ -1,6 +1,6 @@
 # StudentEdge Product Requirements
 
-Last updated: 2026-07-23
+Last updated: 2026-08-02
 
 ## Product Summary
 
@@ -19,10 +19,11 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 
 | User | Primary needs |
 | --- | --- |
-| Student | View status, submit forms and evidence, scan movement QR, update profile, receive decisions |
+| Student | View status, submit evidence, download private documents, scan movement QR, update profile, manage active sessions, and receive decisions |
 | Scholarship admin | Manage scholarship records, B40 TVET data, announcements, and student submissions |
 | Discipline admin | Manage offenses, rules, evidence, fines, stickers, announcements, and movement issues |
 | Guard | Operate and review campus movement workflows |
+| Head of Student Affairs | Oversee scholarship, discipline, sensitive student records, and the Document Centre |
 | System admin | Manage accounts, configuration, monitoring, maintenance, and full operational access |
 
 ## Required Capabilities
@@ -35,6 +36,7 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 - In-app notifications and optional browser push
 - Responsive web and PWA support
 - Problem reporting and accessible account settings
+- Active-device visibility and revocation of other authenticated sessions
 
 ### Student
 
@@ -45,6 +47,7 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 - Vehicle-sticker application and status
 - Rules and discipline announcements
 - Campus checkout/return through QR with movement history
+- Private Document Centre downloads and scholarship offer-letter status
 
 ### Administration
 
@@ -55,12 +58,15 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 - Vehicle-sticker decisions
 - Movement QR, checkpoint, curfew, violation, export, and guard views
 - Administrator management, maintenance, monitoring, reports, bug reports, and audit logging
+- System feature controls and private student-document review
 
 ## Key Functional Rules
 
 - Every protected request must require a valid current account session.
 - Admin capabilities must be enforced server-side by role scope.
+- Student list, sensitive identity, export, management, and document abilities must remain distinct.
 - Students may access only their own records and submissions.
+- Private documents must use authenticated controller downloads and must never be served from the public storage link.
 - Critical administrative decisions and destructive actions must be auditable.
 - Uploaded evidence must be validated by type and size.
 - Imports must validate headers and rows, report failures clearly, and avoid silent partial corruption.
@@ -106,6 +112,7 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 ## Out of Scope Until Reviewed
 
 - Autonomous AI write actions
+- Automated iPayment receipt-authenticity decisions until an official API or verifiable QR contract is approved
 - Sending full student datasets or private uploads to external AI services
 - Native iOS or Android clients
 - Direct integration with the institution database without an agreed synchronization contract

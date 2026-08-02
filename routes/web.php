@@ -4,12 +4,14 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AiHelperController as AdminAiHelperController;
 use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
+use App\Http\Controllers\Admin\FeatureController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\StudentDocumentController as AdminStudentDocumentController;
 use App\Http\Controllers\Admin\StudentScholarshipStatusController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BugReportController;
@@ -20,6 +22,7 @@ use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Student\AiHelperController as StudentAiHelperController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\DocumentController as StudentDocumentController;
 use App\Http\Controllers\Student\MovementController as StudentMovementController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Http\Controllers\Student\ScholarshipStatusController;
@@ -62,6 +65,12 @@ Route::post('/settings', [SettingController::class, 'update'])
 Route::post('/settings/role-mode', [SettingController::class, 'updateRoleMode'])
     ->middleware('auth.session.any')
     ->name('settings.role-mode.update');
+Route::delete('/settings/sessions', [SettingController::class, 'destroyOtherSessions'])
+    ->middleware('auth.session.any')
+    ->name('settings.sessions.destroy-others');
+Route::delete('/settings/sessions/{publicId}', [SettingController::class, 'destroySession'])
+    ->middleware('auth.session.any')
+    ->name('settings.sessions.destroy');
 Route::get('/notifications/feed', NotificationFeedController::class)
     ->middleware('auth.session.any')
     ->name('notifications.feed');
@@ -102,6 +111,12 @@ Route::get('/student/movements/scan', [StudentMovementController::class, 'scan']
 Route::post('/student/movements', [StudentMovementController::class, 'store'])
     ->middleware('auth.session:student')
     ->name('student.movements.store');
+Route::get('/student/documents', [StudentDocumentController::class, 'index'])
+    ->middleware(['auth.session:student', 'feature.enabled:document_centre'])
+    ->name('student.documents.index');
+Route::get('/student/documents/{id}/download', [StudentDocumentController::class, 'download'])
+    ->middleware(['auth.session:student', 'feature.enabled:document_centre'])
+    ->name('student.documents.download');
 
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
@@ -112,6 +127,15 @@ Route::get('/admin/profile', [AdminProfileController::class, 'show'])
 Route::post('/admin/profile/photo', [AdminProfileController::class, 'updatePhoto'])
     ->middleware('auth.session:admin')
     ->name('admin.profile.photo');
+Route::get('/admin/documents', [AdminStudentDocumentController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:documents'])
+    ->name('admin.documents.index');
+Route::get('/admin/documents/{id}/download', [AdminStudentDocumentController::class, 'download'])
+    ->middleware(['auth.session:admin', 'admin.scope:documents'])
+    ->name('admin.documents.download');
+Route::patch('/admin/documents/{id}/review', [AdminStudentDocumentController::class, 'review'])
+    ->middleware(['auth.session:admin', 'admin.scope:documents'])
+    ->name('admin.documents.review');
 Route::get('/admin/system-monitoring/live', [AdminDashboardController::class, 'live'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.system-monitoring.live');
@@ -121,6 +145,9 @@ Route::get('/admin/reports/monthly', [AdminReportController::class, 'monthly'])
 Route::get('/admin/student-scholarship-status', [StudentScholarshipStatusController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.student-scholarship-status.index');
+Route::get('/admin/student-scholarship-status/documents/{id}/download', [StudentScholarshipStatusController::class, 'downloadOfferLetter'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.student-scholarship-status.documents.download');
 Route::get('/admin/ai-helper', [AdminAiHelperController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice'])
     ->name('admin.ai-helper.index');
@@ -169,6 +196,12 @@ Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])
 Route::post('/admin/maintenance', [MaintenanceController::class, 'update'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.maintenance.update');
+Route::get('/admin/features', [FeatureController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.features.index');
+Route::patch('/admin/features/{feature}', [FeatureController::class, 'update'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.features.update');
 
 Route::get('/admin/admin-users/create', [AdminUserController::class, 'create'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
@@ -199,37 +232,37 @@ Route::delete('/admin/bug-reports/{id}', [AdminBugReportController::class, 'dest
     ->name('admin.bug-reports.destroy');
 
 Route::get('/admin/students', [StudentController::class, 'index'])
-    ->middleware(['auth.session:admin', 'admin.scope:students'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.list'])
     ->name('admin.students.index');
 Route::get('/admin/students/search', [StudentController::class, 'search'])
-    ->middleware(['auth.session:admin', 'admin.scope:students'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.list'])
     ->name('admin.students.search');
 Route::get('/admin/students/export', [StudentController::class, 'export'])
-    ->middleware(['auth.session:admin', 'admin.scope:students'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.export'])
     ->name('admin.students.export');
 Route::get('/admin/students/create', [StudentController::class, 'create'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.create');
 Route::post('/admin/students', [StudentController::class, 'store'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.store');
 Route::post('/admin/students/import', [StudentController::class, 'import'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.import');
 Route::get('/admin/students/{id}', [StudentController::class, 'show'])
-    ->middleware(['auth.session:admin', 'admin.scope:students'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.sensitive'])
     ->name('admin.students.show');
 Route::get('/admin/students/{id}/edit', [StudentController::class, 'edit'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.edit');
 Route::put('/admin/students/{id}', [StudentController::class, 'update'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.update');
 Route::delete('/admin/students/{id}', [StudentController::class, 'destroy'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.destroy');
 Route::post('/admin/students/{id}/reset-password', [StudentController::class, 'resetPassword'])
-    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.reset-password');
 
 Route::get('/admin/scholarships', [ScholarshipController::class, 'index'])
@@ -379,6 +412,7 @@ Route::post('/admin/scholarship-announcements', function (Request $request) {
     ]);
 
     myhepSendPushToAllStudents([
+        'category' => 'scholarship',
         'title' => 'New scholarship announcement',
         'body' => Str::limit($validated['title'], 90),
         'url' => route('student.scholarships.announcements'),
@@ -532,6 +566,7 @@ Route::post('/admin/discipline-announcements', function (Request $request) {
     ]);
 
     myhepSendPushToAllStudents([
+        'category' => 'discipline',
         'title' => 'New discipline announcement',
         'body' => Str::limit($validated['title'], 90),
         'url' => route('student.discipline-announcements.index'),
@@ -1099,6 +1134,7 @@ Route::post('/admin/offenses', function (Request $request) {
     }
 
     myhepSendPushNotification('student', (int) $validated['student_id'], [
+        'category' => 'discipline',
         'title' => 'New offense recorded',
         'body' => 'A new discipline record has been added to your account. Please review it in My Offenses.',
         'url' => route('student.offenses.index'),
@@ -1323,6 +1359,7 @@ Route::post('/admin/offenses/{id}/mark-paid', function (int $id) {
     auditLog('offenses.mark_paid', 'offenses', $id, 'Tukar status kesalahan ke paid');
 
     myhepSendPushNotification('student', (int) $offense->student_id, [
+        'category' => 'discipline',
         'title' => 'Fine marked as paid',
         'body' => 'Your offense payment status has been updated to paid.',
         'url' => route('student.offenses.index'),
@@ -1703,6 +1740,7 @@ Route::post('/student/fine-applications', function (Request $request) {
     }
 
     myhepSendPushToAdminsByScope('discipline', [
+        'category' => 'discipline',
         'title' => 'New payment receipt uploaded',
         'body' => 'A student submitted a fine payment receipt for admin review.',
         'url' => route('admin.offenses.index', ['status' => 'applied']),
@@ -1859,6 +1897,7 @@ Route::post('/admin/vehicle-stickers/{id}/decision', function (Request $request,
     auditLog('vehicle_stickers.decision', 'vehicle_sticker_applications', $id, 'Status: ' . $validated['status']);
 
     myhepSendPushNotification('student', (int) $application->student_id, [
+        'category' => 'discipline',
         'title' => $validated['status'] === 'approved' ? 'Vehicle sticker approved' : 'Vehicle sticker update',
         'body' => $validated['status'] === 'approved'
             ? 'Your vehicle sticker application has been approved.'
@@ -1931,6 +1970,7 @@ Route::post('/admin/fine-applications/{id}/decision', function (Request $request
     auditLog('fine_applications.decision', 'fine_payment_applications', $id, 'Status: ' . $validated['status']);
 
     myhepSendPushNotification('student', (int) $application->student_id, [
+        'category' => 'discipline',
         'title' => $validated['status'] === 'approved' ? 'Payment verified' : 'Payment receipt update',
         'body' => $validated['status'] === 'approved'
             ? 'Your fine payment receipt has been verified. The offense is now marked as paid.'

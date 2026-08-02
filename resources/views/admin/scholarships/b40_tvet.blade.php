@@ -136,7 +136,7 @@
                             <tr>
                                 <td>
                                     {{ $record->student_name }}<br>
-                                    <span style="color:#7b6757;">{{ $record->matric_no ?: '-' }} / {{ $record->ic_no }}</span>
+                                    <span style="color:#7b6757;">{{ $record->matric_no ?: '-' }} / {{ maskIdentityNumber($record->ic_no) }}</span>
                                 </td>
                                 <td>{{ $record->program }}</td>
                                 <td>{{ $record->amount !== null ? 'RM ' . number_format((float) $record->amount, 2) : '-' }}</td>

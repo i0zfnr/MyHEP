@@ -1,5 +1,7 @@
 # StudentEdge Team Presentation Guide
 
+Last updated: 2026-08-02
+
 This file is made for team members who need to explain how the system is built, how the code works, and how the database connects to the features.
 
 The system is a Laravel web application for Student Affairs. The main modules are:
@@ -722,4 +724,26 @@ Before presentation:
 
 ## 23. Short Summary To Memorize
 
-StudentEdge is a Laravel and MySQL system for student affairs. It uses MVC architecture where routes call controllers, controllers process database logic, and Blade views display pages. The B40 TVET feature reads uploaded CSV/XLSX files, filters only Politeknik Besut students by institution name, stores student data and scholarship records in the database, and exports the result to CSV for Excel. Student matric number is optional and is only saved if it exists in the uploaded file.
+StudentEdge is a Laravel and MySQL modular-monolith system for student affairs. Routes call controllers or focused route actions, the database stores operational records, and Blade renders the interface. Central ability middleware protects role-specific work. Private student documents stay outside public storage. B40 TVET import reads CSV/XLSX, filters the approved institution, stores student and scholarship records, and exports CSV for Excel; matric number remains optional when absent from the source.
+
+## 24. 2026 Security and Document Update
+
+### Active sessions
+
+`TrackAccountSession` and `AccountSessionManager` record a public device handle, owner, active role/account, browser/device information, IP address, and last activity. Settings can revoke another device or all other devices. Raw session IDs are not public route identifiers.
+
+### Central permissions
+
+`AdminPermissions` separates student list, sensitive detail, export, management, documents, scholarship, discipline, movement, back-office, and system abilities. For example, Guard may search students for movement work but cannot view sensitive detail or change student records.
+
+### Private Document Centre
+
+`student_documents` stores metadata while the file remains on the private `student_documents` disk. A student sees only their own files. Head of Student Affairs and System Admin can filter, download, approve, or reject documents. Scholarship declarations can add a linked offer letter. The `document_centre` flag is enforced by middleware.
+
+### Performance and interaction
+
+The admin movement feed combines ordered cursor pagination, near-bottom JSON fetch, and bounded DOM virtualization. Lenis smooths mouse-wheel scrolling in the main/document context, while touch and nested tables, scanners, dialogs, notifications, filters, cropper controls, and forms use native scrolling.
+
+### Planned receipt verification
+
+iPayment receipt authenticity verification is not implemented. OCR or an unknown QR value cannot prove authenticity; an official API or documented verification contract is required before automating that decision.

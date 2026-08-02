@@ -1,6 +1,6 @@
 # StudentEdge Design System
 
-Last updated: 2026-07-23
+Last updated: 2026-08-02
 
 ## Design Intent
 
@@ -75,6 +75,8 @@ Use design tokens from `resources/css/design-system.css`; do not scatter replace
 - Avoid rigid delays, timer-driven layout changes, and animations that replay during scrolling.
 - Hover elevation is desktop-only and subtle; touch interfaces use pressed feedback.
 - Notification motion is the quality reference for menus, sheets, and dialogs.
+- Lenis smooths wheel input in the main/document scroll context only. Touch remains native, and nested tables, notifications, filters, scanners, cropper controls, dialogs, and forms keep native scrolling.
+- Long movement feeds use bounded rendering so the visible polish does not grow the DOM without limit.
 
 ## Component Rules
 

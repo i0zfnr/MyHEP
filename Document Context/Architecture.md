@@ -1,6 +1,6 @@
 # StudentEdge Architecture
 
-Last updated: 2026-07-23
+Last updated: 2026-08-02
 
 ## Purpose
 
@@ -20,7 +20,7 @@ Laravel routes + middleware
 Controllers and route actions
         |
         +----> MySQL / MariaDB
-        +----> public storage uploads
+        +----> public uploads + private student-document storage
         +----> mail password-reset codes
         +----> Web Push subscriptions
         +----> PDF and CSV exports
@@ -31,9 +31,9 @@ Controllers and route actions
 | Layer | Location | Responsibility |
 | --- | --- | --- |
 | Routing | `routes/web.php` | Public, student, admin, settings, notification, and export endpoints |
-| Middleware | `app/Http/Middleware` | Session authentication, role scope, locale, and translated frontend content |
+| Middleware | `app/Http/Middleware` | Session authentication/tracking, ability scope, feature availability, locale, and translated frontend content |
 | Controllers | `app/Http/Controllers` | Request validation, workflow coordination, persistence, and responses |
-| Support | `app/Support` | Shared helpers, audit behavior, role-mode session behavior, and utility code |
+| Support | `app/Support` | Permissions, active sessions, feature flags, document options, audit behavior, role-mode behavior, and utilities |
 | Views | `resources/views` | Blade pages, shared layout, partials, and responsive navigation |
 | UI system | `resources/css/design-system.css` | Shared tokens, themes, Liquid Glass materials, responsive layout, and motion |
 | Client behavior | `resources/js/app.js` and layout scripts | PWA registration, notifications, menus, dialogs, and mobile interactions |
@@ -42,8 +42,8 @@ Controllers and route actions
 ## Request Flow
 
 1. A browser request enters `routes/web.php`.
-2. Middleware restores locale and checks `session('auth_user')` for protected routes.
-3. Role middleware verifies the current account and its database-backed permissions.
+2. Web middleware restores locale and registers/touches the authenticated device in `account_sessions`.
+3. Authentication and ability middleware verify `session('auth_user')`, the current database account/role, and any required feature flag.
 4. A controller or route action validates input and performs the workflow.
 5. Data is read or written through Laravel's database layer.
 6. A Blade view, redirect, JSON response, CSV, or PDF is returned.
@@ -55,7 +55,8 @@ Controllers and route actions
 - Students normally authenticate with matric number and either a custom password hash or temporary IC-number fallback.
 - Admins authenticate with an identifier and hashed password.
 - Protected requests revalidate that the account still exists.
-- Admin access is constrained by scholarship, discipline, movement, back-office, or system scope.
+- Admin access is centralized in `AdminPermissions`, including separate student list, sensitive-data, export, management, and document abilities.
+- Account-session records let users inspect and revoke other devices without exposing raw session identifiers.
 - A linked system-admin/student account may switch role mode; this is privileged behavior and must never be inferred from client input alone.
 - CSRF protection, rate limiting, password hashing, upload validation, and audit logging must remain enabled.
 
@@ -69,6 +70,7 @@ Controllers and route actions
 - Student and administrator management
 - Notifications, browser push, reports, monitoring, maintenance, and audit logs
 - Language, theme, account settings, and optional role-mode controls
+- Private student documents, offer-letter review, system feature toggles, and active-device management
 
 ## Frontend Architecture
 
@@ -78,7 +80,7 @@ Transient surfaces may use strong glass materials. Scrolling content cards stay 
 
 ## External and Operational Boundaries
 
-- Uploaded files use Laravel's public storage disk.
+- General uploads use Laravel's public disk. Student documents use the private `student_documents` disk and authenticated download controllers.
 - Password-reset delivery depends on configured mail transport.
 - Browser push uses VAPID configuration and `minishlink/web-push`.
 - PDF output uses DOMPDF.
@@ -90,6 +92,7 @@ Transient surfaces may use strong glass materials. Scrolling content cards stay 
 - `routes/web.php` still contains large inline workflow closures.
 - Feature-test coverage is limited relative to the number of business workflows.
 - Movement token use and active movement creation need stronger transaction/locking guarantees.
+- The feature registry currently contains only `document_centre`; it is not a general plugin system.
 - The root SQL dump remains necessary because migrations do not fully reconstruct every original table from an empty database.
 
 See `docs/SYSTEM_DOCUMENTATION.md` for the expanded system description and `PROJECT_HANDOFF.txt` for handoff details.

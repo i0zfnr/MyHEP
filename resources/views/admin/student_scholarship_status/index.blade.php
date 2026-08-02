@@ -226,6 +226,7 @@
                         <th>{{ __('Penaja') }}</th>
                         <th>{{ __('Jumlah Bulanan') }}</th>
                         <th>{{ __('Catatan') }}</th>
+                        <th>{{ __('Surat Tawaran') }}</th>
                         <th>{{ __('Tarikh Hantar') }}</th>
                     </tr>
                 </thead>
@@ -249,10 +250,11 @@
                             <td>{{ $row->sponsor_name ?: '-' }}</td>
                             <td>{{ $row->monthly_amount !== null ? 'RM ' . number_format((float) $row->monthly_amount, 2) : '-' }}</td>
                             <td>{{ $row->notes ?: '-' }}</td>
+                            <td>@if($row->offer_letter_id)<a class="btn" href="{{ route('admin.student-scholarship-status.documents.download', $row->offer_letter_id) }}">{{ __('Muat Turun') }}</a><br><small>{{ $row->offer_letter_name }}</small>@else - @endif</td>
                             <td>{{ $row->submitted_at ? \Illuminate\Support\Carbon::parse($row->submitted_at)->format('Y-m-d H:i') : '-' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" style="text-align:center;color:#7a6555;">{{ __('Tiada data') }}</td></tr>
+                        <tr><td colspan="8" style="text-align:center;color:#7a6555;">{{ __('Tiada data') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -218,7 +218,7 @@
                     @forelse($admins as $admin)
                         <tr>
                             <td>{{ $admin->full_name }}</td>
-                            <td>{{ $admin->ic_no }}</td>
+                            <td>{{ maskIdentityNumber($admin->ic_no) }}</td>
                             <td><span class="role {{ $admin->role }}">{{ adminRoleLabel($admin->role) }}</span></td>
                             <td>{{ $admin->created_at ? \Illuminate\Support\Carbon::parse($admin->created_at)->format('Y-m-d') : '-' }}</td>
                             <td>

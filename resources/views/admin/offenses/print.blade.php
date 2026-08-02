@@ -186,7 +186,7 @@
             <table class="grid">
                 <tr><th style="width:180px;">Nama Pelajar</th><td>{{ $offense->student_name }}</td></tr>
                 <tr><th>No. Pendaftaran</th><td>{{ $offense->matric_no }}</td></tr>
-                <tr><th>No. KP</th><td>{{ $offense->ic_no }}</td></tr>
+                <tr><th>No. KP</th><td>{{ maskIdentityNumber($offense->ic_no) }}</td></tr>
                 <tr><th>Program</th><td>{{ $offense->program }}</td></tr>
             </table>
         </div>

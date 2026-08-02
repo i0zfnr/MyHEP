@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\AccountSessionManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +28,7 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AccountSessionManager $sessions): RedirectResponse
     {
         $validated = $request->validate([
             'role' => ['required', 'in:student,admin'],
@@ -72,6 +73,7 @@ class LoginController extends Controller
                 'role' => 'student',
                 'name' => $student->full_name,
             ]);
+            $sessions->establish($request, 'student', (int) $student->id);
             auditLog('auth.login_success', 'student', (int) $student->id, 'Login pelajar berjaya');
 
             return redirect()->route('student.dashboard');
@@ -99,6 +101,7 @@ class LoginController extends Controller
             'name' => $admin->full_name,
             'admin_role' => $admin->role,
         ]);
+        $sessions->establish($request, 'admin', (int) $admin->id);
         auditLog('auth.login_success', 'admin', (int) $admin->id, 'Login admin berjaya');
 
         return redirect()->route('admin.dashboard');
@@ -253,7 +256,7 @@ class LoginController extends Controller
         return view('auth.password.reset', ['ref' => $ref]);
     }
 
-    public function resetPassword(Request $request): RedirectResponse
+    public function resetPassword(Request $request, AccountSessionManager $sessions): RedirectResponse
     {
         $validated = $request->validate([
             'ref' => ['required', 'uuid'],
@@ -301,18 +304,20 @@ class LoginController extends Controller
                 ->withErrors(['identifier' => 'Sesi reset kata laluan tidak sah atau telah tamat.']);
         }
 
+        $sessions->revokeAccount($reset->role, (int) $reset->target_id);
         auditLog('auth.password_reset', $reset->role, (int) $reset->target_id, 'Reset kata laluan berjaya');
 
         return redirect()->route('login')
             ->with('success', 'Kata laluan berjaya ditetapkan semula. Sila log masuk.');
     }
 
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, AccountSessionManager $sessions): RedirectResponse
     {
         $locale = $request->session()->get('locale');
         $theme = $request->session()->get('theme');
 
         auditLog('auth.logout', session('auth_user.role'), session('auth_user.id'), 'Pengguna log keluar');
+        $sessions->remove($request->session()->getId());
         $request->session()->forget('auth_user');
         $request->session()->invalidate();
         $request->session()->regenerateToken();

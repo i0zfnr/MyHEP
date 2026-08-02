@@ -178,6 +178,7 @@ class MovementController extends Controller
 
             if ($lateMinutes > 0) {
                 myhepSendPushNotification('student', $studentId, [
+                    'category' => 'movement',
                     'title' => 'Late return recorded',
                     'body' => 'Your return to campus was recorded late. Please review your movement record.',
                     'url' => route('student.movements.index'),
@@ -186,6 +187,7 @@ class MovementController extends Controller
                 ]);
 
                 myhepSendPushToAdminsByScope('movement', [
+                    'category' => 'movement',
                     'title' => 'Movement violation detected',
                     'body' => 'A student return was recorded late and needs admin visibility.',
                     'url' => route('admin.movements.violations'),

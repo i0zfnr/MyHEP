@@ -52,7 +52,7 @@
         <div class="ui-card-body">
             <div class="profile-section-title">{{ __('Student Details') }}</div>
             <div class="profile-grid">
-                <div class="profile-field"><span>{{ __('IC No.') }}</span><b>{{ $student->ic_no }}</b></div>
+                <div class="profile-field"><span>{{ __('IC No.') }}</span><b>{{ maskIdentityNumber($student->ic_no) }}</b></div>
                 <div class="profile-field"><span>{{ __('Email') }}</span><b>{{ $student->email ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Phone') }}</span><b>{{ $student->phone ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Semester') }}</span><b>{{ $student->semester ?: '-' }}</b></div>
@@ -72,9 +72,9 @@
             <div class="profile-section-title">{{ __('Guardian Details') }}</div>
             <div class="profile-grid">
                 <div class="profile-field"><span>{{ __('Guardian Name') }}</span><b>{{ $student->guardian_name ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Guardian IC') }}</span><b>{{ $student->guardian_ic_no ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Guardian IC') }}</span><b>{{ maskIdentityNumber($student->guardian_ic_no) }}</b></div>
                 <div class="profile-field"><span>{{ __('Guardian Phone') }}</span><b>{{ $student->guardian_phone ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Mother IC') }}</span><b>{{ $student->mother_ic_no ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Mother IC') }}</span><b>{{ maskIdentityNumber($student->mother_ic_no) }}</b></div>
                 <div class="profile-field"><span>{{ __('Occupation') }}</span><b>{{ $student->guardian_occupation ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Family Income') }}</span><b>{{ $student->family_income !== null ? 'RM ' . number_format((float) $student->family_income, 2) : '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Guardian Address') }}</span><b>{{ $student->guardian_address ?: '-' }}</b></div>

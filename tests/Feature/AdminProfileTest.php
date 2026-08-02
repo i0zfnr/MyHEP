@@ -47,7 +47,8 @@ class AdminProfileTest extends TestCase
         ])->get('/admin/profile')
             ->assertOk()
             ->assertSee('Discipline Lecturer')
-            ->assertSee('800101010101');
+            ->assertSee('********0101')
+            ->assertDontSee('800101010101');
     }
 
     public function test_admin_photo_is_stored_in_the_admin_profile_folder(): void

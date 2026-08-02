@@ -6,6 +6,23 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
+if (!function_exists('maskIdentityNumber')) {
+    function maskIdentityNumber(?string $identity): string
+    {
+        $identity = trim((string) $identity);
+        if ($identity === '') {
+            return '-';
+        }
+
+        $length = Str::length($identity);
+        if ($length <= 4) {
+            return str_repeat('*', $length);
+        }
+
+        return str_repeat('*', $length - 4) . Str::substr($identity, -4);
+    }
+}
+
 if (!function_exists('myhepCountTable')) {
     function myhepCountTable(string $table, ?callable $scope = null): int
     {
@@ -120,8 +137,7 @@ if (!function_exists('canAccessScholarshipAdmin')) {
             return false;
         }
 
-        $adminRole = session('auth_user.admin_role');
-        return in_array($adminRole, ['scholarship_admin', 'student_affairs_head', 'system_admin'], true);
+        return adminCan('scholarship');
     }
 }
 
@@ -132,8 +148,7 @@ if (!function_exists('canAccessDisciplineAdmin')) {
             return false;
         }
 
-        $adminRole = session('auth_user.admin_role');
-        return in_array($adminRole, ['discipline_admin', 'student_affairs_head', 'system_admin'], true);
+        return adminCan('discipline');
     }
 }
 
@@ -144,8 +159,14 @@ if (!function_exists('canAccessMovementAdmin')) {
             return false;
         }
 
-        $adminRole = session('auth_user.admin_role');
-        return in_array($adminRole, ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'], true);
+        return adminCan('movement');
+    }
+}
+
+if (!function_exists('adminCan')) {
+    function adminCan(string $ability): bool
+    {
+        return app(\App\Support\AdminPermissions::class)->allowsSession($ability);
     }
 }
 
@@ -607,6 +628,7 @@ if (!function_exists('myhepAdminRolesForScope')) {
             'discipline' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
             'movement' => ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'],
             'backoffice' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
+            'documents' => ['student_affairs_head', 'system_admin'],
             default => ['system_admin'],
         };
     }

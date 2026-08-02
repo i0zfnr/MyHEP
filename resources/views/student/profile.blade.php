@@ -280,7 +280,7 @@
                 <div class="grid grid-2" style="margin-top:12px;">
                     <div>
                         <label>{{ __('No. IC') }}</label>
-                        <input type="text" value="{{ $student->ic_no }}" readonly>
+                        <input type="text" value="{{ maskIdentityNumber($student->ic_no) }}" readonly>
                     </div>
                     <div>
                         <label>{{ __('Program') }}</label>
@@ -467,5 +467,4 @@
     </section>
 </div>
 @endsection
-
 

@@ -1,244 +1,82 @@
 PROJECT HANDOFF - StudentEdge
-Date: 2026-07-21
-Path: C:\laragon\www\StudentEdge
+Date: 2026-08-02
+Path: C:\laragon\www\e-biasiswa
 
-Summary
+SUMMARY
 -------
-StudentEdge is a Laravel 13 student affairs application covering scholarship,
-discipline, student profiles, fines, vehicle stickers, announcements, reports,
-admin management, and guard-house student movement tracking.
+StudentEdge is a Laravel 13 student-affairs application covering student profiles,
+scholarship, discipline, fines, vehicle stickers, announcements, campus movement,
+private documents, notifications, reports, administration, and system controls.
 
-Current Git State
------------------
-- Branch: main
-- HEAD: Add mobile student QR scan flow
-- At the last check, main was ready to push to origin/main.
-- Restore checkpoint before the mobile/PWA navigation redesign: 0ecaf9c.
-- Do not reset, discard, or overwrite these changes. Inspect git status and diff
-  before staging or committing anything.
+CURRENT IMPLEMENTATION
+----------------------
+- Custom student/admin session authentication with password reset and linked role mode.
+- Active device/session tracking through account_sessions. Users can revoke one other
+  session or every other session from Settings.
+- Central AdminPermissions abilities. Guard can list/search students but cannot view
+  sensitive detail, export, create, edit, delete, import, or reset passwords.
+- IC numbers are masked outside sensitive-detail contexts.
+- Private student_documents disk and metadata table. Students download only their own
+  documents; Head of Student Affairs and System Admin can review and download them.
+- Scholarship declarations can upload a private offer letter linked to the document
+  workflow. Replacing/removing metadata also handles the stored file.
+- System Admin can enable/disable document_centre; middleware enforces the state.
+- Admin profile photo upload supports browser crop, zoom, rotate, reset, and preview.
+- Movement feed uses cursor batches and bounded DOM virtualization. Lenis smooths
+  mouse-wheel scrolling while touch and nested interactive regions stay native.
+- PWA install prompts appear only on student/admin dashboards.
 
-Current Mobile/PWA Design Direction
------------------------------------
-- Preserve the current StudentEdge color palette and visual identity.
-- Do not redesign desktop/tablet views while working on the student PWA experience.
-- Student mobile/PWA navigation target:
-  Home -> Fines -> Scan QR -> Aid -> More
-- Profile should not be a bottom navigation tab. Students should access profile
-  from the top-right header user/avatar menu.
-- The Scan QR tab should be visually emphasized as the central primary action.
-- The More tab can expose secondary student destinations such as Campus Movement,
-  Vehicle Sticker, Rules, Announcements, and Settings.
-- Student Dashboard mobile view should behave as a lightweight app home screen:
-  keep urgent alerts, compact welcome/status information, and key actions; avoid
-  repeating the full module directory because the bottom navigation handles access.
-- Other student pages should be improved one page at a time with mobile-only CSS:
-  offense/fine records first, then movement/QR, scholarship/aid, and profile if
-  spacing is still poor.
-- Keep routes, controllers, validation, database structure, permissions, and
-  business workflows unchanged unless the user explicitly requests backend work.
+IMPORTANT FILES
+---------------
+- routes/web.php: routes and remaining inline legacy workflows.
+- app/Support/AdminPermissions.php: authoritative ability-to-role mapping.
+- app/Support/AccountSessionManager.php: device registration and revocation.
+- app/Support/SystemFeatures.php: registered feature flags.
+- app/Http/Controllers/Admin/StudentDocumentController.php: document review/download.
+- app/Http/Controllers/Student/DocumentController.php: owned document list/download.
+- config/filesystems.php: public storage and private student_documents disk.
+- resources/js/app.js: PWA, cropper, overlays, Lenis, and movement feed behavior.
+- docs/SYSTEM_DOCUMENTATION.md: expanded functional and technical reference.
+- docs/PROJECT_PROGRESS_AND_NEXT_STEPS.md: current risks and release plan.
 
-Recent Completed Work
----------------------
-- 2026-07-21: Hardened authentication without removing the temporary student IC-number
-  fallback. Password-reset requests and verification attempts are rate limited; reset
-  consumption is transactional with a row lock; protected routes revalidate the live
-  student/admin account and current admin role before proceeding.
-- 2026-07-21: Updated the shared frontend shell and documented the result. The
-  student dashboard uses the full workspace without a desktop sidebar, while its
-  mobile header keeps a hamburger-triggered sidebar drawer. Student module pages
-  retain the normal sticky desktop sidebar and mobile drawer; mobile bottom navigation
-  remains in use.
-- 2026-07-21: Reworked shared popup motion for notifications, confirmation dialogs,
-  media previews, filter sheets, account menus, and the mobile More sheet. Popups
-  now retain their exit state, use reversible opacity/transform motion, and media/
-  filter/notification surfaces use the trigger as their transform origin where
-  available.
-- 2026-07-21: Reduced scrolling cost on content pages. Cards no longer use
-  pointer-tracked lighting, reflection sweeps, entrance-pop animations, or mobile
-  backdrop filters; desktop hover is limited to a small elevation response.
-- 2026-07-17: Pushed checkpoint commit 0ecaf9c before further student PWA/mobile
-  design experiments.
-- 2026-07-17: Added a dedicated student Scan QR route/page for the mobile/PWA
-  bottom nav. Guard QR links now point to /student/movements/scan?token=...,
-  QR tokens remain usable while the checkpoint is active, and the student still
-  receives a short one-time movement pass after each successful scan.
-- Added the guard admin role and migration:
-  database/migrations/2026_07_11_000011_add_guard_role_to_admins_table.php
-- Added admin and student movement management, QR generation, scanning, history,
-  reporting, guard access, and related navigation.
-- Added a Safari-compatible QR scanner fallback using jsQR and device camera video.
-  The active scanner now lives on resources/views/student/movements/scan.blade.php.
-- Improved responsive login, dashboard, sidebar, header, footer, and dark theme UI.
-- Fixed the application shell so the sidebar and header begin at the viewport top.
-- Standardized the Admin Dashboard header spacing with other admin pages.
-- Updated English and Malay frontend translations across multiple admin/student pages.
-- Fixed discipline announcement sidebar active states so only the current item is active.
-- Marked the student AI helper as unavailable and removed its quick-action content.
-- 2026-07-20: Documented current AI Helper / agent integration before further
-  agent changes. Admin AI remains enabled only for backoffice-scoped admins when
-  an API key is configured; student AI remains unavailable.
-- Fixed redirect translation handling: TranslateFrontendContent now ignores redirects
-  and error responses so Laravel redirect headers remain unchanged.
-- Added a regression test for unauthenticated Admin Dashboard redirects to /login.
-- All 11 migrations were applied successfully at the last check.
-- public/storage is linked.
+MIGRATIONS ADDED FOR THE CURRENT FEATURE SET
+--------------------------------------------
+- 2026_07_31_120000_create_account_sessions_table.php
+- 2026_07_31_130000_create_student_documents_table.php
+- 2026_07_31_150000_add_source_to_student_documents_table.php
+- 2026_07_31_160000_create_system_features_table.php
 
-Current Verification Results
-----------------------------
-- php artisan test: PASS
-  - 7 tests, 18 assertions.
-  - Coverage is still minimal and does not validate real business workflows.
-- npm run build: PASS with Vite 8.0.9.
-- npm run build: PASS after the 2026-07-21 UI shell, popup-motion, and card
-  performance changes.
-- php artisan route:list --except-vendor: PASS, 108 routes.
-- php artisan migrate:status: PASS, all 11 migrations marked Ran.
-- php artisan view:cache: PASS after the latest layout changes.
-- composer audit: FAIL because 16 advisories affect 9 installed packages.
+RELEASE BLOCKERS / RISKS
+------------------------
+1. The 2026-08-02 Composer audit reports 28 advisories across 10 packages,
+   including high-severity Laravel/Symfony findings. Update dependencies separately.
+2. Make movement QR consumption and active checkout creation concurrency-safe.
+3. Run real-role desktop/mobile UAT and broaden legacy workflow tests.
+4. Rehearse encrypted database plus public/private file backup and restore.
+5. Verify production HTTPS, debug, cookies, proxy, queue, scheduler, mail, logs,
+   permissions, and rollback configuration.
+6. routes/web.php still contains large workflow closures.
 
-Outstanding Priority Work
--------------------------
-1. Production/debug configuration
-   - The local .env uses APP_ENV=local and APP_DEBUG=true.
-   - This is acceptable only for local development. Do not expose detailed errors on
-     a real deployment or long-lived public Cloudflare tunnel.
-   - Production must use APP_ENV=production and APP_DEBUG=false.
-   - Keep environment-specific values out of committed application code.
+PLANNED ONLY
+------------
+- iPayment receipt authenticity verification is not implemented or confirmed.
+  OCR or reading an unknown QR is not proof. Require an official API or documented
+  verification contract before automating authenticity; retain human review.
+- Student AI and AI-assisted write actions remain disabled pending privacy,
+  authorization, approval, audit, and testing requirements.
 
-2. Dependency security updates
-   - composer audit reported 16 known advisories affecting Laravel, Symfony, Guzzle,
-     and related packages, including high-severity advisories.
-   - Update dependencies in a dedicated change, then run the full test/build/manual
-     verification suite before deployment.
+VERIFICATION
+------------
+Run before deployment or release:
 
-3. QR token race condition
-   - File: app/Http/Controllers/Student/MovementController.php
-   - Token lookup and token rotation are separate operations. Concurrent scans could
-     both validate the same token before it is rotated.
-   - Make validation and rotation atomic using a database transaction with
-     lockForUpdate(), or use a conditional atomic update.
+  git status --short --branch
+  git diff --check
+  php artisan test
+  php artisan route:list --except-vendor
+  php artisan migrate:status
+  php artisan view:cache
+  npm run build
+  composer audit --locked
 
-4. Duplicate active movement race condition
-   - File: app/Http/Controllers/Student/MovementController.php
-   - The active-movement check and checkout insert are not in one transaction.
-   - Concurrent submissions could create multiple active checkout records.
-   - Add transaction/locking protection and, if practical, a database-level invariant.
-
-5. Real feature test coverage
-   - Existing tests only cover the homepage and a guest redirect.
-   - Add tests for login throttling, admin scopes, stale/deleted accounts, password reset
-     attempts, QR single use, concurrent movement submissions, CRUD authorization,
-     uploads, exports, and EN/MS locale switching.
-
-6. routes/web.php maintainability
-   - routes/web.php is approximately 1,858 lines and contains substantial CRUD/business
-     logic in closures.
-   - Move scholarship, discipline, announcements, fines, stickers, and exports into
-     controllers, Form Requests, and focused service classes in small verified stages.
-
-7. AI Helper / agent redesign
-   - Current files:
-     app/Http/Controllers/Admin/AiHelperController.php
-     app/Http/Controllers/Student/AiHelperController.php
-     resources/views/admin/ai_helper/index.blade.php
-     resources/views/layouts/app.blade.php
-     config/services.php
-     routes/web.php
-   - Current provider priority is Gemini, then OpenAI, then DeepSeek, based on
-     configured API keys.
-   - Student AI currently redirects to the dashboard with an unavailable message.
-   - Keep student AI disabled until privacy boundaries, prompt behavior, safety
-     messages, and permissions are defined.
-   - Keep admin AI read-only unless a future task adds a reviewed action/approval
-     workflow.
-   - Do not send secrets, raw session payloads, uploaded files, or full student
-     datasets to external AI providers.
-   - Add feature tests before enabling student-facing agents or AI-assisted writes.
-
-Architecture / Important Files
-------------------------------
-- routes/web.php
-  Main route definitions and many inline workflows. Treat as high risk when editing.
-- app/Http/Controllers/Auth/LoginController.php
-  Login, logout, forgot password, verification code, and password reset flows.
-- app/Http/Controllers/Admin/MovementController.php
-  Movement administration, QR lifecycle, settings, reports, and exports.
-- app/Http/Controllers/Student/MovementController.php
-  Student scan-pass validation, checkout/return recording, GPS checks, and history.
-- app/Http/Middleware/EnsureAdminScope.php
-  Admin scope authorization for system, scholarship, discipline, and movement roles.
-- app/Http/Middleware/TranslateFrontendContent.php
-  Legacy frontend text replacement for successful English HTML responses only.
-- resources/views/layouts/app.blade.php
-  Shared responsive application shell, desktop/mobile sidebar behavior, header,
-  footer, theme, navigation, confirmation modal, and account menu state.
-- resources/css/design-system.css
-  Shared material system, responsive UI shell, popup transitions, card performance
-  constraints, and accessibility/reduced-motion fallbacks.
-- resources/js/app.js
-  Theme behavior, notification center, media preview, mobile filter sheets, popup
-  transform-origin calculation, and PWA/push prompt behavior.
-- lang/en.json and lang/ms.json
-  Primary JSON translation dictionaries.
-- lang/en/frontend_replace.php
-  Compatibility replacement map for remaining hardcoded Malay frontend content.
-- app/Support/helpers.php
-  Shared audit, CSV, cache, and option helpers.
-- StudentEdge.sql
-  Root SQL dump. Migrations may not fully recreate all legacy schema/data.
-
-Recommended Next Execution Order
---------------------------------
-1. Preserve the current work:
-   git status --short --branch
-   git diff --stat
-
-2. If continuing the student PWA/mobile redesign, first verify the current
-   uncommitted Blade changes on a real mobile viewport or installed PWA context.
-   If the result is poor, restore to checkpoint 0ecaf9c or selectively revert the
-   two changed Blade files.
-
-3. Complete and verify the QR/movement transaction fixes.
-
-4. Add password reset throttling and live account/role session validation.
-
-5. If changing agents, keep the current documentation in docs/SYSTEM_DOCUMENTATION.md
-   as the baseline and update it again with the new design before implementation.
-
-6. Add focused feature tests for the above security behavior.
-
-7. Commit the current application changes before attempting dependency updates.
-
-8. Update Composer dependencies in a separate commit and rerun:
-   composer audit
-   php artisan test
-   php artisan route:list --except-vendor
-   npm run build
-   php artisan migrate:status
-
-9. Manually verify desktop and mobile workflows:
-   - Login/logout and forgot-password flow.
-   - Admin/student dashboards and language switching.
-   - Guard QR generation, Safari/Chrome scanning, checkout, and return.
-   - Student scholarship, offense, fine, and sticker workflows.
-   - Admin CRUD, approvals, CSV exports, PDF/print, and uploaded files.
-   - Student full-width desktop dashboard with a mobile hamburger drawer, sticky desktop
-     module sidebar, mobile module drawer/bottom navigation, plus notification, media,
-     filter, account-menu,
-     and More-sheet motion.
-
-Operational Notes
------------------
-- Cloudflare trycloudflare hostnames are temporary. Host changes can make old browser
-  cookies/sessions appear stale; clear site data when testing a new tunnel hostname.
-- Use HTTPS for camera access on mobile Safari/Chrome. localhost is also a secure context.
-- File uploads use the public disk. Verify php artisan storage:link after deployment.
-- Do not commit .env or expose APP_DEBUG=true on a public production environment.
-- Session, cache, and queue currently use database-backed drivers in the local setup.
-
-Collaboration Notes
--------------------
-- The user generally wants changes implemented and verified, not only suggested.
-- Keep progress updates concise and explain visible behavior in plain language.
-- Preserve unrelated/user changes in the dirty worktree.
-- Before any commit or push, inspect status, diff, branch, remote, and recent history.
+Do not commit .env, credentials, student data, database dumps containing real data,
+or uploaded public/private files. Do not discard unrelated working-tree changes.

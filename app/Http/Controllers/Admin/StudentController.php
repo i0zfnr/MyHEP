@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\AccountSessionManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
@@ -17,21 +19,26 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        $studentStats = [
-            'total' => DB::table('students')->count(),
-            'default_ic' => DB::table('students')->whereNull('password')->count(),
-            'custom_password' => DB::table('students')->whereNotNull('password')->count(),
-        ];
+        $canViewSensitiveStudents = adminCan('students.sensitive');
+        $studentStats = ['total' => DB::table('students')->count()];
+        if ($canViewSensitiveStudents) {
+            $studentStats['default_ic'] = DB::table('students')->whereNull('password')->count();
+            $studentStats['custom_password'] = DB::table('students')->whereNotNull('password')->count();
+        }
 
-        $filters = $this->validateFilters($request);
-        $students = $this->filteredStudentsQuery($filters)
-            ->select('id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'created_at')
-            ->selectRaw('CASE WHEN password IS NULL THEN 0 ELSE 1 END as has_custom_password')
-            ->orderBy('full_name')
-            ->paginate(15)
-            ->withQueryString();
+        $filters = $this->validateFilters($request, $canViewSensitiveStudents);
+        $studentsQuery = $this->filteredStudentsQuery($filters, $canViewSensitiveStudents);
+        if ($canViewSensitiveStudents) {
+            $studentsQuery
+                ->select('id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'created_at')
+                ->selectRaw('CASE WHEN password IS NULL THEN 0 ELSE 1 END as has_custom_password');
+        } else {
+            $studentsQuery->select('id', 'full_name', 'matric_no', 'program', 'created_at');
+        }
 
-        return view('admin.students.index', compact('students', 'filters', 'studentStats'));
+        $students = $studentsQuery->orderBy('full_name')->paginate(15)->withQueryString();
+
+        return view('admin.students.index', compact('students', 'filters', 'studentStats', 'canViewSensitiveStudents'));
     }
 
     public function search(Request $request)
@@ -70,18 +77,22 @@ class StudentController extends Controller
                 $student->id,
                 $student->full_name,
                 $student->matric_no,
-                $student->ic_no,
+                maskIdentityNumber($student->ic_no),
                 $student->program,
                 $student->phone ?? '',
                 $student->password_status,
                 $student->created_at,
             ]);
 
-        return downloadCsv(
+        auditLog('students.export', 'students', null, 'Exported filtered student records');
+        $response = downloadCsv(
             'students_' . now()->format('Ymd_His') . '.csv',
             ['ID', 'Nama', 'No Matrik', 'No IC', 'Program', 'Telefon', 'Status Kata Laluan', 'Tarikh Daftar'],
             $rows
         );
+        $response->headers->set('Cache-Control', 'private, no-store, max-age=0');
+
+        return $response;
     }
 
     public function create()
@@ -178,7 +189,16 @@ class StudentController extends Controller
 
     public function show(int $id): View|RedirectResponse
     {
-        $student = DB::table('students')->where('id', $id)->first();
+        $student = DB::table('students')
+            ->select([
+                'id', 'full_name', 'matric_no', 'ic_no', 'email', 'phone', 'program', 'photo',
+                'semester', 'academic_session', 'date_of_birth', 'religion', 'race', 'parliament', 'dun',
+                'address', 'study_address', 'residence_status', 'room_number', 'guardian_name',
+                'guardian_ic_no', 'guardian_phone', 'mother_ic_no', 'guardian_occupation',
+                'family_income', 'guardian_address',
+            ])
+            ->where('id', $id)
+            ->first();
         if (!$student) {
             return $this->studentNotFoundRedirect();
         }
@@ -225,19 +245,29 @@ class StudentController extends Controller
             ->with('success', __('Maklumat pelajar berjaya dikemaskini.'));
     }
 
-    public function destroy(int $id)
+    public function destroy(AccountSessionManager $sessions, int $id)
     {
+        $documentPaths = Schema::hasTable('student_documents')
+            ? DB::table('student_documents')->where('student_id', $id)->pluck('path')
+            : collect();
         $deleted = DB::table('students')->where('id', $id)->delete();
         if (!$deleted) {
             return $this->studentNotFoundRedirect();
         }
+        if (Schema::hasTable('student_documents')) {
+            DB::table('student_documents')->where('student_id', $id)->delete();
+            foreach ($documentPaths as $path) {
+                Storage::disk('student_documents')->delete($path);
+            }
+        }
+        $sessions->revokeAccount('student', $id);
         auditLog('students.delete', 'students', $id, 'Padam rekod pelajar');
 
         return redirect()->route('admin.students.index')
             ->with('success', __('Rekod pelajar berjaya dipadam.'));
     }
 
-    public function resetPassword(int $id)
+    public function resetPassword(AccountSessionManager $sessions, int $id)
     {
         $student = DB::table('students')->where('id', $id)->first();
         if (!$student) {
@@ -251,32 +281,39 @@ class StudentController extends Controller
                 'password' => null,
                 'updated_at' => now(),
             ]);
+        $sessions->revokeAccount('student', $id);
         auditLog('students.reset_password', 'students', $id, 'Reset kata laluan pelajar kepada IC');
 
         return redirect()->route('admin.students.index')
             ->with('success', __('Kata laluan pelajar telah direset kepada No. IC.'));
     }
 
-    private function validateFilters(Request $request): array
+    private function validateFilters(Request $request, bool $allowSensitive = true): array
     {
-        return $request->validate([
+        $rules = [
             'q' => ['nullable', 'string', 'max:150'],
             'matric_no' => ['nullable', 'string', 'max:30'],
             'program' => ['nullable', 'string', 'max:100'],
-            'password_status' => ['nullable', Rule::in(['default', 'custom'])],
-        ]);
+        ];
+        if ($allowSensitive) {
+            $rules['password_status'] = ['nullable', Rule::in(['default', 'custom'])];
+        }
+
+        return $request->validate($rules);
     }
 
-    private function filteredStudentsQuery(array $filters)
+    private function filteredStudentsQuery(array $filters, bool $allowSensitive = true)
     {
         $query = DB::table('students');
 
         if (!empty($filters['q'])) {
             $q = trim($filters['q']);
-            $query->where(function ($sub) use ($q) {
+            $query->where(function ($sub) use ($q, $allowSensitive) {
                 $sub->where('full_name', 'like', "%{$q}%")
-                    ->orWhere('matric_no', 'like', "%{$q}%")
-                    ->orWhere('ic_no', 'like', "%{$q}%");
+                    ->orWhere('matric_no', 'like', "%{$q}%");
+                if ($allowSensitive) {
+                    $sub->orWhere('ic_no', 'like', "%{$q}%");
+                }
             });
         }
 

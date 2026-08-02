@@ -1,6 +1,6 @@
 # StudentEdge Data Schema
 
-Last updated: 2026-07-23
+Last updated: 2026-08-02
 
 ## Sources of Truth
 
@@ -14,6 +14,7 @@ Last updated: 2026-07-23
 students
   |-- scholarships
   |-- student_scholarship_status_forms
+  |-- student_documents
   |-- offenses --< offense_items >-- offense_types
   |       |-- offense_evidence_photos
   |       `-- fine_payment_applications
@@ -53,6 +54,7 @@ rule_categories --< rules
 | `movement_types` | Checkout/return movement types | Referenced by movement records |
 | `movement_settings` | Curfew, GPS, and movement configuration | Operational singleton/configuration data |
 | `student_movements` | Checkout, return, GPS, residence, plate, late status, and explanation | Belongs to student, checkpoint, and movement type |
+| `student_documents` | Private document metadata, source, review state, expiry, and storage path | Belongs to student; review may reference admin |
 
 ## Platform Tables
 
@@ -63,6 +65,8 @@ rule_categories --< rules
 | `bug_reports` | User problem reports and optional screenshots |
 | `audit_logs` | Actor, action, target, metadata, IP, and timestamp trace |
 | `sessions` | Database-backed Laravel sessions |
+| `account_sessions` | Public device handle, owner, active role/account, user agent, IP, and activity timestamps |
+| `system_features` | Feature key, enabled state, and last updating admin |
 | `cache`, `cache_locks` | Laravel cache and locks |
 | `jobs`, `job_batches`, `failed_jobs` | Queue state and failures |
 
@@ -70,7 +74,7 @@ rule_categories --< rules
 
 - Student identity is anchored by the student row and commonly addressed by `matric_no`; migrations permit a nullable matric number for incomplete imports.
 - Student IC numbers are sensitive and currently participate in temporary default-password fallback behavior.
-- Admin role values include `scholarship_admin`, `discipline_admin`, `guard`, and `system_admin`.
+- Admin role values include `scholarship_admin`, `discipline_admin`, `student_affairs_head`, `guard`, and `system_admin`.
 - A privileged linked-role feature may associate a student session with an admin identity; authorization must be resolved from trusted database/session state.
 
 ## Integrity Expectations
@@ -79,7 +83,9 @@ rule_categories --< rules
 - Matric number, IC number, email, and other identifiers need explicit uniqueness rules based on institutional data policy.
 - Monetary values use fixed-precision decimal columns, never floating point.
 - Status fields must use a documented controlled vocabulary and validated transitions.
-- Uploaded documents are stored as paths; replacing or deleting a record must account for the underlying file.
+- `student_documents` status is `pending`, `approved`, or `rejected`; category is `letters`, `receipts`, `scholarship`, `official_notices`, or `other`.
+- Private documents must remain on the `student_documents` disk; replacing or deleting metadata must also handle the file.
+- `system_features.feature_key` is unique and must match the application registry.
 - One-time reset codes and QR tokens need atomic consumption.
 - A student should not gain duplicate active movement rows through concurrent requests.
 

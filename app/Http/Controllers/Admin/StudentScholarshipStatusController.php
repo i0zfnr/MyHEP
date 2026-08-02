@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StudentScholarshipStatusController extends Controller
 {
@@ -19,6 +21,10 @@ class StudentScholarshipStatusController extends Controller
 
         $query = DB::table('students')
             ->leftJoin('student_scholarship_status_forms as forms', 'forms.student_id', '=', 'students.id')
+            ->leftJoin('student_documents as offer_docs', function ($join): void {
+                $join->on('offer_docs.source_id', '=', 'forms.id')
+                    ->where('offer_docs.source_type', '=', 'scholarship_status');
+            })
             ->select(
                 'students.id as student_id',
                 'students.full_name',
@@ -28,10 +34,12 @@ class StudentScholarshipStatusController extends Controller
                 'forms.sponsor_name',
                 'forms.monthly_amount',
                 'forms.notes',
-                'forms.submitted_at'
+                'forms.submitted_at',
+                'offer_docs.id as offer_letter_id',
+                'offer_docs.original_name as offer_letter_name'
             );
 
-        if (!empty($filters['q'])) {
+        if (! empty($filters['q'])) {
             $q = trim($filters['q']);
             $query->where(function ($sub) use ($q) {
                 $sub->where('students.full_name', 'like', "%{$q}%")
@@ -59,5 +67,24 @@ class StudentScholarshipStatusController extends Controller
         ];
 
         return view('admin.student_scholarship_status.index', compact('records', 'filters', 'summary'));
+    }
+
+    public function downloadOfferLetter(int $id): StreamedResponse
+    {
+        $document = DB::table('student_documents')
+            ->where('id', $id)
+            ->where('source_type', 'scholarship_status')
+            ->where('category', 'scholarship')
+            ->first();
+        abort_unless($document && $document->disk === 'student_documents', 404);
+        abort_unless(Storage::disk('student_documents')->exists($document->path), 404);
+
+        auditLog('scholarship.offer_letter_download', 'student_documents', $id, 'Scholarship offer letter downloaded');
+
+        return Storage::disk('student_documents')->download($document->path, $document->original_name, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'Pragma' => 'no-cache',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 }

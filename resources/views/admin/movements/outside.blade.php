@@ -81,7 +81,9 @@
                                     <div>
                                         <strong>{{ $record->student_name }}</strong><br>
                                         <span class="muted">{{ $record->matric_no }} | {{ $record->program }}</span><br>
-                                        <a class="mv-mini-btn" href="{{ route('admin.students.show', $record->student_id) }}">{{ __('View Profile') }}</a>
+                                        @if(adminCan('students.sensitive'))
+                                            <a class="mv-mini-btn" href="{{ route('admin.students.show', $record->student_id) }}">{{ __('View Profile') }}</a>
+                                        @endif
                                     </div>
                                 </div>
                             </td>

@@ -243,8 +243,10 @@
 
 @section('content')
 <div class="wrap">
-    @php($adminRole = session('auth_user.admin_role') ?? null)
-    @php($canManageStudents = in_array($adminRole, ['discipline_admin', 'student_affairs_head', 'system_admin'], true))
+    @php($canViewSensitiveStudents = adminCan('students.sensitive'))
+    @php($canExportStudents = adminCan('students.export'))
+    @php($canManageStudents = adminCan('students.manage'))
+    @php($hasStudentActions = $canViewSensitiveStudents || $canManageStudents)
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
@@ -289,14 +291,16 @@
             <div class="stat-label">{{ __('Total Pelajar') }}</div>
             <div class="stat-value">{{ $studentStats['total'] }}</div>
         </a>
-        <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'default'])) }}">
-            <div class="stat-label">{{ __('Default IC') }}</div>
-            <div class="stat-value">{{ $studentStats['default_ic'] }}</div>
-        </a>
-        <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'custom'])) }}">
-            <div class="stat-label">{{ __('Custom Password') }}</div>
-            <div class="stat-value">{{ $studentStats['custom_password'] }}</div>
-        </a>
+        @if($canViewSensitiveStudents)
+            <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'default'])) }}">
+                <div class="stat-label">{{ __('Default IC') }}</div>
+                <div class="stat-value">{{ $studentStats['default_ic'] }}</div>
+            </a>
+            <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'custom'])) }}">
+                <div class="stat-label">{{ __('Custom Password') }}</div>
+                <div class="stat-value">{{ $studentStats['custom_password'] }}</div>
+            </a>
+        @endif
     </div>
 
     <div class="card">
@@ -304,7 +308,9 @@
             <h1 style="margin:0;font-size:20px;">{{ __('Senarai Pelajar') }}</h1>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
-                <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                @if($canExportStudents)
+                    <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                @endif
                 @if($canManageStudents)
                     <a class="btn" href="{{ route('admin.students.create') }}">{{ __('Tambah Pelajar') }}</a>
                 @endif
@@ -314,16 +320,18 @@
         <div class="filters" data-filter-sheet data-filter-title="{{ __('Student filters') }}">
             <form method="GET" action="{{ route('admin.students.index') }}">
                 <div class="filter-grid">
-                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama / IC') }}"></div>
+                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ $canViewSensitiveStudents ? __('Cari nama / IC') : __('Cari nama') }}"></div>
                     <div><input type="text" name="matric_no" value="{{ $filters['matric_no'] ?? '' }}" placeholder="{{ __('Cari no matrik') }}"></div>
                     <div><input type="text" name="program" value="{{ $filters['program'] ?? '' }}" placeholder="{{ __('Cari program') }}"></div>
-                    <div>
-                        <select name="password_status">
-                            <option value="">{{ __('Semua status kata laluan') }}</option>
-                            <option value="default" {{ ($filters['password_status'] ?? '') === 'default' ? 'selected' : '' }}>{{ __('Default IC') }}</option>
-                            <option value="custom" {{ ($filters['password_status'] ?? '') === 'custom' ? 'selected' : '' }}>{{ __('Custom Password') }}</option>
-                        </select>
-                    </div>
+                    @if($canViewSensitiveStudents)
+                        <div>
+                            <select name="password_status">
+                                <option value="">{{ __('Semua status kata laluan') }}</option>
+                                <option value="default" {{ ($filters['password_status'] ?? '') === 'default' ? 'selected' : '' }}>{{ __('Default IC') }}</option>
+                                <option value="custom" {{ ($filters['password_status'] ?? '') === 'custom' ? 'selected' : '' }}>{{ __('Custom Password') }}</option>
+                            </select>
+                        </div>
+                    @endif
                     <div style="display:flex; gap:8px;">
                         <button class="btn" type="submit">{{ __('Filter') }}</button>
                         <a class="btn" href="{{ route('admin.students.index') }}">{{ __('Reset') }}</a>
@@ -338,11 +346,13 @@
                     <tr>
                         <th>Nama</th>
                         <th>No Matrik</th>
-                        <th class="col-ic">IC</th>
+                        @if($canViewSensitiveStudents)<th class="col-ic">IC</th>@endif
                         <th class="col-program">Program</th>
-                        <th class="col-phone">Telefon</th>
-                        <th class="col-password">Status Kata Laluan</th>
-                        <th>Tindakan</th>
+                        @if($canViewSensitiveStudents)
+                            <th class="col-phone">Telefon</th>
+                            <th class="col-password">Status Kata Laluan</th>
+                        @endif
+                        @if($hasStudentActions)<th>Tindakan</th>@endif
                     </tr>
                 </thead>
                 <tbody>
@@ -350,22 +360,26 @@
                         <tr>
                             <td>
                                 <span class="student-name">{{ $student->full_name }}</span>
-                                <span class="student-sub">{{ $student->program }}<br>{{ $student->ic_no }}</span>
+                                <span class="student-sub">{{ $student->program }}@if($canViewSensitiveStudents)<br>{{ maskIdentityNumber($student->ic_no) }}@endif</span>
                             </td>
                             <td class="matric-cell">{{ $student->matric_no ?: '-' }}</td>
-                            <td class="col-ic">{{ $student->ic_no }}</td>
+                            @if($canViewSensitiveStudents)<td class="col-ic">{{ maskIdentityNumber($student->ic_no) }}</td>@endif
                             <td class="col-program">{{ $student->program }}</td>
-                            <td class="col-phone">{{ $student->phone ?: '-' }}</td>
-                            <td class="col-password">
-                                @if((int) $student->has_custom_password === 1)
-                                    <span class="pwd-badge pwd-custom">Custom Password</span>
-                                @else
-                                    <span class="pwd-badge pwd-default">Default IC</span>
-                                @endif
-                            </td>
-                            <td>
+                            @if($canViewSensitiveStudents)
+                                <td class="col-phone">{{ $student->phone ?: '-' }}</td>
+                                <td class="col-password">
+                                    @if((int) $student->has_custom_password === 1)
+                                        <span class="pwd-badge pwd-custom">Custom Password</span>
+                                    @else
+                                        <span class="pwd-badge pwd-default">Default IC</span>
+                                    @endif
+                                </td>
+                            @endif
+                            @if($hasStudentActions)<td>
                                 <div class="actions-cell">
-                                    <a class="btn" href="{{ route('admin.students.show', $student->id) }}">View Profile</a>
+                                    @if($canViewSensitiveStudents)
+                                        <a class="btn" href="{{ route('admin.students.show', $student->id) }}">View Profile</a>
+                                    @endif
                                     @if($canManageStudents)
                                         <a class="btn manage-action" href="{{ route('admin.students.edit', $student->id) }}">Edit</a>
                                         <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;"
@@ -386,10 +400,10 @@
                                         </form>
                                     @endif
                                 </div>
-                            </td>
+                            </td>@endif
                         </tr>
                     @empty
-                        <tr><td colspan="7" style="text-align:center;color:#7a6555;">Tiada rekod pelajar.</td></tr>
+                        <tr><td colspan="{{ $canViewSensitiveStudents ? 7 : 3 }}" style="text-align:center;color:#7a6555;">Tiada rekod pelajar.</td></tr>
                     @endforelse
                 </tbody>
             </table>

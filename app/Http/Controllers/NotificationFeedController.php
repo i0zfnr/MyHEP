@@ -48,6 +48,7 @@ class NotificationFeedController extends Controller
                     route('student.offenses.index'),
                     now(),
                     'danger',
+                    'discipline',
                 );
             }
         }
@@ -62,12 +63,13 @@ class NotificationFeedController extends Controller
                 $isPending = $application->status === 'pending';
                 $actionableCount += $isPending ? 1 : 0;
                 $items[] = $this->item(
-                    'payment-' . $application->id,
+                    'payment-'.$application->id,
                     __('Payment review'),
                     __('Your latest payment receipt is :status.', ['status' => __($application->status)]),
                     route('student.offenses.index'),
                     $application->updated_at,
                     $isPending ? 'warning' : ($application->status === 'approved' ? 'success' : 'danger'),
+                    'discipline',
                 );
             }
         }
@@ -80,7 +82,7 @@ class NotificationFeedController extends Controller
 
             if ($sticker) {
                 $items[] = $this->item(
-                    'sticker-' . $sticker->id,
+                    'sticker-'.$sticker->id,
                     __('Vehicle sticker'),
                     __('Your :vehicle sticker application is :status.', [
                         'vehicle' => $sticker->vehicle_no,
@@ -89,6 +91,24 @@ class NotificationFeedController extends Controller
                     route('student.vehicle-stickers.index'),
                     $sticker->updated_at,
                     $sticker->status === 'approved' ? 'success' : ($sticker->status === 'rejected' ? 'danger' : 'warning'),
+                    'discipline',
+                );
+            }
+        }
+
+        if (Schema::hasTable('student_documents')) {
+            $document = DB::table('student_documents')->where('student_id', $studentId)->latest('updated_at')->first();
+            if ($document) {
+                $isPending = $document->status === 'pending';
+                $actionableCount += $isPending ? 1 : 0;
+                $items[] = $this->item(
+                    'document-'.$document->id,
+                    __('Document review'),
+                    __('Your document ":title" is :status.', ['title' => $document->title, 'status' => __($document->status)]),
+                    route('student.documents.index'),
+                    $document->updated_at,
+                    $isPending ? 'warning' : ($document->status === 'approved' ? 'success' : 'danger'),
+                    'documents',
                 );
             }
         }
@@ -123,6 +143,7 @@ class NotificationFeedController extends Controller
                     route('admin.bug-reports.index'),
                     DB::table('bug_reports')->whereIn('status', ['new', 'in_progress'])->max('updated_at') ?: now(),
                     'danger',
+                    'account',
                 );
             }
         }
@@ -139,6 +160,7 @@ class NotificationFeedController extends Controller
                         route('admin.offenses.index', ['status' => 'applied']),
                         DB::table('fine_payment_applications')->where('status', 'pending')->max('updated_at') ?: now(),
                         'warning',
+                        'discipline',
                     );
                 }
             }
@@ -154,8 +176,25 @@ class NotificationFeedController extends Controller
                         route('admin.vehicle-stickers.index', ['status' => 'pending']),
                         DB::table('vehicle_sticker_applications')->where('status', 'pending')->max('updated_at') ?: now(),
                         'warning',
+                        'discipline',
                     );
                 }
+            }
+        }
+
+        if (in_array($scope, ['student_affairs_head', 'system_admin'], true) && Schema::hasTable('student_documents')) {
+            $pendingDocuments = DB::table('student_documents')->where('status', 'pending')->count();
+            if ($pendingDocuments > 0) {
+                $actionableCount += $pendingDocuments;
+                $items[] = $this->item(
+                    'pending-documents',
+                    __('Student documents'),
+                    trans_choice('{1} :count document is waiting for review.|[2,*] :count documents are waiting for review.', $pendingDocuments, ['count' => $pendingDocuments]),
+                    route('admin.documents.index', ['status' => 'pending']),
+                    DB::table('student_documents')->where('status', 'pending')->max('updated_at') ?: now(),
+                    'warning',
+                    'documents',
+                );
             }
         }
 
@@ -173,6 +212,7 @@ class NotificationFeedController extends Controller
                     route('admin.movements.violations'),
                     DB::table('student_movements')->where('rule_status', 'late')->max('updated_at') ?: now(),
                     'danger',
+                    'movement',
                 );
             }
         }
@@ -185,6 +225,7 @@ class NotificationFeedController extends Controller
                 route('admin.dashboard'),
                 now(),
                 'success',
+                'account',
             );
         }
 
@@ -193,7 +234,7 @@ class NotificationFeedController extends Controller
 
     private function announcementItems(string $table, string $url, string $type): array
     {
-        if (!Schema::hasTable($table)) {
+        if (! Schema::hasTable($table)) {
             return [];
         }
 
@@ -202,7 +243,7 @@ class NotificationFeedController extends Controller
             ->limit(2)
             ->get()
             ->map(fn (object $announcement) => $this->item(
-                $type . '-' . $announcement->id,
+                $type.'-'.$announcement->id,
                 $announcement->title,
                 Str::limit(strip_tags((string) $announcement->body), 95),
                 $url,
@@ -220,7 +261,7 @@ class NotificationFeedController extends Controller
         string $url,
         mixed $timestamp,
         string $tone,
-        string $type = 'system',
+        string $type = 'account',
     ): array {
         $date = Carbon::parse($timestamp);
 
@@ -231,6 +272,7 @@ class NotificationFeedController extends Controller
             'url' => $url,
             'tone' => $tone,
             'type' => $type,
+            'category' => $type,
             'time' => $date->diffForHumans(),
             'timestamp' => $date->toIso8601String(),
         ];

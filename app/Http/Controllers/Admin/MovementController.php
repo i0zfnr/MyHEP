@@ -331,7 +331,9 @@ class MovementController extends Controller
             'student_photo_url' => !empty($record->student_photo)
                 ? asset('storage/' . $record->student_photo)
                 : null,
-            'student_profile_url' => route('admin.students.show', $record->student_id),
+            'student_profile_url' => adminCan('students.sensitive')
+                ? route('admin.students.show', $record->student_id)
+                : null,
             'program' => (string) $record->program,
             'checkpoint_name' => (string) $record->checkpoint_name,
             'residence_label' => ($record->residence_status ?? 'inside_campus') === 'live_out'

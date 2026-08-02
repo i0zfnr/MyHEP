@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\AccountSessionManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -63,7 +64,7 @@ class AdminUserController extends Controller
         return view('admin.admin_users.edit', compact('adminUser'));
     }
 
-    public function update(Request $request, int $id)
+    public function update(Request $request, AccountSessionManager $sessions, int $id)
     {
         $adminUser = DB::table('admins')->where('id', $id)->first();
         if (!$adminUser) {
@@ -92,12 +93,15 @@ class AdminUserController extends Controller
         }
 
         DB::table('admins')->where('id', $id)->update($payload);
+        if (!empty($validated['password']) || $adminUser->role !== $validated['role']) {
+            $sessions->revokeAccount('admin', $id);
+        }
 
         return redirect()->route('admin.admin-users.index')
             ->with('success', __('Maklumat admin berjaya dikemaskini.'));
     }
 
-    public function resetPassword(int $id)
+    public function resetPassword(AccountSessionManager $sessions, int $id)
     {
         $adminUser = DB::table('admins')->where('id', $id)->first();
         if (!$adminUser) {
@@ -111,13 +115,14 @@ class AdminUserController extends Controller
                 'password' => Hash::make('Admin@12345'),
                 'updated_at' => now(),
             ]);
+        $sessions->revokeAccount('admin', $id);
         auditLog('admin_users.reset_password', 'admins', $id, 'Reset kata laluan admin kepada default');
 
         return redirect()->route('admin.admin-users.index')
             ->with('success', __('Kata laluan admin telah direset kepada Admin@12345.'));
     }
 
-    public function destroy(int $id)
+    public function destroy(AccountSessionManager $sessions, int $id)
     {
         if ((int) session('auth_user.id') === $id) {
             return redirect()->route('admin.admin-users.index')
@@ -129,6 +134,7 @@ class AdminUserController extends Controller
             return redirect()->route('admin.admin-users.index')
                 ->withErrors(['admin' => __('Rekod admin tidak dijumpai.')]);
         }
+        $sessions->revokeAccount('admin', $id);
         auditLog('admin_users.delete', 'admins', $id, 'Padam rekod admin');
 
         return redirect()->route('admin.admin-users.index')

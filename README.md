@@ -1,80 +1,73 @@
-#  StudentEdge
+# StudentEdge
 
-StudentEdge is a Laravel-based student management system developed for student affairs operations that focuses on:
+StudentEdge is a Laravel student-affairs management system for Politeknik Besut. It brings scholarship, discipline, fines, vehicle stickers, campus movement, student documents, notifications, reporting, and role-scoped administration into one responsive web application.
 
--  Scholarship Management
--  Student Offense & Disciplinary Record Management
+## Documentation
 
-The system helps administrators efficiently manage scholarship applications, monitor student disciplinary records, and maintain organized student data through a modern web-based platform.
+- [System documentation](docs/SYSTEM_DOCUMENTATION.md)
+- [Project progress and next steps](docs/PROJECT_PROGRESS_AND_NEXT_STEPS.md)
+- [Team presentation guide](docs/TEAM_PRESENTATION_GUIDE.md)
+- [Panel coding Q&A guide](docs/PANEL_CODING_QA_GUIDE.md)
+- [UAT checklist](docs/UAT_CHECKLIST.md)
+- [Deployment checklist](docs/DEPLOYMENT_CHECKLIST.md)
+- [Backup and restore SOP](docs/BACKUP_RESTORE_SOP.md)
+- [Product and engineering context](Document%20Context/PRD.md)
 
----
+## Main capabilities
 
-# Documentation
+- Custom student/admin authentication, password reset, active-device tracking, and remote session revocation
+- Central admin permissions with separate student list, sensitive-data, export, management, document, scholarship, discipline, movement, back-office, and system abilities
+- Student CRUD, search, CSV/XLSX import, CSV export, identity masking, and pagination
+- Scholarship records, B40 TVET import/export, announcements, declarations, and private offer-letter upload/review
+- Offenses, evidence, fines, payment receipts, rules, discipline announcements, and vehicle-sticker decisions
+- QR-based campus checkout/return, guard views, movement reports, cursor batches, and virtualized long lists
+- Private Student Document Centre with review, authenticated downloads, and a system-admin feature toggle
+- English/Malay UI, light/dark theme, responsive PWA shell, notifications, browser push, and reduced-motion support
+- Reports, monitoring, maintenance, audit logs, and cropped admin profile photos
 
-Full system documentation is available at [`docs/SYSTEM_DOCUMENTATION.md`](docs/SYSTEM_DOCUMENTATION.md).
+## Technology
 
-Existing operational checklists are available in the [`docs`](docs) directory.
+| Technology | Requirement / version |
+| --- | --- |
+| PHP | `^8.3` |
+| Laravel | `^13.0` |
+| MySQL / MariaDB | Supported relational database |
+| Node.js | Current LTS recommended |
+| Vite | `^8.0` |
+| Tailwind CSS | `^4.0` |
+| Cropper.js | `^1.6.2` |
+| Lenis | `1.3.25` |
 
----
+## Local installation
 
-#  Features
-
-##  Scholarship Module
-
-- Scholarship application management
-- Scholarship status tracking
-- Student scholarship records
-- Scholarship approval workflow
-- Scholarship data management for administrators
-
-##  Offense Management Module
-
-- Student disciplinary/offense record management
-- Offense category tracking
-- Offense history monitoring
-- Administrative disciplinary actions
-- Student conduct reporting
-
-##  General Features
-
-- User authentication & authorization
-- Admin dashboard
-- Role-based access control
-- Responsive student interface with a full-width desktop dashboard, mobile dashboard hamburger drawer, sticky module sidebar, and mobile bottom navigation
-- Shared accessible overlays for notifications, confirmations, media previews, filters, and account actions
-- Database seeding for development setup
-
----
-
-#  Tech Stack
-
-| Technology | Version |
-|---|---|
-| PHP | 8.4 |
-| Laravel | 13 |
-| MySQL | 8+ |
-| Node.js | Latest LTS |
-| npm | Latest |
-| Vite | Frontend Build Tool |
-
----
-
-#  Requirements
-
-Before running the project, ensure you have installed:
-
-- PHP 8.2 or higher
-- Composer
-- Node.js and npm
-- MySQL Server
-- Git
-
----
-
-#  Installation
-
-## 1. Clone the Repository
-
-```bash
+```powershell
 git clone https://github.com/i0zfnr/MyHEP.git
-cd MyHEP
+Set-Location MyHEP
+composer install
+Copy-Item .env.example .env
+php artisan key:generate
+```
+
+Create the database from `StudentEdge.sql`, configure `.env`, then apply incremental migrations and build the frontend:
+
+```powershell
+php artisan migrate
+php artisan storage:link
+npm install
+npm run build
+php artisan serve
+```
+
+Private student documents are stored under `storage/app/private/student_documents`; do not expose that directory through `public/storage`.
+
+## Verification
+
+```powershell
+php artisan test
+php artisan route:list --except-vendor
+php artisan view:cache
+npm run build
+git diff --check
+```
+
+See the deployment checklist before production use. Never commit `.env`, production credentials, personal student data, or uploaded documents.

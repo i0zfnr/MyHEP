@@ -1,6 +1,6 @@
 # StudentEdge Engineering Rules
 
-Last updated: 2026-07-23
+Last updated: 2026-08-02
 
 These rules apply to future code and UI changes unless a reviewed requirement explicitly replaces one.
 
@@ -14,6 +14,8 @@ These rules apply to future code and UI changes unless a reviewed requirement ex
 6. Write audit logs for destructive operations, password resets, privileged mode changes, payment decisions, QR changes, and other critical actions.
 7. Use transactions and row locking where duplicate or concurrent writes would violate a business rule.
 8. Back up data before migrations, bulk imports, bulk deletion, or schema changes.
+9. Mask identity numbers in list and print contexts unless the request requires the `students.sensitive` ability.
+10. Store student documents privately and return them only through owner-checked or ability-checked download controllers.
 
 ## Laravel Implementation
 
@@ -25,6 +27,8 @@ These rules apply to future code and UI changes unless a reviewed requirement ex
 6. Avoid N+1 queries and add indexes for frequently searched, joined, or sorted fields.
 7. Keep locale-visible strings in translation files.
 8. Keep environment-specific values in configuration and `.env`; never commit real secrets.
+9. Add new admin access rules to the central `AdminPermissions` map and cover positive and negative cases with tests.
+10. Enforce optional modules with `feature.enabled` middleware; a hidden link is not authorization.
 
 ## Database and Import Rules
 

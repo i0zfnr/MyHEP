@@ -558,6 +558,14 @@
             radial-gradient(circle at 0% 0%, rgba(255,255,255,.07), transparent 34%) !important;
         border-color: rgba(226, 209, 192, .16) !important;
     }
+    body[data-theme="dark"] .monitor-card {
+        background: linear-gradient(145deg, rgba(34, 30, 26, .88), rgba(14, 13, 12, .76));
+        border-color: rgba(226, 209, 192, .16);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    body[data-theme="dark"] .monitor-card::before {
+        background: radial-gradient(circle at 85% 12%, rgba(95, 190, 145, .09), transparent 34%);
+    }
     body[data-theme="dark"] .monitor-kpi-label,
     body[data-theme="dark"] .stat-label,
     body[data-theme="dark"] .portal-card-head,
@@ -837,6 +845,9 @@
     }
     body[data-theme="dark"] .data-card-head::before {
         background: linear-gradient(180deg, #5fbe91 0%, #d7bfa8 100%);
+    }
+    body[data-theme="dark"] .data-card-head {
+        background: linear-gradient(180deg, #211d19 0%, #171411 100%);
     }
 
     @media (prefers-reduced-motion: reduce) {

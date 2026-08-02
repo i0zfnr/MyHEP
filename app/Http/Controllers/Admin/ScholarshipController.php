@@ -124,7 +124,7 @@ class ScholarshipController extends Controller
             ->map(fn ($record) => [
                 $record->full_name,
                 $record->matric_no,
-                $record->ic_no,
+                maskIdentityNumber($record->ic_no),
                 $record->program,
                 $record->phone ?? '',
                 $record->amount !== null ? number_format((float) $record->amount, 2, '.', '') : '',

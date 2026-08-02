@@ -892,7 +892,7 @@
     $studentProgram = $studentProfile->program ?? ($authUser['program'] ?? '-');
     $studentSemester = $studentProfile->semester ?? ($authUser['semester'] ?? '-');
     $studentSession = $studentProfile->academic_session ?? '-';
-    $studentIcNo = $studentProfile->ic_no ?? '-';
+    $studentIcNo = maskIdentityNumber($studentProfile->ic_no ?? null);
     $jsLocale = app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB';
 @endphp
 <div class="sdash">

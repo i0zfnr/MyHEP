@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\AccountSessionManager;
 use App\Support\DualRoleSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -10,10 +11,10 @@ use Illuminate\View\View;
 
 class SettingController extends Controller
 {
-    public function show(Request $request): View|RedirectResponse
+    public function show(Request $request, AccountSessionManager $sessions): View|RedirectResponse
     {
         $authUser = $request->session()->get('auth_user');
-        if (!$authUser) {
+        if (! $authUser) {
             return redirect()->route('login');
         }
 
@@ -26,8 +27,12 @@ class SettingController extends Controller
             'is_student_mode' => ($authUser['role'] ?? null) === 'student',
             'override_enabled' => (bool) ($authUser['admin_override'] ?? false),
         ];
+        $sessionOwner = $sessions->owner($request);
+        $activeSessions = $sessionOwner
+            ? $sessions->sessionsFor($sessionOwner, $request->session()->getId())
+            : collect();
 
-        return view('settings.index', compact('currentLocale', 'currentTheme', 'backRoute', 'roleMode'));
+        return view('settings.index', compact('currentLocale', 'currentTheme', 'backRoute', 'roleMode', 'activeSessions'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -70,14 +75,44 @@ class SettingController extends Controller
             ? DualRoleSession::switchToStudent($request, (bool) ($validated['override'] ?? false))
             : DualRoleSession::switchToAdmin($request);
 
-        if (!$switched) {
+        if (! $switched) {
             return redirect()->route('settings.show')->withErrors([
                 'role_mode' => __('ui.role_mode_unavailable'),
             ]);
         }
 
-        auditLog('auth.role_mode_changed', 'account', null, 'Account access mode changed to ' . $validated['mode']);
+        auditLog('auth.role_mode_changed', 'account', null, 'Account access mode changed to '.$validated['mode']);
 
         return redirect()->route($validated['mode'] === 'admin' ? 'admin.dashboard' : 'student.dashboard');
+    }
+
+    public function destroySession(Request $request, AccountSessionManager $sessions, string $publicId): RedirectResponse
+    {
+        $owner = $sessions->owner($request);
+        abort_unless($owner, 403);
+
+        $result = $sessions->revoke($owner, $publicId, $request->session()->getId());
+        abort_if($result === 'not_found', 404);
+
+        if ($result === 'current') {
+            return redirect()->route('settings.show')->withErrors([
+                'session' => __('ui.cannot_revoke_current_session'),
+            ]);
+        }
+
+        auditLog('auth.session_revoked', $owner['type'], $owner['id'], 'Another account session was revoked');
+
+        return redirect()->route('settings.show')->with('success', __('ui.session_revoked'));
+    }
+
+    public function destroyOtherSessions(Request $request, AccountSessionManager $sessions): RedirectResponse
+    {
+        $owner = $sessions->owner($request);
+        abort_unless($owner, 403);
+
+        $count = $sessions->revokeOthers($owner, $request->session()->getId());
+        auditLog('auth.other_sessions_revoked', $owner['type'], $owner['id'], "Revoked {$count} other account sessions");
+
+        return redirect()->route('settings.show')->with('success', __('ui.other_sessions_revoked'));
     }
 }

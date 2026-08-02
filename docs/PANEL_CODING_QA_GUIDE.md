@@ -1,5 +1,7 @@
 # StudentEdge Panel Coding Q&A Guide
 
+Last updated: 2026-08-02
+
 This guide is for answering technical questions from panel members. It explains the coding side of StudentEdge in a simple but accurate way.
 
 ## 1. Is This System Using API?
@@ -657,4 +659,34 @@ Use this if asked to explain the code live:
 
 ## 28. One-Minute Technical Summary
 
-StudentEdge is a Laravel MVC system. It uses web routes in `routes/web.php`, controllers for logic, Blade files for interface, and MySQL for storage. Admin access is controlled by session middleware and role scope middleware. Student and scholarship data are handled using Laravel Query Builder. The B40 TVET feature imports CSV/XLSX, detects headers, filters rows by `POLITEKNIK BESUT`, saves student records, creates scholarship records, and exports the result to CSV for Excel.
+StudentEdge is a Laravel modular-monolith system. It uses web routes, controllers and route actions, Blade, and MySQL. Custom session middleware revalidates accounts; `AdminPermissions` maps named abilities to roles. Private student documents are downloaded through authorized controllers. B40 TVET imports CSV/XLSX, detects headers, filters `POLITEKNIK BESUT`, stores student and scholarship records, and exports CSV for Excel.
+
+## 29. Current Security and Document Questions
+
+### How are detailed permissions enforced?
+
+> Routes name the required ability, `EnsureAdminScope` checks the central `AdminPermissions` map against the current database-backed role, and forbidden requests return 403. Student list, sensitive detail, export, management, and documents are separate abilities.
+
+### Why mask IC numbers if middleware already exists?
+
+> Middleware prevents unauthorized routes; masking minimizes data inside an allowed list or print view. A guard may need to search students without needing the full IC number.
+
+### How are private documents protected?
+
+> Files are on a private Laravel disk, not `public/storage`. Students download through an owner-filtered controller and administrators require the document ability. Responses disable caching.
+
+### How are multiple login devices managed?
+
+> `account_sessions` links a random public UUID to the backing Laravel session. The system updates activity periodically and can revoke another database session without putting a raw session ID in the URL.
+
+### What happens when a feature is disabled?
+
+> `EnsureFeatureEnabled` checks server-side state. Disabling Document Centre blocks its routes even if someone enters the URL manually; hiding navigation alone is not security.
+
+### How does the large movement list avoid frame drops?
+
+> The server returns ordered cursor batches. JavaScript fetches near the bottom and keeps a bounded visible window plus overscan, controlling both payload and DOM size.
+
+### Does the system verify an iPayment receipt automatically?
+
+> No. Receipt QR/OCR authenticity is planned only. Without an official API or documented, verifiable QR contract, human review remains required.

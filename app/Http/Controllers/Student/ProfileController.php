@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Support\AccountSessionManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -116,7 +117,7 @@ class ProfileController extends Controller
             ->with('success', __('Profil berjaya dikemaskini.'));
     }
 
-    public function updatePassword(Request $request): RedirectResponse
+    public function updatePassword(Request $request, AccountSessionManager $sessions): RedirectResponse
     {
         $studentId = (int) session('auth_user.id');
         $student = DB::table('students')->where('id', $studentId)->first();
@@ -145,6 +146,11 @@ class ProfileController extends Controller
                 'password' => Hash::make($validated['new_password']),
                 'updated_at' => now(),
             ]);
+        $sessions->revokeAccount(
+            'student',
+            $studentId,
+            $request->session()->get('account_session_public_id')
+        );
 
         return redirect()->route('student.profile')
             ->with('success', __('Kata laluan berjaya dikemaskini.'));
