@@ -1,228 +1,253 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
-@section('title', 'Laporan Bulanan')
+@section('title', __('Monthly Operations Report'))
 
 @push('styles')
 <style>
-    .wrap { max-width: 1100px; margin: 0 auto; }
-    .card { background:#fff; border:1px solid #ede4d9; border-radius:12px; overflow:hidden; margin-bottom:12px; }
-    .head { padding:12px 16px; border-bottom:1px solid #ede4d9; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
-    .body { padding:12px 16px; }
-    .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:8px 12px; text-decoration:none; font-weight:600; font-size:13px; cursor:pointer; }
-    .stats { display:grid; grid-template-columns:1fr; gap:10px; }
-    @media (min-width: 900px) { .stats { grid-template-columns:repeat(3,1fr); } }
-    .stat { border:1px solid #ede4d9; border-radius:10px; padding:10px 12px; background:#fcfaf8; }
-    .stat .label { font-size:11px; color:#7a6555; text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px; }
-    .stat .value { font-size:22px; color:#2d1f14; font-weight:700; line-height:1; }
-        /* Admin UX Identity v2 */
-    :root {
-        --admin-ink: #241a12;
-        --admin-muted: #7b6757;
-        --admin-line: #eadfce;
-        --admin-soft: #f8f2ea;
-        --admin-accent: #8f6f52;
-        --admin-accent-2: #c7a98b;
-        --admin-glow: rgba(143, 111, 82, 0.18);
+    .monthly-report { width:min(1320px,100%); margin:0 auto; display:grid; gap:20px; color:var(--text); }
+    .report-hero { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:4px 2px; }
+    .report-eyebrow { display:block; margin-bottom:7px; color:var(--primary-dark); font-size:.7rem; font-weight:850; letter-spacing:.14em; text-transform:uppercase; }
+    .report-hero h1 { margin:0; color:var(--text); font-size:clamp(1.65rem,3vw,2.25rem); line-height:1.08; letter-spacing:-.045em; }
+    .report-hero p { max-width:680px; margin:9px 0 0; color:var(--text-muted); font-size:.88rem; line-height:1.6; }
+    .report-actions { display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; }
+    .report-month-field { display:grid; gap:6px; }
+    .report-month-field label { color:var(--text-muted); font-size:.68rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+    .report-month-field input { min-width:185px; }
+    .report-scope { display:flex; align-items:center; gap:8px; margin:-4px 0 0; color:var(--text-muted); font-size:.76rem; }
+    .report-scope strong { color:var(--text); }
+    .report-scope span { padding:5px 10px; border:1px solid var(--border); border-radius:999px; background:var(--surface); }
+
+    .report-module { display:grid; gap:16px; }
+    .report-module-head { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; }
+    .report-module-head h2 { margin:3px 0 0; color:var(--text); font-size:1.3rem; letter-spacing:-.025em; }
+    .report-module-head p { margin:5px 0 0; color:var(--text-muted); font-size:.8rem; }
+    .report-module-badge { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--text-muted); font-size:.7rem; font-weight:800; white-space:nowrap; }
+    .report-module-badge::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--se-success); box-shadow:0 0 0 4px var(--se-success-soft); }
+
+    .report-kpis { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+    .report-kpi { position:relative; min-width:0; padding:18px; border:1px solid var(--border); border-top:3px solid var(--kpi-accent,var(--primary)); border-radius:16px; background:var(--surface); box-shadow:var(--se-shadow-sm); overflow:hidden; }
+    .report-kpi::after { content:''; position:absolute; width:90px; height:90px; top:-52px; right:-42px; border-radius:50%; background:color-mix(in srgb,var(--kpi-accent,var(--primary)) 13%,transparent); }
+    .report-kpi-label { display:block; min-height:30px; color:var(--text-muted); font-size:.72rem; font-weight:750; line-height:1.35; }
+    .report-kpi-value { display:block; margin-top:8px; color:var(--text); font-size:clamp(1.65rem,3vw,2.2rem); font-weight:850; line-height:1; letter-spacing:-.045em; font-variant-numeric:tabular-nums; }
+    .report-kpi-note { display:block; margin-top:9px; color:var(--text-muted); font-size:.67rem; line-height:1.4; }
+    .tone-slate { --kpi-accent:#64748b; }
+    .tone-gold { --kpi-accent:#c48628; }
+    .tone-blue { --kpi-accent:#5375c5; }
+    .tone-green { --kpi-accent:#3f8f69; }
+    .tone-violet { --kpi-accent:#7258bd; }
+    .tone-red { --kpi-accent:#c14f5c; }
+
+    .report-grid { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(340px,.85fr); gap:16px; }
+    .report-card { min-width:0; border:1px solid var(--border); border-radius:18px; background:var(--surface); box-shadow:var(--se-shadow-sm); overflow:hidden; }
+    .report-card-head { padding:19px 21px 0; }
+    .report-card-kicker { color:var(--primary-dark); font-size:.67rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; }
+    .report-card h3 { margin:5px 0 0; color:var(--text); font-size:1.05rem; letter-spacing:-.018em; }
+    .report-card-copy { margin:5px 0 0; color:var(--text-muted); font-size:.75rem; line-height:1.5; }
+    .report-card-body { padding:20px 21px 22px; }
+
+    .report-bars { min-height:260px; display:flex; align-items:stretch; gap:12px; padding-top:6px; }
+    .report-bar-group { flex:1; min-width:0; display:grid; grid-template-rows:1fr auto; gap:10px; }
+    .report-bar-stage { min-height:205px; display:flex; align-items:flex-end; justify-content:center; gap:6px; padding:0 3px; border-bottom:1px solid var(--border); background:repeating-linear-gradient(to top,transparent 0,transparent 50px,color-mix(in srgb,var(--border) 65%,transparent) 51px); }
+    .report-bar { position:relative; width:min(24px,38%); min-height:4px; height:max(4px,var(--bar-height)); border-radius:7px 7px 2px 2px; background:linear-gradient(180deg,#e8b56a,#a36d24); }
+    .report-bar.secondary { background:linear-gradient(180deg,#75c69b,#347653); }
+    .report-bar[data-zero="true"] { opacity:.22; }
+    .report-bar-value { position:absolute; left:50%; bottom:calc(100% + 5px); transform:translateX(-50%); color:var(--text); font-size:.62rem; font-weight:850; font-variant-numeric:tabular-nums; }
+    .report-bar-label { text-align:center; color:var(--text-muted); font-size:.65rem; line-height:1.25; }
+    .report-bar-label strong { display:block; color:var(--text); font-size:.7rem; }
+    .report-legend { display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:15px; color:var(--text-muted); font-size:.68rem; }
+    .report-legend span { display:inline-flex; align-items:center; gap:6px; }
+    .report-legend i { width:8px; height:8px; border-radius:2px; background:#b47a2d; }
+    .report-legend i.secondary { background:#3f8f69; }
+
+    .report-donut-layout { min-height:260px; display:grid; grid-template-columns:minmax(160px,1fr) minmax(150px,.9fr); align-items:center; gap:18px; }
+    .report-donut { width:170px; aspect-ratio:1; margin:auto; display:grid; place-items:center; border-radius:50%; background:var(--donut); position:relative; }
+    .report-donut::after { content:''; position:absolute; inset:27px; border-radius:50%; background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); }
+    .report-donut-centre { position:relative; z-index:1; text-align:center; }
+    .report-donut-centre strong { display:block; color:var(--text); font-size:1.55rem; letter-spacing:-.04em; }
+    .report-donut-centre span { display:block; margin-top:2px; color:var(--text-muted); font-size:.62rem; }
+    .report-status-list { display:grid; gap:12px; }
+    .report-status-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:8px; color:var(--text-muted); font-size:.7rem; }
+    .report-status-row i { width:9px; height:9px; border-radius:50%; background:var(--status-color); }
+    .report-status-row strong { color:var(--text); font-variant-numeric:tabular-nums; }
+
+    .report-efficiency { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .report-efficiency-item { padding:16px; border:1px solid var(--border); border-radius:14px; background:var(--surface-soft); }
+    .report-efficiency-item span { display:block; color:var(--text-muted); font-size:.68rem; line-height:1.4; }
+    .report-efficiency-item strong { display:block; margin-top:8px; color:var(--text); font-size:1.45rem; letter-spacing:-.03em; }
+    .report-progress { height:7px; margin-top:12px; border-radius:999px; background:var(--surface-muted); overflow:hidden; }
+    .report-progress span { width:var(--progress); height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--primary-dark),var(--primary)); }
+    .report-footer-note { margin:0; padding:2px 2px 8px; color:var(--text-muted); font-size:.68rem; text-align:right; }
+
+    html[data-theme="dark"] .report-kpi,
+    html[data-theme="dark"] .report-card,
+    body[data-theme="dark"] .report-kpi,
+    body[data-theme="dark"] .report-card { background:linear-gradient(145deg,var(--se-surface),var(--se-surface-soft)); }
+    html[data-theme="dark"] .report-donut::after,
+    body[data-theme="dark"] .report-donut::after { background:var(--se-surface); }
+
+    @media(max-width:1100px) {
+        .report-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); }
+        .report-grid { grid-template-columns:1fr; }
     }
-    body {
-        background:
-            radial-gradient(1200px 480px at -10% -15%, #efe3d6 0%, transparent 55%),
-            radial-gradient(900px 360px at 110% -10%, #f4eadf 0%, transparent 52%),
-            linear-gradient(180deg, #faf7f2 0%, #f6f1ea 100%);
+    @media(max-width:720px) {
+        .monthly-report { gap:17px; }
+        .report-hero { align-items:stretch; flex-direction:column; }
+        .report-actions, .report-actions form { width:100%; }
+        .report-actions form { display:grid !important; grid-template-columns:1fr auto; align-items:end !important; }
+        .report-month-field input { min-width:0; }
+        .report-kpis { grid-template-columns:1fr 1fr; }
+        .report-module-head { align-items:flex-start; flex-direction:column; }
+        .report-donut-layout { grid-template-columns:1fr; }
+        .report-efficiency { grid-template-columns:1fr; }
     }
-    .wrap {
-        width: min(1180px, 100%);
-        position: relative;
-        isolation: isolate;
+    @media(max-width:430px) {
+        .report-kpis { grid-template-columns:1fr; }
+        .report-actions form { grid-template-columns:1fr; }
+        .report-actions .ui-btn { width:100%; }
+        .report-card-head, .report-card-body { padding-left:16px; padding-right:16px; }
+        .report-bars { gap:6px; }
+        .report-bar-stage { gap:3px; }
     }
-    .wrap > * + * {
-        margin-top: 1rem;
+    @media print {
+        .sidebar,.topbar,.page-header,.mobile-bottom-nav,.app-footer,.report-actions { display:none !important; }
+        .main-wrap,.page-body { margin:0 !important; padding:0 !important; background:#fff !important; }
+        .monthly-report { width:100%; color:#111; gap:14px; }
+        .report-module { break-inside:avoid; }
+        .report-kpi,.report-card { box-shadow:none !important; break-inside:avoid; }
+        .report-kpis { grid-template-columns:repeat(5,1fr); }
+        .report-grid { grid-template-columns:1.35fr .85fr; }
     }
-    .card,
-    .panel {
-        border: 1px solid var(--admin-line);
-        border-radius: 16px;
-        background: linear-gradient(180deg, #fff 0%, #fffdfa 100%);
-        box-shadow:
-            0 1px 2px rgba(36, 26, 18, 0.07),
-            0 10px 26px rgba(61, 46, 34, 0.06);
-        overflow: hidden;
-        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
-    }
-    .card:hover,
-    .panel:hover {
-        transform: translateY(-2px);
-        border-color: #dfccb6;
-        box-shadow:
-            0 4px 14px rgba(36, 26, 18, 0.10),
-            0 18px 34px rgba(61, 46, 34, 0.10);
-    }
-    .head,
-    .card h2 {
-        position: relative;
-        border-bottom: 1px solid var(--admin-line);
-        background:
-            linear-gradient(180deg, #fff 0%, #fbf5ee 100%);
-    }
-    .head::before,
-    .card h2::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        background: linear-gradient(180deg, var(--admin-accent) 0%, var(--admin-accent-2) 100%);
-    }
-    .head h1,
-    .card h2 {
-        color: var(--admin-ink);
-        letter-spacing: 0.01em;
-    }
-    .btn {
-        border-radius: 10px;
-        border: 1px solid #ceb79f;
-        background: linear-gradient(180deg, #ffffff 0%, #f9f3ec 100%);
-        color: #6e5745;
-        font-weight: 700;
-        transition: transform 170ms ease, box-shadow 170ms ease, background-color 170ms ease, border-color 170ms ease, color 170ms ease;
-    }
-    .btn:hover {
-        transform: translateY(-1px);
-        border-color: #bb9c7d;
-        color: #5d4737;
-        box-shadow: 0 8px 18px rgba(98, 74, 53, 0.14);
-    }
-    .btn:focus-visible {
-        outline: none;
-        box-shadow: 0 0 0 4px var(--admin-glow);
-    }
-    .btn-primary {
-        border-color: #7f6249 !important;
-        background: linear-gradient(135deg, #8f6f52 0%, #c0a183 100%) !important;
-        color: #fff !important;
-    }
-    .btn-primary:hover {
-        border-color: #6f533e !important;
-        background: linear-gradient(135deg, #7a5e46 0%, #b08f70 100%) !important;
-    }
-    input,
-    select,
-    textarea {
-        border-color: #dfceb9 !important;
-        background: #fffdfb;
-        color: var(--admin-ink);
-        transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
-    }
-    input::placeholder,
-    textarea::placeholder {
-        color: #9e8a78;
-    }
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: #b69372 !important;
-        box-shadow: 0 0 0 4px rgba(182, 147, 114, 0.19);
-        outline: none;
-        background: #fff;
-    }
-    .filters {
-        background: linear-gradient(180deg, #fffdfb 0%, #faf4ed 100%);
-        border-top: 1px solid #efe4d8;
-        border-bottom: 1px solid #efe4d8;
-    }
-    table {
-        width: 100%;
-    }
-    th {
-        background: #f9f1e8 !important;
-        color: #7b6757 !important;
-        letter-spacing: 0.06em;
-    }
-    table tbody tr {
-        transition: background-color 140ms ease;
-    }
-    table tbody tr:hover {
-        background: #fcf7f1;
-    }
-    .ok,
-    .msg-ok {
-        border-radius: 12px;
-        border-color: #b8e5c7 !important;
-    }
-    .err,
-    .error,
-    .msg-err {
-        border-radius: 12px;
-    }
-    @media (max-width: 980px) {
-        .head {
-            align-items: flex-start;
-        }
-        .head > div,
-        .head form {
-            width: 100%;
-        }
-        .head .btn {
-            width: auto;
-        }
-        .stats {
-            grid-template-columns: 1fr !important;
-        }
-        th,
-        td {
-            font-size: 12px !important;
-            padding: 9px 10px !important;
-        }
-    }</style>
+</style>
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Laporan Bulanan</h2>
+    <h2 style="margin:0;font-size:1rem;font-weight:700;">{{ __('Monthly Report') }}</h2>
 @endsection
 
 @section('content')
-<div class="wrap">
-    <div class="card">
-        <div class="head">
-            <h1 style="margin:0;font-size:20px;">Ringkasan Bulan {{ $start->format('F Y') }}</h1>
-            <form method="GET" action="{{ route('admin.reports.monthly') }}" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                <input type="month" name="month" value="{{ $month }}" style="border:1px solid #e5d8c8; border-radius:8px; padding:8px 10px; font-size:13px; background:#fff;">
-                <button class="btn" type="submit">Tapis Bulan</button>
+@php
+    $disciplineDecisionTotal = $disciplineSummary ? $disciplineSummary['fine_approved'] + $disciplineSummary['fine_rejected'] : 0;
+    $disciplinePendingPct = $disciplineSummary && $disciplineSummary['fine_total'] > 0 ? round(($disciplineSummary['fine_pending'] / $disciplineSummary['fine_total']) * 100, 2) : 0;
+    $disciplineApprovedPct = $disciplineSummary && $disciplineSummary['fine_total'] > 0 ? round(($disciplineSummary['fine_status_approved'] / $disciplineSummary['fine_total']) * 100, 2) : 0;
+    $scholarshipPendingPct = $scholarshipSummary && $scholarshipSummary['new_records'] > 0 ? round(($scholarshipSummary['pending'] / $scholarshipSummary['new_records']) * 100, 2) : 0;
+    $scholarshipConfirmedCurrent = $scholarshipSummary ? $scholarshipSummary['status_confirmed'] : 0;
+    $scholarshipConfirmedPct = $scholarshipSummary && $scholarshipSummary['new_records'] > 0 ? round(($scholarshipConfirmedCurrent / $scholarshipSummary['new_records']) * 100, 2) : 0;
+@endphp
+<div class="monthly-report">
+    <header class="report-hero">
+        <div>
+            <span class="report-eyebrow">{{ __('Operations Analytics') }}</span>
+            <h1>{{ __('Monthly Performance Report') }}</h1>
+            <p>{{ __('A structured overview of discipline and scholarship activity, workflow decisions, current backlogs, and six-month operational trends.') }}</p>
+        </div>
+        <div class="report-actions">
+            <button class="ui-btn" type="button" onclick="window.print()">{{ __('Print / Save PDF') }}</button>
+            <form method="GET" action="{{ route('admin.reports.monthly') }}" style="display:flex;gap:8px;align-items:flex-end;">
+                <div class="report-month-field">
+                    <label for="reportMonth">{{ __('Report month') }}</label>
+                    <input id="reportMonth" type="month" name="month" value="{{ $month }}" max="{{ now()->format('Y-m') }}">
+                </div>
+                <button class="ui-btn primary" type="submit">{{ __('Generate Report') }}</button>
             </form>
         </div>
-    </div>
+    </header>
+
+    <div class="report-scope"><strong>{{ __('Report scope:') }}</strong><span>{{ $start->format('1 M Y') }} – {{ $end->format('d M Y') }}</span></div>
 
     @if($hasDisciplineAccess && $disciplineSummary)
-    <div class="card">
-        <div class="head"><strong>Modul Disiplin</strong></div>
-        <div class="body">
-            <div class="stats">
-                <div class="stat"><div class="label">Kesalahan Baharu</div><div class="value">{{ $disciplineSummary['new_offenses'] }}</div></div>
-                <div class="stat"><div class="label">Kesalahan Paid</div><div class="value">{{ $disciplineSummary['paid_offenses'] }}</div></div>
-                <div class="stat"><div class="label">Permohonan Denda Pending</div><div class="value">{{ $disciplineSummary['fine_pending'] }}</div></div>
-                <div class="stat"><div class="label">Permohonan Denda Approved</div><div class="value">{{ $disciplineSummary['fine_approved'] }}</div></div>
-                <div class="stat"><div class="label">Sticker Pending</div><div class="value">{{ $disciplineSummary['sticker_pending'] }}</div></div>
-                <div class="stat"><div class="label">Sticker Approved</div><div class="value">{{ $disciplineSummary['sticker_approved'] }}</div></div>
-            </div>
+    <section class="report-module" aria-labelledby="disciplineReportTitle">
+        <div class="report-module-head">
+            <div><span class="report-eyebrow">{{ __('Discipline Analytics') }}</span><h2 id="disciplineReportTitle">{{ __('Discipline Operations') }}</h2><p>{{ __('Offense records, fine-payment decisions, vehicle stickers, and unresolved workload.') }}</p></div>
+            <span class="report-module-badge">{{ __('Live database metrics') }}</span>
         </div>
-    </div>
+
+        <div class="report-kpis">
+            <article class="report-kpi tone-slate"><span class="report-kpi-label">{{ __('New Offenses') }}</span><strong class="report-kpi-value">{{ number_format($disciplineSummary['new_offenses']) }}</strong><span class="report-kpi-note">{{ __('Created during this month') }}</span></article>
+            <article class="report-kpi tone-green"><span class="report-kpi-label">{{ __('Paid Offenses') }}</span><strong class="report-kpi-value">{{ number_format($disciplineSummary['paid_offenses']) }}</strong><span class="report-kpi-note">{{ __('Payment completed this month') }}</span></article>
+            <article class="report-kpi tone-gold"><span class="report-kpi-label">{{ __('Fine Applications Pending') }}</span><strong class="report-kpi-value">{{ number_format($disciplineSummary['fine_pending']) }}</strong><span class="report-kpi-note">{{ __('Submitted within report scope') }}</span></article>
+            <article class="report-kpi tone-blue"><span class="report-kpi-label">{{ __('Fine Applications Approved') }}</span><strong class="report-kpi-value">{{ number_format($disciplineSummary['fine_approved']) }}</strong><span class="report-kpi-note">{{ __('Positive decisions this month') }}</span></article>
+            <article class="report-kpi tone-violet"><span class="report-kpi-label">{{ __('Fine Approval Rate') }}</span><strong class="report-kpi-value">{{ number_format($disciplineSummary['fine_approval_rate'],1) }}%</strong><span class="report-kpi-note">{{ __('Of decided applications') }}</span></article>
+        </div>
+
+        <div class="report-grid">
+            <article class="report-card">
+                <div class="report-card-head"><span class="report-card-kicker">{{ __('Six Months') }}</span><h3>{{ __('Discipline Activity Trends') }}</h3><p class="report-card-copy">{{ __('Monthly offenses compared with approved fine-payment applications.') }}</p></div>
+                <div class="report-card-body">
+                    <div class="report-bars">
+                        @foreach($disciplineSummary['trend'] as $period)
+                        <div class="report-bar-group"><div class="report-bar-stage"><span class="report-bar" style="--bar-height:{{ $period['primary_height'] }}%;" data-zero="{{ $period['primary'] === 0 ? 'true' : 'false' }}"><span class="report-bar-value">{{ $period['primary'] }}</span></span><span class="report-bar secondary" style="--bar-height:{{ $period['secondary_height'] }}%;" data-zero="{{ $period['secondary'] === 0 ? 'true' : 'false' }}"><span class="report-bar-value">{{ $period['secondary'] }}</span></span></div><div class="report-bar-label"><strong>{{ $period['label'] }}</strong>{{ $period['year'] }}</div></div>
+                        @endforeach
+                    </div>
+                    <div class="report-legend"><span><i></i>{{ __('New offenses') }}</span><span><i class="secondary"></i>{{ __('Approved payments') }}</span></div>
+                </div>
+            </article>
+            <article class="report-card">
+                <div class="report-card-head"><span class="report-card-kicker">{{ __('Decision Status') }}</span><h3>{{ __('Fine Application Distribution') }}</h3><p class="report-card-copy">{{ __('Current status of applications submitted this month.') }}</p></div>
+                <div class="report-card-body report-donut-layout">
+                    <div class="report-donut" style="--donut:{{ $disciplineSummary['fine_total'] > 0 ? 'conic-gradient(#c48628 0 '.$disciplinePendingPct.'%,#3f8f69 '.$disciplinePendingPct.'% '.($disciplinePendingPct+$disciplineApprovedPct).'%,#c14f5c '.($disciplinePendingPct+$disciplineApprovedPct).'% 100%)' : 'conic-gradient(var(--surface-muted) 0 100%)' }};"><div class="report-donut-centre"><strong>{{ number_format($disciplineSummary['fine_total']) }}</strong><span>{{ __('Applications') }}</span></div></div>
+                    <div class="report-status-list"><div class="report-status-row" style="--status-color:#c48628"><i></i><span>{{ __('Pending') }}</span><strong>{{ $disciplineSummary['fine_pending'] }}</strong></div><div class="report-status-row" style="--status-color:#3f8f69"><i></i><span>{{ __('Approved') }}</span><strong>{{ $disciplineSummary['fine_status_approved'] }}</strong></div><div class="report-status-row" style="--status-color:#c14f5c"><i></i><span>{{ __('Rejected') }}</span><strong>{{ $disciplineSummary['fine_status_rejected'] }}</strong></div></div>
+                </div>
+            </article>
+        </div>
+
+        <article class="report-card">
+            <div class="report-card-head"><span class="report-card-kicker">{{ __('Operational Monitoring') }}</span><h3>{{ __('Processing Efficiency') }}</h3><p class="report-card-copy">{{ __('Decision rates and unresolved workload requiring administrator attention.') }}</p></div>
+            <div class="report-card-body report-efficiency">
+                <div class="report-efficiency-item"><span>{{ __('Fine decisions completed') }}</span><strong>{{ number_format($disciplineDecisionTotal) }}</strong><div class="report-progress" style="--progress:{{ $disciplineSummary['fine_approval_rate'] }}%"><span></span></div></div>
+                <div class="report-efficiency-item"><span>{{ __('Vehicle sticker approval rate') }}</span><strong>{{ number_format($disciplineSummary['sticker_approval_rate'],1) }}%</strong><div class="report-progress" style="--progress:{{ $disciplineSummary['sticker_approval_rate'] }}%"><span></span></div></div>
+                <div class="report-efficiency-item"><span>{{ __('Current unresolved workload') }}</span><strong>{{ number_format($disciplineSummary['current_unpaid'] + $disciplineSummary['current_fine_backlog']) }}</strong><div class="report-progress" style="--progress:100%"><span></span></div></div>
+            </div>
+        </article>
+    </section>
     @endif
 
     @if($hasScholarshipAccess && $scholarshipSummary)
-    <div class="card">
-        <div class="head"><strong>Modul Scholarship</strong></div>
-        <div class="body">
-            <div class="stats">
-                <div class="stat"><div class="label">Rekod Baharu</div><div class="value">{{ $scholarshipSummary['new_records'] }}</div></div>
-                <div class="stat"><div class="label">Rekod Confirmed</div><div class="value">{{ $scholarshipSummary['confirmed'] }}</div></div>
-                <div class="stat"><div class="label">Rekod Pending</div><div class="value">{{ $scholarshipSummary['pending'] }}</div></div>
-                <div class="stat"><div class="label">Pengumuman Diterbitkan</div><div class="value">{{ $scholarshipSummary['announcements'] }}</div></div>
-            </div>
+    <section class="report-module" aria-labelledby="scholarshipReportTitle">
+        <div class="report-module-head">
+            <div><span class="report-eyebrow">{{ __('Scholarship Analytics') }}</span><h2 id="scholarshipReportTitle">{{ __('Scholarship Operations') }}</h2><p>{{ __('New aid records, decisions, financial value, announcements, and pending workload.') }}</p></div>
+            <span class="report-module-badge">{{ __('Live database metrics') }}</span>
         </div>
-    </div>
+
+        <div class="report-kpis">
+            <article class="report-kpi tone-slate"><span class="report-kpi-label">{{ __('New Scholarship Records') }}</span><strong class="report-kpi-value">{{ number_format($scholarshipSummary['new_records']) }}</strong><span class="report-kpi-note">{{ __('Created during this month') }}</span></article>
+            <article class="report-kpi tone-green"><span class="report-kpi-label">{{ __('Records Confirmed') }}</span><strong class="report-kpi-value">{{ number_format($scholarshipSummary['confirmed']) }}</strong><span class="report-kpi-note">{{ __('Confirmed during this month') }}</span></article>
+            <article class="report-kpi tone-gold"><span class="report-kpi-label">{{ __('Records Pending') }}</span><strong class="report-kpi-value">{{ number_format($scholarshipSummary['pending']) }}</strong><span class="report-kpi-note">{{ __('Created and awaiting decision') }}</span></article>
+            <article class="report-kpi tone-blue"><span class="report-kpi-label">{{ __('Confirmed Financial Value') }}</span><strong class="report-kpi-value">RM {{ number_format($scholarshipSummary['confirmed_amount'],0) }}</strong><span class="report-kpi-note">{{ __('Value confirmed this month') }}</span></article>
+            <article class="report-kpi tone-violet"><span class="report-kpi-label">{{ __('Confirmation Rate') }}</span><strong class="report-kpi-value">{{ number_format($scholarshipSummary['confirmation_rate'],1) }}%</strong><span class="report-kpi-note">{{ __('Of decided records') }}</span></article>
+        </div>
+
+        <div class="report-grid">
+            <article class="report-card">
+                <div class="report-card-head"><span class="report-card-kicker">{{ __('Six Months') }}</span><h3>{{ __('Scholarship Activity Trends') }}</h3><p class="report-card-copy">{{ __('Monthly scholarship records compared with confirmed decisions.') }}</p></div>
+                <div class="report-card-body">
+                    <div class="report-bars">
+                        @foreach($scholarshipSummary['trend'] as $period)
+                        <div class="report-bar-group"><div class="report-bar-stage"><span class="report-bar" style="--bar-height:{{ $period['primary_height'] }}%;" data-zero="{{ $period['primary'] === 0 ? 'true' : 'false' }}"><span class="report-bar-value">{{ $period['primary'] }}</span></span><span class="report-bar secondary" style="--bar-height:{{ $period['secondary_height'] }}%;" data-zero="{{ $period['secondary'] === 0 ? 'true' : 'false' }}"><span class="report-bar-value">{{ $period['secondary'] }}</span></span></div><div class="report-bar-label"><strong>{{ $period['label'] }}</strong>{{ $period['year'] }}</div></div>
+                        @endforeach
+                    </div>
+                    <div class="report-legend"><span><i></i>{{ __('New records') }}</span><span><i class="secondary"></i>{{ __('Confirmed records') }}</span></div>
+                </div>
+            </article>
+            <article class="report-card">
+                <div class="report-card-head"><span class="report-card-kicker">{{ __('Current Status') }}</span><h3>{{ __('Scholarship Status Distribution') }}</h3><p class="report-card-copy">{{ __('Current status of records created this month.') }}</p></div>
+                <div class="report-card-body report-donut-layout">
+                    <div class="report-donut" style="--donut:{{ $scholarshipSummary['new_records'] > 0 ? 'conic-gradient(#c48628 0 '.$scholarshipPendingPct.'%,#3f8f69 '.$scholarshipPendingPct.'% '.($scholarshipPendingPct+$scholarshipConfirmedPct).'%,#c14f5c '.($scholarshipPendingPct+$scholarshipConfirmedPct).'% 100%)' : 'conic-gradient(var(--surface-muted) 0 100%)' }};"><div class="report-donut-centre"><strong>{{ number_format($scholarshipSummary['new_records']) }}</strong><span>{{ __('Records') }}</span></div></div>
+                    <div class="report-status-list"><div class="report-status-row" style="--status-color:#c48628"><i></i><span>{{ __('Pending') }}</span><strong>{{ $scholarshipSummary['pending'] }}</strong></div><div class="report-status-row" style="--status-color:#3f8f69"><i></i><span>{{ __('Confirmed') }}</span><strong>{{ $scholarshipConfirmedCurrent }}</strong></div><div class="report-status-row" style="--status-color:#c14f5c"><i></i><span>{{ __('Rejected') }}</span><strong>{{ $scholarshipSummary['rejected'] }}</strong></div></div>
+                </div>
+            </article>
+        </div>
+
+        <article class="report-card">
+            <div class="report-card-head"><span class="report-card-kicker">{{ __('Operational Monitoring') }}</span><h3>{{ __('Scholarship Workflow') }}</h3><p class="report-card-copy">{{ __('Decision performance, communication activity, and current pending records.') }}</p></div>
+            <div class="report-card-body report-efficiency">
+                <div class="report-efficiency-item"><span>{{ __('Confirmation rate') }}</span><strong>{{ number_format($scholarshipSummary['confirmation_rate'],1) }}%</strong><div class="report-progress" style="--progress:{{ $scholarshipSummary['confirmation_rate'] }}%"><span></span></div></div>
+                <div class="report-efficiency-item"><span>{{ __('Announcements published') }}</span><strong>{{ number_format($scholarshipSummary['announcements']) }}</strong><div class="report-progress" style="--progress:{{ min(100,$scholarshipSummary['announcements']*10) }}%"><span></span></div></div>
+                <div class="report-efficiency-item"><span>{{ __('Current pending backlog') }}</span><strong>{{ number_format($scholarshipSummary['current_pending']) }}</strong><div class="report-progress" style="--progress:100%"><span></span></div></div>
+            </div>
+        </article>
+    </section>
     @endif
+
+    <p class="report-footer-note">{{ __('Generated') }} {{ now()->format('d M Y, H:i') }} · {{ __('StudentEdge monthly operational analytics') }}</p>
 </div>
 @endsection
-
-
