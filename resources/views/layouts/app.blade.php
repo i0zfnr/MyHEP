@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>@yield('title', config('app.name', 'StudentEdge'))</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}?v=5">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/pwa/icon-180.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/pwa/icon-180.png') }}?v=5">
     <meta name="push-public-key" content="{{ config('services.webpush.public_key') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2277,7 +2277,7 @@
         <div class="sb-header">
             <a href="{{ route('home') }}" class="sb-brand">
                 <div class="sb-brand-icon">
-                    <img src="{{ asset('images/newlogo.png') }}" alt="Logo StudentEdge">
+                    <img src="{{ asset('images/newlogo.png') }}?v=5" alt="Logo StudentEdge">
                 </div>
                 <div><div class="sb-brand-name">StudentEdge</div><div class="sb-brand-sub">Student Affairs</div></div>
             </a>
@@ -2717,7 +2717,7 @@
             </button>
             <div class="topbar-brand">
                 <span class="topbar-brand-mark">
-                    <img src="{{ asset('images/newlogo.png') }}" alt="StudentEdge">
+                    <img src="{{ asset('images/newlogo.png') }}?v=5" alt="StudentEdge">
                 </span>
                 <span class="topbar-brand-copy">
                     <span class="topbar-title">StudentEdge</span>
