@@ -196,6 +196,7 @@
 
 @section('content')
 <div class="wrap">
+    @php($canManageOffenses = adminCan('discipline'))
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
@@ -204,7 +205,9 @@
             <h1 style="margin:0;font-size:20px;">{{ __('Senarai Kesalahan Pelajar') }}</h1>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
-                <a class="btn" href="{{ route('admin.offenses.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                @if($canManageOffenses)
+                    <a class="btn" href="{{ route('admin.offenses.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                @endif
                 <a class="btn" href="{{ route('admin.offenses.create') }}">{{ __('Daftar Kesalahan') }}</a>
             </div>
         </div>
@@ -261,26 +264,30 @@
                             <td><span class="status {{ $offense->status }}">{{ __($offense->status) }}</span></td>
                             <td>
                                 <div class="actions-cell">
-                                    <a class="btn" href="{{ route('admin.offenses.edit', $offense->id) }}">Edit</a>
+                                    @if($canManageOffenses)
+                                        <a class="btn" href="{{ route('admin.offenses.edit', $offense->id) }}">Edit</a>
+                                    @endif
                                     <a class="btn" href="{{ route('admin.offenses.print', $offense->id) }}" target="_blank">Print</a>
                                     <a class="btn" href="{{ route('admin.offenses.pdf', $offense->id) }}">PDF</a>
 
-                                    @if($offense->status !== 'paid')
+                                    @if($canManageOffenses && $offense->status !== 'paid')
                                         <form method="POST" action="{{ route('admin.offenses.mark-paid', $offense->id) }}" style="margin:0;">
                                             @csrf
                                             <button class="btn btn-success" type="submit">Mark Paid</button>
                                         </form>
                                     @endif
 
-                                    <form method="POST" action="{{ route('admin.offenses.destroy', $offense->id) }}" style="margin:0;"
-                                        data-confirm-title="{{ __('Delete offense') }}"
-                                        data-confirm-message="{{ __('Delete this offense record?') }}"
-                                        data-confirm-action="{{ __('Delete') }}"
-                                        data-confirm-tone="danger">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger" type="submit">Delete</button>
-                                    </form>
+                                    @if($canManageOffenses)
+                                        <form method="POST" action="{{ route('admin.offenses.destroy', $offense->id) }}" style="margin:0;"
+                                            data-confirm-title="{{ __('Delete offense') }}"
+                                            data-confirm-message="{{ __('Delete this offense record?') }}"
+                                            data-confirm-action="{{ __('Delete') }}"
+                                            data-confirm-tone="danger">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-danger" type="submit">Delete</button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

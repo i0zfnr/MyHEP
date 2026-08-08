@@ -100,6 +100,22 @@
         font-size: .84rem;
         line-height: 1.6;
     }
+    .maint-card.push-centre { grid-column: 1 / -1; }
+    .maint-push-layout { display: grid; gap: 1rem; }
+    @media (min-width: 760px) { .maint-push-layout { grid-template-columns: .8fr 1.2fr; } }
+    .maint-push-panel { border: 1px solid rgba(203,185,164,.6); border-radius: 14px; padding: 1rem; background: rgba(255,255,255,.42); }
+    .maint-push-panel h4 { margin: 0 0 .35rem; color: #2d1f14; font-size: 1rem; }
+    .maint-push-panel p { margin: 0 0 .9rem; color: #74675d; font-size: .83rem; line-height: 1.55; }
+    .maint-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; margin-bottom: 1rem; }
+    .maint-stat { border-radius: 12px; padding: .75rem; background: rgba(255,255,255,.72); border: 1px solid rgba(203,185,164,.5); }
+    .maint-stat strong { display: block; color: #2d1f14; font-size: 1.25rem; }
+    .maint-stat span { display: block; color: #7a6555; font-size: .72rem; font-weight: 700; margin-top: .1rem; }
+    .maint-fields { display: grid; gap: .75rem; }
+    @media (min-width: 640px) { .maint-fields.two { grid-template-columns: 1fr 1fr; } }
+    .maint-field label { display: block; margin-bottom: .35rem; color: #5f4a3a; font-size: .78rem; font-weight: 800; }
+    .maint-field input, .maint-field textarea { width: 100%; box-sizing: border-box; border: 1px solid #d8c8b7; border-radius: 10px; padding: .68rem .75rem; background: rgba(255,255,255,.78); color: #2d1f14; font: inherit; font-size: .86rem; }
+    .maint-field textarea { min-height: 92px; resize: vertical; }
+    .maint-field small { display: block; margin-top: .3rem; color: #8a796c; font-size: .72rem; }
     .msg-ok { padding: .75rem .9rem; border-radius: 12px; background: #e7f3f3; border: 1px solid #b9ddde; color: #1f5559; font-size: .86rem; font-weight: 700; }
     .msg-err { padding: .75rem .9rem; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: .86rem; font-weight: 700; }
 </style>
@@ -212,6 +228,57 @@
                             <button type="submit" class="maint-btn ok">Enable Cache</button>
                         </form>
                     @endif
+                </div>
+            </div>
+        </section>
+
+        <section class="maint-card push-centre">
+            <div class="maint-card-head">Push Notification Centre</div>
+            <div class="maint-card-body">
+                <div class="maint-push-layout">
+                    <div class="maint-push-panel">
+                        <h4>Test this admin device</h4>
+                        <p>Send a private test notification only to devices registered under your System Admin account.</p>
+                        <div class="maint-stats">
+                            <div class="maint-stat"><strong>{{ $pushSubscriptions['current_admin_devices'] }}</strong><span>Your devices</span></div>
+                            <div class="maint-stat"><strong>{{ $pushSubscriptions['devices'] }}</strong><span>All active devices</span></div>
+                            <div class="maint-stat"><strong>{{ $pushSubscriptions['students'] }}</strong><span>Subscribed students</span></div>
+                            <div class="maint-stat"><strong>{{ $pushSubscriptions['admins'] }}</strong><span>Subscribed admins</span></div>
+                        </div>
+                        <form method="POST" action="{{ route('admin.maintenance.push.test') }}">
+                            @csrf
+                            <button type="submit" class="maint-btn ok">Send Test Notification</button>
+                        </form>
+                    </div>
+
+                    <div class="maint-push-panel">
+                        <h4>Announce scheduled maintenance</h4>
+                        <p>Notify every subscribed student and admin. This announcement does not enable maintenance mode automatically.</p>
+                        <form method="POST" action="{{ route('admin.maintenance.push.broadcast') }}"
+                            data-confirm-title="Send maintenance notification"
+                            data-confirm-message="Send this announcement to all subscribed students and admins?"
+                            data-confirm-action="Send notification">
+                            @csrf
+                            <div class="maint-fields two">
+                                <div class="maint-field">
+                                    <label for="starts_at">Maintenance starts</label>
+                                    <input id="starts_at" name="starts_at" type="datetime-local" required min="{{ now()->format('Y-m-d\TH:i') }}" value="{{ old('starts_at', now()->addHour()->startOfHour()->format('Y-m-d\TH:i')) }}">
+                                </div>
+                                <div class="maint-field">
+                                    <label for="ends_at">Expected completion (optional)</label>
+                                    <input id="ends_at" name="ends_at" type="datetime-local" value="{{ old('ends_at') }}">
+                                </div>
+                            </div>
+                            <div class="maint-field" style="margin-top:.75rem;">
+                                <label for="message">Custom message (optional)</label>
+                                <textarea id="message" name="message" maxlength="300" placeholder="Leave blank to use the automatic message with the selected schedule.">{{ old('message') }}</textarea>
+                                <small>Maximum 300 characters. The schedule is added automatically only when this field is blank.</small>
+                            </div>
+                            <div class="maint-actions">
+                                <button type="submit" class="maint-btn warn">Send Maintenance Notification</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </section>

@@ -31,9 +31,17 @@ class StudentDataPermissionTest extends TestCase
             $table->timestamps();
         });
 
+        Schema::create('offense_types', function (Blueprint $table): void {
+            $table->id();
+            $table->string('rule_reference');
+            $table->string('description');
+            $table->boolean('requires_note')->default(false);
+        });
+
         DB::table('admins')->insert([
             ['id' => 1, 'full_name' => 'Campus Guard', 'role' => 'guard'],
             ['id' => 2, 'full_name' => 'Scholarship Officer', 'role' => 'scholarship_admin'],
+            ['id' => 3, 'full_name' => 'Discipline Officer', 'role' => 'discipline_admin'],
         ]);
         DB::table('students')->insert([
             'id' => 10,
@@ -82,6 +90,19 @@ class StudentDataPermissionTest extends TestCase
             ->assertJsonPath('data.0.matric_no', 'PB22001');
         $this->get('/admin/students/10')->assertForbidden();
         $this->get('/admin/students/export')->assertForbidden();
+    }
+
+    public function test_offense_registration_uses_ajax_student_picker_without_manual_dropdown(): void
+    {
+        $response = $this->signIn(3, 'discipline_admin', 'Discipline Officer')
+            ->get('/admin/offenses/create');
+
+        $response->assertOk()
+            ->assertSee('id="student_search"', false)
+            ->assertSee('type="hidden" name="student_id"', false)
+            ->assertSee('id="student_search_results"', false)
+            ->assertDontSee('<select name="student_id"', false)
+            ->assertDontSee('Protected Student');
     }
 
     private function signIn(int $id, string $role, string $name): static

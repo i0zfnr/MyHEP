@@ -153,6 +153,14 @@ class ScholarshipStatusController extends Controller
             Storage::disk('student_documents')->delete($existingOffer->path);
         }
 
+        myhepSendPushToAdminsByScope('scholarship', [
+            'category' => 'scholarship',
+            'title' => 'Scholarship status submitted',
+            'body' => 'A student submitted or updated scholarship status information for review.',
+            'url' => route('admin.student-scholarship-status.index'),
+            'tag' => 'scholarship-status-' . $studentId,
+        ]);
+
         return redirect()->route('student.scholarships.index')
             ->with('success', __('Status biasiswa anda berjaya dihantar dan direkodkan.'));
     }

@@ -7,15 +7,18 @@ class AdminPermissions
     private const ABILITY_ROLES = [
         'scholarship' => ['scholarship_admin', 'student_affairs_head', 'system_admin'],
         'discipline' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
+        'offense.register' => ['lecturer', 'discipline_admin', 'student_affairs_head', 'system_admin'],
         'students' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],
         'movement' => ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'],
         'backoffice' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
         'system' => ['system_admin'],
         'students.list' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],
+        'students.lookup' => ['lecturer', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],
         'students.sensitive' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
         'students.export' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
         'students.manage' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
         'documents' => ['student_affairs_head', 'system_admin'],
+        'lecturers.manage' => ['student_affairs_head', 'system_admin'],
     ];
 
     public function allowsRole(?string $role, string $ability): bool

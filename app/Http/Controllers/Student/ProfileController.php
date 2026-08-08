@@ -152,6 +152,15 @@ class ProfileController extends Controller
             $request->session()->get('account_session_public_id')
         );
 
+        myhepSendPushNotification('student', $studentId, [
+            'category' => 'account',
+            'title' => 'Password changed',
+            'body' => 'Your StudentEdge password was changed. Review your account immediately if this was not you.',
+            'url' => route('settings.show'),
+            'tag' => 'student-password-changed-' . $studentId,
+            'requireInteraction' => true,
+        ]);
+
         return redirect()->route('student.profile')
             ->with('success', __('Kata laluan berjaya dikemaskini.'));
     }

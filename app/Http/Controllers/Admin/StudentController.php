@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Support\AccountSessionManager;
+use App\Support\ProgramIdentifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -109,7 +110,7 @@ class StudentController extends Controller
             'matric_no' => filled($validated['matric_no'] ?? null) ? $validated['matric_no'] : null,
             'ic_no' => $validated['ic_no'],
             'email' => $validated['email'] ?? null,
-            'program' => $validated['program'],
+            'program' => ProgramIdentifier::from($validated['matric_no'] ?? null, $validated['program']),
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
             'residence_status' => $validated['residence_status'],
@@ -231,7 +232,7 @@ class StudentController extends Controller
                 'matric_no' => filled($validated['matric_no'] ?? null) ? $validated['matric_no'] : null,
                 'ic_no' => $validated['ic_no'],
                 'email' => $validated['email'] ?? null,
-                'program' => $validated['program'],
+                'program' => ProgramIdentifier::from($validated['matric_no'] ?? null, $validated['program']),
                 'phone' => $validated['phone'] ?? null,
                 'address' => $validated['address'] ?? null,
                 'residence_status' => $validated['residence_status'],
@@ -283,6 +284,15 @@ class StudentController extends Controller
             ]);
         $sessions->revokeAccount('student', $id);
         auditLog('students.reset_password', 'students', $id, 'Reset kata laluan pelajar kepada IC');
+
+        myhepSendPushNotification('student', $id, [
+            'category' => 'account',
+            'title' => 'Password reset by administrator',
+            'body' => 'An administrator reset your StudentEdge password. Contact the system administrator if this was unexpected.',
+            'url' => route('login'),
+            'tag' => 'student-admin-password-reset-' . $id,
+            'requireInteraction' => true,
+        ]);
 
         return redirect()->route('admin.students.index')
             ->with('success', __('Kata laluan pelajar telah direset kepada No. IC.'));
@@ -453,8 +463,8 @@ class StudentController extends Controller
                 $rowNumber = $index + 2;
                 $fullName = $this->rowValue($row, ['nama pelajar', 'nama penuh', 'nama', 'student name', 'full name', 'name']);
                 $icNo = $this->cleanIdentity($this->rowValue($row, ['no ic', 'no. ic', 'no kp', 'no. kp', 'nombor kp', 'no kad pengenalan', 'nombor kad pengenalan', 'ic no', 'ic number', 'mykad', 'kad pengenalan']));
-                $program = $this->rowValue($row, ['program', 'nama program', 'kursus', 'kod kursus', 'course', 'course code', 'kelas']) ?: 'UNKNOWN';
                 $matricNo = $this->cleanIdentity($this->rowValue($row, ['no matrik', 'no. matrik', 'nombor matrik', 'no pend', 'no. pend', 'matric no', 'matric number', 'id pelajar', 'student id', 'no pendaftaran', 'nombor pendaftaran']));
+                $program = $this->rowValue($row, ['program', 'nama program', 'kursus', 'kod kursus', 'course', 'course code', 'kelas']) ?: 'UNKNOWN';
 
                 if ($fullName === '' || $icNo === '') {
                     $result['skipped']++;
@@ -472,7 +482,7 @@ class StudentController extends Controller
                     'full_name' => Str::upper($fullName),
                     'matric_no' => $matricNo !== '' ? $matricNo : null,
                     'ic_no' => $icNo,
-                    'program' => Str::upper($program),
+                    'program' => ProgramIdentifier::from($matricNo, $program),
                     'updated_at' => $now,
                 ];
 

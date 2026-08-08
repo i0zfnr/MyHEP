@@ -61,6 +61,7 @@ class AccountSessionManager
             ->where('public_id', $publicId)
             ->where('owner_type', $owner['type'])
             ->where('owner_id', $owner['id'])
+            ->where('last_seen_at', '>=', now()->subMinutes((int) config('session.lifetime', 120)))
             ->exists();
     }
 

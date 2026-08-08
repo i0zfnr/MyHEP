@@ -186,7 +186,7 @@ Route::post('/admin/movements/settings', [AdminMovementController::class, 'updat
     ->name('admin.movements.settings.update');
 
 Route::get('/admin/admin-users', [AdminUserController::class, 'index'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
     ->name('admin.admin-users.index');
 
 Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])
@@ -196,30 +196,39 @@ Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])
 Route::post('/admin/maintenance', [MaintenanceController::class, 'update'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.maintenance.update');
+Route::post('/admin/maintenance/push/test', [MaintenanceController::class, 'testPush'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.maintenance.push.test');
+Route::post('/admin/maintenance/push/broadcast', [MaintenanceController::class, 'broadcastMaintenance'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.maintenance.push.broadcast');
 Route::get('/admin/features', [FeatureController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.features.index');
 Route::patch('/admin/features/{feature}', [FeatureController::class, 'update'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.features.update');
+Route::patch('/admin/system-settings/session-lifetime', [FeatureController::class, 'updateSessionLifetime'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.system-settings.session-lifetime.update');
 
 Route::get('/admin/admin-users/create', [AdminUserController::class, 'create'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
     ->name('admin.admin-users.create');
 Route::post('/admin/admin-users', [AdminUserController::class, 'store'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
     ->name('admin.admin-users.store');
 Route::get('/admin/admin-users/{id}/edit', [AdminUserController::class, 'edit'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
     ->name('admin.admin-users.edit');
 Route::put('/admin/admin-users/{id}', [AdminUserController::class, 'update'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
     ->name('admin.admin-users.update');
 Route::post('/admin/admin-users/{id}/reset-password', [AdminUserController::class, 'resetPassword'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
     ->name('admin.admin-users.reset-password');
 Route::delete('/admin/admin-users/{id}', [AdminUserController::class, 'destroy'])
-    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
     ->name('admin.admin-users.destroy');
 Route::get('/admin/bug-reports', [AdminBugReportController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
@@ -235,7 +244,7 @@ Route::get('/admin/students', [StudentController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:students.list'])
     ->name('admin.students.index');
 Route::get('/admin/students/search', [StudentController::class, 'search'])
-    ->middleware(['auth.session:admin', 'admin.scope:students.list'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.lookup'])
     ->name('admin.students.search');
 Route::get('/admin/students/export', [StudentController::class, 'export'])
     ->middleware(['auth.session:admin', 'admin.scope:students.export'])
@@ -872,7 +881,7 @@ Route::get('/admin/offenses', function (Request $request) {
     }
 
     return view('admin.offenses.index', compact('offenses', 'filters'));
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.index');
+})->middleware(['auth.session:admin', 'admin.scope:offense.register', 'lecturer.page:offense_list'])->name('admin.offenses.index');
 
 Route::get('/admin/offenses/export', function (Request $request) {
     $filters = $request->validate([
@@ -986,7 +995,7 @@ Route::get('/admin/offenses/{id}/print', function (int $id) {
     $pdfRoute = route('admin.offenses.pdf', $offense->id);
 
     return view('admin.offenses.print', compact('offense', 'items', 'backRoute', 'pdfRoute'));
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.print');
+})->middleware(['auth.session:admin', 'admin.scope:offense.register', 'lecturer.page:offense_list'])->name('admin.offenses.print');
 
 Route::get('/admin/offenses/{id}/pdf', function (int $id) {
     $offense = DB::table('offenses')
@@ -1045,13 +1054,15 @@ Route::get('/admin/offenses/{id}/pdf', function (int $id) {
         'Content-Type' => 'application/pdf',
         'Content-Disposition' => 'attachment; filename="saman_' . $offense->id . '.pdf"; filename*=UTF-8\'\'saman_' . $offense->id . '.pdf',
     ]);
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.pdf');
+})->middleware(['auth.session:admin', 'admin.scope:offense.register', 'lecturer.page:offense_list'])->name('admin.offenses.pdf');
 
 Route::get('/admin/offenses/create', function () {
-    $students = DB::table('students')
+    $selectedStudent = filled(old('student_id'))
+        ? DB::table('students')
         ->select('id', 'full_name', 'matric_no')
-        ->orderBy('full_name')
-        ->get();
+        ->where('id', (int) old('student_id'))
+        ->first()
+        : null;
 
     $offenseTypes = DB::table('offense_types')
         ->select('id', 'rule_reference', 'description', 'requires_note')
@@ -1059,8 +1070,8 @@ Route::get('/admin/offenses/create', function () {
         ->orderBy('description')
         ->get();
 
-    return view('admin.offenses.create', compact('students', 'offenseTypes'));
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.create');
+    return view('admin.offenses.create', compact('selectedStudent', 'offenseTypes'));
+})->middleware(['auth.session:admin', 'admin.scope:offense.register', 'lecturer.page:offense_register'])->name('admin.offenses.create');
 
 Route::post('/admin/offenses', function (Request $request) {
     $validated = $request->validate([
@@ -1142,17 +1153,21 @@ Route::post('/admin/offenses', function (Request $request) {
         'requireInteraction' => true,
     ]);
 
+    $redirect = (session('auth_user.admin_role') === 'lecturer' && ! app(\App\Support\LecturerPageAccess::class)->enabled((int) session('auth_user.id'), 'offense_list'))
+        ? route('admin.dashboard')
+        : route('admin.offenses.index');
+
     if ($request->expectsJson()) {
         return response()->json([
             'ok' => true,
             'message' => __('Rekod kesalahan berjaya disimpan.'),
-            'redirect' => route('admin.offenses.index'),
+            'redirect' => $redirect,
         ]);
     }
 
-    return redirect()->route('admin.offenses.index')
+    return redirect($redirect)
         ->with('success', __('Rekod kesalahan berjaya disimpan.'));
-})->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.store');
+})->middleware(['auth.session:admin', 'admin.scope:offense.register', 'lecturer.page:offense_register'])->name('admin.offenses.store');
 
 Route::get('/admin/offenses/{id}/edit', function (int $id) {
     $offense = DB::table('offenses')->where('id', $id)->first();
@@ -1661,7 +1676,7 @@ Route::post('/student/vehicle-stickers', function (Request $request) {
     $vehiclePhotoPath = $request->file('vehicle_plate_image')->store('vehicle_stickers/vehicle_photos', 'public');
 
     try {
-        DB::table('vehicle_sticker_applications')->insert([
+        $applicationId = DB::table('vehicle_sticker_applications')->insertGetId([
             'student_id' => $studentId,
             'vehicle_no' => strtoupper(trim($validated['vehicle_no'])),
             'vehicle_type' => $validated['vehicle_type'],
@@ -1677,6 +1692,15 @@ Route::post('/student/vehicle-stickers', function (Request $request) {
         Storage::disk('public')->delete([$licensePath, $permissionPath, $vehiclePhotoPath]);
         throw $e;
     }
+
+    myhepSendPushToAdminsByScope('discipline', [
+        'category' => 'discipline',
+        'title' => 'New vehicle sticker application',
+        'body' => 'A student submitted a vehicle sticker application for review.',
+        'url' => route('admin.vehicle-stickers.index', ['status' => 'pending']),
+        'tag' => 'admin-vehicle-sticker-' . $applicationId,
+        'requireInteraction' => true,
+    ]);
 
     return redirect()->route('student.vehicle-stickers.index')
         ->with('success', __('Permohonan sticker kenderaan berjaya dihantar.'));

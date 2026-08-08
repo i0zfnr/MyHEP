@@ -175,6 +175,7 @@ if (!function_exists('adminRoleLabel')) {
     {
         return match ($role) {
             'guard' => __('Guard'),
+            'lecturer' => __('Lecturer'),
             'scholarship_admin' => __('Scholarship Admin'),
             'discipline_admin' => __('Discipline Admin'),
             'student_affairs_head' => __('Ketua Hal Ehwal Pelajar'),
@@ -620,13 +621,22 @@ if (!function_exists('myhepSendPushToAllStudents')) {
     }
 }
 
+if (!function_exists('myhepSendPushToAllAdmins')) {
+    function myhepSendPushToAllAdmins(array $message): void
+    {
+        myhepSendPushToMany('admin', myhepPushSubscribedUserIds('admin'), $message);
+    }
+}
+
 if (!function_exists('myhepAdminRolesForScope')) {
     function myhepAdminRolesForScope(string $scope): array
     {
         return match ($scope) {
             'scholarship' => ['scholarship_admin', 'student_affairs_head', 'system_admin'],
             'discipline' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
+            'offense.register' => ['lecturer', 'discipline_admin', 'student_affairs_head', 'system_admin'],
             'movement' => ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'],
+            'students.lookup' => ['lecturer', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],
             'backoffice' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
             'documents' => ['student_affairs_head', 'system_admin'],
             default => ['system_admin'],
@@ -675,5 +685,27 @@ if (!function_exists('myhepSendPushToAccountsByEmail')) {
 
         myhepSendPushToMany('student', $studentIds, $message);
         myhepSendPushToMany('admin', $adminIds, $message);
+    }
+}
+
+if (!function_exists('myhepSendPushOnce')) {
+    function myhepSendPushOnce(string $eventKey, callable $send): bool
+    {
+        if (!Schema::hasTable('push_notification_markers')) {
+            return false;
+        }
+
+        $claimed = DB::table('push_notification_markers')->insertOrIgnore([
+            'event_key' => Str::limit($eventKey, 255, ''),
+            'created_at' => now(),
+        ]);
+
+        if ($claimed !== 1) {
+            return false;
+        }
+
+        $send();
+
+        return true;
     }
 }

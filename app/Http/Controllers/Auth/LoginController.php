@@ -76,6 +76,14 @@ class LoginController extends Controller
             $sessions->establish($request, 'student', (int) $student->id);
             auditLog('auth.login_success', 'student', (int) $student->id, 'Login pelajar berjaya');
 
+            myhepSendPushNotification('student', (int) $student->id, [
+                'category' => 'account',
+                'title' => 'New StudentEdge login',
+                'body' => 'A new login to your student account was detected.',
+                'url' => route('settings.show'),
+                'tag' => 'student-login-' . now()->format('YmdHi'),
+            ]);
+
             return redirect()->route('student.dashboard');
         }
 
@@ -103,6 +111,14 @@ class LoginController extends Controller
         ]);
         $sessions->establish($request, 'admin', (int) $admin->id);
         auditLog('auth.login_success', 'admin', (int) $admin->id, 'Login admin berjaya');
+
+        myhepSendPushNotification('admin', (int) $admin->id, [
+            'category' => 'account',
+            'title' => 'New StudentEdge login',
+            'body' => 'A new login to your admin account was detected.',
+            'url' => route('settings.show'),
+            'tag' => 'admin-login-' . now()->format('YmdHi'),
+        ]);
 
         return redirect()->route('admin.dashboard');
     }
@@ -306,6 +322,15 @@ class LoginController extends Controller
 
         $sessions->revokeAccount($reset->role, (int) $reset->target_id);
         auditLog('auth.password_reset', $reset->role, (int) $reset->target_id, 'Reset kata laluan berjaya');
+
+        myhepSendPushNotification($reset->role, (int) $reset->target_id, [
+            'category' => 'account',
+            'title' => 'Password reset completed',
+            'body' => 'Your StudentEdge password was reset. Contact a system administrator immediately if this was not you.',
+            'url' => route('login'),
+            'tag' => $reset->role . '-password-reset-' . $reset->target_id,
+            'requireInteraction' => true,
+        ]);
 
         return redirect()->route('login')
             ->with('success', 'Kata laluan berjaya ditetapkan semula. Sila log masuk.');

@@ -186,8 +186,6 @@
 @section('content')
 <div class="wrap">
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
-    @php($roleOptions = ['guard', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'])
-
     <form method="POST" action="{{ route('admin.admin-users.store') }}">
         @csrf
         <div class="card">
@@ -212,8 +210,8 @@
                     <div>
                         <label for="role">{{ __('Role') }}</label>
                         <select id="role" name="role" required>
-                            @foreach($roleOptions as $role)
-                                <option value="{{ $role }}" {{ old('role') === $role ? 'selected' : '' }}>{{ adminRoleLabel($role) }}</option>
+                            @foreach($roleOptions as $role => $label)
+                                <option value="{{ $role }}" {{ old('role') === $role ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -222,6 +220,19 @@
                         <input id="password" type="password" name="password" minlength="8" required>
                     </div>
                 </div>
+                @if($canConfigureLecturerPages)
+                    <div style="margin-top:14px;">
+                        <label>{{ __('Lecturer Page Access') }}</label>
+                        <div style="display:grid;gap:8px;">
+                            @foreach($lecturerPages as $page)
+                                <label style="display:flex;gap:8px;align-items:flex-start;font-weight:600;color:var(--text);">
+                                    <input type="checkbox" name="lecturer_pages[]" value="{{ $page['key'] }}" @checked(in_array($page['key'], old('lecturer_pages', array_column($lecturerPages, 'key')), true)) style="width:auto;margin-top:3px;">
+                                    <span><strong>{{ __($page['label']) }}</strong><br><small style="color:var(--text-muted);">{{ __($page['description']) }}</small></span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -232,5 +243,4 @@
     </form>
 </div>
 @endsection
-
 

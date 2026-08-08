@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -38,7 +41,19 @@ class MaintenanceController extends Controller
             $maintenance['bypass_url'] = url($maintenance['secret']);
         }
 
-        return view('admin.maintenance.index', compact('maintenance'));
+        $pushSubscriptions = Schema::hasTable('push_subscriptions')
+            ? [
+                'devices' => DB::table('push_subscriptions')->count(),
+                'students' => DB::table('push_subscriptions')->where('user_type', 'student')->distinct()->count('user_id'),
+                'admins' => DB::table('push_subscriptions')->where('user_type', 'admin')->distinct()->count('user_id'),
+                'current_admin_devices' => DB::table('push_subscriptions')
+                    ->where('user_type', 'admin')
+                    ->where('user_id', (int) session('auth_user.id'))
+                    ->count(),
+            ]
+            : ['devices' => 0, 'students' => 0, 'admins' => 0, 'current_admin_devices' => 0];
+
+        return view('admin.maintenance.index', compact('maintenance', 'pushSubscriptions'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -82,5 +97,74 @@ class MaintenanceController extends Controller
 
         return redirect()->route('admin.maintenance.index')
             ->with('success', 'Maintenance mode disabled. The system is public again.');
+    }
+
+    public function testPush(): RedirectResponse
+    {
+        $adminId = (int) session('auth_user.id');
+        $deviceCount = Schema::hasTable('push_subscriptions')
+            ? DB::table('push_subscriptions')->where('user_type', 'admin')->where('user_id', $adminId)->count()
+            : 0;
+
+        if ($deviceCount === 0) {
+            return redirect()->route('admin.maintenance.index')
+                ->withErrors(['push' => 'No push-enabled device is registered for your admin account. Enable notifications on this device first.']);
+        }
+
+        myhepSendPushNotification('admin', $adminId, [
+            'category' => 'account',
+            'title' => 'StudentEdge test notification',
+            'body' => 'Push notifications are connected to this System Admin account.',
+            'url' => route('admin.maintenance.index'),
+            'tag' => 'system-admin-push-test-' . now()->timestamp,
+        ]);
+        auditLog('push.test', 'system', null, "System Admin tested push delivery to {$deviceCount} device(s)");
+
+        return redirect()->route('admin.maintenance.index')
+            ->with('success', "Test notification sent to {$deviceCount} registered device(s).");
+    }
+
+    public function broadcastMaintenance(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'starts_at' => ['required', 'date', 'after_or_equal:now'],
+            'ends_at' => ['nullable', 'date', 'after:starts_at'],
+            'message' => ['nullable', 'string', 'max:300'],
+        ]);
+
+        $startsAt = Carbon::parse($validated['starts_at']);
+        $endsAt = !empty($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : null;
+        $schedule = $startsAt->format('d M Y, h:i A');
+        if ($endsAt) {
+            $schedule .= ' until ' . $endsAt->format('d M Y, h:i A');
+        }
+        $body = filled($validated['message'] ?? null)
+            ? trim((string) $validated['message'])
+            : "StudentEdge is scheduled for maintenance from {$schedule}. Please save your work before maintenance begins.";
+
+        $studentIds = myhepPushSubscribedUserIds('student');
+        $adminIds = myhepPushSubscribedUserIds('admin');
+        if ($studentIds === [] && $adminIds === []) {
+            return redirect()->route('admin.maintenance.index')
+                ->withErrors(['push' => 'No subscribed student or admin devices are available for this broadcast.']);
+        }
+
+        $message = [
+            'category' => 'account',
+            'title' => 'Scheduled System Maintenance',
+            'body' => $body,
+            'url' => '/',
+            'tag' => 'system-maintenance-' . $startsAt->format('YmdHi'),
+            'requireInteraction' => true,
+            'ttl' => 86400,
+        ];
+        myhepSendPushToAllStudents($message);
+        myhepSendPushToAllAdmins($message);
+
+        $recipientCount = count($studentIds) + count($adminIds);
+        auditLog('push.maintenance_broadcast', 'system', null, "Maintenance push sent to {$recipientCount} account(s); starts {$startsAt->toIso8601String()}");
+
+        return redirect()->route('admin.maintenance.index')
+            ->with('success', "Maintenance notification sent to {$recipientCount} subscribed account(s).");
     }
 }

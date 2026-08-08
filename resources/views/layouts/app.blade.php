@@ -1221,6 +1221,18 @@
             display: none;
         }
         .header-user-menu.is-open { display: block; }
+        .header-user-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 45;
+            display: none;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            cursor: default;
+        }
+        .header-user-backdrop.is-open { display: block; }
+        .header-user-menu.is-open { z-index: 60; }
         .header-menu-head {
             padding: .45rem .55rem .6rem;
             border-bottom: 1px solid var(--border);
@@ -2195,6 +2207,11 @@
     $isMovementAdmin = $isAdmin && adminCan('movement');
     $isDocumentAdmin = $isAdmin && adminCan('documents');
     $isGuardAdmin = $isAdmin && $adminScope === 'guard';
+    $isLecturerAdmin = $isAdmin && $adminScope === 'lecturer';
+    $isStudentAffairsHead = $isAdmin && $adminScope === 'student_affairs_head';
+    $lecturerPages = $isLecturerAdmin ? app(\App\Support\LecturerPageAccess::class) : null;
+    $lecturerCanListOffenses = $isLecturerAdmin && $lecturerPages->enabled((int) ($authUser['id'] ?? 0), 'offense_list');
+    $lecturerCanRegisterOffense = $isLecturerAdmin && $lecturerPages->enabled((int) ($authUser['id'] ?? 0), 'offense_register');
     $hasAdminOverride = $isStudent && (bool) ($authUser['admin_override'] ?? false) && !empty($authUser['linked_admin_id']);
     $studentOnDashboard = request()->routeIs('student.dashboard');
     $adminOnDashboard = request()->routeIs('admin.dashboard');
@@ -2206,7 +2223,7 @@
         || request()->routeIs('student.vehicle-stickers.*')
         || request()->routeIs('student.movements.*')
         || request()->routeIs('student.discipline-announcements.*');
-    $adminOnDiscipline = request()->routeIs('admin.students.*')
+    $adminOnDiscipline = (($adminScope === 'discipline_admin' || $adminScope === 'student_affairs_head') && request()->routeIs('admin.students.*'))
         || request()->routeIs('admin.offenses.*')
         || request()->routeIs('admin.vehicle-stickers.*')
         || request()->routeIs('admin.movements.*')
@@ -2215,7 +2232,7 @@
     $adminOnScholarship = request()->routeIs('admin.scholarships.*')
         || request()->routeIs('admin.student-scholarship-status.*')
         || request()->routeIs('admin.scholarship-announcements.*')
-        || ($isScholarshipAdmin && request()->routeIs('admin.students.*'));
+        || ($adminScope === 'scholarship_admin' && request()->routeIs('admin.students.*'));
     // The student dashboard keeps its desktop canvas clear, but still provides
     // the normal sidebar drawer and hamburger control on mobile.
     $showSidebar = $isAdmin || $isStudent;
@@ -2408,7 +2425,7 @@
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2 7-7 7 7"/></svg>
                         {{ __('ui.dashboard') }}
                     </a>
-                    @if(!$isGuardAdmin)
+                    @if(!$isGuardAdmin && !$isLecturerAdmin)
                         <a href="{{ route('admin.reports.monthly') }}" class="nav-link {{ request()->routeIs('admin.reports.monthly') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v18h16.5M7.5 15l3-3 2.25 2.25L16.5 9"/></svg>
                             {{ __('ui.monthly_report') }}
@@ -2448,7 +2465,7 @@
 
                 @if($isScholarshipAdmin)
                     <nav>
-                        @if($adminScope === 'system_admin')
+                        @if(in_array($adminScope, ['system_admin', 'student_affairs_head'], true))
                             <details class="nav-group {{ $adminOnScholarship ? 'active' : '' }}" {{ $adminOnScholarship ? 'open' : '' }}>
                                 <summary class="nav-link nav-group-toggle">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
@@ -2471,10 +2488,12 @@
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
                                     {{ __('Data Status Biasiswa') }}
                                 </a>
-                                <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                                    {{ __('Pelajar') }}
-                                </a>
+                                @if($adminScope === 'scholarship_admin')
+                                    <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                                        {{ __('Pelajar') }}
+                                    </a>
+                                @endif
                                 <span class="nav-link" style="opacity:.55; cursor:not-allowed;" aria-disabled="true" title="Unavailable">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                                     Unavailable
@@ -2488,7 +2507,7 @@
                                     {{ __('Tambah Pengumuman') }}
                                 </a>
                             </div>
-                        @if($adminScope === 'system_admin')
+                        @if(in_array($adminScope, ['system_admin', 'student_affairs_head'], true))
                             </details>
                         @endif
                     </nav>
@@ -2496,7 +2515,7 @@
 
                 @if($isDisciplineAdmin)
                     <nav>
-                        @if($adminScope === 'system_admin')
+                        @if(in_array($adminScope, ['system_admin', 'student_affairs_head'], true))
                             <details class="nav-group {{ $adminOnDiscipline ? 'active' : '' }}" {{ $adminOnDiscipline ? 'open' : '' }}>
                                 <summary class="nav-link nav-group-toggle">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008M4.5 19.5h15l-7.5-15-7.5 15z"/></svg>
@@ -2507,10 +2526,12 @@
                         @else
                             <div>
                         @endif
-                                <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                                    {{ __('Pelajar') }}
-                                </a>
+                                @if($adminScope !== 'system_admin')
+                                    <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                                        {{ __('Pelajar') }}
+                                    </a>
+                                @endif
                                 <a href="{{ route('admin.offenses.index') }}" class="nav-link {{ request()->routeIs('admin.offenses.index') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6"/></svg>
                                     {{ __('Senarai Kesalahan') }}
@@ -2540,8 +2561,26 @@
                                     {{ __('Peraturan') }}
                                 </a>
                             </div>
-                        @if($adminScope === 'system_admin')
+                        @if(in_array($adminScope, ['system_admin', 'student_affairs_head'], true))
                             </details>
+                        @endif
+                    </nav>
+                @endif
+
+                @if($isLecturerAdmin && ($lecturerCanListOffenses || $lecturerCanRegisterOffense))
+                    <div class="nav-label">{{ __('Lecturer') }}</div>
+                    <nav>
+                        @if($lecturerCanListOffenses)
+                            <a href="{{ route('admin.offenses.index') }}" class="nav-link {{ request()->routeIs('admin.offenses.index') ? 'active' : '' }}">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6"/></svg>
+                                {{ __('Senarai Kesalahan') }}
+                            </a>
+                        @endif
+                        @if($lecturerCanRegisterOffense)
+                            <a href="{{ route('admin.offenses.create') }}" class="nav-link {{ request()->routeIs('admin.offenses.create') ? 'active' : '' }}">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                {{ __('Daftar Kesalahan') }}
+                            </a>
                         @endif
                     </nav>
                 @endif
@@ -2556,29 +2595,33 @@
                     </nav>
                 @endif
 
-                @if($adminScope === 'system_admin')
+                @if(in_array($adminScope, ['system_admin', 'student_affairs_head'], true))
                     <div class="nav-label">{{ __('Sistem') }}</div>
                     <nav>
-                        <a href="{{ route('admin.maintenance.index') }}" class="nav-link {{ request()->routeIs('admin.maintenance.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.83-5.83M11.42 15.17l2.496-3.03a3.375 3.375 0 00-4.773-4.773L6.113 9.864m5.307 5.307L9.864 6.113m0 0L4.5 3.75 3.75 4.5l2.363 5.364m3.751-3.751L15.17 11.42"/></svg>
-                            {{ __('Maintenance') }}
-                        </a>
-                        <a href="{{ route('admin.features.index') }}" class="nav-link {{ request()->routeIs('admin.features.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M5 7h14M5 12h14M5 17h14"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="17" r="2"/></svg>
-                            {{ __('Feature Controls') }}
-                        </a>
+                        @if($adminScope === 'system_admin')
+                            <a href="{{ route('admin.maintenance.index') }}" class="nav-link {{ request()->routeIs('admin.maintenance.*') ? 'active' : '' }}">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.83-5.83M11.42 15.17l2.496-3.03a3.375 3.375 0 00-4.773-4.773L6.113 9.864m5.307 5.307L9.864 6.113m0 0L4.5 3.75 3.75 4.5l2.363 5.364m3.751-3.751L15.17 11.42"/></svg>
+                                {{ __('Maintenance') }}
+                            </a>
+                            <a href="{{ route('admin.features.index') }}" class="nav-link {{ request()->routeIs('admin.features.*') ? 'active' : '' }}">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M5 7h14M5 12h14M5 17h14"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+                                {{ __('Feature Controls') }}
+                            </a>
+                        @endif
                         <a href="{{ route('admin.admin-users.index') }}" class="nav-link {{ request()->routeIs('admin.admin-users.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.742-1.34 9.04 9.04 0 00-2.983-3.163m-1.358 5.663A9.035 9.035 0 0112 21a9.035 9.035 0 01-5.401-1.68m10.802 0a9.035 9.035 0 00-10.802 0M6.599 19.32a9.04 9.04 0 01-2.983-3.16A9.095 9.095 0 007.358 14.82m11.384-.44a9.05 9.05 0 00-15.484 0m15.484 0A9.03 9.03 0 0012 12c-2.305 0-4.41.867-6 2.38m12.742 0A9.03 9.03 0 0112 12m0 0a3 3 0 100-6 3 3 0 000 6z"/></svg>
-                            {{ __('Pengurusan Admin') }}
+                            {{ $isStudentAffairsHead ? __('Lecturer Accounts') : __('Pengurusan Admin') }}
                         </a>
-                        <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                            {{ __('Student Management') }}
-                        </a>
-                        <a href="{{ route('admin.bug-reports.index') }}" class="nav-link {{ request()->routeIs('admin.bug-reports.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h6m-7.5-7.5h8.25L18 7.5v12.75A2.25 2.25 0 0115.75 22.5h-9A2.25 2.25 0 014.5 20.25V6A2.25 2.25 0 016.75 3.75H6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 3.75V7.5H18"/></svg>
-                            {{ __('bug_reports.nav_label') }}
-                        </a>
+                        @if($adminScope === 'system_admin')
+                            <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                                {{ __('Student Management') }}
+                            </a>
+                            <a href="{{ route('admin.bug-reports.index') }}" class="nav-link {{ request()->routeIs('admin.bug-reports.*') ? 'active' : '' }}">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h6m-7.5-7.5h8.25L18 7.5v12.75A2.25 2.25 0 0115.75 22.5h-9A2.25 2.25 0 014.5 20.25V6A2.25 2.25 0 016.75 3.75H6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 3.75V7.5H18"/></svg>
+                                {{ __('bug_reports.nav_label') }}
+                            </a>
+                        @endif
                     </nav>
                 @endif
                 <div class="nav-label">{{ __('ui.sidebar_account') }}</div>

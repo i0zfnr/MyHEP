@@ -58,6 +58,54 @@
         .rules-list { max-height: 42vh; }
     }
     .hint { font-size:12px; color:#7a6555; margin-top:5px; }
+    .student-search-shell { position:relative; }
+    .student-search-results {
+        position:absolute;
+        z-index:20;
+        left:0;
+        right:0;
+        top:calc(100% + 6px);
+        max-height:280px;
+        overflow:auto;
+        border:1px solid #dfceb9;
+        border-radius:12px;
+        background:#fff;
+        box-shadow:0 18px 38px rgba(61,46,34,.18);
+        padding:6px;
+    }
+    .student-search-results[hidden] { display:none; }
+    .student-search-option {
+        display:block;
+        width:100%;
+        border:0;
+        border-radius:9px;
+        padding:10px 11px;
+        background:transparent;
+        color:var(--admin-ink);
+        text-align:left;
+        cursor:pointer;
+    }
+    .student-search-option:hover,
+    .student-search-option:focus-visible { background:var(--admin-soft); outline:none; }
+    .student-search-option strong,
+    .student-search-option span { display:block; }
+    .student-search-option span { margin-top:2px; color:var(--admin-muted); font-size:12px; }
+    .student-search-state { padding:10px 11px; color:var(--admin-muted); font-size:12px; }
+    .selected-student {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        margin-top:9px;
+        padding:10px 11px;
+        border:1px solid #d9c4ae;
+        border-radius:11px;
+        background:#fbf5ee;
+    }
+    .selected-student[hidden] { display:none; }
+    .selected-student strong { color:var(--admin-ink); font-size:13px; }
+    .selected-student span { color:var(--admin-muted); font-size:12px; }
+    .selected-student button { flex:0 0 auto; padding:6px 9px; }
         /* Admin UX Identity v2 */
     :root {
         --admin-ink: #241a12;
@@ -241,16 +289,19 @@
                 <div class="grid grid-2">
                     <div>
                         <label for="student_search">{{ __('Cari Pelajar (Nama / Matrik)') }}</label>
-                        <input type="text" id="student_search" placeholder="{{ __('Contoh: 23DIT0001 atau Irfan') }}">
-                        <p class="hint">{{ __('Taip sekurang-kurangnya 2 huruf untuk cari pelajar melalui AJAX.') }}</p>
-
-                        <label for="student_id">{{ __('Pelajar') }}</label>
-                        <select name="student_id" id="student_id" required>
-                            <option value="">{{ __('Pilih pelajar') }}</option>
-                            @foreach($students as $student)
-                                <option value="{{ $student->id }}" {{ (string)old('student_id') === (string)$student->id ? 'selected' : '' }}>{{ $student->full_name }} ({{ $student->matric_no }})</option>
-                            @endforeach
-                        </select>
+                        <div class="student-search-shell">
+                            <input type="search" id="student_search" value="{{ $selectedStudent?->full_name ?? '' }}" placeholder="{{ __('Contoh: 23DIT0001 atau Irfan') }}" autocomplete="off" aria-autocomplete="list" aria-controls="student_search_results" aria-expanded="false">
+                            <div id="student_search_results" class="student-search-results" role="listbox" hidden></div>
+                        </div>
+                        <input type="hidden" name="student_id" id="student_id" value="{{ old('student_id') }}" required>
+                        <div id="selected_student" class="selected-student" @if(!$selectedStudent) hidden @endif>
+                            <div>
+                                <strong id="selected_student_name">{{ $selectedStudent?->full_name }}</strong>
+                                <span id="selected_student_matric">{{ $selectedStudent?->matric_no }}</span>
+                            </div>
+                            <button type="button" class="btn" id="clear_student_btn">{{ __('Tukar') }}</button>
+                        </div>
+                        <p class="hint" id="student_search_hint">{{ __('Taip sekurang-kurangnya 2 huruf, kemudian pilih pelajar daripada hasil AJAX.') }}</p>
                     </div>
                     <div>
                         <label for="place">{{ __('Tempat') }}</label>
@@ -326,7 +377,12 @@
     const evidencePreviewGrid = document.getElementById('evidence_preview_grid');
     const evidenceCountHint = document.getElementById('evidence_count_hint');
     const studentSearch = document.getElementById('student_search');
-    const studentSelect = document.getElementById('student_id');
+    const studentId = document.getElementById('student_id');
+    const studentResults = document.getElementById('student_search_results');
+    const selectedStudent = document.getElementById('selected_student');
+    const selectedStudentName = document.getElementById('selected_student_name');
+    const selectedStudentMatric = document.getElementById('selected_student_matric');
+    const clearStudentBtn = document.getElementById('clear_student_btn');
     const offenseForm = document.getElementById('offense_form');
     const ajaxFormFeedback = document.getElementById('ajax_form_feedback');
     const openCameraBtn = document.getElementById('open_camera_btn');
@@ -444,40 +500,124 @@
         });
     }
 
-    if (studentSearch && studentSelect) {
+    if (studentSearch && studentId && studentResults) {
         let studentSearchTimer = null;
+        let studentSearchRequest = null;
+
+        const closeStudentResults = () => {
+            studentResults.hidden = true;
+            studentSearch.setAttribute('aria-expanded', 'false');
+        };
+
+        const showStudentState = (message) => {
+            studentResults.replaceChildren();
+            const state = document.createElement('div');
+            state.className = 'student-search-state';
+            state.textContent = message;
+            studentResults.appendChild(state);
+            studentResults.hidden = false;
+            studentSearch.setAttribute('aria-expanded', 'true');
+        };
+
+        const clearSelectedStudent = ({ keepSearch = false } = {}) => {
+            studentId.value = '';
+            if (!keepSearch) studentSearch.value = '';
+            if (selectedStudent) selectedStudent.hidden = true;
+            if (selectedStudentName) selectedStudentName.textContent = '';
+            if (selectedStudentMatric) selectedStudentMatric.textContent = '';
+        };
+
+        const chooseStudent = (student) => {
+            studentId.value = String(student.id);
+            studentSearch.value = student.full_name || student.matric_no || '';
+            if (selectedStudentName) selectedStudentName.textContent = student.full_name || '';
+            if (selectedStudentMatric) selectedStudentMatric.textContent = student.matric_no || '';
+            if (selectedStudent) selectedStudent.hidden = false;
+            closeStudentResults();
+        };
+
+        const renderStudentResults = (students) => {
+            studentResults.replaceChildren();
+            if (!students.length) {
+                showStudentState(@json(__('Tiada pelajar sepadan ditemui.')));
+                return;
+            }
+
+            students.forEach((student) => {
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.className = 'student-search-option';
+                option.setAttribute('role', 'option');
+                const name = document.createElement('strong');
+                name.textContent = student.full_name || '-';
+                const matric = document.createElement('span');
+                matric.textContent = student.matric_no || '-';
+                option.append(name, matric);
+                option.addEventListener('click', () => chooseStudent(student));
+                studentResults.appendChild(option);
+            });
+            studentResults.hidden = false;
+            studentSearch.setAttribute('aria-expanded', 'true');
+        };
 
         studentSearch.addEventListener('input', () => {
             const q = studentSearch.value.trim();
             if (studentSearchTimer) clearTimeout(studentSearchTimer);
+            studentSearchRequest?.abort();
+            clearSelectedStudent({ keepSearch: true });
 
-            if (q.length < 2) return;
+            if (q.length < 2) {
+                closeStudentResults();
+                return;
+            }
+
+            showStudentState(@json(__('Mencari pelajar...')));
 
             studentSearchTimer = setTimeout(async () => {
+                studentSearchRequest = new AbortController();
                 try {
                     const resp = await fetch(`{{ route('admin.students.search') }}?q=${encodeURIComponent(q)}`, {
-                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        signal: studentSearchRequest.signal,
                     });
                     const payload = await resp.json().catch(() => ({ data: [] }));
-                    if (!resp.ok || !Array.isArray(payload.data)) return;
-
-                    const current = studentSelect.value;
-                    studentSelect.innerHTML = '<option value="">' + @json(__('Pilih pelajar')) + '</option>';
-                    payload.data.forEach((s) => {
-                        const opt = document.createElement('option');
-                        opt.value = String(s.id);
-                        opt.textContent = `${s.full_name} (${s.matric_no})`;
-                        if (String(s.id) === current) opt.selected = true;
-                        studentSelect.appendChild(opt);
-                    });
-
-                    if (!studentSelect.value && payload.data.length === 1) {
-                        studentSelect.value = String(payload.data[0].id);
-                    }
+                    if (!resp.ok || !Array.isArray(payload.data)) throw new Error('Student search failed');
+                    renderStudentResults(payload.data);
                 } catch (e) {
-                    // silent fallback to manual dropdown selection
+                    if (e?.name !== 'AbortError') showStudentState(@json(__('Carian pelajar gagal. Sila cuba semula.')));
                 }
             }, 320);
+        });
+
+        studentSearch.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeStudentResults();
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                studentResults.querySelector('.student-search-option')?.focus();
+            }
+        });
+        studentResults.addEventListener('keydown', (event) => {
+            const options = Array.from(studentResults.querySelectorAll('.student-search-option'));
+            const index = options.indexOf(document.activeElement);
+            if (event.key === 'ArrowDown' && index < options.length - 1) {
+                event.preventDefault();
+                options[index + 1].focus();
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (index > 0) options[index - 1].focus();
+                else studentSearch.focus();
+            } else if (event.key === 'Escape') {
+                closeStudentResults();
+                studentSearch.focus();
+            }
+        });
+        clearStudentBtn?.addEventListener('click', () => {
+            clearSelectedStudent();
+            closeStudentResults();
+            studentSearch.focus();
+        });
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.student-search-shell')) closeStudentResults();
         });
     }
 
@@ -495,6 +635,12 @@
             if (ajaxFormFeedback) {
                 ajaxFormFeedback.style.display = 'none';
                 ajaxFormFeedback.innerHTML = '';
+            }
+
+            if (!studentId?.value) {
+                showAjaxError(@json(__('Sila cari dan pilih seorang pelajar sebelum menyimpan kesalahan.')));
+                studentSearch?.focus();
+                return;
             }
 
             const submitBtn = offenseForm.querySelector('button[type="submit"]');

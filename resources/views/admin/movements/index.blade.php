@@ -9,11 +9,11 @@
 @push('styles')
 <style>
     .mv-admin { display:flex; flex-direction:column; gap:1rem; }
-    .mv-kpis { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:.85rem; }
+    .mv-kpis { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:.65rem; }
     @media (min-width: 920px) { .mv-kpis { grid-template-columns:repeat(4, minmax(0, 1fr)); } }
     .mv-kpi {
         position:relative;
-        padding:1rem 1.05rem;
+        padding:.78rem .9rem;
         border-radius:16px;
         border:1px solid rgba(255,255,255,.22);
         background:
@@ -39,7 +39,7 @@
         color:#866f5e;
         margin-bottom:.35rem;
     }
-    .mv-kpi-value { font-size:2rem; font-weight:800; color:#2d1f14; line-height:1; }
+    .mv-kpi-value { font-size:1.55rem; font-weight:800; color:#2d1f14; line-height:1; }
     .mv-toolbar { display:grid; grid-template-columns:1fr; gap:.85rem; align-items:start; }
     @media (min-width: 1100px) { .mv-toolbar { grid-template-columns:1.2fr .8fr; } }
     .mv-actions { display:flex; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
@@ -54,6 +54,57 @@
         display:grid;
         gap:1rem;
     }
+    .mv-quick-nav {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:.75rem;
+        flex-wrap:wrap;
+    }
+    .mv-quick-nav-copy strong { display:block; color:var(--text); font-size:.95rem; }
+    .mv-quick-nav-copy span { color:var(--text-muted); font-size:.76rem; }
+    .mv-search-row {
+        display:grid;
+        grid-template-columns:minmax(0, 1fr) auto;
+        gap:.65rem;
+        align-items:end;
+    }
+    .mv-search-input { position:relative; }
+    .mv-search-input input { min-height:48px; padding-right:3rem; font-size:.92rem; }
+    .mv-search-clear {
+        position:absolute;
+        right:.55rem;
+        bottom:.5rem;
+        width:32px;
+        height:32px;
+        border:0;
+        border-radius:9px;
+        background:transparent;
+        color:var(--text-muted);
+        cursor:pointer;
+        font-size:1.05rem;
+    }
+    .mv-search-clear:hover { background:rgba(132,102,75,.1); color:var(--text); }
+    .mv-advanced {
+        border-top:1px solid var(--border);
+        padding-top:.75rem;
+    }
+    .mv-advanced summary {
+        display:inline-flex;
+        align-items:center;
+        gap:.45rem;
+        color:var(--text);
+        cursor:pointer;
+        font-size:.8rem;
+        font-weight:800;
+        list-style:none;
+    }
+    .mv-advanced summary::-webkit-details-marker { display:none; }
+    .mv-advanced summary::after { content:'+'; font-size:1rem; color:var(--text-muted); }
+    .mv-advanced[open] summary::after { content:'−'; }
+    .mv-advanced .mv-filter-grid { margin-top:.8rem; }
+    .mv-search-feedback { min-height:1.2rem; color:var(--text-muted); font-size:.76rem; }
+    .mv-search-feedback.is-loading { color:var(--primary); }
     .mv-filter-top {
         display:flex;
         align-items:flex-start;
@@ -89,7 +140,7 @@
     }
     .mv-results-badge strong { color:var(--text); font-size:.95rem; }
     .mv-filter-grid { display:grid; grid-template-columns:1fr; gap:.8rem; }
-    @media (min-width: 880px) { .mv-filter-grid { grid-template-columns:1.35fr repeat(6, minmax(0, 1fr)); } }
+    @media (min-width: 880px) { .mv-filter-grid { grid-template-columns:repeat(6, minmax(0, 1fr)); } }
     .mv-field { display:flex; flex-direction:column; gap:.3rem; }
     .mv-field span { font-size:.72rem; font-weight:700; color:var(--text-muted); }
     .mv-field input,
@@ -198,7 +249,7 @@
         scrollbar-gutter:stable;
         contain:layout paint;
     }
-    .mv-virtual-scroll .ui-table { min-width:1320px; table-layout:fixed; }
+    .mv-virtual-scroll .ui-table { min-width:900px; table-layout:fixed; }
     .mv-virtual-scroll thead th {
         position:sticky;
         top:0;
@@ -244,6 +295,8 @@
     }
     @keyframes mvSpin { to { transform:rotate(360deg); } }
     @media (max-width: 767px) {
+        .mv-search-row { grid-template-columns:1fr; }
+        .mv-search-row > .ui-btn { width:100%; }
         .mv-virtual-scroll {
             min-height:320px;
             max-height:62dvh;
@@ -291,11 +344,6 @@
         <div class="ui-card"><div class="ui-card-body" style="color:#1f5559;">{{ session('success') }}</div></div>
     @endif
 
-    <div class="ui-hero">
-        <h3>{{ __('Movement Monitoring') }}</h3>
-        <p>{{ __('Track student movement live, review curfew compliance, and move quickly between records, violations, and QR controls.') }}</p>
-    </div>
-
     <div class="mv-kpis">
         <div class="mv-kpi"><div class="mv-kpi-label">{{ __('Outside Now') }}</div><div class="mv-kpi-value">{{ $summary['outside_now'] }}</div></div>
         <div class="mv-kpi"><div class="mv-kpi-label">{{ __('Returned Today') }}</div><div class="mv-kpi-value">{{ $summary['returned_today'] }}</div></div>
@@ -304,10 +352,10 @@
     </div>
 
     <section class="ui-card" data-filter-sheet data-filter-title="{{ __('Movement filters') }}">
-        <div class="ui-card-head mv-toolbar">
-            <div>
-                <strong>{{ __('Search & Filter') }}</strong>
-                <div class="mv-table-note">{{ __('Filter by student, date, movement type, status, or rule result.') }}</div>
+        <div class="ui-card-head mv-quick-nav">
+            <div class="mv-quick-nav-copy">
+                <strong>{{ __('Find student movement') }}</strong>
+                <span>{{ __('Type a student name, matric number, or programme. Results update without reloading the page.') }}</span>
             </div>
             <div class="mv-actions">
                 <a class="ui-btn active" href="{{ route('admin.movements.index') }}">{{ __('Records') }}</a>
@@ -320,68 +368,70 @@
             </div>
         </div>
         <div class="ui-card-body">
-            <form method="GET" class="mv-filter-grid" id="movementFilterForm">
-                <label class="mv-field">
-                    <span>{{ __('Search') }}</span>
-                    <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Student / matric / programme') }}">
-                </label>
-                <label class="mv-field">
-                    <span>{{ __('Start Date') }}</span>
-                    <input type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}">
-                </label>
-                <label class="mv-field">
-                    <span>{{ __('End Date') }}</span>
-                    <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}">
-                </label>
-                <label class="mv-field">
-                    <span>{{ __('Movement Type') }}</span>
-                    <select name="movement_type_id">
-                        <option value="">{{ __('All Movement Types') }}</option>
-                        @foreach($movementTypes as $type)
-                            <option value="{{ $type->id }}" @selected(($filters['movement_type_id'] ?? '') == $type->id)>{{ __($type->name) }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label class="mv-field">
-                    <span>{{ __('Status') }}</span>
-                    <select name="movement_status">
-                        <option value="">{{ __('All Status') }}</option>
-                        <option value="outside" @selected(($filters['movement_status'] ?? '') === 'outside')>{{ __('Outside Campus') }}</option>
-                        <option value="returned" @selected(($filters['movement_status'] ?? '') === 'returned')>{{ __('Returned') }}</option>
-                    </select>
-                </label>
-                <label class="mv-field">
-                    <span>{{ __('Rule') }}</span>
-                    <select name="rule_status">
-                        <option value="">{{ __('All Rules') }}</option>
-                        <option value="pending" @selected(($filters['rule_status'] ?? '') === 'pending')>{{ __('Pending') }}</option>
-                        <option value="compliant" @selected(($filters['rule_status'] ?? '') === 'compliant')>{{ __('Compliant') }}</option>
-                        <option value="late" @selected(($filters['rule_status'] ?? '') === 'late')>{{ __('Late Return') }}</option>
-                    </select>
-                </label>
-                <label class="mv-field">
-                    <span>{{ __('Rows') }}</span>
-                    <select name="per_page">
-                        <option value="25" @selected(($filters['per_page'] ?? '50') === '25')>25</option>
-                        <option value="50" @selected(($filters['per_page'] ?? '50') === '50')>50</option>
-                        <option value="100" @selected(($filters['per_page'] ?? '50') === '100')>100</option>
-                    </select>
-                </label>
+            <form method="GET" id="movementFilterForm" data-movement-filter-form>
+                <div class="mv-search-row">
+                    <label class="mv-field mv-search-input">
+                        <span>{{ __('Student search') }}</span>
+                        <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Start typing a name, matric number, or programme') }}" autocomplete="off" data-movement-search>
+                        <button type="button" class="mv-search-clear" data-movement-clear aria-label="{{ __('Clear search') }}" title="{{ __('Clear search') }}">×</button>
+                    </label>
+                    <button class="ui-btn primary" type="submit">{{ __('Search') }}</button>
+                </div>
+
+                <details class="mv-advanced" @if(count($activeFilterValues) > (filled($filters['q'] ?? null) ? 1 : 0)) open @endif>
+                    <summary>{{ __('Advanced filters') }}</summary>
+                    <div class="mv-filter-grid">
+                        <label class="mv-field"><span>{{ __('Start Date') }}</span><input type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}"></label>
+                        <label class="mv-field"><span>{{ __('End Date') }}</span><input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}"></label>
+                        <label class="mv-field">
+                            <span>{{ __('Movement Type') }}</span>
+                            <select name="movement_type_id">
+                                <option value="">{{ __('All Movement Types') }}</option>
+                                @foreach($movementTypes as $type)<option value="{{ $type->id }}" @selected(($filters['movement_type_id'] ?? '') == $type->id)>{{ __($type->name) }}</option>@endforeach
+                            </select>
+                        </label>
+                        <label class="mv-field">
+                            <span>{{ __('Status') }}</span>
+                            <select name="movement_status">
+                                <option value="">{{ __('All Status') }}</option>
+                                <option value="outside" @selected(($filters['movement_status'] ?? '') === 'outside')>{{ __('Outside Campus') }}</option>
+                                <option value="returned" @selected(($filters['movement_status'] ?? '') === 'returned')>{{ __('Returned') }}</option>
+                            </select>
+                        </label>
+                        <label class="mv-field">
+                            <span>{{ __('Rule') }}</span>
+                            <select name="rule_status">
+                                <option value="">{{ __('All Rules') }}</option>
+                                <option value="pending" @selected(($filters['rule_status'] ?? '') === 'pending')>{{ __('Pending') }}</option>
+                                <option value="compliant" @selected(($filters['rule_status'] ?? '') === 'compliant')>{{ __('Compliant') }}</option>
+                                <option value="late" @selected(($filters['rule_status'] ?? '') === 'late')>{{ __('Late Return') }}</option>
+                            </select>
+                        </label>
+                        <label class="mv-field">
+                            <span>{{ __('Rows') }}</span>
+                            <select name="per_page">
+                                <option value="25" @selected(($filters['per_page'] ?? '50') === '25')>25</option>
+                                <option value="50" @selected(($filters['per_page'] ?? '50') === '50')>50</option>
+                                <option value="100" @selected(($filters['per_page'] ?? '50') === '100')>100</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="mv-filter-buttons" style="margin-top:.8rem;">
+                        <button class="ui-btn primary" type="submit">{{ __('Apply filters') }}</button>
+                        <button class="ui-btn" type="button" data-movement-reset>{{ __('Reset filters') }}</button>
+                    </div>
+                </details>
             </form>
-            <div class="mv-filter-actions" style="margin-top:1rem;">
+            <div class="mv-filter-actions" style="margin-top:.75rem;">
                 <div class="mv-filter-meta">
                     <div class="mv-results-badge">
                         <strong data-movement-loaded-count>{{ $records->count() }}</strong>
                         <span>{{ __('Loaded records') }}</span>
                     </div>
-                    @foreach($activeFilterValues as $label => $value)
-                        <span class="mv-chip"><strong>{{ ucfirst($label) }}:</strong> {{ __($value) }}</span>
-                    @endforeach
+                    <span class="mv-search-feedback" data-movement-search-feedback aria-live="polite"></span>
                 </div>
                 <div class="mv-filter-buttons">
-                    <button class="ui-btn primary" type="submit" form="movementFilterForm">{{ __('Filter') }}</button>
-                    <a class="ui-btn" href="{{ route('admin.movements.index') }}">{{ __('Reset') }}</a>
-                    <a class="ui-btn" href="{{ route('admin.movements.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                    <a class="ui-btn" href="{{ route('admin.movements.export', request()->query()) }}" data-movement-export>{{ __('Export CSV') }}</a>
                 </div>
             </div>
         </div>
@@ -421,15 +471,10 @@
                 <thead>
                     <tr>
                         <th>{{ __('Student') }}</th>
-                        <th>{{ __('Programme') }}</th>
-                        <th>{{ __('Residence') }}</th>
-                        <th>{{ __('Type') }}</th>
-                        <th>{{ __('Plate No.') }}</th>
+                        <th>{{ __('Movement') }}</th>
                         <th>{{ __('Check-Out') }}</th>
                         <th>{{ __('Return') }}</th>
                         <th>{{ __('Status') }}</th>
-                        <th>{{ __('Rule') }}</th>
-                        <th>{{ __('Explanation') }}</th>
                     </tr>
                 </thead>
                 <tbody data-movement-rows>
@@ -445,6 +490,7 @@
                                     <div>
                                         <span class="mv-student">{{ $record->student_name }}</span><br>
                                         <span class="mv-sub">{{ $record->matric_no }}</span>
+                                        <div class="mv-sub">{{ $record->program }} · {{ ($record->residence_status ?? 'inside_campus') === 'live_out' ? __('Live Out') : __('Inside Campus') }}</div>
                                         @if(adminCan('students.sensitive'))
                                             <div class="mv-student-actions">
                                                 <a class="mv-mini-btn" href="{{ route('admin.students.show', $record->student_id) }}">{{ __('View Profile') }}</a>
@@ -453,14 +499,10 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ $record->program }}<br><span class="mv-sub">{{ $record->checkpoint_name }}</span></td>
                             <td>
-                                {{ ($record->residence_status ?? 'inside_campus') === 'live_out' ? __('Live Out') : __('Inside Campus') }}
-                                <br>
-                                <span class="mv-sub">{{ $record->room_number ?: '-' }}</span>
+                                <span class="mv-type-badge">{{ __($record->movement_type_name) }}</span>
+                                <div class="mv-sub" style="margin-top:.35rem;">{{ $record->vehicle_plate_no ?: '-' }} · {{ $record->checkpoint_name }}</div>
                             </td>
-                            <td><span class="mv-type-badge">{{ __($record->movement_type_name) }}</span></td>
-                            <td>{{ $record->vehicle_plate_no ?: '-' }}</td>
                             <td>
                                 <div class="mv-time">
                                     <strong>{{ \Illuminate\Support\Carbon::parse($record->checkout_at)->format('d M Y') }}</strong>
@@ -477,12 +519,13 @@
                                     <span class="mv-row-quiet">{{ __('Not returned yet') }}</span>
                                 @endif
                             </td>
-                            <td><span class="ui-status status-{{ $record->movement_status === 'outside' ? 'pending' : 'confirmed' }}">{{ __($record->movement_status) }}</span></td>
-                            <td><span class="ui-status status-{{ $record->rule_status === 'late' ? 'rejected' : ($record->rule_status === 'pending' ? 'pending' : 'confirmed') }}">{{ __($record->rule_status) }}</span></td>
-                            <td><span class="mv-row-quiet mv-explanation">{{ $record->late_explanation ?: '-' }}</span></td>
+                            <td>
+                                <span class="ui-status status-{{ $record->movement_status === 'outside' ? 'pending' : 'confirmed' }}">{{ __($record->movement_status) }}</span>
+                                <div style="margin-top:.4rem;"><span class="ui-status status-{{ $record->rule_status === 'late' ? 'rejected' : ($record->rule_status === 'pending' ? 'pending' : 'confirmed') }}">{{ __($record->rule_status) }}</span></div>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="10" class="mv-empty">{{ __('No movement records found.') }}</td></tr>
+                        <tr><td colspan="5" class="mv-empty">{{ __('No movement records found.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -526,6 +569,12 @@
     const retryButton = status?.querySelector('[data-movement-retry]');
     const fallbackPagination = document.querySelector('[data-movement-pagination]');
     const loadedCount = document.querySelector('[data-movement-loaded-count]');
+    const filterForm = document.querySelector('[data-movement-filter-form]');
+    const searchInput = filterForm?.querySelector('[data-movement-search]');
+    const clearButton = filterForm?.querySelector('[data-movement-clear]');
+    const resetButton = filterForm?.querySelector('[data-movement-reset]');
+    const feedback = document.querySelector('[data-movement-search-feedback]');
+    const exportLink = document.querySelector('[data-movement-export]');
 
     if (!(viewport instanceof HTMLElement) || !(tbody instanceof HTMLElement) || !seedNode) return;
 
@@ -544,6 +593,8 @@
     let hasMore = Boolean(seed.has_more && nextCursor);
     let loading = false;
     let renderFrame = null;
+    let filterRequest = null;
+    let searchTimer = null;
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
         '&': '&amp;',
@@ -572,19 +623,15 @@
                         <div>
                             <span class="mv-student">${escapeHtml(record.student_name)}</span><br>
                             <span class="mv-sub">${escapeHtml(record.matric_no)}</span>
+                            <div class="mv-sub">${escapeHtml(record.program)} · ${escapeHtml(record.residence_label)}</div>
                             ${profileAction}
                         </div>
                     </div>
                 </td>
-                <td>${escapeHtml(record.program)}<br><span class="mv-sub">${escapeHtml(record.checkpoint_name)}</span></td>
-                <td>${escapeHtml(record.residence_label)}<br><span class="mv-sub">${escapeHtml(record.room_number)}</span></td>
-                <td><span class="mv-type-badge">${escapeHtml(record.movement_type_label)}</span></td>
-                <td>${escapeHtml(record.vehicle_plate_no)}</td>
+                <td><span class="mv-type-badge">${escapeHtml(record.movement_type_label)}</span><div class="mv-sub" style="margin-top:.35rem;">${escapeHtml(record.vehicle_plate_no)} · ${escapeHtml(record.checkpoint_name)}</div></td>
                 <td><div class="mv-time"><strong>${escapeHtml(record.checkout_date)}</strong><span>${escapeHtml(record.checkout_time)}</span></div></td>
                 <td>${returnCell}</td>
-                <td><span class="ui-status status-${escapeHtml(record.movement_status_tone)}">${escapeHtml(record.movement_status_label)}</span></td>
-                <td><span class="ui-status status-${escapeHtml(record.rule_status_tone)}">${escapeHtml(record.rule_status_label)}</span></td>
-                <td><span class="mv-row-quiet mv-explanation">${escapeHtml(record.late_explanation)}</span></td>
+                <td><span class="ui-status status-${escapeHtml(record.movement_status_tone)}">${escapeHtml(record.movement_status_label)}</span><div style="margin-top:.4rem;"><span class="ui-status status-${escapeHtml(record.rule_status_tone)}">${escapeHtml(record.rule_status_label)}</span></div></td>
             </tr>
         `;
     };
@@ -599,11 +646,17 @@
         if (retryButton) retryButton.hidden = !error;
     };
 
+    const setSearchFeedback = (message, loadingState = false) => {
+        if (!feedback) return;
+        feedback.textContent = message;
+        feedback.classList.toggle('is-loading', loadingState);
+    };
+
     const render = () => {
         renderFrame = null;
 
         if (records.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" class="mv-empty">${escapeHtml(viewport.dataset.emptyLabel)}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="mv-empty">${escapeHtml(viewport.dataset.emptyLabel)}</td></tr>`;
             if (loadedCount) loadedCount.textContent = '0';
             return;
         }
@@ -615,9 +668,9 @@
         const bottomHeight = Math.max(0, (records.length - end) * rowHeight);
 
         tbody.innerHTML = `
-            <tr class="mv-virtual-spacer" aria-hidden="true" style="--mv-spacer-height:${topHeight}px"><td colspan="10"></td></tr>
+            <tr class="mv-virtual-spacer" aria-hidden="true" style="--mv-spacer-height:${topHeight}px"><td colspan="5"></td></tr>
             ${records.slice(start, end).map(rowHtml).join('')}
-            <tr class="mv-virtual-spacer" aria-hidden="true" style="--mv-spacer-height:${bottomHeight}px"><td colspan="10"></td></tr>
+            <tr class="mv-virtual-spacer" aria-hidden="true" style="--mv-spacer-height:${bottomHeight}px"><td colspan="5"></td></tr>
         `;
 
         if (loadedCount) loadedCount.textContent = String(records.length);
@@ -665,6 +718,58 @@
         }
     };
 
+    const applyFilters = async ({ updateHistory = true } = {}) => {
+        if (!(filterForm instanceof HTMLFormElement)) return;
+
+        filterRequest?.abort();
+        filterRequest = new AbortController();
+        const params = new URLSearchParams(new FormData(filterForm));
+        [...params.entries()].forEach(([key, value]) => {
+            if (!String(value).trim()) params.delete(key);
+        });
+        const url = new URL(filterForm.action || window.location.href, window.location.origin);
+        url.search = params.toString();
+
+        setSearchFeedback(filterForm.dataset.loadingLabel || '{{ __('Finding matching students...') }}', true);
+        viewport.setAttribute('aria-busy', 'true');
+
+        try {
+            const response = await fetch(url, {
+                headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+                signal: filterRequest.signal,
+            });
+            if (!response.ok) throw new Error('Movement filter request failed');
+
+            const payload = await response.json();
+            records.splice(0, records.length, ...(Array.isArray(payload.data) ? payload.data : []));
+            recordIds.clear();
+            records.forEach((record) => recordIds.add(Number(record.id)));
+            nextCursor = payload.next_cursor || null;
+            hasMore = Boolean(payload.has_more && nextCursor);
+            viewport.dataset.endpoint = url.toString();
+            viewport.scrollTop = 0;
+            render();
+            setStatus(hasMore ? viewport.dataset.readyLabel : viewport.dataset.completeLabel);
+            setSearchFeedback(records.length === 1
+                ? '{{ __('1 matching movement loaded') }}'
+                : `{{ __(':count matching movements loaded', ['count' => '__COUNT__']) }}`.replace('__COUNT__', records.length));
+
+            if (exportLink instanceof HTMLAnchorElement) {
+                const exportUrl = new URL(exportLink.href, window.location.origin);
+                exportUrl.search = params.toString();
+                exportLink.href = exportUrl.toString();
+            }
+            if (updateHistory) window.history.replaceState({}, '', `${url.pathname}${url.search}`);
+        } catch (error) {
+            if (error?.name !== 'AbortError') {
+                setSearchFeedback('{{ __('Search could not be completed. Try again.') }}');
+            }
+        } finally {
+            viewport.removeAttribute('aria-busy');
+        }
+    };
+
     const maybeLoadMore = () => {
         const remaining = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
         if (remaining < rowHeight * 8) loadMore();
@@ -675,6 +780,29 @@
         maybeLoadMore();
     }, { passive: true });
     retryButton?.addEventListener('click', loadMore);
+    filterForm?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        applyFilters();
+    });
+    searchInput?.addEventListener('input', () => {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(() => applyFilters(), 350);
+    });
+    clearButton?.addEventListener('click', () => {
+        if (!(searchInput instanceof HTMLInputElement)) return;
+        searchInput.value = '';
+        searchInput.focus();
+        applyFilters();
+    });
+    resetButton?.addEventListener('click', () => {
+        if (!(filterForm instanceof HTMLFormElement)) return;
+        filterForm.reset();
+        filterForm.querySelectorAll('input:not([type="search"]), select').forEach((field) => {
+            if (field instanceof HTMLInputElement) field.value = '';
+            if (field instanceof HTMLSelectElement) field.selectedIndex = 0;
+        });
+        applyFilters();
+    });
 
     viewport.dataset.virtualReady = 'true';
     if (fallbackPagination) fallbackPagination.hidden = true;

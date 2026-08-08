@@ -256,14 +256,14 @@
                 @csrf
                 <div class="import-grid">
                     <div>
-                        <label for="student_file">{{ __('Import Data Pelajar') }}</label>
+                        <label for="student_file">{{ __('Import & Update Data Pelajar') }}</label>
                         <input id="student_file" type="file" name="student_file" accept=".csv,.txt,.xlsx" required>
                         <div class="import-hint">
-                            Upload CSV atau Excel sehingga 50 MB. Header yang disokong termasuk Nama Pelajar, No Kad Pengenalan, No Matrik, Nama Program, Telefon, Email, Semester dan Sesi Akademik.
-                            Jika No Matrik kosong, sistem akan simpan sebagai kosong. Pelajar boleh lengkapkan No. Bilik sendiri di profil pelajar.
+                            Upload satu senarai pelajar terkini dalam CSV atau Excel sehingga 50 MB. Pelajar baharu akan ditambah, manakala pelajar yang sepadan melalui No. Kad Pengenalan atau No. Matrik akan dikemaskini, termasuk Semester dan Sesi Akademik.
+                            Header yang disokong termasuk Nama Pelajar, No Kad Pengenalan, No Matrik, Nama Program, Telefon, Email, Semester dan Sesi Akademik. Jika No Matrik kosong, sistem akan simpan sebagai kosong.
                         </div>
                     </div>
-                    <button class="btn btn-primary" type="submit">{{ __('Import Pelajar') }}</button>
+                    <button class="btn btn-primary" type="submit">{{ __('Import & Update') }}</button>
                 </div>
             </form>
 

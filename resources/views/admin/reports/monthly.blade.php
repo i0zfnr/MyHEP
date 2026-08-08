@@ -4,20 +4,25 @@
 
 @push('styles')
 <style>
-    .monthly-report { width:min(1320px,100%); margin:0 auto; display:grid; gap:20px; color:var(--text); }
-    .report-hero { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:4px 2px; }
+    .monthly-report { width:min(1320px,100%); margin:0 auto; display:grid; gap:18px; color:var(--text); }
+    .report-hero { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px 24px; border:1px solid var(--border); border-radius:20px; background:linear-gradient(135deg,var(--surface),var(--surface-soft)); box-shadow:var(--se-shadow-sm); }
+    .report-hero-copy { min-width:0; }
     .report-eyebrow { display:block; margin-bottom:7px; color:var(--primary-dark); font-size:.7rem; font-weight:850; letter-spacing:.14em; text-transform:uppercase; }
     .report-hero h1 { margin:0; color:var(--text); font-size:clamp(1.65rem,3vw,2.25rem); line-height:1.08; letter-spacing:-.045em; }
     .report-hero p { max-width:680px; margin:9px 0 0; color:var(--text-muted); font-size:.88rem; line-height:1.6; }
-    .report-actions { display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; }
+    .report-actions { display:flex; align-items:flex-end; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+    .report-actions form { display:flex; gap:8px; align-items:flex-end; }
     .report-month-field { display:grid; gap:6px; }
     .report-month-field label { color:var(--text-muted); font-size:.68rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
     .report-month-field input { min-width:185px; }
-    .report-scope { display:flex; align-items:center; gap:8px; margin:-4px 0 0; color:var(--text-muted); font-size:.76rem; }
+    .report-scope { display:flex; align-items:center; gap:8px; margin-top:13px; color:var(--text-muted); font-size:.76rem; }
     .report-scope strong { color:var(--text); }
     .report-scope span { padding:5px 10px; border:1px solid var(--border); border-radius:999px; background:var(--surface); }
 
-    .report-module { display:grid; gap:16px; }
+    .report-module { display:grid; gap:16px; scroll-margin-top:90px; }
+    .report-jump-nav { display:flex; gap:8px; flex-wrap:wrap; }
+    .report-jump-nav a { display:inline-flex; align-items:center; padding:7px 11px; border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--text-muted); text-decoration:none; font-size:.72rem; font-weight:800; }
+    .report-jump-nav a:hover { border-color:var(--primary); color:var(--primary-dark); }
     .report-module-head { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; }
     .report-module-head h2 { margin:3px 0 0; color:var(--text); font-size:1.3rem; letter-spacing:-.025em; }
     .report-module-head p { margin:5px 0 0; color:var(--text-muted); font-size:.8rem; }
@@ -44,6 +49,10 @@
     .report-card h3 { margin:5px 0 0; color:var(--text); font-size:1.05rem; letter-spacing:-.018em; }
     .report-card-copy { margin:5px 0 0; color:var(--text-muted); font-size:.75rem; line-height:1.5; }
     .report-card-body { padding:20px 21px 22px; }
+    .report-empty { min-height:190px; display:grid; place-items:center; padding:24px; text-align:center; }
+    .report-empty-mark { width:46px; height:46px; margin:0 auto 11px; display:grid; place-items:center; border-radius:14px; background:var(--surface-soft); border:1px solid var(--border); color:var(--primary-dark); font-size:1.25rem; font-weight:850; }
+    .report-empty strong { display:block; color:var(--text); font-size:.92rem; }
+    .report-empty span { display:block; max-width:350px; margin:5px auto 0; color:var(--text-muted); font-size:.74rem; line-height:1.5; }
 
     .report-bars { min-height:260px; display:flex; align-items:stretch; gap:12px; padding-top:6px; }
     .report-bar-group { flex:1; min-width:0; display:grid; grid-template-rows:1fr auto; gap:10px; }
@@ -91,7 +100,7 @@
     }
     @media(max-width:720px) {
         .monthly-report { gap:17px; }
-        .report-hero { align-items:stretch; flex-direction:column; }
+        .report-hero { align-items:stretch; flex-direction:column; padding:18px; }
         .report-actions, .report-actions form { width:100%; }
         .report-actions form { display:grid !important; grid-template-columns:1fr auto; align-items:end !important; }
         .report-month-field input { min-width:0; }
@@ -112,8 +121,10 @@
         .sidebar,.topbar,.page-header,.mobile-bottom-nav,.app-footer,.report-actions { display:none !important; }
         .main-wrap,.page-body { margin:0 !important; padding:0 !important; background:#fff !important; }
         .monthly-report { width:100%; color:#111; gap:14px; }
-        .report-module { break-inside:avoid; }
+        .report-module { break-inside:auto; }
         .report-kpi,.report-card { box-shadow:none !important; break-inside:avoid; }
+        .report-hero { border:0; padding:0; box-shadow:none; }
+        .report-jump-nav { display:none; }
         .report-kpis { grid-template-columns:repeat(5,1fr); }
         .report-grid { grid-template-columns:1.35fr .85fr; }
     }
@@ -132,17 +143,20 @@
     $scholarshipPendingPct = $scholarshipSummary && $scholarshipSummary['new_records'] > 0 ? round(($scholarshipSummary['pending'] / $scholarshipSummary['new_records']) * 100, 2) : 0;
     $scholarshipConfirmedCurrent = $scholarshipSummary ? $scholarshipSummary['status_confirmed'] : 0;
     $scholarshipConfirmedPct = $scholarshipSummary && $scholarshipSummary['new_records'] > 0 ? round(($scholarshipConfirmedCurrent / $scholarshipSummary['new_records']) * 100, 2) : 0;
+    $disciplineTrendTotal = $disciplineSummary ? collect($disciplineSummary['trend'])->sum(fn ($period) => $period['primary'] + $period['secondary']) : 0;
+    $scholarshipTrendTotal = $scholarshipSummary ? collect($scholarshipSummary['trend'])->sum(fn ($period) => $period['primary'] + $period['secondary']) : 0;
 @endphp
 <div class="monthly-report">
     <header class="report-hero">
-        <div>
+        <div class="report-hero-copy">
             <span class="report-eyebrow">{{ __('Operations Analytics') }}</span>
             <h1>{{ __('Monthly Performance Report') }}</h1>
             <p>{{ __('A structured overview of discipline and scholarship activity, workflow decisions, current backlogs, and six-month operational trends.') }}</p>
+            <div class="report-scope"><strong>{{ __('Report scope:') }}</strong><span>{{ $start->format('1 M Y') }} – {{ $end->format('d M Y') }}</span></div>
         </div>
         <div class="report-actions">
             <button class="ui-btn" type="button" onclick="window.print()">{{ __('Print / Save PDF') }}</button>
-            <form method="GET" action="{{ route('admin.reports.monthly') }}" style="display:flex;gap:8px;align-items:flex-end;">
+            <form method="GET" action="{{ route('admin.reports.monthly') }}">
                 <div class="report-month-field">
                     <label for="reportMonth">{{ __('Report month') }}</label>
                     <input id="reportMonth" type="month" name="month" value="{{ $month }}" max="{{ now()->format('Y-m') }}">
@@ -152,10 +166,15 @@
         </div>
     </header>
 
-    <div class="report-scope"><strong>{{ __('Report scope:') }}</strong><span>{{ $start->format('1 M Y') }} – {{ $end->format('d M Y') }}</span></div>
+    @if($hasDisciplineAccess && $hasScholarshipAccess)
+        <nav class="report-jump-nav" aria-label="{{ __('Report sections') }}">
+            <a href="#disciplineReport">{{ __('Discipline Operations') }}</a>
+            <a href="#scholarshipReport">{{ __('Scholarship Operations') }}</a>
+        </nav>
+    @endif
 
     @if($hasDisciplineAccess && $disciplineSummary)
-    <section class="report-module" aria-labelledby="disciplineReportTitle">
+    <section class="report-module" id="disciplineReport" aria-labelledby="disciplineReportTitle">
         <div class="report-module-head">
             <div><span class="report-eyebrow">{{ __('Discipline Analytics') }}</span><h2 id="disciplineReportTitle">{{ __('Discipline Operations') }}</h2><p>{{ __('Offense records, fine-payment decisions, vehicle stickers, and unresolved workload.') }}</p></div>
             <span class="report-module-badge">{{ __('Live database metrics') }}</span>
@@ -172,6 +191,7 @@
         <div class="report-grid">
             <article class="report-card">
                 <div class="report-card-head"><span class="report-card-kicker">{{ __('Six Months') }}</span><h3>{{ __('Discipline Activity Trends') }}</h3><p class="report-card-copy">{{ __('Monthly offenses compared with approved fine-payment applications.') }}</p></div>
+                @if($disciplineTrendTotal > 0)
                 <div class="report-card-body">
                     <div class="report-bars">
                         @foreach($disciplineSummary['trend'] as $period)
@@ -180,13 +200,20 @@
                     </div>
                     <div class="report-legend"><span><i></i>{{ __('New offenses') }}</span><span><i class="secondary"></i>{{ __('Approved payments') }}</span></div>
                 </div>
+                @else
+                <div class="report-empty"><div><div class="report-empty-mark">0</div><strong>{{ __('No discipline activity in this period') }}</strong><span>{{ __('Choose another report month or return after new offenses and payment decisions are recorded.') }}</span></div></div>
+                @endif
             </article>
             <article class="report-card">
                 <div class="report-card-head"><span class="report-card-kicker">{{ __('Decision Status') }}</span><h3>{{ __('Fine Application Distribution') }}</h3><p class="report-card-copy">{{ __('Current status of applications submitted this month.') }}</p></div>
+                @if($disciplineSummary['fine_total'] > 0)
                 <div class="report-card-body report-donut-layout">
                     <div class="report-donut" style="--donut:{{ $disciplineSummary['fine_total'] > 0 ? 'conic-gradient(#c48628 0 '.$disciplinePendingPct.'%,#3f8f69 '.$disciplinePendingPct.'% '.($disciplinePendingPct+$disciplineApprovedPct).'%,#c14f5c '.($disciplinePendingPct+$disciplineApprovedPct).'% 100%)' : 'conic-gradient(var(--surface-muted) 0 100%)' }};"><div class="report-donut-centre"><strong>{{ number_format($disciplineSummary['fine_total']) }}</strong><span>{{ __('Applications') }}</span></div></div>
                     <div class="report-status-list"><div class="report-status-row" style="--status-color:#c48628"><i></i><span>{{ __('Pending') }}</span><strong>{{ $disciplineSummary['fine_pending'] }}</strong></div><div class="report-status-row" style="--status-color:#3f8f69"><i></i><span>{{ __('Approved') }}</span><strong>{{ $disciplineSummary['fine_status_approved'] }}</strong></div><div class="report-status-row" style="--status-color:#c14f5c"><i></i><span>{{ __('Rejected') }}</span><strong>{{ $disciplineSummary['fine_status_rejected'] }}</strong></div></div>
                 </div>
+                @else
+                <div class="report-empty"><div><div class="report-empty-mark">0</div><strong>{{ __('No fine applications this month') }}</strong><span>{{ __('The distribution will appear when students submit fine-payment applications.') }}</span></div></div>
+                @endif
             </article>
         </div>
 
@@ -195,14 +222,14 @@
             <div class="report-card-body report-efficiency">
                 <div class="report-efficiency-item"><span>{{ __('Fine decisions completed') }}</span><strong>{{ number_format($disciplineDecisionTotal) }}</strong><div class="report-progress" style="--progress:{{ $disciplineSummary['fine_approval_rate'] }}%"><span></span></div></div>
                 <div class="report-efficiency-item"><span>{{ __('Vehicle sticker approval rate') }}</span><strong>{{ number_format($disciplineSummary['sticker_approval_rate'],1) }}%</strong><div class="report-progress" style="--progress:{{ $disciplineSummary['sticker_approval_rate'] }}%"><span></span></div></div>
-                <div class="report-efficiency-item"><span>{{ __('Current unresolved workload') }}</span><strong>{{ number_format($disciplineSummary['current_unpaid'] + $disciplineSummary['current_fine_backlog']) }}</strong><div class="report-progress" style="--progress:100%"><span></span></div></div>
+                <div class="report-efficiency-item"><span>{{ __('Current unresolved workload') }}</span><strong>{{ number_format($disciplineSummary['current_unpaid'] + $disciplineSummary['current_fine_backlog']) }}</strong><div class="report-progress" style="--progress:{{ ($disciplineSummary['current_unpaid'] + $disciplineSummary['current_fine_backlog']) > 0 ? 100 : 0 }}%"><span></span></div></div>
             </div>
         </article>
     </section>
     @endif
 
     @if($hasScholarshipAccess && $scholarshipSummary)
-    <section class="report-module" aria-labelledby="scholarshipReportTitle">
+    <section class="report-module" id="scholarshipReport" aria-labelledby="scholarshipReportTitle">
         <div class="report-module-head">
             <div><span class="report-eyebrow">{{ __('Scholarship Analytics') }}</span><h2 id="scholarshipReportTitle">{{ __('Scholarship Operations') }}</h2><p>{{ __('New aid records, decisions, financial value, announcements, and pending workload.') }}</p></div>
             <span class="report-module-badge">{{ __('Live database metrics') }}</span>
@@ -219,6 +246,7 @@
         <div class="report-grid">
             <article class="report-card">
                 <div class="report-card-head"><span class="report-card-kicker">{{ __('Six Months') }}</span><h3>{{ __('Scholarship Activity Trends') }}</h3><p class="report-card-copy">{{ __('Monthly scholarship records compared with confirmed decisions.') }}</p></div>
+                @if($scholarshipTrendTotal > 0)
                 <div class="report-card-body">
                     <div class="report-bars">
                         @foreach($scholarshipSummary['trend'] as $period)
@@ -227,13 +255,20 @@
                     </div>
                     <div class="report-legend"><span><i></i>{{ __('New records') }}</span><span><i class="secondary"></i>{{ __('Confirmed records') }}</span></div>
                 </div>
+                @else
+                <div class="report-empty"><div><div class="report-empty-mark">0</div><strong>{{ __('No scholarship activity in this period') }}</strong><span>{{ __('Choose another report month or return after scholarship records and decisions are added.') }}</span></div></div>
+                @endif
             </article>
             <article class="report-card">
                 <div class="report-card-head"><span class="report-card-kicker">{{ __('Current Status') }}</span><h3>{{ __('Scholarship Status Distribution') }}</h3><p class="report-card-copy">{{ __('Current status of records created this month.') }}</p></div>
+                @if($scholarshipSummary['new_records'] > 0)
                 <div class="report-card-body report-donut-layout">
                     <div class="report-donut" style="--donut:{{ $scholarshipSummary['new_records'] > 0 ? 'conic-gradient(#c48628 0 '.$scholarshipPendingPct.'%,#3f8f69 '.$scholarshipPendingPct.'% '.($scholarshipPendingPct+$scholarshipConfirmedPct).'%,#c14f5c '.($scholarshipPendingPct+$scholarshipConfirmedPct).'% 100%)' : 'conic-gradient(var(--surface-muted) 0 100%)' }};"><div class="report-donut-centre"><strong>{{ number_format($scholarshipSummary['new_records']) }}</strong><span>{{ __('Records') }}</span></div></div>
                     <div class="report-status-list"><div class="report-status-row" style="--status-color:#c48628"><i></i><span>{{ __('Pending') }}</span><strong>{{ $scholarshipSummary['pending'] }}</strong></div><div class="report-status-row" style="--status-color:#3f8f69"><i></i><span>{{ __('Confirmed') }}</span><strong>{{ $scholarshipConfirmedCurrent }}</strong></div><div class="report-status-row" style="--status-color:#c14f5c"><i></i><span>{{ __('Rejected') }}</span><strong>{{ $scholarshipSummary['rejected'] }}</strong></div></div>
                 </div>
+                @else
+                <div class="report-empty"><div><div class="report-empty-mark">0</div><strong>{{ __('No scholarship records this month') }}</strong><span>{{ __('The distribution will appear when scholarship records are created in this report period.') }}</span></div></div>
+                @endif
             </article>
         </div>
 
@@ -242,7 +277,7 @@
             <div class="report-card-body report-efficiency">
                 <div class="report-efficiency-item"><span>{{ __('Confirmation rate') }}</span><strong>{{ number_format($scholarshipSummary['confirmation_rate'],1) }}%</strong><div class="report-progress" style="--progress:{{ $scholarshipSummary['confirmation_rate'] }}%"><span></span></div></div>
                 <div class="report-efficiency-item"><span>{{ __('Announcements published') }}</span><strong>{{ number_format($scholarshipSummary['announcements']) }}</strong><div class="report-progress" style="--progress:{{ min(100,$scholarshipSummary['announcements']*10) }}%"><span></span></div></div>
-                <div class="report-efficiency-item"><span>{{ __('Current pending backlog') }}</span><strong>{{ number_format($scholarshipSummary['current_pending']) }}</strong><div class="report-progress" style="--progress:100%"><span></span></div></div>
+                <div class="report-efficiency-item"><span>{{ __('Current pending backlog') }}</span><strong>{{ number_format($scholarshipSummary['current_pending']) }}</strong><div class="report-progress" style="--progress:{{ $scholarshipSummary['current_pending'] > 0 ? 100 : 0 }}%"><span></span></div></div>
             </div>
         </article>
     </section>

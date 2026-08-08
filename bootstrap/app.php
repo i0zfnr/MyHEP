@@ -5,9 +5,11 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EnsureAdminScope;
 use App\Http\Middleware\EnsureFeatureEnabled;
+use App\Http\Middleware\EnsureLecturerPageAccess;
 use App\Http\Middleware\RequireSessionAuthenticated;
 use App\Http\Middleware\RequireSessionRole;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\SetConfiguredSessionLifetime;
 use App\Http\Middleware\TrackAccountSession;
 use App\Http\Middleware\TranslateFrontendContent;
 use App\Http\Middleware\UseForwardedHostForUrls;
@@ -21,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(prepend: [
             UseForwardedHostForUrls::class,
+            SetConfiguredSessionLifetime::class,
         ]);
 
         $middleware->web(append: [
@@ -34,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.session.any' => RequireSessionAuthenticated::class,
             'admin.scope' => EnsureAdminScope::class,
             'feature.enabled' => EnsureFeatureEnabled::class,
+            'lecturer.page' => EnsureLecturerPageAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

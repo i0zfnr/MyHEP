@@ -196,10 +196,10 @@
 
     <div class="card">
         <div class="head">
-            <h1 style="margin:0;font-size:20px;">{{ __('Senarai Akaun Admin') }}</h1>
+            <h1 style="margin:0;font-size:20px;">{{ $canManageAllAdmins ? __('Senarai Akaun Admin') : __('Lecturer Accounts') }}</h1>
             <div style="display:flex; gap:8px;">
                 <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
-                <a class="btn" href="{{ route('admin.admin-users.create') }}">{{ __('Tambah Admin') }}</a>
+                <a class="btn" href="{{ route('admin.admin-users.create') }}">{{ $canManageAllAdmins ? __('Tambah Admin') : __('Add Lecturer') }}</a>
             </div>
         </div>
 

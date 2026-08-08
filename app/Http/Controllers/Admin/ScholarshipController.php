@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\ProgramIdentifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -183,7 +184,7 @@ class ScholarshipController extends Controller
     {
         $validated = $this->validateScholarship($request);
 
-        DB::table('scholarships')->insert([
+        $scholarshipId = DB::table('scholarships')->insertGetId([
             'student_id' => $validated['student_id'],
             'type' => $validated['type'],
             'provider_name' => $validated['provider_name'] ?? null,
@@ -193,6 +194,19 @@ class ScholarshipController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        if (in_array($validated['status'], ['confirmed', 'rejected'], true)) {
+            myhepSendPushNotification('student', (int) $validated['student_id'], [
+                'category' => 'scholarship',
+                'title' => $validated['status'] === 'confirmed' ? 'Scholarship status confirmed' : 'Scholarship status update',
+                'body' => $validated['status'] === 'confirmed'
+                    ? 'Your scholarship record has been confirmed.'
+                    : 'Your scholarship record was rejected. Please review your scholarship information.',
+                'url' => route('student.scholarships.index'),
+                'tag' => 'scholarship-decision-' . $scholarshipId,
+                'requireInteraction' => $validated['status'] === 'rejected',
+            ]);
+        }
 
         return redirect()->route('admin.scholarships.index')
             ->with('success', __('Rekod scholarship berjaya ditambah.'));
@@ -233,6 +247,19 @@ class ScholarshipController extends Controller
                 'proof_file' => $validated['proof_file'] ?? null,
                 'updated_at' => now(),
             ]);
+
+        if ($record->status !== $validated['status'] && in_array($validated['status'], ['confirmed', 'rejected'], true)) {
+            myhepSendPushNotification('student', (int) $validated['student_id'], [
+                'category' => 'scholarship',
+                'title' => $validated['status'] === 'confirmed' ? 'Scholarship status confirmed' : 'Scholarship status update',
+                'body' => $validated['status'] === 'confirmed'
+                    ? 'Your scholarship record has been confirmed.'
+                    : 'Your scholarship record was rejected. Please review your scholarship information.',
+                'url' => route('student.scholarships.index'),
+                'tag' => 'scholarship-decision-' . $id,
+                'requireInteraction' => $validated['status'] === 'rejected',
+            ]);
+        }
 
         return redirect()->route('admin.scholarships.index')
             ->with('success', __('Rekod scholarship berjaya dikemaskini.'));
@@ -588,7 +615,7 @@ class ScholarshipController extends Controller
                     'full_name' => Str::upper($fullName),
                     'matric_no' => null,
                     'ic_no' => $icNo,
-                    'program' => Str::upper($program),
+                    'program' => ProgramIdentifier::from(null, $program),
                     'updated_at' => $now,
                 ];
 
