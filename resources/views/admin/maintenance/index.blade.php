@@ -103,7 +103,7 @@
     .maint-card.push-centre { grid-column: 1 / -1; }
     .maint-card.email-centre { grid-column: 1 / -1; }
     .maint-push-layout { display: grid; gap: 1rem; }
-    @media (min-width: 760px) { .maint-push-layout { grid-template-columns: .8fr 1.2fr; } }
+    @media (min-width: 900px) { .maint-push-layout { grid-template-columns: minmax(270px, .9fr) minmax(0, 1.55fr); } }
     .maint-push-panel { border: 1px solid rgba(203,185,164,.6); border-radius: 14px; padding: 1rem; background: rgba(255,255,255,.42); }
     .maint-push-panel h4 { margin: 0 0 .35rem; color: #2d1f14; font-size: 1rem; }
     .maint-push-panel p { margin: 0 0 .9rem; color: #74675d; font-size: .83rem; line-height: 1.55; }
@@ -119,6 +119,61 @@
     .maint-field small { display: block; margin-top: .3rem; color: #8a796c; font-size: .72rem; }
     .msg-ok { padding: .75rem .9rem; border-radius: 12px; background: #e7f3f3; border: 1px solid #b9ddde; color: #1f5559; font-size: .86rem; font-weight: 700; }
     .msg-err { padding: .75rem .9rem; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: .86rem; font-weight: 700; }
+    .maint-push-head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+    .maint-push-head-main { display: flex; align-items: center; gap: .65rem; }
+    .maint-push-head-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: #1f5559; color: #fff; }
+    .maint-push-head-icon svg { width: 18px; height: 18px; }
+    .maint-push-head-copy strong { display: block; color: #241a12; font-size: .94rem; }
+    .maint-push-head-copy span { display: block; margin-top: .12rem; color: #806f61; font-size: .68rem; font-weight: 600; }
+    .maint-push-badge { flex: 0 0 auto; padding: .3rem .58rem; border: 1px solid #b9ddde; border-radius: 999px; background: #edf8f8; color: #1f5559; font-size: .65rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+    .push-centre .maint-card-body { padding: 1rem; }
+    .push-centre .maint-push-panel { position: relative; padding: 1.1rem; border-color: #ddd0c3; background: rgba(255,255,255,.84); overflow: hidden; }
+    .push-centre .maint-push-panel::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 4px; background: #2f7378; }
+    .push-centre .maint-push-panel.broadcast-panel::before { background: #c2814d; }
+    .maint-panel-kicker { display: inline-flex; align-items: center; gap: .42rem; margin-bottom: .55rem; color: #1f5559; font-size: .67rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+    .maint-panel-kicker svg { width: 15px; height: 15px; }
+    .broadcast-panel .maint-panel-kicker { color: #935b31; }
+    .push-centre .maint-push-panel h4 { margin-bottom: .38rem; font-size: 1.05rem; letter-spacing: -.015em; }
+    .push-centre .maint-push-panel > p { max-width: 640px; margin-bottom: 1rem; }
+    .push-centre .maint-stats { gap: .65rem; }
+    .push-centre .maint-stat { min-width: 0; padding: .8rem; border-color: #d8e5e5; background: #f4f9f9; }
+    .push-centre .maint-stat strong { color: #173f42; font-size: 1.35rem; }
+    .push-centre .maint-stat span { color: #667879; line-height: 1.35; }
+    .push-centre .maint-field input,
+    .push-centre .maint-field textarea { border-color: #d6c7b8; background: #fff; }
+    .push-centre .maint-field input:focus,
+    .push-centre .maint-field textarea:focus { outline: 3px solid rgba(31,85,89,.12); border-color: #4f8083; }
+    .push-centre .maint-field textarea { min-height: 118px; }
+    .maint-push-test-btn,
+    .maint-broadcast-btn { display: inline-flex; align-items: center; justify-content: center; gap: .48rem; min-height: 44px; border-radius: 11px; padding: .7rem 1rem; font: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; }
+    .maint-push-test-btn { width: 100%; border: 1px solid #1f5559; background: linear-gradient(135deg, #1f5559, #32777b); color: #fff; box-shadow: 0 10px 22px rgba(31,85,89,.18); }
+    .maint-broadcast-btn { border: 1px solid #b56f3e; background: linear-gradient(135deg, #a96334, #c47c48); color: #fff; box-shadow: 0 10px 22px rgba(169,99,52,.18); }
+    .maint-push-test-btn svg, .maint-broadcast-btn svg { width: 17px; height: 17px; }
+    .maint-push-test-btn:hover, .maint-broadcast-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .maint-push-test-btn:focus-visible, .maint-broadcast-btn:focus-visible { outline: 3px solid rgba(31,85,89,.24); outline-offset: 2px; }
+    body[data-theme="dark"] .push-centre { border-color: rgba(226,209,192,.14); background: rgba(20,18,16,.86); }
+    body[data-theme="dark"] .push-centre .maint-card-head { border-color: rgba(226,209,192,.12); background: linear-gradient(180deg, rgba(38,34,30,.96), rgba(27,24,21,.92)); }
+    body[data-theme="dark"] .maint-push-head-copy strong { color: #f7efe8; }
+    body[data-theme="dark"] .maint-push-head-copy span { color: #b9a99b; }
+    body[data-theme="dark"] .maint-push-badge { border-color: rgba(127,184,188,.32); background: rgba(31,85,89,.24); color: #c7ecee; }
+    body[data-theme="dark"] .push-centre .maint-push-panel { border-color: rgba(226,209,192,.16); background: linear-gradient(145deg, rgba(35,31,27,.96), rgba(26,24,21,.96)); }
+    body[data-theme="dark"] .push-centre .maint-push-panel h4 { color: #f7efe8; }
+    body[data-theme="dark"] .push-centre .maint-push-panel > p { color: #c8b8a9; }
+    body[data-theme="dark"] .push-centre .maint-stat { border-color: rgba(127,184,188,.2); background: rgba(31,85,89,.15); }
+    body[data-theme="dark"] .push-centre .maint-stat strong { color: #e6f5f5; }
+    body[data-theme="dark"] .push-centre .maint-stat span { color: #a9c2c3; }
+    body[data-theme="dark"] .push-centre .maint-field label { color: #ead9ca; }
+    body[data-theme="dark"] .push-centre .maint-field small { color: #ad9d90; }
+    body[data-theme="dark"] .push-centre .maint-field input,
+    body[data-theme="dark"] .push-centre .maint-field textarea { border-color: rgba(226,209,192,.2); background: rgba(11,11,10,.66); color: #f7efe8; }
+    body[data-theme="dark"] .maint-push-test-btn { border-color: #77aeb1; background: linear-gradient(135deg, #346f73, #285b5f); }
+    body[data-theme="dark"] .maint-broadcast-btn { border-color: #d39970; background: linear-gradient(135deg, #8f5631, #ab6840); }
+    @media (max-width: 520px) {
+        .maint-push-head { align-items: flex-start; }
+        .maint-push-badge { display: none; }
+        .push-centre .maint-stats { grid-template-columns: 1fr 1fr; }
+        .maint-broadcast-btn { width: 100%; }
+    }
     .maint-email-shell {
         display: grid;
         grid-template-columns: minmax(220px, .7fr) minmax(0, 1.3fr);
@@ -202,7 +257,7 @@
         .maint-email-shell { grid-template-columns: 1fr; }
         .maint-email-intro { padding: .15rem; }
     }
-    @media (prefers-reduced-motion: reduce) { .maint-email-submit { transition: none; } .maint-email-submit:hover { transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .maint-email-submit, .maint-push-test-btn, .maint-broadcast-btn { transition: none; } .maint-email-submit:hover, .maint-push-test-btn:hover, .maint-broadcast-btn:hover { transform: none; } }
 </style>
 @endpush
 
@@ -318,10 +373,25 @@
         </section>
 
         <section class="maint-card push-centre">
-            <div class="maint-card-head">Push Notification Centre</div>
+            <div class="maint-card-head maint-push-head">
+                <div class="maint-push-head-main">
+                    <span class="maint-push-head-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+                    </span>
+                    <span class="maint-push-head-copy">
+                        <strong>Push Notification Centre</strong>
+                        <span>Test delivery and announce scheduled downtime</span>
+                    </span>
+                </div>
+                <span class="maint-push-badge">Web Push</span>
+            </div>
             <div class="maint-card-body">
                 <div class="maint-push-layout">
-                    <div class="maint-push-panel">
+                    <div class="maint-push-panel test-panel">
+                        <span class="maint-panel-kicker">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 5 6v5c0 4.7 2.8 8 7 10 4.2-2 7-5.3 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>
+                            Private test
+                        </span>
                         <h4>Test this admin device</h4>
                         <p>Send a private test notification only to devices registered under your System Admin account.</p>
                         <div class="maint-stats">
@@ -332,11 +402,18 @@
                         </div>
                         <form method="POST" action="{{ route('admin.maintenance.push.test') }}">
                             @csrf
-                            <button type="submit" class="maint-btn ok">Send Test Notification</button>
+                            <button type="submit" class="maint-push-test-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+                                Send Test Notification
+                            </button>
                         </form>
                     </div>
 
-                    <div class="maint-push-panel">
+                    <div class="maint-push-panel broadcast-panel">
+                        <span class="maint-panel-kicker">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 13V6l16-3v13"/><circle cx="6" cy="17" r="3"/><circle cx="18" cy="18" r="3"/></svg>
+                            System announcement
+                        </span>
                         <h4>Announce scheduled maintenance</h4>
                         <p>Notify every subscribed student and admin. This announcement does not enable maintenance mode automatically.</p>
                         <form method="POST" action="{{ route('admin.maintenance.push.broadcast') }}"
@@ -360,7 +437,10 @@
                                 <small>Maximum 300 characters. The schedule is added automatically only when this field is blank.</small>
                             </div>
                             <div class="maint-actions">
-                                <button type="submit" class="maint-btn warn">Send Maintenance Notification</button>
+                                <button type="submit" class="maint-broadcast-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8z"/><path d="M7 12h14"/></svg>
+                                    Send Maintenance Notification
+                                </button>
                             </div>
                         </form>
                     </div>
