@@ -42,7 +42,7 @@
     <div class="staff-scan-vignette" aria-hidden="true"></div>
 
     <div class="staff-scan-topbar">
-        <a href="{{ route('admin.laptops.index') }}" class="staff-scan-icon" aria-label="Close scanner">
+        <a href="{{ route('admin.dashboard') }}" class="staff-scan-icon" aria-label="Close scanner">
             <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </a>
         <div class="staff-scan-clock" id="staffScanClock">--:--</div>

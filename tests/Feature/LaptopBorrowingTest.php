@@ -67,6 +67,7 @@ class LaptopBorrowingTest extends TestCase
             ->assertOk()
             ->assertSee('Borrow or return a laptop')
             ->assertSee('staff-scan-page', false)
+            ->assertSee('href="'.route('admin.dashboard').'"', false)
             ->assertSee('Opening camera. Point it at a JHEP laptop QR code.');
 
         $this->postJson('/admin/laptops/scan', ['token' => '11111111-1111-4111-8111-111111111111'])
