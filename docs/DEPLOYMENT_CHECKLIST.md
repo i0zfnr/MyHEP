@@ -1,11 +1,12 @@
 # StudentEdge Deployment Checklist
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 ## Pre-deployment
 
 - [ ] Confirm the exact release commit/tag and a clean working tree.
-- [ ] Set production `APP_URL`, database, mail, queue, cache, and Web Push configuration without committing `.env`.
+- [ ] Set production `APP_URL`, database, queue, cache, and Web Push configuration without committing `.env`.
+- [ ] Configure `MAIL_MAILER=resend`, a protected `RESEND_API_KEY`, and `MAIL_FROM_ADDRESS` on a verified institutional domain; do not use `onboarding@resend.dev` for general production recipients.
 - [ ] Confirm `APP_ENV=production`, `APP_DEBUG=false`, HTTPS, trusted proxies, secure cookies, and a unique protected `APP_KEY`.
 - [ ] Run `composer audit --locked` and resolve or formally accept every advisory.
 - [ ] Back up the database, public uploads, and `storage/app/private/student_documents`; encrypt/restrict the backup.
@@ -32,12 +33,14 @@ php artisan optimize
 
 ## Post-deployment
 
-- [ ] Run student/admin login, logout, password reset, active-device display, and other-session revocation smoke tests.
+- [ ] Run student/admin login, logout, password reset, active-device display, and other-session revocation smoke tests. Confirm a reset code arrives by email and that push contains only the post-reset security alert.
 - [ ] Test one allowed and one forbidden action for every admin role, including guard and Head of Student Affairs.
 - [ ] Verify lecturer page access flags: enabled offense pages work, disabled pages return forbidden, and lookup does not expose the full student directory.
 - [ ] Test student-owned document download, admin review/download, scholarship offer letter, and disabled Document Centre behavior.
 - [ ] Verify scholarship, discipline, movement, exports, PDF/print, notifications, push, and audit logs.
 - [ ] Register a System Admin push device, send a private test, then verify a maintenance broadcast on one student and one admin device.
+- [ ] Use the System Admin email-delivery test with an approved recipient; confirm the Resend activity record plus inbox/spam delivery, and retain the displayed reference for troubleshooting.
+- [ ] Test staff/guard account boundaries and one complete laptop QR borrow/return cycle, including rejection when another staff member owns the active loan.
 - [ ] Verify the configured session lifetime is applied after config/cache refresh.
 - [ ] Verify Malay/English, light/dark, desktop/mobile, PWA install, scanner, cropper, nested scrolling, and movement feed loading.
 - [ ] Monitor application, web-server, queue, scheduler, and failed-job logs.

@@ -5,8 +5,8 @@ StudentEdge is a Laravel student-affairs management system for Politeknik Besut.
 ## Documentation
 
 - [System documentation](docs/SYSTEM_DOCUMENTATION.md)
-- [Implemented function inventory — 142 functions](docs/FUNCTION_INVENTORY.md)
-- [Word function inventory](docs/StudentEdge_Function_Inventory.docx)
+- [Implemented function inventory — 160 functions](docs/FUNCTION_INVENTORY.md)
+- [Word function inventory (reference snapshot)](docs/StudentEdge_Function_Inventory.docx)
 - [Project progress and next steps](docs/PROJECT_PROGRESS_AND_NEXT_STEPS.md)
 - [Team presentation guide](docs/TEAM_PRESENTATION_GUIDE.md)
 - [Panel coding Q&A guide](docs/PANEL_CODING_QA_GUIDE.md)
@@ -17,9 +17,9 @@ StudentEdge is a Laravel student-affairs management system for Politeknik Besut.
 
 ## Main capabilities
 
-- Custom student/admin authentication, password reset, active-device tracking, and remote session revocation
+- Custom student/admin authentication, Resend-backed password reset, active-device tracking, and remote session revocation
 - Central admin permissions with separate student list, sensitive-data, export, management, document, scholarship, discipline, movement, back-office, and system abilities
-- 142 named application functions: 23 public/shared, 21 student, and 98 admin
+- 160 named application functions: 23 public/shared, 21 student, and 116 admin
 - Lecturer accounts with System Admin-controlled offense page access and limited AJAX student lookup
 - Student CRUD, search, CSV/XLSX import, CSV export, identity masking, and pagination
 - Scholarship records, B40 TVET import/export, announcements, declarations, and private offer-letter upload/review
@@ -27,7 +27,7 @@ StudentEdge is a Laravel student-affairs management system for Politeknik Besut.
 - QR-based campus checkout/return, guard views, movement reports, cursor batches, and virtualized long lists
 - Private Student Document Centre with review, authenticated downloads, and a system-admin feature toggle
 - English/Malay UI, light/dark theme, responsive PWA shell, notifications, browser push, and reduced-motion support
-- Monthly analytics, monitoring, maintenance/cache controls, configurable session lifetime, maintenance push broadcasts, audit logs, and cropped admin profile photos
+- Staff/guard account management, QR laptop borrowing/return, monthly analytics, monitoring, maintenance/cache controls, configurable session lifetime, push broadcasts, email-delivery testing, audit logs, and cropped admin profile photos
 
 ## Technology
 

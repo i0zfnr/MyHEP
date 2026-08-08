@@ -1,6 +1,6 @@
 # StudentEdge Data Schema
 
-Last updated: 2026-08-02
+Last updated: 2026-08-09
 
 ## Sources of Truth
 
@@ -26,6 +26,7 @@ admins
   |-- discipline_announcements
   |-- rules
   |-- offenses
+  |-- jhep_laptop_loans --< jhep_laptops
   `-- administrative decisions and audit records
 
 movement_checkpoints --< student_movements >-- movement_types
@@ -37,7 +38,7 @@ rule_categories --< rules
 | Table | Purpose | Important relationships |
 | --- | --- | --- |
 | `students` | Student identity, authentication, program, contact, residence, guardian, and profile data | Parent of most student workflows |
-| `admins` | Administrator identity, password, role, and profile | Referenced by administrative records and decisions |
+| `admins` | Administrator/staff identity, password, role, profile, staff category, and active state | Referenced by administrative records, laptop loans, and decisions |
 | `scholarships` | Scholarship, sponsorship, welfare, or no-scholarship records | Belongs to `students` |
 | `student_scholarship_status_forms` | Student-submitted scholarship status declaration | Belongs to `students` |
 | `scholarship_announcements` | Scholarship notices and links | Optionally associated with an admin |
@@ -55,6 +56,8 @@ rule_categories --< rules
 | `movement_settings` | Curfew, GPS, and movement configuration | Operational singleton/configuration data |
 | `student_movements` | Checkout, return, GPS, residence, plate, late status, and explanation | Belongs to student, checkpoint, and movement type |
 | `student_documents` | Private document metadata, source, review state, expiry, and storage path | Belongs to student; review may reference admin |
+| `jhep_laptops` | JHEP laptop asset, QR token, availability, and active state | Parent of laptop loan history |
+| `jhep_laptop_loans` | Staff borrowing and return timestamps | Belongs to a laptop and an admin/staff account |
 
 ## Platform Tables
 
@@ -62,6 +65,8 @@ rule_categories --< rules
 | --- | --- |
 | `password_reset_codes` | Reset identity, hashed/controlled code state, attempts, expiry, verification, and consumption |
 | `push_subscriptions` | Browser endpoint and Web Push subscription keys |
+| `push_notification_markers` | Idempotency markers for event-driven push delivery |
+| `system_settings` | System-level operational settings such as session lifetime |
 | `bug_reports` | User problem reports and optional screenshots |
 | `audit_logs` | Actor, action, target, metadata, IP, and timestamp trace |
 | `sessions` | Database-backed Laravel sessions |
@@ -74,7 +79,7 @@ rule_categories --< rules
 
 - Student identity is anchored by the student row and commonly addressed by `matric_no`; migrations permit a nullable matric number for incomplete imports.
 - Student IC numbers are sensitive and currently participate in temporary default-password fallback behavior.
-- Admin role values include `scholarship_admin`, `discipline_admin`, `student_affairs_head`, `guard`, and `system_admin`.
+- Admin role values include `lecturer`, `scholarship_admin`, `discipline_admin`, `student_affairs_head`, `guard`, and `system_admin`; lecturer accounts additionally use a controlled staff category and active state.
 - A privileged linked-role feature may associate a student session with an admin identity; authorization must be resolved from trusted database/session state.
 
 ## Integrity Expectations
@@ -87,6 +92,7 @@ rule_categories --< rules
 - Private documents must remain on the `student_documents` disk; replacing or deleting metadata must also handle the file.
 - `system_features.feature_key` is unique and must match the application registry.
 - One-time reset codes and QR tokens need atomic consumption.
+- Laptop QR processing locks the asset and active loan rows so two staff members cannot borrow the same laptop concurrently.
 - A student should not gain duplicate active movement rows through concurrent requests.
 
 ## Scale Guidance

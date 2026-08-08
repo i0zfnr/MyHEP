@@ -1,6 +1,6 @@
 # StudentEdge Project Progress and Next Steps
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 ## 1. Executive status
 
@@ -22,11 +22,14 @@ The codebase remains a modular Laravel monolith. `StudentEdge.sql` is still requ
 - Cursor-paginated, incrementally fetched, virtualized movement history with bounded DOM rendering
 - Wheel-only Lenis smoothing with native touch/nested scrolling and reduced-motion handling
 - PWA install prompt limited to the student/admin dashboards
-- Audited inventory of 142 named application functions: 23 public/shared, 21 student, and 98 admin
+- Audited inventory of 160 named application functions: 23 public/shared, 21 student, and 116 admin
 - Lecturer role with per-account offense page controls and limited AJAX student lookup
 - AJAX-only offense student picker and compact, AJAX-filtered movement monitoring
 - Configurable session lifetime and normalized student program identifiers
 - Monthly operational analytics UI and System Admin push test/maintenance broadcast controls
+- Resend API mail transport for password-reset codes plus a throttled System Admin email-delivery test with reference-based error logging
+- Dedicated lecturer/JHEP staff and guard account management with active-state enforcement, scoped page access, audited changes, and session revocation
+- Transactional QR laptop borrowing/return with inventory and loan history
 
 ## 3. Current role and privacy model
 
@@ -58,7 +61,7 @@ composer audit --locked
 git diff --check
 ```
 
-The current automated baseline is 73 passing tests with 220 assertions. It covers active sessions, student-data permission boundaries, lecturer lookup/offense access, private documents, admin permissions, identity masking, admin profile photos, Head of Student Affairs access, movement feeds, monthly-report empty states, program normalization, and System Admin push controls. Manual mobile/PWA, real Web Push delivery, and storage-isolation checks are still required.
+The 2026-08-09 working-tree baseline is 98 passing tests with 325 assertions. It covers active sessions, student-data permission boundaries, lecturer lookup/offense access, staff/guard management, laptop borrowing, private documents, admin permissions, identity masking, admin profile photos, Head of Student Affairs access, movement feeds, monthly-report empty states, program normalization, System Admin push controls, branded password-reset mail rendering/delivery, and email-test validation. Manual mobile/PWA, real Web Push delivery, production-domain email delivery, and storage-isolation checks are still required.
 
 ## 5. P0 release blockers
 
@@ -72,7 +75,7 @@ QR validation/rotation and active-movement creation still require transaction/lo
 
 ### Production configuration
 
-Production requires HTTPS, `APP_ENV=production`, `APP_DEBUG=false`, secure cookies, least-privilege database credentials, protected secrets, mail, queue worker supervision, scheduler, logging, backups, correct trusted proxies, and writable storage.
+Production requires HTTPS, `APP_ENV=production`, `APP_DEBUG=false`, secure cookies, least-privilege database credentials, protected secrets, a verified Resend sender domain, queue worker supervision, scheduler, logging, backups, correct trusted proxies, and writable storage.
 
 ### Private-file operations
 

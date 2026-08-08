@@ -1,6 +1,6 @@
 # StudentEdge Architecture
 
-Last updated: 2026-08-02
+Last updated: 2026-08-09
 
 ## Purpose
 
@@ -21,7 +21,7 @@ Controllers and route actions
         |
         +----> MySQL / MariaDB
         +----> public uploads + private student-document storage
-        +----> mail password-reset codes
+        +----> Resend API for password-reset and test email
         +----> Web Push subscriptions
         +----> PDF and CSV exports
 ```
@@ -67,8 +67,9 @@ Controllers and route actions
 - Discipline offenses, evidence, rules, announcements, fines, and receipts
 - Vehicle sticker applications and decisions
 - Campus movement, QR checkpoints, GPS/curfew settings, and guard workflows
-- Student and administrator management
-- Notifications, browser push, reports, monitoring, maintenance, and audit logs
+- Student, administrator, staff, and guard management
+- JHEP laptop inventory and transactional QR borrowing/return
+- Email, browser push, reports, monitoring, maintenance, and audit logs
 - Language, theme, account settings, and optional role-mode controls
 - Private student documents, offer-letter review, system feature toggles, and active-device management
 
@@ -81,7 +82,8 @@ Transient surfaces may use strong glass materials. Scrolling content cards stay 
 ## External and Operational Boundaries
 
 - General uploads use Laravel's public disk. Student documents use the private `student_documents` disk and authenticated download controllers.
-- Password-reset delivery depends on configured mail transport.
+- Password-reset codes and the System Admin delivery test use Laravel Mail with the Resend API transport. Reset codes remain email-only; Web Push is used only for the post-reset security alert.
+- Production email requires a protected API key and verified sender domain. Provider acceptance is not proof of inbox delivery.
 - Browser push uses VAPID configuration and `minishlink/web-push`.
 - PDF output uses DOMPDF.
 - Queue tables exist; production workers are required for queued work.

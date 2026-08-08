@@ -1,6 +1,6 @@
 # StudentEdge Team Presentation Guide
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 This file is made for team members who need to explain how the system is built, how the code works, and how the database connects to the features.
 
@@ -506,7 +506,7 @@ Example:
 - `lecturer` can use limited AJAX student lookup and only offense pages individually enabled by a System Admin.
 - `system_admin` can access system management and admin management.
 
-The audited release has 142 named application functions: 23 public/shared, 21 student, and 98 admin. The complete role/module breakdown is maintained in `docs/FUNCTION_INVENTORY.md`.
+The audited working tree has 160 named application functions: 23 public/shared, 21 student, and 116 admin. The complete role/module breakdown is maintained in `docs/FUNCTION_INVENTORY.md`.
 
 The access logic is handled in:
 

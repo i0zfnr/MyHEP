@@ -1,20 +1,20 @@
 # StudentEdge Implemented Function Inventory
 
-Last updated: 2026-08-08  
-Audited release: `5d5ec84`
+Last updated: 2026-08-09
+Audited source: working tree on 2026-08-09
 
 ## Count and Method
 
-StudentEdge currently exposes **142 implemented named application functions**.
+StudentEdge currently exposes **160 implemented named application functions**.
 
 | Area | Function count |
 | --- | ---: |
 | Public and shared | 23 |
 | Student | 21 |
-| Admin | 98 |
-| **Total** | **142** |
+| Admin | 116 |
+| **Total** | **160** |
 
-The count is generated from `php artisan route:list --json` and includes each named application endpoint once. It excludes Laravel vendor routes such as `/up` and framework storage routes. Internal PHP helper methods, scheduled commands, UI-only buttons, and multiple HTTP verbs on one named endpoint are not counted separately. This makes the number reproducible and avoids inflating the total.
+The count is generated from `php artisan route:list --json` and includes each named application endpoint once. It excludes unnamed framework routes such as `/up` and the named framework storage routes. Internal PHP helper methods, scheduled commands, and UI-only buttons are not counted separately. This makes the number reproducible and avoids inflating the total.
 
 ## Public and Shared Functions (23)
 
@@ -31,7 +31,7 @@ The count is generated from `php artisan route:list --json` and includes each na
 - Open and submit reset-code verification.
 - Open and submit the new password.
 
-### Preferences, roles, and active sessions (8)
+### Preferences, roles, and active sessions (7)
 
 - Change locale and theme.
 - Open and update account settings.
@@ -39,10 +39,11 @@ The count is generated from `php artisan route:list --json` and includes each na
 - Revoke one other authenticated device.
 - Revoke all other authenticated devices.
 
-### Notifications and support (4)
+### Notifications and support (5)
 
 - Load the authenticated notification feed.
-- Subscribe and unsubscribe a browser from Web Push.
+- Subscribe a browser to Web Push.
+- Unsubscribe a browser from Web Push.
 - Open and submit a problem report.
 
 ## Student Functions (21)
@@ -59,12 +60,14 @@ The count is generated from `php artisan route:list --json` and includes each na
 | AI Helper | 1 | Open the student entry point, which currently returns the documented unavailable state. |
 | **Total** | **21** | |
 
-## Admin Functions (98)
+## Admin Functions (116)
 
 | Module | Count | Implemented functions |
 | --- | ---: | --- |
 | Dashboard and monitoring | 2 | Dashboard and live System Admin monitoring. |
 | Admin users and lecturer access | 7 | List, create, store, edit, update, reset password, delete; lecturer page access is configured with the account. |
+| Staff accounts | 7 | List, create, store, edit, update, reset password, and delete lecturer/JHEP staff accounts. |
+| Guard accounts | 7 | List, create, store, edit, update, reset password, and delete guard accounts. |
 | Student management | 11 | List, AJAX lookup, view sensitive profile, create, store, edit, update, delete, import, export, reset password. |
 | Scholarships | 10 | CRUD and export plus B40 TVET view, import, and export. |
 | Scholarship announcements | 7 | List, create, store, edit, update, delete, export. |
@@ -77,12 +80,13 @@ The count is generated from `php artisan route:list --json` and includes each na
 | Movement | 10 | Records, export, outside list, violations, QR control/update/display/status, settings/update. |
 | Student documents | 3 | Review list, authenticated download, approve/reject review. |
 | Feature and session controls | 3 | View/update feature flags and update configured session lifetime. |
-| Maintenance and push | 4 | View controls, change maintenance/cache state, test current-admin push, broadcast scheduled maintenance notice. |
+| Laptop borrowing | 3 | View laptop inventory/history, open the staff scanner, and process an atomic QR borrow/return action. |
+| Maintenance and delivery tests | 5 | View controls, change maintenance/cache state, test current-admin push, test configured email delivery, and broadcast scheduled maintenance notice. |
 | Monthly report | 1 | Generate the selected monthly operational analytics report. |
 | AI Helper | 2 | Open helper and submit a read-only-context question. |
 | Bug reports | 3 | List, update status, delete. |
 | Admin profile | 2 | View profile and upload/crop profile photo. |
-| **Total** | **98** | |
+| **Total** | **116** | |
 
 ## Role Coverage
 
@@ -92,15 +96,19 @@ The count is generated from `php artisan route:list --json` and includes each na
 - **Scholarship Admin:** scholarship workflows and permitted student lookup/list access.
 - **Discipline Admin:** offenses, fines, rules, announcements, stickers, movement, and permitted student data actions.
 - **Head of Student Affairs:** scholarship, discipline, movement, student management/export, and document review, but no system administration.
-- **System Admin:** all registered abilities, admin management, feature/session controls, monitoring, maintenance, and push testing/broadcast.
+- **System Admin:** all registered abilities, admin/staff/guard management, laptop management, feature/session controls, monitoring, maintenance, push testing/broadcast, and email-delivery testing.
 
 ## Recount Command
 
 Run this after adding or removing routes:
 
 ```powershell
-$routes = (php artisan route:list --json | ConvertFrom-Json) |
-    Where-Object { $_.path -notlike 'vendor/*' -and $_.name }
+$routeJson = php artisan route:list --json | ConvertFrom-Json
+$routes = foreach ($route in $routeJson) {
+    if ($route.name -and $route.name -notin @('storage.local', 'storage.local.upload')) {
+        $route
+    }
+}
 $routes.Count
 $routes | Group-Object {
     if ($_.uri -like 'admin/*') { 'Admin' }

@@ -119,6 +119,90 @@
     .maint-field small { display: block; margin-top: .3rem; color: #8a796c; font-size: .72rem; }
     .msg-ok { padding: .75rem .9rem; border-radius: 12px; background: #e7f3f3; border: 1px solid #b9ddde; color: #1f5559; font-size: .86rem; font-weight: 700; }
     .msg-err { padding: .75rem .9rem; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: .86rem; font-weight: 700; }
+    .maint-email-shell {
+        display: grid;
+        grid-template-columns: minmax(220px, .7fr) minmax(0, 1.3fr);
+        gap: 1rem;
+        padding: 1rem;
+        border: 1px solid rgba(185,221,222,.88);
+        border-radius: 16px;
+        background:
+            radial-gradient(circle at 10% 0%, rgba(185,221,222,.46), transparent 38%),
+            linear-gradient(145deg, rgba(248,253,253,.96), rgba(255,250,245,.9));
+    }
+    .maint-email-intro { padding: .3rem .25rem; align-self: center; }
+    .maint-email-icon {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        margin-bottom: .9rem;
+        border-radius: 14px;
+        background: #1f5559;
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(31,85,89,.22);
+    }
+    .maint-email-icon svg { width: 24px; height: 24px; }
+    .maint-email-intro h4 { margin: 0 0 .45rem; color: #213d3f; font-size: 1.08rem; }
+    .maint-email-intro p { margin: 0; color: #6f6156; font-size: .82rem; line-height: 1.65; }
+    .maint-email-status {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        margin-top: .85rem;
+        padding: .35rem .62rem;
+        border: 1px solid #b9ddde;
+        border-radius: 999px;
+        background: rgba(255,255,255,.72);
+        color: #1f5559;
+        font-size: .7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+    .maint-email-status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #2f8f75; box-shadow: 0 0 0 3px rgba(47,143,117,.14); }
+    .maint-email-form { padding: 1rem; border: 1px solid rgba(216,200,183,.72); border-radius: 14px; background: rgba(255,255,255,.82); }
+    .maint-email-form .maint-field input { min-height: 48px; padding-inline: .9rem; border-color: #c9dede; background: #fff; }
+    .maint-email-form .maint-field input:focus { outline: 3px solid rgba(31,85,89,.14); border-color: #3b7478; }
+    .maint-email-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        min-height: 44px;
+        padding: .7rem 1rem;
+        border: 1px solid #1f5559;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #1f5559, #2f7378);
+        color: #fff;
+        font: inherit;
+        font-size: .84rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 10px 22px rgba(31,85,89,.2);
+    }
+    .maint-email-submit:hover { transform: translateY(-1px); box-shadow: 0 13px 27px rgba(31,85,89,.25); }
+    .maint-email-submit:focus-visible { outline: 3px solid rgba(31,85,89,.24); outline-offset: 2px; }
+    .maint-email-submit svg { width: 17px; height: 17px; }
+    body[data-theme="dark"] .maint-email-shell {
+        border-color: rgba(127,184,188,.34);
+        background:
+            radial-gradient(circle at 8% 0%, rgba(70,137,142,.2), transparent 38%),
+            linear-gradient(145deg, rgba(27,32,31,.96), rgba(24,21,18,.94));
+    }
+    body[data-theme="dark"] .maint-email-intro h4 { color: #f7efe8; }
+    body[data-theme="dark"] .maint-email-intro p { color: #c8b8a9; }
+    body[data-theme="dark"] .maint-email-status { border-color: rgba(127,184,188,.32); background: rgba(31,85,89,.24); color: #c7ecee; }
+    body[data-theme="dark"] .maint-email-form { border-color: rgba(226,209,192,.14); background: rgba(13,13,12,.44); }
+    body[data-theme="dark"] .maint-email-form .maint-field label { color: #f0dfcf; }
+    body[data-theme="dark"] .maint-email-form .maint-field small { color: #ae9d8e; }
+    body[data-theme="dark"] .maint-email-form .maint-field input { border-color: rgba(127,184,188,.28); background: rgba(15,16,15,.78); color: #f7efe8; }
+    body[data-theme="dark"] .maint-email-submit { border-color: #83b8bb; background: linear-gradient(135deg, #346f73, #285b5f); color: #fff; }
+    @media (max-width: 720px) {
+        .maint-email-shell { grid-template-columns: 1fr; }
+        .maint-email-intro { padding: .15rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { .maint-email-submit { transition: none; } .maint-email-submit:hover { transform: none; } }
 </style>
 @endpush
 
@@ -287,18 +371,27 @@
         <section class="maint-card email-centre">
             <div class="maint-card-head">Email Delivery Test</div>
             <div class="maint-card-body">
-                <div class="maint-push-panel">
-                    <h4>Send a private test email</h4>
-                    <p>Confirm that the configured {{ config('mail.default') }} mailer accepts StudentEdge email. Delivery to the inbox must still be confirmed by checking the recipient inbox and spam folder.</p>
-                    <form method="POST" action="{{ route('admin.maintenance.email.test') }}">
+                <div class="maint-email-shell">
+                    <div class="maint-email-intro">
+                        <div class="maint-email-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6.5h16v11H4z"/><path d="m5 8 7 5 7-5"/></svg>
+                        </div>
+                        <h4>Verify outbound email</h4>
+                        <p>Send a private message through the same mailer used for password-reset codes. Provider acceptance and inbox delivery are reported separately.</p>
+                        <span class="maint-email-status">{{ config('mail.default') }} mailer active</span>
+                    </div>
+                    <form class="maint-email-form" method="POST" action="{{ route('admin.maintenance.email.test') }}">
                         @csrf
                         <div class="maint-field">
                             <label for="test_email">Recipient email</label>
                             <input id="test_email" name="email" type="email" maxlength="150" autocomplete="email" required value="{{ old('email') }}" placeholder="admin@example.com">
-                            <small>The API key and mail credentials are never displayed on this page.</small>
+                            <small>Use an approved test inbox. API keys and mail credentials are never shown here.</small>
                         </div>
                         <div class="maint-actions">
-                            <button type="submit" class="maint-btn ok">Send Test Email</button>
+                            <button type="submit" class="maint-email-submit">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8z"/><path d="M7 12h14"/></svg>
+                                Send Test Email
+                            </button>
                         </div>
                     </form>
                 </div>

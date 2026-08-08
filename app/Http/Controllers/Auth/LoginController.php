@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordResetCode;
 use App\Support\AccountSessionManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,9 +37,10 @@ class LoginController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $throttleKey = 'login:' . $validated['role'] . '|' . strtolower(trim($validated['username'])) . '|' . $request->ip();
+        $throttleKey = 'login:'.$validated['role'].'|'.strtolower(trim($validated['username'])).'|'.$request->ip();
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
+
             return redirect()->route('login')->withErrors([
                 'username' => __('login.error_throttle', ['seconds' => $seconds]),
             ])->withInput();
@@ -51,16 +53,17 @@ class LoginController extends Controller
 
             $studentLoginValid = false;
             if ($student) {
-                if (!empty($student->password)) {
+                if (! empty($student->password)) {
                     $studentLoginValid = Hash::check($validated['password'], $student->password);
                 } else {
                     $studentLoginValid = $student->ic_no === $validated['password'];
                 }
             }
 
-            if (!$studentLoginValid) {
+            if (! $studentLoginValid) {
                 RateLimiter::hit($throttleKey, 900);
                 auditLog('auth.login_failed', 'student', $student->id ?? null, 'Percubaan login pelajar gagal');
+
                 return redirect()->route('login')->withErrors([
                     'username' => __('login.error_invalid_student'),
                 ])->withInput();
@@ -81,7 +84,7 @@ class LoginController extends Controller
                 'title' => 'New StudentEdge login',
                 'body' => 'A new login to your student account was detected.',
                 'url' => route('settings.show'),
-                'tag' => 'student-login-' . now()->format('YmdHi'),
+                'tag' => 'student-login-'.now()->format('YmdHi'),
             ]);
 
             return redirect()->route('student.dashboard');
@@ -102,9 +105,10 @@ class LoginController extends Controller
             ])->withInput();
         }
 
-        if (!$admin || !Hash::check($validated['password'], $admin->password)) {
+        if (! $admin || ! Hash::check($validated['password'], $admin->password)) {
             RateLimiter::hit($throttleKey, 900);
             auditLog('auth.login_failed', 'admin', $admin->id ?? null, 'Percubaan login admin gagal');
+
             return redirect()->route('login')->withErrors([
                 'username' => __('login.error_invalid_admin'),
             ])->withInput();
@@ -127,7 +131,7 @@ class LoginController extends Controller
             'title' => 'New StudentEdge login',
             'body' => 'A new login to your admin account was detected.',
             'url' => route('settings.show'),
-            'tag' => 'admin-login-' . now()->format('YmdHi'),
+            'tag' => 'admin-login-'.now()->format('YmdHi'),
         ]);
 
         return redirect()->route('admin.dashboard');
@@ -157,7 +161,7 @@ class LoginController extends Controller
         $account = $this->findAccount($validated['role'], trim($validated['identifier']));
         $email = strtolower(trim($validated['email']));
 
-        if (!$account || empty($account->email) || strtolower((string) $account->email) !== $email) {
+        if (! $account || empty($account->email) || strtolower((string) $account->email) !== $email) {
             return redirect()->route('password.forgot')
                 ->withErrors(['identifier' => 'Maklumat pemulihan akaun tidak sepadan.'])
                 ->withInput();
@@ -171,6 +175,7 @@ class LoginController extends Controller
 
         $code = (string) random_int(100000, 999999);
         $ref = (string) Str::uuid();
+        $expiresAt = now()->addMinutes(15);
 
         DB::table('password_reset_codes')->insert([
             'ref' => $ref,
@@ -178,7 +183,7 @@ class LoginController extends Controller
             'target_id' => $account->id,
             'email' => $email,
             'code_hash' => Hash::make($code),
-            'expires_at' => now()->addMinutes(15),
+            'expires_at' => $expiresAt,
             'verified_at' => null,
             'used_at' => null,
             'created_at' => now(),
@@ -187,12 +192,12 @@ class LoginController extends Controller
 
         $deliveryMessage = null;
         try {
-            Mail::raw(
-                "Kod verifikasi reset kata laluan StudentEdge anda: {$code}. Kod ini sah selama 15 minit.",
-                function ($message) use ($email) {
-                    $message->to($email)->subject('Kod Verifikasi Reset Kata Laluan StudentEdge');
-                }
-            );
+            Mail::to($email)->send(new PasswordResetCode(
+                recipientName: (string) $account->full_name,
+                code: $code,
+                reference: $ref,
+                expiresAt: $expiresAt,
+            ));
         } catch (\Throwable $e) {
             $deliveryMessage = config('app.debug')
                 ? "Penghantaran email gagal pada persekitaran ini. Guna kod debug: {$code}"
@@ -211,7 +216,7 @@ class LoginController extends Controller
         $ref = (string) $request->query('ref');
         $reset = $this->getActiveResetByRef($ref);
 
-        if (!$reset) {
+        if (! $reset) {
             return redirect()->route('password.forgot')
                 ->withErrors(['identifier' => 'Sesi verifikasi tidak sah atau telah tamat.']);
         }
@@ -230,7 +235,7 @@ class LoginController extends Controller
         ]);
 
         $reset = $this->getActiveResetByRef($validated['ref']);
-        if (!$reset) {
+        if (! $reset) {
             return redirect()->route('password.forgot')
                 ->withErrors(['identifier' => 'Sesi verifikasi tidak sah atau telah tamat.']);
         }
@@ -241,8 +246,9 @@ class LoginController extends Controller
                 ->withErrors(['code' => 'Terlalu banyak percubaan. Sila minta kod reset baharu.']);
         }
 
-        if (!Hash::check($validated['code'], $reset->code_hash)) {
+        if (! Hash::check($validated['code'], $reset->code_hash)) {
             RateLimiter::hit($verifyKey, 900);
+
             return redirect()->route('password.verify', ['ref' => $validated['ref']])
                 ->withErrors(['code' => 'Kod verifikasi tidak sah.'])
                 ->withInput();
@@ -274,7 +280,7 @@ class LoginController extends Controller
             ->where('expires_at', '>', now())
             ->first();
 
-        if (!$reset) {
+        if (! $reset) {
             return redirect()->route('password.forgot')
                 ->withErrors(['identifier' => 'Sesi reset kata laluan tidak sah atau telah tamat.']);
         }
@@ -298,7 +304,7 @@ class LoginController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (!$reset) {
+            if (! $reset) {
                 return null;
             }
 
@@ -325,7 +331,7 @@ class LoginController extends Controller
             return $reset;
         });
 
-        if (!$reset) {
+        if (! $reset) {
             return redirect()->route('password.forgot')
                 ->withErrors(['identifier' => 'Sesi reset kata laluan tidak sah atau telah tamat.']);
         }
@@ -338,7 +344,7 @@ class LoginController extends Controller
             'title' => 'Password reset completed',
             'body' => 'Your StudentEdge password was reset. Contact a system administrator immediately if this was not you.',
             'url' => route('login'),
-            'tag' => $reset->role . '-password-reset-' . $reset->target_id,
+            'tag' => $reset->role.'-password-reset-'.$reset->target_id,
             'requireInteraction' => true,
         ]);
 
@@ -372,13 +378,13 @@ class LoginController extends Controller
     {
         if ($role === 'admin') {
             return DB::table('admins')
-                ->select('id', 'email')
+                ->select('id', 'full_name', 'email')
                 ->where('ic_no', $identifier)
                 ->first();
         }
 
         return DB::table('students')
-            ->select('id', 'email')
+            ->select('id', 'full_name', 'email')
             ->where('matric_no', $identifier)
             ->first();
     }
@@ -403,14 +409,14 @@ class LoginController extends Controller
             return $email;
         }
 
-        $localMasked = substr($local, 0, 2) . str_repeat('*', max(1, strlen($local) - 2));
+        $localMasked = substr($local, 0, 2).str_repeat('*', max(1, strlen($local) - 2));
 
-        return $localMasked . '@' . $domain;
+        return $localMasked.'@'.$domain;
     }
 
     private function resetRequestThrottleKey(array $validated, Request $request): string
     {
-        return 'password-reset:request:' . hash('sha256', implode('|', [
+        return 'password-reset:request:'.hash('sha256', implode('|', [
             $validated['role'],
             strtolower(trim($validated['identifier'])),
             strtolower(trim($validated['email'])),
@@ -420,6 +426,6 @@ class LoginController extends Controller
 
     private function resetVerifyThrottleKey(string $ref, Request $request): string
     {
-        return 'password-reset:verify:' . hash('sha256', $ref . '|' . $request->ip());
+        return 'password-reset:verify:'.hash('sha256', $ref.'|'.$request->ip());
     }
 }

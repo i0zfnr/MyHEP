@@ -1,13 +1,13 @@
 # StudentEdge UAT Checklist
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 Record tester, account/role, browser/device, build commit, date, evidence, and defect ID for every run.
 
 ## Authentication and sessions
 
 - [ ] Student default/custom password and admin login succeed; wrong credentials and throttling behave safely.
-- [ ] Password reset expiry, attempt limits, one-time consumption, and audit behavior work.
+- [ ] Password reset email delivery, expiry, attempt limits, previous-code invalidation, one-time consumption, session revocation, and audit behavior work; no reset code appears in Web Push.
 - [ ] Logout invalidates the current tracked session.
 - [ ] Settings lists the current and other devices with useful labels and activity time.
 - [ ] A user can revoke one other session and all other sessions, but cannot revoke the current session through the single-device action.
@@ -40,6 +40,9 @@ Record tester, account/role, browser/device, build commit, date, evidence, and d
 - [ ] Feature toggle changes are audited and take effect server-side.
 - [ ] Session lifetime changes are validated, audited, and applied to subsequent requests.
 - [ ] System Admin private push test reaches only their registered device; maintenance broadcast reaches subscribed student/admin test devices and does not enable maintenance mode.
+- [ ] System Admin email-delivery test validates the recipient, is throttled, records an audit event, and produces both a Resend activity entry and an inbox/spam result with the same reference.
+- [ ] Staff and guard account management enforce category/page gates, active state, session revocation, reset, and deletion boundaries.
+- [ ] Laptop QR scan borrows an available device, returns the same staff member's loan, blocks another borrower, and shows correct inventory/history status.
 - [ ] Profile photo crop, zoom, rotate, reset, cancel/apply, upload validation, replacement, and fallback work.
 - [ ] Critical create/update/delete/reset/decision/download actions write appropriate audit logs.
 

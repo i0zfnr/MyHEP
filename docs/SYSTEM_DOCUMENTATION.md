@@ -1,6 +1,6 @@
 # StudentEdge / e-Biasiswa System Documentation
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 ## 1. System Overview
 
@@ -76,7 +76,7 @@ Admin role values:
 | `student_affairs_head` | Scholarship, discipline, movement, sensitive student data, exports, student management, and document review |
 | `system_admin` | Full system access, admin management, maintenance, system monitoring |
 
-The audited release exposes **142 named application functions**: 23 public/shared, 21 student, and 98 admin. See `docs/FUNCTION_INVENTORY.md` for the complete module breakdown, role coverage, methodology, and recount command.
+The audited working tree exposes **160 named application functions**: 23 public/shared, 21 student, and 116 admin. See `docs/FUNCTION_INVENTORY.md` for the complete module breakdown, role coverage, methodology, and recount command.
 
 Admin access control is enforced by:
 
@@ -101,7 +101,7 @@ Public pages and shared functions include:
 
 - Home page with live system overview counts.
 - Login and logout.
-- Forgot password, verification code, and password reset.
+- Forgot password, email verification code, and password reset. The six-digit code is valid for 15 minutes and is sent through the configured Laravel mailer; the code is not sent by Web Push.
 - Problem reporting form.
 - Language switching between English and Malay.
 - Theme switching between light and dark.
@@ -314,6 +314,13 @@ Admin user management:
 - Reset admin password to `Admin@12345`.
 - Prevent admin from deleting their own account.
 
+Staff and guard management:
+
+- Head of Student Affairs and System Admin can manage lecturer/JHEP staff accounts; staff categories are discipline, scholarship, and general.
+- Authorized operational roles can manage guard accounts, subject to the centralized ability map and lecturer page gate.
+- Creating, updating, disabling, deleting, or resetting an account is audited; security-relevant changes revoke active sessions.
+- Lecturer page permissions remain individually configurable.
+
 Important routes:
 
 - `GET|POST /admin/students`
@@ -324,6 +331,22 @@ Important routes:
 - `GET|POST /admin/admin-users`
 - `GET|PUT|DELETE /admin/admin-users/{id}`
 - `POST /admin/admin-users/{id}/reset-password`
+- `GET|POST /admin/staff`
+- `GET|PUT|DELETE /admin/staff/{id}`
+- `POST /admin/staff/{id}/reset-password`
+- `GET|POST /admin/guards`
+- `GET|PUT|DELETE /admin/guards/{id}`
+- `POST /admin/guards/{id}/reset-password`
+
+### 5.7.1 JHEP Laptop Borrowing
+
+Authorized staff can scan a laptop QR code to borrow an available device or return their own active loan. Processing runs in a database transaction with row locks. A device already borrowed by another staff member is rejected. Head of Student Affairs and System Admin can view inventory status and loan history.
+
+Important routes:
+
+- `GET /admin/laptops`
+- `GET /admin/laptops/scan`
+- `POST /admin/laptops/scan`
 
 ### 5.8 Student Document Centre and Feature Controls
 
@@ -354,6 +377,7 @@ The system provides:
 - System cache controls.
 - Configurable authenticated-session lifetime.
 - System Admin push test and scheduled maintenance announcement controls.
+- System Admin email-delivery test using the configured Laravel mailer. The form is limited to five requests per ten minutes, never displays credentials, and reports provider acceptance separately from inbox delivery.
 - CSV exports across major modules.
 
 Important routes:
@@ -363,6 +387,7 @@ Important routes:
 - `GET /admin/reports/monthly`
 - `GET|POST /admin/maintenance`
 - `POST /admin/maintenance/push/test`
+- `POST /admin/maintenance/email/test`
 - `POST /admin/maintenance/push/broadcast`
 - `PATCH /admin/system-settings/session-lifetime`
 
@@ -440,6 +465,8 @@ Core tables:
 | `push_subscriptions` | Browser push subscription data |
 | `push_notification_markers` | Idempotency markers for event-driven push notifications |
 | `system_settings` | System-level operational settings such as session lifetime |
+| `jhep_laptops` | JHEP laptop asset identity, QR token, availability, and active state |
+| `jhep_laptop_loans` | Staff laptop borrowing and return history |
 | `bug_reports` | Public problem reports |
 | `audit_logs` | Critical action trace records |
 | `sessions` | Laravel database session storage |
@@ -457,6 +484,7 @@ Security-related behavior:
 - Admin passwords are stored as hashes.
 - Password reset requests are limited to three per role/identifier/email/IP combination per 15 minutes; verification codes are limited to five attempts per reset reference/IP combination per 15 minutes.
 - Password reset consumption uses a database transaction and row lock so a verified code is consumed only once.
+- A new reset request invalidates previous unused codes for the same account. A successful reset revokes tracked sessions and sends a Web Push security alert only after completion; the verification code remains email-only.
 - Session middleware verifies that the student/admin account still exists on every protected request. Admin scope middleware also verifies the current database role and invalidates stale sessions.
 - Web middleware registers authenticated devices and updates their activity at most once per minute. Settings show active devices and permit revoking another device or all other sessions.
 - Student list, sensitive identity, export, management, and document permissions are independently enforced.
@@ -468,7 +496,7 @@ Known security and maintainability risks are listed in section 14.
 
 ## 8. Notifications and PWA Support
 
-The application includes PWA assets and browser push notification support.
+The application includes email notifications, PWA assets, and browser push notification support.
 
 Relevant files:
 
@@ -490,8 +518,11 @@ Push notifications are used for workflows such as:
 - Vehicle sticker application submitted for admin review.
 - System Admin test notification.
 - Scheduled maintenance announcement broadcast to subscribed students and admins.
+- Password-reset completion security alert to subscribed devices; reset codes are never included in push payloads.
 
 The maintenance broadcast is sent immediately and describes the selected future start/end schedule. It does not schedule delayed delivery and does not enable Laravel maintenance mode automatically.
+
+Password-reset and System Admin test email delivery use Laravel Mail. Password reset is sent as a branded, responsive HTML message with a plain-text fallback, recipient name, six-digit one-time code, expiry time, security warning, and short troubleshooting reference. The Resend API transport requires `MAIL_MAILER=resend`, a protected `RESEND_API_KEY`, and an allowed sender address. `onboarding@resend.dev` is suitable only for initial testing to the Resend account owner; production delivery to arbitrary student/admin addresses requires a verified institutional domain with the provider's DNS records. A successful API response means the provider accepted the message, not that the recipient opened it.
 
 Required environment variables depend on `config/services.php`, including Web Push VAPID subject, public key, and private key.
 
@@ -661,7 +692,7 @@ Before production deployment:
 - Set `APP_DEBUG=false`.
 - Set the correct `APP_URL`.
 - Configure database credentials.
-- Configure mail settings for password reset.
+- Configure the Resend mail transport for password reset and delivery testing. Store `RESEND_API_KEY` only in the deployment environment, verify the production sender domain, and never commit credentials.
 - Configure Web Push VAPID keys if push notifications are required.
 - Run database backup before deployment.
 - Run Composer install without dev dependencies.

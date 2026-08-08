@@ -1,5 +1,5 @@
 PROJECT HANDOFF - StudentEdge
-Date: 2026-08-08
+Date: 2026-08-09
 Path: C:\laragon\www\e-biasiswa
 
 SUMMARY
@@ -25,12 +25,18 @@ CURRENT IMPLEMENTATION
 - Movement feed uses cursor batches and bounded DOM virtualization. Lenis smooths
   mouse-wheel scrolling while touch and nested interactive regions stay native.
 - PWA install prompts appear only on student/admin dashboards.
-- The audited interface contains 142 named application functions: 23 public/shared,
-  21 student, and 98 admin. See docs/FUNCTION_INVENTORY.md for the reproducible count.
+- The audited interface contains 160 named application functions: 23 public/shared,
+  21 student, and 116 admin. See docs/FUNCTION_INVENTORY.md for the reproducible count.
 - Lecturer accounts receive only individually enabled offense pages and limited AJAX
   student lookup; they do not receive the general student directory.
 - System Admin can configure session lifetime, test push delivery to their own device,
   and broadcast scheduled maintenance notices to subscribed students and admins.
+- Password-reset codes use the configured Resend API transport and remain email-only;
+  push is a security alert after reset completion. System Admin has a throttled email
+  delivery test that reports provider acceptance with a troubleshooting reference.
+- Dedicated staff/guard management enforces category/page access, active state,
+  audit logs, and session revocation. Staff can borrow/return JHEP laptops by QR;
+  Head of Student Affairs and System Admin can view inventory and loan history.
 
 IMPORTANT FILES
 ---------------
@@ -40,6 +46,9 @@ IMPORTANT FILES
 - app/Support/SystemFeatures.php: registered feature flags.
 - app/Http/Controllers/Admin/StudentDocumentController.php: document review/download.
 - app/Http/Controllers/Student/DocumentController.php: owned document list/download.
+- app/Http/Controllers/Admin/MaintenanceController.php: maintenance, push, and email tests.
+- app/Http/Controllers/Admin/LaptopController.php: transactional QR borrow/return.
+- app/Mail/SystemEmailTest.php: administrative delivery-test email.
 - config/filesystems.php: public storage and private student_documents disk.
 - resources/js/app.js: PWA, cropper, overlays, Lenis, and movement feed behavior.
 - docs/SYSTEM_DOCUMENTATION.md: expanded functional and technical reference.
@@ -56,6 +65,8 @@ MIGRATIONS ADDED FOR THE CURRENT FEATURE SET
 - 2026_08_06_100000_create_system_settings_table.php
 - 2026_08_06_110000_normalize_student_program_identifiers.php
 - 2026_08_08_090000_create_push_notification_markers_table.php
+- 2026_08_08_120000_add_staff_profile_fields_to_admins_table.php
+- 2026_08_08_130000_create_jhep_laptop_tables.php
 
 RELEASE BLOCKERS / RISKS
 ------------------------
@@ -64,8 +75,8 @@ RELEASE BLOCKERS / RISKS
 2. Make movement QR consumption and active checkout creation concurrency-safe.
 3. Run real-role desktop/mobile UAT and broaden legacy workflow tests.
 4. Rehearse encrypted database plus public/private file backup and restore.
-5. Verify production HTTPS, debug, cookies, proxy, queue, scheduler, mail, logs,
-   permissions, and rollback configuration.
+5. Verify production HTTPS, debug, cookies, proxy, queue, scheduler, Resend sender
+   domain/API key, email delivery, logs, permissions, and rollback configuration.
 6. routes/web.php still contains large workflow closures.
 
 PLANNED ONLY
