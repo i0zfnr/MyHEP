@@ -375,7 +375,7 @@
     <div class="shell">
         <div class="topbar">
             <a href="{{ route('home') }}" class="brand">
-                <img src="{{ asset('images/studentedge-mark.png') }}?v=10" alt="StudentEdge">
+                <img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt="StudentEdge">
                 <span>StudentEdge</span>
             </a>
             <a href="{{ route('home') }}" class="back-link">{{ __('bug_reports.back_home') }}</a>

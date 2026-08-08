@@ -2411,7 +2411,7 @@
         <div class="sb-header">
             <a href="{{ route('home') }}" class="sb-brand">
                 <div class="sb-brand-icon">
-                    <img src="{{ asset('images/studentedge-mark.png') }}?v=10" alt="Logo StudentEdge">
+                    <img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt="Logo StudentEdge">
                 </div>
                 <div><div class="sb-brand-name">StudentEdge</div><div class="sb-brand-sub">Student Affairs</div></div>
             </a>
@@ -2851,7 +2851,7 @@
             </button>
             <div class="topbar-brand">
                 <span class="topbar-brand-mark">
-                    <img src="{{ asset('images/studentedge-mark.png') }}?v=10" alt="StudentEdge">
+                    <img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt="StudentEdge">
                 </span>
                 <span class="topbar-brand-copy">
                     <span class="topbar-title">StudentEdge</span>

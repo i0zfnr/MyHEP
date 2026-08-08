@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'studentedge-pwa-v10';
+const CACHE_VERSION = 'studentedge-pwa-v11';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = '/offline.html';
@@ -6,11 +6,11 @@ const OFFLINE_URL = '/offline.html';
 const STATIC_ASSETS = [
     '/',
     OFFLINE_URL,
-    '/manifest.webmanifest?v=10',
-    '/images/pwa/icon-192.png?v=10',
-    '/images/pwa/icon-512.png?v=10',
-    '/images/pwa/icon-32.png?v=10',
-    '/favicon.ico?v=10',
+    '/manifest.webmanifest?v=11',
+    '/images/pwa/icon-192.png?v=11',
+    '/images/pwa/icon-512.png?v=11',
+    '/images/pwa/icon-32.png?v=11',
+    '/favicon.ico?v=11',
 ];
 
 self.addEventListener('install', (event) => {
@@ -85,8 +85,8 @@ self.addEventListener('push', (event) => {
     const title = payload.title || 'StudentEdge';
     const options = {
         body: payload.body || 'You have a new notification.',
-        icon: payload.icon || '/images/pwa/icon-192.png?v=10',
-        badge: payload.badge || '/images/pwa/icon-192.png?v=10',
+        icon: payload.icon || '/images/pwa/icon-192.png?v=11',
+        badge: payload.badge || '/images/pwa/icon-192.png?v=11',
         tag: payload.tag || 'studentedge-general',
         renotify: Boolean(payload.renotify),
         requireInteraction: Boolean(payload.requireInteraction),

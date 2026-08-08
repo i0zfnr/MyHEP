@@ -65,8 +65,18 @@ class BugReportController extends Controller
         try {
             Mail::to((string) config('mail.system_admin_report_address'))
                 ->send(new BugReportSubmitted($report));
+            \DB::table('bug_reports')->where('id', $bugReportId)->update([
+                'email_notification_status' => 'sent',
+                'email_notification_error' => null,
+                'email_notification_attempted_at' => now(),
+            ]);
             auditLog('bug_reports.email_sent', 'bug_reports', $bugReportId, 'New report email sent to system admin');
         } catch (Throwable $exception) {
+            \DB::table('bug_reports')->where('id', $bugReportId)->update([
+                'email_notification_status' => 'failed',
+                'email_notification_error' => \Illuminate\Support\Str::limit($exception->getMessage(), 1000, ''),
+                'email_notification_attempted_at' => now(),
+            ]);
             report($exception);
             auditLog('bug_reports.email_failed', 'bug_reports', $bugReportId, 'New report email could not be sent');
         }

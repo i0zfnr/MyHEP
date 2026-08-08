@@ -25,6 +25,9 @@ class BugReportNotificationTest extends TestCase
             $table->text('description');
             $table->string('screenshot_path')->nullable();
             $table->string('status', 30);
+            $table->string('email_notification_status', 20)->default('pending');
+            $table->text('email_notification_error')->nullable();
+            $table->timestamp('email_notification_attempted_at')->nullable();
             $table->timestamps();
         });
     }
@@ -48,6 +51,7 @@ class BugReportNotificationTest extends TestCase
             'reporter_email' => 'student@example.test',
             'subject' => 'Dashboard card is not loading',
             'status' => 'new',
+            'email_notification_status' => 'sent',
         ]);
 
         Mail::assertSent(function (BugReportSubmitted $mail): bool {

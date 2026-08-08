@@ -204,6 +204,38 @@
         .bugs-card-head,
         .bug-item-head { flex-direction: column; align-items: flex-start; }
     }
+    .bug-email-state { display:inline-flex;align-items:center;gap:.35rem;padding:.32rem .62rem;border:1px solid;border-radius:999px;font-size:.7rem;font-weight:800;letter-spacing:.03em; }
+    .bug-email-state.sent { color:#256b4b;background:#eaf7f0;border-color:#aed9c2; }
+    .bug-email-state.failed { color:#a33434;background:#fff0f0;border-color:#efb0b0; }
+    .bug-email-state.pending { color:#815b20;background:#fff7e8;border-color:#e8ca91; }
+    .bug-email-error { margin-top:.55rem;padding:.7rem .8rem;border-radius:10px;background:color-mix(in srgb,#ef4444 8%,var(--surface));color:var(--text-muted);font-size:.74rem;line-height:1.5;overflow-wrap:anywhere; }
+    .bug-shot { display:grid;place-items:center;max-height:380px;padding:12px;background:color-mix(in srgb,var(--surface) 90%,#000 10%); }
+    .bug-shot a { display:grid;place-items:center;width:100%;max-height:354px; }
+    .bug-shot img { width:auto;max-width:100%;max-height:354px;object-fit:contain;border-radius:10px; }
+    body[data-theme="dark"] .bugs-stat,
+    body[data-theme="dark"] .bugs-card,
+    body[data-theme="dark"] .bug-item { background:var(--glass-bg-strong);border-color:var(--glass-line);box-shadow:var(--glass-shadow); }
+    body[data-theme="dark"] .bugs-card-head { background:color-mix(in srgb,var(--surface) 92%,var(--primary) 8%);border-color:var(--glass-line); }
+    body[data-theme="dark"] .bugs-stat-label,
+    body[data-theme="dark"] .bug-date,
+    body[data-theme="dark"] .bug-copy,
+    body[data-theme="dark"] .bug-notes-meta,
+    body[data-theme="dark"] .bug-empty { color:var(--text-muted); }
+    body[data-theme="dark"] .bugs-stat-value,
+    body[data-theme="dark"] .bugs-card-head h3,
+    body[data-theme="dark"] .bug-title,
+    body[data-theme="dark"] .bug-copy strong { color:var(--text); }
+    body[data-theme="dark"] .bugs-input,
+    body[data-theme="dark"] .bugs-select,
+    body[data-theme="dark"] .bugs-textarea { color-scheme:dark;background:var(--surface);color:var(--text);border-color:var(--border); }
+    body[data-theme="dark"] .bugs-select option { background:#171412;color:#f7efe8; }
+    body[data-theme="dark"] .bugs-input:focus,
+    body[data-theme="dark"] .bugs-select:focus,
+    body[data-theme="dark"] .bugs-textarea:focus { background:var(--surface); }
+    body[data-theme="dark"] .bug-pill.category { color:#f0d39a;background:rgba(240,211,154,.1);border-color:rgba(240,211,154,.2); }
+    body[data-theme="dark"] .bug-email-state.sent { color:#a7e6c6;background:rgba(34,197,94,.12);border-color:rgba(134,239,172,.28); }
+    body[data-theme="dark"] .bug-email-state.failed { color:#fecaca;background:rgba(239,68,68,.12);border-color:rgba(252,165,165,.28); }
+    body[data-theme="dark"] .bug-email-state.pending { color:#f5d59c;background:rgba(245,158,11,.12);border-color:rgba(253,186,116,.25); }
 </style>
 @endpush
 
@@ -270,7 +302,12 @@
                                 <span class="bug-pill category">{{ __('bug_reports.category_' . $bugReport->category) }}</span>
                                 <span class="bug-pill status-{{ $bugReport->status }}">{{ __('bug_reports.status_' . $bugReport->status) }}</span>
                                 <span class="bug-pill category">#{{ $bugReport->id }}</span>
+                                @php($emailState = $bugReport->email_notification_status ?? 'pending')
+                                <span class="bug-email-state {{ $emailState }}">Email: {{ ucfirst($emailState) }}</span>
                             </div>
+                            @if($emailState === 'failed' && $bugReport->email_notification_error)
+                                <div class="bug-email-error"><strong>Email delivery error:</strong> {{ $bugReport->email_notification_error }}</div>
+                            @endif
                         </div>
                         <div class="bug-date">{{ \Illuminate\Support\Carbon::parse($bugReport->created_at)->format('d M Y, h:i A') }}</div>
                     </div>

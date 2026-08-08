@@ -387,12 +387,20 @@ if (!function_exists('writeSystemCacheMeta')) {
 if (!function_exists('myhepWebPushConfig')) {
     function myhepWebPushConfig(): array
     {
+        $versionPushAsset = static function (string $path): string {
+            if (Str::startsWith($path, '/images/pwa/')) {
+                return Str::before($path, '?') . '?v=11';
+            }
+
+            return $path;
+        };
+
         return [
             'subject' => (string) config('services.webpush.subject', ''),
             'public_key' => (string) config('services.webpush.public_key', ''),
             'private_key' => (string) config('services.webpush.private_key', ''),
-            'icon' => (string) config('services.webpush.icon', '/images/pwa/icon-192.png'),
-            'badge' => (string) config('services.webpush.badge', '/images/pwa/icon-192.png'),
+            'icon' => $versionPushAsset((string) config('services.webpush.icon', '/images/pwa/icon-192.png')),
+            'badge' => $versionPushAsset((string) config('services.webpush.badge', '/images/pwa/icon-192.png')),
             'openssl_conf' => (string) config('services.webpush.openssl_conf', ''),
             'ca_bundle' => (string) config('services.webpush.ca_bundle', ''),
         ];
