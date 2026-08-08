@@ -9,6 +9,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <script>
+        if (window.navigator.standalone === true) {
+            document.documentElement.classList.add('ios-standalone');
+        }
+    </script>
     <title>@yield('title', config('app.name', 'StudentEdge'))</title>
     <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
@@ -69,6 +74,7 @@
             --accent-light: #f7dcc0;
             --sidebar-w: 288px;
             --topbar-h: 72px;
+            --app-safe-top: env(safe-area-inset-top, 0px);
             --surface: #fffdf9;
             --bg: #f8f1e9;
             --text: #2f2116;
@@ -874,9 +880,9 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
-            min-height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
-            padding: env(safe-area-inset-top, 0px) 1.15rem 0;
+            height: calc(var(--topbar-h) + var(--app-safe-top));
+            min-height: calc(var(--topbar-h) + var(--app-safe-top));
+            padding: var(--app-safe-top) 1.15rem 0;
             background: var(--glass-bg-strong);
             border-bottom: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
@@ -959,7 +965,7 @@
             .topbar-title { font-size: 1rem; }
             .topbar {
                 gap: .9rem;
-                padding: env(safe-area-inset-top, 0px) max(1rem, env(safe-area-inset-right, 0px)) 0 max(1rem, env(safe-area-inset-left, 0px));
+                padding: var(--app-safe-top) max(1rem, env(safe-area-inset-right, 0px)) 0 max(1rem, env(safe-area-inset-left, 0px));
             }
             .topbar-brand {
                 gap: .8rem;

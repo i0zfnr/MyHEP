@@ -1355,10 +1355,10 @@ body[data-theme="dark"] footer {
     }
 
     .app-layout .topbar {
-        height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px)) !important;
-        min-height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px)) !important;
-        flex: 0 0 calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
-        padding-top: env(safe-area-inset-top, 0px) !important;
+        height: calc(var(--topbar-h) + var(--app-safe-top)) !important;
+        min-height: calc(var(--topbar-h) + var(--app-safe-top)) !important;
+        flex: 0 0 calc(var(--topbar-h) + var(--app-safe-top));
+        padding-top: var(--app-safe-top) !important;
         padding-left: max(1rem, env(safe-area-inset-left, 0px));
         padding-right: max(1rem, env(safe-area-inset-right, 0px));
     }
@@ -1372,7 +1372,7 @@ body[data-theme="dark"] footer {
     }
 
     .app-layout .topbar {
-        padding: 0 1rem !important;
+        padding: var(--app-safe-top) max(1rem, env(safe-area-inset-right, 0px)) 0 max(1rem, env(safe-area-inset-left, 0px)) !important;
     }
 
     .app-layout .topbar-brand {
@@ -1386,6 +1386,34 @@ body[data-theme="dark"] footer {
 
     .app-layout .page-header-right {
         gap: .4rem !important;
+    }
+}
+
+/* iOS can return a zero top inset for an installed Home Screen app. Reserve
+   enough space for Dynamic Island/notch hardware whenever standalone mode is active. */
+@media (display-mode: standalone) and (max-width: 1023px) {
+    :root {
+        --app-safe-top: max(env(safe-area-inset-top, 0px), 54px);
+    }
+}
+
+@media (max-width: 1023px) {
+    html.ios-standalone {
+        --app-safe-top: max(env(safe-area-inset-top, 0px), 54px);
+    }
+}
+
+@supports (-webkit-touch-callout: none) {
+    @media (display-mode: standalone) and (max-width: 1023px) and (orientation: landscape) {
+        :root {
+            --app-safe-top: max(env(safe-area-inset-top, 0px), 20px);
+        }
+    }
+
+    @media (max-width: 1023px) and (orientation: landscape) {
+        html.ios-standalone {
+            --app-safe-top: max(env(safe-area-inset-top, 0px), 20px);
+        }
     }
 }
 
