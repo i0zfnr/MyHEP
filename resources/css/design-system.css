@@ -1324,7 +1324,7 @@ body[data-theme="dark"] footer {
 @media (max-width: 1023px) {
     :root {
         --sidebar-w: min(284px, 82vw);
-        --topbar-h: 72px;
+        --topbar-h: 64px;
     }
 
     .app-layout .sb-header {
@@ -1386,34 +1386,6 @@ body[data-theme="dark"] footer {
 
     .app-layout .page-header-right {
         gap: .4rem !important;
-    }
-}
-
-/* iOS can return a zero top inset for an installed Home Screen app. Reserve
-   enough space for Dynamic Island/notch hardware whenever standalone mode is active. */
-@media (display-mode: standalone) and (max-width: 1023px) {
-    :root {
-        --app-safe-top: max(env(safe-area-inset-top, 0px), 54px);
-    }
-}
-
-@media (max-width: 1023px) {
-    html.ios-standalone {
-        --app-safe-top: max(env(safe-area-inset-top, 0px), 54px);
-    }
-}
-
-@supports (-webkit-touch-callout: none) {
-    @media (display-mode: standalone) and (max-width: 1023px) and (orientation: landscape) {
-        :root {
-            --app-safe-top: max(env(safe-area-inset-top, 0px), 20px);
-        }
-    }
-
-    @media (max-width: 1023px) and (orientation: landscape) {
-        html.ios-standalone {
-            --app-safe-top: max(env(safe-area-inset-top, 0px), 20px);
-        }
     }
 }
 

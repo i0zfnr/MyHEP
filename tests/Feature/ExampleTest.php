@@ -125,15 +125,13 @@ class ExampleTest extends TestCase
             'apple-mobile-web-app-status-bar-style" content="default',
             $layout,
         );
-        $this->assertStringContainsString('window.navigator.standalone === true', $layout);
         $this->assertStringContainsString('--app-safe-top: env(safe-area-inset-top, 0px)', $layout);
         $this->assertStringContainsString(
             'height: calc(var(--topbar-h) + var(--app-safe-top)) !important;',
             $designSystem,
         );
-        $this->assertStringContainsString('@media (display-mode: standalone)', $designSystem);
-        $this->assertStringContainsString('html.ios-standalone', $designSystem);
-        $this->assertStringContainsString('max(env(safe-area-inset-top, 0px), 54px)', $designSystem);
+        $this->assertStringContainsString('--topbar-h: 64px', $designSystem);
+        $this->assertStringNotContainsString('max(env(safe-area-inset-top, 0px), 54px)', $designSystem);
         $this->assertStringNotContainsString('padding: 0 1rem !important;', $designSystem);
         $this->assertStringContainsString(
             'padding: var(--app-safe-top) max(1rem, env(safe-area-inset-right, 0px)) 0 max(1rem, env(safe-area-inset-left, 0px)) !important;',

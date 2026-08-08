@@ -9,11 +9,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <script>
-        if (window.navigator.standalone === true) {
-            document.documentElement.classList.add('ios-standalone');
-        }
-    </script>
     <title>@yield('title', config('app.name', 'StudentEdge'))</title>
     <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
