@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\BugReportSubmitted;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
+use Throwable;
 
 class BugReportController extends Controller
 {
@@ -47,6 +50,40 @@ class BugReportController extends Controller
         ]);
 
         auditLog('bug_reports.create', 'bug_reports', $bugReportId, 'Public bug report submitted');
+
+        $report = [
+            'id' => $bugReportId,
+            'reporter_name' => trim($validated['reporter_name']),
+            'reporter_email' => trim($validated['reporter_email']),
+            'category' => $validated['category'],
+            'subject' => trim($validated['subject']),
+            'page_url' => filled($validated['page_url'] ?? null) ? trim($validated['page_url']) : null,
+            'description' => trim($validated['description']),
+            'has_screenshot' => $screenshotPath !== null,
+        ];
+
+        try {
+            Mail::to((string) config('mail.system_admin_report_address'))
+                ->send(new BugReportSubmitted($report));
+            auditLog('bug_reports.email_sent', 'bug_reports', $bugReportId, 'New report email sent to system admin');
+        } catch (Throwable $exception) {
+            report($exception);
+            auditLog('bug_reports.email_failed', 'bug_reports', $bugReportId, 'New report email could not be sent');
+        }
+
+        try {
+            myhepSendPushToAdminsByScope('system', [
+                'category' => 'account',
+                'title' => 'New system report',
+                'body' => trim($validated['subject']) . ' — submitted by ' . trim($validated['reporter_name']),
+                'url' => route('admin.bug-reports.index'),
+                'tag' => 'bug-report-' . $bugReportId,
+                'requireInteraction' => true,
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+            auditLog('bug_reports.push_failed', 'bug_reports', $bugReportId, 'New report push notification could not be sent');
+        }
 
         return redirect()
             ->route('bug-reports.create')
