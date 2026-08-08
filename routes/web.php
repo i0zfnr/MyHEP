@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AiHelperController as AdminAiHelperController;
 use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
 use App\Http\Controllers\Admin\FeatureController;
+use App\Http\Controllers\Admin\GuardManagementController;
+use App\Http\Controllers\Admin\LaptopController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
@@ -13,6 +15,7 @@ use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentDocumentController as AdminStudentDocumentController;
 use App\Http\Controllers\Admin\StudentScholarshipStatusController;
+use App\Http\Controllers\Admin\StaffManagementController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BugReportController;
 use App\Http\Controllers\HomeController;
@@ -121,6 +124,15 @@ Route::get('/student/documents/{id}/download', [StudentDocumentController::class
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
     ->name('admin.dashboard');
+Route::get('/admin/laptops', [LaptopController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:laptops.manage'])
+    ->name('admin.laptops.index');
+Route::get('/admin/laptops/scan', [LaptopController::class, 'scan'])
+    ->middleware(['auth.session:admin', 'admin.scope:laptops.use'])
+    ->name('admin.laptops.scan');
+Route::post('/admin/laptops/scan', [LaptopController::class, 'processScan'])
+    ->middleware(['auth.session:admin', 'admin.scope:laptops.use', 'throttle:30,1'])
+    ->name('admin.laptops.scan.process');
 Route::get('/admin/profile', [AdminProfileController::class, 'show'])
     ->middleware('auth.session:admin')
     ->name('admin.profile');
@@ -186,7 +198,7 @@ Route::post('/admin/movements/settings', [AdminMovementController::class, 'updat
     ->name('admin.movements.settings.update');
 
 Route::get('/admin/admin-users', [AdminUserController::class, 'index'])
-    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.index');
 
 Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])
@@ -213,23 +225,43 @@ Route::patch('/admin/system-settings/session-lifetime', [FeatureController::clas
     ->name('admin.system-settings.session-lifetime.update');
 
 Route::get('/admin/admin-users/create', [AdminUserController::class, 'create'])
-    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.create');
 Route::post('/admin/admin-users', [AdminUserController::class, 'store'])
-    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.store');
 Route::get('/admin/admin-users/{id}/edit', [AdminUserController::class, 'edit'])
-    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.edit');
 Route::put('/admin/admin-users/{id}', [AdminUserController::class, 'update'])
-    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.update');
 Route::post('/admin/admin-users/{id}/reset-password', [AdminUserController::class, 'resetPassword'])
-    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.reset-password');
 Route::delete('/admin/admin-users/{id}', [AdminUserController::class, 'destroy'])
-    ->middleware(['auth.session:admin', 'admin.scope:lecturers.manage'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.admin-users.destroy');
+
+Route::prefix('/admin/staff')->middleware(['auth.session:admin', 'admin.scope:staff.manage'])->name('admin.staff.')->group(function (): void {
+    Route::get('/', [StaffManagementController::class, 'index'])->name('index');
+    Route::get('/create', [StaffManagementController::class, 'create'])->name('create');
+    Route::post('/', [StaffManagementController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [StaffManagementController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [StaffManagementController::class, 'update'])->name('update');
+    Route::post('/{id}/reset-password', [StaffManagementController::class, 'resetPassword'])->name('reset-password');
+    Route::delete('/{id}', [StaffManagementController::class, 'destroy'])->name('destroy');
+});
+
+Route::prefix('/admin/guards')->middleware(['auth.session:admin', 'admin.scope:guards.manage', 'lecturer.page:guard_management'])->name('admin.guards.')->group(function (): void {
+    Route::get('/', [GuardManagementController::class, 'index'])->name('index');
+    Route::get('/create', [GuardManagementController::class, 'create'])->name('create');
+    Route::post('/', [GuardManagementController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [GuardManagementController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [GuardManagementController::class, 'update'])->name('update');
+    Route::post('/{id}/reset-password', [GuardManagementController::class, 'resetPassword'])->name('reset-password');
+    Route::delete('/{id}', [GuardManagementController::class, 'destroy'])->name('destroy');
+});
 Route::get('/admin/bug-reports', [AdminBugReportController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.bug-reports.index');

@@ -10,9 +10,8 @@ class DualRoleSession
     public static function linkedAdmin(Request $request): ?object
     {
         $authUser = $request->session()->get('auth_user', []);
-        $adminId = ($authUser['role'] ?? null) === 'admin'
-            ? ($authUser['id'] ?? null)
-            : ($authUser['linked_admin_id'] ?? null);
+        $linkedAdminId = $authUser['linked_admin_id'] ?? null;
+        $adminId = $linkedAdminId ?: (($authUser['role'] ?? null) === 'admin' ? ($authUser['id'] ?? null) : null);
 
         if (!$adminId) {
             return null;
@@ -24,7 +23,7 @@ class DualRoleSession
             ->where('role', 'system_admin')
             ->first();
 
-        if (!$admin || (($authUser['role'] ?? null) === 'admin' && ($authUser['admin_role'] ?? null) !== $admin->role)) {
+        if (!$admin || (!$linkedAdminId && ($authUser['role'] ?? null) === 'admin' && ($authUser['admin_role'] ?? null) !== $admin->role)) {
             return null;
         }
 
@@ -44,6 +43,34 @@ class DualRoleSession
         $admin = self::linkedAdmin($request);
 
         return $admin && self::linkedStudent($admin);
+    }
+
+    public static function canSwitchToGeneralStaff(Request $request): bool
+    {
+        return self::linkedAdmin($request) !== null;
+    }
+
+    public static function switchToGeneralStaff(Request $request): bool
+    {
+        $admin = self::linkedAdmin($request);
+        if (!$admin) {
+            return false;
+        }
+
+        $request->session()->regenerate(true);
+        $request->session()->put('auth_user', [
+            'id' => (int) $admin->id,
+            'role' => 'admin',
+            'name' => $admin->full_name,
+            'admin_role' => 'lecturer',
+            'staff_category' => 'general',
+            'linked_admin_id' => (int) $admin->id,
+            'linked_admin_role' => $admin->role,
+            'admin_override' => true,
+            'staff_override' => true,
+        ]);
+
+        return true;
     }
 
     public static function switchToStudent(Request $request, bool $override): bool

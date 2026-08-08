@@ -153,6 +153,33 @@ class ActiveSessionManagementTest extends TestCase
         $this->assertSame(10, (int) $after->active_account_id);
     }
 
+    public function test_system_admin_can_override_general_jhep_staff_and_return_to_admin_mode(): void
+    {
+        $this->withSession([
+            'auth_user' => [
+                'id' => 3,
+                'role' => 'admin',
+                'admin_role' => 'system_admin',
+                'name' => 'Dual Role Admin',
+            ],
+        ])->get('/settings')->assertOk()->assertSee('General JHEP Staff');
+
+        $this->post('/settings/role-mode', ['mode' => 'general_staff'])
+            ->assertRedirect('/admin/dashboard')
+            ->assertSessionHas('auth_user.admin_role', 'lecturer')
+            ->assertSessionHas('auth_user.staff_category', 'general')
+            ->assertSessionHas('auth_user.staff_override', true)
+            ->assertSessionHas('session_owner.type', 'admin')
+            ->assertSessionHas('session_owner.id', 3);
+
+        $this->get('/settings')->assertOk()->assertSee(__('ui.admin_mode'));
+
+        $this->post('/settings/role-mode', ['mode' => 'admin'])
+            ->assertRedirect('/admin/dashboard')
+            ->assertSessionHas('auth_user.admin_role', 'system_admin')
+            ->assertSessionMissing('auth_user.staff_override');
+    }
+
     public function test_password_reset_session_cleanup_does_not_affect_another_account(): void
     {
         $this->insertSession((string) Str::uuid(), 'first-session', 1);

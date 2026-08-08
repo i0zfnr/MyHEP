@@ -23,8 +23,11 @@ class SettingController extends Controller
         $backRoute = ($authUser['role'] ?? null) === 'admin' ? 'admin.dashboard' : 'student.dashboard';
 
         $roleMode = [
-            'available' => DualRoleSession::canSwitch($request),
+            'available' => DualRoleSession::canSwitch($request) || DualRoleSession::canSwitchToGeneralStaff($request),
+            'student_available' => DualRoleSession::canSwitch($request),
+            'general_staff_available' => DualRoleSession::canSwitchToGeneralStaff($request),
             'is_student_mode' => ($authUser['role'] ?? null) === 'student',
+            'is_general_staff_mode' => (bool) ($authUser['staff_override'] ?? false),
             'override_enabled' => (bool) ($authUser['admin_override'] ?? false),
         ];
         $sessionOwner = $sessions->owner($request);
@@ -67,13 +70,15 @@ class SettingController extends Controller
     public function updateRoleMode(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'mode' => ['required', 'in:student,admin'],
+            'mode' => ['required', 'in:student,admin,general_staff'],
             'override' => ['nullable', 'boolean'],
         ]);
 
-        $switched = $validated['mode'] === 'student'
-            ? DualRoleSession::switchToStudent($request, (bool) ($validated['override'] ?? false))
-            : DualRoleSession::switchToAdmin($request);
+        $switched = match ($validated['mode']) {
+            'student' => DualRoleSession::switchToStudent($request, (bool) ($validated['override'] ?? false)),
+            'general_staff' => DualRoleSession::switchToGeneralStaff($request),
+            default => DualRoleSession::switchToAdmin($request),
+        };
 
         if (! $switched) {
             return redirect()->route('settings.show')->withErrors([
@@ -83,7 +88,7 @@ class SettingController extends Controller
 
         auditLog('auth.role_mode_changed', 'account', null, 'Account access mode changed to '.$validated['mode']);
 
-        return redirect()->route($validated['mode'] === 'admin' ? 'admin.dashboard' : 'student.dashboard');
+        return redirect()->route($validated['mode'] === 'student' ? 'student.dashboard' : 'admin.dashboard');
     }
 
     public function destroySession(Request $request, AccountSessionManager $sessions, string $publicId): RedirectResponse

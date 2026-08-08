@@ -16,6 +16,11 @@ class LecturerPageAccess
             'label' => 'Register Offense',
             'description' => 'Allow lecturer to register a new offense for a student.',
         ],
+        'guard_management' => [
+            'label' => 'Guard Management',
+            'description' => 'Allow this lecturer to add, update, reset, and remove guard accounts.',
+            'default' => false,
+        ],
     ];
 
     public function exists(string $page): bool
@@ -26,7 +31,7 @@ class LecturerPageAccess
     public function enabled(int $adminId, string $page): bool
     {
         if (! $this->exists($page) || ! Schema::hasTable('lecturer_page_access')) {
-            return $this->exists($page);
+            return $this->exists($page) && (bool) (self::PAGES[$page]['default'] ?? true);
         }
 
         $value = DB::table('lecturer_page_access')
@@ -34,7 +39,7 @@ class LecturerPageAccess
             ->where('page_key', $page)
             ->value('enabled');
 
-        return $value === null ? true : (bool) $value;
+        return $value === null ? (bool) (self::PAGES[$page]['default'] ?? true) : (bool) $value;
     }
 
     public function allFor(int $adminId): array

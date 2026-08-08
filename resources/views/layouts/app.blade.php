@@ -2182,6 +2182,15 @@
                 padding: 0 !important;
             }
         }
+        .password-input-wrap{position:relative}
+        .password-input-wrap input{padding-right:3rem!important}
+        .password-visibility-toggle{position:absolute;top:50%;right:.45rem;transform:translateY(-50%)!important;width:2.25rem;height:2.25rem;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;background:transparent;color:#715c4c;cursor:pointer;transition:none!important;box-shadow:none!important}
+        .password-visibility-toggle:hover,.password-visibility-toggle:active{transform:translateY(-50%)!important;background:transparent!important;box-shadow:none!important}
+        .password-visibility-toggle:focus-visible{outline:2px solid #8f6f52;outline-offset:1px}
+        .password-visibility-toggle svg{width:1.2rem;height:1.2rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .password-visibility-toggle .password-eye-off{display:none}
+        .password-visibility-toggle[aria-pressed="true"] .password-eye{display:none}
+        .password-visibility-toggle[aria-pressed="true"] .password-eye-off{display:block}
     </style>
     @vite('resources/css/design-system.css')
 </head>
@@ -2201,7 +2210,7 @@
             ->where('id', $authUser['id'])
             ->value('photo'));
         if ($authPhotoPath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($authPhotoPath)) {
-            $authAvatarUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($authPhotoPath);
+            $authAvatarUrl = asset('storage/' . ltrim($authPhotoPath, '/'));
         }
     }
     $isScholarshipAdmin = $isAdmin && adminCan('scholarship');
@@ -2210,10 +2219,15 @@
     $isDocumentAdmin = $isAdmin && adminCan('documents');
     $isGuardAdmin = $isAdmin && $adminScope === 'guard';
     $isLecturerAdmin = $isAdmin && $adminScope === 'lecturer';
+    $hasStaffOverride = $isLecturerAdmin && (bool) ($authUser['staff_override'] ?? false) && !empty($authUser['linked_admin_id']);
     $isStudentAffairsHead = $isAdmin && $adminScope === 'student_affairs_head';
     $lecturerPages = $isLecturerAdmin ? app(\App\Support\LecturerPageAccess::class) : null;
     $lecturerCanListOffenses = $isLecturerAdmin && $lecturerPages->enabled((int) ($authUser['id'] ?? 0), 'offense_list');
     $lecturerCanRegisterOffense = $isLecturerAdmin && $lecturerPages->enabled((int) ($authUser['id'] ?? 0), 'offense_register');
+    $lecturerCanManageGuards = $isLecturerAdmin && $lecturerPages->enabled((int) ($authUser['id'] ?? 0), 'guard_management');
+    $canManageGuards = $isAdmin && adminCan('guards.manage') && (!$isLecturerAdmin || $lecturerCanManageGuards);
+    $canUseLaptops = $isAdmin && adminCan('laptops.use');
+    $canManageLaptops = $isAdmin && adminCan('laptops.manage');
     $hasAdminOverride = $isStudent && (bool) ($authUser['admin_override'] ?? false) && !empty($authUser['linked_admin_id']);
     $studentOnDashboard = request()->routeIs('student.dashboard');
     $adminOnDashboard = request()->routeIs('admin.dashboard');
@@ -2241,6 +2255,7 @@
     $showDesktopSidebar = $isAdmin || ($isStudent && !$studentOnDashboard);
     $showHeaderUserMenu = (bool) $authUser && ($isStudent || $adminOnDashboard);
     $showStudentBottomNav = $isStudent;
+    $showStaffBottomNav = $isLecturerAdmin;
     $studentMoreActive = request()->routeIs('student.movements.index')
         || request()->routeIs('student.documents.*')
         || request()->routeIs('student.vehicle-stickers.*')
@@ -2249,7 +2264,7 @@
         || request()->routeIs('settings.*');
     $bodyClasses = trim(
         ($isStudent ? 'student-mobile-shell' : '') . ' ' .
-        ($showStudentBottomNav ? 'student-bottom-nav-eligible' : '') . ' ' .
+        (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-eligible' : '') . ' ' .
         (request()->routeIs('student.movements.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar' : '')
     );
@@ -2610,11 +2625,15 @@
                                 {{ __('Feature Controls') }}
                             </a>
                         @endif
-                        <a href="{{ route('admin.admin-users.index') }}" class="nav-link {{ request()->routeIs('admin.admin-users.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.staff.index') }}" class="nav-link {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.742-1.34 9.04 9.04 0 00-2.983-3.163m-1.358 5.663A9.035 9.035 0 0112 21a9.035 9.035 0 01-5.401-1.68m10.802 0a9.035 9.035 0 00-10.802 0M6.599 19.32a9.04 9.04 0 01-2.983-3.16A9.095 9.095 0 007.358 14.82m11.384-.44a9.05 9.05 0 00-15.484 0m15.484 0A9.03 9.03 0 0012 12c-2.305 0-4.41.867-6 2.38m12.742 0A9.03 9.03 0 0112 12m0 0a3 3 0 100-6 3 3 0 000 6z"/></svg>
-                            {{ $isStudentAffairsHead ? __('Lecturer Accounts') : __('Pengurusan Admin') }}
+                            {{ __('Staff Management') }}
                         </a>
                         @if($adminScope === 'system_admin')
+                            <a href="{{ route('admin.admin-users.index') }}" class="nav-link {{ request()->routeIs('admin.admin-users.*') ? 'active' : '' }}">
+                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3.75a4.5 4.5 0 014.5 4.5v1.5h.75A2.25 2.25 0 0119.5 12v6.75A2.25 2.25 0 0117.25 21H6.75A2.25 2.25 0 014.5 18.75V12a2.25 2.25 0 012.25-2.25h.75v-1.5a4.5 4.5 0 014.5-4.5z"/></svg>
+                                {{ __('Admin Management') }}
+                            </a>
                             <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
                                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
                                 {{ __('Student Management') }}
@@ -2623,6 +2642,29 @@
                                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h6m-7.5-7.5h8.25L18 7.5v12.75A2.25 2.25 0 0115.75 22.5h-9A2.25 2.25 0 014.5 20.25V6A2.25 2.25 0 016.75 3.75H6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 3.75V7.5H18"/></svg>
                                 {{ __('bug_reports.nav_label') }}
                             </a>
+                        @endif
+                    </nav>
+                @endif
+                @if($canUseLaptops || $canManageGuards)
+                    <div class="nav-label">{{ __('Operations') }}</div>
+                    <nav>
+                        @if($canUseLaptops)
+                            <a href="{{ route('admin.laptops.scan') }}" class="nav-link {{ request()->routeIs('admin.laptops.scan*') ? 'active' : '' }}">
+                                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h2m2 0h2m-6 4h6"/></svg>
+                                {{ __('Scan Laptop QR') }}
+                            </a>
+                        @endif
+                        @if($canManageLaptops)
+                            <a href="{{ route('admin.laptops.index') }}" class="nav-link {{ request()->routeIs('admin.laptops.index') ? 'active' : '' }}">
+                                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>
+                                {{ __('Laptop Management') }}
+                            </a>
+                        @endif
+                        @if($canManageGuards)
+                        <a href="{{ route('admin.guards.index') }}" class="nav-link {{ request()->routeIs('admin.guards.*') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7.5 3v5.25c0 4.35-3.05 8.1-7.5 9.75-4.45-1.65-7.5-5.4-7.5-9.75V6L12 3z"/></svg>
+                            {{ __('Guard Management') }}
+                        </a>
                         @endif
                     </nav>
                 @endif
@@ -2636,6 +2678,16 @@
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v2.25l1.5 1.5"/></svg>
                         {{ __('ui.settings') }}
                     </a>
+                    @if($hasStaffOverride)
+                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="admin">
+                            <button type="submit" class="nav-link nav-system-controls" style="width:100%;cursor:pointer;font:inherit;">
+                                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7 4 12l5 5"/><path d="M4 12h10a6 6 0 0 0 6-6"/></svg>
+                                Return to System Admin
+                            </button>
+                        </form>
+                    @endif
                 </nav>
             @endif
             </div>
@@ -2853,6 +2905,45 @@
     </nav>
 @endif
 
+@if($showStaffBottomNav)
+    @php
+        $staffCategory = $authUser['staff_category'] ?? null;
+        $staffWorkRoute = match ($staffCategory) {
+            'scholarship' => route('admin.scholarships.index'),
+            'discipline' => route('admin.offenses.index'),
+            default => route('admin.dashboard'),
+        };
+        $staffWorkActive = match ($staffCategory) {
+            'scholarship' => request()->routeIs('admin.scholarships.*'),
+            'discipline' => request()->routeIs('admin.offenses.*'),
+            default => request()->routeIs('admin.dashboard'),
+        };
+    @endphp
+    <nav class="mobile-bottom-nav" aria-label="Staff mobile navigation">
+        <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span>Home</span>
+        </a>
+        <a href="{{ $staffWorkRoute }}" class="{{ $staffWorkActive ? 'active' : '' }}">
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>Work</span>
+        </a>
+        <a href="{{ route('admin.laptops.scan') }}" class="mobile-scan-tab {{ request()->routeIs('admin.laptops.scan*') ? 'active' : '' }}">
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2M18 14h2M14 18h6"/></svg></span><span>Scan QR</span>
+        </a>
+        @if($lecturerCanManageGuards)
+            <a href="{{ route('admin.guards.index') }}" class="{{ request()->routeIs('admin.guards.*') ? 'active' : '' }}">
+                <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4-2.8 7.5-7 9-4.2-1.5-7-5-7-9V6z"/></svg></span><span>Guards</span>
+            </a>
+        @else
+            <a href="{{ route('settings.show') }}" class="{{ request()->routeIs('settings.*') ? 'active' : '' }}">
+                <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12h2M3 12h2M12 3v2m0 14v2"/></svg></span><span>Settings</span>
+            </a>
+        @endif
+        <a href="{{ route('admin.profile') }}" class="{{ request()->routeIs('admin.profile*') ? 'active' : '' }}">
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg></span><span>Profile</span>
+        </a>
+    </nav>
+@endif
+
 @if($authUser)
 <div class="se-notification-center" id="notificationCenter" aria-hidden="true">
     <div class="se-notification-panel" role="dialog" aria-modal="false" aria-labelledby="notificationCenterTitle">
@@ -2909,6 +3000,21 @@
 </div>
 
 @stack('scripts')
+<script>
+document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-password-toggle]');
+    if (!button) return;
+
+    var input = document.getElementById(button.getAttribute('aria-controls'));
+    if (!input) return;
+
+    var reveal = input.type === 'password';
+    input.type = reveal ? 'text' : 'password';
+    button.setAttribute('aria-pressed', reveal ? 'true' : 'false');
+    button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+    button.setAttribute('title', reveal ? 'Hide password' : 'Show password');
+});
+</script>
 <script>
 (function () {
     var sidebar = document.getElementById('appSidebar');

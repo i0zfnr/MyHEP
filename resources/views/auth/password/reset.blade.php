@@ -23,6 +23,15 @@
         p { margin:0 0 14px; color:var(--muted); font-size:14px; }
         label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; }
         input { width:100%; border:1px solid var(--border); border-radius:8px; padding:9px 10px; font-size:14px; margin-bottom:10px; background:var(--field); color:var(--text); }
+        .password-wrap { position:relative; margin-bottom:10px; }
+        .password-wrap input { margin-bottom:0; padding-right:46px; }
+        .password-toggle { position:absolute; top:50%; right:5px; transform:translateY(-50%)!important; width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:8px; background:transparent!important; color:var(--muted); box-shadow:none!important; transition:none!important; cursor:pointer; }
+        .password-toggle:hover,.password-toggle:active { transform:translateY(-50%)!important; background:transparent!important; box-shadow:none!important; }
+        .password-toggle:focus-visible { outline:2px solid var(--primary); outline-offset:1px; }
+        .password-toggle svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+        .password-toggle .eye-off { display:none; }
+        .password-toggle[aria-pressed="true"] .eye { display:none; }
+        .password-toggle[aria-pressed="true"] .eye-off { display:block; }
         .actions { display:flex; gap:8px; margin-top:8px; }
         .btn { display:inline-block; border:1px solid #cbb9a4; background:var(--surface); color:var(--primary); border-radius:8px; padding:9px 12px; text-decoration:none; font-size:13px; font-weight:600; cursor:pointer; }
         .btn-primary { background:linear-gradient(135deg,#A48D78,#CBB9A4); color:#fff; border:none; }
@@ -53,10 +62,10 @@
         <input type="hidden" name="ref" value="{{ $ref }}">
 
         <label for="password">Kata Laluan Baharu</label>
-        <input id="password" name="password" type="password" minlength="8" required>
+        <div class="password-wrap"><input id="password" name="password" type="password" minlength="8" required><button type="button" class="password-toggle" data-password-toggle aria-controls="password" aria-pressed="false" aria-label="Show password" title="Show password"><svg class="eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18"/><path d="M10.6 6.2A11.7 11.7 0 0 1 12 6c6.5 0 10 6 10 6a18 18 0 0 1-2.2 3"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.5 6 10 6c1 0 2-.2 2.8-.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
 
         <label for="password_confirmation">Sahkan Kata Laluan Baharu</label>
-        <input id="password_confirmation" name="password_confirmation" type="password" minlength="8" required>
+        <div class="password-wrap"><input id="password_confirmation" name="password_confirmation" type="password" minlength="8" required><button type="button" class="password-toggle" data-password-toggle aria-controls="password_confirmation" aria-pressed="false" aria-label="Show password" title="Show password"><svg class="eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18"/><path d="M10.6 6.2A11.7 11.7 0 0 1 12 6c6.5 0 10 6 10 6a18 18 0 0 1-2.2 3"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.5 6 10 6c1 0 2-.2 2.8-.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
 
         <div class="actions">
             <button class="btn btn-primary" type="submit">Simpan Kata Laluan</button>
@@ -65,5 +74,18 @@
     </form>
 </div>
 @include('partials.app_footer')
+<script>
+document.addEventListener('click', function (event) {
+    const button = event.target.closest('[data-password-toggle]');
+    if (!button) return;
+    const input = document.getElementById(button.getAttribute('aria-controls'));
+    if (!input) return;
+    const reveal = input.type === 'password';
+    input.type = reveal ? 'text' : 'password';
+    button.setAttribute('aria-pressed', reveal ? 'true' : 'false');
+    button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+    button.setAttribute('title', reveal ? 'Hide password' : 'Show password');
+});
+</script>
 </body>
 </html>

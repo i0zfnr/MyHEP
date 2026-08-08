@@ -93,6 +93,15 @@ class LoginController extends Controller
             ->orWhereRaw('LOWER(full_name) = ?', [strtolower($adminUsername)])
             ->first();
 
+        if ($admin && property_exists($admin, 'is_active') && ! (bool) $admin->is_active) {
+            RateLimiter::hit($throttleKey, 900);
+            auditLog('auth.login_failed', 'admin', $admin->id, 'Inactive staff/admin account attempted login');
+
+            return redirect()->route('login')->withErrors([
+                'username' => __('This staff account is inactive. Contact the Head of Student Affairs or System Admin.'),
+            ])->withInput();
+        }
+
         if (!$admin || !Hash::check($validated['password'], $admin->password)) {
             RateLimiter::hit($throttleKey, 900);
             auditLog('auth.login_failed', 'admin', $admin->id ?? null, 'Percubaan login admin gagal');
@@ -108,6 +117,7 @@ class LoginController extends Controller
             'role' => 'admin',
             'name' => $admin->full_name,
             'admin_role' => $admin->role,
+            'staff_category' => $admin->staff_category ?? null,
         ]);
         $sessions->establish($request, 'admin', (int) $admin->id);
         auditLog('auth.login_success', 'admin', (int) $admin->id, 'Login admin berjaya');

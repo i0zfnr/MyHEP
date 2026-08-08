@@ -21,7 +21,8 @@ class RequireSessionAuthenticated
             ? DB::table('admins')->select('id', 'role', 'full_name')->where('id', $authUser['id'] ?? 0)->first()
             : DB::table('students')->select('id', 'full_name')->where('id', $authUser['id'] ?? 0)->first();
 
-        if (!$account || ($authUser['role'] === 'admin' && ($account->role ?? null) !== ($authUser['admin_role'] ?? null))) {
+        $isStaffOverride = $authUser['role'] === 'admin' && (bool) ($authUser['staff_override'] ?? false);
+        if (!$account || ($authUser['role'] === 'admin' && !$isStaffOverride && ($account->role ?? null) !== ($authUser['admin_role'] ?? null))) {
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 

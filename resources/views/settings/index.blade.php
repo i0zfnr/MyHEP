@@ -213,36 +213,34 @@
                 <p class="settings-section-copy">{{ __('ui.access_mode_hint') }}</p>
 
                 <div class="settings-actions" style="justify-content:flex-start;">
-                    @if($roleMode['is_student_mode'])
+                    @if($roleMode['student_available'])
                         <form method="POST" action="{{ route('settings.role-mode.update') }}">
                             @csrf
                             <input type="hidden" name="mode" value="student">
                             <input type="hidden" name="override" value="0">
-                            <button class="btn" type="submit">{{ __('ui.student_mode') }}</button>
+                            <button class="btn {{ $roleMode['is_student_mode'] && !$roleMode['override_enabled'] ? 'btn-primary' : '' }}" type="submit">{{ __('ui.student_mode') }}</button>
                         </form>
                         <form method="POST" action="{{ route('settings.role-mode.update') }}">
                             @csrf
                             <input type="hidden" name="mode" value="student">
                             <input type="hidden" name="override" value="1">
-                            <button class="btn {{ $roleMode['override_enabled'] ? '' : 'btn-primary' }}" type="submit">{{ __('ui.enable_override') }}</button>
+                            <button class="btn {{ $roleMode['is_student_mode'] && $roleMode['override_enabled'] ? 'btn-primary' : '' }}" type="submit">{{ __('ui.enable_override') }}</button>
                         </form>
+                    @endif
+
+                    @if($roleMode['general_staff_available'])
+                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
+                            @csrf
+                            <input type="hidden" name="mode" value="general_staff">
+                            <button class="btn {{ $roleMode['is_general_staff_mode'] ? 'btn-primary' : '' }}" type="submit">General JHEP Staff</button>
+                        </form>
+                    @endif
+
+                    @if($roleMode['is_student_mode'] || $roleMode['is_general_staff_mode'])
                         <form method="POST" action="{{ route('settings.role-mode.update') }}">
                             @csrf
                             <input type="hidden" name="mode" value="admin">
                             <button class="btn" type="submit">{{ __('ui.admin_mode') }}</button>
-                        </form>
-                    @else
-                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
-                            @csrf
-                            <input type="hidden" name="mode" value="student">
-                            <input type="hidden" name="override" value="0">
-                            <button class="btn" type="submit">{{ __('ui.student_mode') }}</button>
-                        </form>
-                        <form method="POST" action="{{ route('settings.role-mode.update') }}">
-                            @csrf
-                            <input type="hidden" name="mode" value="student">
-                            <input type="hidden" name="override" value="1">
-                            <button class="btn btn-primary" type="submit">{{ __('ui.enable_override') }}</button>
                         </form>
                     @endif
                 </div>

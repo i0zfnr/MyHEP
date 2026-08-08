@@ -225,6 +225,7 @@
             transition: border-color .2s, box-shadow .2s;
             outline: none;
         }
+        .input-wrap input[type="password"] { padding-right: 3rem; }
         .field input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(164,141,120,.18);
@@ -233,15 +234,22 @@
         .field-error { font-size: .78rem; color: var(--error); margin-top: .3rem; }
 
         .pwd-toggle {
-            position: absolute; right: .85rem; top: 50%; transform: translateY(-50%);
-            background: none; border: none; cursor: pointer;
-            color: var(--text-muted);
-            width: 28px; height: 28px; padding: 0;
+            position: absolute; right: .45rem; top: 50%; transform: translateY(-50%) !important;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: transparent; border: none; border-radius: 8px; cursor: pointer;
+            color: var(--text-muted); transition: none;
+            width: 2.25rem; height: 2.25rem; padding: 0; box-shadow: none !important;
         }
-        .pwd-toggle:hover { transform: translateY(-50%); }
+        .pwd-toggle:hover,
+        .pwd-toggle:active { transform: translateY(-50%) !important; background: transparent !important; box-shadow: none !important; }
+        .pwd-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
         .pwd-toggle svg {
-            position: absolute; top: 5px; left: 5px;
+            width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor;
+            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
         }
+        .pwd-toggle .password-eye-off { display: none; }
+        .pwd-toggle[aria-pressed="true"] .password-eye { display: none; }
+        .pwd-toggle[aria-pressed="true"] .password-eye-off { display: block; }
 
         .form-row {
             display: flex; align-items: center; justify-content: space-between;
@@ -316,31 +324,42 @@
                 padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
             }
             .login-shell {
-                min-height: calc(100vh - max(2rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
-                min-height: calc(100dvh - max(2rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+                min-height: 0;
                 max-width: 420px;
                 margin: 0 auto;
+                justify-content: flex-start;
             }
             .page-wrapper {
                 flex-direction: column;
                 max-width: 100%;
                 min-height: auto;
-                margin: 4.25rem 0 1rem;
+                margin: 3.75rem 0 .75rem;
                 border-radius: 18px;
             }
-            .brand-panel { padding: 1.9rem 1.35rem 1.65rem; }
-            .brand-logo { width: 64px; height: 64px; }
-            .brand-title { font-size: 1.2rem; }
-            .brand-badge { margin-top: 1.1rem; }
+            .brand-panel {
+                min-height: auto;
+                padding: 1rem 1.25rem;
+                align-items: flex-start;
+            }
+            .brand-panel-inner { width: 100%; text-align: left; }
+            .brand-logo,
+            .brand-badge { display: none; }
+            .brand-title { font-size: 1.05rem; margin-bottom: .18rem; }
+            .brand-subtitle { font-size: .76rem; }
             .form-panel {
                 flex: none;
-                padding: 1.7rem 1.35rem 1.35rem;
+                padding: 1.35rem 1.25rem 1.25rem;
                 justify-content: flex-start;
             }
+            .form-heading { font-size: 1.3rem; }
             .form-subheading { margin-bottom: 1.25rem; }
             .role-toggle { margin-bottom: 1.1rem; }
+            .field { margin-bottom: .95rem; }
+            .field input[type="text"],
+            .field input[type="password"] { min-height: 46px; }
             .form-row {
-                align-items: flex-start;
+                align-items: center;
+                flex-wrap: nowrap;
                 margin-bottom: 1.15rem;
             }
             .remember-label,
@@ -359,24 +378,27 @@
 
         @media (max-width: 420px) {
             body {
-                padding-left: .75rem;
-                padding-right: .75rem;
+                padding-left: .5rem;
+                padding-right: .5rem;
             }
             .page-wrapper {
-                margin-top: 4rem;
+                margin-top: 3.5rem;
+                border-radius: 16px;
             }
             .brand-panel,
             .form-panel {
-                padding-left: 1rem;
-                padding-right: 1rem;
+                padding-left: 1.05rem;
+                padding-right: 1.05rem;
             }
             .form-heading {
                 font-size: 1.25rem;
             }
             .field input[type="text"],
             .field input[type="password"] {
-                font-size: .92rem;
+                font-size: 1rem;
             }
+            .remember-label,
+            .link-inline { font-size: .76rem; white-space: nowrap; }
             .btn-submit,
             .btn-home {
                 padding: .78rem;
@@ -584,13 +606,9 @@
                     <input id="password" type="password" name="password" required
                            class="{{ $errors->has('password') ? 'is-error' : '' }}"
                            placeholder="{{ __('login.password_placeholder_student') }}">
-                    <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="{{ __('login.show_password') }}">
-                        <svg id="eyeOpenIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        <svg id="eyeClosedIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/>
-                        </svg>
+                    <button type="button" class="pwd-toggle" id="pwdToggle" aria-controls="password" aria-pressed="false" aria-label="{{ __('login.show_password') }}" title="{{ __('login.show_password') }}">
+                        <svg class="password-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg class="password-eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18"/><path d="M10.6 6.2A11.7 11.7 0 0 1 12 6c6.5 0 10 6 10 6a18 18 0 0 1-2.2 3"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.5 6 10 6c1 0 2-.2 2.8-.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
                     </button>
                 </div>
                 @error('password')
@@ -663,14 +681,12 @@
 
     const pwdToggle = document.getElementById('pwdToggle');
     const pwdInput = document.getElementById('password');
-    const eyeOpenIcon = document.getElementById('eyeOpenIcon');
-    const eyeClosedIcon = document.getElementById('eyeClosedIcon');
-
     pwdToggle.addEventListener('click', () => {
         const isPassword = pwdInput.type === 'password';
         pwdInput.type = isPassword ? 'text' : 'password';
-        eyeOpenIcon.style.display = isPassword ? 'none' : '';
-        eyeClosedIcon.style.display = isPassword ? '' : 'none';
+        pwdToggle.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+        pwdToggle.setAttribute('aria-label', isPassword ? 'Hide password' : @json(__('login.show_password')));
+        pwdToggle.setAttribute('title', isPassword ? 'Hide password' : @json(__('login.show_password')));
     });
 </script>
 </body>
