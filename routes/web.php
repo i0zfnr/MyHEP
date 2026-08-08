@@ -211,6 +211,9 @@ Route::post('/admin/maintenance', [MaintenanceController::class, 'update'])
 Route::post('/admin/maintenance/push/test', [MaintenanceController::class, 'testPush'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.maintenance.push.test');
+Route::post('/admin/maintenance/email/test', [MaintenanceController::class, 'testEmail'])
+    ->middleware(['auth.session:admin', 'admin.scope:system', 'throttle:5,10'])
+    ->name('admin.maintenance.email.test');
 Route::post('/admin/maintenance/push/broadcast', [MaintenanceController::class, 'broadcastMaintenance'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.maintenance.push.broadcast');

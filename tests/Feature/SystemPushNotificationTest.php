@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Mail\SystemEmailTest;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -45,6 +47,9 @@ class SystemPushNotificationTest extends TestCase
     {
         $this->signIn(2, 'discipline_admin')->get('/admin/maintenance')->assertForbidden();
         $this->signIn(2, 'discipline_admin')->post('/admin/maintenance/push/test')->assertForbidden();
+        $this->signIn(2, 'discipline_admin')->post('/admin/maintenance/email/test', [
+            'email' => 'admin@example.test',
+        ])->assertForbidden();
         $this->signIn(2, 'discipline_admin')->post('/admin/maintenance/push/broadcast', [
             'starts_at' => now()->addHour()->format('Y-m-d H:i:s'),
         ])->assertForbidden();
@@ -58,7 +63,9 @@ class SystemPushNotificationTest extends TestCase
         $this->signIn(1, 'system_admin')->get('/admin/maintenance')
             ->assertOk()
             ->assertSee('Push Notification Centre')
+            ->assertSee('Email Delivery Test')
             ->assertSee('Send Test Notification')
+            ->assertSee('Send Test Email')
             ->assertSee('Send Maintenance Notification')
             ->assertSee('This announcement does not enable maintenance mode automatically.');
     }
@@ -87,6 +94,35 @@ class SystemPushNotificationTest extends TestCase
             'message' => 'Please save your work before the scheduled maintenance.',
         ])->assertRedirect('/admin/maintenance')
             ->assertSessionHas('success', 'Maintenance notification sent to 2 subscribed account(s).');
+    }
+
+    public function test_system_admin_can_send_a_test_email(): void
+    {
+        Mail::fake();
+
+        $this->signIn(1, 'system_admin')->post('/admin/maintenance/email/test', [
+            'email' => 'delivery@example.test',
+        ])->assertRedirect('/admin/maintenance')
+            ->assertSessionHas('success');
+
+        Mail::assertSent(function (SystemEmailTest $mail): bool {
+            return $mail->hasTo('delivery@example.test')
+                && $mail->envelope()->subject === 'StudentEdge Email Delivery Test';
+        });
+    }
+
+    public function test_email_delivery_test_validates_the_recipient(): void
+    {
+        Mail::fake();
+
+        $response = $this->signIn(1, 'system_admin')->from('/admin/maintenance')->post('/admin/maintenance/email/test', [
+            'email' => 'not-an-email',
+        ]);
+
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame(url('/admin/maintenance'), $response->headers->get('Location'));
+
+        Mail::assertNothingSent();
     }
 
     private function signIn(int $id, string $role): static

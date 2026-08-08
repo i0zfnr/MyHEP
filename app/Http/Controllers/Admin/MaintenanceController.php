@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SystemEmailTest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -37,7 +40,7 @@ class MaintenanceController extends Controller
             'server_time' => now()->format('Y-m-d H:i:s'),
         ];
 
-        if (!empty($maintenance['secret'])) {
+        if (! empty($maintenance['secret'])) {
             $maintenance['bypass_url'] = url($maintenance['secret']);
         }
 
@@ -63,7 +66,7 @@ class MaintenanceController extends Controller
         ]);
 
         if ($validated['action'] === 'enable') {
-            $secret = 'myhep-maintenance-' . Str::lower(Str::random(24));
+            $secret = 'myhep-maintenance-'.Str::lower(Str::random(24));
             Artisan::call('down', [
                 '--secret' => $secret,
                 '--retry' => 60,
@@ -116,12 +119,44 @@ class MaintenanceController extends Controller
             'title' => 'StudentEdge test notification',
             'body' => 'Push notifications are connected to this System Admin account.',
             'url' => route('admin.maintenance.index'),
-            'tag' => 'system-admin-push-test-' . now()->timestamp,
+            'tag' => 'system-admin-push-test-'.now()->timestamp,
         ]);
         auditLog('push.test', 'system', null, "System Admin tested push delivery to {$deviceCount} device(s)");
 
         return redirect()->route('admin.maintenance.index')
             ->with('success', "Test notification sent to {$deviceCount} registered device(s).");
+    }
+
+    public function testEmail(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email:rfc', 'max:150'],
+        ]);
+
+        $recipient = strtolower(trim($validated['email']));
+        $mailer = (string) config('mail.default', 'log');
+        $reference = Str::upper(Str::random(10));
+
+        try {
+            Mail::to($recipient)->send(new SystemEmailTest($reference, now()));
+        } catch (\Throwable $exception) {
+            Log::error('System Admin email delivery test failed.', [
+                'admin_id' => (int) session('auth_user.id'),
+                'mailer' => $mailer,
+                'reference' => $reference,
+                'exception' => $exception,
+            ]);
+            auditLog('email.test_failed', 'system', null, "Email delivery test failed via {$mailer}; reference {$reference}");
+
+            return redirect()->route('admin.maintenance.index')
+                ->withInput()
+                ->withErrors(['email_test' => "Test email could not be sent. Check the mail configuration and server log. Reference: {$reference}"]);
+        }
+
+        auditLog('email.test', 'system', null, "System Admin submitted an email delivery test via {$mailer}; reference {$reference}");
+
+        return redirect()->route('admin.maintenance.index')
+            ->with('success', "Test email accepted by the {$mailer} mailer. Check the recipient inbox and spam folder. Reference: {$reference}");
     }
 
     public function broadcastMaintenance(Request $request): RedirectResponse
@@ -133,10 +168,10 @@ class MaintenanceController extends Controller
         ]);
 
         $startsAt = Carbon::parse($validated['starts_at']);
-        $endsAt = !empty($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : null;
+        $endsAt = ! empty($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : null;
         $schedule = $startsAt->format('d M Y, h:i A');
         if ($endsAt) {
-            $schedule .= ' until ' . $endsAt->format('d M Y, h:i A');
+            $schedule .= ' until '.$endsAt->format('d M Y, h:i A');
         }
         $body = filled($validated['message'] ?? null)
             ? trim((string) $validated['message'])
@@ -154,7 +189,7 @@ class MaintenanceController extends Controller
             'title' => 'Scheduled System Maintenance',
             'body' => $body,
             'url' => '/',
-            'tag' => 'system-maintenance-' . $startsAt->format('YmdHi'),
+            'tag' => 'system-maintenance-'.$startsAt->format('YmdHi'),
             'requireInteraction' => true,
             'ttl' => 86400,
         ];

@@ -101,6 +101,7 @@
         line-height: 1.6;
     }
     .maint-card.push-centre { grid-column: 1 / -1; }
+    .maint-card.email-centre { grid-column: 1 / -1; }
     .maint-push-layout { display: grid; gap: 1rem; }
     @media (min-width: 760px) { .maint-push-layout { grid-template-columns: .8fr 1.2fr; } }
     .maint-push-panel { border: 1px solid rgba(203,185,164,.6); border-radius: 14px; padding: 1rem; background: rgba(255,255,255,.42); }
@@ -279,6 +280,27 @@
                             </div>
                         </form>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="maint-card email-centre">
+            <div class="maint-card-head">Email Delivery Test</div>
+            <div class="maint-card-body">
+                <div class="maint-push-panel">
+                    <h4>Send a private test email</h4>
+                    <p>Confirm that the configured {{ config('mail.default') }} mailer accepts StudentEdge email. Delivery to the inbox must still be confirmed by checking the recipient inbox and spam folder.</p>
+                    <form method="POST" action="{{ route('admin.maintenance.email.test') }}">
+                        @csrf
+                        <div class="maint-field">
+                            <label for="test_email">Recipient email</label>
+                            <input id="test_email" name="email" type="email" maxlength="150" autocomplete="email" required value="{{ old('email') }}" placeholder="admin@example.com">
+                            <small>The API key and mail credentials are never displayed on this page.</small>
+                        </div>
+                        <div class="maint-actions">
+                            <button type="submit" class="maint-btn ok">Send Test Email</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </section>
