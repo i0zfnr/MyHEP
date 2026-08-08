@@ -22,8 +22,6 @@
     .staff-scan-frame span:nth-child(2){top:0;right:0;border-top:5px solid;border-right:5px solid;border-radius:0 18px 0 0}
     .staff-scan-frame span:nth-child(3){right:0;bottom:0;border-right:5px solid;border-bottom:5px solid;border-radius:0 0 18px}
     .staff-scan-frame span:nth-child(4){bottom:0;left:0;border-bottom:5px solid;border-left:5px solid;border-radius:0 0 0 18px}
-    .staff-scan-line{position:absolute;left:8%;right:8%;top:50%;height:2px;border-radius:99px;background:#f2d5b5;box-shadow:0 0 14px #f2d5b5;animation:staffScanLine 2.2s ease-in-out infinite}
-    @keyframes staffScanLine{0%,100%{transform:translateY(-82px);opacity:.55}50%{transform:translateY(82px);opacity:1}}
     .staff-scan-bottom{position:absolute;left:calc(1rem + env(safe-area-inset-left,0px));right:calc(1rem + env(safe-area-inset-right,0px));bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:4;display:grid;gap:.7rem}
     .staff-scan-status{justify-self:center;width:min(100%,430px);padding:.8rem 1rem;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:rgba(12,9,7,.54);color:#fff3df;font-size:.82rem;font-weight:700;line-height:1.45;text-align:center;box-shadow:0 18px 44px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.12);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%)}
     .staff-scan-status.success{border-color:rgba(110,231,164,.48);color:#cffbdd}.staff-scan-status.error{border-color:rgba(252,165,165,.5);color:#fecaca}
@@ -31,7 +29,6 @@
     .staff-scan-mode span{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border-radius:999px;color:rgba(255,255,255,.72);font-size:.8rem;font-weight:850;text-align:center}.staff-scan-mode .active{background:#fffaf5;color:#7d582f}
     .staff-token-confirm{width:min(100%,430px);min-height:46px;justify-self:center;border:1px solid rgba(255,255,255,.3);border-radius:14px;background:#fffaf5;color:#5b3e22;font:inherit;font-weight:850;cursor:pointer}.staff-token-confirm[hidden]{display:none}
     .staff-scan-canvas{display:none}
-    @media(prefers-reduced-motion:reduce){.staff-scan-line{animation:none}}
 </style>
 @endpush
 
@@ -49,7 +46,7 @@
         <span class="staff-scan-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h8l-1 8 11-14h-8z"/></svg></span>
     </div>
 
-    <div class="staff-scan-frame" aria-hidden="true"><span></span><span></span><span></span><span></span><i class="staff-scan-line"></i></div>
+    <div class="staff-scan-frame" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
     <div class="staff-scan-bottom">
         <div class="staff-scan-status" id="laptopScanResult" role="status" aria-live="polite">Opening camera. Point it at a JHEP laptop QR code.</div>

@@ -532,15 +532,15 @@
             color: #e8cdb5;
         }
         body[data-theme="dark"] .btn-submit {
-            background: linear-gradient(135deg, #d7bfa8, #f2dfca);
-            color: #17130f;
-            box-shadow: 0 12px 26px rgba(215,191,168,.18);
+            background: linear-gradient(135deg, #f0d39a 0%, #c28a3d 100%) !important;
+            color: #25190f !important;
+            box-shadow: 0 12px 26px rgba(194,138,61,.24);
         }
         body[data-theme="dark"] .btn-home {
-            background: rgba(255,255,255,.08);
-            border-color: rgba(226,209,192,.18);
-            color: #f2dfca;
-            box-shadow: none;
+            background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(215,191,168,.04));
+            border-color: rgba(226,209,192,.26);
+            color: #f7efe8;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
         }
         body[data-theme="dark"] .btn-home:hover {
             background: rgba(215,191,168,.14);

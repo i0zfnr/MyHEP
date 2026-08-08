@@ -32,7 +32,7 @@ return [
     'privacy_title' => 'Privacy',
     'privacy_description' => 'Only the system admin should review these reports. Do not include passwords, full card details, or sensitive data that is not needed for debugging.',
     'response_title' => 'After submission',
-    'response_description' => 'Reports are stored in the internal admin queue so the team can review, update status, and track resolution.',
+    'response_description' => 'The report is saved under Admin System > Bug Reports. A system administrator can review it, add internal notes, and update its status. If your email matches a registered account with PWA notifications enabled, you may receive a push update when the status changes.',
     'admin_page_title' => 'Bug Reports',
     'admin_heading' => 'Bug Reports',
     'admin_queue_title' => 'System issue queue',

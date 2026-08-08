@@ -32,7 +32,7 @@ return [
     'privacy_title' => 'Privasi',
     'privacy_description' => 'Hanya system admin patut menyemak laporan ini. Jangan sertakan kata laluan, butiran kad penuh, atau data sensitif yang tidak diperlukan untuk semakan.',
     'response_title' => 'Selepas dihantar',
-    'response_description' => 'Laporan akan disimpan dalam senarai semakan dalaman admin supaya pasukan boleh menilai, mengemas kini status, dan menjejak penyelesaian.',
+    'response_description' => 'Laporan disimpan di Admin System > Bug Reports. System admin boleh menyemak, menambah nota dalaman, dan mengemas kini status. Jika e-mel anda sepadan dengan akaun berdaftar yang mengaktifkan notifikasi PWA, anda mungkin menerima notifikasi apabila status berubah.',
     'admin_page_title' => 'Laporan Masalah',
     'admin_heading' => 'Laporan Masalah',
     'admin_queue_title' => 'Senarai isu sistem',

@@ -220,6 +220,17 @@
             background: rgba(255,255,255,.62);
             color: var(--text);
         }
+        body[data-theme="dark"] .btn-primary {
+            border-color: rgba(240,211,154,.38) !important;
+            background: linear-gradient(135deg, #f0d39a 0%, #c28a3d 100%) !important;
+            color: #25190f !important;
+            box-shadow: 0 12px 28px rgba(194,138,61,.22);
+        }
+        body[data-theme="dark"] .btn-secondary {
+            background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(215,191,168,.04)) !important;
+            border-color: rgba(226,209,192,.26) !important;
+            color: #f7efe8 !important;
+        }
         .message {
             margin-bottom: 18px;
             border-radius: 18px;
@@ -305,6 +316,57 @@
                 line-height: 1.65;
             }
         }
+
+        /* StudentEdge support-page alignment */
+        .hero { grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr); align-items: start; }
+        .panel,
+        .info-card { border-radius: 20px; border-color: var(--border); box-shadow: 0 18px 46px rgba(61, 46, 34, .10); }
+        .panel-head {
+            padding: 26px 28px;
+            border-bottom-color: rgba(255,255,255,.14);
+            background: linear-gradient(135deg, #3b291d 0%, #765237 58%, #a77950 100%);
+        }
+        .panel-head h1 { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
+        .panel-head .lead { color: rgba(255,255,255,.82); }
+        .panel-head .eyebrow { color: #f8e2c8; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.14); }
+        .panel-body { background: var(--surface); }
+        .field { gap: 7px; }
+        .field label { color: var(--text); font-size: .72rem; letter-spacing: .07em; }
+        input,
+        select,
+        textarea { min-height: 48px; border-radius: 12px; background: color-mix(in srgb, var(--surface-strong) 94%, transparent); }
+        select { color-scheme: light; cursor: pointer; }
+        select option { background: #fff; color: #261b14; }
+        textarea { min-height: 158px; }
+        .btn { min-height: 46px; border-radius: 12px; }
+        .btn-primary { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+        .info-card { padding: 16px; gap: 12px; background: var(--surface); }
+        .info-block { padding: 17px; border-radius: 15px; background: color-mix(in srgb, var(--surface-strong) 82%, var(--accent) 18%); }
+        .info-block h2 { color: var(--text); }
+        .info-block p,
+        .info-block li { margin-top: 0; color: var(--muted); }
+        .info-block:last-child { border-color: color-mix(in srgb, var(--border) 60%, var(--accent) 40%); }
+        body[data-theme="dark"] .panel,
+        body[data-theme="dark"] .info-card { background: rgba(22,19,17,.88); border-color: rgba(226,209,192,.22); }
+        body[data-theme="dark"] .panel-body { background: rgba(18,16,14,.92); }
+        body[data-theme="dark"] .field label,
+        body[data-theme="dark"] .info-block h2 { color: #f7efe8; }
+        body[data-theme="dark"] input,
+        body[data-theme="dark"] select,
+        body[data-theme="dark"] textarea { background: rgba(10,9,8,.72); border-color: rgba(226,209,192,.25); color: #f7efe8; }
+        body[data-theme="dark"] select { color-scheme: dark; }
+        body[data-theme="dark"] select option { background: #171412; color: #f7efe8; }
+        body[data-theme="dark"] .info-block { background: rgba(255,255,255,.045); border-color: rgba(226,209,192,.18); }
+        body[data-theme="dark"] .info-block p,
+        body[data-theme="dark"] .info-block li,
+        body[data-theme="dark"] .hint { color: #cdbbaa; }
+        @media (max-width: 920px) { .hero { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) {
+            .panel-head,
+            .panel-body { padding: 20px; }
+            .info-card { padding: 12px; }
+            .actions .btn { flex: 1 1 140px; }
+        }
     </style>
     @vite('resources/css/design-system.css')
 </head>
@@ -313,7 +375,7 @@
     <div class="shell">
         <div class="topbar">
             <a href="{{ route('home') }}" class="brand">
-                <img src="{{ asset('images/studentedge-mark.png') }}?v=9" alt="StudentEdge">
+                <img src="{{ asset('images/studentedge-mark.png') }}?v=10" alt="StudentEdge">
                 <span>StudentEdge</span>
             </a>
             <a href="{{ route('home') }}" class="back-link">{{ __('bug_reports.back_home') }}</a>
