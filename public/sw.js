@@ -6,10 +6,10 @@ const OFFLINE_URL = '/offline.html';
 const STATIC_ASSETS = [
     '/',
     OFFLINE_URL,
-    '/manifest.webmanifest?v=9',
+    '/manifest.webmanifest?v=10',
     '/images/pwa/icon-192.png?v=10',
     '/images/pwa/icon-512.png?v=10',
-    '/images/pwa/icon-32.png?v=9',
+    '/images/pwa/icon-32.png?v=10',
     '/favicon.ico?v=10',
 ];
 
