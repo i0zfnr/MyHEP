@@ -18,7 +18,17 @@ class AppearanceSettingsTest extends TestCase
             $table->string('full_name');
         });
 
+        Schema::create('admins', function (Blueprint $table): void {
+            $table->id();
+            $table->string('full_name');
+            $table->string('role');
+        });
+
         DB::table('students')->insert(['id' => 10, 'full_name' => 'Student']);
+        DB::table('admins')->insert([
+            ['id' => 1, 'full_name' => 'System Admin', 'role' => 'system_admin'],
+            ['id' => 2, 'full_name' => 'Discipline Admin', 'role' => 'discipline_admin'],
+        ]);
     }
 
     public function test_student_can_save_liquid_glass_transparency(): void
@@ -44,5 +54,38 @@ class AppearanceSettingsTest extends TestCase
             'glass_transparency' => 5,
         ])->assertRedirect('/settings')
             ->assertSessionHasErrors('glass_transparency');
+    }
+
+    public function test_system_admin_can_save_liquid_glass_transparency(): void
+    {
+        $this->withSession([
+            'auth_user' => [
+                'id' => 1,
+                'role' => 'admin',
+                'admin_role' => 'system_admin',
+                'name' => 'System Admin',
+            ],
+        ])->post('/settings', [
+            'locale' => 'en',
+            'theme' => 'dark',
+            'glass_transparency' => 60,
+        ])->assertRedirect('/settings')
+            ->assertSessionHas('glass_transparency', 60);
+    }
+
+    public function test_other_admin_roles_cannot_change_liquid_glass_transparency(): void
+    {
+        $this->withSession([
+            'auth_user' => [
+                'id' => 2,
+                'role' => 'admin',
+                'admin_role' => 'discipline_admin',
+                'name' => 'Discipline Admin',
+            ],
+        ])->post('/settings', [
+            'locale' => 'en',
+            'theme' => 'dark',
+            'glass_transparency' => 60,
+        ])->assertForbidden();
     }
 }

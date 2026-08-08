@@ -21,7 +21,7 @@ class SettingController extends Controller
         $currentLocale = app()->getLocale();
         $currentTheme = $request->session()->get('theme', 'light');
         $currentGlassTransparency = (int) $request->session()->get('glass_transparency', 40);
-        $canAdjustGlass = ($authUser['role'] ?? null) === 'student';
+        $canAdjustGlass = $this->canAdjustGlass($authUser);
         $backRoute = ($authUser['role'] ?? null) === 'admin' ? 'admin.dashboard' : 'student.dashboard';
 
         $roleMode = [
@@ -50,11 +50,16 @@ class SettingController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
+        $authUser = $request->session()->get('auth_user', []);
         $validated = $request->validate([
             'locale' => ['required', 'in:en,ms'],
             'theme' => ['required', 'in:light,dark'],
             'glass_transparency' => ['nullable', 'integer', 'min:10', 'max:65'],
         ]);
+
+        if (array_key_exists('glass_transparency', $validated) && ! $this->canAdjustGlass($authUser)) {
+            abort(403);
+        }
 
         $request->session()->put('locale', $validated['locale']);
         $request->session()->put('theme', $validated['theme']);
@@ -64,6 +69,13 @@ class SettingController extends Controller
         app()->setLocale($validated['locale']);
 
         return redirect()->route('settings.show')->with('success', __('ui.settings_saved'));
+    }
+
+    private function canAdjustGlass(array $authUser): bool
+    {
+        return ($authUser['role'] ?? null) === 'student'
+            || (($authUser['role'] ?? null) === 'admin'
+                && ($authUser['admin_role'] ?? null) === 'system_admin');
     }
 
     public function updateTheme(Request $request): JsonResponse|RedirectResponse
