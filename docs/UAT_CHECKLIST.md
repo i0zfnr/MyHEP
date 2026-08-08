@@ -1,6 +1,6 @@
 # StudentEdge UAT Checklist
 
-Last updated: 2026-08-02
+Last updated: 2026-08-08
 
 Record tester, account/role, browser/device, build commit, date, evidence, and defect ID for every run.
 
@@ -19,6 +19,7 @@ Record tester, account/role, browser/device, build commit, date, evidence, and d
 - [ ] Discipline Admin can use discipline, movement, sensitive student detail/export/manage, but not documents/system.
 - [ ] Guard can use movement and student list/search only; IC is masked and detail/export/mutation is forbidden.
 - [ ] Head of Student Affairs can use scholarship, discipline, movement, sensitive students, management/export, and documents, but not system administration.
+- [ ] Lecturer can use only AJAX student lookup and the offense register/list pages explicitly enabled for that account.
 - [ ] System Admin can use all registered abilities and feature controls.
 - [ ] Students cannot access admin routes or another student's records/files.
 
@@ -37,6 +38,8 @@ Record tester, account/role, browser/device, build commit, date, evidence, and d
 - [ ] Offense/evidence/fine, receipt decision, vehicle sticker, rules, and discipline announcement workflows work.
 - [ ] Document filters/counts, private download, approval, rejection-with-required-note, and already-reviewed conflict behavior work.
 - [ ] Feature toggle changes are audited and take effect server-side.
+- [ ] Session lifetime changes are validated, audited, and applied to subsequent requests.
+- [ ] System Admin private push test reaches only their registered device; maintenance broadcast reaches subscribed student/admin test devices and does not enable maintenance mode.
 - [ ] Profile photo crop, zoom, rotate, reset, cancel/apply, upload validation, replacement, and fallback work.
 - [ ] Critical create/update/delete/reset/decision/download actions write appropriate audit logs.
 

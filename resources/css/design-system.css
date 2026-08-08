@@ -1355,9 +1355,12 @@ body[data-theme="dark"] footer {
     }
 
     .app-layout .topbar {
-        height: var(--topbar-h) !important;
-        min-height: var(--topbar-h) !important;
-        flex: 0 0 var(--topbar-h);
+        height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px)) !important;
+        min-height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px)) !important;
+        flex: 0 0 calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
+        padding-top: env(safe-area-inset-top, 0px) !important;
+        padding-left: max(1rem, env(safe-area-inset-left, 0px));
+        padding-right: max(1rem, env(safe-area-inset-right, 0px));
     }
 
     .main-wrap.has-sidebar .page-header {

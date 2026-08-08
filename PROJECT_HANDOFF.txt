@@ -1,5 +1,5 @@
 PROJECT HANDOFF - StudentEdge
-Date: 2026-08-02
+Date: 2026-08-08
 Path: C:\laragon\www\e-biasiswa
 
 SUMMARY
@@ -25,6 +25,12 @@ CURRENT IMPLEMENTATION
 - Movement feed uses cursor batches and bounded DOM virtualization. Lenis smooths
   mouse-wheel scrolling while touch and nested interactive regions stay native.
 - PWA install prompts appear only on student/admin dashboards.
+- The audited interface contains 142 named application functions: 23 public/shared,
+  21 student, and 98 admin. See docs/FUNCTION_INVENTORY.md for the reproducible count.
+- Lecturer accounts receive only individually enabled offense pages and limited AJAX
+  student lookup; they do not receive the general student directory.
+- System Admin can configure session lifetime, test push delivery to their own device,
+  and broadcast scheduled maintenance notices to subscribed students and admins.
 
 IMPORTANT FILES
 ---------------
@@ -37,6 +43,7 @@ IMPORTANT FILES
 - config/filesystems.php: public storage and private student_documents disk.
 - resources/js/app.js: PWA, cropper, overlays, Lenis, and movement feed behavior.
 - docs/SYSTEM_DOCUMENTATION.md: expanded functional and technical reference.
+- docs/FUNCTION_INVENTORY.md: route-backed role/module function count and inventory.
 - docs/PROJECT_PROGRESS_AND_NEXT_STEPS.md: current risks and release plan.
 
 MIGRATIONS ADDED FOR THE CURRENT FEATURE SET
@@ -45,6 +52,10 @@ MIGRATIONS ADDED FOR THE CURRENT FEATURE SET
 - 2026_07_31_130000_create_student_documents_table.php
 - 2026_07_31_150000_add_source_to_student_documents_table.php
 - 2026_07_31_160000_create_system_features_table.php
+- 2026_08_06_090000_add_lecturer_role_and_page_access.php
+- 2026_08_06_100000_create_system_settings_table.php
+- 2026_08_06_110000_normalize_student_program_identifiers.php
+- 2026_08_08_090000_create_push_notification_markers_table.php
 
 RELEASE BLOCKERS / RISKS
 ------------------------

@@ -1,6 +1,6 @@
 # StudentEdge Project Progress and Next Steps
 
-Last updated: 2026-08-02
+Last updated: 2026-08-08
 
 ## 1. Executive status
 
@@ -22,11 +22,17 @@ The codebase remains a modular Laravel monolith. `StudentEdge.sql` is still requ
 - Cursor-paginated, incrementally fetched, virtualized movement history with bounded DOM rendering
 - Wheel-only Lenis smoothing with native touch/nested scrolling and reduced-motion handling
 - PWA install prompt limited to the student/admin dashboards
+- Audited inventory of 142 named application functions: 23 public/shared, 21 student, and 98 admin
+- Lecturer role with per-account offense page controls and limited AJAX student lookup
+- AJAX-only offense student picker and compact, AJAX-filtered movement monitoring
+- Configurable session lifetime and normalized student program identifiers
+- Monthly operational analytics UI and System Admin push test/maintenance broadcast controls
 
 ## 3. Current role and privacy model
 
 | Ability | Roles |
 | --- | --- |
+| Limited student lookup and enabled offense pages | Lecturer |
 | Scholarship | Scholarship Admin, Head of Student Affairs, System Admin |
 | Discipline | Discipline Admin, Head of Student Affairs, System Admin |
 | Movement | Guard, Discipline Admin, Head of Student Affairs, System Admin |
@@ -52,7 +58,7 @@ composer audit --locked
 git diff --check
 ```
 
-The current focused test set covers active-session management, student-data permission boundaries, private documents, admin permissions, identity masking, admin profile photos, Head of Student Affairs access, and the virtualized movement feed. Manual mobile/PWA and storage-isolation checks are still required.
+The current automated baseline is 73 passing tests with 220 assertions. It covers active sessions, student-data permission boundaries, lecturer lookup/offense access, private documents, admin permissions, identity masking, admin profile photos, Head of Student Affairs access, movement feeds, monthly-report empty states, program normalization, and System Admin push controls. Manual mobile/PWA, real Web Push delivery, and storage-isolation checks are still required.
 
 ## 5. P0 release blockers
 
@@ -74,7 +80,7 @@ Confirm `storage/app/private/student_documents` is writable by PHP, excluded fro
 
 ## 6. P1 acceptance and hardening
 
-- Run UAT with Student, Guard, Scholarship Admin, Discipline Admin, Head of Student Affairs, and System Admin accounts.
+- Run UAT with Student, Lecturer, Guard, Scholarship Admin, Discipline Admin, Head of Student Affairs, and System Admin accounts.
 - Test desktop Chrome/Edge, Android Chrome, and iPhone Safari/PWA.
 - Verify active-session labels/revocation, role-mode changes, and deleted-account behavior.
 - Verify student document ownership, offer-letter replacement/removal, rejection notes, expiry filters, feature disabling, and audited downloads.

@@ -1,6 +1,6 @@
 # StudentEdge Panel Coding Q&A Guide
 
-Last updated: 2026-08-02
+Last updated: 2026-08-08
 
 This guide is for answering technical questions from panel members. It explains the coding side of StudentEdge in a simple but accurate way.
 
@@ -201,19 +201,13 @@ app/Http/Middleware/EnsureAdminScope.php
 Example:
 
 ```php
-$allowed = match ($scope) {
-    'scholarship' => ['scholarship_admin', 'system_admin'],
-    'discipline' => ['discipline_admin', 'system_admin'],
-    'students' => ['scholarship_admin', 'discipline_admin', 'guard', 'system_admin'],
-    'movement' => ['guard', 'discipline_admin', 'system_admin'],
-    'backoffice' => ['scholarship_admin', 'discipline_admin', 'system_admin'],
-    default => ['system_admin'],
-};
+$allowed = app(\App\Support\AdminPermissions::class)
+    ->rolesFor($ability);
 ```
 
 Panel answer:
 
-> Each admin has a role. Middleware checks the role before allowing access. For example, scholarship admin can access scholarship pages, while system admin has wider access.
+> Each admin has a role and each route names a server-side ability. The centralized permission map decides which roles receive that ability. Lecturer access has an additional per-account page gate, while System Admin alone receives system controls.
 
 ## 8. Database Coding
 

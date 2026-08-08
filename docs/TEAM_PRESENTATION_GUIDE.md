@@ -1,6 +1,6 @@
 # StudentEdge Team Presentation Guide
 
-Last updated: 2026-08-02
+Last updated: 2026-08-08
 
 This file is made for team members who need to explain how the system is built, how the code works, and how the database connects to the features.
 
@@ -341,6 +341,8 @@ Common admin roles:
 - `scholarship_admin`
 - `discipline_admin`
 - `guard`
+- `student_affairs_head`
+- `lecturer`
 
 ### scholarships
 
@@ -500,7 +502,11 @@ Example:
 - `scholarship_admin` can access scholarship pages and student list.
 - `discipline_admin` can access discipline pages and student management.
 - `guard` can access movement-related pages and student list.
+- `student_affairs_head` can access scholarship, discipline, movement, student management, export, and document review, but not system controls.
+- `lecturer` can use limited AJAX student lookup and only offense pages individually enabled by a System Admin.
 - `system_admin` can access system management and admin management.
+
+The audited release has 142 named application functions: 23 public/shared, 21 student, and 98 admin. The complete role/module breakdown is maintained in `docs/FUNCTION_INVENTORY.md`.
 
 The access logic is handled in:
 

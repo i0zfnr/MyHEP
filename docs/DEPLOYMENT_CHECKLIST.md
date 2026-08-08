@@ -1,6 +1,6 @@
 # StudentEdge Deployment Checklist
 
-Last updated: 2026-08-02
+Last updated: 2026-08-08
 
 ## Pre-deployment
 
@@ -34,8 +34,11 @@ php artisan optimize
 
 - [ ] Run student/admin login, logout, password reset, active-device display, and other-session revocation smoke tests.
 - [ ] Test one allowed and one forbidden action for every admin role, including guard and Head of Student Affairs.
+- [ ] Verify lecturer page access flags: enabled offense pages work, disabled pages return forbidden, and lookup does not expose the full student directory.
 - [ ] Test student-owned document download, admin review/download, scholarship offer letter, and disabled Document Centre behavior.
 - [ ] Verify scholarship, discipline, movement, exports, PDF/print, notifications, push, and audit logs.
+- [ ] Register a System Admin push device, send a private test, then verify a maintenance broadcast on one student and one admin device.
+- [ ] Verify the configured session lifetime is applied after config/cache refresh.
 - [ ] Verify Malay/English, light/dark, desktop/mobile, PWA install, scanner, cropper, nested scrolling, and movement feed loading.
 - [ ] Monitor application, web-server, queue, scheduler, and failed-job logs.
 

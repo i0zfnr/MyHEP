@@ -1,6 +1,6 @@
 # StudentEdge / e-Biasiswa System Documentation
 
-Last updated: 2026-08-02
+Last updated: 2026-08-08
 
 ## 1. System Overview
 
@@ -69,11 +69,14 @@ Admin role values:
 
 | Role | Scope |
 | --- | --- |
+| `lecturer` | Limited AJAX student lookup and only the offense register/list pages individually enabled by a System Admin |
 | `scholarship_admin` | Scholarship records, scholarship announcements, scholarship status review |
 | `discipline_admin` | Discipline records, rules, fines, vehicle stickers, discipline announcements, movement |
 | `guard` | Movement-related access |
 | `student_affairs_head` | Scholarship, discipline, movement, sensitive student data, exports, student management, and document review |
 | `system_admin` | Full system access, admin management, maintenance, system monitoring |
+
+The audited release exposes **142 named application functions**: 23 public/shared, 21 student, and 98 admin. See `docs/FUNCTION_INVENTORY.md` for the complete module breakdown, role coverage, methodology, and recount command.
 
 Admin access control is enforced by:
 
@@ -85,6 +88,8 @@ Admin access control is enforced by:
 - `admin.scope:system`
 - `admin.scope:students.list`, `students.sensitive`, `students.export`, and `students.manage`
 - `admin.scope:documents`
+- `admin.scope:offense.register`, `admin.scope:students.lookup`, and `admin.scope:lecturers.manage`
+- `lecturer.page:offense_register` and `lecturer.page:offense_list`
 
 The ability-to-role map is centralized in `app/Support/AdminPermissions.php`. A menu item is never the security boundary; routes enforce every ability on the server.
 
@@ -347,6 +352,8 @@ The system provides:
 - Live system monitoring for system admins.
 - Maintenance mode controls.
 - System cache controls.
+- Configurable authenticated-session lifetime.
+- System Admin push test and scheduled maintenance announcement controls.
 - CSV exports across major modules.
 
 Important routes:
@@ -355,6 +362,9 @@ Important routes:
 - `GET /admin/system-monitoring/live`
 - `GET /admin/reports/monthly`
 - `GET|POST /admin/maintenance`
+- `POST /admin/maintenance/push/test`
+- `POST /admin/maintenance/push/broadcast`
+- `PATCH /admin/system-settings/session-lifetime`
 
 ### 5.10 AI Helper / Agent Integration
 
@@ -428,6 +438,8 @@ Core tables:
 | `account_sessions` | Authenticated device/session registry used for visibility and remote revocation |
 | `password_reset_codes` | Password reset code, verification, expiry, and usage tracking |
 | `push_subscriptions` | Browser push subscription data |
+| `push_notification_markers` | Idempotency markers for event-driven push notifications |
+| `system_settings` | System-level operational settings such as session lifetime |
 | `bug_reports` | Public problem reports |
 | `audit_logs` | Critical action trace records |
 | `sessions` | Laravel database session storage |
@@ -474,6 +486,12 @@ Push notifications are used for workflows such as:
 - Vehicle sticker decision sent to student.
 - Late movement return detected.
 - Admin movement violation alert.
+- Scholarship declaration and offer-letter workflow events.
+- Vehicle sticker application submitted for admin review.
+- System Admin test notification.
+- Scheduled maintenance announcement broadcast to subscribed students and admins.
+
+The maintenance broadcast is sent immediately and describes the selected future start/end schedule. It does not schedule delayed delivery and does not enable Laravel maintenance mode automatically.
 
 Required environment variables depend on `config/services.php`, including Web Push VAPID subject, public key, and private key.
 

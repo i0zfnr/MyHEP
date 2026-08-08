@@ -874,8 +874,9 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            height: var(--topbar-h);
-            padding: 0 1.15rem;
+            height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
+            min-height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
+            padding: env(safe-area-inset-top, 0px) 1.15rem 0;
             background: var(--glass-bg-strong);
             border-bottom: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
@@ -958,7 +959,7 @@
             .topbar-title { font-size: 1rem; }
             .topbar {
                 gap: .9rem;
-                padding: 0 1rem;
+                padding: env(safe-area-inset-top, 0px) max(1rem, env(safe-area-inset-right, 0px)) 0 max(1rem, env(safe-area-inset-left, 0px));
             }
             .topbar-brand {
                 gap: .8rem;
