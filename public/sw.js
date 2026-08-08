@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'studentedge-pwa-v5';
+const CACHE_VERSION = 'studentedge-pwa-v8';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = '/offline.html';
@@ -9,7 +9,8 @@ const STATIC_ASSETS = [
     '/manifest.webmanifest',
     '/images/pwa/icon-192.png',
     '/images/pwa/icon-512.png',
-    '/images/newlogo.png',
+    '/images/pwa/icon-32.png',
+    '/favicon.ico',
 ];
 
 self.addEventListener('install', (event) => {

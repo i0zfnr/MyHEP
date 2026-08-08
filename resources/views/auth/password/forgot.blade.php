@@ -10,9 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Lupa Kata Laluan</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}">
-    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/pwa/icon-180.png') }}">
+    @include('partials.brand_icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         :root { --bg:#fdf8f3; --surface:#fff; --text:#111827; --muted:#6b7280; --border:#eadfd2; --field:#fff; --primary:#8a7362; }

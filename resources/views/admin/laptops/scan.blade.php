@@ -5,23 +5,62 @@
 
 @push('styles')
 <style>
-    .staff-scan-wrap{max-width:680px;margin:0 auto;display:grid;gap:1rem}.staff-scan-hero{padding:1.2rem;border-radius:18px;background:linear-gradient(135deg,#3b291d,#765237 60%,#a77950);color:#fff;box-shadow:var(--glass-shadow)}.staff-scan-hero h1{margin:.25rem 0;font-size:1.45rem}.staff-scan-hero p{margin:0;color:rgba(255,255,255,.76);line-height:1.5}.staff-scan-card{padding:1rem;border:1px solid var(--glass-line);border-radius:18px;background:var(--glass-bg-strong);box-shadow:var(--glass-shadow)}.scanner-stage{position:relative;overflow:hidden;aspect-ratio:4/3;border-radius:15px;background:#15110e;display:grid;place-items:center}.scanner-stage video{width:100%;height:100%;object-fit:cover}.scanner-frame{position:absolute;width:62%;aspect-ratio:1;border:3px solid #f2d5b5;border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.32);pointer-events:none}.scanner-line{position:absolute;left:9%;right:9%;top:50%;height:2px;background:#f2d5b5;box-shadow:0 0 10px #f2d5b5}.scan-actions{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.8rem}.scan-btn{min-height:46px;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--text);font:inherit;font-weight:800;cursor:pointer}.scan-btn.primary{background:var(--primary-dark);border-color:var(--primary-dark);color:var(--surface)}body[data-theme="dark"] .scan-btn.primary{background:var(--primary);color:#21170f}.scan-result{display:none;margin-top:.8rem;padding:.85rem;border-radius:12px;font-weight:700;font-size:.82rem}.scan-result.show{display:block}.scan-result.success{background:#e7f4ee;color:#287352}.scan-result.error{background:var(--danger-light);color:var(--danger)}body[data-theme="dark"] .scan-result.success{background:rgba(46,160,112,.18);color:#8ee0bb}.scan-help{margin:.75rem 0 0;color:var(--text-muted);font-size:.74rem;line-height:1.5}.current-loans h2{margin:0 0 .7rem;color:var(--text);font-size:1rem}.loan-chip{display:flex;justify-content:space-between;gap:.7rem;padding:.75rem 0;border-top:1px solid var(--glass-line);color:var(--text);font-size:.78rem}.loan-chip small{color:var(--text-muted)}.manual-confirm{display:none}.manual-confirm.show{display:block}@media(max-width:480px){.staff-scan-card{padding:.75rem}.scanner-stage{aspect-ratio:3/4}.scan-actions{grid-template-columns:1fr}}
+    body.student-scan-mode :is(.topbar,.page-header,.sidebar,.sb-overlay,.app-footer),
+    body.student-scan-mode > :is(.mobile-bottom-nav,.mobile-more-sheet,.mobile-more-backdrop,.header-user-menu--mobile,.header-user-backdrop) { display:none!important; }
+    body.student-scan-mode .page-body { padding:0!important; background:#0c0907!important; }
+    body.student-scan-mode .main-wrap { overflow:hidden!important; }
+    .staff-scan-page{position:fixed;inset:0;z-index:900;overflow:hidden;background:#0c0907;color:#fffaf5}
+    .staff-scan-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0c0907}
+    .staff-scan-vignette{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.5),transparent 22%,transparent 62%,rgba(0,0,0,.72)),radial-gradient(circle at center,transparent 32%,rgba(0,0,0,.4) 100%)}
+    .staff-scan-topbar{position:absolute;top:calc(1rem + env(safe-area-inset-top,0px));left:calc(1rem + env(safe-area-inset-left,0px));right:calc(1rem + env(safe-area-inset-right,0px));z-index:4;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .staff-scan-icon{width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(0,0,0,.28);color:#fff;text-decoration:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.16);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%)}
+    .staff-scan-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .staff-scan-clock{font-size:.82rem;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.36)}
+    .staff-scan-frame{position:absolute;left:50%;top:44%;z-index:3;width:min(64vw,320px);aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none}
+    .staff-scan-frame span{position:absolute;width:56px;height:56px;border-color:rgba(255,255,255,.96)}
+    .staff-scan-frame span:nth-child(1){top:0;left:0;border-top:5px solid;border-left:5px solid;border-radius:18px 0 0}
+    .staff-scan-frame span:nth-child(2){top:0;right:0;border-top:5px solid;border-right:5px solid;border-radius:0 18px 0 0}
+    .staff-scan-frame span:nth-child(3){right:0;bottom:0;border-right:5px solid;border-bottom:5px solid;border-radius:0 0 18px}
+    .staff-scan-frame span:nth-child(4){bottom:0;left:0;border-bottom:5px solid;border-left:5px solid;border-radius:0 0 0 18px}
+    .staff-scan-line{position:absolute;left:8%;right:8%;top:50%;height:2px;border-radius:99px;background:#f2d5b5;box-shadow:0 0 14px #f2d5b5;animation:staffScanLine 2.2s ease-in-out infinite}
+    @keyframes staffScanLine{0%,100%{transform:translateY(-82px);opacity:.55}50%{transform:translateY(82px);opacity:1}}
+    .staff-scan-bottom{position:absolute;left:calc(1rem + env(safe-area-inset-left,0px));right:calc(1rem + env(safe-area-inset-right,0px));bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:4;display:grid;gap:.7rem}
+    .staff-scan-status{justify-self:center;width:min(100%,430px);padding:.8rem 1rem;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:rgba(12,9,7,.54);color:#fff3df;font-size:.82rem;font-weight:700;line-height:1.45;text-align:center;box-shadow:0 18px 44px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.12);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%)}
+    .staff-scan-status.success{border-color:rgba(110,231,164,.48);color:#cffbdd}.staff-scan-status.error{border-color:rgba(252,165,165,.5);color:#fecaca}
+    .staff-scan-mode{width:min(100%,430px);justify-self:center;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem;padding:.35rem;border-radius:999px;background:rgba(12,9,7,.56);box-shadow:0 18px 44px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(24px) saturate(155%);-webkit-backdrop-filter:blur(24px) saturate(155%)}
+    .staff-scan-mode span{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border-radius:999px;color:rgba(255,255,255,.72);font-size:.8rem;font-weight:850;text-align:center}.staff-scan-mode .active{background:#fffaf5;color:#7d582f}
+    .staff-token-confirm{width:min(100%,430px);min-height:46px;justify-self:center;border:1px solid rgba(255,255,255,.3);border-radius:14px;background:#fffaf5;color:#5b3e22;font:inherit;font-weight:850;cursor:pointer}.staff-token-confirm[hidden]{display:none}
+    .staff-scan-canvas{display:none}
+    @media(prefers-reduced-motion:reduce){.staff-scan-line{animation:none}}
 </style>
 @endpush
 
 @section('content')
-<div class="staff-scan-wrap">
-    <section class="staff-scan-hero"><span style="font-size:.67rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#f2d5b5">JHEP asset scanner</span><h1>Borrow or return a laptop</h1><p>Scan once when taking a laptop. Scan the same QR again when returning it. No late-return penalties are applied.</p></section>
-    <section class="staff-scan-card">
-        <div class="scanner-stage"><video id="laptopScannerVideo" playsinline muted></video><div class="scanner-frame"><span class="scanner-line"></span></div></div>
-        <canvas id="laptopScannerCanvas" hidden></canvas>
-        <div class="scan-actions"><button type="button" class="scan-btn primary" id="startLaptopScanner">Start Camera</button><button type="button" class="scan-btn" id="stopLaptopScanner" disabled>Stop Camera</button></div>
-        <button type="button" class="scan-btn primary manual-confirm {{ $initialToken !== '' ? 'show' : '' }}" id="confirmLaptopToken" style="width:100%;margin-top:.7rem">Confirm Laptop Scan</button>
-        <div class="scan-result" id="laptopScanResult" role="status" aria-live="polite"></div>
-        <p class="scan-help">Camera access requires HTTPS or localhost. The scanner stops after reading a QR to prevent duplicate transactions.</p>
-    </section>
-    <section class="staff-scan-card current-loans"><h2>Your current laptops</h2>@forelse($currentLoans as $loan)<div class="loan-chip"><span><strong>{{ $loan->name }}</strong><br><small>{{ $loan->asset_code }}</small></span><small>{{ \Illuminate\Support\Carbon::parse($loan->borrowed_at)->format('d M, h:i A') }}</small></div>@empty<p class="scan-help">You are not currently borrowing a JHEP laptop.</p>@endforelse</section>
+<div class="staff-scan-page">
+    <video class="staff-scan-video" id="laptopScannerVideo" playsinline muted autoplay aria-label="Laptop QR scanner camera preview"></video>
+    <canvas class="staff-scan-canvas" id="laptopScannerCanvas"></canvas>
+    <div class="staff-scan-vignette" aria-hidden="true"></div>
+
+    <div class="staff-scan-topbar">
+        <a href="{{ route('admin.laptops.index') }}" class="staff-scan-icon" aria-label="Close scanner">
+            <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </a>
+        <div class="staff-scan-clock" id="staffScanClock">--:--</div>
+        <span class="staff-scan-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h8l-1 8 11-14h-8z"/></svg></span>
+    </div>
+
+    <div class="staff-scan-frame" aria-hidden="true"><span></span><span></span><span></span><span></span><i class="staff-scan-line"></i></div>
+
+    <div class="staff-scan-bottom">
+        <div class="staff-scan-status" id="laptopScanResult" role="status" aria-live="polite">Opening camera. Point it at a JHEP laptop QR code.</div>
+        <button type="button" class="staff-token-confirm" id="confirmLaptopToken" {{ $initialToken === '' ? 'hidden' : '' }}>Confirm Laptop Scan</button>
+        <div class="staff-scan-mode" aria-label="Scan mode">
+            <span class="active">Scan QR</span>
+            <span>JHEP Staff · {{ $currentLoans->count() }} active</span>
+        </div>
+    </div>
 </div>
+<span class="sr-only">Borrow or return a laptop</span>
 @endsection
 
 @push('scripts')
@@ -30,55 +69,91 @@
 (() => {
     const video = document.getElementById('laptopScannerVideo');
     const canvas = document.getElementById('laptopScannerCanvas');
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    const startButton = document.getElementById('startLaptopScanner');
-    const stopButton = document.getElementById('stopLaptopScanner');
-    const confirmButton = document.getElementById('confirmLaptopToken');
+    const context = canvas?.getContext('2d', { willReadFrequently: true });
     const result = document.getElementById('laptopScanResult');
+    const confirmButton = document.getElementById('confirmLaptopToken');
+    const clock = document.getElementById('staffScanClock');
     const endpoint = @json(route('admin.laptops.scan.process'));
-    let token = @json($initialToken);
+    const initialToken = @json($initialToken);
     let stream = null;
-    let frame = null;
+    let detector = null;
+    let timer = null;
     let busy = false;
 
-    function show(message, type) { result.textContent = message; result.className = `scan-result show ${type}`; }
-    function extractToken(value) {
-        try { const url = new URL(value, window.location.origin); return url.searchParams.get('token') || value; } catch (_) { return value; }
-    }
-    function stop() {
-        if (frame) cancelAnimationFrame(frame);
-        if (stream) stream.getTracks().forEach(track => track.stop());
-        frame = null; stream = null; video.srcObject = null; startButton.disabled = false; stopButton.disabled = true;
-    }
-    async function submit(value) {
+    const show = (message, tone = '') => {
+        result.textContent = message;
+        result.className = `staff-scan-status${tone ? ` ${tone}` : ''}`;
+    };
+    const updateClock = () => { clock.textContent = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }); };
+    const extractToken = (value) => {
+        const raw = String(value || '').trim();
+        try { const url = new URL(raw, window.location.origin); return url.searchParams.get('token') || raw; } catch (_) { return raw; }
+    };
+    const stop = () => {
+        if (timer) window.clearInterval(timer);
+        stream?.getTracks().forEach(track => track.stop());
+        timer = null; stream = null;
+        if (video) video.srcObject = null;
+    };
+    const submit = async (value) => {
         if (busy) return;
-        busy = true; stop(); show('Recording laptop activity…', 'success');
+        busy = true; stop(); confirmButton.hidden = true;
+        show('Recording laptop activity…', 'success');
         try {
-            const response = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':@json(csrf_token())}, body:JSON.stringify({token:extractToken(value)}) });
+            const response = await fetch(endpoint, { method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':@json(csrf_token())}, body:JSON.stringify({token:extractToken(value)}) });
             const data = await response.json();
             show(data.message || 'Unable to process this QR code.', response.ok ? 'success' : 'error');
-            if (response.ok) setTimeout(() => window.location.reload(), 1200);
-        } catch (_) { show('The scan could not be saved. Check your connection and try again.', 'error'); }
-        finally { busy = false; }
-    }
-    async function tick() {
-        if (!stream || busy) return;
-        if (video.readyState >= 2) {
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const image = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = window.jsQR ? window.jsQR(image.data, image.width, image.height, { inversionAttempts:'dontInvert' }) : null;
-            if (code?.data) { await submit(code.data); return; }
-        }
-        frame = requestAnimationFrame(tick);
-    }
-    startButton.addEventListener('click', async () => {
-        try { stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}); video.srcObject = stream; await video.play(); startButton.disabled=true; stopButton.disabled=false; show('Camera ready. Point it at a laptop QR code.', 'success'); tick(); }
-        catch (_) { show('Camera access was not available. Allow camera permission and try again.', 'error'); }
-    });
-    stopButton.addEventListener('click', stop);
-    confirmButton.addEventListener('click', () => submit(token));
+            if (response.ok) window.setTimeout(() => window.location.reload(), 1400);
+            else window.setTimeout(start, 1800);
+        } catch (_) {
+            show('The scan could not be saved. Check your connection and try again.', 'error');
+            window.setTimeout(start, 1800);
+        } finally { busy = false; }
+    };
+    const scanFrame = async () => {
+        if (!stream || busy || video.readyState < 2) return;
+        try {
+            if (detector) {
+                const codes = await detector.detect(video);
+                if (codes[0]?.rawValue) await submit(codes[0].rawValue);
+                return;
+            }
+            if (!window.jsQR || !context) return;
+            const width = video.videoWidth; const height = video.videoHeight;
+            if (!width || !height) return;
+            canvas.width = width; canvas.height = height;
+            context.drawImage(video, 0, 0, width, height);
+            const image = context.getImageData(0, 0, width, height);
+            const code = window.jsQR(image.data, image.width, image.height, { inversionAttempts:'dontInvert' });
+            if (code?.data) await submit(code.data);
+        } catch (_) { show('Keep the QR code steady inside the frame.', 'error'); }
+    };
+    const requestCamera = async () => {
+        const options = [
+            {video:{facingMode:{exact:'environment'}},audio:false},
+            {video:{facingMode:{ideal:'environment'}},audio:false},
+            {video:true,audio:false},
+        ];
+        let lastError;
+        for (const constraints of options) { try { return await navigator.mediaDevices.getUserMedia(constraints); } catch (error) { lastError = error; } }
+        throw lastError;
+    };
+    const start = async () => {
+        if (!navigator.mediaDevices?.getUserMedia) { show('Camera scanning requires HTTPS or the installed PWA.', 'error'); return; }
+        try {
+            if ('BarcodeDetector' in window) detector = new BarcodeDetector({ formats:['qr_code'] });
+            stream = await requestCamera();
+            video.srcObject = stream; await video.play();
+            show('Camera is ready. Point it at a JHEP laptop QR code.', 'success');
+            timer = window.setInterval(scanFrame, 350);
+        } catch (_) { show('Camera access failed. Allow camera permission and reopen Scan QR.', 'error'); }
+    };
+
+    confirmButton?.addEventListener('click', () => submit(initialToken));
+    updateClock(); window.setInterval(updateClock, 1000);
     window.addEventListener('pagehide', stop);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
+    start();
 })();
 </script>
 @endpush

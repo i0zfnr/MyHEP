@@ -145,6 +145,41 @@
                 </div>
             </section>
 
+            @if($canAdjustGlass)
+                <section class="settings-section glass-control-section" role="group" aria-labelledby="settingsGlassTitle">
+                    <h3 class="settings-section-title" id="settingsGlassTitle">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 3h10l4 7-9 11L3 10l4-7Z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m3 10 9 3 9-3M12 13v8"/>
+                        </svg>
+                        {{ __('ui.glass_transparency') }}
+                    </h3>
+                    <p class="settings-section-copy">{{ __('ui.glass_transparency_hint') }}</p>
+
+                    <div class="glass-control" data-glass-control>
+                        <div class="glass-control-preview" aria-hidden="true">
+                            <span>{{ __('ui.glass_preview') }}</span>
+                            <strong data-glass-output>{{ $currentGlassTransparency }}%</strong>
+                        </div>
+                        <label class="glass-range-label" for="glassTransparency">
+                            <span>{{ __('ui.glass_more_solid') }}</span>
+                            <span>{{ __('ui.glass_more_clear') }}</span>
+                        </label>
+                        <input
+                            id="glassTransparency"
+                            class="glass-range"
+                            type="range"
+                            name="glass_transparency"
+                            min="10"
+                            max="65"
+                            step="5"
+                            value="{{ $currentGlassTransparency }}"
+                            aria-describedby="settingsGlassTitle"
+                        >
+                    </div>
+                </section>
+            @endif
+
             <div class="settings-actions">
                 <a class="btn" href="{{ route($backRoute) }}">{{ __('ui.back_dashboard') }}</a>
                 <button class="btn btn-primary" type="submit">{{ __('ui.save_changes') }}</button>
@@ -191,7 +226,7 @@
             </div>
 
             @if($activeSessions->where('is_current', false)->isNotEmpty())
-                <form method="POST" action="{{ route('settings.sessions.destroy-others') }}" class="settings-actions" style="justify-content:flex-start;">
+                <form method="POST" action="{{ route('settings.sessions.destroy-others') }}" class="settings-actions settings-actions--inline">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-danger" type="submit">{{ __('ui.revoke_other_sessions') }}</button>
@@ -212,7 +247,7 @@
                 </h3>
                 <p class="settings-section-copy">{{ __('ui.access_mode_hint') }}</p>
 
-                <div class="settings-actions" style="justify-content:flex-start;">
+                <div class="settings-actions settings-actions--inline">
                     @if($roleMode['student_available'])
                         <form method="POST" action="{{ route('settings.role-mode.update') }}">
                             @csrf

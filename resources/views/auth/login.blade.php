@@ -10,9 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{{ __('login.page_title') }}</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}">
-    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/pwa/icon-180.png') }}">
+    @include('partials.brand_icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -320,20 +318,24 @@
 
         @media (max-width: 700px) {
             body {
-                display: block;
-                padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+                display: flex;
+                min-height: 100svh;
+                padding:
+                    max(.75rem, env(safe-area-inset-top))
+                    1rem
+                    max(.75rem, env(safe-area-inset-bottom));
             }
             .login-shell {
-                min-height: 0;
+                min-height: calc(100svh - max(1.5rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
                 max-width: 420px;
                 margin: 0 auto;
-                justify-content: flex-start;
+                justify-content: center;
             }
             .page-wrapper {
                 flex-direction: column;
                 max-width: 100%;
                 min-height: auto;
-                margin: 3.75rem 0 .75rem;
+                margin: 3.25rem 0 .7rem;
                 border-radius: 18px;
             }
             .brand-panel {
@@ -372,7 +374,17 @@
                 padding: .24rem .5rem;
             }
             .app-footer {
-                padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+                padding: 0 .75rem .5rem;
+            }
+        }
+
+        @media (max-width: 700px) and (max-height: 760px) {
+            .login-shell {
+                justify-content: flex-start;
+            }
+
+            .page-wrapper {
+                margin-top: 3.25rem;
             }
         }
 
@@ -382,7 +394,7 @@
                 padding-right: .5rem;
             }
             .page-wrapper {
-                margin-top: 3.5rem;
+                margin-top: 3.25rem;
                 border-radius: 16px;
             }
             .brand-panel,
@@ -437,6 +449,20 @@
             color: #7a6555;
             z-index: 5;
             padding: 0 1rem 1.25rem;
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        .app-footer::before {
+            display: none !important;
+        }
+        .app-footer-inner {
+            min-height: 0;
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
         }
         body[data-theme="dark"] .page-wrapper {
             background: #12100e;

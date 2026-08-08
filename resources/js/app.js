@@ -6,8 +6,30 @@ import 'lenis/dist/lenis.css';
 const PWA_PROMPT_KEY = 'studentedge-pwa-dismissed-v1';
 const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
 const THEME_KEY = 'studentedge-theme';
+const GLASS_TRANSPARENCY_KEY = 'studentedge-glass-transparency';
 
 const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
+const normalizeGlassTransparency = (value) => Math.min(65, Math.max(10, Number(value) || 40));
+
+const applyGlassTransparency = (value, persist = true) => {
+    const transparency = normalizeGlassTransparency(value);
+    document.documentElement.style.setProperty('--glass-opacity', ((100 - transparency) / 100).toFixed(2));
+    document.documentElement.dataset.glassTransparency = String(transparency);
+
+    if (document.body) {
+        document.body.dataset.glassTransparency = String(transparency);
+    }
+
+    document.querySelectorAll('[data-glass-output]').forEach((output) => {
+        output.textContent = `${transparency}%`;
+    });
+
+    if (persist) {
+        window.localStorage.setItem(GLASS_TRANSPARENCY_KEY, String(transparency));
+    }
+
+    return transparency;
+};
 
 const applyTheme = (theme, persist = true) => {
     const nextTheme = normalizeTheme(theme);
@@ -72,6 +94,10 @@ const registerThemeUi = () => {
         || 'light';
 
     applyTheme(initialTheme, false);
+    const initialGlassTransparency = window.localStorage.getItem(GLASS_TRANSPARENCY_KEY)
+        || document.documentElement.dataset.glassTransparency
+        || '40';
+    applyGlassTransparency(initialGlassTransparency, false);
 
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -91,7 +117,14 @@ const registerThemeUi = () => {
             if (selectedTheme) {
                 window.localStorage.setItem(THEME_KEY, normalizeTheme(selectedTheme));
             }
+            const selectedGlassTransparency = settingsForm.querySelector('input[name="glass_transparency"]')?.value;
+            if (selectedGlassTransparency) {
+                applyGlassTransparency(selectedGlassTransparency);
+            }
         });
+
+        const glassInput = settingsForm.querySelector('input[name="glass_transparency"]');
+        glassInput?.addEventListener('input', () => applyGlassTransparency(glassInput.value));
     }
 };
 

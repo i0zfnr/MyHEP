@@ -1195,6 +1195,21 @@ body[data-theme="dark"] .se-page-number.is-current {
     min-height: 44px;
 }
 
+.settings-actions--inline {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    padding: 1rem 0 0;
+    background: transparent !important;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.settings-actions--inline form {
+    margin: 0;
+}
+
 /* Standalone pages */
 html[data-theme="dark"] body > .login-shell .page-wrapper,
 html[data-theme="dark"] body > .shell,
@@ -1428,6 +1443,18 @@ body[data-theme="dark"] footer {
         width: 100%;
     }
 
+    .settings-actions--inline {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        flex-direction: initial;
+        align-items: stretch;
+    }
+
+    .settings-actions--inline form,
+    .settings-actions--inline .btn {
+        width: 100%;
+    }
+
     .se-pagination {
         align-items: stretch;
         flex-direction: column;
@@ -1466,6 +1493,12 @@ body[data-theme="dark"] footer {
 
     .bugs-filters .bugs-input {
         grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 420px) {
+    .settings-actions--inline {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1855,9 +1888,9 @@ body > .card {
         width: 34px !important;
         height: 34px !important;
         border-radius: 10px !important;
-        background: var(--se-surface) !important;
-        border-color: var(--se-border) !important;
-        box-shadow: none !important;
+        background: linear-gradient(145deg, #fffdf9, #f5eadc) !important;
+        border-color: rgba(183, 146, 107, .38) !important;
+        box-shadow: 0 5px 12px rgba(0, 0, 0, .20), inset 0 1px 0 rgba(255,255,255,.92) !important;
     }
 
     .app-layout .topbar-brand-mark img {
@@ -4822,4 +4855,142 @@ body[data-theme="dark"] .app-layout :is(.sb-user-role, .header-user-role, .heade
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+}
+
+/* User-controlled Liquid Glass strength and system-wide UI safeguards. */
+:root,
+html[data-theme="light"] {
+    --glass-opacity: .60;
+    --liquid-surface: rgb(255 255 255 / var(--glass-opacity));
+    --liquid-surface-strong: rgb(255 255 255 / calc(var(--glass-opacity) + .12));
+    --liquid-field: rgb(255 255 255 / calc(var(--glass-opacity) - .08));
+    --liquid-shell: rgb(255 252 247 / var(--glass-opacity));
+    --liquid-shell-strong: rgb(255 255 255 / calc(var(--glass-opacity) + .10));
+    --liquid-popup: rgb(255 252 248 / calc(var(--glass-opacity) + .14));
+    --glass-bg: var(--liquid-surface);
+    --glass-bg-strong: var(--liquid-surface-strong);
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+body[data-theme="dark"] {
+    --liquid-surface: rgb(29 26 23 / var(--glass-opacity));
+    --liquid-surface-strong: rgb(29 26 23 / calc(var(--glass-opacity) + .12));
+    --liquid-field: rgb(12 11 10 / calc(var(--glass-opacity) - .08));
+    --liquid-shell: rgb(17 15 13 / var(--glass-opacity));
+    --liquid-shell-strong: rgb(23 20 17 / calc(var(--glass-opacity) + .10));
+    --liquid-popup: rgb(25 22 19 / calc(var(--glass-opacity) + .14));
+    --glass-bg: var(--liquid-surface);
+    --glass-bg-strong: var(--liquid-surface-strong);
+}
+
+.glass-control {
+    display: grid;
+    gap: .8rem;
+    margin-top: 1rem;
+}
+
+.glass-control-preview {
+    min-height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--liquid-stroke-soft);
+    border-radius: 18px;
+    background:
+        radial-gradient(180px circle at 82% 0%, var(--liquid-glow), transparent 72%),
+        var(--liquid-surface-strong);
+    color: var(--se-text);
+    box-shadow: var(--liquid-shadow);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+
+.glass-control-preview span {
+    color: var(--se-text-soft);
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.glass-control-preview strong {
+    color: var(--se-primary-strong);
+    font-size: 1.15rem;
+}
+
+.glass-range-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--se-text-muted) !important;
+    font-size: .72rem;
+    font-weight: 750;
+}
+
+.glass-range {
+    width: 100%;
+    min-height: 44px;
+    accent-color: var(--se-primary-strong);
+    cursor: pointer;
+}
+
+:where(a[href], button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--se-primary) 78%, white) !important;
+    outline-offset: 3px !important;
+    box-shadow: var(--se-ring) !important;
+}
+
+.page-body :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+    min-height: 44px;
+    color: var(--se-text);
+    background-color: var(--liquid-field);
+}
+
+.page-body :where(button, .btn, .ui-btn, .action-btn, .portal-link, [role="button"]) {
+    min-height: 44px;
+}
+
+:where(button, input, select, textarea):disabled,
+:where(.btn, .ui-btn, .action-btn)[aria-disabled="true"] {
+    opacity: .52 !important;
+    cursor: not-allowed !important;
+    filter: saturate(.55);
+}
+
+.page-body :where(table) {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.page-body :where(table thead th) {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--liquid-shell-strong);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+}
+
+.page-body :where(.table-wrap, .ui-table-wrap, [class*="table-wrap"], [style*="overflow-x:auto"]) {
+    max-width: 100%;
+    overscroll-behavior-inline: contain;
+    scrollbar-gutter: stable;
+}
+
+@media (max-width: 767px) {
+    .page-body :where(.ui-card, .card, .portal-card, .stat-card, .data-card, .panel, .settings-panel) {
+        backdrop-filter: blur(14px) saturate(135%) !important;
+        -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
+    }
+
+    .page-body :where(.btn, .ui-btn, .action-btn, button[type="submit"]) {
+        touch-action: manipulation;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    :root {
+        --glass-opacity: .94 !important;
+    }
 }

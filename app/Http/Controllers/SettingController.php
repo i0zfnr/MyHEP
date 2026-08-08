@@ -20,6 +20,8 @@ class SettingController extends Controller
 
         $currentLocale = app()->getLocale();
         $currentTheme = $request->session()->get('theme', 'light');
+        $currentGlassTransparency = (int) $request->session()->get('glass_transparency', 40);
+        $canAdjustGlass = ($authUser['role'] ?? null) === 'student';
         $backRoute = ($authUser['role'] ?? null) === 'admin' ? 'admin.dashboard' : 'student.dashboard';
 
         $roleMode = [
@@ -35,7 +37,15 @@ class SettingController extends Controller
             ? $sessions->sessionsFor($sessionOwner, $request->session()->getId())
             : collect();
 
-        return view('settings.index', compact('currentLocale', 'currentTheme', 'backRoute', 'roleMode', 'activeSessions'));
+        return view('settings.index', compact(
+            'currentLocale',
+            'currentTheme',
+            'currentGlassTransparency',
+            'canAdjustGlass',
+            'backRoute',
+            'roleMode',
+            'activeSessions'
+        ));
     }
 
     public function update(Request $request): RedirectResponse
@@ -43,10 +53,14 @@ class SettingController extends Controller
         $validated = $request->validate([
             'locale' => ['required', 'in:en,ms'],
             'theme' => ['required', 'in:light,dark'],
+            'glass_transparency' => ['nullable', 'integer', 'min:10', 'max:65'],
         ]);
 
         $request->session()->put('locale', $validated['locale']);
         $request->session()->put('theme', $validated['theme']);
+        if (array_key_exists('glass_transparency', $validated)) {
+            $request->session()->put('glass_transparency', $validated['glass_transparency']);
+        }
         app()->setLocale($validated['locale']);
 
         return redirect()->route('settings.show')->with('success', __('ui.settings_saved'));

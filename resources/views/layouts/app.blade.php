@@ -10,9 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>@yield('title', config('app.name', 'StudentEdge'))</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}?v=5">
-    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/pwa/icon-180.png') }}?v=5">
+    @include('partials.brand_icons')
     <meta name="push-public-key" content="{{ config('services.webpush.public_key') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -632,10 +630,39 @@
         .sidebar.is-open { transform: translateX(0); box-shadow: 8px 0 40px rgba(164,141,120,.2); }
         @media (min-width: 1024px) {
             .sidebar { position: sticky; top: 0; height: 100vh; min-height: 100vh; transform: translateX(0) !important; box-shadow: none !important; }
-            body.student-dashboard-mobile-sidebar .sidebar,
-            body.student-dashboard-mobile-sidebar .sb-overlay,
+            body.student-dashboard-mobile-sidebar .sidebar {
+                position: fixed;
+                top: var(--topbar-h);
+                height: calc(100vh - var(--topbar-h));
+                min-height: calc(100vh - var(--topbar-h));
+                z-index: 1200;
+                display: flex !important;
+                transform: translateX(-100%) !important;
+                box-shadow: 8px 0 40px rgba(0,0,0,.28) !important;
+            }
+            body.student-dashboard-mobile-sidebar .sidebar.is-open {
+                transform: translateX(0) !important;
+            }
+            body.student-dashboard-mobile-sidebar .sb-overlay {
+                inset: var(--topbar-h) 0 0;
+                z-index: 1150;
+                display: block !important;
+            }
             .main-wrap.student-dashboard-mobile-sidebar-shell .topbar {
+                position: sticky;
+                top: 0;
+                z-index: 1250;
+                display: flex !important;
+            }
+            body.student-dashboard-mobile-sidebar .page-header {
                 display: none !important;
+            }
+            body.student-dashboard-mobile-sidebar .header-user-menu--mobile {
+                position: fixed;
+                top: calc(var(--topbar-h) + .65rem);
+                right: 1.15rem;
+                z-index: 1300;
+                min-width: 248px;
             }
         }
 
@@ -648,9 +675,10 @@
         .sb-brand-icon {
             width: 34px;
             height: 34px;
-            border-radius: 9px;
-            background: #fff;
-            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: linear-gradient(145deg, #fffdf9, #f5eadc);
+            border: 1px solid rgba(183, 146, 107, .30);
+            box-shadow: 0 5px 12px rgba(79, 54, 33, .10), inset 0 1px 0 rgba(255,255,255,.92);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -660,7 +688,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 3px;
+            padding: 4px;
         }
         .sb-brand-name { font-size: .8125rem; font-weight: 700; color: var(--text); line-height: 1.2; }
         .sb-brand-sub { font-size: .6rem; font-weight: 700; color: #8a6f59; letter-spacing: .08em; text-transform: uppercase; }
@@ -914,9 +942,9 @@
             width: 42px;
             height: 42px;
             border-radius: 13px;
-            border: 1px solid rgba(226, 209, 192, .12);
-            background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+            border: 1px solid rgba(183, 146, 107, .30);
+            background: linear-gradient(145deg, #fffdf9, #f5eadc);
+            box-shadow: 0 5px 12px rgba(79, 54, 33, .10), inset 0 1px 0 rgba(255,255,255,.92);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -924,8 +952,8 @@
             overflow: hidden;
         }
         .topbar-brand-mark img {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             object-fit: contain;
             display: block;
         }
@@ -1753,6 +1781,25 @@
         }
 
         @media (max-width: 767px) {
+            @view-transition { navigation: auto; }
+
+            ::view-transition-old(root) {
+                animation: student-liquid-out 180ms ease-in both;
+            }
+
+            ::view-transition-new(root) {
+                animation: student-liquid-in 360ms cubic-bezier(.22, 1, .36, 1) both;
+            }
+
+            @keyframes student-liquid-out {
+                to { opacity: 0; transform: scale(.985); filter: blur(3px); }
+            }
+
+            @keyframes student-liquid-in {
+                from { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(5px); }
+                to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+            }
+
             .page-header {
                 width: calc(100% - 1rem);
                 min-height: 54px;
@@ -1891,6 +1938,91 @@
 
             .mobile-bottom-nav :is(a, button):active {
                 transform: scale(.96);
+            }
+
+            .mobile-bottom-nav [data-liquid-link]::after {
+                content: '';
+                position: absolute;
+                inset: 8px 10px;
+                border-radius: inherit;
+                background: radial-gradient(circle at center, rgba(255,255,255,.72), transparent 66%);
+                opacity: 0;
+                transform: scale(.35);
+                pointer-events: none;
+            }
+
+            .mobile-bottom-nav [data-liquid-link].is-launching::after {
+                animation: student-liquid-ripple 420ms ease-out both;
+            }
+
+            @keyframes student-liquid-ripple {
+                0% { opacity: .72; transform: scale(.35); }
+                100% { opacity: 0; transform: scale(1.55); }
+            }
+
+            body.student-liquid-aid,
+            body.student-liquid-fines {
+                background:
+                    radial-gradient(380px 220px at 100% 0%, rgba(201,174,149,.24), transparent 72%),
+                    radial-gradient(300px 220px at 0% 38%, rgba(255,255,255,.78), transparent 72%),
+                    var(--bg);
+            }
+
+            body.student-liquid-aid .page-body,
+            body.student-liquid-fines .page-body {
+                animation: student-liquid-page-in 420ms cubic-bezier(.22, 1, .36, 1) both;
+            }
+
+            @keyframes student-liquid-page-in {
+                from { opacity: 0; transform: translateY(12px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            body.student-liquid-aid .sch-hero,
+            body.student-liquid-fines .wrap > .card:first-of-type {
+                border-radius: 24px !important;
+                box-shadow: 0 18px 38px rgba(73, 50, 29, .14), inset 0 1px 0 rgba(255,255,255,.24) !important;
+            }
+
+            body.student-liquid-aid .sch-chip,
+            body.student-liquid-fines .quick .btn {
+                backdrop-filter: blur(14px) saturate(145%);
+                -webkit-backdrop-filter: blur(14px) saturate(145%);
+            }
+
+            body.student-liquid-fines .wrap {
+                position: relative;
+                gap: .9rem;
+            }
+
+            body.student-liquid-fines .wrap::before {
+                content: 'Fines & discipline records';
+                display: block;
+                padding: .8rem 1rem;
+                border: 1px solid rgba(185, 91, 79, .18);
+                border-radius: 18px;
+                background: linear-gradient(135deg, rgba(255,249,246,.88), rgba(255,234,228,.72));
+                color: #8f3f35;
+                font-size: .76rem;
+                font-weight: 800;
+                letter-spacing: .04em;
+                text-transform: uppercase;
+                box-shadow: 0 12px 26px rgba(122, 61, 52, .10), inset 0 1px 0 rgba(255,255,255,.82);
+            }
+
+            body[data-theme="dark"].student-liquid-aid,
+            body[data-theme="dark"].student-liquid-fines {
+                background:
+                    radial-gradient(380px 220px at 100% 0%, rgba(215,191,168,.13), transparent 72%),
+                    radial-gradient(300px 220px at 0% 38%, rgba(255,255,255,.04), transparent 72%),
+                    var(--bg);
+            }
+
+            body[data-theme="dark"].student-liquid-fines .wrap::before {
+                border-color: rgba(252, 165, 165, .20);
+                background: linear-gradient(135deg, rgba(91, 35, 30, .54), rgba(49, 23, 20, .44));
+                color: #fecaca;
+                box-shadow: 0 14px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.06);
             }
 
             .mobile-bottom-nav .mobile-nav-icon {
@@ -2264,8 +2396,10 @@
         || request()->routeIs('settings.*');
     $bodyClasses = trim(
         ($isStudent ? 'student-mobile-shell' : '') . ' ' .
+        ($isStudent && request()->routeIs('student.scholarships.index') ? 'student-liquid-aid' : '') . ' ' .
+        ($isStudent && request()->routeIs('student.offenses.index') ? 'student-liquid-fines' : '') . ' ' .
         (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-eligible' : '') . ' ' .
-        (request()->routeIs('student.movements.scan') ? 'student-scan-mode ' : '') .
+        (request()->routeIs('student.movements.scan', 'admin.laptops.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar' : '')
     );
 @endphp
@@ -2277,7 +2411,7 @@
         <div class="sb-header">
             <a href="{{ route('home') }}" class="sb-brand">
                 <div class="sb-brand-icon">
-                    <img src="{{ asset('images/newlogo.png') }}?v=5" alt="Logo StudentEdge">
+                    <img src="{{ asset('images/studentedge-mark.png') }}?v=9" alt="Logo StudentEdge">
                 </div>
                 <div><div class="sb-brand-name">StudentEdge</div><div class="sb-brand-sub">Student Affairs</div></div>
             </a>
@@ -2717,7 +2851,7 @@
             </button>
             <div class="topbar-brand">
                 <span class="topbar-brand-mark">
-                    <img src="{{ asset('images/newlogo.png') }}?v=5" alt="StudentEdge">
+                    <img src="{{ asset('images/studentedge-mark.png') }}?v=9" alt="StudentEdge">
                 </span>
                 <span class="topbar-brand-copy">
                     <span class="topbar-title">StudentEdge</span>
@@ -2878,7 +3012,7 @@
             </span>
             <span>Home</span>
         </a>
-        <a href="{{ route('student.offenses.index') }}" class="{{ request()->routeIs('student.offenses.*') ? 'active' : '' }}">
+        <a href="{{ route('student.offenses.index') }}" data-liquid-link="fines" class="{{ request()->routeIs('student.offenses.*') ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
             </span>
@@ -2890,7 +3024,7 @@
             </span>
             <span>Scan QR</span>
         </a>
-        <a href="{{ route('student.scholarships.index') }}" class="{{ $studentOnScholarship ? 'active' : '' }}">
+        <a href="{{ route('student.scholarships.index') }}" data-liquid-link="aid" class="{{ $studentOnScholarship ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M19 7V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v2"/><path d="M3 6v12a2 2 0 0 0 2 2h16v-6h-5a2 2 0 0 1 0-4h5V8"/><path d="M16 14h.01"/></svg>
             </span>
@@ -3093,7 +3227,16 @@ document.addEventListener('click', function (event) {
     function openSidebar() {
         if (!sidebar) return;
         if (window.innerWidth >= 1024) {
-            sidebar.setAttribute('aria-hidden', document.body.classList.contains('student-mobile-shell') ? 'true' : 'false');
+            if (!document.body.classList.contains('student-dashboard-mobile-sidebar')) {
+                sidebar.setAttribute('aria-hidden', document.body.classList.contains('student-mobile-shell') ? 'true' : 'false');
+                return;
+            }
+            sidebar.classList.add('is-open');
+            sidebar.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('sidebar-open');
+            if (overlay) overlay.classList.add('is-visible');
+            if (hamBox) hamBox.classList.add('is-open-ham');
+            if (toggle) toggle.setAttribute('aria-expanded', 'true');
             return;
         }
         sidebar.classList.add('is-open');
@@ -3108,7 +3251,16 @@ document.addEventListener('click', function (event) {
     function closeSidebar() {
         if (!sidebar) return;
         if (window.innerWidth >= 1024) {
-            sidebar.setAttribute('aria-hidden', document.body.classList.contains('student-mobile-shell') ? 'true' : 'false');
+            if (!document.body.classList.contains('student-dashboard-mobile-sidebar')) {
+                sidebar.setAttribute('aria-hidden', document.body.classList.contains('student-mobile-shell') ? 'true' : 'false');
+                return;
+            }
+            sidebar.classList.remove('is-open');
+            sidebar.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('sidebar-open');
+            if (overlay) overlay.classList.remove('is-visible');
+            if (hamBox) hamBox.classList.remove('is-open-ham');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
             return;
         }
         sidebar.classList.remove('is-open');
@@ -3150,6 +3302,17 @@ document.addEventListener('click', function (event) {
         });
         if (headerUserBackdrop) headerUserBackdrop.addEventListener('click', closeHeaderUserMenu);
     }
+
+    document.querySelectorAll('[data-liquid-link]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
+                || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return;
+            }
+
+            link.classList.add('is-launching');
+        });
+    });
 
     if (mobileMoreToggle && mobileMoreSheet) {
         mobileMoreToggle.addEventListener('click', function (event) {

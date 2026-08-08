@@ -10,9 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{{ __('bug_reports.public_title') }} - StudentEdge</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}">
-    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/pwa/icon-180.png') }}">
+    @include('partials.brand_icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         :root {
@@ -315,7 +313,7 @@
     <div class="shell">
         <div class="topbar">
             <a href="{{ route('home') }}" class="brand">
-                <img src="{{ asset('images/newlogo.png') }}" alt="StudentEdge">
+                <img src="{{ asset('images/studentedge-mark.png') }}?v=9" alt="StudentEdge">
                 <span>StudentEdge</span>
             </a>
             <a href="{{ route('home') }}" class="back-link">{{ __('bug_reports.back_home') }}</a>

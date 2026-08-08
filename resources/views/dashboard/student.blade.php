@@ -278,6 +278,10 @@
 }
 @media (min-width: 560px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 900px) { .stats-grid { grid-template-columns: repeat(5, 1fr); } }
+@media (min-width: 1200px) {
+    .sdash { max-width: 1400px; padding-inline: 1.5rem; }
+    .stats-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
 
 .stat-card {
     background: #fff;
@@ -363,6 +367,7 @@
     gap: 1rem;
 }
 @media (min-width: 700px) { .portal-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1200px) { .portal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 .portal-card {
     position: relative;
@@ -437,6 +442,47 @@
 }
 .portal-card-cta svg { width: 13px; height: 13px; transition: transform var(--transition); }
 .portal-card:hover .portal-card-cta svg { transform: translateX(3px); }
+
+@media (max-width: 767px) {
+    .portal-grid { gap: .75rem; }
+    .portal-card.mobile-liquid-card {
+        min-height: 154px;
+        padding: 1rem 1.05rem !important;
+        border-radius: 22px !important;
+        isolation: isolate;
+        overflow: hidden;
+        box-shadow: 0 16px 34px rgba(76, 57, 41, .12), inset 0 1px 0 rgba(255,255,255,.82);
+    }
+    .portal-card.mobile-liquid-card::before {
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        right: -74px;
+        top: -102px;
+        z-index: -1;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,255,255,.88) 0%, rgba(255,255,255,0) 70%);
+        filter: blur(1px);
+    }
+    .portal-card.mobile-liquid-card.scholarship {
+        border-color: rgba(197, 151, 53, .34);
+        background: linear-gradient(135deg, #fffdf5, #f6e8c5) !important;
+    }
+    .portal-card.mobile-liquid-card.offense {
+        border-color: rgba(202, 96, 80, .28);
+        background: linear-gradient(135deg, #fffafa, #f8dfd8) !important;
+    }
+    .portal-card.mobile-liquid-card:active {
+        transform: scale(.975) !important;
+    }
+    body[data-theme="dark"] .portal-card.mobile-liquid-card.scholarship {
+        background: linear-gradient(135deg, rgba(93, 70, 31, .92), rgba(42, 33, 19, .88)) !important;
+    }
+    body[data-theme="dark"] .portal-card.mobile-liquid-card.offense {
+        background: linear-gradient(135deg, rgba(87, 38, 32, .92), rgba(44, 22, 20, .88)) !important;
+    }
+}
 
 /* â”€â”€ DIVIDER WITH LABEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .divider-row {

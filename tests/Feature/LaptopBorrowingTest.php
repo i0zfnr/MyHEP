@@ -63,7 +63,11 @@ class LaptopBorrowingTest extends TestCase
 
     public function test_staff_scan_borrows_then_returns_the_same_laptop(): void
     {
-        $this->signIn(3, 'general')->get('/admin/laptops/scan')->assertOk()->assertSee('Borrow or return a laptop');
+        $this->signIn(3, 'general')->get('/admin/laptops/scan')
+            ->assertOk()
+            ->assertSee('Borrow or return a laptop')
+            ->assertSee('staff-scan-page', false)
+            ->assertSee('Opening camera. Point it at a JHEP laptop QR code.');
 
         $this->postJson('/admin/laptops/scan', ['token' => '11111111-1111-4111-8111-111111111111'])
             ->assertOk()->assertJson(['action' => 'borrowed']);
