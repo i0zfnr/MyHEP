@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#171412">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>@yield('title', config('app.name', 'StudentEdge'))</title>
     <link rel="icon" type="image/png" href="{{ asset('images/newlogo.png') }}">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">

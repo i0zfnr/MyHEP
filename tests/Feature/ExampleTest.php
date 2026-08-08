@@ -114,4 +114,23 @@ class ExampleTest extends TestCase
         $this->assertSame('<nav>Profile | Profile photo</nav>', $response->getContent());
         $this->assertStringNotContainsString('Profilee', $response->getContent());
     }
+
+    public function test_ios_standalone_topbar_respects_dynamic_island_safe_area(): void
+    {
+        $layout = file_get_contents(resource_path('views/layouts/app.blade.php'));
+        $designSystem = file_get_contents(resource_path('css/design-system.css'));
+
+        $this->assertStringContainsString('viewport-fit=cover', $layout);
+        $this->assertStringContainsString(
+            'apple-mobile-web-app-status-bar-style" content="default',
+            $layout,
+        );
+        $this->assertStringContainsString('env(safe-area-inset-top, 0px)', $layout);
+        $this->assertStringContainsString(
+            'height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px)) !important;',
+            $designSystem,
+        );
+        $this->assertStringContainsString('env(safe-area-inset-left, 0px)', $designSystem);
+        $this->assertStringContainsString('env(safe-area-inset-right, 0px)', $designSystem);
+    }
 }
