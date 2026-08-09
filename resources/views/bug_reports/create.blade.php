@@ -423,10 +423,6 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="field">
-                                <label for="page_url">{{ __('bug_reports.form_page_url') }}</label>
-                                <input id="page_url" name="page_url" type="url" value="{{ old('page_url', url()->previous() !== url()->current() ? url()->previous() : '') }}" placeholder="https://example.com/page">
-                            </div>
                             <div class="field full">
                                 <label for="subject">{{ __('bug_reports.form_subject') }}</label>
                                 <input id="subject" name="subject" type="text" value="{{ old('subject') }}" required>

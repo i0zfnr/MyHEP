@@ -31,7 +31,6 @@ class BugReportController extends Controller
             'reporter_email' => ['required', 'email', 'max:150'],
             'category' => ['required', 'in:' . implode(',', self::CATEGORIES)],
             'subject' => ['required', 'string', 'max:200'],
-            'page_url' => ['nullable', 'url', 'max:500'],
             'description' => ['required', 'string', 'max:3000'],
             'screenshot' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -53,7 +52,7 @@ class BugReportController extends Controller
             'reporter_email' => trim($validated['reporter_email']),
             'category' => $validated['category'],
             'subject' => trim($validated['subject']),
-            'page_url' => filled($validated['page_url'] ?? null) ? trim($validated['page_url']) : null,
+            'page_url' => null,
             'description' => trim($validated['description']),
             'screenshot_path' => $screenshotPath,
             'status' => 'new',
@@ -69,7 +68,7 @@ class BugReportController extends Controller
             'reporter_email' => trim($validated['reporter_email']),
             'category' => $validated['category'],
             'subject' => trim($validated['subject']),
-            'page_url' => filled($validated['page_url'] ?? null) ? trim($validated['page_url']) : null,
+            'page_url' => null,
             'description' => trim($validated['description']),
             'has_screenshot' => $screenshotPath !== null,
         ];
