@@ -18,6 +18,7 @@ html[data-theme="light"] {
     --se-primary-button-start: #704a23;
     --se-primary-button-end: #8b6a34;
     --se-primary-button-text: #ffffff;
+    --se-accent-ink: #2a1e15;
     --se-accent: #c8a96a;
     --se-accent-strong: #8b6a34;
     --se-accent-soft: #f6e7c8;
@@ -1494,6 +1495,230 @@ body[data-theme="dark"] footer {
     .bugs-filters .bugs-input {
         grid-column: 1 / -1;
     }
+}
+
+/* Curated beta accent themes. Semantic success, warning, and danger colors remain fixed. */
+html[data-accent-theme="candy_blue"] {
+    --se-primary: #6fa9c4;
+    --se-primary-strong: #2c6684;
+    --se-primary-soft: #e1f0f6;
+    --se-primary-muted: #abd1e2;
+    --se-primary-button-start: #2f6d8b;
+    --se-primary-button-end: #5d9fbe;
+    --se-accent: #6fa9c4;
+    --se-accent-strong: #2c6684;
+    --se-accent-soft: #e1f0f6;
+    --se-accent-ink: #102f3e;
+}
+
+html[data-accent-theme="lavender"] {
+    --se-primary: #a58bca;
+    --se-primary-strong: #654f91;
+    --se-primary-soft: #efe9f8;
+    --se-primary-muted: #cbbbe3;
+    --se-primary-button-start: #70569e;
+    --se-primary-button-end: #9c82c4;
+    --se-accent: #a58bca;
+    --se-accent-strong: #654f91;
+    --se-accent-soft: #efe9f8;
+    --se-accent-ink: #29203f;
+}
+
+html[data-accent-theme="orchid"] {
+    --se-primary: #ca8ca9;
+    --se-primary-strong: #83445f;
+    --se-primary-soft: #fae8f0;
+    --se-primary-muted: #e7b7ca;
+    --se-primary-button-start: #914b69;
+    --se-primary-button-end: #c57c9e;
+    --se-accent: #ca8ca9;
+    --se-accent-strong: #83445f;
+    --se-accent-soft: #fae8f0;
+    --se-accent-ink: #3c1f2c;
+}
+
+html[data-accent-theme="violet"] {
+    --se-primary: #8068ba;
+    --se-primary-strong: #4a357b;
+    --se-primary-soft: #ece8f8;
+    --se-primary-muted: #b6a8d9;
+    --se-primary-button-start: #503887;
+    --se-primary-button-end: #7860b2;
+    --se-accent: #8068ba;
+    --se-accent-strong: #4a357b;
+    --se-accent-soft: #ece8f8;
+    --se-accent-ink: #211635;
+}
+
+.settings-section--beta { position: relative; }
+.settings-beta-label { display:inline-flex; align-items:center; min-height:20px; margin:0 0 .65rem; padding:0 .5rem; border:1px solid var(--se-primary-muted); border-radius:999px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.64rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+.settings-options--accent { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+.settings-option--accent { gap:.6rem; padding:.75rem; }
+.settings-option--accent .settings-option-line { gap:.45rem; }
+.settings-option--accent strong { font-size:.78rem; }
+.accent-preview { display:grid; grid-template-columns:repeat(3, 1fr); gap:3px; height:22px; overflow:hidden; border-radius:8px; }
+.accent-preview span { border-radius:3px; }
+.accent-preview--gold { background:#f6e7c8; }.accent-preview--gold span:nth-child(1) { background:#704a23; }.accent-preview--gold span:nth-child(2) { background:#c8a96a; }.accent-preview--gold span:nth-child(3) { background:#f6e7c8; }
+.accent-preview--candy-blue { background:#e1f0f6; }.accent-preview--candy-blue span:nth-child(1) { background:#2f6d8b; }.accent-preview--candy-blue span:nth-child(2) { background:#6fa9c4; }.accent-preview--candy-blue span:nth-child(3) { background:#e1f0f6; }
+.accent-preview--lavender { background:#efe9f8; }.accent-preview--lavender span:nth-child(1) { background:#70569e; }.accent-preview--lavender span:nth-child(2) { background:#a58bca; }.accent-preview--lavender span:nth-child(3) { background:#efe9f8; }
+.accent-preview--orchid { background:#fae8f0; }.accent-preview--orchid span:nth-child(1) { background:#914b69; }.accent-preview--orchid span:nth-child(2) { background:#ca8ca9; }.accent-preview--orchid span:nth-child(3) { background:#fae8f0; }
+.accent-preview--violet { background:#ece8f8; }.accent-preview--violet span:nth-child(1) { background:#503887; }.accent-preview--violet span:nth-child(2) { background:#8068ba; }.accent-preview--violet span:nth-child(3) { background:#ece8f8; }
+
+@media (max-width: 767px) {
+    .settings-options--accent { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+
+/* A quiet accent aura makes theme selection visible beyond form controls. */
+.app-layout .page-body {
+    background:
+        radial-gradient(42rem circle at 92% -8%, color-mix(in srgb, var(--se-primary) 18%, transparent), transparent 60%),
+        radial-gradient(30rem circle at 4% 102%, color-mix(in srgb, var(--se-primary-muted) 15%, transparent), transparent 64%),
+        linear-gradient(rgba(255, 255, 255, .30), rgba(255, 255, 255, .12)) !important;
+}
+
+html[data-theme="dark"] .app-layout .page-body,
+body[data-theme="dark"] .app-layout .page-body {
+    background:
+        radial-gradient(42rem circle at 92% -8%, color-mix(in srgb, var(--se-primary) 14%, transparent), transparent 60%),
+        radial-gradient(30rem circle at 4% 102%, color-mix(in srgb, var(--se-primary-muted) 10%, transparent), transparent 64%),
+        linear-gradient(rgba(255, 255, 255, .012), transparent 24%) !important;
+}
+
+/* Accent expansion: identity, navigation, and dashboard emphasis stay distinct from data surfaces. */
+.app-layout .sb-user {
+    border-color: color-mix(in srgb, var(--se-primary) 32%, var(--se-border)) !important;
+    background:
+        radial-gradient(180px circle at 100% 0%, color-mix(in srgb, var(--se-primary) 18%, transparent), transparent 68%),
+        var(--liquid-surface-strong) !important;
+}
+
+.app-layout .nav-link.active,
+.app-layout .nav-group[open] > .nav-group-toggle,
+.app-layout .nav-group.active > .nav-group-toggle {
+    background: color-mix(in srgb, var(--se-primary-soft) 82%, transparent) !important;
+    color: var(--se-primary-strong) !important;
+}
+
+.app-layout .nav-link.active::before,
+.app-layout .nav-group.active > .nav-group-toggle::before {
+    background: linear-gradient(180deg, var(--se-primary), var(--se-primary-strong)) !important;
+}
+
+.app-layout .page-header::after {
+    background: linear-gradient(90deg, var(--se-primary), color-mix(in srgb, var(--se-primary-muted) 72%, transparent), transparent) !important;
+    opacity: .82;
+}
+
+.page-body :is(.portal-card, .stat-card, .data-card, .monitor-card, .monitor-kpi, .summary-card) {
+    border-color: color-mix(in srgb, var(--se-primary) 14%, var(--se-border)) !important;
+    box-shadow: var(--se-shadow-sm), 0 14px 32px color-mix(in srgb, var(--se-primary) 8%, transparent) !important;
+}
+
+.page-body :is(.portal-card, .stat-card, .data-card, .monitor-card, .monitor-kpi, .summary-card):hover {
+    border-color: color-mix(in srgb, var(--se-primary) 44%, var(--se-border)) !important;
+    box-shadow: var(--se-shadow-md), 0 18px 38px color-mix(in srgb, var(--se-primary) 14%, transparent) !important;
+}
+
+.sdash .hero {
+    background:
+        radial-gradient(ellipse 62% 90% at 88% 18%, color-mix(in srgb, var(--se-primary) 58%, transparent), transparent 70%),
+        linear-gradient(118deg, var(--se-accent-ink) 0%, color-mix(in srgb, var(--se-accent-ink) 72%, var(--se-primary-strong)) 52%, color-mix(in srgb, var(--se-primary-strong) 64%, var(--se-accent-ink)) 100%) !important;
+}
+
+.sdash .hero::before {
+    background:
+        radial-gradient(ellipse 62% 90% at 88% 18%, color-mix(in srgb, var(--se-primary-muted) 30%, transparent), transparent 70%),
+        radial-gradient(ellipse 40% 60% at 10% 90%, color-mix(in srgb, var(--se-primary) 18%, transparent), transparent 62%) !important;
+}
+
+.sdash .hero-eyebrow,
+.sdash .hero-badge {
+    color: color-mix(in srgb, white 72%, var(--se-primary-muted)) !important;
+}
+
+.sdash .stat-card::before,
+.sdash .portal-card::after {
+    background: linear-gradient(90deg, var(--se-primary-strong), var(--se-primary)) !important;
+}
+
+html[data-theme="dark"] .app-layout .sb-user {
+    border-color: color-mix(in srgb, var(--se-primary) 30%, var(--se-border)) !important;
+    background:
+        radial-gradient(180px circle at 100% 0%, color-mix(in srgb, var(--se-primary) 16%, transparent), transparent 68%),
+        var(--liquid-surface-strong) !important;
+}
+
+/* Student dashboard keeps its established layout while inheriting the selected accent. */
+.sdash {
+    --gold: var(--se-primary);
+    --gold-dim: var(--se-primary-muted);
+    --sand-400: var(--se-primary-muted);
+    --sand-500: var(--se-primary);
+    --sand-600: var(--se-primary-strong);
+}
+
+.sdash .summary,
+.sdash .stat-card,
+.sdash .portal-card {
+    border-color: color-mix(in srgb, var(--se-primary) 18%, var(--se-border)) !important;
+}
+
+.sdash .portal-card-icon.gold,
+.sdash .portal-card-icon.sand {
+    background: var(--se-primary-soft) !important;
+    color: var(--se-primary-strong) !important;
+}
+
+.sdash .portal-card-cta {
+    color: var(--se-primary-strong) !important;
+}
+
+/* Scholarship feature pages use the same accent contract as the dashboard. */
+:is(.sch-shell .sch-hero, .ann-page .ann-hero) {
+    border-color: color-mix(in srgb, var(--se-primary) 42%, rgba(255,255,255,.24)) !important;
+    background:
+        radial-gradient(560px circle at 100% 0%, color-mix(in srgb, var(--se-primary) 64%, transparent), transparent 68%),
+        linear-gradient(112deg, var(--se-accent-ink) 0%, color-mix(in srgb, var(--se-accent-ink) 72%, var(--se-primary-strong)) 48%, color-mix(in srgb, var(--se-primary-strong) 64%, var(--se-accent-ink)) 100%) !important;
+}
+
+:is(.sch-shell .sch-hero-label, .ann-page .ann-eyebrow) {
+    color: color-mix(in srgb, white 76%, var(--se-primary-muted)) !important;
+}
+
+:is(.sch-shell .sch-chip.primary, .ann-page .ann-chip.primary, .sch-shell .sch-empty-action, .page-body > .wrap .btn-primary) {
+    border-color: var(--se-primary-strong) !important;
+    background: linear-gradient(135deg, var(--se-primary-button-start), var(--se-primary-button-end)) !important;
+    color: var(--se-primary-button-text) !important;
+}
+
+:is(.sch-shell .sch-stat, .sch-shell .sch-card, .ann-page .ann-stat, .ann-page .ann-card, .ann-page .announcement-card) {
+    border-color: color-mix(in srgb, var(--se-primary) 18%, var(--se-border)) !important;
+}
+
+:is(.sch-shell .sch-head, .ann-page .ann-card-head, .ann-page .ann-head) {
+    background: var(--liquid-shell-strong) !important;
+}
+
+:is(.sch-shell .sch-head::before, .ann-page .ann-card-head::before, .ann-page .ann-head::before) {
+    background: linear-gradient(180deg, var(--se-primary-strong), var(--se-primary)) !important;
+}
+
+.sch-shell .sch-empty-state-icon {
+    border-color: var(--se-primary-muted) !important;
+    background: var(--se-primary-soft) !important;
+    color: var(--se-primary-strong) !important;
+}
+
+:is(.sch-shell .sch-chip:hover, .ann-page .ann-chip:hover, .sch-shell .ann-link:hover, .ann-page .ann-link:hover) {
+    border-color: var(--se-primary) !important;
+    background: var(--se-primary-soft) !important;
+    color: var(--se-primary-strong) !important;
+}
+
+/* Status form fields and its primary action follow the active accent without recoloring validation feedback. */
+.page-body > .wrap :is(input, select, textarea):focus {
+    border-color: var(--se-primary) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--se-primary) 18%, transparent) !important;
 }
 
 @media (max-width: 420px) {
@@ -5048,4 +5273,167 @@ body[data-theme="dark"] {
 
 .page-body :is(.ui-card-head, .table-wrap thead th, .ui-table-wrap thead th) {
     background: var(--liquid-shell-strong) !important;
+}
+
+/* Keep the Settings experience compact and rhythmically consistent on phones. */
+@media (max-width: 767px) {
+    .settings-shell {
+        gap: .75rem;
+    }
+
+    .settings-intro,
+    .settings-panel {
+        border-radius: 16px;
+    }
+
+    .settings-intro {
+        gap: .75rem;
+        padding: 1rem;
+    }
+
+    .settings-intro-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+    }
+
+    .settings-intro-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .settings-eyebrow {
+        margin-bottom: .15rem;
+        font-size: .62rem;
+    }
+
+    .settings-intro h2 {
+        font-size: 1.15rem;
+    }
+
+    .settings-intro p {
+        margin-top: .2rem;
+        font-size: .78rem;
+        line-height: 1.42;
+    }
+
+    .settings-section {
+        padding: 1rem;
+    }
+
+    .settings-section-title {
+        gap: .5rem;
+        font-size: .94rem;
+    }
+
+    .settings-section-title svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .settings-section-copy {
+        margin: .28rem 0 .8rem;
+        font-size: .78rem;
+        line-height: 1.42;
+    }
+
+    .settings-options {
+        gap: .6rem;
+    }
+
+    .settings-option {
+        gap: .55rem;
+        min-height: 0;
+        padding: .75rem;
+        border-radius: 13px;
+    }
+
+    .settings-option-line {
+        gap: .55rem;
+    }
+
+    .settings-option-check {
+        width: 18px;
+        height: 18px;
+    }
+
+    .settings-option-check::after {
+        width: 8px;
+        height: 8px;
+    }
+
+    .settings-option strong {
+        font-size: .82rem;
+    }
+
+    .settings-option small {
+        font-size: .69rem;
+        line-height: 1.35;
+    }
+
+    .theme-preview {
+        height: 62px;
+        grid-template-columns: 18px 1fr;
+        gap: 6px;
+        padding: 7px;
+    }
+
+    .theme-preview-content {
+        grid-template-rows: 10px 1fr;
+        gap: 5px;
+    }
+
+    .glass-control {
+        gap: .65rem;
+        margin-top: .8rem;
+    }
+
+    .glass-control-preview {
+        min-height: 68px;
+        padding: .8rem .9rem;
+        border-radius: 14px;
+    }
+
+    .glass-control-preview span,
+    .glass-range-label {
+        font-size: .7rem;
+    }
+
+    .glass-control-preview strong {
+        font-size: 1rem;
+    }
+
+    .glass-range {
+        min-height: 34px;
+    }
+
+    .settings-actions {
+        gap: .5rem;
+        padding: .85rem 1rem;
+    }
+
+    .settings-autosave {
+        text-align: center;
+        font-size: .72rem;
+    }
+
+    .session-list {
+        gap: .6rem;
+        margin-top: .8rem;
+    }
+
+    .session-item {
+        gap: .75rem;
+        padding: .85rem;
+        border-radius: 14px;
+    }
+
+    .session-title strong {
+        font-size: .82rem;
+    }
+
+    .session-meta {
+        font-size: .74rem;
+        line-height: 1.45;
+    }
 }

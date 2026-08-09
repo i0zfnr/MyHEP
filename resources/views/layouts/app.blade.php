@@ -2404,7 +2404,7 @@
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar' : '')
     );
 @endphp
-<body data-theme="{{ session('theme', 'light') }}" class="{{ $bodyClasses }}">
+<body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" class="{{ $bodyClasses }}">
 <div class="app-layout">
 
     @if($showSidebar)

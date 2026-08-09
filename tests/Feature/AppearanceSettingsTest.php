@@ -44,6 +44,39 @@ class AppearanceSettingsTest extends TestCase
             ->assertSessionHas('theme', 'dark');
     }
 
+    public function test_preferences_can_save_immediately_with_a_json_request(): void
+    {
+        $this->withSession([
+            'auth_user' => ['id' => 10, 'role' => 'student', 'name' => 'Student'],
+        ])->postJson('/settings', [
+            'locale' => 'ms',
+            'theme' => 'dark',
+            'glass_transparency' => 55,
+        ])->assertOk()
+            ->assertJson([
+                'locale' => 'ms',
+                'theme' => 'dark',
+                'glass_transparency' => 55,
+            ])
+            ->assertSessionHas('locale', 'ms')
+            ->assertSessionHas('theme', 'dark')
+            ->assertSessionHas('glass_transparency', 55);
+    }
+
+    public function test_student_can_save_a_beta_accent_theme(): void
+    {
+        $this->withSession([
+            'auth_user' => ['id' => 10, 'role' => 'student', 'name' => 'Student'],
+        ])->postJson('/settings', [
+            'locale' => 'en',
+            'theme' => 'light',
+            'accent_theme' => 'candy_blue',
+            'glass_transparency' => 40,
+        ])->assertOk()
+            ->assertJson(['accent_theme' => 'candy_blue'])
+            ->assertSessionHas('accent_theme', 'candy_blue');
+    }
+
     public function test_liquid_glass_transparency_is_limited_to_safe_readable_values(): void
     {
         $this->withSession([
@@ -68,12 +101,14 @@ class AppearanceSettingsTest extends TestCase
         ])->post('/settings', [
             'locale' => 'en',
             'theme' => 'dark',
+            'accent_theme' => 'violet',
             'glass_transparency' => 60,
         ])->assertRedirect('/settings')
-            ->assertSessionHas('glass_transparency', 60);
+            ->assertSessionHas('glass_transparency', 60)
+            ->assertSessionHas('accent_theme', 'violet');
     }
 
-    public function test_other_admin_roles_cannot_change_liquid_glass_transparency(): void
+    public function test_other_admin_roles_cannot_change_beta_visual_settings(): void
     {
         $this->withSession([
             'auth_user' => [
@@ -85,7 +120,7 @@ class AppearanceSettingsTest extends TestCase
         ])->post('/settings', [
             'locale' => 'en',
             'theme' => 'dark',
-            'glass_transparency' => 60,
+            'accent_theme' => 'violet',
         ])->assertForbidden();
     }
 }

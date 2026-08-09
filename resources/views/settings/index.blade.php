@@ -11,6 +11,10 @@
     .session-title strong { color:var(--text); }
     .session-current { padding:3px 8px; border-radius:999px; background:rgba(22,163,74,.12); color:#15803d; font-size:.72rem; font-weight:800; }
     .session-meta { color:var(--text-muted); font-size:.82rem; line-height:1.55; overflow-wrap:anywhere; }
+    .settings-autosave { color:var(--text-muted); font-size:.78rem; font-weight:700; }
+    .settings-autosave[data-state="saving"] { color:var(--primary-dark); }
+    .settings-autosave[data-state="saved"] { color:#15803d; }
+    .settings-autosave[data-state="error"] { color:var(--danger); }
     body[data-theme="dark"] .session-current { background:rgba(119,215,166,.14); color:#9be6bd; }
     @media (max-width:640px) { .session-item { align-items:flex-start; flex-direction:column; } }
 </style>
@@ -145,6 +149,26 @@
                 </div>
             </section>
 
+            @if($canAdjustAccentTheme)
+                <section class="settings-section settings-section--beta" role="group" aria-labelledby="settingsAccentTitle">
+                    <div class="settings-beta-label">Beta</div>
+                    <h3 class="settings-section-title" id="settingsAccentTitle">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path stroke-linecap="round" d="M12 4v16M4 12h16"/></svg>
+                        Accent color
+                    </h3>
+                    <p class="settings-section-copy">Choose a curated color mood for StudentEdge. Status and safety colors stay unchanged.</p>
+                    <div class="settings-options settings-options--accent">
+                        @foreach(['gold' => ['StudentEdge Gold', 'accent-preview--gold'], 'candy_blue' => ['Candy Blue', 'accent-preview--candy-blue'], 'lavender' => ['Lavender', 'accent-preview--lavender'], 'orchid' => ['Orchid', 'accent-preview--orchid'], 'violet' => ['Violet', 'accent-preview--violet']] as $value => [$label, $previewClass])
+                            <label class="settings-option settings-option--accent">
+                                <input type="radio" name="accent_theme" value="{{ $value }}" @checked($currentAccentTheme === $value)>
+                                <span class="accent-preview {{ $previewClass }}" aria-hidden="true"><span></span><span></span><span></span></span>
+                                <span class="settings-option-line"><span class="settings-option-check" aria-hidden="true"></span><span><strong>{{ $label }}</strong></span></span>
+                            </label>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
             @if($canAdjustGlass)
                 <section class="settings-section glass-control-section" role="group" aria-labelledby="settingsGlassTitle">
                     <h3 class="settings-section-title" id="settingsGlassTitle">
@@ -172,7 +196,7 @@
                             name="glass_transparency"
                             min="10"
                             max="65"
-                            step="5"
+                            step="1"
                             value="{{ $currentGlassTransparency }}"
                             aria-describedby="settingsGlassTitle"
                         >
@@ -182,7 +206,7 @@
 
             <div class="settings-actions">
                 <a class="btn" href="{{ route($backRoute) }}">{{ __('ui.back_dashboard') }}</a>
-                <button class="btn btn-primary" type="submit">{{ __('ui.save_changes') }}</button>
+                <span class="settings-autosave" data-settings-autosave aria-live="polite">Changes save automatically</span>
             </div>
         </div>
     </form>

@@ -17,9 +17,9 @@
         --c-text-primary: #1A1714;
         --c-text-secondary: #6B6560;
         --c-text-muted: #9E9892;
-        --c-accent: #2D6A4F;
-        --c-accent-light: #D8EDDF;
-        --c-accent-text: #1B4332;
+        --c-accent: var(--se-primary, #2D6A4F);
+        --c-accent-light: var(--se-primary-soft, #D8EDDF);
+        --c-accent-text: var(--se-primary-strong, #1B4332);
         --c-gold: #C5960A;
         --c-gold-light: #FEF3C7;
         --c-gold-text: #78350F;
@@ -57,9 +57,9 @@
         --c-text-primary: #f7efe8;
         --c-text-secondary: #c8b8a9;
         --c-text-muted: #9e8f81;
-        --c-accent: #5fbe91;
-        --c-accent-light: rgba(95, 190, 145, .16);
-        --c-accent-text: #cdf7df;
+        --c-accent: var(--se-primary, #5fbe91);
+        --c-accent-light: var(--se-primary-soft, rgba(95, 190, 145, .16));
+        --c-accent-text: var(--se-primary, #cdf7df);
         --c-gold-light: rgba(245, 158, 11, .16);
         --c-gold-text: #fde68a;
         --c-red-light: rgba(239, 68, 68, .16);
@@ -435,7 +435,7 @@
         inset: 0;
         background:
             linear-gradient(120deg, rgba(255,255,255,0.58), transparent 36%),
-            radial-gradient(circle at 85% 12%, rgba(45,106,79,0.10), transparent 34%);
+            radial-gradient(circle at 85% 12%, color-mix(in srgb, var(--c-accent) 18%, transparent), transparent 34%);
         pointer-events: none;
     }
     .monitor-card > * {
@@ -503,7 +503,7 @@
     .meter-fill {
         height: 100%;
         border-radius: inherit;
-        background: linear-gradient(90deg, #2D6A4F, #48A67E);
+        background: linear-gradient(90deg, var(--c-accent-text), var(--c-accent));
         transition: width 300ms ease;
     }
     .meter-fill.warn { background: linear-gradient(90deg, #D97706, #F59E0B); }
@@ -542,7 +542,7 @@
         border: 1px solid rgba(255,255,255,0.78);
         background:
             linear-gradient(145deg, rgba(255,255,255,0.78), rgba(250,253,251,0.46)),
-            radial-gradient(circle at 92% 8%, rgba(45,106,79,0.11), transparent 34%);
+            radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--c-accent) 20%, transparent), transparent 34%);
         border-radius: 14px;
         padding: .85rem .85rem;
         box-shadow: 0 14px 35px rgba(31, 41, 55, 0.09), inset 0 1px 0 rgba(255,255,255,0.82);
@@ -641,8 +641,8 @@
         border-radius: 50%;
         display: grid;
         place-items: center;
-        background: conic-gradient(#2D6A4F var(--angle, 0deg), rgba(236,232,225,0.72) 0deg);
-        box-shadow: 0 16px 34px rgba(45,106,79,0.13), inset 0 0 0 1px rgba(255,255,255,.6);
+        background: conic-gradient(var(--c-accent-text) var(--angle, 0deg), rgba(236,232,225,0.72) 0deg);
+        box-shadow: 0 16px 34px color-mix(in srgb, var(--c-accent) 22%, transparent), inset 0 0 0 1px rgba(255,255,255,.6);
         position: relative;
     }
     .perf-circle::after {
@@ -663,7 +663,7 @@
     .perf-circle-text strong {
         display: block;
         font-size: 1.5rem;
-        color: #1f3d33;
+        color: var(--c-accent-text);
         line-height: 1.1;
         font-weight: 800;
     }
@@ -725,13 +725,13 @@
     .trend-bar {
         width: 100%;
         border-radius: 8px 8px 3px 3px;
-        background: linear-gradient(180deg, #67b190 0%, #2D6A4F 100%);
+        background: linear-gradient(180deg, var(--c-accent) 0%, var(--c-accent-text) 100%);
         min-height: 8px;
         opacity: .85;
-        box-shadow: 0 8px 18px rgba(45,106,79,0.14);
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--c-accent) 24%, transparent);
     }
     .trend-col.active .trend-bar {
-        background: linear-gradient(180deg, #7ca7ff 0%, #4f73ce 100%);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--c-accent) 65%, white) 0%, var(--c-accent-text) 100%);
         opacity: 1;
     }
     .trend-day {
@@ -740,7 +740,7 @@
         font-weight: 700;
     }
     .trend-col.active .trend-day {
-        color: #3d5faa;
+        color: var(--c-accent-text);
     }
     body[data-theme="dark"] .perf-circle {
         background: conic-gradient(#5fbe91 var(--angle, 0deg), rgba(255,255,255,.10) 0deg);
@@ -849,6 +849,38 @@
     body[data-theme="dark"] .data-card-head {
         background: linear-gradient(180deg, #211d19 0%, #171411 100%);
     }
+
+    /* The selected accent carries the dashboard identity; operational warnings stay semantic. */
+    .adash::before {
+        background:
+            radial-gradient(1100px 460px at -12% -18%, color-mix(in srgb, var(--se-primary-muted) 30%, transparent) 0%, transparent 55%),
+            radial-gradient(900px 360px at 112% -10%, color-mix(in srgb, var(--se-primary) 20%, transparent) 0%, transparent 52%);
+    }
+    body[data-theme="dark"] .adash::before {
+        background:
+            radial-gradient(900px 420px at -12% -18%, color-mix(in srgb, var(--se-primary-muted) 16%, transparent) 0%, transparent 58%),
+            radial-gradient(820px 360px at 112% -10%, color-mix(in srgb, var(--se-primary) 12%, transparent) 0%, transparent 54%);
+    }
+    .dash-hero {
+        border-color: color-mix(in srgb, var(--se-primary) 42%, rgba(255,255,255,.24)) !important;
+        background:
+            radial-gradient(560px circle at 100% 0%, color-mix(in srgb, var(--se-primary) 68%, transparent), transparent 68%),
+            linear-gradient(112deg, var(--se-accent-ink) 0%, color-mix(in srgb, var(--se-accent-ink) 72%, var(--se-primary-strong)) 48%, color-mix(in srgb, var(--se-primary-strong) 64%, var(--se-accent-ink)) 100%) !important;
+    }
+    .dash-hero::before { background: linear-gradient(135deg, transparent 18%, color-mix(in srgb, var(--se-primary-muted) 30%, transparent) 100%) !important; }
+    .dash-hero :is(h3, p, .dash-hero-date) { color:#fff8ef !important; }
+    .dash-hero-label { background:color-mix(in srgb, white 86%, var(--se-primary)) !important; color:var(--se-primary-strong) !important; }
+    body[data-theme="dark"] .dash-hero {
+        background:
+            radial-gradient(560px circle at 100% 0%, color-mix(in srgb, var(--se-primary) 38%, transparent), transparent 68%),
+            linear-gradient(112deg, color-mix(in srgb, var(--se-accent-ink) 72%, black) 0%, color-mix(in srgb, var(--se-accent-ink) 56%, var(--se-primary-strong)) 48%, color-mix(in srgb, var(--se-primary-strong) 52%, var(--se-accent-ink)) 100%) !important;
+    }
+    .monitor-card::before { background:linear-gradient(120deg, rgba(255,255,255,.58), transparent 36%), radial-gradient(circle at 85% 12%, color-mix(in srgb, var(--c-accent) 18%, transparent), transparent 34%); }
+    body[data-theme="dark"] .monitor-card::before { background:radial-gradient(circle at 85% 12%, color-mix(in srgb, var(--c-accent) 14%, transparent), transparent 34%); }
+    body[data-theme="dark"] .perf-circle { background:conic-gradient(var(--c-accent) var(--angle, 0deg), rgba(255,255,255,.10) 0deg); }
+    body[data-theme="dark"] .perf-circle-text strong { color:var(--c-accent); }
+    body[data-theme="dark"] .trend-bar { background:linear-gradient(180deg, color-mix(in srgb, var(--c-accent) 68%, white) 0%, var(--c-accent) 100%); box-shadow:0 8px 18px color-mix(in srgb, var(--c-accent) 24%, transparent); }
+    body[data-theme="dark"] .trend-col.active .trend-bar { background:linear-gradient(180deg, color-mix(in srgb, var(--c-accent) 45%, white) 0%, var(--c-accent-text) 100%); }
 
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {

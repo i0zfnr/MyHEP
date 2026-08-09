@@ -6,9 +6,11 @@ import 'lenis/dist/lenis.css';
 const PWA_PROMPT_KEY = 'studentedge-pwa-dismissed-v1';
 const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
 const THEME_KEY = 'studentedge-theme';
+const ACCENT_THEME_KEY = 'studentedge-accent-theme';
 const GLASS_TRANSPARENCY_KEY = 'studentedge-glass-transparency';
 
 const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
+const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet'].includes(theme) ? theme : 'gold';
 const normalizeGlassTransparency = (value) => Math.min(65, Math.max(10, Number(value) || 40));
 
 const applyGlassTransparency = (value, persist = true) => {
@@ -67,6 +69,18 @@ const applyTheme = (theme, persist = true) => {
     return nextTheme;
 };
 
+const applyAccentTheme = (theme, persist = true) => {
+    const nextTheme = normalizeAccentTheme(theme);
+    document.documentElement.dataset.accentTheme = nextTheme;
+    document.body?.setAttribute('data-accent-theme', nextTheme);
+
+    if (persist) {
+        window.localStorage.setItem(ACCENT_THEME_KEY, nextTheme);
+    }
+
+    return nextTheme;
+};
+
 const persistThemeToServer = async (theme) => {
     const url = document.querySelector('meta[name="theme-update-url"]')?.getAttribute('content');
     const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -94,37 +108,102 @@ const registerThemeUi = () => {
         || 'light';
 
     applyTheme(initialTheme, false);
+    const initialAccentTheme = document.documentElement.dataset.accentTheme
+        || document.body?.dataset.accentTheme
+        || window.localStorage.getItem(ACCENT_THEME_KEY)
+        || 'gold';
+    applyAccentTheme(initialAccentTheme, false);
     const initialGlassTransparency = window.localStorage.getItem(GLASS_TRANSPARENCY_KEY)
         || document.documentElement.dataset.glassTransparency
         || '40';
     applyGlassTransparency(initialGlassTransparency, false);
+    const settingsForm = document.querySelector('[data-settings-form]');
 
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
         button.addEventListener('click', () => {
             const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
             applyTheme(nextTheme);
-            persistThemeToServer(nextTheme).catch(() => {});
+            if (!settingsForm) {
+                persistThemeToServer(nextTheme).catch(() => {});
+            }
         });
     });
 
-    const settingsForm = document.querySelector('[data-settings-form]');
     if (settingsForm) {
         settingsForm.querySelectorAll('input[name="theme"]').forEach((input) => {
             input.addEventListener('change', () => applyTheme(input.value, false));
         });
-        settingsForm.addEventListener('submit', () => {
+        settingsForm.querySelectorAll('input[name="accent_theme"]').forEach((input) => {
+            input.addEventListener('change', () => applyAccentTheme(input.value));
+        });
+        const autosave = settingsForm.querySelector('[data-settings-autosave]');
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        let saveTimer = null;
+        let saveSequence = 0;
+
+        const setAutosaveStatus = (message, state = '') => {
+            if (!autosave) return;
+            autosave.textContent = message;
+            autosave.dataset.state = state;
+        };
+        const savePreferences = async () => {
+            const sequence = ++saveSequence;
+            setAutosaveStatus('Saving...', 'saving');
+            try {
+                const response = await fetch(settingsForm.action, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf || '' },
+                    body: new FormData(settingsForm),
+                });
+                if (!response.ok) throw new Error('Unable to save changes.');
+                const saved = await response.json();
+                if (sequence !== saveSequence) return;
+                setAutosaveStatus('Saved', 'saved');
+                if (saved.locale && saved.locale !== document.documentElement.lang) {
+                    window.location.reload();
+                }
+            } catch (_) {
+                if (sequence === saveSequence) setAutosaveStatus('Could not save. Try again.', 'error');
+            }
+        };
+        const scheduleSave = () => {
+            window.clearTimeout(saveTimer);
+            saveTimer = window.setTimeout(savePreferences, 280);
+        };
+
+        settingsForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            window.clearTimeout(saveTimer);
+            savePreferences();
+        });
+        settingsForm.querySelectorAll('input[type="radio"]').forEach((input) => {
+            input.addEventListener('change', savePreferences);
+        });
+        const glassInput = settingsForm.querySelector('input[name="glass_transparency"]');
+        glassInput?.addEventListener('input', () => {
+            applyGlassTransparency(glassInput.value);
+            scheduleSave();
+        });
+        glassInput?.addEventListener('change', () => {
+            window.clearTimeout(saveTimer);
+            savePreferences();
+        });
+
+        settingsForm.addEventListener('change', () => {
             const selectedTheme = settingsForm.querySelector('input[name="theme"]:checked')?.value;
             if (selectedTheme) {
                 window.localStorage.setItem(THEME_KEY, normalizeTheme(selectedTheme));
+            }
+            const selectedAccentTheme = settingsForm.querySelector('input[name="accent_theme"]:checked')?.value;
+            if (selectedAccentTheme) {
+                applyAccentTheme(selectedAccentTheme);
             }
             const selectedGlassTransparency = settingsForm.querySelector('input[name="glass_transparency"]')?.value;
             if (selectedGlassTransparency) {
                 applyGlassTransparency(selectedGlassTransparency);
             }
         });
-
-        const glassInput = settingsForm.querySelector('input[name="glass_transparency"]');
-        glassInput?.addEventListener('input', () => applyGlassTransparency(glassInput.value));
     }
 };
 

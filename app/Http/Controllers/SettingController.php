@@ -20,8 +20,10 @@ class SettingController extends Controller
 
         $currentLocale = app()->getLocale();
         $currentTheme = $request->session()->get('theme', 'light');
+        $currentAccentTheme = $request->session()->get('accent_theme', 'gold');
         $currentGlassTransparency = (int) $request->session()->get('glass_transparency', 40);
         $canAdjustGlass = $this->canAdjustGlass($authUser);
+        $canAdjustAccentTheme = $this->canAdjustGlass($authUser);
         $backRoute = ($authUser['role'] ?? null) === 'admin' ? 'admin.dashboard' : 'student.dashboard';
 
         $roleMode = [
@@ -40,33 +42,49 @@ class SettingController extends Controller
         return view('settings.index', compact(
             'currentLocale',
             'currentTheme',
+            'currentAccentTheme',
             'currentGlassTransparency',
             'canAdjustGlass',
+            'canAdjustAccentTheme',
             'backRoute',
             'roleMode',
             'activeSessions'
         ));
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request): JsonResponse|RedirectResponse
     {
         $authUser = $request->session()->get('auth_user', []);
         $validated = $request->validate([
             'locale' => ['required', 'in:en,ms'],
             'theme' => ['required', 'in:light,dark'],
+            'accent_theme' => ['nullable', 'in:gold,candy_blue,lavender,orchid,violet'],
             'glass_transparency' => ['nullable', 'integer', 'min:10', 'max:65'],
         ]);
 
-        if (array_key_exists('glass_transparency', $validated) && ! $this->canAdjustGlass($authUser)) {
+        if ((array_key_exists('glass_transparency', $validated) || array_key_exists('accent_theme', $validated))
+            && ! $this->canAdjustGlass($authUser)) {
             abort(403);
         }
 
         $request->session()->put('locale', $validated['locale']);
         $request->session()->put('theme', $validated['theme']);
+        if (array_key_exists('accent_theme', $validated)) {
+            $request->session()->put('accent_theme', $validated['accent_theme']);
+        }
         if (array_key_exists('glass_transparency', $validated)) {
             $request->session()->put('glass_transparency', $validated['glass_transparency']);
         }
         app()->setLocale($validated['locale']);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'locale' => $validated['locale'],
+                'theme' => $validated['theme'],
+                'accent_theme' => $validated['accent_theme'] ?? null,
+                'glass_transparency' => $validated['glass_transparency'] ?? null,
+            ]);
+        }
 
         return redirect()->route('settings.show')->with('success', __('ui.settings_saved'));
     }
