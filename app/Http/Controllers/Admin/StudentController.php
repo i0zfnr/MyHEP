@@ -31,10 +31,10 @@ class StudentController extends Controller
         $studentsQuery = $this->filteredStudentsQuery($filters, $canViewSensitiveStudents);
         if ($canViewSensitiveStudents) {
             $studentsQuery
-                ->select('id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'created_at')
+                ->select('id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'photo', 'created_at')
                 ->selectRaw('CASE WHEN password IS NULL THEN 0 ELSE 1 END as has_custom_password');
         } else {
-            $studentsQuery->select('id', 'full_name', 'matric_no', 'program', 'created_at');
+            $studentsQuery->select('id', 'full_name', 'matric_no', 'program', 'photo', 'created_at');
         }
 
         $students = $studentsQuery->orderBy('full_name')->paginate(15)->withQueryString();
@@ -266,6 +266,60 @@ class StudentController extends Controller
 
         return redirect()->route('admin.students.index')
             ->with('success', __('Rekod pelajar berjaya dipadam.'));
+    }
+
+    public function destroyAll(Request $request, AccountSessionManager $sessions): RedirectResponse
+    {
+        $request->validate([
+            'confirmation' => ['required', 'in:DELETE ALL STUDENTS'],
+        ]);
+
+        $students = DB::table('students')->select('id', 'photo')->get();
+        if ($students->isEmpty()) {
+            return redirect()->route('admin.students.index')->with('success', __('No student records to delete.'));
+        }
+
+        $studentIds = $students->pluck('id');
+        $documentPaths = Schema::hasTable('student_documents')
+            ? DB::table('student_documents')->whereIn('student_id', $studentIds)->pluck('path')
+            : collect();
+
+        DB::transaction(function () use ($studentIds): void {
+            foreach (['student_scholarship_status_forms', 'student_movements', 'student_documents', 'scholarships', 'offenses', 'fine_payment_applications'] as $table) {
+                if (Schema::hasTable($table)) {
+                    DB::table($table)->whereIn('student_id', $studentIds)->delete();
+                }
+            }
+
+            if (Schema::hasTable('push_subscriptions')) {
+                DB::table('push_subscriptions')->where('user_type', 'student')->whereIn('user_id', $studentIds)->delete();
+            }
+
+            if (Schema::hasTable('password_reset_codes')) {
+                DB::table('password_reset_codes')->where('role', 'student')->whereIn('target_id', $studentIds)->delete();
+            }
+
+            if (Schema::hasTable('audit_logs')) {
+                DB::table('audit_logs')->where('target_type', 'student')->whereIn('target_id', $studentIds)->delete();
+            }
+
+            DB::table('students')->whereIn('id', $studentIds)->delete();
+        });
+
+        foreach ($students as $student) {
+            $sessions->revokeAccount('student', (int) $student->id);
+            if (filled($student->photo)) {
+                Storage::disk('public')->delete($student->photo);
+            }
+        }
+        foreach ($documentPaths as $path) {
+            Storage::disk('student_documents')->delete($path);
+        }
+
+        auditLog('students.delete_all', 'students', null, "Deleted {$students->count()} student records and related data");
+
+        return redirect()->route('admin.students.index')
+            ->with('success', __('Deleted :count student records and their related data.', ['count' => $students->count()]));
     }
 
     public function resetPassword(AccountSessionManager $sessions, int $id)

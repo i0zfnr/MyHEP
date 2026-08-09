@@ -42,7 +42,15 @@
     .import-summary span { display:block; font-size:11px; text-transform:uppercase; font-weight:800; color:#7a6555; }
     .import-summary strong { display:block; margin-top:3px; font-size:18px; color:#2d1f14; }
     .error-list { margin:10px 0 0; padding-left:18px; color:#991b1b; font-size:12px; line-height:1.5; }
+    .bulk-delete { margin-bottom:12px; border:1px solid #fecaca; border-radius:12px; background:#fff7f7; overflow:hidden; }
+    .bulk-delete summary { padding:11px 14px; color:#991b1b; font-size:13px; font-weight:800; cursor:pointer; }
+    .bulk-delete form { display:flex; gap:8px; align-items:center; padding:0 14px 14px; }
+    .bulk-delete input { flex:1; }
     .student-name { font-weight:700; color:var(--se-text); }
+    .student-identity { display:flex; align-items:center; gap:.7rem; min-width:0; }
+    .student-avatar { position:relative; flex:0 0 auto; display:grid; width:34px; height:34px; place-items:center; overflow:hidden; border:1px solid var(--admin-line); border-radius:50%; background:linear-gradient(135deg,#f1e4d5,#c7a98b); color:#513b2a; font-size:.7rem; font-weight:900; letter-spacing:.03em; }
+    .student-avatar img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#fff; }
+    .student-name-block { min-width:0; }
     .student-sub { display:none; margin-top:3px; color:var(--se-text-soft); font-size:11px; line-height:1.35; }
     .matric-cell { color:var(--se-text); white-space:nowrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
     html[data-theme="dark"] .students-table .student-name { color:#f7f1e8 !important; }
@@ -222,6 +230,7 @@
         .students-table th:nth-child(2), .students-table td:nth-child(2) { width:32%; }
         .students-table th:nth-child(7), .students-table td:nth-child(7) { width:20%; }
         .student-sub { display:block; }
+        .student-avatar { width:30px; height:30px; }
         .col-ic, .col-phone, .col-password, .col-program { display:none; }
         .matric-cell { white-space:normal; overflow-wrap:anywhere; font-size:11px !important; }
         .actions-cell { justify-content:flex-end; }
@@ -249,6 +258,18 @@
     @php($hasStudentActions = $canViewSensitiveStudents || $canManageStudents)
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+
+    @if(session('auth_user.admin_role') === 'system_admin')
+        <details class="bulk-delete">
+            <summary>Danger zone: delete every student record</summary>
+            <form method="POST" action="{{ route('admin.students.destroy-all') }}" data-confirm-title="Delete all student data" data-confirm-message="This permanently deletes every student, their documents, photos, sessions, scholarship, discipline, and movement records. This cannot be undone." data-confirm-action="Delete All Students" data-confirm-tone="danger">
+                @csrf
+                @method('DELETE')
+                <input name="confirmation" required autocomplete="off" placeholder="Type DELETE ALL STUDENTS to confirm" aria-label="Confirmation">
+                <button class="btn btn-danger" type="submit">Delete All Students</button>
+            </form>
+        </details>
+    @endif
 
     @if($canManageStudents)
         <div class="card import-panel">
@@ -359,8 +380,18 @@
                     @forelse($students as $student)
                         <tr>
                             <td>
-                                <span class="student-name">{{ $student->full_name }}</span>
-                                <span class="student-sub">{{ $student->program }}@if($canViewSensitiveStudents)<br>{{ maskIdentityNumber($student->ic_no) }}@endif</span>
+                                <div class="student-identity">
+                                    <span class="student-avatar" aria-hidden="true">
+                                        {{ strtoupper(substr(trim($student->full_name), 0, 2)) }}
+                                        @if($student->photo)
+                                            <img src="{{ asset('storage/' . ltrim($student->photo, '/')) }}" alt="" onerror="this.remove()">
+                                        @endif
+                                    </span>
+                                    <span class="student-name-block">
+                                        <span class="student-name">{{ $student->full_name }}</span>
+                                        <span class="student-sub">{{ $student->program }}@if($canViewSensitiveStudents)<br>{{ maskIdentityNumber($student->ic_no) }}@endif</span>
+                                    </span>
+                                </div>
                             </td>
                             <td class="matric-cell">{{ $student->matric_no ?: '-' }}</td>
                             @if($canViewSensitiveStudents)<td class="col-ic">{{ maskIdentityNumber($student->ic_no) }}</td>@endif

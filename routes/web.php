@@ -324,6 +324,9 @@ Route::put('/admin/students/{id}', [StudentController::class, 'update'])
 Route::delete('/admin/students/{id}', [StudentController::class, 'destroy'])
     ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.destroy');
+Route::delete('/admin/students', [StudentController::class, 'destroyAll'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.students.destroy-all');
 Route::post('/admin/students/{id}/reset-password', [StudentController::class, 'resetPassword'])
     ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.reset-password');
