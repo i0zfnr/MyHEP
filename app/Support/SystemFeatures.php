@@ -12,6 +12,10 @@ class SystemFeatures
             'label' => 'Document Centre',
             'description' => 'Student document archive and private document downloads.',
         ],
+        'ai_helper' => [
+            'label' => 'AI Helper',
+            'description' => 'AI-assisted back-office guidance for authorized administrators.',
+        ],
     ];
 
     public function exists(string $key): bool

@@ -103,7 +103,7 @@ Route::post('/student/profile/password', [ProfileController::class, 'updatePassw
     ->middleware('auth.session:student')
     ->name('student.profile.password.update');
 Route::get('/student/ai-helper', [StudentAiHelperController::class, 'index'])
-    ->middleware('auth.session:student')
+    ->middleware(['auth.session:student', 'feature.enabled:ai_helper'])
     ->name('student.ai-helper.index');
 Route::get('/student/movements', [StudentMovementController::class, 'index'])
     ->middleware('auth.session:student')
@@ -175,10 +175,10 @@ Route::get('/admin/student-scholarship-status/documents/{id}/download', [Student
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.student-scholarship-status.documents.download');
 Route::get('/admin/ai-helper', [AdminAiHelperController::class, 'index'])
-    ->middleware(['auth.session:admin', 'admin.scope:backoffice'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:ai_helper'])
     ->name('admin.ai-helper.index');
 Route::post('/admin/ai-helper', [AdminAiHelperController::class, 'ask'])
-    ->middleware(['auth.session:admin', 'admin.scope:backoffice'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:ai_helper'])
     ->name('admin.ai-helper.ask');
 Route::get('/admin/movements', [AdminMovementController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:movement'])
