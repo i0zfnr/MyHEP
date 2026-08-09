@@ -16,7 +16,7 @@
     @if(session('success'))<div class="msg-ok">{{ session('success') }}</div>@endif
     <section class="laptop-hero">
         <div><span class="laptop-kicker">Asset operations</span><h1>JHEP Laptop Loans</h1><p>Print each QR code, monitor current loans, and review borrowing and return times.</p></div>
-        <a class="laptop-scan-link" href="{{ route('admin.laptops.scan') }}">Scan a Laptop QR</a>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap"><a class="laptop-scan-link" href="{{ route('admin.laptops.print') }}" target="_blank">Print QR Labels</a><a class="laptop-scan-link" href="{{ route('admin.laptops.scan') }}">Scan a Laptop QR</a></div>
     </section>
 
     <form method="GET" class="laptop-filter">
@@ -29,7 +29,7 @@
     <div class="laptop-grid">
         @foreach($laptops as $laptop)
             @php
-                $scanUrl = route('admin.laptops.scan', ['token' => $laptop->qr_token]);
+                $scanUrl = route('laptops.borrow', ['token' => $laptop->qr_token]);
             @endphp
             <article class="laptop-card">
                 <div class="laptop-card-head"><div><h2>{{ $laptop->name }}</h2><div class="laptop-code">{{ $laptop->asset_code }}</div></div><span class="laptop-status {{ $laptop->status }}">{{ $laptop->status }}</span></div>
@@ -40,7 +40,7 @@
                         <strong>Ready to borrow</strong>No active loan
                     @endif
                 </div>
-                <a class="laptop-qr" href="{{ $scanUrl }}" title="Open scanner link"><img loading="lazy" alt="QR code for {{ $laptop->name }}" src="https://api.qrserver.com/v1/create-qr-code/?size=360x360&data={{ urlencode($scanUrl) }}"></a>
+                <a class="laptop-qr" href="{{ $scanUrl }}" title="Open public borrowing page"><img loading="lazy" alt="QR code for {{ $laptop->name }}" src="https://api.qrserver.com/v1/create-qr-code/?size=360x360&data={{ urlencode($scanUrl) }}"></a>
             </article>
         @endforeach
     </div>

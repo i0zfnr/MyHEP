@@ -3005,7 +3005,7 @@
         @endif
     </div>
 
-    <nav class="mobile-bottom-nav" aria-label="Student mobile navigation">
+    <nav class="mobile-bottom-nav mobile-bottom-nav--student" aria-label="Student mobile navigation">
         <a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
@@ -3053,7 +3053,7 @@
             default => request()->routeIs('admin.dashboard'),
         };
     @endphp
-    <nav class="mobile-bottom-nav" aria-label="Staff mobile navigation">
+    <nav class="mobile-bottom-nav mobile-bottom-nav--staff" aria-label="Staff mobile navigation">
         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span>Home</span>
         </a>

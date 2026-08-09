@@ -4495,35 +4495,6 @@ body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile
     color: #fff7ef;
 }
 
-/* Only raise and emphasize Scan QR while the scanner route is active. */
-.mobile-bottom-nav .mobile-scan-tab:not(.active),
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) {
-    min-height: 54px;
-    margin-top: 0;
-    border: 0;
-    border-radius: 999px;
-    background: transparent !important;
-    color: var(--text-muted);
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-}
-
-.mobile-bottom-nav .mobile-scan-tab:not(.active)::before,
-.mobile-bottom-nav .mobile-scan-tab:not(.active)::after {
-    content: none;
-}
-
-.mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile-nav-icon,
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile-nav-icon {
-    width: 26px;
-    height: 26px;
-    border-color: rgba(215, 191, 168, .18);
-    background: rgba(215, 191, 168, .12);
-    color: var(--primary-dark);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
-}
-
 /* Content cards are lightweight surfaces; reserve deep material motion for overlays. */
 .page-body :where(.ui-card, .card, .portal-card, .stat-card, .stat, .data-card, .monitor-card, .monitor-kpi, .settings-card, .filter-card, .form-card, .maint-card, .summary-card, .bugs-card, .bugs-stat, .mv-kpi, .mv-live-kpi, .ann-stat) {
     animation: none !important;

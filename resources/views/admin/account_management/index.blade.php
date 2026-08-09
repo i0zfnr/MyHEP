@@ -80,6 +80,17 @@
             </table>
         </div>
     </section>
+
+    @if($mode === 'staff')
+        <section class="account-card" style="padding:1.15rem 1.2rem">
+            <div class="account-toolbar-head" style="margin-bottom:.85rem">
+                <div><h2>All-staff laptop borrower registry</h2><p>Import all eligible staff for printed laptop QR borrowing. This does not create a StudentEdge login account.</p></div>
+            </div>
+            <form method="POST" action="{{ route('admin.staff.borrowers.import') }}" enctype="multipart/form-data" style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap">@csrf<input type="file" name="staff_file" accept=".csv,text/csv" required><button class="account-btn primary" type="submit">Import All Staff CSV</button></form>
+            <p style="margin:.75rem 0 0;color:var(--text-muted);font-size:.78rem">Required CSV columns: <code>nric</code> and <code>full_name</code> (optional: <code>department</code>). Matching NRIC records are updated.</p>
+            @error('staff_file')<p class="msg-err" style="margin:.75rem 0 0">{{ $message }}</p>@enderror
+        </section>
+    @endif
     {{ $accounts->links() }}
 </div>
 @endsection

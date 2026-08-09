@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -65,6 +66,51 @@ class StaffManagementController extends Controller
         auditLog('staff.create', 'admins', $id, 'Created lecturer/staff account');
 
         return redirect()->route('admin.staff.index')->with('success', 'Staff account created successfully.');
+    }
+
+    public function importBorrowers(Request $request): RedirectResponse
+    {
+        $request->validate(['staff_file' => ['required', 'file', 'max:10240', 'mimes:csv,txt']]);
+        $handle = fopen($request->file('staff_file')->getRealPath(), 'r');
+        $header = fgetcsv($handle);
+        if (! $header) {
+            return back()->withErrors(['staff_file' => 'The staff CSV is empty.']);
+        }
+
+        $columns = array_flip(array_map(fn ($value) => Str::of((string) $value)->lower()->replaceMatches('/[^a-z0-9]/', '')->toString(), $header));
+        $nricColumn = $columns['nric'] ?? $columns['icno'] ?? $columns['icnumber'] ?? null;
+        $nameColumn = $columns['fullname'] ?? $columns['name'] ?? null;
+        $departmentColumn = $columns['department'] ?? $columns['unit'] ?? null;
+        if ($nricColumn === null || $nameColumn === null) {
+            return back()->withErrors(['staff_file' => 'The CSV must contain NRIC and full_name (or name) columns.']);
+        }
+
+        $imported = 0;
+        while (($row = fgetcsv($handle)) !== false) {
+            $nric = preg_replace('/[^0-9]/', '', (string) ($row[$nricColumn] ?? '')) ?? '';
+            $name = trim((string) ($row[$nameColumn] ?? ''));
+            if ($nric === '' || $name === '') {
+                continue;
+            }
+
+            $payload = [
+                'full_name' => Str::limit($name, 150, ''),
+                'department' => $departmentColumn === null ? null : Str::limit(trim((string) ($row[$departmentColumn] ?? '')), 150, ''),
+                'is_active' => true,
+                'updated_at' => now(),
+            ];
+            $existing = DB::table('jhep_laptop_staff')->where('nric', $nric)->value('id');
+            if ($existing) {
+                DB::table('jhep_laptop_staff')->where('id', $existing)->update($payload);
+            } else {
+                DB::table('jhep_laptop_staff')->insert($payload + ['nric' => $nric, 'created_at' => now()]);
+            }
+            $imported++;
+        }
+        fclose($handle);
+        auditLog('laptop.staff_import', 'jhep_laptop_staff', null, "Imported {$imported} laptop borrower records");
+
+        return redirect()->route('admin.staff.index')->with('success', "Imported or updated {$imported} all-staff borrower record(s).");
     }
 
     public function edit(int $id, LecturerPageAccess $pages): View

@@ -124,6 +124,17 @@ Route::get('/student/documents/{id}/download', [StudentDocumentController::class
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
     ->name('admin.dashboard');
+Route::get('/laptop-borrow/{token}', [LaptopController::class, 'borrowForm'])
+    ->whereUuid('token')
+    ->name('laptops.borrow');
+Route::post('/laptop-borrow/{token}/staff-check', [LaptopController::class, 'checkStaff'])
+    ->whereUuid('token')
+    ->middleware('throttle:30,1')
+    ->name('laptops.borrow.staff-check');
+Route::post('/laptop-borrow/{token}', [LaptopController::class, 'borrow'])
+    ->whereUuid('token')
+    ->middleware('throttle:10,1')
+    ->name('laptops.borrow.store');
 Route::get('/admin/laptops', [LaptopController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:laptops.manage'])
     ->name('admin.laptops.index');
@@ -133,6 +144,9 @@ Route::get('/admin/laptops/scan', [LaptopController::class, 'scan'])
 Route::post('/admin/laptops/scan', [LaptopController::class, 'processScan'])
     ->middleware(['auth.session:admin', 'admin.scope:laptops.use', 'throttle:30,1'])
     ->name('admin.laptops.scan.process');
+Route::get('/admin/laptops/print', [LaptopController::class, 'print'])
+    ->middleware(['auth.session:admin', 'admin.scope:laptops.manage'])
+    ->name('admin.laptops.print');
 Route::get('/admin/profile', [AdminProfileController::class, 'show'])
     ->middleware('auth.session:admin')
     ->name('admin.profile');
@@ -250,6 +264,7 @@ Route::prefix('/admin/staff')->middleware(['auth.session:admin', 'admin.scope:st
     Route::get('/', [StaffManagementController::class, 'index'])->name('index');
     Route::get('/create', [StaffManagementController::class, 'create'])->name('create');
     Route::post('/', [StaffManagementController::class, 'store'])->name('store');
+    Route::post('/borrowers/import', [StaffManagementController::class, 'importBorrowers'])->name('borrowers.import');
     Route::get('/{id}/edit', [StaffManagementController::class, 'edit'])->name('edit');
     Route::put('/{id}', [StaffManagementController::class, 'update'])->name('update');
     Route::post('/{id}/reset-password', [StaffManagementController::class, 'resetPassword'])->name('reset-password');

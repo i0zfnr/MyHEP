@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -42,9 +43,18 @@ class LaptopBorrowingTest extends TestCase
         Schema::create('jhep_laptop_loans', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('laptop_id');
-            $table->unsignedBigInteger('staff_id');
+            $table->unsignedBigInteger('staff_id')->nullable();
+            $table->unsignedBigInteger('laptop_staff_id')->nullable();
             $table->timestamp('borrowed_at');
             $table->timestamp('returned_at')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('jhep_laptop_staff', function (Blueprint $table): void {
+            $table->id();
+            $table->string('nric')->unique();
+            $table->string('full_name');
+            $table->string('department')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
 
@@ -94,6 +104,50 @@ class LaptopBorrowingTest extends TestCase
         $this->signIn(1, null, 'system_admin')->get('/admin/laptops')->assertOk()->assertSee('JHEP Laptop Loans');
         $this->signIn(2, null, 'student_affairs_head')->get('/admin/laptops')->assertOk();
         $this->signIn(3, 'general')->get('/admin/laptops')->assertForbidden();
+    }
+
+    public function test_imported_staff_can_borrow_from_the_public_qr_page_without_logging_in(): void
+    {
+        DB::table('jhep_laptop_staff')->insert([
+            'id' => 8, 'nric' => '900101011234', 'full_name' => 'Borrowing Staff', 'is_active' => true,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        $url = '/laptop-borrow/11111111-1111-4111-8111-111111111111';
+
+        $this->get($url)->assertOk()->assertSee('Take This Laptop')->assertDontSee('Login');
+        $this->postJson($url.'/staff-check', ['nric' => '900101-01-1234'])->assertOk()->assertJson(['eligible' => true]);
+        $this->postJson($url, ['nric' => '900101011234'])->assertOk()->assertJson(['message' => 'Laptop JHEP 1 has been recorded as borrowed.']);
+
+        $this->assertDatabaseHas('jhep_laptop_loans', ['laptop_id' => 1, 'staff_id' => null, 'laptop_staff_id' => 8, 'returned_at' => null]);
+        $this->assertDatabaseHas('jhep_laptops', ['id' => 1, 'status' => 'borrowed']);
+
+        $this->postJson($url.'/staff-check', ['nric' => '900101011234'])->assertOk()->assertJson(['eligible' => true, 'action' => 'return']);
+        $this->postJson($url, ['nric' => '900101011234'])->assertOk()->assertJson(['action' => 'returned']);
+        $this->assertDatabaseHas('jhep_laptops', ['id' => 1, 'status' => 'available']);
+    }
+
+    public function test_unregistered_nric_cannot_borrow_from_the_public_qr_page(): void
+    {
+        $url = '/laptop-borrow/11111111-1111-4111-8111-111111111111';
+
+        $this->postJson($url.'/staff-check', ['nric' => '900101011234'])->assertOk()->assertJson(['eligible' => false]);
+        $this->postJson($url, ['nric' => '900101011234'])->assertUnprocessable();
+        $this->assertDatabaseMissing('jhep_laptop_loans', ['laptop_id' => 1]);
+    }
+
+    public function test_system_admin_can_import_all_staff_from_staff_management(): void
+    {
+        $file = UploadedFile::fake()->createWithContent('all-staff.csv', "nric,full_name,department\n900101-01-1234,All Staff Member,JHEP\n");
+
+        $this->signIn(1, null, 'system_admin')->post('/admin/staff/borrowers/import', ['staff_file' => $file])
+            ->assertRedirect(route('admin.staff.index'));
+
+        $this->assertDatabaseHas('jhep_laptop_staff', [
+            'nric' => '900101011234',
+            'full_name' => 'All Staff Member',
+            'department' => 'JHEP',
+            'is_active' => true,
+        ]);
     }
 
     private function signIn(int $id, ?string $category = null, string $role = 'lecturer'): static
