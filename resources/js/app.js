@@ -25,6 +25,9 @@ const applyGlassTransparency = (value, persist = true) => {
     document.querySelectorAll('[data-glass-output]').forEach((output) => {
         output.textContent = `${transparency}%`;
     });
+    document.querySelectorAll('.glass-slider').forEach((slider) => {
+        slider.style.setProperty('--glass-range-progress', `${((transparency - 10) / 55) * 100}%`);
+    });
 
     if (persist) {
         window.localStorage.setItem(GLASS_TRANSPARENCY_KEY, String(transparency));

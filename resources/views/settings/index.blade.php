@@ -185,21 +185,30 @@
                             <span>{{ __('ui.glass_preview') }}</span>
                             <strong data-glass-output>{{ $currentGlassTransparency }}%</strong>
                         </div>
-                        <label class="glass-range-label" for="glassTransparency">
+                        <div class="glass-slider" style="--glass-range-progress: {{ (($currentGlassTransparency - 10) / 55) * 100 }}%;">
+                            <span class="glass-slider-icon" title="{{ __('ui.glass_more_solid') }}" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3.5" y="5" width="14" height="11" rx="3"/><rect x="7" y="8" width="13.5" height="10.5" rx="3"/></svg>
+                            </span>
+                            <input
+                                id="glassTransparency"
+                                class="glass-range"
+                                type="range"
+                                name="glass_transparency"
+                                min="10"
+                                max="65"
+                                step="1"
+                                value="{{ $currentGlassTransparency }}"
+                                aria-label="{{ __('ui.glass_transparency') }}"
+                                aria-describedby="settingsGlassTitle"
+                            >
+                            <span class="glass-slider-icon glass-slider-icon--clear" title="{{ __('ui.glass_more_clear') }}" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3.5" y="5" width="14" height="11" rx="3"/><rect x="7" y="8" width="13.5" height="10.5" rx="3" fill="currentColor" fill-opacity=".17"/></svg>
+                            </span>
+                        </div>
+                        <div class="glass-range-label" aria-hidden="true">
                             <span>{{ __('ui.glass_more_solid') }}</span>
                             <span>{{ __('ui.glass_more_clear') }}</span>
-                        </label>
-                        <input
-                            id="glassTransparency"
-                            class="glass-range"
-                            type="range"
-                            name="glass_transparency"
-                            min="10"
-                            max="65"
-                            step="1"
-                            value="{{ $currentGlassTransparency }}"
-                            aria-describedby="settingsGlassTitle"
-                        >
+                        </div>
                     </div>
                 </section>
             @endif
