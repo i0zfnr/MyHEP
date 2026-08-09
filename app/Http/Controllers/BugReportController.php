@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\BugReportSubmitted;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Throwable;
@@ -13,11 +14,14 @@ class BugReportController extends Controller
 {
     private const CATEGORIES = ['bug', 'feature', 'account', 'other'];
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('bug_reports.create', [
+        $data = [
             'categories' => self::CATEGORIES,
-        ]);
+            'authenticatedReporter' => $this->authenticatedReporter($request),
+        ];
+
+        return view($data['authenticatedReporter'] ? 'bug_reports.create_authenticated' : 'bug_reports.create', $data);
     }
 
     public function store(Request $request): RedirectResponse
@@ -31,6 +35,14 @@ class BugReportController extends Controller
             'description' => ['required', 'string', 'max:3000'],
             'screenshot' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
+
+        if ($authenticatedReporter = $this->authenticatedReporter($request)) {
+            $validated['reporter_name'] = $authenticatedReporter->full_name;
+
+            if (filled($authenticatedReporter->email)) {
+                $validated['reporter_email'] = $authenticatedReporter->email;
+            }
+        }
 
         $screenshotPath = $request->file('screenshot')
             ? $request->file('screenshot')->store('bug_reports/screenshots', 'public')
@@ -98,5 +110,24 @@ class BugReportController extends Controller
         return redirect()
             ->route('bug-reports.create')
             ->with('success', __('bug_reports.public_success', ['id' => $bugReportId]));
+    }
+
+    private function authenticatedReporter(Request $request): ?object
+    {
+        $authUser = $request->session()->get('auth_user', []);
+
+        $table = match ($authUser['role'] ?? null) {
+            'student' => 'students',
+            'admin' => 'admins',
+            default => null,
+        };
+
+        if ($table === null || empty($authUser['id'])) {
+            return null;
+        }
+
+        return DB::table($table)
+            ->select('full_name', 'email')
+            ->find((int) $authUser['id']);
     }
 }

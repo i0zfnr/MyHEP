@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AiHelperController as AdminAiHelperController;
+use App\Http\Controllers\Admin\ActiveVisitorController;
 use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
 use App\Http\Controllers\Admin\FeatureController;
 use App\Http\Controllers\Admin\GuardManagementController;
@@ -289,6 +290,9 @@ Route::put('/admin/bug-reports/{id}', [AdminBugReportController::class, 'update'
 Route::delete('/admin/bug-reports/{id}', [AdminBugReportController::class, 'destroy'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.bug-reports.destroy');
+Route::get('/admin/active-visitors', [ActiveVisitorController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.active-visitors.index');
 
 Route::get('/admin/students', [StudentController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:students.list'])

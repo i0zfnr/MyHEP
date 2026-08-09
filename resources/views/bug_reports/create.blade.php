@@ -407,11 +407,11 @@
                         <div class="grid">
                             <div class="field">
                                 <label for="reporter_name">{{ __('bug_reports.form_name') }}</label>
-                                <input id="reporter_name" name="reporter_name" type="text" value="{{ old('reporter_name') }}" required>
+                                <input id="reporter_name" name="reporter_name" type="text" value="{{ old('reporter_name', $authenticatedReporter?->full_name) }}" required @if($authenticatedReporter) readonly @endif>
                             </div>
                             <div class="field">
                                 <label for="reporter_email">{{ __('bug_reports.form_email') }}</label>
-                                <input id="reporter_email" name="reporter_email" type="email" value="{{ old('reporter_email') }}" required>
+                                <input id="reporter_email" name="reporter_email" type="email" value="{{ old('reporter_email', $authenticatedReporter?->email) }}" required @if($authenticatedReporter?->email) readonly @endif>
                             </div>
                             <div class="field">
                                 <label for="category">{{ __('bug_reports.form_category') }}</label>
