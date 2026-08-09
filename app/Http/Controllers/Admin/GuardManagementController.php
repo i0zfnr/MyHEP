@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Support\AccountSessionManager;
+use App\Support\Nric;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,7 @@ class GuardManagementController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->normalizeIdentityInput($request);
         $validated = $this->validateAccount($request);
         $id = DB::table('admins')->insertGetId($this->payload($validated) + [
             'password' => Hash::make($validated['password']), 'role' => 'guard', 'staff_category' => null,
@@ -49,6 +51,7 @@ class GuardManagementController extends Controller
     public function update(Request $request, AccountSessionManager $sessions, int $id): RedirectResponse
     {
         $guard = $this->guardOrFail($id);
+        $this->normalizeIdentityInput($request);
         $validated = $this->validateAccount($request, $id, false);
         $payload = $this->payload($validated);
         if (! empty($validated['password'])) $payload['password'] = Hash::make($validated['password']);
@@ -90,7 +93,7 @@ class GuardManagementController extends Controller
     {
         return $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
-            'ic_no' => ['required', 'string', 'max:20', Rule::unique('admins', 'ic_no')->ignore($id)],
+            'ic_no' => ['required', 'string', 'max:20', fn (string $attribute, string $value, \Closure $fail) => Nric::isAssignedToAdmin($value, $id) && $fail('This NRIC is already assigned to an existing admin or staff account.')],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
             'is_active' => ['required', 'boolean'],
             'password' => [$passwordRequired ? 'required' : 'nullable', 'string', 'min:8'],
@@ -107,5 +110,13 @@ class GuardManagementController extends Controller
     private function guardOrFail(int $id): object
     {
         return DB::table('admins')->where('id', $id)->where('role', 'guard')->firstOrFail();
+    }
+
+    private function normalizeIdentityInput(Request $request): void
+    {
+        $request->merge([
+            'ic_no' => Nric::normalize($request->input('ic_no')),
+            'email' => filled($request->input('email')) ? strtolower(trim((string) $request->input('email'))) : null,
+        ]);
     }
 }

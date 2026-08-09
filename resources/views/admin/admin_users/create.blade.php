@@ -198,7 +198,7 @@
                     </div>
                     <div>
                         <label for="ic_no">{{ __('No. IC') }}</label>
-                        <input id="ic_no" type="text" name="ic_no" value="{{ old('ic_no') }}" required>
+                        <input id="ic_no" type="text" name="ic_no" value="{{ old('ic_no') }}" inputmode="numeric" autocomplete="off" maxlength="20" required>
                     </div>
                 </div>
 

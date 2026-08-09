@@ -3050,7 +3050,7 @@
         $staffWorkActive = match ($staffCategory) {
             'scholarship' => request()->routeIs('admin.scholarships.*'),
             'discipline' => request()->routeIs('admin.offenses.*'),
-            default => request()->routeIs('admin.dashboard'),
+            default => false,
         };
     @endphp
     <nav class="mobile-bottom-nav mobile-bottom-nav--staff" aria-label="Staff mobile navigation">

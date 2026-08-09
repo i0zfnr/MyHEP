@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Support\AccountSessionManager;
 use App\Support\LecturerPageAccess;
+use App\Support\Nric;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -42,9 +43,10 @@ class AdminUserController extends Controller
 
     public function store(Request $request, LecturerPageAccess $lecturerPages)
     {
+        $this->normalizeIdentityInput($request);
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
-            'ic_no' => ['required', 'string', 'max:20', 'unique:admins,ic_no'],
+            'ic_no' => ['required', 'string', 'max:20', fn (string $attribute, string $value, \Closure $fail) => Nric::isAssignedToAdmin($value) && $fail('This NRIC is already assigned to an existing admin or staff account.')],
             'email' => ['nullable', 'email', 'max:150', 'unique:admins,email'],
             'role' => ['required', Rule::in(array_keys($this->roleOptions()))],
             'password' => ['required', 'string', 'min:8'],
@@ -98,9 +100,10 @@ class AdminUserController extends Controller
         }
         $this->authorizeAdminUserAccess($adminUser);
 
+        $this->normalizeIdentityInput($request);
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
-            'ic_no' => ['required', 'string', 'max:20', Rule::unique('admins', 'ic_no')->ignore($id)],
+            'ic_no' => ['required', 'string', 'max:20', fn (string $attribute, string $value, \Closure $fail) => Nric::isAssignedToAdmin($value, $id) && $fail('This NRIC is already assigned to an existing admin or staff account.')],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
             'role' => ['required', Rule::in(array_keys($this->roleOptions()))],
             'password' => ['nullable', 'string', 'min:8'],
@@ -227,5 +230,13 @@ class AdminUserController extends Controller
         }
 
         return array_values($validated['lecturer_pages'] ?? []);
+    }
+
+    private function normalizeIdentityInput(Request $request): void
+    {
+        $request->merge([
+            'ic_no' => Nric::normalize($request->input('ic_no')),
+            'email' => filled($request->input('email')) ? strtolower(trim((string) $request->input('email'))) : null,
+        ]);
     }
 }

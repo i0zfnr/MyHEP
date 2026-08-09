@@ -60,7 +60,7 @@ class StaffAndGuardManagementTest extends TestCase
     public function test_head_can_create_discipline_staff_with_selected_page_access(): void
     {
         $response = $this->signIn(2, 'student_affairs_head')->post('/admin/staff', [
-            'full_name' => 'New Discipline Lecturer', 'ic_no' => '900101015555',
+            'full_name' => 'New Discipline Lecturer', 'ic_no' => '900101-01-5555',
             'email' => 'discipline@example.test', 'staff_category' => 'discipline',
             'is_active' => '1', 'password' => 'SecurePass123',
             'lecturer_pages' => ['offense_register', 'guard_management'],
@@ -71,6 +71,37 @@ class StaffAndGuardManagementTest extends TestCase
         $this->assertSame('lecturer', DB::table('admins')->where('id', $id)->value('role'));
         $this->assertSame('discipline', DB::table('admins')->where('id', $id)->value('staff_category'));
         $this->assertDatabaseHas('lecturer_page_access', ['admin_id' => $id, 'page_key' => 'guard_management', 'enabled' => 1]);
+    }
+
+    public function test_system_admin_can_create_an_admin_with_a_formatted_new_nric(): void
+    {
+        $this->signIn(1, 'system_admin')->post('/admin/admin-users', [
+            'full_name' => 'New System Guard',
+            'ic_no' => '920101-01-1234',
+            'email' => 'new.guard@example.test',
+            'role' => 'guard',
+            'password' => 'SecurePass123',
+        ])->assertRedirect('/admin/admin-users');
+
+        $this->assertDatabaseHas('admins', [
+            'full_name' => 'New System Guard',
+            'ic_no' => '920101011234',
+            'email' => 'new.guard@example.test',
+            'role' => 'guard',
+        ]);
+    }
+
+    public function test_canonical_duplicate_nric_is_rejected_for_another_account(): void
+    {
+        DB::table('admins')->insert(array_replace($this->account(9, 'Existing NRIC', 'guard'), ['ic_no' => '900101011234']));
+
+        $this->signIn(1, 'system_admin')->post('/admin/admin-users', [
+            'full_name' => 'Duplicate Account',
+            'ic_no' => '900101-01-1234',
+            'email' => 'duplicate@example.test',
+            'role' => 'guard',
+            'password' => 'SecurePass123',
+        ])->assertSessionHasErrors('ic_no');
     }
 
     public function test_guard_management_is_available_to_authorized_operational_roles_only(): void
