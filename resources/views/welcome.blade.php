@@ -291,6 +291,22 @@
         .btn-primary:focus-visible { outline: 3px solid var(--sandstone); outline-offset: 3px; }
 
         .btn-primary svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .pwa-options { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; margin-top:1rem; }
+        .pwa-option {
+            display:inline-flex; align-items:center; justify-content:center; gap:.45rem; min-height:38px; padding:.55rem .85rem;
+            border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--text-primary);
+            font:inherit; font-size:.78rem; font-weight:700; line-height:1; cursor:pointer;
+            transition:border-color .2s, color .2s, transform .2s;
+        }
+        .pwa-option:hover { border-color:var(--desert-rock); color:var(--desert-rock); transform:translateY(-1px); }
+        .pwa-option svg { display:block; width:16px; height:16px; flex:0 0 16px; }
+        .pwa-install-dialog { width:min(420px, calc(100% - 2rem)); border:0; border-radius:22px; padding:0; color:var(--text-primary); background:var(--surface); box-shadow:0 24px 70px rgba(37,27,18,.28); }
+        .pwa-install-dialog::backdrop { background:rgba(25,20,16,.48); backdrop-filter:blur(3px); }
+        .pwa-install-dialog-inner { padding:1.35rem; }
+        .pwa-install-dialog h2 { margin:0 0 .55rem; font-size:1.25rem; }
+        .pwa-install-dialog p,.pwa-install-dialog li { color:var(--text-secondary); line-height:1.6; }
+        .pwa-install-dialog ol { margin:.8rem 0; padding-left:1.3rem; }
+        .pwa-install-dialog-close { width:100%; padding:.72rem; border:0; border-radius:12px; background:var(--desert-rock); color:#fff; font:inherit; font-weight:800; cursor:pointer; }
 
         .stat-pill {
             display: inline-flex;
@@ -763,8 +779,10 @@
             .hero { padding: 4.5rem 5vw 3.5rem; }
             .brand { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
             .brand-logo { width: 140px; }
-            .cta-group { flex-direction: column; align-items: flex-start; }
-            .btn-primary { width: 100%; justify-content: center; }
+             .cta-group { flex-direction: column; align-items: flex-start; }
+             .btn-primary { width: 100%; justify-content: center; }
+             .pwa-options { width:100%; }
+             .pwa-option { flex:1; }
             .cards-grid { grid-template-columns: 1fr; }
             .feature-card:first-child,
             .feature-card:last-child { transform: none; }
@@ -857,6 +875,42 @@
     })();
 </script>
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
+<script>
+    (() => {
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            deferredPrompt = event;
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const dialog = document.getElementById('pwaInstallDialog');
+            const instructions = document.getElementById('pwaInstallInstructions');
+            const showDialog = (content) => {
+                instructions.innerHTML = content;
+                dialog.showModal();
+            };
+
+        document.getElementById('androidInstallButton')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice.catch(() => null);
+                deferredPrompt = null;
+                return;
+            }
+
+            showDialog('<p>The install prompt is not available yet. In Chrome, tap the three-dot menu, then choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</p><p>If you already installed StudentEdge, open it from your home screen.</p>');
+        });
+
+        document.getElementById('iosInstallButton')?.addEventListener('click', () => {
+            showDialog('<p>Open StudentEdge in <strong>Safari</strong>, then:</p><ol><li>Tap the <strong>Share</strong> button.</li><li>Scroll and select <strong>Add to Home Screen</strong>.</li><li>Tap <strong>Add</strong>.</li></ol><p>Chrome on iPhone cannot install this app. Use Safari instead.</p>');
+        });
+
+        document.getElementById('pwaInstallClose')?.addEventListener('click', () => dialog.close());
+            window.addEventListener('appinstalled', () => dialog?.close());
+        });
+    })();
+</script>
 @php
     $homeStats = $homeStats ?? [
         'students_managed' => 0,
@@ -905,6 +959,16 @@
                     <span data-home-stat="system-status">{{ __('home.official_label') }} · StudentEdge · {{ __('home.live_label') }}</span>
                 </div>
             </div>
+            <div class="pwa-options" aria-label="Install StudentEdge">
+                <button type="button" class="pwa-option" id="androidInstallButton">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
+                    Install on Android
+                </button>
+                <button type="button" class="pwa-option" id="iosInstallButton">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 16V3m0 0 4 4m-4-4L8 7M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>
+                    Add to iPhone Home Screen
+                </button>
+            </div>
 
         </div>
 
@@ -937,6 +1001,14 @@
 
         </div>
     </section>
+
+    <dialog class="pwa-install-dialog" id="pwaInstallDialog" aria-labelledby="pwaInstallTitle">
+        <div class="pwa-install-dialog-inner">
+            <h2 id="pwaInstallTitle">Install StudentEdge</h2>
+            <div id="pwaInstallInstructions"></div>
+            <button type="button" class="pwa-install-dialog-close" id="pwaInstallClose">Close</button>
+        </div>
+    </dialog>
 
     <!-- ── MAIN CONTENT ── -->
     <main class="content-sections">
