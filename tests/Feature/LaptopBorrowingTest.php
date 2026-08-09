@@ -107,6 +107,21 @@ class LaptopBorrowingTest extends TestCase
         $this->signIn(3, 'general')->get('/admin/laptops')->assertForbidden();
     }
 
+    public function test_every_admin_role_can_open_the_laptop_scanner_and_scan_public_qr_links(): void
+    {
+        DB::table('admins')->insert([
+            $this->admin(5, 'Guard', 'guard'),
+            $this->admin(6, 'Scholarship Admin', 'scholarship_admin'),
+            $this->admin(7, 'Discipline Admin', 'discipline_admin'),
+        ]);
+
+        foreach ([3 => 'lecturer', 5 => 'guard', 6 => 'scholarship_admin', 7 => 'discipline_admin', 2 => 'student_affairs_head', 1 => 'system_admin'] as $id => $role) {
+            $this->signIn($id, $role === 'lecturer' ? 'general' : null, $role)->get('/admin/laptops/scan')
+                ->assertOk()
+                ->assertSee('url.pathname.match', false);
+        }
+    }
+
     public function test_imported_staff_can_borrow_from_the_public_qr_page_without_logging_in(): void
     {
         DB::table('jhep_laptop_staff')->insert([

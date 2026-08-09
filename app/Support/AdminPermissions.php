@@ -21,7 +21,7 @@ class AdminPermissions
         'lecturers.manage' => ['student_affairs_head', 'system_admin'],
         'staff.manage' => ['student_affairs_head', 'system_admin'],
         'guards.manage' => ['lecturer', 'discipline_admin', 'student_affairs_head', 'system_admin'],
-        'laptops.use' => ['lecturer', 'student_affairs_head', 'system_admin'],
+        'laptops.use' => ['lecturer', 'guard', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
         'laptops.manage' => ['student_affairs_head', 'system_admin'],
     ];
 

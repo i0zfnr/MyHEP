@@ -84,7 +84,10 @@
     const updateClock = () => { clock.textContent = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }); };
     const extractToken = (value) => {
         const raw = String(value || '').trim();
-        try { const url = new URL(raw, window.location.origin); return url.searchParams.get('token') || raw; } catch (_) { return raw; }
+        try {
+            const url = new URL(raw, window.location.origin);
+            return url.searchParams.get('token') || url.pathname.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0] || raw;
+        } catch (_) { return raw; }
     };
     const stop = () => {
         if (timer) window.clearInterval(timer);
