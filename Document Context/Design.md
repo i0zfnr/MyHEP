@@ -1,6 +1,6 @@
 # StudentEdge Design System
 
-Last updated: 2026-08-02
+Last updated: 2026-08-09
 
 ## Design Intent
 
@@ -40,7 +40,7 @@ Use design tokens from `resources/css/design-system.css`; do not scatter replace
 ### Mobile student shell
 
 - The topbar remains sticky and contains hamburger, brand, notification, and account controls.
-- The Current Page header remains sticky directly below the topbar.
+- Student module Current Page headers remain below the topbar; the dashboard omits the duplicate strip to preserve vertical space.
 - The overlay sidebar and its backdrop must render above both sticky headers.
 - Long account names truncate with an ellipsis; fixed controls and avatars never shrink.
 - The account menu is a top-level overlay so glass-container clipping cannot hide it.
@@ -86,6 +86,29 @@ Use design tokens from `resources/css/design-system.css`; do not scatter replace
 - Inputs, buttons, menus, and tables must expose visible focus states.
 - Empty states should explain the absence of data without showing broken table boxes.
 - Sticky elements must reserve their own space and must not cover page content.
+
+## Appearance Settings
+
+- Theme and locale save automatically.
+- Beta accent themes are available only to students and System Admins: `gold`, `candy_blue`, `lavender`, `orchid`, and `violet`.
+- Accent colors may style identity and primary actions, but semantic success, warning, error, and destructive colors remain invariant.
+- The canonical setting name is **Live Glass Transparency**. It controls surface opacity from 10% to 65% in 1% increments and saves automatically.
+- Keep the accepted Apple-inspired control design: compact live-preview row, subtle percentage badge, thin accent track, small solid/clear endpoint icons, and a restrained frosted capsule thumb.
+- Do not add nested decorative panels around the slider or expand the control into a large showcase.
+
+## PWA Installation
+
+- The welcome page exposes Android Install and iPhone Add to Home Screen choices.
+- Android uses the native browser prompt when available and otherwise explains Chrome's Install app/Add to Home screen menu.
+- iPhone guidance must direct users to Safari Share -> Add to Home Screen; browsers cannot invoke that native action directly.
+- Installed-mode launch treatment runs once per app session and respects `prefers-reduced-motion`.
+
+## Operational Components
+
+- Active Visitors is a dense System Admin table with search, account role, IP, user agent, login time, and last activity. Copy must not imply exact real-time human presence.
+- Global student deletion belongs in a clearly separated danger zone with the exact phrase `DELETE ALL STUDENTS`, an irreversible-action warning, and System Admin-only authorization.
+- Student list rows show a compact circular profile photo with initials fallback.
+- Authenticated problem reporting uses the normal application shell; anonymous reporting retains the standalone public layout.
 
 ## Verification
 

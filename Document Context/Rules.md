@@ -1,6 +1,6 @@
 # StudentEdge Engineering Rules
 
-Last updated: 2026-08-02
+Last updated: 2026-08-09
 
 These rules apply to future code and UI changes unless a reviewed requirement explicitly replaces one.
 
@@ -16,6 +16,9 @@ These rules apply to future code and UI changes unless a reviewed requirement ex
 8. Back up data before migrations, bulk imports, bulk deletion, or schema changes.
 9. Mask identity numbers in list and print contexts unless the request requires the `students.sensitive` ability.
 10. Store student documents privately and return them only through owner-checked or ability-checked download controllers.
+11. Never cache authenticated pages, private downloads, account feeds, or responses marked `private`/`no-store` in the service worker; clear obsolete sensitive cache versions during release and logout remediation.
+12. Public NRIC-based actions require explicit approval, throttling, enumeration-resistant responses, safe audit metadata, and preferably a second verification factor or supervised confirmation.
+13. Retain Active Visitors IP/user-agent data and bug-report delivery errors only as long as operationally required and expose them only to authorized System Admins.
 
 ## Laravel Implementation
 
@@ -37,7 +40,7 @@ These rules apply to future code and UI changes unless a reviewed requirement ex
 3. Define foreign-key behavior deliberately; do not rely on accidental orphan records.
 4. Large student imports must validate headers, normalize identifiers, detect duplicates, process in chunks, and return a useful result summary.
 5. Do not load 50,000 rows into browser memory or a single unbounded PHP collection.
-6. Test bulk deletion against an exact import batch, ID set, or explicit filter; never use an ambiguous broad delete.
+6. Prefer deletion against an exact import batch, ID set, or explicit filter. The current global student-deletion endpoint is an exceptional destructive operation and must require System Admin scope, the exact confirmation phrase, a current backup, full related-file reconciliation, audit logging, and disposable-database UAT.
 
 ## UI and Motion Rules
 
@@ -52,6 +55,7 @@ These rules apply to future code and UI changes unless a reviewed requirement ex
 9. The shared Current Page header remains sticky on desktop so its notification, support, and account controls stay available while scrolling.
 10. Preserve reduced-motion, reduced-transparency, contrast, keyboard, and focus behavior.
 11. Do not add card entrance animations, pointer-tracked effects, or expensive repeated backdrop filters without mobile performance evidence.
+12. Preserve the accepted Live Glass control: compact preview/value, thin accent track, endpoint icons, frosted capsule thumb, 10-65 bounds, and automatic saving.
 
 ## Change Discipline
 
@@ -60,6 +64,7 @@ These rules apply to future code and UI changes unless a reviewed requirement ex
 3. Update these context files when product behavior, architecture, design rules, or schema changes materially.
 4. Add or update tests in proportion to the risk and affected workflow.
 5. Do not claim a production security guarantee; document remaining risk and required deployment controls.
+6. Do not describe a release as verified while automated tests fail or dependency advisories remain unreviewed.
 
 ## Required Verification
 

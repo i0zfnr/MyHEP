@@ -31,6 +31,8 @@ admins
 
 movement_checkpoints --< student_movements >-- movement_types
 rule_categories --< rules
+jhep_laptop_staff --< jhep_laptop_loans >-- jhep_laptops
+students/admins --< account_sessions
 ```
 
 ## Domain Tables
@@ -57,7 +59,8 @@ rule_categories --< rules
 | `student_movements` | Checkout, return, GPS, residence, plate, late status, and explanation | Belongs to student, checkpoint, and movement type |
 | `student_documents` | Private document metadata, source, review state, expiry, and storage path | Belongs to student; review may reference admin |
 | `jhep_laptops` | JHEP laptop asset, QR token, availability, and active state | Parent of laptop loan history |
-| `jhep_laptop_loans` | Staff borrowing and return timestamps | Belongs to a laptop and an admin/staff account |
+| `jhep_laptop_staff` | Imported all-staff borrower registry with canonical NRIC, name, department, source, and active state | Optional borrower parent for public laptop loans |
+| `jhep_laptop_loans` | Staff borrowing and return timestamps | Belongs to a laptop and either an admin/staff account or registry borrower |
 
 ## Platform Tables
 
@@ -67,7 +70,7 @@ rule_categories --< rules
 | `push_subscriptions` | Browser endpoint and Web Push subscription keys |
 | `push_notification_markers` | Idempotency markers for event-driven push delivery |
 | `system_settings` | System-level operational settings such as session lifetime |
-| `bug_reports` | User problem reports and optional screenshots |
+| `bug_reports` | User problem reports, optional screenshots, status/notes, resolution metadata, and email-delivery sent/failed/error/attempt state |
 | `audit_logs` | Actor, action, target, metadata, IP, and timestamp trace |
 | `sessions` | Database-backed Laravel sessions |
 | `account_sessions` | Public device handle, owner, active role/account, user agent, IP, and activity timestamps |
@@ -80,6 +83,7 @@ rule_categories --< rules
 - Student identity is anchored by the student row and commonly addressed by `matric_no`; migrations permit a nullable matric number for incomplete imports.
 - Student IC numbers are sensitive and currently participate in temporary default-password fallback behavior.
 - Admin role values include `lecturer`, `scholarship_admin`, `discipline_admin`, `student_affairs_head`, `guard`, and `system_admin`; lecturer accounts additionally use a controlled staff category and active state.
+- Student and admin rows may contain public-disk profile-photo paths. Replacement/deletion must remove the previous file where applicable.
 - A privileged linked-role feature may associate a student session with an admin identity; authorization must be resolved from trusted database/session state.
 
 ## Integrity Expectations
@@ -93,7 +97,11 @@ rule_categories --< rules
 - `system_features.feature_key` is unique and must match the application registry.
 - One-time reset codes and QR tokens need atomic consumption.
 - Laptop QR processing locks the asset and active loan rows so two staff members cannot borrow the same laptop concurrently.
+- Public laptop loans may use nullable alternative borrower keys (`staff_id` or `laptop_staff_id`); application validation must guarantee exactly one valid borrower source. `laptop_staff_id` is indexed but currently lacks a database foreign key.
 - A student should not gain duplicate active movement rows through concurrent requests.
+- The feature registry currently recognizes `document_centre` and `ai_helper`.
+- Global student deletion must reconcile database rows with public profile photos, public evidence/receipt files, and private Document Centre files; database deletion alone is not sufficient.
+- NRIC values in `jhep_laptop_staff`, IP/user-agent values in `account_sessions`, and bug-report delivery errors are sensitive operational data requiring restricted access and retention rules.
 
 ## Scale Guidance
 

@@ -1,10 +1,10 @@
 # StudentEdge Product Requirements
 
-Last updated: 2026-08-02
+Last updated: 2026-08-09
 
 ## Product Summary
 
-StudentEdge is a centralized student-affairs system for Politeknik Besut. It gives students one place to manage scholarship, discipline, fine, vehicle, profile, and campus-movement tasks while giving authorized staff role-specific administrative control.
+StudentEdge is a centralized student-affairs system for Politeknik Besut. It gives students one place to manage scholarship, discipline, fine, vehicle, document, profile, and campus-movement tasks while giving authorized staff role-specific administration, monitoring, reporting, and JHEP laptop workflows.
 
 ## Product Goals
 
@@ -23,8 +23,10 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 | Scholarship admin | Manage scholarship records, B40 TVET data, announcements, and student submissions |
 | Discipline admin | Manage offenses, rules, evidence, fines, stickers, announcements, and movement issues |
 | Guard | Operate and review campus movement workflows |
+| Lecturer / general staff | Use explicitly granted staff, discipline, scholarship, movement, guard, or laptop workflows |
 | Head of Student Affairs | Oversee scholarship, discipline, sensitive student records, and the Document Centre |
-| System admin | Manage accounts, configuration, monitoring, maintenance, and full operational access |
+| System admin | Manage accounts, configuration, monitoring, active visitors, reports, maintenance, and full operational access |
+| Public laptop borrower | Borrow or return an assigned JHEP laptop through a supervised QR and NRIC flow |
 
 ## Required Capabilities
 
@@ -35,13 +37,15 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 - Light and dark themes
 - In-app notifications and optional browser push
 - Responsive web and PWA support
-- Problem reporting and accessible account settings
+- Home-page Android/iPhone installation guidance and dashboard browser-install prompts
+- Public and authenticated problem reporting with screenshots and lifecycle notifications
+- Accessible account settings, beta accent themes, and 10-65% Live Glass transparency
 - Active-device visibility and revocation of other authenticated sessions
 
 ### Student
 
 - Dashboard with urgent status and key actions
-- Profile completion and password change
+- Profile completion, profile photo, and password change
 - Scholarship-status submission, records, and announcements
 - Offense and fine review, printing, and receipt submission
 - Vehicle-sticker application and status
@@ -57,8 +61,10 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 - Offense creation, evidence, fine decisions, printing, and PDF output
 - Vehicle-sticker decisions
 - Movement QR, checkpoint, curfew, violation, export, and guard views
-- Administrator management, maintenance, monitoring, reports, bug reports, and audit logging
+- Administrator/staff/guard management, maintenance, monitoring, Active Visitors, reports, bug reports, and audit logging
 - System feature controls and private student-document review
+- JHEP laptop inventory, QR label printing, public/staff borrowing, and borrower-registry import
+- System Admin-only global student deletion with explicit typed confirmation, backup, audit, session revocation, and related-data cleanup requirements
 
 ## Key Functional Rules
 
@@ -72,6 +78,10 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 - Imports must validate headers and rows, report failures clearly, and avoid silent partial corruption.
 - Password-reset codes must expire, be attempt limited, and be consumed once.
 - Privileged role-mode switching must require a verified linked account and server-side authorization.
+- Active Visitors is an account-session view, not a precise real-time people counter; multiple devices may represent one person.
+- Authenticated pages, feeds, and private downloads must never be retained in PWA Cache Storage.
+- Public identity checks must be rate-limited, enumeration-resistant, audited without raw NRIC leakage, and institutionally approved.
+- Bulk student deletion must account for every database relationship and uploaded file and must be tested against a disposable database before production use.
 
 ## Non-Functional Requirements
 
@@ -108,6 +118,8 @@ StudentEdge is a centralized student-affairs system for Politeknik Besut. It giv
 - Import, search, export, and pagination remain usable with at least 50,000 student records.
 - Critical actions appear in audit logs.
 - Production build, view compilation, migrations, and automated tests pass before deployment.
+- No authenticated/private response remains available offline after logout.
+- Dependency advisories are resolved or explicitly risk-accepted before release.
 
 ## Out of Scope Until Reviewed
 

@@ -13,14 +13,8 @@ const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
 const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet'].includes(theme) ? theme : 'gold';
 const normalizeGlassTransparency = (value) => Math.min(65, Math.max(10, Number(value) || 40));
 
-const applyGlassTransparency = (value, persist = true) => {
+const updateGlassControls = (value) => {
     const transparency = normalizeGlassTransparency(value);
-    document.documentElement.style.setProperty('--glass-opacity', ((100 - transparency) / 100).toFixed(2));
-    document.documentElement.dataset.glassTransparency = String(transparency);
-
-    if (document.body) {
-        document.body.dataset.glassTransparency = String(transparency);
-    }
 
     document.querySelectorAll('[data-glass-output]').forEach((output) => {
         output.textContent = `${transparency}%`;
@@ -28,6 +22,18 @@ const applyGlassTransparency = (value, persist = true) => {
     document.querySelectorAll('.glass-slider').forEach((slider) => {
         slider.style.setProperty('--glass-range-progress', `${((transparency - 10) / 55) * 100}%`);
     });
+
+    return transparency;
+};
+
+const applyGlassTransparency = (value, persist = true) => {
+    const transparency = updateGlassControls(value);
+    document.documentElement.style.setProperty('--glass-opacity', ((100 - transparency) / 100).toFixed(2));
+    document.documentElement.dataset.glassTransparency = String(transparency);
+
+    if (document.body) {
+        document.body.dataset.glassTransparency = String(transparency);
+    }
 
     if (persist) {
         window.localStorage.setItem(GLASS_TRANSPARENCY_KEY, String(transparency));
@@ -184,11 +190,29 @@ const registerThemeUi = () => {
             input.addEventListener('change', savePreferences);
         });
         const glassInput = settingsForm.querySelector('input[name="glass_transparency"]');
+        const useLightweightGlassPreview = window.matchMedia('(pointer: coarse), (max-width: 767px)').matches;
+        let glassPreviewFrame = null;
+
         glassInput?.addEventListener('input', () => {
-            applyGlassTransparency(glassInput.value);
-            scheduleSave();
+            if (glassPreviewFrame !== null) {
+                window.cancelAnimationFrame(glassPreviewFrame);
+            }
+
+            glassPreviewFrame = window.requestAnimationFrame(() => {
+                if (useLightweightGlassPreview) {
+                    updateGlassControls(glassInput.value);
+                } else {
+                    applyGlassTransparency(glassInput.value, false);
+                }
+                glassPreviewFrame = null;
+            });
         });
         glassInput?.addEventListener('change', () => {
+            if (glassPreviewFrame !== null) {
+                window.cancelAnimationFrame(glassPreviewFrame);
+                glassPreviewFrame = null;
+            }
+            applyGlassTransparency(glassInput.value);
             window.clearTimeout(saveTimer);
             savePreferences();
         });

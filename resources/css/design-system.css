@@ -1548,7 +1548,8 @@ body[data-theme="dark"] footer {
 }
 
 /* Curated beta accent themes. Semantic success, warning, and danger colors remain fixed. */
-html[data-accent-theme="candy_blue"] {
+html[data-accent-theme="candy_blue"],
+body[data-accent-theme="candy_blue"] {
     --se-primary: #6fa9c4;
     --se-primary-strong: #2c6684;
     --se-primary-soft: #e1f0f6;
@@ -1561,7 +1562,8 @@ html[data-accent-theme="candy_blue"] {
     --se-accent-ink: #102f3e;
 }
 
-html[data-accent-theme="lavender"] {
+html[data-accent-theme="lavender"],
+body[data-accent-theme="lavender"] {
     --se-primary: #a58bca;
     --se-primary-strong: #654f91;
     --se-primary-soft: #efe9f8;
@@ -1574,7 +1576,8 @@ html[data-accent-theme="lavender"] {
     --se-accent-ink: #29203f;
 }
 
-html[data-accent-theme="orchid"] {
+html[data-accent-theme="orchid"],
+body[data-accent-theme="orchid"] {
     --se-primary: #ca8ca9;
     --se-primary-strong: #83445f;
     --se-primary-soft: #fae8f0;
@@ -1587,7 +1590,8 @@ html[data-accent-theme="orchid"] {
     --se-accent-ink: #3c1f2c;
 }
 
-html[data-accent-theme="violet"] {
+html[data-accent-theme="violet"],
+body[data-accent-theme="violet"] {
     --se-primary: #8068ba;
     --se-primary-strong: #4a357b;
     --se-primary-soft: #ece8f8;
@@ -1598,6 +1602,71 @@ html[data-accent-theme="violet"] {
     --se-accent-strong: #4a357b;
     --se-accent-soft: #ece8f8;
     --se-accent-ink: #211635;
+}
+
+/* Dark surfaces need luminous accents and translucent soft fills. */
+:is(html, body)[data-theme="dark"][data-accent-theme="candy_blue"] {
+    --se-primary: #79bddb;
+    --se-primary-strong: #a9dcf0;
+    --se-primary-soft: rgba(47, 109, 139, .24);
+    --se-primary-muted: #5d9fbe;
+    --se-primary-button-start: #397b9a;
+    --se-primary-button-end: #69abc8;
+    --se-accent: #79bddb;
+    --se-accent-strong: #a9dcf0;
+    --se-accent-soft: rgba(47, 109, 139, .24);
+    --se-accent-ink: #102f3e;
+    --se-ring: 0 0 0 4px rgba(121, 189, 219, .22);
+    --liquid-stroke-soft: rgba(121, 189, 219, .28);
+    --liquid-glow: rgba(121, 189, 219, .16);
+}
+
+:is(html, body)[data-theme="dark"][data-accent-theme="lavender"] {
+    --se-primary: #b29bd5;
+    --se-primary-strong: #d2c2e9;
+    --se-primary-soft: rgba(112, 86, 158, .24);
+    --se-primary-muted: #9278bb;
+    --se-primary-button-start: #7458a5;
+    --se-primary-button-end: #a087c8;
+    --se-accent: #b29bd5;
+    --se-accent-strong: #d2c2e9;
+    --se-accent-soft: rgba(112, 86, 158, .24);
+    --se-accent-ink: #29203f;
+    --se-ring: 0 0 0 4px rgba(178, 155, 213, .22);
+    --liquid-stroke-soft: rgba(178, 155, 213, .28);
+    --liquid-glow: rgba(178, 155, 213, .16);
+}
+
+:is(html, body)[data-theme="dark"][data-accent-theme="orchid"] {
+    --se-primary: #d598b5;
+    --se-primary-strong: #edbfd3;
+    --se-primary-soft: rgba(145, 75, 105, .25);
+    --se-primary-muted: #bd7697;
+    --se-primary-button-start: #99506f;
+    --se-primary-button-end: #ca83a4;
+    --se-accent: #d598b5;
+    --se-accent-strong: #edbfd3;
+    --se-accent-soft: rgba(145, 75, 105, .25);
+    --se-accent-ink: #3c1f2c;
+    --se-ring: 0 0 0 4px rgba(213, 152, 181, .22);
+    --liquid-stroke-soft: rgba(213, 152, 181, .28);
+    --liquid-glow: rgba(213, 152, 181, .16);
+}
+
+:is(html, body)[data-theme="dark"][data-accent-theme="violet"] {
+    --se-primary: #9b83d4;
+    --se-primary-strong: #c8b8ec;
+    --se-primary-soft: rgba(80, 56, 135, .28);
+    --se-primary-muted: #8068ba;
+    --se-primary-button-start: #60439e;
+    --se-primary-button-end: #8a71c6;
+    --se-accent: #9b83d4;
+    --se-accent-strong: #c8b8ec;
+    --se-accent-soft: rgba(80, 56, 135, .28);
+    --se-accent-ink: #211635;
+    --se-ring: 0 0 0 4px rgba(155, 131, 212, .24);
+    --liquid-stroke-soft: rgba(155, 131, 212, .30);
+    --liquid-glow: rgba(155, 131, 212, .18);
 }
 
 .settings-section--beta { position: relative; }
@@ -5278,6 +5347,13 @@ body[data-theme="dark"] {
     border-radius: 12px;
     background: linear-gradient(155deg, rgba(255,255,255,.88), rgba(255,255,255,.48) 58%, rgba(236,241,248,.58));
     box-shadow: 0 8px 17px rgba(38,31,25,.20), 0 2px 4px rgba(38,31,25,.10), inset 0 1px 0 rgba(255,255,255,.98);
+}
+
+@media (pointer: coarse) {
+    .glass-range::-webkit-slider-thumb {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
 }
 
 html[data-theme="dark"] .glass-slider,

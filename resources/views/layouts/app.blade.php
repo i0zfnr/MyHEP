@@ -90,12 +90,12 @@
             --glass-blur: 16px;
         }
         body[data-theme="dark"] {
-            --primary: #d7bfa8;
-            --primary-dark: #f2dfca;
-            --primary-light: #b99b82;
-            --primary-hover: rgba(215, 191, 168, .14);
-            --accent: #f2c999;
-            --accent-light: rgba(242, 201, 153, .18);
+            --primary: var(--se-primary);
+            --primary-dark: var(--se-primary-strong);
+            --primary-light: var(--se-primary-muted);
+            --primary-hover: var(--se-primary-soft);
+            --accent: var(--se-accent);
+            --accent-light: var(--se-accent-soft);
             --surface: #171412;
             --bg: #0f0e0d;
             --text: #f7efe8;
