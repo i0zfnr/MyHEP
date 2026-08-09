@@ -4867,6 +4867,7 @@ html[data-theme="light"] {
     --liquid-shell: rgb(255 252 247 / var(--glass-opacity));
     --liquid-shell-strong: rgb(255 255 255 / calc(var(--glass-opacity) + .10));
     --liquid-popup: rgb(255 252 248 / calc(var(--glass-opacity) + .14));
+    --liquid-nav: rgb(250 244 235 / calc(var(--glass-opacity) + .04));
     --glass-bg: var(--liquid-surface);
     --glass-bg-strong: var(--liquid-surface-strong);
 }
@@ -4880,6 +4881,7 @@ body[data-theme="dark"] {
     --liquid-shell: rgb(17 15 13 / var(--glass-opacity));
     --liquid-shell-strong: rgb(23 20 17 / calc(var(--glass-opacity) + .10));
     --liquid-popup: rgb(25 22 19 / calc(var(--glass-opacity) + .14));
+    --liquid-nav: rgb(24 21 18 / calc(var(--glass-opacity) + .04));
     --glass-bg: var(--liquid-surface);
     --glass-bg-strong: var(--liquid-surface-strong);
 }
@@ -4993,4 +4995,57 @@ body[data-theme="dark"] {
     :root {
         --glass-opacity: .94 !important;
     }
+}
+
+/* Apply the user-selected material strength to shared application chrome. */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .app-layout .sidebar {
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / .18), transparent 58%),
+            radial-gradient(circle at top left, rgb(201 174 149 / .12), transparent 34%),
+            var(--liquid-shell) !important;
+    }
+
+    body[data-theme="dark"] .app-layout .sidebar {
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / .07), transparent 58%),
+            radial-gradient(circle at top left, rgb(215 191 168 / .09), transparent 34%),
+            var(--liquid-shell) !important;
+    }
+
+    .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) {
+        background:
+            linear-gradient(118deg, rgb(255 255 255 / .22) 0%, rgb(255 255 255 / .06) 38%, transparent 72%),
+            var(--liquid-nav) !important;
+    }
+
+    body[data-theme="dark"] .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) {
+        background:
+            linear-gradient(118deg, rgb(255 255 255 / .12) 0%, rgb(255 255 255 / .035) 38%, transparent 72%),
+            var(--liquid-nav) !important;
+    }
+
+    .app-layout .header-user-menu,
+    :is(.confirm-dialog, .se-media-dialog, .se-notification-panel, .se-filter-sheet) {
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / .18), transparent 48%),
+            var(--liquid-popup) !important;
+    }
+
+    body[data-theme="dark"] .app-layout .header-user-menu,
+    body[data-theme="dark"] :is(.confirm-dialog, .se-media-dialog, .se-notification-panel, .se-filter-sheet) {
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / .10), transparent 48%),
+            var(--liquid-popup) !important;
+    }
+}
+
+/* Page surfaces share the same live material while retaining their own borders and shadows. */
+.page-body :is(.ui-card, .card, .portal-card, .stat-card, .data-card, .panel, .settings-panel, .monitor-card, .monitor-kpi, .bugs-card, .settings-option, .ui-stat-card),
+.page-header {
+    background: var(--liquid-surface-strong) !important;
+}
+
+.page-body :is(.ui-card-head, .table-wrap thead th, .ui-table-wrap thead th) {
+    background: var(--liquid-shell-strong) !important;
 }
