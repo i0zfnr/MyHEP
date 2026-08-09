@@ -922,6 +922,126 @@
             display: none;
         }
     }
+
+    /* PWA-first student dashboard: reserve vertical space for useful account data. */
+    @media (max-width: 767px) {
+        body.student-dashboard-mobile-sidebar .app-layout .page-header {
+            display: none !important;
+        }
+
+        body.student-dashboard-mobile-sidebar .app-layout .topbar {
+            min-height: 58px !important;
+            height: 58px !important;
+            padding: 0 .8rem !important;
+            border-bottom-color: rgba(215, 191, 168, .14) !important;
+        }
+
+        body.student-dashboard-mobile-sidebar .app-layout .topbar-brand {
+            gap: .45rem !important;
+        }
+
+        body.student-dashboard-mobile-sidebar .app-layout .topbar-brand-mark {
+            width: 30px !important;
+            height: 30px !important;
+        }
+
+        body.student-dashboard-mobile-sidebar .app-layout .topbar-title {
+            font-size: .86rem !important;
+        }
+
+        body.student-dashboard-mobile-sidebar .app-layout .topbar-subtitle {
+            display: none !important;
+        }
+
+        body.student-dashboard-mobile-sidebar .app-layout .topbar-actions .header-user {
+            max-width: 116px !important;
+            padding: .28rem .42rem !important;
+        }
+
+        body.student-dashboard-mobile-sidebar .app-layout .topbar-actions .header-user-role {
+            display: none !important;
+        }
+
+        .sdash {
+            padding: .8rem .9rem calc(5.8rem + env(safe-area-inset-bottom, 0px));
+            gap: .9rem;
+        }
+
+        .alert {
+            gap: .65rem;
+            padding: .8rem;
+            border-radius: 18px;
+        }
+
+        .alert-icon {
+            width: 30px;
+            height: 30px;
+        }
+
+        .alert-body strong { font-size: .8rem; }
+        .alert-body p { font-size: .72rem; line-height: 1.45; }
+        .alert-warn .alert-action { min-height: 40px; font-size: .78rem; }
+
+        .hero {
+            padding: 1.1rem;
+            gap: .75rem;
+            border-radius: 22px;
+        }
+
+        .hero-eyebrow { font-size: .62rem; margin-bottom: .25rem; }
+        .hero-name { font-size: clamp(1.35rem, 7vw, 1.7rem); line-height: 1.05; }
+        .hero-sub { font-size: .72rem; }
+        .hero-right { gap: .45rem; }
+        .hero-badge { padding: .48rem .6rem; }
+        .hero-badge-value { font-size: .96rem; }
+        .hero-meta-grid { gap: .4rem; }
+        .hero-meta-item { min-height: 50px; padding: .42rem .52rem; }
+        .hero-meta-label { font-size: .53rem; }
+        .hero-meta-value { font-size: .69rem; }
+
+        .section-label { margin: .15rem 0 .5rem; font-size: .61rem; letter-spacing: .12em; }
+        .student-stats-section .stats-grid { gap: .6rem; }
+        .student-stats-section .stat-card {
+            min-height: 104px;
+            padding: .78rem;
+            border-radius: 17px;
+            background: rgba(255,255,255,.94) !important;
+            border-color: rgba(176, 145, 115, .28) !important;
+            box-shadow: 0 10px 22px rgba(73, 54, 39, .08), inset 0 1px 0 rgba(255,255,255,.9) !important;
+        }
+
+        .student-stats-section .stat-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .student-stats-section .stat-icon {
+            width: 28px;
+            height: 28px;
+            margin-bottom: .55rem;
+            border-radius: 9px;
+        }
+
+        .student-stats-section .stat-icon svg { width: 13px; height: 13px; }
+        .student-stats-section .stat-label { color: #786c61; font-size: .61rem; line-height: 1.25; }
+        .student-stats-section .stat-value { color: #2d2118; font-size: 1.28rem; }
+        .student-stats-section .stat-value.sm { color: #2d2118; font-size: .76rem; }
+        .student-stats-section .stat-card:nth-child(1) .stat-icon { background:#f6eadb; color:#9a6c31; }
+        .student-stats-section .stat-card:nth-child(2) .stat-icon { background:#fde8e5; color:#b84d40; }
+        .student-stats-section .stat-card:nth-child(3) .stat-icon { background:#eee9ff; color:#7057b7; }
+        .student-stats-section .stat-card:nth-child(5) .stat-icon { background:#e5f5ee; color:#278360; }
+        .student-stats-section .stat-card:nth-child(6) .stat-icon { background:#e8eefb; color:#496caf; }
+
+        body[data-theme="dark"] .student-stats-section .stat-card {
+            background: linear-gradient(145deg, rgba(47,38,31,.96), rgba(28,24,21,.96)) !important;
+            border-color: rgba(226, 209, 192, .16) !important;
+            box-shadow: 0 12px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06) !important;
+        }
+
+        body[data-theme="dark"] .student-stats-section .stat-label { color: rgba(244,233,219,.62) !important; }
+        body[data-theme="dark"] .student-stats-section .stat-value,
+        body[data-theme="dark"] .student-stats-section .stat-value.sm { color: #fff5e9 !important; }
+    }
 </style>
 @endpush
 

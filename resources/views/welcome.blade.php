@@ -307,6 +307,13 @@
         .pwa-install-dialog p,.pwa-install-dialog li { color:var(--text-secondary); line-height:1.6; }
         .pwa-install-dialog ol { margin:.8rem 0; padding-left:1.3rem; }
         .pwa-install-dialog-close { width:100%; padding:.72rem; border:0; border-radius:12px; background:var(--desert-rock); color:#fff; font:inherit; font-weight:800; cursor:pointer; }
+        .pwa-guide-mark { display:grid; width:58px; height:58px; margin:0 auto 1rem; place-items:center; border:1px solid var(--border); border-radius:19px; background:#fff; box-shadow:0 10px 22px rgba(94,67,43,.12); }
+        .pwa-guide-mark img { width:38px; height:38px; object-fit:contain; }
+        .pwa-guide-kicker { margin:0 0 .4rem; color:var(--desert-rock); font-size:.7rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+        .pwa-guide-steps { display:grid; gap:.55rem; margin:1.1rem 0; text-align:left; }
+        .pwa-guide-step { display:flex; align-items:flex-start; gap:.65rem; padding:.7rem; border:1px solid rgba(203,185,164,.62); border-radius:14px; background:rgba(255,255,255,.65); color:var(--text-secondary); font-size:.84rem; line-height:1.45; }
+        .pwa-guide-number { display:grid; flex:0 0 auto; width:21px; height:21px; place-items:center; border-radius:50%; background:var(--desert-rock); color:#fff; font-size:.7rem; font-weight:900; }
+        .pwa-guide-action { width:100%; margin-top:.25rem; padding:.8rem; border:0; border-radius:12px; background:linear-gradient(135deg,#a48d78,#806753); color:#fff; font:inherit; font-weight:900; cursor:pointer; }
 
         .stat-pill {
             display: inline-flex;
@@ -886,28 +893,41 @@
         document.addEventListener('DOMContentLoaded', () => {
             const dialog = document.getElementById('pwaInstallDialog');
             const instructions = document.getElementById('pwaInstallInstructions');
-            const showDialog = (content) => {
-                instructions.innerHTML = content;
+            const options = document.querySelector('.pwa-options');
+            const showGuide = (platform) => {
+                const android = platform === 'android';
+                const canPrompt = android && deferredPrompt;
+                instructions.innerHTML = `
+                    <div class="pwa-guide-mark"><img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt=""></div>
+                    <p class="pwa-guide-kicker">${android ? 'Android install' : 'iPhone setup'}</p>
+                    <h2>${android ? 'Make StudentEdge feel like an app' : 'Add StudentEdge to your Home Screen'}</h2>
+                    <p>${android ? (canPrompt ? 'One more step opens the secure install prompt.' : 'Chrome can still add StudentEdge from its browser menu.') : 'Safari keeps this step in its Share menu.'}</p>
+                    <div class="pwa-guide-steps">
+                        ${android
+                            ? (canPrompt ? '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Continue to open the Android install prompt.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Choose <strong>Install</strong> to add StudentEdge to your home screen.</span></div>' : '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Tap Chrome’s three-dot menu.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</span></div>')
+                            : '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Open this page in <strong>Safari</strong>.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Tap <strong>Share</strong>, then choose <strong>Add to Home Screen</strong>.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">3</span><span>Tap <strong>Add</strong> to finish.</span></div>'}
+                    </div>
+                    <button type="button" class="pwa-guide-action" id="pwaGuideAction">${canPrompt ? 'Continue to install' : (android ? 'I understand' : 'I will use Safari')}</button>`;
                 dialog.showModal();
+                document.getElementById('pwaGuideAction').addEventListener('click', async () => {
+                    if (!android || !deferredPrompt) {
+                        dialog.close();
+                        return;
+                    }
+                    deferredPrompt.prompt();
+                    await deferredPrompt.userChoice.catch(() => null);
+                    deferredPrompt = null;
+                    dialog.close();
+                });
             };
 
-        document.getElementById('androidInstallButton')?.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice.catch(() => null);
-                deferredPrompt = null;
-                return;
-            }
-
-            showDialog('<p>The install prompt is not available yet. In Chrome, tap the three-dot menu, then choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</p><p>If you already installed StudentEdge, open it from your home screen.</p>');
-        });
-
-        document.getElementById('iosInstallButton')?.addEventListener('click', () => {
-            showDialog('<p>Open StudentEdge in <strong>Safari</strong>, then:</p><ol><li>Tap the <strong>Share</strong> button.</li><li>Scroll and select <strong>Add to Home Screen</strong>.</li><li>Tap <strong>Add</strong>.</li></ol><p>Chrome on iPhone cannot install this app. Use Safari instead.</p>');
-        });
-
-        document.getElementById('pwaInstallClose')?.addEventListener('click', () => dialog.close());
-            window.addEventListener('appinstalled', () => dialog?.close());
+            document.getElementById('androidInstallButton')?.addEventListener('click', () => showGuide('android'));
+            document.getElementById('iosInstallButton')?.addEventListener('click', () => showGuide('ios'));
+            document.getElementById('pwaInstallClose')?.addEventListener('click', () => dialog.close());
+            window.addEventListener('appinstalled', () => {
+                dialog.close();
+                options.hidden = true;
+            });
         });
     })();
 </script>

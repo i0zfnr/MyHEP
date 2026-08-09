@@ -108,6 +108,56 @@ html[data-theme="light"] {
     --text-secondary: var(--se-text-soft);
 }
 
+/* Student dashboard account metrics need solid contrast on compact mobile screens. */
+@media (max-width: 767px) {
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card {
+        min-height: 104px;
+        padding: .78rem;
+        border: 1px solid rgba(176, 145, 115, .28) !important;
+        border-radius: 17px;
+        background: rgba(255, 255, 255, .96) !important;
+        box-shadow: 0 10px 22px rgba(73, 54, 39, .08), inset 0 1px 0 rgba(255,255,255,.9) !important;
+    }
+
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-icon {
+        width: 28px;
+        height: 28px;
+        margin-bottom: .55rem;
+        border-radius: 9px;
+    }
+
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-label {
+        color: #786c61 !important;
+        font-size: .61rem;
+        line-height: 1.25;
+    }
+
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value,
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value.sm {
+        color: #2d2118 !important;
+    }
+
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card {
+        background: linear-gradient(145deg, rgba(47,38,31,.98), rgba(28,24,21,.98)) !important;
+        border-color: rgba(226, 209, 192, .16) !important;
+        box-shadow: 0 12px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06) !important;
+    }
+
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-label {
+        color: rgba(244,233,219,.62) !important;
+    }
+
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value.sm {
+        color: #fff5e9 !important;
+    }
+}
+
 /* On phones, navigation and page titles stay in document flow to avoid covering content. */
 @media (max-width: 1023px) {
     .app-layout .topbar {
@@ -5436,4 +5486,50 @@ body[data-theme="dark"] {
         font-size: .74rem;
         line-height: 1.45;
     }
+}
+
+/* Student dashboard account metrics need solid contrast on compact mobile screens. */
+@media (max-width: 767px) {
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card {
+        min-height: 104px;
+        padding: .78rem;
+        border: 1px solid rgba(176, 145, 115, .28) !important;
+        border-radius: 17px;
+        background: rgba(255, 255, 255, .96) !important;
+        box-shadow: 0 10px 22px rgba(73, 54, 39, .08), inset 0 1px 0 rgba(255,255,255,.9) !important;
+    }
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card > * { position: relative; z-index: 1; }
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-icon { width: 28px; height: 28px; margin-bottom: .55rem; border-radius: 9px; }
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-label { color: #786c61 !important; font-size: .61rem; line-height: 1.25; }
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value,
+    body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value.sm { color: #2d2118 !important; }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card {
+        background: linear-gradient(145deg, #241e1a 0%, #171412 100%) !important;
+        border-color: rgba(226, 209, 192, .18) !important;
+        box-shadow: 0 14px 30px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.055) !important;
+    }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card::before,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card::before {
+        background: linear-gradient(125deg, rgba(255,255,255,.045), transparent 48%) !important;
+    }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-label,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-label { color: #bcae9f !important; }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value,
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value.sm,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-value.sm { color: #fff7ed !important; }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-icon,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-icon {
+        border: 1px solid rgba(226,209,192,.12);
+        background: rgba(255,255,255,.07) !important;
+    }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(2) .stat-icon,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(2) .stat-icon { color:#f09a8f !important; }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(3) .stat-icon,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(3) .stat-icon { color:#d9bb72 !important; }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(5) .stat-icon,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(5) .stat-icon { color:#70c7a5 !important; }
+    html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(6) .stat-icon,
+    body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(6) .stat-icon { color:#9fb7e8 !important; }
 }
