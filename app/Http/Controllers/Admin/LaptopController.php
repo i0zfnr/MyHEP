@@ -115,9 +115,12 @@ class LaptopController extends Controller
     {
         $laptop = $this->laptopForPublicToken($token);
         $nric = $this->normalizedNric($request->validate(['nric' => ['required', 'string', 'max:30']])['nric']);
-        $staff = DB::table('jhep_laptop_staff')->where('nric', $nric)->where('is_active', true)->first();
+        $staff = $this->publicStaffForNric($nric);
         $activeLoan = DB::table('jhep_laptop_loans')->where('laptop_id', $laptop->id)->whereNull('returned_at')->first();
-        $action = ! $activeLoan ? 'borrow' : ((int) $activeLoan->laptop_staff_id === (int) ($staff->id ?? 0) ? 'return' : 'unavailable');
+        $ownsLoan = $staff && $activeLoan && ($staff->source === 'account'
+            ? (int) $activeLoan->staff_id === (int) $staff->id
+            : (int) $activeLoan->laptop_staff_id === (int) $staff->id);
+        $action = ! $activeLoan ? 'borrow' : ($ownsLoan ? 'return' : 'unavailable');
         $eligible = $staff !== null && $action !== 'unavailable';
 
         return response()->json(['eligible' => $eligible, 'action' => $action]);
@@ -133,33 +136,36 @@ class LaptopController extends Controller
                 return response()->json(['message' => 'This laptop QR code is not active.'], 404);
             }
 
-            $staff = DB::table('jhep_laptop_staff')->where('nric', $nric)->where('is_active', true)->lockForUpdate()->first();
+            $staff = $this->publicStaffForNric($nric, true);
             if (! $staff) {
                 return response()->json(['message' => 'This NRIC is not registered to borrow a JHEP laptop.'], 422);
             }
 
             $activeLoan = DB::table('jhep_laptop_loans')->where('laptop_id', $laptop->id)->whereNull('returned_at')->lockForUpdate()->first();
-            if ($activeLoan && (int) $activeLoan->laptop_staff_id !== (int) $staff->id) {
+            $ownsLoan = $activeLoan && ($staff->source === 'account'
+                ? (int) $activeLoan->staff_id === (int) $staff->id
+                : (int) $activeLoan->laptop_staff_id === (int) $staff->id);
+            if ($activeLoan && ! $ownsLoan) {
                 return response()->json(['message' => 'This laptop is currently unavailable.'], 409);
             }
             if ($activeLoan) {
                 DB::table('jhep_laptop_loans')->where('id', $activeLoan->id)->update(['returned_at' => now(), 'updated_at' => now()]);
                 DB::table('jhep_laptops')->where('id', $laptop->id)->update(['status' => 'available', 'updated_at' => now()]);
-                auditLog('laptop.returned_public', 'jhep_laptop', (int) $laptop->id, "{$laptop->name} returned by imported staff {$staff->id}");
+                auditLog('laptop.returned_public', 'jhep_laptop', (int) $laptop->id, "{$laptop->name} returned by {$staff->source} staff {$staff->id}");
 
                 return response()->json(['message' => "{$laptop->name} has been recorded as returned.", 'action' => 'returned']);
             }
 
             DB::table('jhep_laptop_loans')->insert([
                 'laptop_id' => $laptop->id,
-                'staff_id' => null,
-                'laptop_staff_id' => $staff->id,
+                'staff_id' => $staff->source === 'account' ? $staff->id : null,
+                'laptop_staff_id' => $staff->source === 'registry' ? $staff->id : null,
                 'borrowed_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
             DB::table('jhep_laptops')->where('id', $laptop->id)->update(['status' => 'borrowed', 'updated_at' => now()]);
-            auditLog('laptop.borrowed_public', 'jhep_laptop', (int) $laptop->id, "{$laptop->name} borrowed by imported staff {$staff->id}");
+            auditLog('laptop.borrowed_public', 'jhep_laptop', (int) $laptop->id, "{$laptop->name} borrowed by {$staff->source} staff {$staff->id}");
 
             return response()->json(['message' => "{$laptop->name} has been recorded as borrowed.", 'action' => 'borrowed']);
         });
@@ -180,5 +186,29 @@ class LaptopController extends Controller
     private function normalizedNric(string $value): string
     {
         return preg_replace('/[^0-9]/', '', $value) ?? '';
+    }
+
+    private function publicStaffForNric(string $nric, bool $lock = false): ?object
+    {
+        $registryQuery = DB::table('jhep_laptop_staff')
+            ->where('nric', $nric)
+            ->where('is_active', true);
+        $registry = ($lock ? $registryQuery->lockForUpdate() : $registryQuery)->first();
+        if ($registry) {
+            $registry->source = 'registry';
+
+            return $registry;
+        }
+
+        $accountQuery = DB::table('admins')
+            ->where('role', 'lecturer')
+            ->where('is_active', true)
+            ->whereRaw("REPLACE(REPLACE(ic_no, '-', ''), ' ', '') = ?", [$nric]);
+        $account = ($lock ? $accountQuery->lockForUpdate() : $accountQuery)->first();
+        if ($account) {
+            $account->source = 'account';
+        }
+
+        return $account;
     }
 }

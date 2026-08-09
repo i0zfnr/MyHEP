@@ -17,6 +17,7 @@ class LaptopBorrowingTest extends TestCase
         Schema::create('admins', function (Blueprint $table): void {
             $table->id();
             $table->string('full_name');
+            $table->string('ic_no')->nullable();
             $table->string('role');
             $table->string('staff_category')->nullable();
             $table->boolean('is_active')->default(true);
@@ -124,6 +125,27 @@ class LaptopBorrowingTest extends TestCase
         $this->postJson($url.'/staff-check', ['nric' => '900101011234'])->assertOk()->assertJson(['eligible' => true, 'action' => 'return']);
         $this->postJson($url, ['nric' => '900101011234'])->assertOk()->assertJson(['action' => 'returned']);
         $this->assertDatabaseHas('jhep_laptops', ['id' => 1, 'status' => 'available']);
+    }
+
+    public function test_active_staff_account_nric_can_borrow_from_the_public_qr_page(): void
+    {
+        DB::table('admins')->where('id', 3)->update(['ic_no' => '060717030254']);
+        $url = '/laptop-borrow/11111111-1111-4111-8111-111111111111';
+
+        $this->postJson($url.'/staff-check', ['nric' => '060717-03-0254'])
+            ->assertOk()
+            ->assertJson(['eligible' => true, 'action' => 'borrow']);
+
+        $this->postJson($url, ['nric' => '060717030254'])
+            ->assertOk()
+            ->assertJson(['action' => 'borrowed']);
+
+        $this->assertDatabaseHas('jhep_laptop_loans', [
+            'laptop_id' => 1,
+            'staff_id' => 3,
+            'laptop_staff_id' => null,
+            'returned_at' => null,
+        ]);
     }
 
     public function test_unregistered_nric_cannot_borrow_from_the_public_qr_page(): void
