@@ -292,6 +292,7 @@
 
         .btn-primary svg { width: 16px; height: 16px; flex-shrink: 0; }
         .pwa-options { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; margin-top:1rem; }
+        .pwa-options[hidden] { display:none !important; }
         .pwa-option {
             display:inline-flex; align-items:center; justify-content:center; gap:.45rem; min-height:38px; padding:.55rem .85rem;
             border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--text-primary);
@@ -885,15 +886,50 @@
 <script>
     (() => {
         let deferredPrompt = null;
+        const displayModeQueries = [
+            '(display-mode: standalone)',
+            '(display-mode: fullscreen)',
+            '(display-mode: minimal-ui)',
+            '(display-mode: window-controls-overlay)',
+        ];
+        const isInstalledDisplayMode = () =>
+            displayModeQueries.some((query) => window.matchMedia(query).matches)
+            || window.navigator.standalone === true
+            || document.referrer.startsWith('android-app://');
+        const isIosSafari = () => {
+            const userAgent = window.navigator.userAgent;
+            const isIos = /iPad|iPhone|iPod/.test(userAgent)
+                || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+
+            return isIos && /Safari/.test(userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(userAgent);
+        };
+        const syncInstallOptions = () => {
+            const options = document.querySelector('.pwa-options');
+            const androidButton = document.getElementById('androidInstallButton');
+            const iosButton = document.getElementById('iosInstallButton');
+
+            if (!options || !androidButton || !iosButton) return;
+
+            const installed = isInstalledDisplayMode();
+            const showAndroid = !installed && Boolean(deferredPrompt);
+            const showIos = !installed && isIosSafari();
+
+            androidButton.hidden = !showAndroid;
+            iosButton.hidden = !showIos;
+            options.hidden = !(showAndroid || showIos);
+        };
+
         window.addEventListener('beforeinstallprompt', (event) => {
             event.preventDefault();
             deferredPrompt = event;
+            syncInstallOptions();
         });
 
         document.addEventListener('DOMContentLoaded', () => {
             const dialog = document.getElementById('pwaInstallDialog');
             const instructions = document.getElementById('pwaInstallInstructions');
             const options = document.querySelector('.pwa-options');
+            syncInstallOptions();
             const showGuide = (platform) => {
                 const android = platform === 'android';
                 const canPrompt = android && deferredPrompt;
@@ -925,8 +961,16 @@
             document.getElementById('iosInstallButton')?.addEventListener('click', () => showGuide('ios'));
             document.getElementById('pwaInstallClose')?.addEventListener('click', () => dialog.close());
             window.addEventListener('appinstalled', () => {
+                deferredPrompt = null;
                 dialog.close();
-                options.hidden = true;
+                syncInstallOptions();
+            });
+            window.addEventListener('pageshow', syncInstallOptions);
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) syncInstallOptions();
+            });
+            displayModeQueries.forEach((query) => {
+                window.matchMedia(query).addEventListener?.('change', syncInstallOptions);
             });
         });
     })();
@@ -979,12 +1023,12 @@
                     <span data-home-stat="system-status">{{ __('home.official_label') }} · StudentEdge · {{ __('home.live_label') }}</span>
                 </div>
             </div>
-            <div class="pwa-options" aria-label="Install StudentEdge">
-                <button type="button" class="pwa-option" id="androidInstallButton">
+            <div class="pwa-options" aria-label="Install StudentEdge" hidden>
+                <button type="button" class="pwa-option" id="androidInstallButton" hidden>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
                     Install on Android
                 </button>
-                <button type="button" class="pwa-option" id="iosInstallButton">
+                <button type="button" class="pwa-option" id="iosInstallButton" hidden>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 16V3m0 0 4 4m-4-4L8 7M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>
                     Add to iPhone Home Screen
                 </button>
