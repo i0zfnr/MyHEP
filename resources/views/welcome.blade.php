@@ -789,10 +789,73 @@
             .brand-text h1 { font-size: 1.8rem; }
             .brand-text p { font-size: .78rem; }
         }
+
+        .pwa-launch {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            padding: max(2rem, env(safe-area-inset-top, 0px)) 1.5rem max(2rem, env(safe-area-inset-bottom, 0px));
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(185, 142, 90, .18), transparent 27%),
+                radial-gradient(circle at 50% 50%, #211911, #0f0e0d 62%);
+            color: #fff8ef;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 260ms ease;
+        }
+        .pwa-launch.is-visible { opacity: 1; pointer-events: auto; }
+        .pwa-launch.is-leaving { opacity: 0; }
+        .pwa-launch::before,
+        .pwa-launch::after { content: ''; position: absolute; border-radius: 50%; pointer-events: none; }
+        .pwa-launch::before { width: min(76vw, 390px); aspect-ratio: 1; border: 1px solid rgba(245, 223, 196, .12); box-shadow: 0 0 0 28px rgba(245, 223, 196, .025), 0 0 0 62px rgba(245, 223, 196, .018); }
+        .pwa-launch::after { width: min(48vw, 240px); aspect-ratio: 1; background: radial-gradient(circle, rgba(214, 169, 107, .18), transparent 68%); filter: blur(8px); }
+        .pwa-launch-content { position: relative; z-index: 1; display: grid; justify-items: center; text-align: center; animation: pwa-launch-enter 600ms cubic-bezier(.2,.8,.2,1) both; }
+        .pwa-launch-mark { width: 106px; height: 106px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.18); border-radius: 32px; background: rgba(255,253,249,.96); box-shadow: 0 20px 48px rgba(0,0,0,.32), inset 0 1px 0 #fff; }
+        .pwa-launch-mark img { width: 76px; height: 76px; object-fit: contain; }
+        .pwa-launch-title { margin: 1.25rem 0 .35rem; font-size: 1.55rem; font-weight: 800; letter-spacing: -.04em; }
+        .pwa-launch-copy { margin: 0; color: rgba(255,244,231,.62); font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+        .pwa-launch-progress { width: 76px; height: 2px; margin-top: 1.4rem; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.16); }
+        .pwa-launch-progress::after { content: ''; display: block; width: 44%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #c48b45, #f4d9ad); animation: pwa-launch-progress 760ms cubic-bezier(.4,0,.2,1) both; }
+        @keyframes pwa-launch-enter { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+        @keyframes pwa-launch-progress { from { transform: translateX(-110%); } to { transform: translateX(250%); } }
+        @media (prefers-reduced-motion: reduce) { .pwa-launch, .pwa-launch-content, .pwa-launch-progress::after { transition: none; animation: none; } }
     </style>
     @vite('resources/css/design-system.css')
 </head>
 <body data-theme="{{ session('theme', 'light') }}">
+<div class="pwa-launch" id="pwaLaunch" aria-hidden="true">
+    <div class="pwa-launch-content">
+        <div class="pwa-launch-mark"><img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt=""></div>
+        <strong class="pwa-launch-title">StudentEdge</strong>
+        <p class="pwa-launch-copy">Politeknik Besut</p>
+        <span class="pwa-launch-progress" aria-hidden="true"></span>
+    </div>
+</div>
+<script>
+    (() => {
+        const standalone = ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay']
+            .some((mode) => window.matchMedia(`(display-mode: ${mode})`).matches)
+            || window.navigator.standalone === true
+            || document.referrer.startsWith('android-app://');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const launch = document.getElementById('pwaLaunch');
+
+        if (!standalone || reduceMotion || !launch) return;
+        try {
+            if (window.sessionStorage.getItem('studentedge-pwa-launch-seen') === '1') return;
+            window.sessionStorage.setItem('studentedge-pwa-launch-seen', '1');
+        } catch (_) {
+            // The launch transition remains safe when storage is unavailable.
+        }
+
+        launch.classList.add('is-visible');
+        window.setTimeout(() => launch.classList.add('is-leaving'), 820);
+        window.setTimeout(() => launch.remove(), 1120);
+    })();
+</script>
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
 @php
     $homeStats = $homeStats ?? [
