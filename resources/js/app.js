@@ -11,7 +11,7 @@ const GLASS_TRANSPARENCY_KEY = 'studentedge-glass-transparency';
 
 const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
 const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet'].includes(theme) ? theme : 'gold';
-const normalizeGlassTransparency = (value) => Math.min(65, Math.max(10, Number(value) || 40));
+const normalizeGlassTransparency = (value) => Math.min(80, Math.max(10, Number(value) || 40));
 
 const updateGlassControls = (value) => {
     const transparency = normalizeGlassTransparency(value);
@@ -20,7 +20,7 @@ const updateGlassControls = (value) => {
         output.textContent = `${transparency}%`;
     });
     document.querySelectorAll('.glass-slider').forEach((slider) => {
-        slider.style.setProperty('--glass-range-progress', `${((transparency - 10) / 55) * 100}%`);
+        slider.style.setProperty('--glass-range-progress', `${((transparency - 10) / 70) * 100}%`);
     });
 
     return transparency;
@@ -1362,8 +1362,8 @@ const registerMainSmoothScroll = () => {
             autoResize: true,
             smoothWheel: true,
             syncTouch: false,
-            lerp: 0.18,
-            wheelMultiplier: 1,
+            lerp: 0.28,
+            wheelMultiplier: 0.9,
             overscroll: false,
             allowNestedScroll: true,
             prevent: shouldKeepNativeScroll,

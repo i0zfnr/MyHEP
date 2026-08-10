@@ -22,6 +22,8 @@ html[data-theme="light"] {
     --se-accent: #c8a96a;
     --se-accent-strong: #8b6a34;
     --se-accent-soft: #f6e7c8;
+    --se-atmosphere-primary: #ffb21a;
+    --se-atmosphere-secondary: #ffd95a;
     --se-success: #28686c;
     --se-success-strong: #1f5559;
     --se-success-soft: #e7f3f3;
@@ -1430,7 +1432,7 @@ body[data-theme="dark"] footer {
     }
 
     .main-wrap.has-sidebar .page-header {
-        top: var(--topbar-h) !important;
+        top: 0 !important;
     }
 
     .main-wrap.no-sidebar .page-header {
@@ -1560,6 +1562,8 @@ body[data-accent-theme="candy_blue"] {
     --se-accent-strong: #2c6684;
     --se-accent-soft: #e1f0f6;
     --se-accent-ink: #102f3e;
+    --se-atmosphere-primary: #3b8d99;
+    --se-atmosphere-secondary: #aa4b6b;
 }
 
 html[data-accent-theme="lavender"],
@@ -1574,6 +1578,8 @@ body[data-accent-theme="lavender"] {
     --se-accent-strong: #654f91;
     --se-accent-soft: #efe9f8;
     --se-accent-ink: #29203f;
+    --se-atmosphere-primary: #8ca6db;
+    --se-atmosphere-secondary: #b993d6;
 }
 
 html[data-accent-theme="orchid"],
@@ -1588,6 +1594,8 @@ body[data-accent-theme="orchid"] {
     --se-accent-strong: #83445f;
     --se-accent-soft: #fae8f0;
     --se-accent-ink: #3c1f2c;
+    --se-atmosphere-primary: #f15f79;
+    --se-atmosphere-secondary: #b24592;
 }
 
 html[data-accent-theme="violet"],
@@ -1602,6 +1610,8 @@ body[data-accent-theme="violet"] {
     --se-accent-strong: #4a357b;
     --se-accent-soft: #ece8f8;
     --se-accent-ink: #211635;
+    --se-atmosphere-primary: #ff0099;
+    --se-atmosphere-secondary: #493240;
 }
 
 /* Dark surfaces need luminous accents and translucent soft fills. */
@@ -1677,11 +1687,11 @@ body[data-accent-theme="violet"] {
 .settings-option--accent strong { font-size:.78rem; }
 .accent-preview { display:grid; grid-template-columns:repeat(3, 1fr); gap:3px; height:22px; overflow:hidden; border-radius:8px; }
 .accent-preview span { border-radius:3px; }
-.accent-preview--gold { background:#f6e7c8; }.accent-preview--gold span:nth-child(1) { background:#704a23; }.accent-preview--gold span:nth-child(2) { background:#c8a96a; }.accent-preview--gold span:nth-child(3) { background:#f6e7c8; }
-.accent-preview--candy-blue { background:#e1f0f6; }.accent-preview--candy-blue span:nth-child(1) { background:#2f6d8b; }.accent-preview--candy-blue span:nth-child(2) { background:#6fa9c4; }.accent-preview--candy-blue span:nth-child(3) { background:#e1f0f6; }
-.accent-preview--lavender { background:#efe9f8; }.accent-preview--lavender span:nth-child(1) { background:#70569e; }.accent-preview--lavender span:nth-child(2) { background:#a58bca; }.accent-preview--lavender span:nth-child(3) { background:#efe9f8; }
-.accent-preview--orchid { background:#fae8f0; }.accent-preview--orchid span:nth-child(1) { background:#914b69; }.accent-preview--orchid span:nth-child(2) { background:#ca8ca9; }.accent-preview--orchid span:nth-child(3) { background:#fae8f0; }
-.accent-preview--violet { background:#ece8f8; }.accent-preview--violet span:nth-child(1) { background:#503887; }.accent-preview--violet span:nth-child(2) { background:#8068ba; }.accent-preview--violet span:nth-child(3) { background:#ece8f8; }
+.accent-preview--gold { background:#fff4cc; }.accent-preview--gold span:nth-child(1) { background:#ff6a00; }.accent-preview--gold span:nth-child(2) { background:#ffd500; }.accent-preview--gold span:nth-child(3) { background:#c8a96a; }
+.accent-preview--candy-blue { background:#e1f0f6; }.accent-preview--candy-blue span:nth-child(1) { background:#aa4b6b; }.accent-preview--candy-blue span:nth-child(2) { background:#3b8d99; }.accent-preview--candy-blue span:nth-child(3) { background:#6fa9c4; }
+.accent-preview--lavender { background:#efe9f8; }.accent-preview--lavender span:nth-child(1) { background:#b993d6; }.accent-preview--lavender span:nth-child(2) { background:#8ca6db; }.accent-preview--lavender span:nth-child(3) { background:#a58bca; }
+.accent-preview--orchid { background:#fae8f0; }.accent-preview--orchid span:nth-child(1) { background:#b24592; }.accent-preview--orchid span:nth-child(2) { background:#f15f79; }.accent-preview--orchid span:nth-child(3) { background:#ca8ca9; }
+.accent-preview--violet { background:#ece8f8; }.accent-preview--violet span:nth-child(1) { background:#493240; }.accent-preview--violet span:nth-child(2) { background:#ff0099; }.accent-preview--violet span:nth-child(3) { background:#8068ba; }
 
 @media (max-width: 767px) {
     .settings-options--accent { grid-template-columns:repeat(2, minmax(0, 1fr)); }
@@ -1690,17 +1700,24 @@ body[data-accent-theme="violet"] {
 /* A quiet accent aura makes theme selection visible beyond form controls. */
 .app-layout .page-body {
     background:
-        radial-gradient(42rem circle at 92% -8%, color-mix(in srgb, var(--se-primary) 18%, transparent), transparent 60%),
-        radial-gradient(30rem circle at 4% 102%, color-mix(in srgb, var(--se-primary-muted) 15%, transparent), transparent 64%),
-        linear-gradient(rgba(255, 255, 255, .30), rgba(255, 255, 255, .12)) !important;
+        radial-gradient(42rem circle at 92% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 32%, transparent), transparent 60%),
+        radial-gradient(30rem circle at 4% 102%, color-mix(in srgb, var(--se-atmosphere-secondary) 26%, transparent), transparent 64%),
+        linear-gradient(
+            color-mix(in srgb, var(--se-primary-soft) 28%, rgba(255, 255, 255, .30)),
+            color-mix(in srgb, var(--se-primary-soft) 20%, rgba(255, 255, 255, .12))
+        ) !important;
+    transition: background-color var(--dur-slow, 420ms) ease;
 }
 
 html[data-theme="dark"] .app-layout .page-body,
 body[data-theme="dark"] .app-layout .page-body {
     background:
-        radial-gradient(42rem circle at 92% -8%, color-mix(in srgb, var(--se-primary) 14%, transparent), transparent 60%),
-        radial-gradient(30rem circle at 4% 102%, color-mix(in srgb, var(--se-primary-muted) 10%, transparent), transparent 64%),
-        linear-gradient(rgba(255, 255, 255, .012), transparent 24%) !important;
+        radial-gradient(42rem circle at 92% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 28%, transparent), transparent 60%),
+        radial-gradient(30rem circle at 4% 102%, color-mix(in srgb, var(--se-atmosphere-secondary) 24%, transparent), transparent 64%),
+        linear-gradient(
+            color-mix(in srgb, var(--se-primary-soft) 25%, rgba(255, 255, 255, .018)),
+            transparent 28%
+        ) !important;
 }
 
 /* Accent expansion: identity, navigation, and dashboard emphasis stay distinct from data surfaces. */
@@ -2206,12 +2223,30 @@ body > .card {
     }
 
     .app-layout .topbar {
-        height: var(--topbar-h) !important;
-        min-height: var(--topbar-h) !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1250 !important;
+        height: calc(var(--topbar-h) + var(--app-safe-top)) !important;
+        min-height: calc(var(--topbar-h) + var(--app-safe-top)) !important;
+        flex: 0 0 calc(var(--topbar-h) + var(--app-safe-top));
         gap: .75rem !important;
-        padding: 0 .875rem !important;
-        border-bottom: 0 !important;
-        box-shadow: 0 6px 18px rgba(73, 50, 29, .07) !important;
+        padding: var(--app-safe-top) .875rem 0 !important;
+        border-bottom: 1px solid color-mix(in srgb, var(--se-primary) 20%, var(--se-border)) !important;
+        border-radius: 0 !important;
+        background:
+            linear-gradient(135deg, color-mix(in srgb, var(--se-primary-soft) 22%, transparent), transparent 46%),
+            color-mix(in srgb, var(--se-surface) 96%, transparent) !important;
+        box-shadow: 0 6px 18px color-mix(in srgb, var(--se-primary) 9%, transparent) !important;
+        backdrop-filter: blur(28px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(28px) saturate(150%) !important;
+    }
+
+    :is(html, body)[data-theme="dark"] .app-layout .topbar {
+        background:
+            linear-gradient(135deg, color-mix(in srgb, var(--se-primary-soft) 18%, transparent), transparent 46%),
+            color-mix(in srgb, var(--se-surface) 94%, transparent) !important;
+        border-bottom-color: color-mix(in srgb, var(--se-primary) 24%, var(--se-border)) !important;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, .28) !important;
     }
 
     .app-layout .btn-ham {
@@ -2264,7 +2299,7 @@ body > .card {
     }
 
     .main-wrap.has-sidebar .page-header {
-        top: var(--topbar-h) !important;
+        top: 0 !important;
     }
 
     .app-layout .page-header {
@@ -5217,7 +5252,7 @@ body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab.active .mobile-nav-i
     .main-wrap.has-sidebar .page-header,
     .main-wrap.no-sidebar .page-header {
         position: sticky !important;
-        top: var(--topbar-h) !important;
+        top: 0 !important;
         z-index: 990 !important;
     }
 
@@ -5591,14 +5626,36 @@ body[data-theme="dark"] .glass-range::-moz-range-thumb {
 
     .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) {
         background:
-            linear-gradient(118deg, rgb(255 255 255 / .22) 0%, rgb(255 255 255 / .06) 38%, transparent 72%),
+            linear-gradient(118deg, rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .24)) 0%, rgb(255 255 255 / calc(.02 + var(--glass-opacity) * .08)) 38%, transparent 72%),
             var(--liquid-nav) !important;
     }
 
     body[data-theme="dark"] .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) {
         background:
-            linear-gradient(118deg, rgb(255 255 255 / .12) 0%, rgb(255 255 255 / .035) 38%, transparent 72%),
+            linear-gradient(118deg, rgb(255 255 255 / calc(.04 + var(--glass-opacity) * .12)) 0%, rgb(255 255 255 / calc(.015 + var(--glass-opacity) * .04)) 38%, transparent 72%),
             var(--liquid-nav) !important;
+    }
+
+    .app-layout .topbar :is(.btn-ham, .topbar-brand-mark, .se-notification-trigger--topbar, .header-user) {
+        border-color: rgb(255 255 255 / calc(var(--glass-opacity) + .18)) !important;
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / calc(var(--glass-opacity) + .16)), rgb(255 248 239 / calc(var(--glass-opacity) * .72))),
+            rgb(255 252 247 / calc(var(--glass-opacity) + .08)) !important;
+        box-shadow:
+            0 7px 18px rgb(73 50 29 / calc(var(--glass-opacity) * .18)),
+            inset 0 1px 0 rgb(255 255 255 / calc(var(--glass-opacity) + .32)) !important;
+        backdrop-filter: blur(22px) saturate(155%) !important;
+        -webkit-backdrop-filter: blur(22px) saturate(155%) !important;
+    }
+
+    body[data-theme="dark"] .app-layout .topbar :is(.btn-ham, .topbar-brand-mark, .se-notification-trigger--topbar, .header-user) {
+        border-color: rgb(231 211 168 / calc(.12 + var(--glass-opacity) * .16)) !important;
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .12)), transparent 62%),
+            rgb(24 21 18 / calc(.18 + var(--glass-opacity) * .58)) !important;
+        box-shadow:
+            0 8px 20px rgba(0, 0, 0, .24),
+            inset 0 1px 0 rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .14)) !important;
     }
 
     .app-layout .header-user-menu,
@@ -5624,6 +5681,296 @@ body[data-theme="dark"] .glass-range::-moz-range-thumb {
 
 .page-body :is(.ui-card-head, .table-wrap thead th, .ui-table-wrap thead th) {
     background: var(--liquid-shell-strong) !important;
+}
+
+/* Dark glass needs a restrained luminous edge and accent refraction to retain depth. */
+body[data-theme="dark"] .app-layout .topbar {
+    background:
+        radial-gradient(26rem circle at 12% -40%, color-mix(in srgb, var(--se-atmosphere-secondary) 22%, transparent), transparent 64%),
+        radial-gradient(22rem circle at 88% -36%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 62%),
+        linear-gradient(118deg, rgb(255 255 255 / calc(.04 + var(--glass-opacity) * .12)), rgb(255 255 255 / calc(.012 + var(--glass-opacity) * .04)) 42%, transparent 74%),
+        var(--liquid-nav) !important;
+}
+
+body[data-theme="dark"] .page-body :is(
+    .ui-card, .card, .portal-card, .stat-card, .data-card, .panel,
+    .settings-panel, .monitor-card, .monitor-kpi, .bugs-card,
+    .settings-option, .ui-stat-card
+),
+body[data-theme="dark"] .page-header {
+    border-color: color-mix(in srgb, var(--se-primary) 22%, var(--liquid-stroke-soft)) !important;
+    background:
+        radial-gradient(24rem circle at 100% -12%, color-mix(in srgb, var(--se-atmosphere-primary) 12%, transparent), transparent 64%),
+        radial-gradient(20rem circle at 0% 112%, color-mix(in srgb, var(--se-atmosphere-secondary) 8%, transparent), transparent 68%),
+        linear-gradient(145deg, rgb(255 255 255 / calc(.035 + var(--glass-opacity) * .08)), transparent 48%),
+        var(--liquid-surface-strong) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, .30),
+        0 10px 28px color-mix(in srgb, var(--se-primary) 8%, transparent),
+        inset 0 1px 0 rgb(255 255 255 / calc(.07 + var(--glass-opacity) * .12)),
+        inset 0 -1px 0 rgba(0, 0, 0, .22) !important;
+}
+
+body[data-theme="dark"] .page-body :is(.ui-card-head, .table-wrap thead th, .ui-table-wrap thead th) {
+    background:
+        linear-gradient(120deg, rgb(255 255 255 / calc(.035 + var(--glass-opacity) * .06)), transparent 60%),
+        var(--liquid-shell-strong) !important;
+}
+
+/* Accent-aware surfaces: gold stays the default, while every selected palette
+   also tints navigation identity and ordinary content cards. */
+.app-layout .sidebar {
+    background:
+        radial-gradient(30rem circle at 20% 8%, color-mix(in srgb, var(--se-atmosphere-primary) 28%, transparent), transparent 62%),
+        radial-gradient(26rem circle at 90% 72%, color-mix(in srgb, var(--se-atmosphere-secondary) 20%, transparent), transparent 66%),
+        linear-gradient(180deg, color-mix(in srgb, var(--se-surface) 88%, var(--se-primary)), color-mix(in srgb, var(--se-bg) 90%, var(--se-primary-muted))) !important;
+}
+
+.app-layout .sb-user {
+    border-color: color-mix(in srgb, var(--se-primary) 48%, var(--liquid-stroke-soft)) !important;
+    background:
+        radial-gradient(15rem circle at 100% 0%, color-mix(in srgb, var(--se-atmosphere-primary) 36%, transparent), transparent 68%),
+        radial-gradient(12rem circle at 0% 110%, color-mix(in srgb, var(--se-atmosphere-secondary) 26%, transparent), transparent 70%),
+        linear-gradient(145deg, rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .16)), transparent 52%),
+        color-mix(in srgb, var(--liquid-surface-strong) 86%, var(--se-primary-soft)) !important;
+}
+
+.app-layout :is(.nav-link.active, .nav-group.active > .nav-group-toggle, .nav-group[open] > .nav-group-toggle) {
+    border-color: color-mix(in srgb, var(--se-primary) 38%, var(--se-border)) !important;
+    background:
+        linear-gradient(110deg, color-mix(in srgb, var(--se-primary-soft) 82%, transparent), color-mix(in srgb, var(--se-atmosphere-secondary) 8%, transparent)) !important;
+    color: var(--se-primary-strong) !important;
+}
+
+body:not([data-theme="dark"]) .page-body :is(
+    .ui-card, .card, .portal-card, .stat-card, .data-card, .panel,
+    .settings-panel, .monitor-card, .monitor-kpi, .bugs-card,
+    .settings-option, .ui-stat-card
+) {
+    border-color: color-mix(in srgb, var(--se-primary) 22%, var(--liquid-stroke-soft)) !important;
+    background:
+        radial-gradient(24rem circle at 100% -14%, color-mix(in srgb, var(--se-atmosphere-primary) 10%, transparent), transparent 66%),
+        radial-gradient(18rem circle at 0% 112%, color-mix(in srgb, var(--se-atmosphere-secondary) 6%, transparent), transparent 70%),
+        linear-gradient(145deg, rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .14)), transparent 52%),
+        var(--liquid-surface-strong) !important;
+}
+
+body[data-theme="dark"] .app-layout .sb-user {
+    border-color: color-mix(in srgb, var(--se-primary) 42%, var(--liquid-stroke-soft)) !important;
+    background:
+        radial-gradient(15rem circle at 100% 0%, color-mix(in srgb, var(--se-atmosphere-primary) 28%, transparent), transparent 68%),
+        radial-gradient(12rem circle at 0% 110%, color-mix(in srgb, var(--se-atmosphere-secondary) 20%, transparent), transparent 70%),
+        linear-gradient(145deg, rgb(255 255 255 / calc(.035 + var(--glass-opacity) * .08)), transparent 52%),
+        var(--liquid-surface-strong) !important;
+}
+
+body[data-theme="dark"] .app-layout .sidebar {
+    background:
+        radial-gradient(30rem circle at 20% 8%, color-mix(in srgb, var(--se-atmosphere-primary) 22%, transparent), transparent 62%),
+        radial-gradient(26rem circle at 90% 72%, color-mix(in srgb, var(--se-atmosphere-secondary) 16%, transparent), transparent 66%),
+        var(--liquid-shell) !important;
+}
+
+/* Lightweight Liquid Glass settings cards: blur the shared panel once and
+   render individual choices with inexpensive translucent refraction layers. */
+.settings-shell .settings-panel {
+    background:
+        radial-gradient(42rem circle at 100% -10%, color-mix(in srgb, var(--se-atmosphere-primary) 12%, transparent), transparent 66%),
+        radial-gradient(34rem circle at 0% 104%, color-mix(in srgb, var(--se-atmosphere-secondary) 8%, transparent), transparent 70%),
+        var(--liquid-surface) !important;
+    backdrop-filter: blur(24px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(145%) !important;
+}
+
+.settings-shell .settings-option {
+    overflow: hidden;
+    isolation: isolate;
+    border-color: color-mix(in srgb, var(--se-primary) 24%, var(--liquid-stroke-soft)) !important;
+    background:
+        radial-gradient(15rem circle at 100% -24%, color-mix(in srgb, var(--se-atmosphere-primary) 11%, transparent), transparent 66%),
+        radial-gradient(12rem circle at 0% 120%, color-mix(in srgb, var(--se-atmosphere-secondary) 7%, transparent), transparent 70%),
+        linear-gradient(145deg, rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .14)), transparent 54%),
+        color-mix(in srgb, var(--liquid-surface-strong) 94%, var(--se-primary-soft)) !important;
+    box-shadow:
+        0 10px 24px color-mix(in srgb, var(--se-primary) 6%, transparent),
+        inset 0 1px 0 rgb(255 255 255 / calc(.18 + var(--glass-opacity) * .30)),
+        inset 0 -1px 0 rgba(86, 56, 32, .06) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.settings-shell .settings-option:has(input:checked) {
+    border-color: color-mix(in srgb, var(--se-primary) 48%, var(--liquid-stroke-soft)) !important;
+    background:
+        radial-gradient(16rem circle at 100% -18%, color-mix(in srgb, var(--se-atmosphere-primary) 28%, transparent), transparent 66%),
+        radial-gradient(13rem circle at 0% 118%, color-mix(in srgb, var(--se-atmosphere-secondary) 20%, transparent), transparent 70%),
+        linear-gradient(145deg, rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .18)), transparent 52%),
+        color-mix(in srgb, var(--liquid-surface-strong) 82%, var(--se-primary-soft)) !important;
+    box-shadow:
+        0 14px 30px color-mix(in srgb, var(--se-primary) 14%, transparent),
+        0 0 0 3px color-mix(in srgb, var(--se-primary) 14%, transparent),
+        inset 0 1px 0 rgb(255 255 255 / calc(.24 + var(--glass-opacity) * .34)),
+        inset 0 -1px 0 color-mix(in srgb, var(--se-primary-strong) 10%, transparent) !important;
+}
+
+body[data-theme="dark"] .settings-shell .settings-panel {
+    background:
+        radial-gradient(42rem circle at 100% -10%, color-mix(in srgb, var(--se-atmosphere-primary) 12%, transparent), transparent 66%),
+        radial-gradient(34rem circle at 0% 104%, color-mix(in srgb, var(--se-atmosphere-secondary) 8%, transparent), transparent 70%),
+        var(--liquid-surface) !important;
+}
+
+body[data-theme="dark"] .settings-shell .settings-option {
+    border-color: color-mix(in srgb, var(--se-primary) 22%, var(--liquid-stroke-soft)) !important;
+    background:
+        radial-gradient(15rem circle at 100% -24%, color-mix(in srgb, var(--se-atmosphere-primary) 10%, transparent), transparent 66%),
+        radial-gradient(12rem circle at 0% 120%, color-mix(in srgb, var(--se-atmosphere-secondary) 6%, transparent), transparent 70%),
+        linear-gradient(145deg, rgb(255 255 255 / calc(.025 + var(--glass-opacity) * .07)), transparent 54%),
+        var(--liquid-surface-strong) !important;
+}
+
+body[data-theme="dark"] .settings-shell .settings-option:has(input:checked) {
+    border-color: color-mix(in srgb, var(--se-primary) 46%, var(--liquid-stroke-soft)) !important;
+    background:
+        radial-gradient(16rem circle at 100% -18%, color-mix(in srgb, var(--se-atmosphere-primary) 24%, transparent), transparent 66%),
+        radial-gradient(13rem circle at 0% 118%, color-mix(in srgb, var(--se-atmosphere-secondary) 16%, transparent), transparent 70%),
+        linear-gradient(145deg, rgb(255 255 255 / calc(.04 + var(--glass-opacity) * .09)), transparent 52%),
+        var(--liquid-surface-strong) !important;
+}
+
+/* An open navigation drawer sits above a dimming scrim. Keep its base nearly
+   solid so high user transparency does not let that grey scrim wash it out. */
+.app-layout .sidebar.is-open {
+    background:
+        radial-gradient(30rem circle at 20% 8%, color-mix(in srgb, var(--se-atmosphere-primary) 26%, transparent), transparent 62%),
+        radial-gradient(26rem circle at 90% 72%, color-mix(in srgb, var(--se-atmosphere-secondary) 18%, transparent), transparent 66%),
+        linear-gradient(180deg, color-mix(in srgb, var(--se-surface) 94%, var(--se-primary)), color-mix(in srgb, var(--se-bg) 95%, var(--se-primary-muted))) !important;
+    border-right-color: color-mix(in srgb, var(--se-primary) 28%, var(--se-border)) !important;
+    box-shadow:
+        18px 0 42px rgba(35, 24, 16, .20),
+        inset -1px 0 0 rgb(255 255 255 / .58) !important;
+    opacity: 1 !important;
+}
+
+body[data-theme="dark"] .app-layout .sidebar.is-open {
+    background:
+        radial-gradient(30rem circle at 20% 8%, color-mix(in srgb, var(--se-atmosphere-primary) 20%, transparent), transparent 62%),
+        radial-gradient(26rem circle at 90% 72%, color-mix(in srgb, var(--se-atmosphere-secondary) 14%, transparent), transparent 66%),
+        linear-gradient(180deg, color-mix(in srgb, #171411 94%, var(--se-primary)), color-mix(in srgb, #0f0e0d 96%, var(--se-primary-muted))) !important;
+    border-right-color: color-mix(in srgb, var(--se-primary) 30%, var(--se-border)) !important;
+    box-shadow:
+        18px 0 46px rgba(0, 0, 0, .48),
+        inset -1px 0 0 rgb(255 255 255 / .10) !important;
+}
+
+/* Floating Liquid Glass bottom navigation. One shared blur keeps the material
+   fluid without applying an expensive backdrop filter to every destination. */
+@media (max-width: 767px) {
+    .app-layout .mobile-bottom-nav {
+        width: min(calc(100vw - 1.4rem), 420px) !important;
+        min-height: 72px;
+        gap: .18rem !important;
+        padding: .48rem .52rem calc(.48rem + env(safe-area-inset-bottom, 0px)) !important;
+        border: 1px solid color-mix(in srgb, var(--se-primary) 28%, rgb(255 255 255 / .72)) !important;
+        border-radius: 30px !important;
+        background:
+            radial-gradient(18rem circle at 8% -30%, rgb(255 255 255 / calc(.18 + var(--glass-opacity) * .28)), transparent 64%),
+            radial-gradient(16rem circle at 88% 130%, color-mix(in srgb, var(--se-atmosphere-primary) 20%, transparent), transparent 68%),
+            linear-gradient(118deg, rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .24)), rgb(255 252 247 / calc(.05 + var(--glass-opacity) * .12)) 48%, transparent 82%),
+            rgb(250 244 235 / max(.40, calc(var(--glass-opacity) + .04))) !important;
+        box-shadow:
+            0 22px 54px rgba(45, 31, 20, .22),
+            0 8px 26px color-mix(in srgb, var(--se-primary) 12%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / calc(.34 + var(--glass-opacity) * .42)),
+            inset 0 -1px 0 rgba(98, 66, 42, .10) !important;
+        backdrop-filter: blur(30px) saturate(175%) brightness(1.06) !important;
+        -webkit-backdrop-filter: blur(30px) saturate(175%) brightness(1.06) !important;
+    }
+
+    .mobile-bottom-nav :is(a, button) {
+        min-height: 58px !important;
+        gap: .28rem !important;
+        border: 1px solid transparent !important;
+        border-radius: 22px !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .mobile-bottom-nav .mobile-nav-icon {
+        width: 30px !important;
+        height: 30px !important;
+        border-color: rgb(255 255 255 / calc(.18 + var(--glass-opacity) * .30)) !important;
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / calc(.18 + var(--glass-opacity) * .28)), rgb(255 248 239 / calc(.05 + var(--glass-opacity) * .12))) !important;
+        box-shadow:
+            inset 0 1px 0 rgb(255 255 255 / calc(.30 + var(--glass-opacity) * .40)),
+            0 5px 12px color-mix(in srgb, var(--se-primary) 8%, transparent) !important;
+    }
+
+    .mobile-bottom-nav :is(a, button).active:not(.mobile-scan-tab) {
+        min-height: 58px !important;
+        margin: 0 !important;
+        border-color: color-mix(in srgb, var(--se-primary) 34%, rgb(255 255 255 / .52)) !important;
+        background:
+            radial-gradient(8rem circle at 86% -30%, color-mix(in srgb, var(--se-atmosphere-primary) 28%, transparent), transparent 68%),
+            linear-gradient(145deg, color-mix(in srgb, var(--se-primary-soft) 72%, transparent), rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .16))) !important;
+        box-shadow:
+            0 8px 18px color-mix(in srgb, var(--se-primary) 12%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / calc(.28 + var(--glass-opacity) * .34)) !important;
+    }
+
+    .mobile-bottom-nav .mobile-scan-tab,
+    .mobile-bottom-nav .mobile-scan-tab:not(.active),
+    .mobile-bottom-nav .mobile-scan-tab.active {
+        min-height: 76px !important;
+        margin: -1.35rem -.08rem -.1rem !important;
+        border-color: color-mix(in srgb, var(--se-primary) 58%, rgb(255 255 255 / .58)) !important;
+        border-radius: 25px !important;
+        background:
+            radial-gradient(9rem circle at 18% 0%, rgb(255 255 255 / calc(.16 + var(--glass-opacity) * .26)), transparent 64%),
+            radial-gradient(8rem circle at 88% 112%, color-mix(in srgb, var(--se-atmosphere-secondary) 24%, transparent), transparent 66%),
+            linear-gradient(145deg, color-mix(in srgb, var(--se-primary) 74%, rgb(255 255 255 / calc(.16 + var(--glass-opacity) * .22))), var(--se-primary-button-start) 56%, var(--se-primary-button-end)) !important;
+        box-shadow:
+            0 15px 30px color-mix(in srgb, var(--se-primary-strong) 25%, transparent),
+            0 0 0 1px color-mix(in srgb, var(--se-primary) 20%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / calc(.30 + var(--glass-opacity) * .36)),
+            inset 0 -1px 0 color-mix(in srgb, var(--se-primary-strong) 30%, transparent) !important;
+        color: var(--se-primary-button-text) !important;
+        text-shadow: 0 1px 2px color-mix(in srgb, var(--se-accent-ink) 42%, transparent) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon {
+        width: 36px !important;
+        height: 36px !important;
+        border-color: rgb(255 255 255 / calc(.20 + var(--glass-opacity) * .28)) !important;
+        background: rgb(255 255 255 / calc(.10 + var(--glass-opacity) * .18)) !important;
+        color: var(--se-primary-button-text) !important;
+    }
+
+    body[data-theme="dark"] .app-layout .mobile-bottom-nav {
+        border-color: color-mix(in srgb, var(--se-primary) 30%, rgb(255 255 255 / .18)) !important;
+        background:
+            radial-gradient(18rem circle at 8% -30%, rgb(255 255 255 / calc(.05 + var(--glass-opacity) * .12)), transparent 64%),
+            radial-gradient(16rem circle at 88% 130%, color-mix(in srgb, var(--se-atmosphere-primary) 16%, transparent), transparent 68%),
+            linear-gradient(118deg, rgb(255 255 255 / calc(.035 + var(--glass-opacity) * .08)), transparent 72%),
+            rgb(24 21 18 / max(.44, calc(.22 + var(--glass-opacity) * .58))) !important;
+        box-shadow:
+            0 24px 58px rgba(0, 0, 0, .46),
+            0 8px 28px color-mix(in srgb, var(--se-primary) 10%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .15)) !important;
+    }
+
+    body[data-theme="dark"] .mobile-bottom-nav :is(a, button).active:not(.mobile-scan-tab) {
+        color: var(--se-primary-strong) !important;
+        border-color: color-mix(in srgb, var(--se-primary) 36%, rgb(255 255 255 / .14)) !important;
+        background:
+            radial-gradient(8rem circle at 86% -30%, color-mix(in srgb, var(--se-atmosphere-primary) 22%, transparent), transparent 68%),
+            linear-gradient(145deg, color-mix(in srgb, var(--se-primary-soft) 68%, transparent), rgb(255 255 255 / calc(.03 + var(--glass-opacity) * .06))) !important;
+    }
 }
 
 /* Keep the Settings experience compact and rhythmically consistent on phones. */

@@ -1,0 +1,30 @@
+# Secrets and local credentials
+.env
+.env.*
+auth.json
+cookies.txt
+
+# Database dumps and exports
+*.sql
+*.sqlite
+*.sqlite3
+*.csv
+*.xlsx
+*.xls
+
+# Student uploads, generated files, logs, caches, and dependencies
+storage/
+public/storage/
+public/build/
+vendor/
+node_modules/
+.git/
+.graphify-venv/
+graphify-out/
+
+# IDE and assistant-local configuration
+.codex/
+.cursor/
+.idea/
+.vscode/
+

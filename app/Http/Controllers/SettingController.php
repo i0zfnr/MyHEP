@@ -59,7 +59,7 @@ class SettingController extends Controller
             'locale' => ['required', 'in:en,ms'],
             'theme' => ['required', 'in:light,dark'],
             'accent_theme' => ['nullable', 'in:gold,candy_blue,lavender,orchid,violet'],
-            'glass_transparency' => ['nullable', 'integer', 'min:10', 'max:65'],
+            'glass_transparency' => ['nullable', 'integer', 'min:10', 'max:80'],
         ]);
 
         if ((array_key_exists('glass_transparency', $validated) || array_key_exists('accent_theme', $validated))

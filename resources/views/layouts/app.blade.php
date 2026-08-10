@@ -116,13 +116,14 @@
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background:
-                radial-gradient(circle at 6% 8%, rgba(240, 196, 135, .22), transparent 32%),
-                radial-gradient(circle at 94% 4%, rgba(247, 220, 192, .20), transparent 30%),
-                radial-gradient(circle at 50% 100%, rgba(215, 232, 215, .16), transparent 28%),
-                var(--bg);
+                radial-gradient(circle at 6% 8%, color-mix(in srgb, var(--se-atmosphere-secondary) 28%, transparent), transparent 34%),
+                radial-gradient(circle at 94% 4%, color-mix(in srgb, var(--se-atmosphere-primary) 32%, transparent), transparent 32%),
+                radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--se-primary) 25%, transparent), transparent 30%),
+                color-mix(in srgb, var(--bg) 94%, var(--se-primary));
             color: var(--text);
             position: relative;
             top: 0 !important;
+            transition: background-color var(--dur-slow) var(--ease);
         }
         body > .app-layout {
             margin-top: 0 !important;
@@ -132,9 +133,9 @@
         }
         body[data-theme="dark"] {
             background:
-                radial-gradient(circle at 8% 8%, rgba(215, 191, 168, .12), transparent 34%),
-                radial-gradient(circle at 92% 6%, rgba(242, 201, 153, .08), transparent 30%),
-                var(--bg);
+                radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--se-atmosphere-secondary) 25%, transparent), transparent 36%),
+                radial-gradient(circle at 92% 6%, color-mix(in srgb, var(--se-atmosphere-primary) 28%, transparent), transparent 32%),
+                color-mix(in srgb, var(--bg) 96%, var(--se-primary));
         }
         body[data-theme="dark"] input,
         body[data-theme="dark"] select,
@@ -889,6 +890,14 @@
             min-height: 0;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            overscroll-behavior: contain;
+        }
+        .main-scroll-viewport {
+            flex: 1 1 auto;
+            min-width: 0;
+            min-height: 0;
             overflow-x: hidden;
             overflow-y: auto;
             overscroll-behavior: contain;
@@ -2857,8 +2866,7 @@
     <div class="sb-overlay" id="sbOverlay" aria-hidden="true"></div>
     @endif
 
-    <div class="main-wrap {{ $showDesktopSidebar ? 'has-sidebar' : 'no-sidebar' }}{{ $isStudent && $studentOnDashboard ? ' student-dashboard-mobile-sidebar-shell' : '' }}" data-lenis-main>
-        <div class="main-scroll-inner">
+    <div class="main-wrap {{ $showDesktopSidebar ? 'has-sidebar' : 'no-sidebar' }}{{ $isStudent && $studentOnDashboard ? ' student-dashboard-mobile-sidebar-shell' : '' }}">
         @if($showSidebar)
         <div class="topbar">
             <button class="btn-ham" id="sbToggle" aria-label="{{ __('Buka sidebar') }}" aria-expanded="false" aria-controls="appSidebar">
@@ -2887,6 +2895,9 @@
             </div>
         </div>
         @endif
+
+        <div class="main-scroll-viewport" data-lenis-main>
+        <div class="main-scroll-inner">
 
         @hasSection('header')
             <div class="page-header{{ $showHeaderUserMenu ? ' has-user-menu' : '' }}">
@@ -2947,6 +2958,7 @@
 
         <main class="page-body">@yield('content')</main>
         @include('partials.app_footer')
+        </div>
         </div>
     </div>
 </div>
