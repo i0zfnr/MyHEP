@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +23,8 @@ class StaffAndGuardManagementTest extends TestCase
             $table->string('password');
             $table->string('role');
             $table->string('staff_category')->nullable();
+            $table->string('staff_department')->nullable();
+            $table->string('position')->nullable();
             $table->boolean('is_active')->default(true);
             $table->string('photo')->nullable();
             $table->timestamps();
@@ -142,6 +145,40 @@ class StaffAndGuardManagementTest extends TestCase
             ->assertSee('student-bottom-nav-eligible', false);
     }
 
+    public function test_staff_csv_import_creates_accounts_in_the_matching_departments(): void
+    {
+        $csv = "Bahagian,Nama,No IC,Jawatan,Email\nJTMK,Nur Aina,900101-01-1001,Pensyarah,nur.aina@example.test\nUnit Pengurusan Kewangan,Siti Aminah,900202-02-2002,Pegawai Kewangan,siti.aminah@example.test\n";
+        $file = UploadedFile::fake()->createWithContent('staff.csv', $csv);
+
+        $this->signIn(1, 'system_admin')->post('/admin/staff/import', ['staff_file' => $file])
+            ->assertRedirect('/admin/staff')
+            ->assertSessionHas('success', 'Staff import completed: 2 created, 0 updated, 0 skipped.');
+
+        $this->assertDatabaseHas('admins', [
+            'full_name' => 'NUR AINA', 'ic_no' => '900101011001', 'role' => 'lecturer',
+            'staff_department' => 'jtmk', 'position' => 'Pensyarah',
+        ]);
+        $this->assertDatabaseHas('admins', [
+            'full_name' => 'SITI AMINAH', 'staff_department' => 'unit_pengurusan_kewangan',
+        ]);
+    }
+
+    public function test_official_style_xlsx_department_headings_place_staff_in_the_correct_sections(): void
+    {
+        $file = $this->officialStyleStaffWorkbook();
+
+        $this->signIn(1, 'system_admin')->post('/admin/staff/import', ['staff_file' => $file])
+            ->assertRedirect('/admin/staff')
+            ->assertSessionHas('success', 'Staff import completed: 2 created, 0 updated, 0 skipped.');
+
+        $this->assertDatabaseHas('admins', [
+            'full_name' => 'ALI BIN AHMAD', 'staff_department' => 'pejabat_pengarah', 'position' => 'Pengarah',
+        ]);
+        $this->assertDatabaseHas('admins', [
+            'full_name' => 'LIM MEI LING', 'staff_department' => 'jrkv', 'position' => 'Pensyarah',
+        ]);
+    }
+
     private function signIn(int $id, string $role, ?string $category = null): static
     {
         return $this->withSession(['auth_user' => ['id' => $id, 'role' => 'admin', 'admin_role' => $role, 'staff_category' => $category, 'name' => "Account {$id}"]]);
@@ -152,5 +189,19 @@ class StaffAndGuardManagementTest extends TestCase
         return ['id' => $id, 'full_name' => $name, 'ic_no' => "IC{$id}", 'email' => "user{$id}@example.test",
             'password' => Hash::make('Password123'), 'role' => $role, 'staff_category' => $category,
             'is_active' => true, 'photo' => null, 'created_at' => now(), 'updated_at' => now()];
+    }
+
+    private function officialStyleStaffWorkbook(): UploadedFile
+    {
+        $path = tempnam(sys_get_temp_dir(), 'staff-xlsx-');
+        $zip = new \ZipArchive();
+        $zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $zip->addFromString('[Content_Types].xml', '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>');
+        $zip->addFromString('xl/workbook.xml', '<?xml version="1.0"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Staff" sheetId="1" r:id="rId1"/></sheets></workbook>');
+        $zip->addFromString('xl/_rels/workbook.xml.rels', '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>');
+        $zip->addFromString('xl/worksheets/sheet1.xml', '<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>BIL</t></is></c><c r="B1" t="inlineStr"><is><t>NAMA</t></is></c><c r="E1" t="inlineStr"><is><t>JAWATAN</t></is></c><c r="F1" t="inlineStr"><is><t>NO IC</t></is></c><c r="G1" t="inlineStr"><is><t>EMAIL</t></is></c></row><row r="2"><c r="A2" t="inlineStr"><is><t>PEJABAT PENGARAH</t></is></c></row><row r="3"><c r="A3"><v>1</v></c><c r="B3" t="inlineStr"><is><t>Ali Bin Ahmad</t></is></c><c r="E3" t="inlineStr"><is><t>Pengarah</t></is></c><c r="F3"><v>800101011111</v></c><c r="G3" t="inlineStr"><is><t>ali@example.test</t></is></c></row><row r="4"><c r="A4" t="inlineStr"><is><t>JABATAN REKA BENTUK &amp; KOMUNIKASI VISUAL (JRKV)</t></is></c></row><row r="5"><c r="A5"><v>2</v></c><c r="B5" t="inlineStr"><is><t>Lim Mei Ling</t></is></c><c r="E5" t="inlineStr"><is><t>Pensyarah</t></is></c><c r="F5"><v>810202022222</v></c><c r="G5" t="inlineStr"><is><t>lim@example.test</t></is></c></row></sheetData></worksheet>');
+        $zip->close();
+
+        return new UploadedFile($path, 'staf-polibesut.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
     }
 }

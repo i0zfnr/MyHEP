@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -170,21 +169,6 @@ class LaptopBorrowingTest extends TestCase
         $this->postJson($url.'/staff-check', ['nric' => '900101011234'])->assertOk()->assertJson(['eligible' => false]);
         $this->postJson($url, ['nric' => '900101011234'])->assertUnprocessable();
         $this->assertDatabaseMissing('jhep_laptop_loans', ['laptop_id' => 1]);
-    }
-
-    public function test_system_admin_can_import_all_staff_from_staff_management(): void
-    {
-        $file = UploadedFile::fake()->createWithContent('all-staff.csv', "nric,full_name,department\n900101-01-1234,All Staff Member,JHEP\n");
-
-        $this->signIn(1, null, 'system_admin')->post('/admin/staff/borrowers/import', ['staff_file' => $file])
-            ->assertRedirect(route('admin.staff.index'));
-
-        $this->assertDatabaseHas('jhep_laptop_staff', [
-            'nric' => '900101011234',
-            'full_name' => 'All Staff Member',
-            'department' => 'JHEP',
-            'is_active' => true,
-        ]);
     }
 
     private function signIn(int $id, ?string $category = null, string $role = 'lecturer'): static

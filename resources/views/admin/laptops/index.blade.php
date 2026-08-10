@@ -37,7 +37,7 @@
                     @if($laptop->borrower_name)
                         <strong>{{ $laptop->borrower_name }}</strong>Borrowed {{ \Illuminate\Support\Carbon::parse($laptop->borrowed_at)->format('d M Y, h:i A') }}
                     @else
-                        <strong>Ready to borrow</strong>No active loan
+                        <strong>Ready to borrow</strong>No current borrower
                     @endif
                 </div>
                 <a class="laptop-qr" href="{{ $scanUrl }}" title="Open public borrowing page"><img loading="lazy" alt="QR code for {{ $laptop->name }}" src="https://api.qrserver.com/v1/create-qr-code/?size=360x360&data={{ urlencode($scanUrl) }}"></a>

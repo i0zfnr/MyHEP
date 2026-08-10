@@ -8,6 +8,7 @@
     .account-hero h1{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.18)}
     .account-hero p{color:rgba(255,255,255,.82)!important}
     .account-hero-stat strong{color:#fff!important}
+    .account-toolbar-actions{display:flex;gap:.55rem;flex-wrap:wrap}.account-table .account-department-row td,body.admin-liquid-disabled .account-table .account-department-row td{padding:.72rem 1rem!important;background:linear-gradient(135deg,#65442e,#7d5639)!important;color:#fff8ef!important;border-bottom-color:#513520!important;font-size:.75rem!important;font-weight:900!important;letter-spacing:.07em;text-shadow:0 1px 1px rgba(32,20,12,.28)!important;text-transform:uppercase}.account-position{color:var(--text);font-weight:700}.account-import-dialog{position:fixed;inset:0;width:min(620px,calc(100% - 2rem));max-height:calc(100dvh - 2rem);margin:auto;padding:0;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);box-shadow:0 24px 70px rgba(28,20,14,.28)}.account-import-dialog::backdrop{background:rgba(28,24,20,.52);backdrop-filter:blur(3px)}.account-import-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:1.2rem 1.25rem;border-bottom:1px solid var(--border)}.account-import-head h2{margin:0;font-size:1.1rem}.account-import-head p{margin:.3rem 0 0;color:var(--text-muted);line-height:1.5}.account-import-close{width:40px;min-height:40px!important;padding:0}.account-import-body{display:grid;gap:1rem;padding:1.25rem}.account-import-body input[type=file]{width:100%;min-height:48px;border:1px solid var(--border);border-radius:11px;background:var(--surface-soft);color:var(--text)}.account-import-notes{margin:0;padding-left:1.15rem;color:var(--text-muted);font-size:.78rem;line-height:1.65}.account-import-actions{display:flex;justify-content:flex-end;gap:.6rem}.account-import-errors{margin:0 0 1rem;padding:.85rem 1rem;border:1px solid color-mix(in srgb,var(--danger) 40%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--danger) 7%,var(--surface));color:var(--text);font-size:.8rem}.account-import-errors ul{margin:.4rem 0 0;padding-left:1.1rem}@media(max-width:760px){.account-toolbar-actions{width:100%}.account-toolbar-actions .account-btn{flex:1}.account-department-row td{display:block!important}.account-import-actions{display:grid;grid-template-columns:1fr 1fr}.account-import-actions .account-btn{width:100%}}
 </style>
 @endpush
 
@@ -19,6 +20,7 @@
 <div class="account-wrap">
     @if(session('success'))<div class="msg-ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="msg-err">{{ $errors->first() }}</div>@endif
+    @if(session('import_errors'))<div class="account-import-errors"><strong>Some rows need attention</strong><ul>@foreach(session('import_errors') as $importError)<li>{{ $importError }}</li>@endforeach</ul></div>@endif
 
     <section class="account-hero">
         <div class="account-hero-copy">
@@ -33,40 +35,47 @@
         <div class="account-toolbar">
             <div class="account-toolbar-head">
                 <div><h2>Find {{ $mode === 'staff' ? 'staff members' : 'guards' }}</h2><p>Search and manage account access from one place.</p></div>
-                <a class="account-btn primary" href="{{ $createRoute }}">+ Add {{ $mode === 'staff' ? 'Staff' : 'Guard' }}</a>
+                <div class="account-toolbar-actions">
+                    @if($mode === 'staff')<button class="account-btn" type="button" data-staff-import-open>Import Staff</button>@endif
+                    <a class="account-btn primary" href="{{ $createRoute }}">+ Add {{ $mode === 'staff' ? 'Staff' : 'Guard' }}</a>
+                </div>
             </div>
             <form method="GET" class="account-filters {{ $mode === 'guard' ? 'guard' : '' }}">
                 <div class="account-field">
                     <label for="search">Search</label>
-                    <input id="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Name or IC number">
+                    <input id="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Name, IC, email, or position">
                 </div>
                 @if($mode === 'staff')
                     <div class="account-field">
-                        <label for="category">Staff category</label>
-                        <select id="category" name="category">
-                            <option value="">All categories</option>
-                            @foreach($categories as $value => $label)
-                                <option value="{{ $value }}" @selected(($filters['category'] ?? '') === $value)>{{ $label }}</option>
+                        <label for="department">Department / Unit</label>
+                        <select id="department" name="department">
+                            <option value="">All departments</option>
+                            @foreach($departments as $value => $label)
+                                <option value="{{ $value }}" @selected(($filters['department'] ?? '') === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                 @endif
                 <button class="account-btn" type="submit">Filter</button>
-                @if(!empty($filters['search']) || !empty($filters['category']))<a class="account-btn" href="{{ url()->current() }}">Clear</a>@endif
+                @if(!empty($filters['search']) || !empty($filters['department']))<a class="account-btn" href="{{ url()->current() }}">Clear</a>@endif
             </form>
         </div>
 
         <div class="account-table-wrap">
             <table class="account-table">
-                <thead><tr><th>Account</th><th>IC Number</th>@if($mode === 'staff')<th>Category</th>@endif<th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+                <thead><tr><th>{{ $mode === 'staff' ? 'Staff member' : 'Account' }}</th><th>IC Number</th>@if($mode === 'staff')<th>Position</th><th>Department / Unit</th>@endif<th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
+                    @php($currentDepartment = null)
                     @forelse($accounts as $account)
+                        @if($mode === 'staff' && $currentDepartment !== ($account->staff_department ?? 'other'))
+                            @php($currentDepartment = $account->staff_department ?? 'other')
+                            <tr class="account-department-row"><td colspan="6">{{ $departments[$currentDepartment] ?? 'Other Staff' }}</td></tr>
+                        @endif
                         <tr>
                             <td data-label="Account"><div class="account-name">{{ $account->full_name }}</div><div class="account-meta">{{ $account->email ?: 'No email provided' }}</div></td>
                             <td data-label="IC number">{{ maskIdentityNumber($account->ic_no) }}</td>
-                            @if($mode === 'staff')<td data-label="Category"><span class="account-category">{{ $categories[$account->staff_category] ?? 'General JHEP Staff' }}</span></td>@endif
+                            @if($mode === 'staff')<td data-label="Position"><span class="account-position">{{ $account->position ?: 'Not specified' }}</span></td><td data-label="Department"><span class="account-category">{{ $departments[$account->staff_department] ?? 'Other Staff' }}</span></td>@endif
                             <td data-label="Status"><span class="account-status {{ $account->is_active ? 'active' : 'inactive' }}">{{ $account->is_active ? 'Active' : 'Inactive' }}</span></td>
-                            <td data-label="Created">{{ $account->created_at ? \Illuminate\Support\Carbon::parse($account->created_at)->format('d M Y') : '-' }}</td>
                             <td data-label="Actions"><div class="account-actions">
                                 <a class="account-btn" href="{{ $mode === 'staff' ? route('admin.staff.edit',$account->id) : route('admin.guards.edit',$account->id) }}">Edit</a>
                                 <form method="POST" action="{{ $mode === 'staff' ? route('admin.staff.reset-password',$account->id) : route('admin.guards.reset-password',$account->id) }}" data-confirm-title="Reset password" data-confirm-message="Reset this account password to its default value?" data-confirm-action="Reset">@csrf<button class="account-btn" type="submit">Reset</button></form>
@@ -74,23 +83,41 @@
                             </div></td>
                         </tr>
                     @empty
-                        <tr><td class="account-empty" colspan="{{ $mode === 'staff' ? 6 : 5 }}"><strong>No {{ $mode }} accounts found</strong><span>Try a different search or add the first {{ $mode }} account.</span></td></tr>
+                        <tr><td class="account-empty" colspan="{{ $mode === 'staff' ? 6 : 4 }}"><strong>No {{ $mode }} accounts found</strong><span>Try a different search or add the first {{ $mode }} account.</span></td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </section>
 
-    @if($mode === 'staff')
-        <section class="account-card" style="padding:1.15rem 1.2rem">
-            <div class="account-toolbar-head" style="margin-bottom:.85rem">
-                <div><h2>All-staff laptop borrower registry</h2><p>Import all eligible staff for printed laptop QR borrowing. This does not create a StudentEdge login account.</p></div>
-            </div>
-            <form method="POST" action="{{ route('admin.staff.borrowers.import') }}" enctype="multipart/form-data" style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap">@csrf<input type="file" name="staff_file" accept=".csv,text/csv" required><button class="account-btn primary" type="submit">Import All Staff CSV</button></form>
-            <p style="margin:.75rem 0 0;color:var(--text-muted);font-size:.78rem">Required CSV columns: <code>nric</code> and <code>full_name</code> (optional: <code>department</code>). Matching NRIC records are updated.</p>
-            @error('staff_file')<p class="msg-err" style="margin:.75rem 0 0">{{ $message }}</p>@enderror
-        </section>
-    @endif
     {{ $accounts->links() }}
 </div>
+
+@if($mode === 'staff')
+<dialog class="account-import-dialog" data-staff-import-dialog>
+    <div class="account-import-head"><div><h2>Import Staff</h2><p>Upload the official staff workbook or a structured CSV file.</p></div><button class="account-btn account-import-close" type="button" data-staff-import-close aria-label="Close import window">×</button></div>
+    <form class="account-import-body" method="POST" action="{{ route('admin.staff.import') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="account-field"><label for="staff_file">Staff file</label><input id="staff_file" type="file" name="staff_file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" required></div>
+        <ul class="account-import-notes"><li>Accepted formats: XLSX and CSV, up to 20 MB.</li><li>Recognized fields: Nama, No IC, Jawatan, Email, and Bahagian/Jabatan/Unit.</li><li>Department headings in the official Politeknik Besut workbook are detected automatically.</li><li>New accounts use <strong>Staff@12345</strong>. Existing IC records are updated.</li></ul>
+        <div class="account-import-actions"><button class="account-btn" type="button" data-staff-import-close>Cancel</button><button class="account-btn primary" type="submit">Import Staff</button></div>
+    </form>
+</dialog>
+@endif
 @endsection
+
+@if($mode === 'staff')
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dialog = document.querySelector('[data-staff-import-dialog]');
+    if (!dialog) return;
+    document.querySelector('[data-staff-import-open]')?.addEventListener('click', () => dialog.showModal());
+    dialog.querySelectorAll('[data-staff-import-close]').forEach((button) => button.addEventListener('click', () => dialog.close()));
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+    });
+});
+</script>
+@endpush
+@endif

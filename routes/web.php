@@ -265,7 +265,7 @@ Route::prefix('/admin/staff')->middleware(['auth.session:admin', 'admin.scope:st
     Route::get('/', [StaffManagementController::class, 'index'])->name('index');
     Route::get('/create', [StaffManagementController::class, 'create'])->name('create');
     Route::post('/', [StaffManagementController::class, 'store'])->name('store');
-    Route::post('/borrowers/import', [StaffManagementController::class, 'importBorrowers'])->name('borrowers.import');
+    Route::post('/import', [StaffManagementController::class, 'import'])->name('import');
     Route::get('/{id}/edit', [StaffManagementController::class, 'edit'])->name('edit');
     Route::put('/{id}', [StaffManagementController::class, 'update'])->name('update');
     Route::post('/{id}/reset-password', [StaffManagementController::class, 'resetPassword'])->name('reset-password');
