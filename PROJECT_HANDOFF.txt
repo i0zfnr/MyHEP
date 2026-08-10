@@ -1,5 +1,5 @@
 PROJECT HANDOFF - StudentEdge
-Date: 2026-08-09
+Date: 2026-08-10
 Path: C:\laragon\www\e-biasiswa
 
 SUMMARY
@@ -37,6 +37,25 @@ CURRENT IMPLEMENTATION
 - Dedicated staff/guard management enforces category/page access, active state,
   audit logs, and session revocation. Staff can borrow/return JHEP laptops by QR;
   Head of Student Affairs and System Admin can view inventory and loan history.
+- Admin and Lecturer dashboards currently provide one responsive 3D-styled summary
+  graph with a persistent Show/Hide control. In the current 2026-08-10 build,
+  visualization mode adds the graph above the metric cards instead of replacing
+  those cards. Every Lecturer receives the Discipline Admin-style aggregate
+  overview without gaining unrestricted access to student or offense pages.
+- Monthly Report uses 3D-styled KPI cards, trend columns, and status donuts. Every
+  Lecturer can open Discipline Monthly Analytics; scholarship analytics remain
+  limited to scholarship-authorized roles.
+- Lecturer offense registration is enabled by default, but System Admin can disable
+  `offense_register` per lecturer. `offense_list` is a separate per-account control.
+- Register Student Offense restores the 23 default violated-rule choices through
+  an idempotent migration when an environment is missing the original SQL seed.
+- Student List, Offense List, and Vehicle Sticker use debounced automatic AJAX
+  result updates; Student Movement retains its existing AJAX feed. Status and
+  advanced dropdowns update automatically, including the Offense List status.
+- Authorized student searches cover name, matric number, and NRIC. Movement NRIC
+  search remains limited to roles allowed to access sensitive student identity.
+- Light-theme sidebar navigation uses stronger text contrast when liquid glass
+  transparency reaches 70% or higher, without changing the liquid design.
 
 IMPORTANT FILES
 ---------------
@@ -81,6 +100,39 @@ RELEASE BLOCKERS / RISKS
 
 PLANNED ONLY
 ------------
+- Revise the dashboard visualization toggle into two mutually exclusive modes:
+  Card mode shows the existing metric cards and hides dashboard graphs; Graph mode
+  hides the metric cards and replaces them with a multi-graph analytics layout.
+- Graph mode must contain a full suite of complementary visuals across 4 categories:
+  1. Composition / Distribution Charts:
+     - Pie Chart / Donut Chart for gender distribution & user roles (2-4 categories).
+     - Treemap for dense multi-category breakdowns (e.g. offense counts categorized by specific rules broken).
+     - Stacked Bar for comparing fractional student statuses across class years/programs.
+  2. Comparison & Category Metrics:
+     - Horizontal Bar Chart for ranking specific long-label offense types (e.g., "Late Returns", "Outsiders").
+     - Vertical Column Chart for standard comparison across discrete categories.
+     - Grouped Bar Chart for side-by-side comparisons (e.g. comparing offenses this month vs last month).
+  3. Trends Over Time (Chronological):
+     - Line Chart showing 6-month micro-fluctuations and volume trajectories.
+     - Area Chart highlighting cumulative volume spikes over timelines.
+     - Calendar Heatmap visualizing peak activity days throughout the semester to spot behavioral patterns.
+  4. Status Indicators & Summary Widgets:
+     - KPI Metric Card: Giant number paired with percent change metrics.
+     - Progress Gauge / Radial Bar tracking progress against fixed ceiling metrics or safety targets.
+     - Sparkline: Micro-line charts embedded in summary rows to show direction without massive graph containers.
+- Apply the replacement behavior consistently to Admin and Lecturer dashboards.
+  Each role must see only aggregate datasets already permitted for that role. Keep
+  the saved toggle state, responsive/mobile layout, dark theme, reduced-motion
+  handling, meaningful zero-data states, and accessible chart labels/data summaries.
+- The screenshots `Screenshot 2026-08-10 201342.png` and `Screenshot 2026-08-10
+  201348.png` are the handoff evidence for the current state to be replaced.
+- Password-change clarification: Students can change their own password while
+  signed in from Student Profile by entering the current password and a confirmed
+  new password; this does not request an email code. Admin and Lecturer profiles do
+  not currently provide an in-system self-service password-change form. Their
+  available self-service path is Forgot Password, which sends a six-digit email
+  verification code. Authorized account managers can also set/reset staff passwords
+  through administration; that administrative action does not email a reset code.
 - iPayment receipt authenticity verification is not implemented or confirmed.
   OCR or reading an unknown QR is not proof. Require an official API or documented
   verification contract before automating authenticity; retain human review.

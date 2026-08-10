@@ -347,6 +347,9 @@
                     <span class="rules-selected-count" id="rule_selected_count">{{ __('0 dipilih') }}</span>
                 </div>
                 <div class="rules-list" id="rules_list">
+                @if($offenseTypes->isEmpty())
+                    <div class="rule-row" role="status">{{ __('No violated rules are configured. Run the latest database migrations or contact the System Admin.') }}</div>
+                @endif
                 @foreach($offenseTypes as $type)
                     <div class="rule-row" data-requires-note="{{ $type->requires_note ? '1' : '0' }}" data-rule-text="{{ strtolower(__($type->rule_reference) . ' ' . __($type->description)) }}">
                         <div class="rule-top">

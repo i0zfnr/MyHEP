@@ -177,6 +177,26 @@ body.admin-liquid-disabled :is(.card, .panel, .ui-card, .portal-card, .stat-card
     transform: none !important;
 }
 
+/* Keep navigation readable when the light liquid material is near maximum transparency. */
+html[data-theme="light"][data-glass-high="true"] .app-layout .sidebar :is(.sb-brand-name, .sb-user-name) {
+    color: #241a12 !important;
+    text-shadow: 0 1px 0 rgba(255,255,255,.9);
+}
+
+html[data-theme="light"][data-glass-high="true"] .app-layout .sidebar :is(.sb-brand-sub, .sb-user-role, .nav-label) {
+    color: #664c39 !important;
+    text-shadow: 0 1px 0 rgba(255,255,255,.88);
+}
+
+html[data-theme="light"][data-glass-high="true"] .app-layout .sidebar .nav-link:not(.nav-system-controls) {
+    color: #493729 !important;
+    text-shadow: 0 1px 0 rgba(255,255,255,.92);
+}
+
+html[data-theme="light"][data-glass-high="true"] .app-layout .sidebar :is(.nav-icon, .nav-chevron) {
+    color: #765433 !important;
+}
+
 /* On phones, navigation and page titles stay in document flow to avoid covering content. */
 @media (max-width: 1023px) {
     .app-layout .topbar {

@@ -286,10 +286,14 @@ class MovementController extends Controller
 
         if (!empty($filters['q'])) {
             $q = trim((string) $filters['q']);
-            $query->where(function ($sub) use ($q) {
+            $canSearchIdentity = adminCan('students.sensitive');
+            $query->where(function ($sub) use ($q, $canSearchIdentity) {
                 $sub->where('students.full_name', 'like', "%{$q}%")
                     ->orWhere('students.matric_no', 'like', "%{$q}%")
                     ->orWhere('students.program', 'like', "%{$q}%");
+                if ($canSearchIdentity) {
+                    $sub->orWhere('students.ic_no', 'like', "%{$q}%");
+                }
             });
         }
 

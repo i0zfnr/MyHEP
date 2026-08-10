@@ -3,6 +3,61 @@ import 'cropperjs/dist/cropper.css';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 
+const initializeLiveFilters = () => {
+    document.querySelectorAll('[data-live-filter-form]').forEach((form) => {
+        if (!(form instanceof HTMLFormElement) || form.dataset.liveFilterReady === 'true') return;
+        form.dataset.liveFilterReady = 'true';
+        const status = form.querySelector('[data-live-filter-status]');
+        let timer = null;
+        let request = null;
+
+        const run = async (requestedUrl = null) => {
+            request?.abort();
+            request = new AbortController();
+            const url = requestedUrl instanceof URL ? requestedUrl : new URL(form.action || window.location.href, window.location.origin);
+            if (!(requestedUrl instanceof URL)) {
+                const params = new URLSearchParams(new FormData(form));
+                [...params.entries()].forEach(([key, value]) => { if (!String(value).trim()) params.delete(key); });
+                url.search = params.toString();
+            }
+            if (status) status.textContent = 'Searching…';
+            form.setAttribute('aria-busy', 'true');
+
+            try {
+                const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, signal: request.signal });
+                if (!response.ok) throw new Error('Search request failed');
+                const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+                const next = page.querySelector('[data-live-filter-results]');
+                const current = document.querySelector('[data-live-filter-results]');
+                if (!next || !current) throw new Error('Search results missing');
+                current.replaceWith(next);
+                window.history.replaceState({}, '', `${url.pathname}${url.search}`);
+                if (status) status.textContent = 'Results updated';
+            } catch (error) {
+                if (error.name !== 'AbortError' && status) status.textContent = 'Unable to update results';
+            } finally {
+                form.removeAttribute('aria-busy');
+            }
+        };
+
+        const schedule = () => {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(() => run(), Number(form.dataset.liveFilterDelay || 350));
+        };
+        form.addEventListener('submit', (event) => { event.preventDefault(); run(); });
+        form.querySelectorAll('input').forEach((field) => field.addEventListener('input', schedule));
+        form.querySelectorAll('select').forEach((field) => field.addEventListener('change', () => run()));
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest('[data-live-filter-results] a[href]');
+            if (!link) return;
+            const url = new URL(link.href, window.location.origin);
+            if (url.origin !== window.location.origin) return;
+            event.preventDefault();
+            run(url);
+        });
+    });
+};
+
 const PWA_PROMPT_KEY = 'studentedge-pwa-dismissed-v1';
 const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
 const THEME_KEY = 'studentedge-theme';
@@ -30,9 +85,11 @@ const applyGlassTransparency = (value, persist = true) => {
     const transparency = updateGlassControls(value);
     document.documentElement.style.setProperty('--glass-opacity', ((100 - transparency) / 100).toFixed(2));
     document.documentElement.dataset.glassTransparency = String(transparency);
+    document.documentElement.dataset.glassHigh = transparency >= 70 ? 'true' : 'false';
 
     if (document.body) {
         document.body.dataset.glassTransparency = String(transparency);
+        document.body.dataset.glassHigh = transparency >= 70 ? 'true' : 'false';
     }
 
     if (persist) {
@@ -1440,6 +1497,7 @@ if ('serviceWorker' in navigator) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    initializeLiveFilters();
     syncPwaDisplayMode();
     registerThemeUi();
     registerLiquidGlassUi();

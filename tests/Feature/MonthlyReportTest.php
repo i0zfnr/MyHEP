@@ -46,6 +46,11 @@ class MonthlyReportTest extends TestCase
             'full_name' => 'System Admin',
             'role' => 'system_admin',
         ]);
+        \Illuminate\Support\Facades\DB::table('admins')->insert([
+            'id' => 2,
+            'full_name' => 'General Lecturer',
+            'role' => 'lecturer',
+        ]);
     }
 
     public function test_zero_activity_report_uses_compact_empty_states(): void
@@ -66,5 +71,23 @@ class MonthlyReportTest extends TestCase
             ->assertSee('No scholarship records this month')
             ->assertSee('href="#disciplineReport"', false)
             ->assertSee('href="#scholarshipReport"', false);
+    }
+
+    public function test_every_lecturer_can_view_discipline_monthly_analytics(): void
+    {
+        $response = $this->withSession([
+            'auth_user' => [
+                'id' => 2,
+                'role' => 'admin',
+                'admin_role' => 'lecturer',
+                'staff_category' => null,
+                'name' => 'General Lecturer',
+            ],
+        ])->get('/admin/reports/monthly?month=2026-08');
+
+        $response->assertOk()
+            ->assertSee('Discipline Operations')
+            ->assertSee('Discipline Activity Trends')
+            ->assertDontSee('Scholarship Operations');
     }
 }

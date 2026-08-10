@@ -208,7 +208,7 @@
         </div>
 
         <div class="filters" data-filter-sheet data-filter-title="{{ __('Vehicle sticker filters') }}">
-            <form method="GET" action="{{ route('admin.vehicle-stickers.index') }}">
+            <form method="GET" action="{{ route('admin.vehicle-stickers.index') }}" data-live-filter-form data-live-filter-delay="350">
                 <div class="filter-grid">
                     <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama pelajar / matrik / no kenderaan') }}"></div>
                     <div>
@@ -219,14 +219,12 @@
                             @endforeach
                         </select>
                     </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn" type="submit">{{ __('Filter') }}</button>
-                        <a class="btn" href="{{ route('admin.vehicle-stickers.index') }}">{{ __('Reset') }}</a>
-                    </div>
+                    <span data-live-filter-status aria-live="polite" style="font-size:.75rem;color:var(--text-muted);"></span>
                 </div>
             </form>
         </div>
 
+        <div data-live-filter-results>
         <div style="overflow-x:auto;">
             <table>
                 <thead><tr><th>{{ __('Pelajar') }}</th><th>{{ __('Kenderaan') }}</th><th>{{ __('Dokumen') }}</th><th>{{ __('Status') }}</th><th>{{ __('Disemak Oleh') }}</th><th>{{ __('Tarikh') }}</th><th>{{ __('Tindakan') }}</th></tr></thead>
@@ -284,9 +282,9 @@
                 </tbody>
             </table>
         </div>
+        <div style="margin-top:14px;">{{ $applications->links() }}</div>
+        </div>
     </div>
-
-    <div style="margin-top:14px;">{{ $applications->links() }}</div>
 </div>
 @endsection
 

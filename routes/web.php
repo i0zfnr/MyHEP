@@ -167,7 +167,7 @@ Route::get('/admin/system-monitoring/live', [AdminDashboardController::class, 'l
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.system-monitoring.live');
 Route::get('/admin/reports/monthly', [AdminReportController::class, 'monthly'])
-    ->middleware(['auth.session:admin', 'admin.scope:backoffice'])
+    ->middleware(['auth.session:admin', 'admin.scope:reports'])
     ->name('admin.reports.monthly');
 Route::get('/admin/student-scholarship-status', [StudentScholarshipStatusController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
@@ -896,6 +896,7 @@ Route::get('/admin/offenses', function (Request $request) {
         $query->where(function ($sub) use ($q) {
             $sub->where('students.full_name', 'like', "%{$q}%")
                 ->orWhere('students.matric_no', 'like', "%{$q}%")
+                ->orWhere('students.ic_no', 'like', "%{$q}%")
                 ->orWhere('offenses.place', 'like', "%{$q}%");
         });
     }
@@ -1883,6 +1884,7 @@ Route::get('/admin/vehicle-stickers', function (Request $request) {
         $query->where(function ($sub) use ($q) {
             $sub->where('students.full_name', 'like', "%{$q}%")
                 ->orWhere('students.matric_no', 'like', "%{$q}%")
+                ->orWhere('students.ic_no', 'like', "%{$q}%")
                 ->orWhere('vehicle_sticker_applications.vehicle_no', 'like', "%{$q}%");
         });
     }

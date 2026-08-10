@@ -11,6 +11,7 @@ class AdminPermissions
         'students' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],
         'movement' => ['guard', 'discipline_admin', 'student_affairs_head', 'system_admin'],
         'backoffice' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
+        'reports' => ['lecturer', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
         'system' => ['system_admin'],
         'students.list' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],
         'students.lookup' => ['lecturer', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],

@@ -1,6 +1,6 @@
 # StudentEdge Project Progress and Next Steps
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 ## 1. Executive status
 
@@ -30,6 +30,13 @@ The codebase remains a modular Laravel monolith. `StudentEdge.sql` is still requ
 - Resend API mail transport for password-reset codes plus a throttled System Admin email-delivery test with reference-based error logging
 - Dedicated lecturer/JHEP staff and guard account management with active-state enforcement, scoped page access, audited changes, and session revocation
 - Transactional QR laptop borrowing/return with inventory and loan history
+- Partial dashboard visualization: one responsive 3D-styled summary graph and a persistent toggle are implemented, but graph mode currently leaves the metric cards visible
+- Discipline Admin-style aggregate dashboard and Discipline Monthly Analytics access for every Lecturer, while retaining individual offense page controls
+- 3D-styled Monthly Report KPI cards, six-month trend columns, and status donuts with mobile/print fallbacks
+- Restored default violated-rule catalogue through an idempotent migration for installations missing the original SQL seed
+- Debounced automatic AJAX filtering for Student List, Offense List, and Vehicle Sticker, complementing the existing asynchronous Student Movement feed
+- Name, matric-number, and permission-aware NRIC lookup across the requested student-related administration lists
+- High-transparency light-theme sidebar text contrast correction without changing the liquid design
 
 ## 3. Current role and privacy model
 
@@ -101,6 +108,32 @@ Confirm `storage/app/private/student_documents` is writable by PHP, excluded fro
 - Keep admin AI read-only and student AI disabled until privacy, prompt, permission, and audit boundaries are approved.
 
 ## 8. Planned functions, not implemented
+
+### Dashboard visualizations and display toggle — revision required
+
+- Current state: Admin and Lecturer dashboards render one responsive 3D-styled horizontal summary graph. Every Lecturer receives the same aggregate discipline/movement overview presentation as Discipline Admin, while protected page links still follow individual controls.
+- Current defect: enabling visualization adds that graph above the complete metric-card grid. The 2026-08-10 screenshots `201342` and `201348` confirm that cards and graph remain visible together.
+- Required behavior: the toggle must switch between mutually exclusive Card and Graph modes. Card mode displays the existing metric cards and no dashboard graphs. Graph mode hides those metric cards and replaces them with a multi-graph analytics layout.
+- Graph mode should provide several complementary views, for example a six-month offense trend, offense/payment status distribution, movement activity comparison, and unresolved-workload chart. Use only role-authorized aggregate data, avoid redundant charts, retain useful zero-data states, and preserve the saved per-account preference.
+- The replacement layout must remain responsive, readable in light/dark themes, keyboard and screen-reader understandable, reduced-motion safe, and usable by every Lecturer without broadening offense/student page permissions.
+
+### Discipline UI and automatic list search — implemented 2026-08-10
+
+- An idempotent migration restores the 23 default `offense_types` rows when an installation is missing the original SQL seed. Existing matching rows are retained, and the migration does not remove referenced rules on rollback.
+- Student List, Offense List, and Vehicle Sticker now update result regions through debounced asynchronous requests without Filter/Reset buttons. Pagination remains asynchronous and stale requests are aborted. Student Movement retains its cursor-based asynchronous feed and automatic search.
+- Offense status remains a dropdown and updates results immediately. Name and matric searches are supported throughout; NRIC search is available only where the signed-in role has sensitive-student permission.
+
+### Light-theme sidebar readability — implemented 2026-08-10
+
+The light-theme sidebar now switches to stronger text/icon colors when liquid transparency is 70% or higher. The application slider currently has a safe maximum of 80%, so this covers the reported near-maximum condition while preserving the slider behavior, layout, and liquid material.
+
+### Password change behavior confirmed from the current implementation
+
+- Student: while signed in, the Student Profile form accepts the current password plus a confirmed new password of at least eight characters. It changes the password directly without an email verification code and revokes the student's other active sessions.
+- Admin and Lecturer: the current Admin Profile supports account information and profile-photo management but has no self-service password-change form. If the user uses Forgot Password, the shared recovery flow requires the emailed six-digit verification code before accepting a new password.
+- Administrative reset: an authorized account manager can set or reset admin/lecturer passwords from account management without sending the user a verification code. This is an administrator-controlled action, not the user's own in-system change flow.
+
+Violated-rules restoration, automatic list searches, sidebar contrast correction, Lecturer aggregate analytics access, and the initial 3D visualization are implemented. The dashboard visualization mode still requires the card-to-multiple-graphs replacement described above. The admin/lecturer self-service password-change form also remains planned.
 
 ### iPayment receipt authenticity verification
 

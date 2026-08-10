@@ -12,7 +12,8 @@ class ReportController extends Controller
 {
     public function monthly(Request $request): View
     {
-        $hasDisciplineAccess = canAccessDisciplineAdmin();
+        $hasDisciplineAccess = canAccessDisciplineAdmin()
+            || (session('auth_user.admin_role') ?? null) === 'lecturer';
         $hasScholarshipAccess = canAccessScholarshipAdmin();
 
         $monthInput = (string) $request->query('month', '');

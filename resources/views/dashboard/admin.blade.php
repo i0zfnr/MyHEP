@@ -136,6 +136,15 @@
         color: var(--c-text-muted);
         white-space: nowrap;
     }
+    .dash-hero-actions { position:relative; z-index:1; display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; justify-content:flex-end; }
+    .viz-mode { display:inline-flex; align-items:center; gap:2px; padding:4px; border:1px solid var(--c-border-strong); border-radius:999px; background:var(--c-surface); box-shadow:var(--shadow-sm); }
+    .viz-mode-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border:0; border-radius:999px; background:transparent; color:var(--c-text-secondary); font:inherit; font-size:.74rem; font-weight:700; cursor:pointer; transition:background 160ms ease, color 160ms ease; }
+    .viz-mode-btn svg { width:13px; height:13px; }
+    .viz-mode-btn:hover { color:var(--c-text-primary); }
+    .viz-mode-btn[aria-pressed="true"] { background:var(--c-accent); color:#fff; }
+    .viz-mode-btn[aria-pressed="true"] svg { color:inherit; }
+    .viz-mode-btn:focus-visible { outline:none; box-shadow:var(--shadow-focus); }
+    @media (max-width:640px) { .dash-hero { align-items:flex-start; } .dash-hero-actions { width:100%; justify-content:space-between; } }
 
     /* ── Alert ── */
     .ui-alert-success {
@@ -928,9 +937,23 @@
                 @endif
             </p>
         </div>
-        <div class="dash-hero-date">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="display:inline;vertical-align:-2px;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            {{ now()->format('d M Y') }}
+        <div class="dash-hero-actions">
+            @if(!empty($analytics['domains']))
+            <div class="viz-mode" role="group" aria-label="{{ __('Dashboard view mode') }}">
+                <button type="button" class="viz-mode-btn" data-dashboard-mode="cards" aria-pressed="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 17a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zm10-6a1 1 0 011-1h4a1 1 0 011 1v8a1 1 0 01-1 1h-4a1 1 0 01-1-1v-8z"/></svg>
+                    {{ __('Cards') }}
+                </button>
+                <button type="button" class="viz-mode-btn" data-dashboard-mode="graphs" aria-pressed="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    {{ __('Graphs') }}
+                </button>
+            </div>
+            @endif
+            <div class="dash-hero-date">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="display:inline;vertical-align:-2px;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                {{ now()->format('d M Y') }}
+            </div>
         </div>
     </div>
 
@@ -944,7 +967,7 @@
                     Laporan Bulanan
                 </a>
             @endif
-            @if($hasMovementAccess)
+            @if($canAccessMovementModule)
                 <a href="{{ route('admin.movements.qr') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zm-12 12h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zM9 6h6M6 9v6M18 9v6M9 18h6"/></svg>
                     Guard House QR
@@ -959,14 +982,18 @@
                 </a>
             @endif
             @if($hasDisciplineAccess)
+                @if($canRegisterOffense)
                 <a href="{{ route('admin.offenses.create') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     Daftar Kesalahan
                 </a>
+                @endif
+                @if($canViewOffenseList)
                 <a href="{{ route('admin.offenses.index') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                     Senarai Kesalahan
                 </a>
+                @endif
             @endif
             @if($hasScholarshipAccess)
                 <a href="{{ route('admin.scholarships.index') }}" class="portal-link">
@@ -986,6 +1013,8 @@
             @endif
         </div>
     </div>
+
+    @include('dashboard.partials.admin_analytics', ['analytics' => $analytics])
 
     @if(($showSystemMonitoring ?? false) && !empty($systemMonitoring))
         <p class="section-heading">System Monitoring</p>
@@ -1163,10 +1192,10 @@
             <div class="data-card">
                 <div class="data-card-head">
                     <strong>Rekod Kesalahan Terkini</strong>
-                    <a class="btn-ghost" href="{{ route('admin.offenses.index') }}">
+                    @if($canViewOffenseList)<a class="btn-ghost" href="{{ route('admin.offenses.index') }}">
                         Lihat Semua
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </a>
+                    </a>@endif
                 </div>
                 @if($recentOffenses->isEmpty())
                     <div class="empty-state">
@@ -1200,10 +1229,10 @@
             <div class="data-card">
                 <div class="data-card-head">
                     <strong>Resit Bayaran Terkini</strong>
-                    <a class="btn-ghost" href="{{ route('admin.offenses.index', ['status' => 'applied']) }}">
+                    @if($canViewOffenseList)<a class="btn-ghost" href="{{ route('admin.offenses.index', ['status' => 'applied']) }}">
                         Buka Senarai Kesalahan
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </a>
+                    </a>@endif
                 </div>
                 @if($recentFineApplications->isEmpty())
                     <div class="empty-state">
@@ -1385,6 +1414,26 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const dashboard = document.querySelector('.adash');
+    const modeButtons = document.querySelectorAll('[data-dashboard-mode]');
+    if (dashboard && modeButtons.length) {
+        const preferenceKey = `studentedge-dashboard-viz-{{ session('auth_user.id') }}-{{ session('auth_user.admin_role') }}`;
+        const applyMode = (mode) => {
+            dashboard.setAttribute('data-dashboard-mode', mode);
+            modeButtons.forEach((button) => {
+                button.setAttribute('aria-pressed', button.dataset.dashboardMode === mode ? 'true' : 'false');
+            });
+        };
+        applyMode(window.localStorage.getItem(preferenceKey) === 'on' ? 'graphs' : 'cards');
+        modeButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const mode = button.dataset.dashboardMode;
+                applyMode(mode);
+                window.localStorage.setItem(preferenceKey, mode === 'graphs' ? 'on' : 'off');
+            });
+        });
+    }
+
     const root = document.querySelector('[data-system-monitoring]');
     if (!root) return;
 

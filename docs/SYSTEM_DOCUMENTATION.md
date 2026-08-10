@@ -69,7 +69,7 @@ Admin role values:
 
 | Role | Scope |
 | --- | --- |
-| `lecturer` | Limited AJAX student lookup and only the offense register/list pages individually enabled by a System Admin |
+| `lecturer` | Discipline-style aggregate dashboard and Discipline Monthly Analytics, limited AJAX student lookup, and offense register/list pages individually controlled by a System Admin |
 | `scholarship_admin` | Scholarship records, scholarship announcements, scholarship status review |
 | `discipline_admin` | Discipline records, rules, fines, vehicle stickers, discipline announcements, movement |
 | `guard` | Movement-related access |
@@ -101,7 +101,7 @@ Public pages and shared functions include:
 
 - Home page with live system overview counts.
 - Login and logout.
-- Forgot password, email verification code, and password reset. The six-digit code is valid for 15 minutes and is sent through the configured Laravel mailer; the code is not sent by Web Push.
+- Forgot password, email verification code, and password reset for Student and Admin login roles. The six-digit code is valid for 15 minutes and is sent through the configured Laravel mailer; the code is not sent by Web Push. This recovery code is not required when a signed-in student changes a password from Student Profile.
 - Problem reporting form.
 - Language switching between English and Malay.
 - Theme switching between light and dark.
@@ -149,6 +149,8 @@ Important routes:
 - `GET /student/dashboard`
 - `GET|POST /student/profile`
 - `POST /student/profile/password`
+
+The signed-in student password-change route verifies the current password (or the IC fallback when no custom password exists), requires a confirmed new password of at least eight characters, and revokes the student's other active sessions. Admin and Lecturer profiles do not currently expose an equivalent self-service password-change route; those users use the email-code Forgot Password flow, or an authorized account manager performs an administrative set/reset.
 
 ### 5.3 Scholarship Module
 
@@ -302,6 +304,7 @@ Authorized admins can manage student accounts according to distinct abilities; s
 Student management:
 
 - List, search, filter, create, edit, delete, and export students.
+- Student List uses debounced automatic result updates for name, matric number, program, and authorized NRIC/password-status queries. Offense List and Vehicle Sticker use the same shared asynchronous filtering behavior; status dropdowns update immediately and pagination does not require a full navigation.
 - Reset student password to IC fallback by clearing `students.password`.
 - Track whether student uses default IC login or custom password.
 - Mask IC numbers in list and print contexts for roles without sensitive-data access.
@@ -372,6 +375,8 @@ The system provides:
 
 - Monthly report page.
 - Admin dashboard metrics.
+- Current dashboard visualization behavior: Admin and Lecturer dashboards have one responsive 3D-styled horizontal summary graph with a saved Show/Hide control. When enabled, the graph is currently added above the metric cards. A documented follow-up must make Card and Graph modes mutually exclusive and replace the cards with several complementary graphs in Graph mode. Every Lecturer sees the Discipline Admin-style aggregate overview, but page links and write actions still follow individual permissions.
+- Monthly Report uses 3D-styled KPI cards, six-month columns, and status donuts. Every Lecturer can view Discipline Monthly Analytics; scholarship analytics remain role-scoped.
 - Live system monitoring for system admins.
 - Maintenance mode controls.
 - System cache controls.
@@ -566,6 +571,7 @@ Desktop student navigation:
 - The student dashboard does not show a desktop sidebar and uses the full workspace.
 - Student module pages retain the normal sticky sidebar on desktop for frequent module navigation.
 - Admin desktop navigation retains the shared sidebar.
+- In the light theme, sidebar text/icons switch to stronger contrast when liquid transparency reaches 70% or higher; the liquid layout and material remain unchanged.
 
 Mobile navigation:
 

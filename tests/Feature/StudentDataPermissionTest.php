@@ -37,11 +37,21 @@ class StudentDataPermissionTest extends TestCase
             $table->string('description');
             $table->boolean('requires_note')->default(false);
         });
+        Schema::create('lecturer_page_access', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('admin_id');
+            $table->string('page_key');
+            $table->boolean('enabled')->default(true);
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->timestamps();
+            $table->unique(['admin_id', 'page_key']);
+        });
 
         DB::table('admins')->insert([
             ['id' => 1, 'full_name' => 'Campus Guard', 'role' => 'guard'],
             ['id' => 2, 'full_name' => 'Scholarship Officer', 'role' => 'scholarship_admin'],
             ['id' => 3, 'full_name' => 'Discipline Officer', 'role' => 'discipline_admin'],
+            ['id' => 4, 'full_name' => 'General Lecturer', 'role' => 'lecturer'],
         ]);
         DB::table('students')->insert([
             'id' => 10,
@@ -54,6 +64,26 @@ class StudentDataPermissionTest extends TestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+    }
+
+    public function test_lecturer_can_register_offense_by_default_but_individual_page_control_can_disable_it(): void
+    {
+        $this->signIn(4, 'lecturer', 'General Lecturer')
+            ->get('/admin/offenses/create')
+            ->assertOk();
+
+        DB::table('lecturer_page_access')->insert([
+            'admin_id' => 4,
+            'page_key' => 'offense_register',
+            'enabled' => false,
+            'updated_by' => 3,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->signIn(4, 'lecturer', 'General Lecturer')
+            ->get('/admin/offenses/create')
+            ->assertForbidden();
     }
 
     public function test_guard_can_use_basic_directory_without_receiving_sensitive_fields_or_actions(): void

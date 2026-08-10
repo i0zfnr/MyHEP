@@ -344,7 +344,7 @@
         </div>
 
         <div class="filters" data-filter-sheet data-filter-title="{{ __('Student filters') }}">
-            <form method="GET" action="{{ route('admin.students.index') }}">
+            <form method="GET" action="{{ route('admin.students.index') }}" data-live-filter-form data-live-filter-delay="350">
                 <div class="filter-grid">
                     <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ $canViewSensitiveStudents ? __('Cari nama / IC') : __('Cari nama') }}"></div>
                     <div><input type="text" name="matric_no" value="{{ $filters['matric_no'] ?? '' }}" placeholder="{{ __('Cari no matrik') }}"></div>
@@ -358,14 +358,12 @@
                             </select>
                         </div>
                     @endif
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn" type="submit">{{ __('Filter') }}</button>
-                        <a class="btn" href="{{ route('admin.students.index') }}">{{ __('Reset') }}</a>
-                    </div>
+                    <span data-live-filter-status aria-live="polite" style="font-size:.75rem;color:var(--text-muted);"></span>
                 </div>
             </form>
         </div>
 
+        <div data-live-filter-results>
         <div class="student-table-wrap" style="overflow-x:auto;">
             <table class="students-table">
                 <thead>
@@ -388,7 +386,7 @@
                                 <div class="student-identity">
                                     <span class="student-avatar" aria-hidden="true">
                                         {{ strtoupper(substr(trim($student->full_name), 0, 2)) }}
-                                        @if($student->photo)
+                                        @if($student->photo ?? null)
                                             <img src="{{ asset('storage/' . ltrim($student->photo, '/')) }}" alt="" onerror="this.remove()">
                                         @endif
                                     </span>
@@ -444,9 +442,10 @@
                 </tbody>
             </table>
         </div>
+        </div>
+        <div class="student-pagination" style="margin-top:14px;">{{ $students->onEachSide(1)->links('vendor.pagination.studentedge') }}</div>
+        </div>
     </div>
-
-    <div class="student-pagination" style="margin-top:14px;">{{ $students->onEachSide(1)->links('vendor.pagination.studentedge') }}</div>
 </div>
 @endsection
 
