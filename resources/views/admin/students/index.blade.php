@@ -4,7 +4,11 @@
 
 @push('styles')
 <style>
-    .wrap { max-width: 1150px; margin: 0 auto; }
+    .page-body > .student-list-wrap {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
     .card { background:#fff; border:1px solid #ede4d9; border-radius:12px; overflow:hidden; }
     .stats { display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:12px; }
     @media (min-width: 900px) { .stats { grid-template-columns:repeat(3,1fr); } }
@@ -73,7 +77,8 @@
             linear-gradient(180deg, #faf7f2 0%, #f6f1ea 100%);
     }
     .wrap {
-        width: min(1180px, 100%);
+        width: 100%;
+        max-width: none;
         position: relative;
         isolation: isolate;
     }
@@ -251,7 +256,7 @@
 @endsection
 
 @section('content')
-<div class="wrap">
+<div class="wrap student-list-wrap">
     @php($canViewSensitiveStudents = adminCan('students.sensitive'))
     @php($canExportStudents = adminCan('students.export'))
     @php($canManageStudents = adminCan('students.manage'))

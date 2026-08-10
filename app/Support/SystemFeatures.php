@@ -16,6 +16,10 @@ class SystemFeatures
             'label' => 'AI Helper',
             'description' => 'AI-assisted back-office guidance for authorized administrators.',
         ],
+        'admin_liquid_design' => [
+            'label' => 'Liquid Design for Administrators',
+            'description' => 'Use liquid glass effects for non-system administrators. Turn this off for solid, higher-contrast panels with clearer borders and reduced visual effects.',
+        ],
     ];
 
     public function exists(string $key): bool
@@ -39,6 +43,11 @@ class SystemFeatures
         return collect(self::FEATURES)->map(function (array $feature, string $key): array {
             return array_merge($feature, ['key' => $key, 'enabled' => $this->enabled($key)]);
         })->values()->all();
+    }
+
+    public function adminLiquidDesignEnabled(?string $adminRole): bool
+    {
+        return $adminRole === 'system_admin' || $this->enabled('admin_liquid_design');
     }
 
     public function set(string $key, bool $enabled, int $adminId): void

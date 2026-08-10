@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\SystemFeatures;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -48,6 +49,24 @@ class AiHelperFeatureControlTest extends TestCase
             ->assertSee('AI Helper');
         $this->actingAsSystemAdmin()->post('/admin/ai-helper', ['question' => 'Test'])
             ->assertStatus(503);
+    }
+
+    public function test_system_admin_can_disable_liquid_design_for_other_administrators(): void
+    {
+        $this->actingAsSystemAdmin()
+            ->patch('/admin/features/admin_liquid_design', ['enabled' => 0])
+            ->assertRedirect('/admin/features');
+
+        $this->assertDatabaseHas('system_features', [
+            'feature_key' => 'admin_liquid_design',
+            'enabled' => false,
+        ]);
+
+        $features = app(SystemFeatures::class);
+        $this->assertFalse($features->adminLiquidDesignEnabled('discipline_admin'));
+        $this->assertFalse($features->adminLiquidDesignEnabled('scholarship_admin'));
+        $this->assertFalse($features->adminLiquidDesignEnabled('student_affairs_head'));
+        $this->assertTrue($features->adminLiquidDesignEnabled('system_admin'));
     }
 
     private function actingAsSystemAdmin(): static

@@ -2397,7 +2397,9 @@
     $showHeaderUserMenu = (bool) $authUser && ($isStudent || $adminOnDashboard);
     $showStudentBottomNav = $isStudent;
     $showStaffBottomNav = $isLecturerAdmin;
-    $aiHelperEnabled = app(\App\Support\SystemFeatures::class)->enabled('ai_helper');
+    $systemFeatures = app(\App\Support\SystemFeatures::class);
+    $aiHelperEnabled = $systemFeatures->enabled('ai_helper');
+    $adminLiquidDesignEnabled = ! $isAdmin || $systemFeatures->adminLiquidDesignEnabled($adminScope);
     $studentMoreActive = request()->routeIs('student.movements.index')
         || request()->routeIs('student.documents.*')
         || request()->routeIs('student.vehicle-stickers.*')
@@ -2410,7 +2412,8 @@
         ($isStudent && request()->routeIs('student.offenses.index') ? 'student-liquid-fines' : '') . ' ' .
         (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-eligible' : '') . ' ' .
         (request()->routeIs('student.movements.scan', 'admin.laptops.scan') ? 'student-scan-mode ' : '') .
-        ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar' : '')
+        ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar ' : '') .
+        (! $adminLiquidDesignEnabled ? 'admin-liquid-disabled' : '')
     );
 @endphp
 <body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" class="{{ $bodyClasses }}">

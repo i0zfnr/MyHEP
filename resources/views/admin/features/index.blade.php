@@ -43,7 +43,7 @@
             @foreach($features as $feature)
                 <div class="feature-row">
                     <div class="feature-copy"><strong>{{ __($feature['label']) }}</strong><p>{{ __($feature['description']) }}</p></div>
-                    <form method="POST" action="{{ route('admin.features.update', $feature['key']) }}">@csrf @method('PATCH')<input type="hidden" name="enabled" value="{{ $feature['enabled'] ? 0 : 1 }}"><button class="ui-btn {{ $feature['enabled'] ? 'btn-danger' : 'primary' }}" type="submit">{{ $feature['enabled'] ? __('Turn Off') : __('Turn On') }}</button></form>
+                    <form method="POST" action="{{ route('admin.features.update', $feature['key']) }}">@csrf @method('PATCH')<input type="hidden" name="enabled" value="{{ $feature['enabled'] ? 0 : 1 }}"><button class="ui-btn {{ $feature['enabled'] ? 'btn-danger' : 'primary' }}" type="submit" aria-label="{{ $feature['enabled'] ? __('Turn off :feature', ['feature' => __($feature['label'])]) : __('Turn on :feature', ['feature' => __($feature['label'])]) }}">{{ $feature['enabled'] ? __('Turn Off') : __('Turn On') }}</button></form>
                 </div>
             @endforeach
         </div>

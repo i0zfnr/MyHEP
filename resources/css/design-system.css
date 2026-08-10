@@ -160,6 +160,23 @@ html[data-theme="light"] {
     }
 }
 
+/* Readability adjustments used when liquid design is disabled for admins. */
+body.admin-liquid-disabled .page-body {
+    font-size: 15px;
+}
+
+body.admin-liquid-disabled .page-body :is(input, select, textarea, button, .btn, .ui-btn) {
+    min-height: 44px;
+}
+
+body.admin-liquid-disabled .page-body :is(p, small, .muted, .hint, .help, .stat-label) {
+    color: var(--text-muted) !important;
+}
+
+body.admin-liquid-disabled :is(.card, .panel, .ui-card, .portal-card, .stat-card):hover {
+    transform: none !important;
+}
+
 /* On phones, navigation and page titles stay in document flow to avoid covering content. */
 @media (max-width: 1023px) {
     .app-layout .topbar {
@@ -361,6 +378,16 @@ body[data-theme="dark"] .app-layout .page-body {
 
 .page-body :where(.ui-shell, .wrap, .bugs-wrap, .mv-shell, .maint-wrap, .rules-page, .ann-page) {
     width: min(100%, var(--se-content));
+}
+
+/* Authenticated screens share the same edge-to-edge content canvas. The page
+   body keeps the readable outer gutter; individual screens no longer add a
+   second centred max-width that leaves large unused columns on desktop. */
+.app-layout .page-body > :where(div, section, article, form) {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
 /* Keep the established sidebar treatment; only space the added theme control. */
@@ -6180,4 +6207,42 @@ body[data-theme="dark"] .app-layout .sidebar.is-open {
     body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(5) .stat-icon { color:#70c7a5 !important; }
     html[data-theme="dark"] body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(6) .stat-icon,
     body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(6) .stat-icon { color:#9fb7e8 !important; }
+}
+
+/* Keep accessibility mode authoritative after all theme and accent variants. */
+body.admin-liquid-disabled {
+    --glass-opacity: 1;
+    --glass-blur: 0px;
+    --glass-bg: #fffdf9;
+    --glass-bg-strong: #ffffff;
+    --glass-border: #b9a997;
+    --glass-line: #c9b9a7;
+    --glass-shadow: 0 2px 8px rgba(48, 36, 25, .10);
+    --surface: #ffffff;
+    --surface-soft: #f7f2eb;
+    --border: #b9a997;
+    --text: #211a14;
+    --text-muted: #62564b;
+}
+
+body[data-theme="dark"].admin-liquid-disabled {
+    --glass-bg: #171615;
+    --glass-bg-strong: #1d1b19;
+    --glass-border: #786f66;
+    --glass-line: #5f5851;
+    --glass-shadow: 0 2px 8px rgba(0, 0, 0, .34);
+    --surface: #1d1b19;
+    --surface-soft: #272421;
+    --border: #786f66;
+    --text: #fffaf4;
+    --text-muted: #d2c8be;
+}
+
+body.admin-liquid-disabled :is(.topbar, .sidebar, .page-header, .sb-user, .header-control, .header-user, .ui-card, .card, .panel, .portal-card, .stat-card, .data-card, .settings-panel, .settings-intro, .settings-option, .account-card, .manage-form-card, .laptop-card, .laptop-panel) {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: var(--surface) !important;
+    background-image: none !important;
+    border-color: var(--border) !important;
+    box-shadow: var(--glass-shadow) !important;
 }
