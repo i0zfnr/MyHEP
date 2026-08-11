@@ -171,6 +171,34 @@ html.se-theme-switching *::after {
     }
 }
 
+/* Navigation must remain readable regardless of the user's content-glass level. */
+@media (max-width: 1023px) {
+    .app-layout .sidebar.is-open {
+        background:
+            linear-gradient(180deg,rgba(255,255,255,.38),transparent 42%),
+            color-mix(in srgb,var(--se-surface) 96%,var(--se-bg)) !important;
+        -webkit-backdrop-filter:blur(8px) saturate(108%) !important;
+        backdrop-filter:blur(8px) saturate(108%) !important;
+        box-shadow:10px 0 34px rgba(44,34,26,.2) !important;
+    }
+
+    body[data-theme="dark"] .app-layout .sidebar.is-open {
+        background:
+            radial-gradient(22rem circle at -12% 5%,color-mix(in srgb,var(--se-primary) 16%,transparent),transparent 64%),
+            radial-gradient(19rem circle at 112% 82%,color-mix(in srgb,var(--se-atmosphere-secondary) 11%,transparent),transparent 66%),
+            linear-gradient(145deg,rgba(255,255,255,.065),transparent 46%),
+            color-mix(in srgb,var(--se-surface) 90%,#080706) !important;
+        -webkit-backdrop-filter:blur(12px) saturate(120%) !important;
+        backdrop-filter:blur(12px) saturate(120%) !important;
+        border-right-color:color-mix(in srgb,var(--se-primary) 22%,var(--se-border)) !important;
+        box-shadow:10px 0 34px rgba(0,0,0,.42),inset -1px 0 0 rgba(255,255,255,.055) !important;
+    }
+
+    .app-layout .sidebar.is-open :is(.nav-link,.nav-group-toggle,.sb-brand-name,.sb-user-name) {
+        text-shadow:none !important;
+    }
+}
+
 /* Readability adjustments used when liquid design is disabled for admins. */
 body.admin-liquid-disabled .page-body {
     font-size: 15px;
