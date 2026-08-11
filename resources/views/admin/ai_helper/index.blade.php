@@ -512,10 +512,10 @@
             <section class="ops-card">
                 <h4 class="ops-title">{{ __('Data Sources') }}</h4>
                 <ul class="ops-kv">
-                    <li><span>{{ __('students') }}</span><strong>table</strong></li>
-                    <li><span>{{ __('scholarships') }}</span><strong>table</strong></li>
-                    <li><span>{{ __('offenses') }}</span><strong>table</strong></li>
-                    <li><span>{{ __('fine_payment_applications') }}</span><strong>table</strong></li>
+                    <li><span>students</span><strong>table</strong></li>
+                    <li><span>scholarships</span><strong>table</strong></li>
+                    <li><span>offenses</span><strong>table</strong></li>
+                    <li><span>fine_payment_applications</span><strong>table</strong></li>
                 </ul>
             </section>
         </div>
