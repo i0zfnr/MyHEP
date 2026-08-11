@@ -155,9 +155,19 @@ class DashboardController extends Controller
             }))->map(fn ($row) => (object) $row);
         }
 
-        $systemMonitoring = $showSystemMonitoring ? $this->buildSystemMonitoring() : null;
+        $systemMonitoring = $showSystemMonitoring
+            ? systemCacheRemember('myhep.dashboard.system_monitoring', 10, fn () => $this->buildSystemMonitoring())
+            : null;
 
-        $analytics = $this->buildAnalytics($hasDisciplineAccess, $hasMovementAccess, $hasScholarshipAccess);
+        $analyticsScope = implode('.', array_map(
+            fn (bool $enabled) => $enabled ? '1' : '0',
+            [$hasDisciplineAccess, $hasMovementAccess, $hasScholarshipAccess]
+        ));
+        $analytics = systemCacheRemember(
+            'myhep.dashboard.analytics.payload.' . app()->getLocale() . '.' . $analyticsScope,
+            300,
+            fn () => $this->buildAnalytics($hasDisciplineAccess, $hasMovementAccess, $hasScholarshipAccess)
+        );
 
         return view('dashboard.admin', compact(
             'authUser',
@@ -196,7 +206,11 @@ class DashboardController extends Controller
         }
 
         return response()->json([
-            'data' => $this->buildSystemMonitoring(),
+            'data' => systemCacheRemember(
+                'myhep.dashboard.system_monitoring',
+                10,
+                fn () => $this->buildSystemMonitoring()
+            ),
         ]);
     }
 
@@ -229,7 +243,7 @@ class DashboardController extends Controller
             return $analytics;
         }
 
-        $palette = ['#3f8f69', '#c48628', '#5375c5', '#7258bd', '#c14f5c', '#64748b', '#2d7d8a', '#9a6a3f'];
+        $palette = ['#c8a96a', '#28686c', '#8c8175', '#7d8055', '#a65f4f', '#64706a', '#6f8d78', '#9a6a3f'];
 
         $analytics['donuts'][] = $this->adminRoleDonut($palette);
         $analytics['donuts'][] = $this->studentRaceDonut($palette);
@@ -274,10 +288,11 @@ class DashboardController extends Controller
 
     private function adminRoleDonut(array $palette): array
     {
-        $rows = collect(systemCacheRemember('myhep.dashboard.analytics.roles', 300, function () {
+        $rows = collect(systemCacheRemember('myhep.dashboard.analytics.roles.public.v2', 300, function () {
             return Schema::hasTable('admins')
                 ? DB::table('admins')
                     ->selectRaw('role, COUNT(*) as c')
+                    ->where('role', '!=', 'system_admin')
                     ->groupBy('role')
                     ->orderByDesc('c')
                     ->get()
@@ -307,7 +322,7 @@ class DashboardController extends Controller
     private function studentRaceDonut(array $palette): array
     {
         $rows = collect(systemCacheRemember('myhep.dashboard.analytics.races', 300, function () {
-            return Schema::hasTable('students')
+            return Schema::hasTable('students') && Schema::hasColumn('students', 'race')
                 ? DB::table('students')
                     ->selectRaw('race, COUNT(*) as c')
                     ->groupBy('race')
@@ -343,6 +358,8 @@ class DashboardController extends Controller
     {
         $rows = collect(systemCacheRemember('myhep.dashboard.analytics.programs', 300, function () {
             return Schema::hasTable('students')
+                && Schema::hasColumn('students', 'program')
+                && Schema::hasColumn('students', 'semester')
                 ? DB::table('students')
                     ->selectRaw('program, semester, COUNT(*) as c')
                     ->groupBy('program', 'semester')
@@ -687,13 +704,18 @@ class DashboardController extends Controller
             $labels[] = $month->format('M y');
         }
 
-        if (Schema::hasTable($table)) {
+        if (Schema::hasTable($table)
+            && Schema::hasColumn($table, $dateColumn)
+            && ($statusColumn === null || Schema::hasColumn($table, $statusColumn))) {
+            $monthExpression = DB::getDriverName() === 'sqlite'
+                ? "strftime('%Y-%m', $dateColumn)"
+                : "DATE_FORMAT($dateColumn, '%Y-%m')";
             $query = DB::table($table)->where($dateColumn, '>=', now()->subMonths($months - 1)->startOfMonth());
             if ($statusColumn !== null) {
                 $query->where($statusColumn, $statusValue);
             }
 
-            foreach ($query->selectRaw("DATE_FORMAT($dateColumn, '%Y-%m') as ym, COUNT(*) as c")->groupBy('ym')->get() as $row) {
+            foreach ($query->selectRaw("$monthExpression as ym, COUNT(*) as c")->groupBy('ym')->get() as $row) {
                 if (array_key_exists($row->ym, $keyed)) {
                     $keyed[$row->ym] = (int) $row->c;
                 }
@@ -719,9 +741,14 @@ class DashboardController extends Controller
             $keyed['last'][] = ['label' => $status, 'value' => 0];
         }
 
-        if (Schema::hasTable($table)) {
+        if (Schema::hasTable($table)
+            && Schema::hasColumn($table, $dateColumn)
+            && Schema::hasColumn($table, 'status')) {
+            $monthExpression = DB::getDriverName() === 'sqlite'
+                ? "strftime('%Y-%m', $dateColumn)"
+                : "DATE_FORMAT($dateColumn, '%Y-%m')";
             $rows = DB::table($table)
-                ->selectRaw("DATE_FORMAT($dateColumn, '%Y-%m') as ym, status, COUNT(*) as c")
+                ->selectRaw("$monthExpression as ym, status, COUNT(*) as c")
                 ->where($dateColumn, '>=', now()->subMonth()->startOfMonth())
                 ->groupBy('ym', 'status')
                 ->get();
@@ -758,10 +785,13 @@ class DashboardController extends Controller
             ];
         }
 
-        if (Schema::hasTable($table)) {
+        if (Schema::hasTable($table) && Schema::hasColumn($table, $dateColumn)) {
+            $dayExpression = DB::getDriverName() === 'sqlite'
+                ? "strftime('%Y-%m-%d', $dateColumn)"
+                : "DATE_FORMAT($dateColumn, '%Y-%m-%d')";
             foreach (DB::table($table)
                 ->where($dateColumn, '>=', now()->subDays($days - 1)->startOfDay())
-                ->selectRaw("DATE_FORMAT($dateColumn, '%Y-%m-%d') as d, COUNT(*) as c")
+                ->selectRaw("$dayExpression as d, COUNT(*) as c")
                 ->groupBy('d')
                 ->get() as $row) {
                 if (array_key_exists($row->d, $keyed)) {

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'studentedge-pwa-v11';
+const CACHE_VERSION = 'studentedge-pwa-v12';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = '/offline.html';
@@ -37,6 +37,18 @@ self.addEventListener('fetch', (event) => {
     }
 
     const url = new URL(event.request.url);
+
+    // Never cache authenticated pages or API responses. They are user-specific
+    // and must always come from Laravel rather than an older runtime response.
+    if (url.origin === self.location.origin
+        && (event.request.mode === 'navigate'
+            || url.pathname.startsWith('/admin/')
+            || url.pathname.startsWith('/student/')
+            || url.pathname.startsWith('/notifications/')
+            || url.pathname.startsWith('/push/'))) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
 
     if (event.request.mode === 'navigate') {
         event.respondWith(

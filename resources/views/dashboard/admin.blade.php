@@ -904,6 +904,19 @@
     @media (max-width: 640px) {
         .monitor-kpi-grid { grid-template-columns: 1fr; }
     }
+    /* Long dashboards scroll more smoothly when in-flow cards do not continuously
+       sample and blur the page behind them. Offscreen sections are skipped until needed. */
+    .adash .portal-card,
+    .adash .stat-card,
+    .adash .data-card,
+    .adash .monitor-card,
+    .adash .monitor-kpi,
+    .adash .an-card,
+    .adash .an-kpi { -webkit-backdrop-filter:none!important; backdrop-filter:none!important; }
+    .adash .stats-grid,
+    .adash .two-col,
+    .adash .monitor-grid,
+    .adash .analytics-dashboard { content-visibility:auto; contain-intrinsic-size:auto 280px; }
 </style>
 @endpush
 
@@ -1464,9 +1477,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state !== 'ok') el.classList.add(state);
     };
 
+    let monitoringTimer = null;
+    let monitoringRequest = null;
+
     async function refreshMonitoring() {
+        if (document.hidden || monitoringRequest) return;
+
+        monitoringRequest = new AbortController();
         try {
-            const response = await fetch(liveUrl, { headers: { Accept: 'application/json' } });
+            const response = await fetch(liveUrl, {
+                headers: { Accept: 'application/json' },
+                signal: monitoringRequest.signal,
+            });
             if (!response.ok) return;
 
             const payload = await response.json();
@@ -1516,11 +1538,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (error) {
             // Keep the last rendered values if the live endpoint is temporarily unavailable.
+        } finally {
+            monitoringRequest = null;
         }
     }
 
-    refreshMonitoring();
-    setInterval(refreshMonitoring, 5000);
+    const scheduleMonitoring = () => {
+        window.clearInterval(monitoringTimer);
+        monitoringTimer = document.hidden ? null : window.setInterval(refreshMonitoring, 15000);
+        if (!document.hidden) refreshMonitoring();
+    };
+
+    document.addEventListener('visibilitychange', scheduleMonitoring);
+    window.addEventListener('pagehide', () => {
+        window.clearInterval(monitoringTimer);
+        monitoringRequest?.abort();
+    }, { once:true });
+    scheduleMonitoring();
 });
 </script>
 @endpush

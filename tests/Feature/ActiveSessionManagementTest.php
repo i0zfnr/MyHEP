@@ -162,7 +162,7 @@ class ActiveSessionManagementTest extends TestCase
                 'admin_role' => 'system_admin',
                 'name' => 'Dual Role Admin',
             ],
-        ])->get('/settings')->assertOk()->assertSee('General JHEP Staff');
+        ])->get('/settings')->assertOk()->assertSee('PBT Staff');
 
         $this->post('/settings/role-mode', ['mode' => 'general_staff'])
             ->assertRedirect('/admin/dashboard')

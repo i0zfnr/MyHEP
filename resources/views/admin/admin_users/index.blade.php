@@ -22,6 +22,9 @@
     .role.discipline_admin { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
     .role.student_affairs_head { background:#f3e8ff; color:#7e22ce; border-color:#e9d5ff; }
     .actions { display:flex; gap:6px; flex-wrap:wrap; }
+    .admin-search { display:flex; gap:.65rem; align-items:center; padding:1rem; border-bottom:1px solid var(--admin-line); background:linear-gradient(180deg,#fffdfb,#faf4ed); }
+    .admin-search input { flex:1; min-width:0; min-height:42px; padding:.65rem .8rem; border:1px solid #dfceb9; border-radius:10px; font:inherit; }
+    .admin-pagination { margin-top:1rem; }
         /* Admin UX Identity v2 */
     :root {
         --admin-ink: #241a12;
@@ -203,6 +206,13 @@
             </div>
         </div>
 
+        <form class="admin-search" method="GET" role="search" data-live-filter-form data-live-filter-delay="300">
+            <input type="search" name="search" value="{{ $search }}" placeholder="Search name, IC, or email" aria-label="Search admin and lecturer accounts">
+            <button class="btn" type="submit">Search</button>
+            @if($search !== '')<a class="btn" href="{{ route('admin.admin-users.index') }}">Clear</a>@endif
+        </form>
+
+        <div data-live-filter-results>
         <div style="overflow-x:auto;">
             <table>
                 <thead>
@@ -249,9 +259,9 @@
                 </tbody>
             </table>
         </div>
+        <div class="admin-pagination">{{ $admins->links('vendor.pagination.studentedge') }}</div>
+        </div>
     </div>
-
-    <div style="margin-top:14px;">{{ $admins->links() }}</div>
 </div>
 @endsection
 

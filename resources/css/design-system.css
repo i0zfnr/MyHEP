@@ -4225,10 +4225,6 @@ body[data-theme="dark"] .se-notification-panel {
         transition: opacity var(--se-motion-base) var(--se-motion-ease);
     }
 
-    body.is-navigating .page-body {
-        opacity: 0;
-    }
-
     .page-body > :where(section, article, div, form, nav, aside, header) {
         animation: se-motion-fade-in var(--se-motion-section) var(--se-motion-ease) both;
     }

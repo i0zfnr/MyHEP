@@ -22,6 +22,11 @@
     .admin-profile-field strong { display:block; color:var(--se-text); font-size:.9rem; overflow-wrap:anywhere; }
     .admin-profile-actions { display:flex; gap:.65rem; flex-wrap:wrap; margin-top:1rem; }
     .admin-profile-actions .btn { min-height:44px; }
+    .admin-profile-password-form { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.8rem; align-items:end; }
+    .admin-profile-password-field { display:grid; gap:.4rem; }
+    .admin-profile-password-field label { color:var(--se-text-soft); font-size:.78rem; font-weight:700; }
+    .admin-profile-password-field input { width:100%; min-height:44px; padding:.65rem .75rem; border:1px solid var(--se-border); border-radius:9px; background:var(--se-surface); color:var(--se-text); font:inherit; }
+    .admin-profile-password-form .btn { min-height:44px; grid-column:1 / -1; justify-self:start; }
     body.profile-crop-open { overflow:hidden !important; }
     .profile-crop-modal { position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:16px; background:rgba(17,16,15,.72); opacity:0; visibility:hidden; pointer-events:none; transition:opacity .18s ease, visibility 0s linear .18s; }
     .profile-crop-modal.is-open { opacity:1; visibility:visible; pointer-events:auto; transition-delay:0s; }
@@ -39,7 +44,7 @@
     .profile-crop-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .profile-crop-actions .btn { min-height:44px; text-align:center; }
     .cropper-view-box, .cropper-face { border-radius:50%; }
-    @media (max-width:680px) { .admin-profile-grid { grid-template-columns:1fr; } .admin-profile-photo-row { align-items:flex-start; } .admin-profile-photo { width:88px; height:88px; flex-basis:88px; } }
+    @media (max-width:680px) { .admin-profile-grid, .admin-profile-password-form { grid-template-columns:1fr; } .admin-profile-photo-row { align-items:flex-start; } .admin-profile-photo { width:88px; height:88px; flex-basis:88px; } }
     @media (max-width:440px) { .admin-profile-photo-row { flex-direction:column; } .admin-profile-upload { width:100%; } .profile-crop-modal { padding:8px; } .profile-crop-stage { min-height:0; height:48dvh; } .profile-crop-tool { flex:1 1 calc(33.333% - 8px); } }
     @media (prefers-reduced-motion:reduce) { .profile-crop-modal, .profile-crop-dialog { transition:none; } }
 </style>
@@ -95,6 +100,29 @@
                 <div class="admin-profile-field"><span>{{ __('NRIC') }}</span><strong>{{ maskIdentityNumber($admin->ic_no) }}</strong></div>
                 <div class="admin-profile-field"><span>{{ __('Role') }}</span><strong>{{ adminRoleLabel($admin->role) }}</strong></div>
             </div>
+        </div>
+    </section>
+
+    <section class="admin-profile-card">
+        <div class="admin-profile-head"><h3>{{ __('Change password') }}</h3></div>
+        <div class="admin-profile-body">
+            <form class="admin-profile-password-form" method="POST" action="{{ route('admin.profile.password') }}">
+                @csrf
+                @method('PUT')
+                <div class="admin-profile-password-field">
+                    <label for="current_password">{{ __('Current password') }}</label>
+                    <input id="current_password" type="password" name="current_password" autocomplete="current-password" required>
+                </div>
+                <div class="admin-profile-password-field">
+                    <label for="password">{{ __('New password') }}</label>
+                    <input id="password" type="password" name="password" autocomplete="new-password" minlength="8" required>
+                </div>
+                <div class="admin-profile-password-field">
+                    <label for="password_confirmation">{{ __('Confirm new password') }}</label>
+                    <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password" minlength="8" required>
+                </div>
+                <button class="btn btn-primary" type="submit">{{ __('Update password') }}</button>
+            </form>
         </div>
     </section>
 </div>

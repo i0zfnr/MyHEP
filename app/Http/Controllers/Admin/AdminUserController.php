@@ -15,21 +15,27 @@ class AdminUserController extends Controller
 {
     private const ADMIN_ROLES = ['guard', 'lecturer', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'];
 
-    public function index()
+    public function index(Request $request)
     {
         $authRole = session('auth_user.admin_role');
+        $search = trim((string) $request->query('search'));
         $adminsQuery = DB::table('admins')
-            ->select('id', 'full_name', 'ic_no', 'role', 'created_at')
+            ->select('id', 'full_name', 'ic_no', 'email', 'role', 'created_at')
+            ->when($search !== '', fn ($query) => $query->where(function ($nested) use ($search): void {
+                $nested->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('ic_no', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            }))
             ->orderBy('full_name');
 
         if ($authRole !== 'system_admin') {
             $adminsQuery->where('role', 'lecturer');
         }
 
-        $admins = $adminsQuery->paginate(15);
+        $admins = $adminsQuery->paginate(15)->withQueryString();
         $canManageAllAdmins = $authRole === 'system_admin';
 
-        return view('admin.admin_users.index', compact('admins', 'canManageAllAdmins'));
+        return view('admin.admin_users.index', compact('admins', 'canManageAllAdmins', 'search'));
     }
 
     public function create()

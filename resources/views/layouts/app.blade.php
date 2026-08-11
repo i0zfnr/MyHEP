@@ -2413,7 +2413,8 @@
         (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-eligible' : '') . ' ' .
         (request()->routeIs('student.movements.scan', 'admin.laptops.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar ' : '') .
-        (! $adminLiquidDesignEnabled ? 'admin-liquid-disabled' : '')
+        (! $adminLiquidDesignEnabled ? 'admin-liquid-disabled ' : '') .
+        ($adminOnDashboard ? 'admin-dashboard-page' : '')
     );
 @endphp
 <body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" class="{{ $bodyClasses }}">

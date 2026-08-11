@@ -20,7 +20,7 @@ class StaffManagementController extends Controller
     private const CATEGORIES = [
         'discipline' => 'Discipline Lecturer',
         'scholarship' => 'Scholarship Lecturer',
-        'general' => 'General JHEP Staff',
+        'general' => 'PBT Staff',
     ];
 
     private const DEPARTMENTS = [
@@ -37,6 +37,8 @@ class StaffManagementController extends Controller
     {
         $search = trim((string) $request->query('search'));
         $department = trim((string) $request->query('department'));
+        // Keep the roster total stable when a lecturer is promoted to another admin role.
+        $totalAccounts = DB::table('admins')->whereNotNull('staff_category')->count();
 
         $staff = DB::table('admins')
             ->select('id', 'full_name', 'ic_no', 'email', 'staff_category', 'staff_department', 'position', 'is_active', 'created_at')
@@ -58,11 +60,12 @@ class StaffManagementController extends Controller
             'accounts' => $staff,
             'mode' => 'staff',
             'title' => 'Staff Management',
-            'description' => 'Manage lecturer and JHEP staff accounts. Login roles are resolved automatically from the IC number.',
+            'description' => 'Manage lecturer and PBT staff accounts, department assignments, and access from one place.',
             'createRoute' => route('admin.staff.create'),
             'categories' => self::CATEGORIES,
             'departments' => self::DEPARTMENTS,
             'filters' => compact('search', 'department'),
+            'totalAccounts' => $totalAccounts,
         ]);
     }
 

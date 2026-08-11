@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\AccountSessionManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -61,5 +64,40 @@ class ProfileController extends Controller
         auditLog('admin.profile_photo_updated', 'admins', $adminId, 'Admin profile photo updated');
 
         return redirect()->route('admin.profile')->with('success', __('Profile photo updated successfully.'));
+    }
+
+    public function updatePassword(Request $request, AccountSessionManager $sessions): RedirectResponse
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'different:current_password'],
+        ]);
+
+        $adminId = (int) session('auth_user.id');
+        $admin = DB::table('admins')->select('id', 'password')->where('id', $adminId)->first();
+        if (! $admin) {
+            return redirect()->route('login');
+        }
+
+        if (! Hash::check($validated['current_password'], $admin->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => __('The current password is incorrect.'),
+            ]);
+        }
+
+        DB::table('admins')->where('id', $adminId)->update([
+            'password' => Hash::make($validated['password']),
+            'updated_at' => now(),
+        ]);
+
+        $oldSessionId = $request->session()->getId();
+        $request->session()->regenerate();
+        $owner = ['type' => 'admin', 'id' => $adminId];
+        $sessions->rotate($request, $oldSessionId, $owner);
+        $sessions->revokeOthers($owner, $request->session()->getId());
+
+        auditLog('admin.password_updated', 'admins', $adminId, 'Admin updated own password');
+
+        return redirect()->route('admin.profile')->with('success', __('Password updated successfully. Other sessions have been signed out.'));
     }
 }

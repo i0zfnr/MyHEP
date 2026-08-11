@@ -66,9 +66,9 @@ class MonthlyReportTest extends TestCase
 
         $response->assertOk()
             ->assertSee('No discipline activity in this period')
-            ->assertSee('No fine applications this month')
+            ->assertSee('No applications')
             ->assertSee('No scholarship activity in this period')
-            ->assertSee('No scholarship records this month')
+            ->assertSee('No new records')
             ->assertSee('href="#disciplineReport"', false)
             ->assertSee('href="#scholarshipReport"', false);
     }

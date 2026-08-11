@@ -154,6 +154,9 @@ Route::get('/admin/profile', [AdminProfileController::class, 'show'])
 Route::post('/admin/profile/photo', [AdminProfileController::class, 'updatePhoto'])
     ->middleware('auth.session:admin')
     ->name('admin.profile.photo');
+Route::put('/admin/profile/password', [AdminProfileController::class, 'updatePassword'])
+    ->middleware(['auth.session:admin', 'throttle:6,1'])
+    ->name('admin.profile.password');
 Route::get('/admin/documents', [AdminStudentDocumentController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:documents'])
     ->name('admin.documents.index');

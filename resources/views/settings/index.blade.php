@@ -300,7 +300,7 @@
                         <form method="POST" action="{{ route('settings.role-mode.update') }}">
                             @csrf
                             <input type="hidden" name="mode" value="general_staff">
-                            <button class="btn {{ $roleMode['is_general_staff_mode'] ? 'btn-primary' : '' }}" type="submit">General JHEP Staff</button>
+                            <button class="btn {{ $roleMode['is_general_staff_mode'] ? 'btn-primary' : '' }}" type="submit">PBT Staff</button>
                         </form>
                     @endif
 

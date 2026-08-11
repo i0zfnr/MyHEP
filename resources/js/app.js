@@ -47,14 +47,6 @@ const initializeLiveFilters = () => {
         form.addEventListener('submit', (event) => { event.preventDefault(); run(); });
         form.querySelectorAll('input').forEach((field) => field.addEventListener('input', schedule));
         form.querySelectorAll('select').forEach((field) => field.addEventListener('change', () => run()));
-        document.addEventListener('click', (event) => {
-            const link = event.target.closest('[data-live-filter-results] a[href]');
-            if (!link) return;
-            const url = new URL(link.href, window.location.origin);
-            if (url.origin !== window.location.origin) return;
-            event.preventDefault();
-            run(url);
-        });
     });
 };
 
@@ -1182,11 +1174,15 @@ const registerLoadingUi = () => {
 
     document.addEventListener('submit', (event) => {
         const form = event.target;
-        if (!(form instanceof HTMLFormElement) || form.hasAttribute('data-confirm-message')) return;
+        if (!(form instanceof HTMLFormElement)
+            || event.defaultPrevented
+            || form.hasAttribute('data-confirm-message')
+            || form.hasAttribute('data-live-filter-form')) return;
         setLoading(form, event.submitter);
     });
 
     document.addEventListener('click', (event) => {
+        if (event.defaultPrevented) return;
         const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
         if (!anchor || anchor.target || anchor.hasAttribute('download') || anchor.dataset.mediaViewer !== undefined) return;
         if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -1391,6 +1387,10 @@ const registerMainSmoothScroll = () => {
         return;
     }
 
+    if (document.body.classList.contains('admin-dashboard-page')) {
+        return;
+    }
+
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let lenis = null;
 
@@ -1490,7 +1490,7 @@ if ('serviceWorker' in navigator) {
             return;
         }
 
-        navigator.serviceWorker.register('/sw.js?v=11').catch(() => {
+        navigator.serviceWorker.register('/sw.js?v=12').catch(() => {
             // Keep the app usable even if PWA registration fails.
         });
     });
