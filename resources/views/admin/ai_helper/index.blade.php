@@ -741,18 +741,25 @@
     body.admin-ai-helper-page .app-footer { display:none !important; }
     body.admin-ai-helper-page .ai-admin,body.admin-ai-helper-page .ai-admin>.ai-panel:first-child { min-height:0 !important; height:100% !important; }
     @media(max-width:640px){
-        body.admin-ai-helper-page .page-body { padding:.45rem .75rem 0 !important; }
+        body.admin-ai-helper-page .page-body { padding:.4rem .55rem .7rem !important; }
         .ai-admin > .ai-panel:first-child { min-height:0 !important; height:100% !important; grid-template-rows:minmax(0,1fr) auto auto !important; }
-        .ai-chat-log { min-height:0 !important; height:auto !important; overflow-y:auto !important; padding:1rem .25rem .7rem !important; overscroll-behavior:contain; }
-        .ai-empty-state { min-height:100% !important; }
-        .ai-compose { position:relative !important; bottom:auto !important; margin:0 auto .35rem !important; padding:0 !important; }
+        .ai-chat-log { min-height:0 !important; height:auto !important; overflow-y:auto !important; padding:.7rem .2rem .55rem !important; overscroll-behavior:contain; }
+        .ai-empty-state { min-height:0 !important; padding:2rem .45rem 1rem; align-content:start; }
+        .ai-empty-state h3 { font-size:clamp(1.55rem,7vw,2rem); line-height:1.12; }
+        .ai-empty-state p { max-width:330px; font-size:.9rem; line-height:1.55; }
+        .ai-empty-chips { width:100%; gap:.42rem; }
+        .ai-empty-chip { flex:0 1 auto; min-height:42px; padding:.58rem .78rem; font-size:.7rem; }
+        .ai-compose { position:relative !important; bottom:auto !important; width:100% !important; margin:0 auto !important; padding:0 !important; }
+        .ai-compose-frame { width:100%; border-radius:24px; }
+        .ai-compose-frame .ai-compose-row { min-height:54px; padding:4px 6px 4px 8px; }
+        .ai-input { height:42px !important; min-height:42px !important; max-height:42px !important; font-size:.82rem !important; }
+        .ai-compose-icon,.ai-send { width:40px !important; height:40px !important; }
         .ai-admin--admin .ai-compose-row { grid-template-columns:42px minmax(0,1fr) 42px !important; }
         .ai-admin--lecturer .ai-compose-row { grid-template-columns:42px minmax(0,1fr) 42px !important; }
-        .ai-compose-frame { border-radius:24px; }
         .ai-format-pill { display:none !important; }
         .ai-admin--student .ai-compose-row { grid-template-columns:minmax(0,1fr) 44px !important; padding-left:10px; }
         .ai-admin--student .ai-input { padding-left:12px !important; }
-        .ai-hint { margin:.35rem .5rem 0 !important; font-size:.61rem !important; line-height:1.35; }
+        .ai-hint { display:none; }
         .ai-admin .ai-toolbar { margin:.25rem auto .45rem; }
         .ai-admin .ai-toolbar .ai-btn { width:38px; height:38px; min-height:38px; padding:0; justify-content:center; }
         .ai-admin .ai-toolbar .ai-btn span { display:none; }
@@ -768,7 +775,8 @@
            (max-width:767px) and (display-mode:fullscreen),
            (max-width:767px) and (display-mode:minimal-ui),
            (max-width:767px) and (display-mode:window-controls-overlay) {
-        body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(5.8rem + env(safe-area-inset-bottom,0px)) !important; }
+        body.admin-ai-helper-page .page-body { padding-bottom:calc(4.2rem + env(safe-area-inset-bottom,0px)) !important; }
+        body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(6.2rem + env(safe-area-inset-bottom,0px)) !important; }
     }
 
 </style>

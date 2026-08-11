@@ -96,10 +96,23 @@ class AiHelperFeatureControlTest extends TestCase
         $this->actingAsRegularAdmin()->get('/admin/ai-helper')->assertStatus(503);
     }
 
-    public function test_student_ai_helper_is_not_available(): void
+    public function test_student_ai_helper_has_an_independent_control(): void
     {
-        $this->actingAsStudent()->get('/student/ai-helper')->assertNotFound();
-        $this->actingAsStudent()->postJson('/student/ai-helper', ['message' => 'Help me'])->assertNotFound();
+        $this->actingAsSystemAdmin()
+            ->patch('/admin/features/student_ai_helper', ['enabled' => 0])
+            ->assertRedirect('/admin/features');
+
+        $this->assertDatabaseHas('system_features', [
+            'feature_key' => 'student_ai_helper',
+            'enabled' => false,
+        ]);
+        $this->actingAsStudent()->get('/student/ai-helper')->assertStatus(503);
+
+        $this->actingAsSystemAdmin()->patch('/admin/features/student_ai_helper', ['enabled' => 1]);
+        $this->actingAsStudent()->get('/student/ai-helper')
+            ->assertOk()
+            ->assertSee('AI Helper (Student)')
+            ->assertDontSee('id="reportAttachment"', false);
     }
 
     public function test_lecturer_ai_helper_has_an_independent_system_admin_control(): void

@@ -104,6 +104,8 @@ class AiHelperViewTest extends TestCase
         $this->assertStringContainsString("routeIs('admin.ai-helper.*', 'student.ai-helper.*', 'lecturer.ai-helper.*')", $layout);
         $this->assertStringContainsString('.ai-chat-log { min-height:0 !important; height:auto !important; overflow-y:auto !important;', $view);
         $this->assertStringContainsString('.ai-compose { position:relative !important; bottom:auto !important;', $view);
+        $this->assertStringContainsString('body.admin-ai-helper-page .page-body { padding-bottom:calc(4.2rem + env(safe-area-inset-bottom,0px)) !important;', $view);
+        $this->assertStringContainsString('.ai-hint { display:none; }', $view);
         $this->assertStringContainsString('.ai-admin--admin .ai-compose-row { grid-template-columns:42px minmax(0,1fr) 42px !important;', $view);
         $this->assertStringContainsString('.ai-format-pill { display:none !important; }', $view);
     }
@@ -120,7 +122,7 @@ class AiHelperViewTest extends TestCase
         $this->assertStringContainsString('var(--se-primary-button-start)', $view);
         $this->assertStringContainsString('.ai-admin .msg.ai {', $view);
         $this->assertStringContainsString('var(--se-primary-soft)', $view);
-        $this->assertStringContainsString('body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(5.8rem + env(safe-area-inset-bottom,0px)) !important; }', $view);
+        $this->assertStringContainsString('body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(6.2rem + env(safe-area-inset-bottom,0px)) !important; }', $view);
         $this->assertStringNotContainsString("(message.provider || 'AI').toUpperCase()", $view);
         $this->assertStringNotContainsString("(payload.provider || 'ai').toUpperCase()", $view);
     }
