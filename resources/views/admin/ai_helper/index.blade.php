@@ -775,8 +775,18 @@
            (max-width:767px) and (display-mode:fullscreen),
            (max-width:767px) and (display-mode:minimal-ui),
            (max-width:767px) and (display-mode:window-controls-overlay) {
-        body.admin-ai-helper-page .page-body { padding-bottom:calc(4.2rem + env(safe-area-inset-bottom,0px)) !important; }
-        body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(6.2rem + env(safe-area-inset-bottom,0px)) !important; }
+        body.admin-ai-helper-page .page-body { padding-bottom:calc(4.7rem + env(safe-area-inset-bottom,0px)) !important; }
+        body.admin-ai-helper-page .ai-compose {
+            position:fixed !important;
+            z-index:1080 !important;
+            left:max(.55rem,env(safe-area-inset-left,0px));
+            right:max(.55rem,env(safe-area-inset-right,0px));
+            bottom:calc(.8rem + env(safe-area-inset-bottom,0px)) !important;
+            width:auto !important;
+        }
+        body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(10.8rem + env(safe-area-inset-bottom,0px)) !important; }
+        body.student-bottom-nav-eligible.admin-ai-helper-page .ai-compose { bottom:calc(6.65rem + env(safe-area-inset-bottom,0px)) !important; }
+        body.student-bottom-nav-eligible.admin-ai-helper-page .ai-chat-log { padding-bottom:4.5rem !important; }
     }
 
 </style>
@@ -813,7 +823,7 @@
             <div class="ai-empty-state" id="aiEmptyState">
                 <span class="ai-empty-orb">@include('partials.ai_helper_icon')</span>
                 <h3>{{ __('What should we focus on?') }}</h3>
-                <p>{{ $lecturerAiMode ? __('Research any topic, analyze attached documents, or summarize the anonymized records available to your lecturer category.') : __('Research any topic, analyze attached documents, or work with authorized StudentEdge records.') }}</p>
+                <p>{{ $studentAiMode ? __('Ask about your own scholarship, offenses, payments, rules, or StudentEdge portal steps.') : ($lecturerAiMode ? __('Research any topic, analyze attached documents, or summarize the anonymized records available to your lecturer category.') : __('Research any topic, analyze attached documents, or work with authorized StudentEdge records.')) }}</p>
                 <div class="ai-empty-chips">
                     @if($studentAiMode)
                     <button type="button" class="ai-empty-chip" data-template="{{ __('What can the AI Helper help me with?') }}">{{ __('Overview') }}</button>
