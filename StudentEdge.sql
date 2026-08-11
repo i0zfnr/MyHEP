@@ -291,11 +291,6 @@ CREATE INDEX idx_audit_actor ON audit_logs (actor_type, actor_id, created_at);
 -- SEED DATA
 -- ============================================================
 
--- Seed: Sample students
-INSERT INTO students (full_name, matric_no, ic_no, program, phone, address, photo) VALUES
-('Irfan', NULL, '030101011111', 'Diploma Teknologi Maklumat', NULL, NULL, NULL),
-('Nuraa', NULL, '030202011112', 'Diploma Teknologi Maklumat', NULL, NULL, NULL);
-
 -- Seed: Rule categories
 INSERT INTO rule_categories (name) VALUES
 ('Kad Pelajar'),
@@ -341,9 +336,3 @@ INSERT INTO offense_types (rule_reference, description, requires_note) VALUES
 -- Other offenses
 ('Other', 'Violating road signs or traffic directions', 0),
 ('Other', 'Parking in prohibited areas', 1);
-
--- Seed: Sample admins
-INSERT INTO admins (full_name, ic_no, password, role) VALUES
-('Ustazah Wan Jamilah', '800101015555', '$2y$12$R9h7cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ee8Wm6vvKkQ7Tpl6', 'scholarship_admin'),
-('Encik Azlan', '750202026666', '$2y$12$R9h7cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ee8Wm6vvKkQ7Tpl6', 'discipline_admin'),
-('Hafizul', '900305015555', '$2y$12$R9h7cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ee8Wm6vvKkQ7Tpl6', 'system_admin');

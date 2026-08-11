@@ -90,10 +90,9 @@ class LoginController extends Controller
             return redirect()->route('student.dashboard');
         }
 
-        $adminUsername = trim($validated['username']);
+        $adminEmail = strtolower(trim($validated['username']));
         $admin = DB::table('admins')
-            ->where('ic_no', $adminUsername)
-            ->orWhereRaw('LOWER(full_name) = ?', [strtolower($adminUsername)])
+            ->whereRaw('LOWER(email) = ?', [$adminEmail])
             ->first();
 
         if ($admin && property_exists($admin, 'is_active') && ! (bool) $admin->is_active) {

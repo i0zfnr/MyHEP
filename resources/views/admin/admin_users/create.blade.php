@@ -205,7 +205,7 @@
                 <div class="grid grid-2" style="margin-top:12px;">
                     <div>
                         <label for="email">Email</label>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}">
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required>
                     </div>
                     <div>
                         <label for="role">{{ __('Role') }}</label>

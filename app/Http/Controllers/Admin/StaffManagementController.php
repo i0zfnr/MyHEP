@@ -194,11 +194,12 @@ class StaffManagementController extends Controller
     public function resetPassword(AccountSessionManager $sessions, int $id): RedirectResponse
     {
         $this->staffOrFail($id);
-        DB::table('admins')->where('id', $id)->update(['password' => Hash::make('Staff@12345'), 'updated_at' => now()]);
+        $staff = $this->staffOrFail($id);
+        DB::table('admins')->where('id', $id)->update(['password' => Hash::make($staff->ic_no), 'updated_at' => now()]);
         $sessions->revokeAccount('admin', $id);
         auditLog('staff.reset_password', 'admins', $id, 'Reset staff password');
 
-        return redirect()->route('admin.staff.index')->with('success', 'Staff password reset to Staff@12345.');
+        return redirect()->route('admin.staff.index')->with('success', 'Staff password reset to NRIC.');
     }
 
     public function destroy(AccountSessionManager $sessions, LecturerPageAccess $pages, int $id): RedirectResponse
@@ -234,7 +235,7 @@ class StaffManagementController extends Controller
         return $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
             'ic_no' => ['required', 'string', 'max:20', fn (string $attribute, string $value, \Closure $fail) => Nric::isAssignedToAdmin($value, $id) && $fail('This NRIC is already assigned to an existing admin or staff account.')],
-            'email' => ['nullable', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
+            'email' => ['required', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
             'staff_category' => ['required', Rule::in(array_keys(self::CATEGORIES))],
             'staff_department' => ['nullable', Rule::in(array_keys(self::DEPARTMENTS))],
             'position' => ['nullable', 'string', 'max:180'],

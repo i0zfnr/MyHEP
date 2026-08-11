@@ -12,7 +12,7 @@ use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetConfiguredSessionLifetime;
 use App\Http\Middleware\TrackAccountSession;
 use App\Http\Middleware\TranslateFrontendContent;
-use App\Http\Middleware\UseForwardedHostForUrls;
+use App\Http\Middleware\SecurityHeaders;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,8 +21,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustHosts(
+            at: fn (): array => config('security.allowed_hosts'),
+            subdomains: false,
+        );
+
         $middleware->web(prepend: [
-            UseForwardedHostForUrls::class,
             SetConfiguredSessionLifetime::class,
         ]);
 
@@ -30,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
             TrackAccountSession::class,
             TranslateFrontendContent::class,
+            SecurityHeaders::class,
         ]);
 
         $middleware->alias([

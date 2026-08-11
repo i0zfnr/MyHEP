@@ -2414,7 +2414,8 @@
         (request()->routeIs('student.movements.scan', 'admin.laptops.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar ' : '') .
         (! $adminLiquidDesignEnabled ? 'admin-liquid-disabled ' : '') .
-        ($adminOnDashboard ? 'admin-dashboard-page' : '')
+        ($adminOnDashboard ? 'admin-dashboard-page ' : '') .
+        ($adminOnDashboard && $adminScope === 'system_admin' ? 'system-admin-dashboard' : '')
     );
 @endphp
 <body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" class="{{ $bodyClasses }}">

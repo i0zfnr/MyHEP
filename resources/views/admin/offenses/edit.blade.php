@@ -31,8 +31,8 @@
         background:linear-gradient(180deg, #ffeaea 0%, #fbd7da 100%) !important;
         color:#912018 !important;
     }
-    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:10px; }
-    .evidence-card { position:relative; border:1px solid #e7daca; border-radius:10px; background:#fffdfb; padding:8px; }
+    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,220px)); justify-content:start; gap:12px; margin-top:12px; }
+    .evidence-card { position:relative; min-width:0; border:1px solid var(--se-border); border-radius:12px; background:var(--se-surface); padding:8px; }
     .evidence-card img { width:100%; aspect-ratio:4 / 3; object-fit:cover; border-radius:8px; display:block; }
     .evidence-card button { margin-top:8px; width:100%; }
     .evidence-card small { display:block; margin-top:6px; color:#7a6555; text-align:center; }

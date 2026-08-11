@@ -21,12 +21,12 @@
         @csrf
         @if($account) @method('PUT') @endif
         <section class="manage-form-card">
-            <div class="manage-form-head"><h1>{{ $title }}</h1><p>The IC number identifies this account automatically on the shared Admin/Staff login.</p></div>
+            <div class="manage-form-head"><h1>{{ $title }}</h1><p>Email is used as the login ID. The NRIC is the default password for new and reset accounts.</p></div>
             <div class="manage-form-body">
                 <div class="manage-grid">
                     <div class="manage-field"><label for="full_name">Full name</label><input id="full_name" name="full_name" value="{{ old('full_name',$account->full_name ?? '') }}" required></div>
                     <div class="manage-field"><label for="ic_no">NRIC number</label><input id="ic_no" name="ic_no" value="{{ old('ic_no',$account->ic_no ?? '') }}" inputmode="numeric" autocomplete="off" maxlength="20" required><small>Numbers only. Hyphens and spaces are removed automatically.</small></div>
-                    <div class="manage-field"><label for="email">Email</label><input id="email" type="email" name="email" value="{{ old('email',$account->email ?? '') }}"></div>
+                    <div class="manage-field"><label for="email">Email</label><input id="email" type="email" name="email" value="{{ old('email',$account->email ?? '') }}" required></div>
                     @if($mode === 'staff')
                         <div class="manage-field"><label for="staff_category">Staff category</label><select id="staff_category" name="staff_category" required>@foreach($categories as $value=>$label)<option value="{{ $value }}" @selected(old('staff_category',$account->staff_category ?? '')===$value)>{{ $label }}</option>@endforeach</select><small style="color:#806f62;">Discipline and Scholarship categories automatically receive their matching operational module.</small></div>
                         <div class="manage-field"><label for="staff_department">Department / Unit</label><select id="staff_department" name="staff_department"><option value="">Not specified</option>@foreach($departments as $value=>$label)<option value="{{ $value }}" @selected(old('staff_department',$account->staff_department ?? '')===$value)>{{ $label }}</option>@endforeach</select></div>

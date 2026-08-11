@@ -119,7 +119,7 @@ class StaffAndGuardManagementTest extends TestCase
     public function test_discipline_lecturer_can_create_guard_when_individually_authorized(): void
     {
         $this->signIn(4, 'lecturer', 'discipline')->post('/admin/guards', [
-            'full_name' => 'Night Guard', 'ic_no' => '880101015555', 'email' => null,
+            'full_name' => 'Night Guard', 'ic_no' => '880101015555', 'email' => 'night.guard@example.test',
             'is_active' => '1', 'password' => 'GuardPass123',
         ])->assertRedirect('/admin/guards');
 
@@ -130,9 +130,36 @@ class StaffAndGuardManagementTest extends TestCase
     {
         DB::table('admins')->where('id', 4)->update(['is_active' => false]);
 
-        $this->post('/login', ['role' => 'admin', 'username' => 'IC4', 'password' => 'Password123'])
+        $this->post('/login', ['role' => 'admin', 'username' => 'user4@example.test', 'password' => 'Password123'])
             ->assertRedirect('/login')
             ->assertSessionHasErrors('username');
+        $this->assertFalse(session()->has('auth_user'));
+    }
+
+    public function test_admin_logs_in_with_email_and_default_nric_password(): void
+    {
+        DB::table('admins')->where('id', 1)->update(['password' => Hash::make('IC1')]);
+
+        $this->post('/login', [
+            'role' => 'admin',
+            'username' => 'USER1@EXAMPLE.TEST',
+            'password' => 'IC1',
+        ])->assertRedirect('/admin/dashboard');
+
+        $this->assertSame(1, session('auth_user.id'));
+        $this->assertSame('admin', session('auth_user.role'));
+    }
+
+    public function test_admin_cannot_use_nric_as_the_login_identifier(): void
+    {
+        DB::table('admins')->where('id', 1)->update(['password' => Hash::make('IC1')]);
+
+        $this->post('/login', [
+            'role' => 'admin',
+            'username' => 'IC1',
+            'password' => 'IC1',
+        ])->assertRedirect('/login')->assertSessionHasErrors('username');
+
         $this->assertFalse(session()->has('auth_user'));
     }
 

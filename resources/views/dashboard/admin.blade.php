@@ -917,6 +917,38 @@
     .adash .two-col,
     .adash .monitor-grid,
     .adash .analytics-dashboard { content-visibility:auto; contain-intrinsic-size:auto 280px; }
+
+    /* Unified dashboard system */
+    .adash { gap:16px; --c-bg:var(--se-bg); --c-surface:var(--se-surface); --c-surface-2:var(--se-surface-soft); --c-border:var(--se-border); --c-border-strong:color-mix(in srgb,var(--se-border) 72%,var(--se-text)); --c-text-primary:var(--se-text); --c-text-secondary:var(--se-text-muted); --c-text-muted:var(--se-text-soft); }
+    .adash :is(.dash-hero,.portal-card,.stat-card,.data-card,.monitor-card,.monitor-kpi) { border:1px solid var(--c-border); border-radius:14px; background:var(--c-surface); box-shadow:0 1px 2px rgba(25,20,16,.045); }
+    .adash :is(.portal-card,.stat-card,.data-card,.monitor-card,.monitor-kpi):hover { transform:none; border-color:var(--c-border-strong); box-shadow:0 5px 16px rgba(25,20,16,.065); }
+    .dash-hero { min-height:116px; padding:22px 24px; border-color:var(--c-border)!important; background:linear-gradient(135deg,var(--c-surface),color-mix(in srgb,var(--se-primary-soft) 35%,var(--c-surface)))!important; }
+    .dash-hero::before { background:radial-gradient(320px circle at 100% 0%,color-mix(in srgb,var(--se-primary) 16%,transparent),transparent 68%)!important; }
+    .dash-hero :is(h3,p,.dash-hero-date) { color:#fffaf4!important; }
+    .dash-hero h3 { font-family:inherit; font-size:1.55rem; font-weight:850; letter-spacing:-.035em; }
+    .dash-hero p { color:rgba(255,250,244,.9)!important; font-weight:650; }
+    .dash-hero-date { color:rgba(255,250,244,.88)!important; font-weight:700; }
+    .dash-hero-label { background:var(--se-primary-soft)!important; color:var(--se-primary-strong)!important; }
+    .stats-grid { grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr)); gap:12px; }
+    .stat-card { min-height:106px; padding:15px 17px; border-left:0; overflow:hidden; position:relative; }
+    .stat-card::before { content:''; position:absolute; inset:0 0 auto; height:3px; background:var(--c-accent); }
+    .stat-card.blue::before { background:var(--se-info); }
+    .stat-card.red::before { background:var(--se-danger); }
+    .stat-card.gold::before { background:var(--se-warning); }
+    .stat-value { margin-top:7px; font-family:inherit; font-size:1.8rem; font-weight:750; letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+    .stat-label { font-size:.74rem; font-weight:750; letter-spacing:.045em; }
+    .portal-card-head,.section-heading { font-size:.74rem; }
+    .portal-link { font-size:.84rem; }
+    .two-col,.monitor-kpi-grid,.monitor-two-up { gap:12px; }
+    .data-card-head { min-height:52px; padding:14px 16px; border-color:var(--c-border); background:transparent; }
+    .data-card-head::before { display:none; }
+    .data-card table { font-size:.78rem; }
+    .data-card th { padding:9px 16px; background:var(--c-surface-2); color:var(--c-text-muted); font-size:.64rem; letter-spacing:.07em; }
+    .data-card td { padding:11px 16px; border-color:var(--c-border); }
+    .data-card tbody tr:hover { background:color-mix(in srgb,var(--se-primary-soft) 34%,transparent); }
+    .badge { border-radius:999px; font-size:.62rem; font-weight:800; letter-spacing:.035em; }
+    body[data-theme="dark"] .dash-hero { background:linear-gradient(135deg,var(--se-surface),color-mix(in srgb,var(--se-primary-soft) 42%,var(--se-surface)))!important; }
+    body[data-theme="dark"] .adash :is(.dash-hero,.portal-card,.stat-card,.data-card,.monitor-card,.monitor-kpi) { box-shadow:0 1px 2px rgba(0,0,0,.2); }
 </style>
 @endpush
 
@@ -936,7 +968,7 @@
         <div class="dash-hero-text">
             <span class="dash-hero-label">Overview</span>
             <h3>Dashboard Admin</h3>
-            <p>
+            <p style="color:#fffaf3!important;font-weight:700!important;opacity:1!important;text-shadow:0 1px 2px rgba(0,0,0,.24)!important;">
                 @if($hasDisciplineAccess && $hasScholarshipAccess)
                     Gambaran keseluruhan modul disiplin dan scholarship.
                 @elseif($hasMovementAccess && !$hasDisciplineAccess && !$hasScholarshipAccess)

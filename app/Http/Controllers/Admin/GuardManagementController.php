@@ -64,10 +64,11 @@ class GuardManagementController extends Controller
     public function resetPassword(AccountSessionManager $sessions, int $id): RedirectResponse
     {
         $this->guardOrFail($id);
-        DB::table('admins')->where('id', $id)->update(['password' => Hash::make('Guard@12345'), 'updated_at' => now()]);
+        $guard = $this->guardOrFail($id);
+        DB::table('admins')->where('id', $id)->update(['password' => Hash::make($guard->ic_no), 'updated_at' => now()]);
         $sessions->revokeAccount('admin', $id);
         auditLog('guards.reset_password', 'admins', $id, 'Reset guard password');
-        return redirect()->route('admin.guards.index')->with('success', 'Guard password reset to Guard@12345.');
+        return redirect()->route('admin.guards.index')->with('success', 'Guard password reset to NRIC.');
     }
 
     public function destroy(AccountSessionManager $sessions, int $id): RedirectResponse
@@ -94,7 +95,7 @@ class GuardManagementController extends Controller
         return $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
             'ic_no' => ['required', 'string', 'max:20', fn (string $attribute, string $value, \Closure $fail) => Nric::isAssignedToAdmin($value, $id) && $fail('This NRIC is already assigned to an existing admin or staff account.')],
-            'email' => ['nullable', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
+            'email' => ['required', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
             'is_active' => ['required', 'boolean'],
             'password' => [$passwordRequired ? 'required' : 'nullable', 'string', 'min:8'],
         ]);

@@ -28,9 +28,9 @@
     .camera-msg { margin-top:8px; color:#7a6555; font-size:12px; }
     .camera-msg.err { color:#991b1b; background:#fff; border:none; margin-bottom:0; padding:0; }
     .preview-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:10px; }
-    .evidence-card { position:relative; border:1px solid #e7daca; border-radius:10px; background:#fffdfb; padding:8px; }
-    .evidence-card img { width:100%; aspect-ratio:4 / 3; object-fit:cover; border-radius:8px; display:block; }
+    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,220px)); justify-content:start; gap:12px; margin-top:12px; }
+    .evidence-card { position:relative; min-width:0; border:1px solid var(--se-border); border-radius:12px; background:var(--se-surface); padding:8px; box-shadow:var(--se-shadow-sm); }
+    .evidence-card img { width:100%; aspect-ratio:4 / 3; object-fit:cover; border-radius:8px; display:block; background:var(--se-surface-muted); }
     .evidence-card button { margin-top:8px; width:100%; }
     .evidence-card small { display:block; margin-top:6px; color:#7a6555; text-align:center; }
     .btn-danger-soft {
@@ -58,6 +58,24 @@
         .rules-list { max-height: 42vh; }
     }
     .hint { font-size:12px; color:#7a6555; margin-top:5px; }
+    :is(html,body)[data-theme="dark"] .card { background:var(--se-surface); border-color:var(--se-border); }
+    :is(html,body)[data-theme="dark"] .card h2 { border-color:var(--se-border); color:var(--se-text); }
+    :is(html,body)[data-theme="dark"] .card label,
+    :is(html,body)[data-theme="dark"] .hint,
+    :is(html,body)[data-theme="dark"] .camera-msg,
+    :is(html,body)[data-theme="dark"] .rules-selected-only,
+    :is(html,body)[data-theme="dark"] .rules-selected-count,
+    :is(html,body)[data-theme="dark"] .evidence-card small { color:var(--se-text-muted); }
+    :is(html,body)[data-theme="dark"] .camera-panel { background:var(--se-surface-soft); border-color:var(--se-border); }
+    :is(html,body)[data-theme="dark"] .camera-live { border-color:var(--se-border); }
+    :is(html,body)[data-theme="dark"] .evidence-card { background:var(--se-surface-soft); border-color:var(--se-border); box-shadow:none; }
+    :is(html,body)[data-theme="dark"] .rule-row { background:var(--se-surface-soft); border-color:var(--se-border); }
+    :is(html,body)[data-theme="dark"] .btn:not(.btn-primary):not(.btn-danger-soft) { background:var(--se-surface-soft); border-color:var(--se-border); color:var(--se-text); }
+    :is(html,body)[data-theme="dark"] .btn-danger-soft { background:var(--se-danger-soft)!important; border-color:color-mix(in srgb,var(--se-danger) 42%,var(--se-border))!important; color:var(--se-danger)!important; }
+    :is(html,body)[data-theme="dark"] .student-search-results { background:var(--se-surface); border-color:var(--se-border); box-shadow:var(--se-shadow-lg); }
+    @media (max-width:520px) {
+        .evidence-grid { grid-template-columns:1fr; }
+    }
     .student-search-shell { position:relative; }
     .student-search-results {
         position:absolute;

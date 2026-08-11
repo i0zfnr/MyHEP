@@ -53,7 +53,7 @@ class AdminUserController extends Controller
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
             'ic_no' => ['required', 'string', 'max:20', fn (string $attribute, string $value, \Closure $fail) => Nric::isAssignedToAdmin($value) && $fail('This NRIC is already assigned to an existing admin or staff account.')],
-            'email' => ['nullable', 'email', 'max:150', 'unique:admins,email'],
+            'email' => ['required', 'email', 'max:150', 'unique:admins,email'],
             'role' => ['required', Rule::in(array_keys($this->roleOptions()))],
             'password' => ['required', 'string', 'min:8'],
             'lecturer_pages' => ['nullable', 'array'],
@@ -110,7 +110,7 @@ class AdminUserController extends Controller
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
             'ic_no' => ['required', 'string', 'max:20', fn (string $attribute, string $value, \Closure $fail) => Nric::isAssignedToAdmin($value, $id) && $fail('This NRIC is already assigned to an existing admin or staff account.')],
-            'email' => ['nullable', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
+            'email' => ['required', 'email', 'max:150', Rule::unique('admins', 'email')->ignore($id)],
             'role' => ['required', Rule::in(array_keys($this->roleOptions()))],
             'password' => ['nullable', 'string', 'min:8'],
             'lecturer_pages' => ['nullable', 'array'],
@@ -165,7 +165,7 @@ class AdminUserController extends Controller
         DB::table('admins')
             ->where('id', $id)
             ->update([
-                'password' => Hash::make('Admin@12345'),
+                'password' => Hash::make($adminUser->ic_no),
                 'updated_at' => now(),
             ]);
         $sessions->revokeAccount('admin', $id);
@@ -181,7 +181,7 @@ class AdminUserController extends Controller
         ]);
 
         return redirect()->route('admin.admin-users.index')
-            ->with('success', __('Kata laluan admin telah direset kepada Admin@12345.'));
+            ->with('success', __('Kata laluan admin telah direset kepada NRIC.'));
     }
 
     public function destroy(AccountSessionManager $sessions, int $id)

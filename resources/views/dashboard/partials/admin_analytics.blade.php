@@ -99,9 +99,11 @@
     .an-trend-dot { fill:var(--surface); stroke:var(--primary); stroke-width:2; }
     .an-trend-labels { display:flex; justify-content:space-between; margin-top:4px; color:var(--text-muted); font-size:.6rem; }
 
-    .an-heat { display:grid; grid-template-columns:26px repeat(7,1fr); gap:5px; align-items:center; }
-    .an-heat-dow { color:var(--text-muted); font-size:.58rem; font-weight:800; text-align:center; text-transform:uppercase; }
-    .an-heat-cell { aspect-ratio:1; border-radius:5px; background:var(--surface-soft); border:1px solid var(--border); }
+    .an-heat-shell { max-width:100%; overflow-x:auto; padding:4px 0 2px; }
+    .an-heat { width:max-content; margin:0 auto; display:grid; grid-template-columns:36px repeat(8,44px); grid-template-rows:20px repeat(7,25px); gap:5px; align-items:center; }
+    .an-heat-dow { color:var(--text-muted); font-size:.68rem; font-weight:850; text-align:center; text-transform:uppercase; }
+    .an-heat-week { color:var(--text-muted); font-size:.64rem; font-weight:750; text-align:center; white-space:nowrap; }
+    .an-heat-cell { width:25px; height:25px; justify-self:center; border-radius:6px; background:var(--surface-soft); border:1px solid var(--border); cursor:default; }
     .an-heat-cell[data-lvl="1"] { background:color-mix(in srgb,var(--primary) 22%,var(--surface)); border-color:color-mix(in srgb,var(--primary) 30%,var(--border)); }
     .an-heat-cell[data-lvl="2"] { background:color-mix(in srgb,var(--primary) 42%,var(--surface)); border-color:color-mix(in srgb,var(--primary) 46%,var(--border)); }
     .an-heat-cell[data-lvl="3"] { background:color-mix(in srgb,var(--primary) 64%,var(--surface)); border-color:color-mix(in srgb,var(--primary) 66%,var(--border)); }
@@ -165,7 +167,7 @@
     .an-trend-grid.has-featured > .an-card:first-child .an-columns { height:292px; }
     .an-trend-grid.has-featured > .an-card:first-child .an-col-stage { height:252px; }
     .an-trend-grid.has-featured > .an-card:first-child .an-card-body { padding-bottom:26px; }
-    .an-trend-grid-featured { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .an-trend-grid-featured { grid-template-columns:repeat(3,minmax(0,1fr)); }
     .an-trend-grid-featured .an-monthly-support { display:none; }
     .an-donut::after, .an-gauge::after { background:#fff; border:1px solid #f2f4f7; box-shadow:none; }
     .an-heat-cell { border-color:#eaecf0; border-radius:4px; }
@@ -331,6 +333,99 @@
     html[data-theme="dark"] .an-active-svg .an-gridline,
     body[data-theme="dark"] .an-active-svg .an-gridline { stroke:color-mix(in srgb,var(--se-border) 70%,transparent); }
 
+    /* Unified analytics system */
+    .analytics-dashboard { gap:16px; }
+    .an-kpis,.an-grid,.an-ranked-pair,.an-trend-grid,.an-statistics-pies { gap:12px; }
+    .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) { border:1px solid var(--se-border); border-radius:14px; background:var(--se-surface); box-shadow:0 1px 2px rgba(25,20,16,.045); }
+    .analytics-dashboard :is(.an-card,.an-kpi,.an-featured):hover { transform:none; border-color:color-mix(in srgb,var(--se-border) 72%,var(--se-text)); box-shadow:0 5px 16px rgba(25,20,16,.065); }
+    .an-kpi { min-height:110px; padding:15px 17px; }
+    .an-kpi::after { display:none; }
+    .an-kpi-label { min-height:0; font-size:.74rem; letter-spacing:.045em; text-transform:uppercase; }
+    .an-kpi-value { margin-top:7px; font-size:clamp(1.6rem,2.4vw,1.9rem); font-weight:750; }
+    .an-kpi-bottom { margin-top:8px; }
+    .an-kpi-sub { font-size:.72rem; line-height:1.45; }
+    .an-card-head { padding:17px 18px 0; }
+    .an-card-body { padding:17px 18px 19px; }
+    .an-card-head h3 { color:var(--se-text); font-size:1.08rem; font-weight:750; line-height:1.35; }
+    .an-card-copy { color:var(--se-text-muted); font-size:.8rem; line-height:1.55; }
+    .an-card-kicker { font-size:.72rem; font-weight:850; }
+    .an-card-kicker { color:var(--se-primary-strong); }
+    .an-range { background:var(--se-surface-soft); border:1px solid var(--se-border); }
+    .an-range button { color:var(--se-text-muted); }
+    .an-range button:hover { color:var(--se-text); transform:none; }
+    .an-range button.active { background:var(--se-surface); color:var(--se-text); box-shadow:0 1px 2px rgba(25,20,16,.08); }
+    .an-stack-track,.an-hbar-track,.an-progress,.an-statistics-period { background:var(--se-surface-soft); }
+    .an-group-bar.last,.an-group-key i.last { background:var(--se-surface-muted); }
+    .an-donut::after,.an-gauge::after { background:var(--se-surface); border-color:var(--se-border); }
+    .an-trend-svg .an-gridline,.an-active-svg .an-gridline { stroke:color-mix(in srgb,var(--se-border) 72%,transparent); stroke-width:.35; stroke-dasharray:1.2 1.6; }
+    .an-trend-line,.an-active-line { stroke-width:.7; vector-effect:non-scaling-stroke; stroke-dasharray:none; stroke-dashoffset:0; animation:none; }
+    .an-active-line-secondary { stroke-width:.65; vector-effect:non-scaling-stroke; stroke-dasharray:none; stroke-dashoffset:0; animation:none; }
+    .an-trend-dot,.an-active-node { fill:var(--se-surface); stroke-width:1.5; vector-effect:non-scaling-stroke; }
+    .an-active-guide { stroke:var(--se-text-soft); stroke-width:.5; vector-effect:non-scaling-stroke; }
+    .an-trend-labels,.an-col-label,.an-daily-labels,.an-featured-axis,.an-featured-labels,.an-statistics-labels { color:var(--se-text-soft); }
+    .an-trend-labels { font-size:.72rem; font-weight:650; }
+    .an-legend-row,.an-stack-row,.an-hbar-row,.an-group { font-size:.75rem; }
+    .an-stack-legend,.an-group-key,.an-statistics-legend { font-size:.72rem; }
+    .an-donut-centre span,.an-gauge-centre span { font-size:.68rem; }
+    .an-ranked-row { font-size:.76rem; }
+    .an-report-link { font-size:.75rem; }
+    .an-statistics-icon { background:var(--se-primary-soft); border-color:color-mix(in srgb,var(--se-primary) 28%,var(--se-border)); box-shadow:none; }
+    .an-statistics-metric { background:var(--se-surface-soft); border-color:var(--se-border); }
+    .an-statistics-pie { background:var(--se-surface-soft); border-color:var(--se-border); }
+    .an-statistics-pies { border-color:var(--se-border); }
+    .an-ranked-row { min-height:44px; border-color:var(--se-border); }
+    .an-report-link { border-color:var(--se-border); background:var(--se-surface-soft); color:var(--se-text); }
+    .an-report-link:hover { border-color:var(--se-primary); color:var(--se-primary-strong); }
+    .an-empty { min-height:136px; }
+    .an-empty strong { font-size:.94rem; }
+    .an-empty span { font-size:.76rem; }
+    .an-empty-mark { background:var(--se-primary-soft); border-color:color-mix(in srgb,var(--se-primary) 30%,var(--se-border)); color:var(--se-primary-strong); }
+    .an-statistics-empty { background:var(--se-surface-soft); border-color:var(--se-border); }
+    .an-heat-card .an-card-body { display:flex; min-height:250px; flex-direction:column; justify-content:center; }
+    .an-heat-card .an-heat-foot { color:var(--se-text-muted); font-size:.73rem; font-weight:650; }
+    body[data-theme="dark"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) { box-shadow:0 1px 2px rgba(0,0,0,.2); }
+
+    /* System Admin graph mode uses a restrained liquid-glass layer. */
+    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
+        border-color:color-mix(in srgb,var(--se-primary) 18%,var(--se-border));
+        background:
+            linear-gradient(145deg,rgba(255,255,255,.68),rgba(255,255,255,.42)),
+            color-mix(in srgb,var(--se-surface) 78%,transparent);
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 8px 24px rgba(70,52,34,.075);
+        -webkit-backdrop-filter:blur(6px) saturate(115%)!important;
+        backdrop-filter:blur(6px) saturate(115%)!important;
+    }
+    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured)::after {
+        pointer-events:none;
+    }
+    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard .an-card {
+        position:relative;
+    }
+    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard .an-card::before {
+        content:'';
+        position:absolute;
+        inset:0 0 auto;
+        z-index:0;
+        height:42%;
+        background:linear-gradient(180deg,rgba(255,255,255,.16),transparent);
+        border-radius:inherit;
+        pointer-events:none;
+    }
+    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard .an-card > * {
+        position:relative;
+        z-index:1;
+    }
+    body[data-theme="dark"].system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
+        border-color:color-mix(in srgb,var(--se-primary) 22%,var(--se-border));
+        background:
+            linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018)),
+            color-mix(in srgb,var(--se-surface) 82%,transparent);
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 28px rgba(0,0,0,.18);
+    }
+    body[data-theme="dark"].system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard .an-card::before {
+        background:linear-gradient(180deg,rgba(255,255,255,.045),transparent);
+    }
+
     @media (max-width:1100px) {
         .an-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
         .an-grid-3, .an-grid-2, .an-trend-grid { grid-template-columns:1fr; }
@@ -431,10 +526,10 @@
     $anRankedPrograms = array_slice($analytics['treemap']['tiles'] ?? array_map(fn ($row) => ['label' => $row['label'], 'value' => $row['total']], $analytics['stacked']['series'] ?? []), 0, 4);
     $anActiveValues = $anFeaturedTrend['six']['values'] ?? [];
     $anActiveLabels = $anFeaturedTrend['six']['labels'] ?? [];
-    $anActivePoints = $anComputePoints($anActiveValues, 100, 50, 4);
+    $anActivePoints = $anComputePoints($anActiveValues, 100, 15, 1);
     $anActiveSecondaryValues = $anFeaturedTrend['area'] ?? [];
-    $anActiveSecondaryPoints = $anComputePoints($anActiveSecondaryValues, 100, 50, 4);
-    $anActiveAreaPath = $anActiveSecondaryPoints === [] ? '' : $anPointsToSmoothPath($anActiveSecondaryPoints) . ' L' . $anActiveSecondaryPoints[count($anActiveSecondaryPoints) - 1]['x'] . ',50 L' . $anActiveSecondaryPoints[0]['x'] . ',50 Z';
+    $anActiveSecondaryPoints = $anComputePoints($anActiveSecondaryValues, 100, 15, 1);
+    $anActiveAreaPath = $anActiveSecondaryPoints === [] ? '' : $anPointsToSmoothPath($anActiveSecondaryPoints) . ' L' . $anActiveSecondaryPoints[count($anActiveSecondaryPoints) - 1]['x'] . ',15 L' . $anActiveSecondaryPoints[0]['x'] . ',15 Z';
     $anActiveCurrent = (int) ($anActiveValues[count($anActiveValues) - 1] ?? 0);
     $anActivePrevious = (int) ($anActiveValues[count($anActiveValues) - 2] ?? 0);
     $anActiveDelta = $anActivePrevious > 0 ? round((($anActiveCurrent - $anActivePrevious) / $anActivePrevious) * 100, 1) : ($anActiveCurrent > 0 ? 100 : 0);
@@ -587,15 +682,15 @@
                 @if ($anActiveSixTotal > 0 || $anActiveMonthly > 0)
                 <div class="an-active-chart an-statistics-chart" data-an-chart>
                     @if ($anActivePoints !== [])
-                    <svg class="an-active-svg" viewBox="0 0 100 50" preserveAspectRatio="none" role="img" aria-label="{{ __('Monthly and cumulative activity') }}: {{ implode(', ', $anActiveValues) }}">
+                    <svg class="an-active-svg" viewBox="0 0 100 15" preserveAspectRatio="none" role="img" aria-label="{{ __('Monthly and cumulative activity') }}: {{ implode(', ', $anActiveValues) }}">
                         <defs><linearGradient id="anActiveGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--se-primary)" stop-opacity=".20"/><stop offset="100%" stop-color="var(--se-primary)" stop-opacity="0"/></linearGradient></defs>
-                        <line class="an-gridline" x1="0" y1="12.5" x2="100" y2="12.5"/><line class="an-gridline" x1="0" y1="25" x2="100" y2="25"/><line class="an-gridline" x1="0" y1="37.5" x2="100" y2="37.5"/>
+                        <line class="an-gridline" x1="0" y1="3.75" x2="100" y2="3.75"/><line class="an-gridline" x1="0" y1="7.5" x2="100" y2="7.5"/><line class="an-gridline" x1="0" y1="11.25" x2="100" y2="11.25"/>
                         <path class="an-active-area" d="{{ $anActiveAreaPath }}"/>
-                        <line class="an-active-guide" data-an-guide x1="0" y1="0" x2="0" y2="50"/>
+                        <line class="an-active-guide" data-an-guide x1="0" y1="0" x2="0" y2="15"/>
                         <path class="an-active-line-secondary" pathLength="1" d="{{ $anPointsToSmoothPath($anActiveSecondaryPoints) }}"/>
                         <path class="an-active-line" pathLength="1" d="{{ $anPointsToSmoothPath($anActivePoints) }}"/>
                         @foreach ($anActivePoints as $pointIndex => $point)
-                        <circle class="an-active-node" data-an-point data-an-x="{{ $point['x'] }}" data-an-tooltip="{{ $anActiveLabels[$pointIndex] ?? ($pointIndex + 1) }}|Monthly: {{ number_format($anActiveValues[$pointIndex] ?? 0) }} · Cumulative: {{ number_format($anActiveSecondaryValues[$pointIndex] ?? 0) }}" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="1.5"/>
+                        <circle class="an-active-node" data-an-point data-an-x="{{ $point['x'] }}" data-an-tooltip="{{ $anActiveLabels[$pointIndex] ?? ($pointIndex + 1) }}|Monthly: {{ number_format($anActiveValues[$pointIndex] ?? 0) }} · Cumulative: {{ number_format($anActiveSecondaryValues[$pointIndex] ?? 0) }}" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r=".55"/>
                         @endforeach
                     </svg>
                     @endif
@@ -820,14 +915,11 @@
 
     @foreach ($analytics['trends'] as $trendIndex => $trend)
         @php
-            $linePoints = $anComputePoints($trend['six']['values'], 100, 44, 5);
-            $areaPoints = $anComputePoints($trend['area'], 100, 44, 5);
+            $linePoints = $anComputePoints($trend['six']['values'], 100, 25, 2);
+            $areaPoints = $anComputePoints($trend['area'], 100, 25, 2);
             $twelveTotal = (int) array_sum($trend['twelve']['values']);
             $twelveMax = max(1, ...$trend['twelve']['values']);
-            $heatWeekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            $heatFirst = $trend['heat']['cells'][0]['weekday'] ?? 'Mon';
-            $heatStartIndex = array_search($heatFirst, $heatWeekdays, true);
-            $heatLabels = array_slice($heatWeekdays, $heatStartIndex === false ? 0 : $heatStartIndex, 7);
+            $heatLabels = array_column(array_slice($trend['heat']['cells'], 0, 7), 'weekday');
         @endphp
         <div class="an-trend-grid {{ $trendIndex === 0 ? 'an-trend-grid-featured' : '' }}">
             <article class="an-card an-monthly-support">
@@ -869,13 +961,13 @@
                 </div>
                 <div class="an-card-body">
                     @if ((int) array_sum($trend['six']['values']) > 0)
-                    <svg class="an-trend-svg" data-an-chart viewBox="0 0 100 44" preserveAspectRatio="none" role="img" aria-label="{{ $trend['title'] }} last six months: {{ implode(', ', $trend['six']['values']) }}">
-                        <line class="an-gridline" x1="0" y1="11" x2="100" y2="11"/>
-                        <line class="an-gridline" x1="0" y1="22" x2="100" y2="22"/>
-                        <line class="an-gridline" x1="0" y1="33" x2="100" y2="33"/>
-                        <polyline class="an-trend-line" pathLength="1" points="{{ $anPointsToLine($linePoints) }}"/>
+                    <svg class="an-trend-svg" data-an-chart viewBox="0 0 100 25" preserveAspectRatio="none" role="img" aria-label="{{ $trend['title'] }} last six months: {{ implode(', ', $trend['six']['values']) }}">
+                        <line class="an-gridline" x1="0" y1="6.25" x2="100" y2="6.25"/>
+                        <line class="an-gridline" x1="0" y1="12.5" x2="100" y2="12.5"/>
+                        <line class="an-gridline" x1="0" y1="18.75" x2="100" y2="18.75"/>
+                        <path class="an-trend-line" pathLength="1" d="{{ $anPointsToSmoothPath($linePoints) }}"/>
                         @foreach ($linePoints as $pointIndex => $point)
-                        <circle class="an-trend-dot" data-an-point data-an-tooltip="{{ $trend['six']['labels'][$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($trend['six']['values'][$pointIndex] ?? 0) }} activity" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="2.4"/>
+                        <circle class="an-trend-dot" data-an-point data-an-tooltip="{{ $trend['six']['labels'][$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($trend['six']['values'][$pointIndex] ?? 0) }} activity" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r=".7"/>
                         @endforeach
                     </svg>
                     <div class="an-trend-labels">
@@ -903,20 +995,20 @@
                 </div>
                 <div class="an-card-body">
                     @if ((int) array_sum($trend['six']['values']) > 0)
-                    <svg class="an-trend-svg" data-an-chart viewBox="0 0 100 44" preserveAspectRatio="none" role="img" aria-label="Cumulative {{ $trend['title'] }}: {{ implode(', ', $trend['area']) }}">
+                    <svg class="an-trend-svg" data-an-chart viewBox="0 0 100 25" preserveAspectRatio="none" role="img" aria-label="Cumulative {{ $trend['title'] }}: {{ implode(', ', $trend['area']) }}">
                         <defs>
                             <linearGradient id="anAreaGrad{{ $trendIndex }}" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.30"/>
                                 <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.03"/>
                             </linearGradient>
                         </defs>
-                        <line class="an-gridline" x1="0" y1="11" x2="100" y2="11"/>
-                        <line class="an-gridline" x1="0" y1="22" x2="100" y2="22"/>
-                        <line class="an-gridline" x1="0" y1="33" x2="100" y2="33"/>
-                        <path class="an-trend-area" d="M{{ $anPointsToArea($areaPoints, 44) }}" style="fill:url(#anAreaGrad{{ $trendIndex }})"/>
-                        <polyline class="an-trend-line" pathLength="1" points="{{ $anPointsToLine($areaPoints) }}"/>
+                        <line class="an-gridline" x1="0" y1="6.25" x2="100" y2="6.25"/>
+                        <line class="an-gridline" x1="0" y1="12.5" x2="100" y2="12.5"/>
+                        <line class="an-gridline" x1="0" y1="18.75" x2="100" y2="18.75"/>
+                        <path class="an-trend-area" d="{{ $anPointsToSmoothPath($areaPoints) }} L{{ $areaPoints[count($areaPoints)-1]['x'] }},25 L{{ $areaPoints[0]['x'] }},25 Z" style="fill:url(#anAreaGrad{{ $trendIndex }})"/>
+                        <path class="an-trend-line" pathLength="1" d="{{ $anPointsToSmoothPath($areaPoints) }}"/>
                         @foreach ($areaPoints as $pointIndex => $point)
-                        <circle class="an-trend-dot" data-an-point data-an-tooltip="{{ $trend['six']['labels'][$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($trend['area'][$pointIndex] ?? 0) }} cumulative" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="2.4"/>
+                        <circle class="an-trend-dot" data-an-point data-an-tooltip="{{ $trend['six']['labels'][$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($trend['area'][$pointIndex] ?? 0) }} cumulative" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r=".7"/>
                         @endforeach
                     </svg>
                     <div class="an-trend-labels">
@@ -935,9 +1027,8 @@
                     @endif
                 </div>
             </article>
-        </div>
 
-        <article class="an-card">
+        <article class="an-card an-heat-card">
             <div class="an-card-head">
                 <span class="an-card-kicker">{{ $trend['kicker'] }}</span>
                 <h3>{{ __('Activity Heatmap') }} – 8 {{ __('Weeks') }}</h3>
@@ -945,17 +1036,20 @@
             </div>
             <div class="an-card-body">
                 @if ($trend['heat']['total'] > 0)
-                <div class="an-heat" role="img" aria-label="{{ $trend['title'] }} by day, {{ $trend['heat']['total'] }} total. {{ $trend['heat']['cells'][0]['date'] }} to {{ $trend['heat']['cells'][count($trend['heat']['cells']) - 1]['date'] }}">
-                    <span class="an-heat-dow"></span>
-                    @foreach ($heatLabels as $heatLabel)
+                <div class="an-heat-shell">
+                <div class="an-heat" data-an-chart role="img" aria-label="{{ $trend['title'] }} by day, {{ $trend['heat']['total'] }} total. {{ $trend['heat']['cells'][0]['date'] }} to {{ $trend['heat']['cells'][count($trend['heat']['cells']) - 1]['date'] }}">
+                    <span aria-hidden="true"></span>
+                    @foreach (range(0, 7) as $weekIndex)
+                    <span class="an-heat-week">{{ $trend['heat']['cells'][$weekIndex * 7]['date'] }}</span>
+                    @endforeach
+                    @foreach ($heatLabels as $dayIndex => $heatLabel)
                     <span class="an-heat-dow">{{ $heatLabel }}</span>
+                        @foreach (range(0, 7) as $weekIndex)
+                            @php($heatCell = $trend['heat']['cells'][$weekIndex * 7 + $dayIndex])
+                            <span class="an-heat-cell" data-an-point data-an-tooltip="{{ $heatCell['date'] }}|{{ number_format($heatCell['count']) }} {{ Str::lower($trend['kicker']) }}" data-lvl="{{ $heatCell['level'] }}" aria-label="{{ $heatCell['date'] }}: {{ $heatCell['count'] }} {{ Str::lower($trend['kicker']) }}"></span>
+                        @endforeach
                     @endforeach
-                    @foreach ($trend['heat']['cells'] as $cellIndex => $cell)
-                    @if ($cellIndex % 7 === 0)
-                    <span class="an-heat-dow">{{ $cell['weekday'] }}</span>
-                    @endif
-                    <span class="an-heat-cell" data-lvl="{{ $cell['level'] }}" title="{{ $cell['date'] }}: {{ $cell['count'] }} {{ Str::lower($trend['kicker']) }}"></span>
-                    @endforeach
+                </div>
                 </div>
                 <div class="an-heat-foot">
                     <span>{{ $trend['heat']['cells'][0]['date'] }} – {{ $trend['heat']['cells'][count($trend['heat']['cells']) - 1]['date'] }} · {{ number_format($trend['heat']['total']) }} {{ Str::lower($trend['kicker']) }}</span>
@@ -972,6 +1066,7 @@
                 @endif
             </div>
         </article>
+        </div>
     @endforeach
 </section>
 <div class="an-tooltip" data-an-tooltip-surface role="status" aria-live="polite"></div>

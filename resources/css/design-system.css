@@ -110,6 +110,17 @@ html[data-theme="light"] {
     --text-secondary: var(--se-text-soft);
 }
 
+/* Theme changes should be one coordinated repaint, not hundreds of card,
+   border, shadow, and gradient transitions competing on the main thread. */
+html.se-theme-switching,
+html.se-theme-switching *,
+html.se-theme-switching *::before,
+html.se-theme-switching *::after {
+    transition:none!important;
+    animation:none!important;
+    scroll-behavior:auto!important;
+}
+
 /* Student dashboard account metrics need solid contrast on compact mobile screens. */
 @media (max-width: 767px) {
     body.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card {
@@ -647,7 +658,9 @@ body[data-theme="dark"] .se-theme-icon-moon {
 .page-body .ui-hero > p,
 .page-body .dash-hero p,
 .page-body .dash-hero-date {
-    color: rgba(255, 250, 243, .82) !important;
+    color: #fffaf3 !important;
+    font-weight: 650;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .2);
 }
 
 .page-body .dash-hero-label {

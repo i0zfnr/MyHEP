@@ -94,6 +94,11 @@ const applyGlassTransparency = (value, persist = true) => {
 const applyTheme = (theme, persist = true) => {
     const nextTheme = normalizeTheme(theme);
     const isDark = nextTheme === 'dark';
+    const isChanging = document.documentElement.dataset.theme !== nextTheme;
+
+    if (isChanging) {
+        document.documentElement.classList.add('se-theme-switching');
+    }
 
     document.documentElement.dataset.theme = nextTheme;
     document.documentElement.style.colorScheme = nextTheme;
@@ -122,6 +127,12 @@ const applyTheme = (theme, persist = true) => {
 
     if (persist) {
         window.localStorage.setItem(THEME_KEY, nextTheme);
+    }
+
+    if (isChanging) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            document.documentElement.classList.remove('se-theme-switching');
+        }));
     }
 
     return nextTheme;
