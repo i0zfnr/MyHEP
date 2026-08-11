@@ -30,11 +30,26 @@ class TranslateFrontendContent
 
         static $replace = null;
         if ($replace === null) {
-            $replace = require lang_path('en/frontend_replace.php');
+            $replace = $this->loadReplacementMap();
         }
 
         $response->setContent(strtr($content, $replace));
 
         return $response;
+    }
+
+    private function loadReplacementMap(): array
+    {
+        ob_start();
+
+        try {
+            $replace = require lang_path('en/frontend_replace.php');
+        } finally {
+            // A UTF-8 BOM or accidental whitespace in the PHP file must not
+            // send output before Laravel has finished preparing its headers.
+            ob_end_clean();
+        }
+
+        return is_array($replace) ? $replace : [];
     }
 }

@@ -21,6 +21,10 @@ class ProgramIdentifier
 
         $value = strtoupper(trim((string) $value));
 
+        if (preg_match('/(?:DIT|DDT|DDC|DBF)/', $value, $matches)) {
+            return $matches[0];
+        }
+
         return self::COURSE_CODES[$value] ?? $value;
     }
 }

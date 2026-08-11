@@ -37,7 +37,7 @@
                 @endif
                 <div class="profile-title">
                     <h3>{{ $student->full_name }}</h3>
-                    <span>{{ $student->matric_no }} | {{ $student->program }}</span>
+                    <span>{{ $student->matric_no }} | {{ $student->class_name ?: $student->program }}</span>
                     <span>{{ ($student->residence_status ?? 'inside_campus') === 'live_out' ? __('Live Out / Outside Campus') : __('Inside Campus') }}: {{ $student->room_number ?: '-' }}</span>
                 </div>
                 <div class="ui-actions" style="margin-left:auto;">

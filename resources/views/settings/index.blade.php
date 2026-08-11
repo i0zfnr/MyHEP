@@ -213,6 +213,18 @@
                 </section>
             @endif
 
+            <section class="settings-section smooth-scroll-section" role="group" aria-labelledby="settingsSmoothScrollTitle">
+                <h3 class="settings-section-title" id="settingsSmoothScrollTitle">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7l4-4 4 4M16 17l-4 4-4-4M12 3v18"/></svg>
+                    Smooth scrolling
+                </h3>
+                <p class="settings-section-copy">Turn Lenis scrolling on for fluid wheel movement, or off to use native browser scrolling.</p>
+                <button class="smooth-scroll-toggle" type="button" role="switch" aria-checked="true" data-smooth-scroll-toggle>
+                    <span class="smooth-scroll-toggle-copy"><strong>Lenis scroll</strong><small data-smooth-scroll-status>On</small></span>
+                    <span class="smooth-scroll-switch" aria-hidden="true"><i></i></span>
+                </button>
+            </section>
+
             <div class="settings-actions">
                 <a class="btn" href="{{ route($backRoute) }}">{{ __('ui.back_dashboard') }}</a>
                 <span class="settings-autosave" data-settings-autosave aria-live="polite">Changes save automatically</span>

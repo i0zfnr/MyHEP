@@ -1275,6 +1275,16 @@ body[data-theme="dark"] .se-page-number.is-current {
     font-size: .75rem;
 }
 
+.smooth-scroll-toggle { width:100%; min-height:58px; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.75rem .9rem; border:1px solid var(--se-border); border-radius:13px; background:var(--se-surface-soft); color:var(--se-text); font:inherit; text-align:left; cursor:pointer; }
+.smooth-scroll-toggle-copy { display:grid; gap:3px; }
+.smooth-scroll-toggle-copy strong { font-size:.82rem; }
+.smooth-scroll-toggle-copy small { color:var(--se-text-muted); font-size:.72rem; }
+.smooth-scroll-switch { width:44px; height:24px; flex:0 0 44px; padding:3px; border-radius:999px; background:var(--se-surface-muted); box-shadow:inset 0 0 0 1px var(--se-border); transition:background .18s ease; }
+.smooth-scroll-switch i { display:block; width:18px; height:18px; border-radius:50%; background:var(--se-surface); box-shadow:0 1px 4px rgba(0,0,0,.2); transition:transform .18s ease; }
+.smooth-scroll-toggle[aria-checked="true"] .smooth-scroll-switch { background:var(--se-primary); }
+.smooth-scroll-toggle[aria-checked="true"] .smooth-scroll-switch i { transform:translateX(20px); }
+.smooth-scroll-toggle:focus-visible { outline:none; box-shadow:var(--se-ring); }
+
 .theme-preview {
     height: 74px;
     display: grid;
@@ -6302,6 +6312,31 @@ body.admin-liquid-disabled :is(.topbar, .sidebar, .page-header, .sb-user, .heade
     background-image: none !important;
     border-color: var(--border) !important;
     box-shadow: var(--glass-shadow) !important;
+}
+
+/* Large data tables should not re-blur the full viewport on every scroll frame. */
+.page-body .student-list-wrap > .card {
+    background:var(--se-surface)!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    box-shadow:0 1px 3px rgba(35,27,20,.06)!important;
+}
+.page-body .student-list-wrap .students-table,
+.page-body .student-list-wrap .students-table tbody,
+.page-body .student-list-wrap .students-table tr {
+    background-color:var(--se-surface)!important;
+}
+.page-body .student-list-wrap .students-table tbody tr:hover {
+    background-color:var(--se-primary-soft)!important;
+}
+
+body[data-theme="dark"] .page-body .adash :is(.monitor-card,.monitor-kpi) {
+    border-color:color-mix(in srgb,var(--se-primary) 22%,var(--se-border))!important;
+    background:
+        linear-gradient(150deg,color-mix(in srgb,#fff 5%,var(--se-surface)),var(--se-surface) 52%,color-mix(in srgb,var(--se-primary-soft) 24%,var(--se-surface)))!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 12px 28px rgba(0,0,0,.18)!important;
 }
 
 /* The open mobile drawer has a higher-specificity liquid background. Keep the

@@ -336,6 +336,11 @@
     /* Unified analytics system */
     .analytics-dashboard { gap:16px; }
     .an-kpis,.an-grid,.an-ranked-pair,.an-trend-grid,.an-statistics-pies { gap:12px; }
+    .an-grid-3 { grid-template-columns:repeat(6,minmax(0,1fr)); }
+    .an-grid-3 > .an-card { grid-column:span 2; }
+    .an-grid-3 .an-donut-layout { grid-template-columns:170px minmax(0,1fr); }
+    .an-grid-3:has(> .an-card:nth-child(5):last-child) > .an-card:nth-child(4) { grid-column:2 / span 2; }
+    .an-grid-3:has(> .an-card:nth-child(5):last-child) > .an-card:nth-child(5) { grid-column:4 / span 2; }
     .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) { border:1px solid var(--se-border); border-radius:14px; background:var(--se-surface); box-shadow:0 1px 2px rgba(25,20,16,.045); }
     .analytics-dashboard :is(.an-card,.an-kpi,.an-featured):hover { transform:none; border-color:color-mix(in srgb,var(--se-border) 72%,var(--se-text)); box-shadow:0 5px 16px rgba(25,20,16,.065); }
     .an-kpi { min-height:110px; padding:15px 17px; }
@@ -385,6 +390,14 @@
     .an-heat-card .an-heat-foot { color:var(--se-text-muted); font-size:.73rem; font-weight:650; }
     body[data-theme="dark"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) { box-shadow:0 1px 2px rgba(0,0,0,.2); }
 
+    @media (max-width:1250px) {
+        .an-grid-3 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .an-grid-3 > .an-card,
+        .an-grid-3:has(> .an-card:nth-child(5):last-child) > .an-card:nth-child(4),
+        .an-grid-3:has(> .an-card:nth-child(5):last-child) > .an-card:nth-child(5) { grid-column:auto; }
+        .an-grid-3 > .an-card:last-child:nth-child(odd) { grid-column:1 / -1; }
+    }
+
     /* System Admin graph mode uses a restrained liquid-glass layer. */
     body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
         border-color:color-mix(in srgb,var(--se-primary) 18%,var(--se-border));
@@ -426,6 +439,34 @@
         background:linear-gradient(180deg,rgba(255,255,255,.045),transparent);
     }
 
+    /* Modern analytics finish: stronger hierarchy without visual noise. */
+    .analytics-dashboard .an-card-head { padding-bottom:2px; }
+    .analytics-dashboard .an-card-kicker { color:var(--se-primary-strong); letter-spacing:.11em; }
+    .analytics-dashboard .an-donut { width:160px; box-shadow:0 14px 30px color-mix(in srgb,var(--se-primary) 10%,transparent),inset 0 0 0 1px color-mix(in srgb,#fff 52%,transparent); }
+    .analytics-dashboard .an-donut::after { inset:28px; box-shadow:inset 0 0 0 1px var(--se-border),0 2px 8px rgba(0,0,0,.035); }
+    .analytics-dashboard .an-donut-centre strong { font-size:1.65rem; font-weight:800; }
+    .analytics-dashboard .an-legend { gap:6px; }
+    .analytics-dashboard .an-legend-row { min-height:38px; padding:7px 9px; margin:0; border:1px solid transparent; border-radius:9px; }
+    .analytics-dashboard .an-legend-row:hover { transform:none; border-color:var(--se-border); background:var(--se-surface-soft); }
+    .analytics-dashboard .an-legend-row i { width:9px; height:9px; box-shadow:0 0 0 3px color-mix(in srgb,var(--legend-color) 12%,transparent); }
+    .analytics-dashboard .an-stack-track { height:16px; background:var(--se-surface-muted); }
+    .analytics-dashboard .an-stack-seg:first-child { border-radius:999px 0 0 999px; }
+    .analytics-dashboard .an-stack-seg:last-child { border-radius:0 999px 999px 0; }
+    .analytics-dashboard .an-tile { min-height:64px; display:flex; flex-direction:column; justify-content:center; border-radius:11px; }
+    .analytics-dashboard .an-gauge { box-shadow:0 14px 30px color-mix(in srgb,var(--se-primary) 9%,transparent),inset 0 0 0 1px color-mix(in srgb,#fff 48%,transparent); }
+    body[data-theme="dark"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
+        border-color:color-mix(in srgb,var(--se-primary) 14%,var(--se-border));
+        background:linear-gradient(155deg,color-mix(in srgb,#fff 4%,var(--se-surface)),var(--se-surface) 48%,color-mix(in srgb,var(--se-primary-soft) 18%,var(--se-surface)));
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 10px 26px rgba(0,0,0,.15);
+    }
+    body[data-theme="dark"] .analytics-dashboard :is(.an-statistics-pie,.an-statistics-metric,.an-active-chart) {
+        background:color-mix(in srgb,var(--se-surface-soft) 86%,transparent);
+        border-color:var(--se-border);
+    }
+    body[data-theme="dark"] .analytics-dashboard .an-donut::after,
+    body[data-theme="dark"] .analytics-dashboard .an-gauge::after { background:color-mix(in srgb,var(--se-surface) 94%,#000); }
+    body[data-theme="dark"] .analytics-dashboard .an-legend-row:hover { background:color-mix(in srgb,var(--se-primary-soft) 38%,var(--se-surface-soft)); }
+
     @media (max-width:1100px) {
         .an-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
         .an-grid-3, .an-grid-2, .an-trend-grid { grid-template-columns:1fr; }
@@ -460,7 +501,7 @@
 
 @if (!empty($analytics['domains']))
 @php
-    $anTileColors = ['#c8a96a', '#28686c', '#8c8175', '#7d8055', '#a65f4f', '#64706a', '#6f8d78', '#9a6a3f'];
+    $anTileColors = ['var(--se-primary)', 'var(--se-success)', 'var(--se-warning)', 'var(--se-info)', 'var(--se-danger)', '#8c8175', '#6f8d78', '#9a6a3f'];
 
     $anComputePoints = function (array $values, int $width = 100, int $height = 44, int $pad = 4): array {
         $max = max(1, ...$values);

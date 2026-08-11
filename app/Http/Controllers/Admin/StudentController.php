@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Support\AccountSessionManager;
 use App\Support\ProgramIdentifier;
+use App\Support\StudentClassIdentifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -192,7 +193,7 @@ class StudentController extends Controller
     {
         $student = DB::table('students')
             ->select([
-                'id', 'full_name', 'matric_no', 'ic_no', 'email', 'phone', 'program', 'photo',
+                'id', 'full_name', 'matric_no', 'ic_no', 'email', 'phone', 'program', 'class_name', 'photo',
                 'semester', 'academic_session', 'date_of_birth', 'religion', 'race', 'parliament', 'dun',
                 'address', 'study_address', 'residence_status', 'room_number', 'guardian_name',
                 'guardian_ic_no', 'guardian_phone', 'mother_ic_no', 'guardian_occupation',
@@ -518,7 +519,10 @@ class StudentController extends Controller
                 $fullName = $this->rowValue($row, ['nama pelajar', 'nama penuh', 'nama', 'student name', 'full name', 'name']);
                 $icNo = $this->cleanIdentity($this->rowValue($row, ['no ic', 'no. ic', 'no kp', 'no. kp', 'nombor kp', 'no kad pengenalan', 'nombor kad pengenalan', 'ic no', 'ic number', 'mykad', 'kad pengenalan']));
                 $matricNo = $this->cleanIdentity($this->rowValue($row, ['no matrik', 'no. matrik', 'nombor matrik', 'no pend', 'no. pend', 'matric no', 'matric number', 'id pelajar', 'student id', 'no pendaftaran', 'nombor pendaftaran']));
-                $program = $this->rowValue($row, ['program', 'nama program', 'kursus', 'kod kursus', 'course', 'course code', 'kelas']) ?: 'UNKNOWN';
+                $className = StudentClassIdentifier::normalize($this->rowValue($row, ['kelas', 'class', 'class name']));
+                $program = $this->rowValue($row, ['program', 'nama program', 'kursus', 'kod kursus', 'course', 'course code'])
+                    ?: $className
+                    ?: 'UNKNOWN';
 
                 if ($fullName === '' || $icNo === '') {
                     $result['skipped']++;
@@ -555,6 +559,13 @@ class StudentController extends Controller
                     if ($value !== '' && $studentColumns->has($column)) {
                         $payload[$column] = $column === 'email' ? strtolower($value) : $value;
                     }
+                }
+
+                if ($studentColumns->has('class_name') && $className !== null) {
+                    $payload['class_name'] = $className;
+                }
+                if ($studentColumns->has('semester') && ($semester = StudentClassIdentifier::semester($className)) !== null) {
+                    $payload['semester'] = $semester;
                 }
 
                 if (!$student && $studentColumns->has('residence_status') && empty($payload['residence_status'])) {

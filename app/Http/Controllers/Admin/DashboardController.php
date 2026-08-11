@@ -243,7 +243,7 @@ class DashboardController extends Controller
             return $analytics;
         }
 
-        $palette = ['#c8a96a', '#28686c', '#8c8175', '#7d8055', '#a65f4f', '#64706a', '#6f8d78', '#9a6a3f'];
+        $palette = ['var(--se-primary)', 'var(--se-success)', 'var(--se-warning)', 'var(--se-info)', 'var(--se-danger)', '#8c8175', '#6f8d78', '#9a6a3f'];
 
         $analytics['donuts'][] = $this->adminRoleDonut($palette);
         $analytics['donuts'][] = $this->studentRaceDonut($palette);
@@ -420,8 +420,6 @@ class DashboardController extends Controller
         $cached = systemCacheRemember('myhep.dashboard.analytics.discipline', 90, function () {
             $ruleBreakdown = [];
             $topOffenseTypes = [];
-            $fineTotal = 0;
-            $finePaid = 0;
 
             if (Schema::hasTable('offense_items') && Schema::hasTable('offense_types')) {
                 $ruleBreakdown = DB::table('offense_items')
@@ -444,16 +442,9 @@ class DashboardController extends Controller
                     ->all();
             }
 
-            if (Schema::hasTable('offenses')) {
-                $fineTotal = (int) DB::table('offenses')->sum('fine_amount');
-                $finePaid = (int) DB::table('offenses')->where('status', 'paid')->sum('fine_amount');
-            }
-
             return [
                 'rule_breakdown' => $ruleBreakdown,
                 'top_offense_types' => $topOffenseTypes,
-                'fine_total' => $fineTotal,
-                'fine_paid' => $finePaid,
             ];
         });
 
@@ -497,14 +488,12 @@ class DashboardController extends Controller
         $studentSix = $this->monthlyCounts('students', 'created_at', 6);
 
         $totalOffenses = Schema::hasTable('offenses') ? (int) DB::table('offenses')->count() : 0;
+        $paidOffenses = Schema::hasTable('offenses') ? (int) DB::table('offenses')->where('status', 'paid')->count() : 0;
         $unpaidOffenses = Schema::hasTable('offenses') ? (int) DB::table('offenses')->where('status', 'unpaid')->count() : 0;
         $pendingFine = Schema::hasTable('fine_payment_applications')
             ? (int) DB::table('fine_payment_applications')->where('status', 'pending')->count()
             : 0;
         $totalStudents = Schema::hasTable('students') ? (int) DB::table('students')->count() : 0;
-
-        $fineTotal = (int) $cached['fine_total'];
-        $finePaid = (int) $cached['fine_paid'];
 
         return [
             'treemap' => $treemap,
@@ -523,15 +512,15 @@ class DashboardController extends Controller
             'trend' => $this->domainTrends('discipline', __('Offense Activity'), __('Offenses'), 'offenses', 'offense_date'),
             'gauge' => [
                 'kicker' => __('Discipline'),
-                'title' => __('Fine Collection'),
-                'copy' => __('Share of registered fine value paid to date.'),
-                'value' => $fineTotal > 0 ? (int) round(($finePaid / $fineTotal) * 100) : 0,
-                'display' => $fineTotal > 0 ? number_format(($finePaid / $fineTotal) * 100, 1) . '%' : '0%',
-                'note' => $fineTotal > 0
-                    ? __('RM :paid of RM :total collected', ['paid' => number_format($finePaid), 'total' => number_format($fineTotal)])
-                    : __('No fine value recorded yet.'),
+                'title' => __('Offense Payment Rate'),
+                'copy' => __('Share of registered offenses marked as paid.'),
+                'value' => $totalOffenses > 0 ? (int) round(($paidOffenses / $totalOffenses) * 100) : 0,
+                'display' => $totalOffenses > 0 ? number_format(($paidOffenses / $totalOffenses) * 100, 1) . '%' : '0%',
+                'note' => $totalOffenses > 0
+                    ? __(':paid of :total offenses paid', ['paid' => number_format($paidOffenses), 'total' => number_format($totalOffenses)])
+                    : __('No offenses recorded yet.'),
                 'tone' => 'green',
-                'active' => $fineTotal > 0,
+                'active' => $totalOffenses > 0,
             ],
             'kpis' => [
                 $this->kpi(__('Total Offenses'), number_format($totalOffenses), __('All registered offense records'), 'slate', $six['values']),

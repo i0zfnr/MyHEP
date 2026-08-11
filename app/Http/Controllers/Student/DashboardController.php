@@ -21,6 +21,9 @@ class DashboardController extends Controller
         if (Schema::hasColumn('students', 'academic_session')) {
             $studentColumns[] = 'academic_session';
         }
+        if (Schema::hasColumn('students', 'class_name')) {
+            $studentColumns[] = 'class_name';
+        }
 
         $studentProfile = DB::table('students')
             ->select($studentColumns)

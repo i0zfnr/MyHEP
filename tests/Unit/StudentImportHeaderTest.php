@@ -27,6 +27,7 @@ class StudentImportHeaderTest extends TestCase
         $this->assertSame('080316031157', $mapped[0]['no kp']);
         $this->assertSame('34DIT26F1001', $mapped[0]['no pend']);
         $this->assertSame('DF008', $mapped[0]['kod kursus']);
+        $this->assertSame('DIT1A', $mapped[0]['kelas']);
         $this->assertSame('I : 2026/2027', $mapped[0]['sesi semasa']);
     }
 

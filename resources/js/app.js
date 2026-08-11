@@ -55,10 +55,33 @@ const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
 const THEME_KEY = 'studentedge-theme';
 const ACCENT_THEME_KEY = 'studentedge-accent-theme';
 const GLASS_TRANSPARENCY_KEY = 'studentedge-glass-transparency';
+const SMOOTH_SCROLL_KEY = 'studentedge-smooth-scroll';
 
 const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
 const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet'].includes(theme) ? theme : 'gold';
 const normalizeGlassTransparency = (value) => Math.min(80, Math.max(10, Number(value) || 40));
+const isSmoothScrollEnabled = () => window.localStorage.getItem(SMOOTH_SCROLL_KEY) !== 'off';
+
+const registerSmoothScrollPreference = () => {
+    const update = () => {
+        const enabled = isSmoothScrollEnabled();
+        document.documentElement.dataset.smoothScrollPreference = enabled ? 'on' : 'off';
+        document.querySelectorAll('[data-smooth-scroll-toggle]').forEach((button) => {
+            button.setAttribute('aria-checked', enabled ? 'true' : 'false');
+            const status = button.querySelector('[data-smooth-scroll-status]');
+            if (status) status.textContent = enabled ? 'On' : 'Off';
+        });
+    };
+
+    document.querySelectorAll('[data-smooth-scroll-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+            window.localStorage.setItem(SMOOTH_SCROLL_KEY, isSmoothScrollEnabled() ? 'off' : 'on');
+            update();
+            window.dispatchEvent(new CustomEvent('studentedge:smooth-scroll-change'));
+        });
+    });
+    update();
+};
 
 const updateGlassControls = (value) => {
     const transparency = normalizeGlassTransparency(value);
@@ -1380,6 +1403,7 @@ const shouldKeepNativeScroll = (node) => node.matches([
     '.se-filter-sheet-body',
     '.table-wrap',
     '.ui-table-wrap',
+    '.student-table-wrap',
     '.move-scanner',
     '#qr-reader',
     '[data-qr-reader]',
@@ -1398,10 +1422,6 @@ const registerMainSmoothScroll = () => {
         return;
     }
 
-    if (document.body.classList.contains('admin-dashboard-page')) {
-        return;
-    }
-
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let lenis = null;
 
@@ -1412,7 +1432,7 @@ const registerMainSmoothScroll = () => {
     };
 
     const sync = () => {
-        if (reducedMotion.matches) {
+        if (reducedMotion.matches || !isSmoothScrollEnabled()) {
             destroy();
             return;
         }
@@ -1430,8 +1450,8 @@ const registerMainSmoothScroll = () => {
             autoResize: true,
             smoothWheel: true,
             syncTouch: false,
-            lerp: 0.28,
-            wheelMultiplier: 0.9,
+            lerp: 0.42,
+            wheelMultiplier: 1,
             overscroll: false,
             allowNestedScroll: true,
             prevent: shouldKeepNativeScroll,
@@ -1441,6 +1461,7 @@ const registerMainSmoothScroll = () => {
     };
 
     reducedMotion.addEventListener?.('change', sync);
+    window.addEventListener('studentedge:smooth-scroll-change', sync);
     window.addEventListener('pagehide', destroy, { once: true });
     sync();
 };
@@ -1460,7 +1481,7 @@ const registerDocumentSmoothScroll = () => {
     };
 
     const sync = () => {
-        if (reducedMotion.matches) {
+        if (reducedMotion.matches || !isSmoothScrollEnabled()) {
             destroy();
             return;
         }
@@ -1475,7 +1496,7 @@ const registerDocumentSmoothScroll = () => {
             autoResize: true,
             smoothWheel: true,
             syncTouch: false,
-            lerp: 0.18,
+            lerp: 0.32,
             wheelMultiplier: 1,
             overscroll: true,
             allowNestedScroll: true,
@@ -1488,6 +1509,7 @@ const registerDocumentSmoothScroll = () => {
     };
 
     reducedMotion.addEventListener?.('change', sync);
+    window.addEventListener('studentedge:smooth-scroll-change', sync);
     window.addEventListener('pagehide', destroy, { once: true });
     sync();
 };
@@ -1512,6 +1534,7 @@ window.addEventListener('DOMContentLoaded', () => {
     syncPwaDisplayMode();
     registerThemeUi();
     registerLiquidGlassUi();
+    registerSmoothScrollPreference();
     registerNotificationCenter();
     registerMediaViewer();
     registerLiquidFilterSheets();

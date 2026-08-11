@@ -1056,6 +1056,7 @@
     $studentName = $studentProfile->full_name ?? ($authUser['name'] ?? __('Pelajar'));
     $studentMatric = $studentProfile->matric_no ?? ($authUser['matric_no'] ?? '-');
     $studentProgram = $studentProfile->program ?? ($authUser['program'] ?? '-');
+    $studentClass = $studentProfile->class_name ?? '-';
     $studentSemester = $studentProfile->semester ?? ($authUser['semester'] ?? '-');
     $studentSession = $studentProfile->academic_session ?? '-';
     $studentIcNo = maskIdentityNumber($studentProfile->ic_no ?? null);
@@ -1127,7 +1128,7 @@
                 </div>
                 <div class="hero-meta-item">
                     <span class="hero-meta-label">{{ __('Kelas') }}</span>
-                    <span class="hero-meta-value">{{ $studentProgram ?: '-' }}</span>
+                    <span class="hero-meta-value">{{ $studentClass ?: '-' }}</span>
                 </div>
                 <div class="hero-meta-item">
                     <span class="hero-meta-label">{{ __('Tarikh') }}</span>

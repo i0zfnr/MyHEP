@@ -19,4 +19,10 @@ class ProgramIdentifierTest extends TestCase
         $this->assertSame('DDC', ProgramIdentifier::from(null, 'DV010'));
         $this->assertSame('DBF', ProgramIdentifier::from(null, 'DV011'));
     }
+
+    public function test_it_extracts_the_program_from_a_class_name(): void
+    {
+        $this->assertSame('DIT', ProgramIdentifier::from(null, 'DIT3B'));
+        $this->assertSame('DDT', ProgramIdentifier::from(null, 'DDT2A'));
+    }
 }

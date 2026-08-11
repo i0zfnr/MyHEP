@@ -57,6 +57,9 @@
     .student-name-block { min-width:0; }
     .student-sub { display:none; margin-top:3px; color:var(--se-text-soft); font-size:11px; line-height:1.35; }
     .matric-cell { color:var(--se-text); white-space:nowrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .student-head-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .student-scroll-hint { display:none; margin:0; padding:8px 10px; border-bottom:1px solid var(--se-border); background:var(--se-surface-soft); color:var(--se-text-muted); font-size:.72rem; font-weight:650; }
+    .student-table-wrap { max-width:100%; overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:thin; scrollbar-color:var(--se-border-strong) transparent; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y; }
     html[data-theme="dark"] .students-table .student-name { color:#f7f1e8 !important; }
     html[data-theme="dark"] .students-table .student-sub { color:#cbbba9 !important; }
     html[data-theme="dark"] .students-table .matric-cell { color:#f0e3d1 !important; }
@@ -228,8 +231,14 @@
         .filters { padding:9px 10px; }
         .filter-grid { gap:7px; }
         .filters input, .filters select { padding:7px 9px; font-size:12px; }
-        .student-table-wrap { overflow-x:hidden !important; }
-        .students-table { table-layout:fixed; min-width:0; }
+        .head { display:grid; grid-template-columns:1fr; gap:9px; }
+        .student-head-actions { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px !important; }
+        .student-head-actions .btn { width:100% !important; min-height:38px; display:flex; align-items:center; justify-content:center; text-align:center; }
+        .student-head-actions .btn:last-child:nth-child(odd) { grid-column:1 / -1; }
+        .student-scroll-hint { display:flex; align-items:center; gap:6px; }
+        .student-scroll-hint::before { content:'↔'; color:var(--se-primary-strong); font-size:.9rem; }
+        .student-table-wrap { overflow-x:auto !important; }
+        .students-table { table-layout:fixed; min-width:520px; }
         .students-table th, .students-table td { padding:8px 9px !important; font-size:12px !important; }
         .students-table th:nth-child(1), .students-table td:nth-child(1) { width:48%; }
         .students-table th:nth-child(2), .students-table td:nth-child(2) { width:32%; }
@@ -332,7 +341,7 @@
     <div class="card">
         <div class="head">
             <h1 style="margin:0;font-size:20px;">{{ __('Senarai Pelajar') }}</h1>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <div class="student-head-actions">
                 <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
                 @if($canExportStudents)
                     <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">{{ __('Export CSV') }}</a>
@@ -364,6 +373,7 @@
         </div>
 
         <div data-live-filter-results>
+        <p class="student-scroll-hint">{{ __('Swipe horizontally to view all student columns.') }}</p>
         <div class="student-table-wrap" style="overflow-x:auto;">
             <table class="students-table">
                 <thead>
