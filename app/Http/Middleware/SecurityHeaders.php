@@ -15,14 +15,14 @@ class SecurityHeaders
         $response->headers->set('Content-Security-Policy', implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",
-            "connect-src 'self'",
+            "connect-src 'self' https://cloudflareinsights.com",
             "font-src 'self' https://fonts.gstatic.com data:",
             "form-action 'self'",
             "frame-ancestors 'none'",
             "frame-src 'self' https://maps.google.com https://www.google.com",
             "img-src 'self' data: blob: https:",
             "object-src 'none'",
-            "script-src 'self' 'unsafe-inline'",
+            "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         ]));
         $response->headers->set('Permissions-Policy', 'camera=(self), geolocation=(self), microphone=()');

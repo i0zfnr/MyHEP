@@ -13,6 +13,7 @@ use App\Http\Middleware\SetConfiguredSessionLifetime;
 use App\Http\Middleware\TrackAccountSession;
 use App\Http\Middleware\TranslateFrontendContent;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\UseRequestOriginForUrls;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->web(prepend: [
+            UseRequestOriginForUrls::class,
             SetConfiguredSessionLifetime::class,
         ]);
 

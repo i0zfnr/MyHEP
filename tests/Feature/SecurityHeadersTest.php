@@ -18,6 +18,7 @@ class SecurityHeadersTest extends TestCase
 
         $this->assertStringContainsString("frame-ancestors 'none'", (string) $response->headers->get('Content-Security-Policy'));
         $this->assertStringContainsString("object-src 'none'", (string) $response->headers->get('Content-Security-Policy'));
+        $this->assertStringContainsString('https://static.cloudflareinsights.com', (string) $response->headers->get('Content-Security-Policy'));
     }
 
     public function test_untrusted_forwarded_host_is_not_reflected_in_generated_urls(): void
@@ -25,8 +26,9 @@ class SecurityHeadersTest extends TestCase
         $response = $this->withHeaders([
             'X-Forwarded-Host' => 'attacker.example',
             'X-Forwarded-Proto' => 'https',
-        ])->get('/login');
+        ])->withServerVariables(['REMOTE_ADDR' => '192.0.2.10'])->get('/login');
 
         $response->assertOk()->assertDontSee('attacker.example', false);
     }
+
 }
