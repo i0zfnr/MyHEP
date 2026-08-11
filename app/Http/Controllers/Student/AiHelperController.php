@@ -23,7 +23,16 @@ class AiHelperController extends Controller
 
     public function ask(Request $request, AiProvider $ai): JsonResponse
     {
-        $validated = $request->validate(['message' => ['required', 'string', 'min:2', 'max:1200']]);
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'min:2', 'max:1200'],
+            'attachment' => ['prohibited'],
+        ]);
+
+        if ($this->requestsImageGeneration($validated['message'])) {
+            return response()->json([
+                'message' => __('Student AI Helper provides text guidance only. Image generation requests are not supported.'),
+            ], 422);
+        }
         if (! $ai->enabled()) {
             return response()->json(['message' => __('AI API key is not configured on the server.')], 422);
         }
@@ -32,7 +41,7 @@ class AiHelperController extends Controller
         $context = $this->studentContext($studentId);
         $prompt = implode("\n\n", [
             'You are StudentEdge Student AI Helper for a Malaysian polytechnic.',
-            'Answer only about the signed-in student and general portal guidance. Never infer missing records, reveal another person, or treat advice as an official decision. Be concise and use the language used in the question.',
+            'Answer only about the signed-in student and general portal guidance. Provide text guidance only; never generate or offer images or other visual assets. Never infer missing records, reveal another person, or treat advice as an official decision. Be concise and use the language used in the question.',
             'Signed-in student context JSON: '.json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'Student question: '.$validated['message'],
         ]);
@@ -45,6 +54,14 @@ class AiHelperController extends Controller
         }
 
         return response()->json(['answer' => $answer, 'provider' => $ai->name(), 'model' => $ai->model()]);
+    }
+
+    private function requestsImageGeneration(string $message): bool
+    {
+        return preg_match(
+            '/\b(?:generate|create|draw|design|make|produce)\s+(?:an?\s+|some\s+)?(?:image|picture|illustration|poster|logo|artwork|graphic)\b|\b(?:jana|hasilkan|cipta|lukis|reka)\s+(?:sebuah\s+)?(?:imej|gambar|ilustrasi|poster|logo|grafik)\b/iu',
+            $message
+        ) === 1;
     }
 
     private function studentContext(int $studentId): array

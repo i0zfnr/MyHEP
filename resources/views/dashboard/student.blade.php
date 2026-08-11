@@ -649,32 +649,31 @@
     }
     body[data-theme="dark"] .sdash .hero {
         background:
-            linear-gradient(135deg, rgba(54, 43, 34, .92), rgba(24, 20, 17, .82)),
-            radial-gradient(circle at 14% 0%, rgba(255,255,255,.08), transparent 34%),
-            radial-gradient(circle at 92% 6%, rgba(95, 190, 145, .10), transparent 36%) !important;
-        border: 1px solid rgba(226, 209, 192, .18);
+            radial-gradient(ellipse 62% 90% at 88% 18%, color-mix(in srgb, var(--se-primary) 62%, transparent), transparent 70%),
+            linear-gradient(118deg, #211239 0%, color-mix(in srgb, #211239 64%, var(--se-primary-strong)) 52%, color-mix(in srgb, var(--se-primary-strong) 72%, #2b1746) 100%) !important;
+        border: 1px solid color-mix(in srgb, var(--se-primary-muted) 30%, transparent);
         box-shadow:
-            0 22px 48px rgba(0,0,0,.34),
-            inset 0 1px 0 rgba(255,255,255,.08);
+            0 22px 48px rgba(12, 5, 27, .42),
+            inset 0 1px 0 rgba(255,255,255,.12);
         backdrop-filter: blur(18px) saturate(126%);
         -webkit-backdrop-filter: blur(18px) saturate(126%);
     }
     body[data-theme="dark"] .sdash .hero::before {
         background:
-            linear-gradient(120deg, rgba(255,255,255,.08), transparent 42%),
-            radial-gradient(ellipse 60% 80% at 86% 10%, rgba(215,191,168,.14) 0%, transparent 68%) !important;
+            linear-gradient(120deg, rgba(255,255,255,.09), transparent 42%),
+            radial-gradient(ellipse 60% 80% at 86% 10%, color-mix(in srgb, var(--se-primary-muted) 28%, transparent) 0%, transparent 68%) !important;
     }
     body[data-theme="dark"] .sdash .hero-eyebrow,
     body[data-theme="dark"] .sdash .section-label {
-        color: #d7bfa8 !important;
+        color: color-mix(in srgb, white 76%, var(--se-primary-muted)) !important;
     }
     body[data-theme="dark"] .sdash .hero-sub {
         color: rgba(247,239,232,.68) !important;
     }
     body[data-theme="dark"] .sdash .hero-badge,
     body[data-theme="dark"] .sdash .hero-meta-item {
-        background: rgba(255,255,255,.075) !important;
-        border-color: rgba(226, 209, 192, .18) !important;
+        background: color-mix(in srgb, white 9%, var(--se-primary) 5%) !important;
+        border-color: color-mix(in srgb, white 18%, var(--se-primary-muted) 12%) !important;
         box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
         backdrop-filter: blur(12px) saturate(128%);
         -webkit-backdrop-filter: blur(12px) saturate(128%);
@@ -683,12 +682,12 @@
     body[data-theme="dark"] .sdash .portal-card {
         position: relative;
         background:
-            linear-gradient(145deg, rgba(31, 27, 23, .88), rgba(14, 13, 12, .78)),
-            radial-gradient(circle at 10% 0%, rgba(255,255,255,.06), transparent 36%) !important;
-        border-color: rgba(226, 209, 192, .16) !important;
+            radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--se-primary) 22%, transparent), transparent 48%),
+            linear-gradient(145deg, rgba(39, 24, 57, .96), rgba(24, 17, 36, .94)) !important;
+        border-color: color-mix(in srgb, var(--se-primary-muted) 30%, transparent) !important;
         box-shadow:
-            0 18px 38px rgba(0,0,0,.24),
-            inset 0 1px 0 rgba(255,255,255,.07) !important;
+            0 18px 38px rgba(10, 4, 24, .30),
+            inset 0 1px 0 rgba(255,255,255,.09) !important;
         overflow: hidden;
         backdrop-filter: blur(16px) saturate(126%);
         -webkit-backdrop-filter: blur(16px) saturate(126%);
@@ -704,15 +703,15 @@
     body[data-theme="dark"] .sdash .stat-card:hover,
     body[data-theme="dark"] .sdash .portal-card:hover {
         transform: translateY(-3px);
-        border-color: rgba(215,191,168,.34) !important;
+        border-color: color-mix(in srgb, var(--se-primary-muted) 58%, transparent) !important;
         box-shadow:
             0 24px 52px rgba(0,0,0,.34),
             inset 0 1px 0 rgba(255,255,255,.10) !important;
     }
     body[data-theme="dark"] .sdash .stat-icon,
     body[data-theme="dark"] .sdash .portal-card-icon {
-        background: rgba(255,255,255,.10) !important;
-        border: 1px solid rgba(255,255,255,.08);
+        background: color-mix(in srgb, var(--se-primary) 18%, rgba(255,255,255,.08)) !important;
+        border: 1px solid color-mix(in srgb, var(--se-primary-muted) 22%, transparent);
         box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
     }
     body[data-theme="dark"] .sdash .stat-icon.sand,
@@ -743,7 +742,7 @@
         text-shadow: 0 1px 1px rgba(0,0,0,.24);
     }
     body[data-theme="dark"] .sdash .portal-card-cta {
-        color: #d7bfa8 !important;
+        color: var(--se-primary-muted) !important;
     }
     body[data-theme="dark"] .sdash .portal-card::after {
         opacity: .9;
@@ -797,9 +796,9 @@
     }
     body[data-theme="dark"] .sdash .alert-warn {
         background:
-            radial-gradient(circle at 100% 0%, rgba(200, 169, 106, .16), transparent 42%),
-            linear-gradient(135deg, rgba(37, 34, 29, .98) 0%, rgba(20, 19, 17, .98) 100%) !important;
-        border-color: rgba(200, 169, 106, .5) !important;
+            radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--se-primary) 22%, transparent), transparent 42%),
+            linear-gradient(135deg, rgba(38, 27, 52, .98) 0%, rgba(24, 18, 34, .98) 100%) !important;
+        border-color: color-mix(in srgb, #d8b96f 58%, var(--se-primary) 18%) !important;
         box-shadow: 0 14px 32px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
     }
     body[data-theme="dark"] .sdash .alert-warn .alert-icon {
@@ -1033,8 +1032,10 @@
         .student-stats-section .stat-card:nth-child(6) .stat-icon { background:#e8eefb; color:#496caf; }
 
         body[data-theme="dark"] .student-stats-section .stat-card {
-            background: linear-gradient(145deg, rgba(47,38,31,.96), rgba(28,24,21,.96)) !important;
-            border-color: rgba(226, 209, 192, .16) !important;
+            background:
+                radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--se-primary) 22%, transparent), transparent 48%),
+                linear-gradient(145deg, rgba(39,24,57,.96), rgba(24,17,36,.94)) !important;
+            border-color: color-mix(in srgb, var(--se-primary-muted) 30%, transparent) !important;
             box-shadow: 0 12px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06) !important;
         }
 

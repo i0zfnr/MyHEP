@@ -3157,6 +3157,10 @@
 
 <div class="se-page-progress" aria-hidden="true"><span></span></div>
 
+@if($isAdmin && !$isGuardAdmin && !$isLecturerAdmin && $adminAiHelperEnabled && !request()->routeIs('admin.ai-helper.*'))
+    @include('partials.admin_ai_chatbox')
+@endif
+
 <div class="confirm-modal" id="confirmModal" aria-hidden="true">
     <div class="confirm-dialog" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
         <div class="confirm-head">

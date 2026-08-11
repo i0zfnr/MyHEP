@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Http\UploadedFile;
 use Illuminate\View\View;
 
 class AiHelperController extends Controller
@@ -29,7 +30,15 @@ class AiHelperController extends Controller
             'filters.report_month' => ['nullable', 'date_format:Y-m'],
             'filters.status' => ['nullable', 'string', 'max:40'],
             'filters.matric_no' => ['nullable', 'string', 'max:40'],
+            'filters.output_format' => ['nullable', 'in:auto,formal_report,executive_summary,table,csv,json'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
         ]);
+
+        if ($this->requestsImageGeneration($validated['message'])) {
+            return response()->json([
+                'message' => 'AI Helper generates written reports only. Image generation requests are not supported.',
+            ], 422);
+        }
 
         if (!$this->hasApiKey()) {
             return response()->json([
@@ -37,11 +46,18 @@ class AiHelperController extends Controller
             ], 422);
         }
 
-        $prompt = $this->buildPrompt($validated);
+        $attachment = $request->file('attachment');
+        if ($attachment && $this->providerName() !== 'gemini') {
+            return response()->json([
+                'message' => 'Document and image report generation currently requires the Gemini provider.',
+            ], 422);
+        }
+
+        $prompt = $this->buildPrompt($validated, $attachment);
 
         try {
             $answer = match ($this->providerName()) {
-                'gemini' => $this->askGemini($prompt),
+                'gemini' => $this->askGemini($prompt, $attachment),
                 'openai' => $this->askOpenAi($prompt),
                 default => $this->askDeepSeek($prompt),
             };
@@ -58,6 +74,7 @@ class AiHelperController extends Controller
             'provider' => $this->providerName(),
             'model' => $this->modelName(),
             'generated_at' => now()->format('Y-m-d H:i:s'),
+            'attachment_name' => $attachment?->getClientOriginalName(),
         ]);
     }
 
@@ -84,19 +101,42 @@ class AiHelperController extends Controller
         return (string) config("services.{$this->providerName()}.model");
     }
 
-    private function buildPrompt(array $validated): string
+    private function buildPrompt(array $validated, ?UploadedFile $attachment = null): string
     {
         $authUser = session('auth_user', []);
         $context = $this->adminContext($validated['filters'] ?? []);
 
+        $outputFormat = data_get($validated, 'filters.output_format', 'auto');
+        $formatInstruction = match ($outputFormat) {
+            'formal_report' => 'Return a formal report with title, purpose, findings, analysis, recommendations, and conclusion.',
+            'executive_summary' => 'Return a concise executive summary with key findings, risks, and recommended actions.',
+            'table' => 'Return the report primarily as readable Markdown tables with a short findings summary.',
+            'csv' => 'Return valid CSV only, including a header row. Do not wrap it in Markdown fences.',
+            'json' => 'Return valid JSON only. Do not wrap it in Markdown fences.',
+            default => 'Follow the exact written report format, language, headings, fields, and ordering requested by the administrator. If none is specified, use a clear formal report structure.',
+        };
+
         return implode("\n\n", [
             'You are StudentEdge Admin AI Helper for a Malaysian polytechnic student affairs system.',
-            'Answer as an operations assistant. Be concise, factual, and action-oriented. Do not invent records. If data is missing, say what must be checked in the system.',
+            'Generate written reports only. Never generate, design, or offer images, illustrations, posters, logos, or other visual assets. You may inspect an attached image strictly as evidence for a written report.',
+            'Answer as an operations assistant. Be factual and action-oriented. Do not invent records. If data is missing, say what must be checked in the system.',
+            'Output requirement: '.$formatInstruction,
             'Current admin: ' . ($authUser['name'] ?? 'Admin') . ' / role: ' . ($authUser['admin_role'] ?? 'admin'),
             'Selected template: ' . ($validated['template'] ?? 'custom'),
             'Available system context JSON: ' . json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            $attachment
+                ? 'Attached report source: '.$attachment->getClientOriginalName().'. Inspect it carefully, extract only visible or documented facts, and clearly distinguish attached-source facts from system-context facts.'
+                : 'No report source file was attached.',
             'Admin request: ' . $validated['message'],
         ]);
+    }
+
+    private function requestsImageGeneration(string $message): bool
+    {
+        return preg_match(
+            '/\b(?:generate|create|draw|design|make|produce)\s+(?:an?\s+|some\s+)?(?:image|picture|illustration|poster|logo|artwork|graphic)\b|\b(?:jana|hasilkan|cipta|lukis|reka)\s+(?:sebuah\s+)?(?:imej|gambar|ilustrasi|poster|logo|grafik)\b/iu',
+            $message
+        ) === 1;
     }
 
     private function adminContext(array $filters): array
@@ -195,11 +235,21 @@ class AiHelperController extends Controller
         return trim((string) data_get($response, 'choices.0.message.content', ''));
     }
 
-    private function askGemini(string $prompt): string
+    private function askGemini(string $prompt, ?UploadedFile $attachment = null): string
     {
         $baseUrl = rtrim((string) config('services.gemini.url'), '/');
         $model = $this->modelName();
         $url = "{$baseUrl}/models/{$model}:generateContent";
+
+        $parts = [['text' => $prompt]];
+        if ($attachment) {
+            $parts[] = [
+                'inlineData' => [
+                    'mimeType' => (string) $attachment->getMimeType(),
+                    'data' => base64_encode((string) file_get_contents($attachment->getRealPath())),
+                ],
+            ];
+        }
 
         $response = Http::acceptJson()
             ->timeout(45)
@@ -212,9 +262,7 @@ class AiHelperController extends Controller
                 'contents' => [
                     [
                         'role' => 'user',
-                        'parts' => [
-                            ['text' => $prompt],
-                        ],
+                        'parts' => $parts,
                     ],
                 ],
                 'generationConfig' => [
