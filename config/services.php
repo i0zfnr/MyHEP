@@ -36,7 +36,7 @@ return [
     ],
 
     'ipayment' => [
-        'url' => env('IPAYMENT_URL'),
+        'url' => env('IPAYMENT_URL', 'https://ipayment.anm.gov.my/'),
     ],
 
     'webpush' => [
