@@ -6165,6 +6165,11 @@ body[data-theme="dark"] .app-layout .sidebar.is-open {
 
 /* Keep the Settings experience compact and rhythmically consistent on phones. */
 @media (max-width: 767px) {
+    body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab > span:not(.mobile-nav-icon) {
+        color: #fff7ef !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, .72) !important;
+    }
+
     .settings-shell {
         gap: .75rem;
     }

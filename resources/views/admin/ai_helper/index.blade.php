@@ -54,6 +54,7 @@
         --ai-field-text: #2e1e13;
         --ai-kv: #5f4635;
         --ai-kv-strong: #2d1f14;
+        position:relative;
         display: grid;
         grid-template-columns: minmax(0, 1.5fr) minmax(320px, .9fr);
         gap: 1.1rem;
@@ -512,6 +513,41 @@
 
     .msg.ai { max-width:min(92%,760px); }
     .msg.user { max-width:min(78%,620px); }
+    .ai-message-actions { display:flex; align-items:center; gap:.15rem; margin-top:.65rem; padding-top:.5rem; border-top:1px solid color-mix(in srgb,var(--se-primary) 16%,var(--border)); }
+    .ai-message-actions[hidden] { display:none !important; }
+    .ai-message-action { min-height:30px; display:inline-flex; align-items:center; gap:.32rem; padding:.32rem .48rem; border:0; border-radius:8px; background:transparent; color:var(--text-muted); font:inherit; font-size:.67rem; font-weight:700; cursor:pointer; }
+    .ai-message-action svg { width:14px; height:14px; }
+    .ai-message-action:hover,.ai-message-action:focus-visible { background:var(--se-primary-soft); color:var(--se-primary-strong); outline:0; }
+    .ai-message-action:disabled { opacity:.42; cursor:not-allowed; }
+    .ai-edit-actions button { min-height:32px; padding:.38rem .68rem; border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:9px; background:transparent; color:var(--se-primary-strong); font:inherit; font-size:.7rem; font-weight:750; cursor:pointer; }
+    .msg.ai.is-writing { width:min(88%,760px); max-width:min(88%,760px); padding:0 !important; overflow:hidden; border-radius:20px !important; background:color-mix(in srgb,var(--surface) 94%,var(--se-primary-soft)) !important; }
+    .ai-writing-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.68rem .8rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 18%,var(--border)); }
+    .ai-writing-label { display:inline-flex; align-items:center; gap:.42rem; min-height:34px; padding:.4rem .65rem; border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); border-radius:999px; color:var(--text); font-size:.74rem; font-weight:750; }
+    .ai-writing-label svg,.ai-writing-tools svg { width:16px; height:16px; }
+    .ai-writing-tools { display:flex; gap:.3rem; }
+    .ai-writing-tools button { width:34px; height:34px; display:grid; place-items:center; border:0; border-radius:9px; background:transparent; color:var(--text-muted); cursor:pointer; }
+    .ai-writing-tools button:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
+    .ai-writing-body { padding:.75rem .8rem .8rem; }
+    .ai-message-editor { width:100%; min-height:300px; max-height:52vh; resize:vertical; padding:.85rem; border:1px solid color-mix(in srgb,var(--se-primary) 34%,var(--border)); border-radius:12px; outline:0; background:color-mix(in srgb,var(--bg) 84%,var(--surface)); color:var(--text); font:inherit; font-size:.86rem; line-height:1.6; box-sizing:border-box; }
+    .ai-message-editor:focus { box-shadow:0 0 0 3px color-mix(in srgb,var(--se-primary) 16%,transparent); }
+    .ai-edit-prompt { display:grid; grid-template-columns:minmax(0,1fr) 34px; gap:.4rem; margin-bottom:.6rem; padding:.35rem; border:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); border-radius:12px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); }
+    .ai-edit-prompt input { min-width:0; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.76rem; }
+    .ai-edit-prompt button { width:34px; height:34px; border:0; border-radius:9px; background:var(--se-primary); color:var(--se-primary-button-text); cursor:pointer; }
+    .ai-edit-actions { display:flex; justify-content:flex-end; gap:.45rem; margin-top:.55rem; }
+    .ai-edit-actions .is-primary { background:var(--se-primary); color:var(--se-primary-button-text); }
+    .msg.ai.is-writing.is-expanded { position:fixed; z-index:14500; inset:24px; width:auto; max-width:none; margin:0; }
+    .msg.ai.is-writing.is-expanded .ai-writing-body { height:calc(100% - 60px); display:grid; grid-template-rows:auto minmax(0,1fr) auto; }
+    .msg.ai.is-writing.is-expanded .ai-message-editor { height:100%; max-height:none; resize:none; }
+    body.ai-writing-expanded #appSidebar,body.ai-writing-expanded #sbOverlay { display:none !important; }
+    body.ai-writing-expanded .main-wrap { width:100%; }
+    body.ai-writing-expanded { overflow:hidden !important; }
+    body.ai-writing-expanded .ai-chat-log { overflow:visible !important; -webkit-mask-image:none !important; mask-image:none !important; }
+    @media(max-width:640px){ .msg.ai.is-writing { width:100%; max-width:100% !important; } .msg.ai.is-writing.is-expanded { inset:8px; } }
+    .ai-selection-tools { position:fixed; z-index:15000; display:flex; overflow:hidden; border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:11px; background:#202124; box-shadow:0 10px 30px rgba(0,0,0,.32); opacity:0; visibility:hidden; pointer-events:none; transform:translateY(4px); transition:opacity .12s ease,transform .12s ease,visibility 0s linear .12s; }
+    .ai-selection-tools.is-open { opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0); transition-delay:0s; }
+    .ai-selection-tools button { min-height:38px; padding:.5rem .75rem; border:0; border-right:1px solid rgba(255,255,255,.1); background:transparent; color:#fff; font:inherit; font-size:.72rem; font-weight:750; cursor:pointer; white-space:nowrap; }
+    .ai-selection-tools button:last-child { border-right:0; }
+    .ai-selection-tools button:hover { background:color-mix(in srgb,var(--se-primary) 22%,#202124); }
     .msg-rich { white-space:normal; overflow-wrap:anywhere; }
     .msg-rich h3 { margin:0 0 .85rem; padding-bottom:.65rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); font-size:1.05rem; line-height:1.35; letter-spacing:.015em; color:var(--text); }
     .msg-rich h4 { margin:1rem 0 .45rem; font-size:.94rem; line-height:1.4; color:var(--se-primary-muted); }
@@ -535,8 +571,36 @@
 
     /* Final layout safeguards against global admin form and panel rules. */
     .ai-admin > .ai-panel:first-child > .ai-head { display:none !important; }
-    .ai-admin > .ai-panel:first-child { min-height:calc(100vh - 160px) !important; grid-template-rows:minmax(390px,1fr) auto auto !important; }
+    .ai-admin > .ai-panel:first-child { position:relative; min-height:calc(100vh - 160px) !important; grid-template-rows:auto minmax(390px,1fr) auto auto !important; }
     .ai-chat-log { min-height:420px !important; max-height:none !important; }
+    .ai-admin.has-chat .ai-chat-log.can-scroll-up:not(.can-scroll-down) {
+        -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 42px,#000 100%);
+        mask-image:linear-gradient(to bottom,transparent 0,#000 42px,#000 100%);
+    }
+    .ai-admin.has-chat .ai-chat-log.can-scroll-down:not(.can-scroll-up) {
+        -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 72px),transparent 100%);
+        mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 72px),transparent 100%);
+    }
+    .ai-admin.has-chat .ai-chat-log.can-scroll-up.can-scroll-down {
+        -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 42px,#000 calc(100% - 72px),transparent 100%);
+        mask-image:linear-gradient(to bottom,transparent 0,#000 42px,#000 calc(100% - 72px),transparent 100%);
+    }
+    @media(min-width:641px){
+        .ai-chat-log { gap:.78rem; padding-left:max(1rem,10%) !important; padding-right:max(1rem,10%) !important; }
+        .msg { padding:.72rem .82rem; font-size:.8rem; line-height:1.5; }
+        .msg.ai { max-width:min(88%,680px); }
+        .msg.user { max-width:min(72%,560px); }
+        .ai-admin .msg.user pre { padding:.58rem .84rem; font-size:.78rem; }
+        .msg-rich h3 { font-size:.92rem; }
+        .msg-rich h4 { font-size:.83rem; }
+        .msg-rich p { line-height:1.56; }
+        .msg-rich .report-meta { padding:.46rem .58rem; }
+        .msg-rich .report-meta-label { font-size:.66rem; }
+        .msg-rich table { font-size:.72rem; }
+        .ai-toolbar .ai-btn { font-size:.69rem !important; }
+        .ai-input { font-size:.8rem !important; }
+        .ai-format-pill { font-size:.7rem; }
+    }
     .ai-compose { bottom:18px; padding:0 10px !important; }
     .ai-compose-row { min-height:60px; grid-template-columns:46px minmax(0,1fr) auto 46px; align-items:center; padding:6px 7px; border-radius:30px; }
     .ai-input { width:100% !important; height:46px !important; min-height:46px !important; max-height:46px !important; padding:12px 6px !important; overflow-y:auto; resize:none !important; line-height:22px; border:0 !important; border-radius:0 !important; background:transparent !important; scrollbar-width:none; -ms-overflow-style:none; }
@@ -563,9 +627,33 @@
     .ai-admin.ai-admin--lecturer .ai-compose-row textarea.ai-input { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; }
     body[data-theme="dark"] .ai-admin--lecturer .ai-compose-row { background:#1f1f1f !important; }
     .ai-compose-frame { width:min(100%,620px); margin:0 auto; overflow:visible; padding:0; border:0; border-radius:30px; background:transparent; box-shadow:none; }
+    .ai-compose-context { display:none; height:34px; align-items:center; gap:.42rem; padding:0 .68rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 16%,var(--border)); color:var(--text-muted); box-sizing:border-box; }
+    .ai-compose-context[hidden] { display:none !important; }
+    .ai-compose-context.is-visible { display:flex; }
+    .ai-compose-context svg { width:14px; height:14px; flex:0 0 14px; color:var(--se-primary-strong); }
+    .ai-compose-context blockquote { flex:1; min-width:0; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.66rem; line-height:1.2; }
+    .ai-compose-context button { width:20px; height:20px; flex:0 0 20px; display:grid; place-items:center; padding:0; border:0; border-radius:6px; background:transparent; color:var(--text-muted); cursor:pointer; }
+    .ai-compose-context button:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
     .ai-compose-frame .ai-compose-row { min-height:58px; padding:5px 7px 5px 10px; border:0 !important; border-radius:999px !important; background:#1f1f1f !important; box-shadow:none !important; }
     .ai-compose-frame:has(.ai-compose-attachments.is-visible) { padding:.55rem; border:1px solid color-mix(in srgb,var(--se-primary) 20%,var(--border)); border-radius:26px; background:#202124; }
+    .ai-compose-frame:has(.ai-compose-context.is-visible) { overflow:hidden; border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); border-radius:24px; background:#202124; }
+    .ai-compose-frame:has(.ai-compose-context.is-visible) .ai-compose-row { min-height:50px; padding-top:3px; padding-bottom:3px; border-radius:0 0 24px 24px !important; }
+    .ai-compose:has(.ai-compose-context.is-visible) .ai-hint { display:none; }
     .ai-compose-frame:has(.ai-compose-attachments.is-visible) .ai-compose-row { min-height:54px; }
+    body:not([data-theme="dark"]) .ai-compose-frame .ai-compose-row {
+        border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important;
+        background:color-mix(in srgb,#fff 94%,var(--se-primary-soft)) !important;
+        box-shadow:0 12px 30px rgba(82,58,42,.1),inset 0 1px 0 rgba(255,255,255,.92) !important;
+    }
+    body:not([data-theme="dark"]) .ai-compose-frame:has(.ai-compose-attachments.is-visible) {
+        border-color:color-mix(in srgb,var(--se-primary) 28%,var(--border));
+        background:color-mix(in srgb,#fff 92%,var(--se-primary-soft));
+        box-shadow:0 14px 34px rgba(82,58,42,.1);
+    }
+    body:not([data-theme="dark"]) .ai-compose-frame:has(.ai-compose-context.is-visible) { border-color:color-mix(in srgb,var(--se-primary) 28%,var(--border)); background:color-mix(in srgb,#fff 94%,var(--se-primary-soft)); box-shadow:0 14px 34px rgba(82,58,42,.1); }
+    body:not([data-theme="dark"]) .ai-compose-icon { color:var(--text); }
+    body:not([data-theme="dark"]) .ai-input { color:var(--text) !important; }
+    body:not([data-theme="dark"]) .ai-input::placeholder { color:color-mix(in srgb,var(--text-muted) 86%,transparent) !important; opacity:1; }
     .ai-compose-attachments { display:none; flex-wrap:nowrap; gap:.5rem; max-width:100%; margin:0; padding:0 .05rem .45rem; overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:thin; }
     .ai-compose-attachments.is-visible { display:flex; }
     .ai-compose-attachment { position:relative; flex:0 0 104px; width:104px; height:104px; display:flex; align-items:flex-end; overflow:visible; padding:.62rem; border:1px solid color-mix(in srgb,var(--text) 7%,transparent); border-radius:17px; background:color-mix(in srgb,var(--surface) 72%,#3c4043); box-shadow:none; }
@@ -580,8 +668,13 @@
     .ai-compose-attachment-remove:hover { background:var(--se-primary-soft) !important; color:var(--se-primary-strong) !important; border-color:var(--se-primary) !important; }
     .ai-compose-attachment-limit { flex:1 0 100%; color:var(--se-danger); font-size:.68rem; font-weight:750; }
     .ai-admin .msg.user { width:auto; max-width:min(78%,620px); padding:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important; display:grid; justify-items:end; gap:.42rem; }
-    .ai-admin .msg.user pre { width:auto; max-width:100%; margin:0; padding:.72rem 1.05rem; border:0; border-radius:999px; background:#171717; color:#f1f1f1; box-shadow:none; white-space:pre-wrap; font-family:inherit; font-size:.88rem; font-weight:500; line-height:1.35; }
-    body:not([data-theme="dark"]) .ai-admin .msg.user pre { background:color-mix(in srgb,var(--text) 90%,#171717); color:var(--surface); }
+    .ai-admin .msg.user pre { width:auto; max-width:100%; margin:0; padding:.72rem 1.05rem; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:999px; background:#171717; color:#f1f1f1; box-shadow:0 4px 14px color-mix(in srgb,var(--se-primary) 8%,transparent); white-space:pre-wrap; font-family:inherit; font-size:.88rem; font-weight:500; line-height:1.35; }
+    body:not([data-theme="dark"]) .ai-admin .msg.user pre {
+        border:1px solid color-mix(in srgb,var(--se-primary) 38%,var(--border));
+        background:color-mix(in srgb,var(--se-primary-soft) 68%,#fff);
+        color:var(--se-primary-strong);
+        box-shadow:0 8px 20px color-mix(in srgb,var(--se-primary) 10%,transparent);
+    }
     .ai-sent-attachments { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.42rem; max-width:100%; }
     .ai-sent-attachment { position:relative; width:102px; height:102px; display:flex; align-items:flex-end; overflow:hidden; padding:.62rem; border:1px solid color-mix(in srgb,var(--text) 7%,transparent); border-radius:17px; background:color-mix(in srgb,var(--surface) 72%,#3c4043); color:var(--text); box-sizing:border-box; }
     .ai-sent-attachment-type { position:absolute; top:.62rem; left:.62rem; font-size:.66rem; font-weight:850; color:color-mix(in srgb,var(--text) 78%,transparent); }
@@ -594,6 +687,9 @@
     .ai-format-pill { min-height:38px; display:inline-flex; align-items:center; gap:.42rem; padding:.48rem .75rem; border:0; border-radius:999px; background:#2b2b2b; color:#ededed; }
     .ai-format-pill::before { display:none; }
     .ai-format-pill:hover,.ai-format-pill[aria-expanded="true"] { border-color:transparent; background:#343434; color:#fff; }
+    body:not([data-theme="dark"]) .ai-format-pill { background:color-mix(in srgb,var(--se-primary-soft) 55%,#f5f1ed); color:var(--text); }
+    body:not([data-theme="dark"]) .ai-format-pill:hover,
+    body:not([data-theme="dark"]) .ai-format-pill[aria-expanded="true"] { background:var(--se-primary-soft); color:var(--se-primary-strong); }
     .ai-format-menu { position:absolute; right:48px; bottom:62px; width:235px; display:none; gap:.25rem; padding:.55rem; border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:16px; background:color-mix(in srgb,var(--surface) 96%,transparent); box-shadow:0 20px 50px rgba(0,0,0,.28); backdrop-filter:blur(20px); }
     .ai-format-menu.is-open { display:grid; }
     .ai-format-option { display:flex; justify-content:space-between; align-items:center; gap:.5rem; width:100%; padding:.65rem .72rem; border:0; border-radius:10px; background:transparent; color:var(--text); font:inherit; font-size:.76rem; font-weight:750; text-align:left; cursor:pointer; }
@@ -679,6 +775,14 @@
         color:var(--text) !important;
         box-shadow:0 12px 28px color-mix(in srgb,var(--se-primary) 10%,transparent) !important;
     }
+    .ai-admin .msg.ai.is-conversation { padding:.2rem 0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; }
+    .ai-admin .msg.ai.is-report { width:min(88%,720px); max-width:min(88%,720px); padding:1rem 1.05rem !important; border-radius:17px !important; }
+    .ai-report-kicker { display:flex; align-items:center; gap:.42rem; margin:0 0 .7rem; color:var(--se-primary-strong); font-size:.63rem; font-weight:800; letter-spacing:.075em; text-transform:uppercase; }
+    .ai-report-kicker::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--se-primary); box-shadow:0 0 0 4px color-mix(in srgb,var(--se-primary) 14%,transparent); }
+    .ai-report-content { position:relative; }
+    .ai-admin .msg.ai.is-report.is-collapsed .ai-report-content { max-height:420px; overflow:hidden; }
+    .ai-admin .msg.ai.is-report.is-collapsed .ai-report-content::after { content:''; position:absolute; right:0; bottom:0; left:0; height:72px; background:linear-gradient(transparent,color-mix(in srgb,var(--surface) 96%,var(--se-primary-soft))); pointer-events:none; }
+    .ai-report-toggle { margin:.55rem 0 0; padding:.4rem .62rem; border:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); border-radius:9px; background:transparent; color:var(--se-primary-strong); font:inherit; font-size:.69rem; font-weight:750; cursor:pointer; }
     .ai-admin .msg-meta { color:var(--text-muted) !important; }
     .ai-admin .ai-toolbar {
         width:max-content;
@@ -710,10 +814,12 @@
         outline:none;
         box-shadow:0 5px 14px color-mix(in srgb,var(--se-primary) 14%,transparent) !important;
     }
-    .ai-history-trigger { position:absolute; z-index:8; top:12px; left:12px; display:inline-flex; align-items:center; gap:.45rem; min-height:40px; padding:.5rem .72rem; border:1px solid color-mix(in srgb,var(--se-primary) 34%,var(--border)); border-radius:13px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); color:var(--se-primary-strong); font:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
+    .ai-top-actions { position:relative; z-index:8; justify-self:end; width:max-content; display:flex; align-items:center; gap:.45rem; margin:12px 12px 0; }
+    .ai-history-trigger,.ai-new-chat-trigger { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:.45rem; min-height:40px; padding:.5rem .72rem; border:1px solid color-mix(in srgb,var(--se-primary) 34%,var(--border)); border-radius:13px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); color:var(--se-primary-strong); font:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
     .ai-history-trigger svg { width:17px; height:17px; }
-    .ai-history-trigger:hover { background:var(--se-primary-soft); border-color:var(--se-primary); }
-    .ai-history-backdrop { position:fixed; inset:0; z-index:11990; border:0; background:rgba(0,0,0,.34); opacity:0; visibility:hidden; transition:.2s ease; }
+    .ai-new-chat-trigger svg { width:16px; height:16px; }
+    .ai-history-trigger:hover,.ai-new-chat-trigger:hover { background:var(--se-primary-soft); border-color:var(--se-primary); }
+    .ai-history-backdrop { position:absolute; inset:0; z-index:11990; border:0; border-radius:inherit; background:transparent; opacity:0; visibility:hidden; transition:opacity .18s ease,visibility 0s linear .18s; }
     .ai-history-backdrop.is-open { opacity:1; visibility:visible; }
     .ai-history-panel { position:fixed; z-index:12000; top:88px; bottom:18px; left:-390px; width:min(360px,calc(100vw - 28px)); display:grid; grid-template-rows:auto minmax(0,1fr) auto; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:22px; overflow:hidden; background:linear-gradient(165deg,color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)),var(--surface)); box-shadow:24px 0 70px rgba(0,0,0,.3); transition:left .24s ease; }
     .ai-history-panel.is-open { left:18px; }
@@ -733,6 +839,64 @@
     .ai-history-foot { padding:.75rem; border-top:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); }
     .ai-history-retention { margin:0 0 .6rem; color:var(--text-muted); font-size:.67rem; line-height:1.45; text-align:center; }
     .ai-history-delete-all { width:100%; padding:.65rem; border:1px solid color-mix(in srgb,#dc2626 45%,var(--border)); border-radius:11px; background:color-mix(in srgb,#dc2626 9%,var(--surface)); color:#ef4444; font:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
+    .ai-history-panel { position:absolute; z-index:12000; top:16px; right:16px; bottom:auto; left:auto; width:min(320px,calc(100% - 32px)); height:min(720px,calc(100% - 32px)); display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(255,255,255,.1); border-radius:18px; background:#1e1e1e; box-shadow:0 18px 50px rgba(0,0,0,.24); color:#f3f3f3; opacity:0; visibility:hidden; pointer-events:none; transform:translateX(calc(100% + 32px)); transition:transform .24s ease,opacity .18s ease,visibility 0s linear .24s; }
+    .ai-history-panel.is-open { right:16px; left:auto; opacity:1; visibility:visible; pointer-events:auto; transform:translateX(0); transition-delay:0s; }
+    .ai-history-head { width:100%; display:block; padding:.78rem .75rem; border-color:rgba(255,255,255,.08); box-sizing:border-box; }
+    .ai-history-brand { width:100%; display:flex; align-items:center; justify-content:space-between; gap:.6rem; box-sizing:border-box; }
+    .ai-history-brand strong { display:flex; align-items:center; gap:.55rem; font-size:1rem; }
+    .ai-history-brand svg { width:22px; height:22px; color:var(--se-primary); }
+    .ai-history-brand .ai-history-icon-btn { width:34px; height:34px; flex:0 0 34px; border-color:rgba(255,255,255,.12); background:#292526; color:#ddd; }
+    .ai-history-brand .ai-history-icon-btn:hover { border-color:var(--se-primary); background:#343031; color:#fff; }
+    .ai-history-tabs { display:grid; grid-template-columns:1fr 1fr; padding:3px; border-radius:999px; background:#171717; }
+    .ai-history-tab { min-height:30px; border:0; border-radius:999px; background:transparent; color:#bdbdbd; font:inherit; font-size:.72rem; font-weight:750; }
+    .ai-history-tab.is-active { background:#252525; color:#fff; }
+    .ai-history-primary-actions { display:grid; gap:.08rem; padding:.42rem .48rem .3rem; border-bottom:1px solid rgba(255,255,255,.06); }
+    .ai-history-primary-action { width:100%; min-height:38px; display:flex; align-items:center; gap:.7rem; padding:.5rem .55rem; border:0; border-radius:10px; background:transparent; color:#f2f2f2; font:inherit; font-size:.77rem; font-weight:700; text-align:left; cursor:pointer; }
+    .ai-history-primary-action:hover { background:#292929; }
+    .ai-history-primary-action svg { width:18px; height:18px; flex:0 0 18px; color:#d8c4ff; }
+    .ai-history-search { display:none; margin:.1rem .55rem .45rem; }
+    .ai-history-search.is-visible { display:block; }
+    .ai-history-search input { width:100%; min-height:38px; padding:.55rem .7rem; border:1px solid rgba(255,255,255,.14); border-radius:10px; outline:0; background:#151515; color:#fff; font:inherit; font-size:.76rem; box-sizing:border-box; }
+    .ai-history-search input:focus { border-color:var(--se-primary); box-shadow:0 0 0 2px color-mix(in srgb,var(--se-primary) 20%,transparent); }
+    .ai-history-section-label { padding:.55rem .72rem .28rem; color:#999; font-size:.64rem; font-weight:750; text-transform:uppercase; letter-spacing:.045em; }
+    .ai-history-list { flex:1 1 auto; gap:.06rem; padding:.08rem .42rem .65rem; scrollbar-width:thin; }
+    .ai-history-item { min-height:32px; display:block; padding:.47rem 4rem .47rem .55rem; border:0; border-radius:9px; background:transparent; color:#f3f3f3; box-sizing:border-box; }
+    .ai-history-item:hover,.ai-history-item.is-active { border:0; background:#292929; box-shadow:none; }
+    .ai-history-title { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.7rem; line-height:1.35; font-weight:650; }
+    .ai-history-time { display:none; }
+    .ai-history-item-actions { opacity:0; transition:opacity .15s ease; }
+    .ai-history-item:hover .ai-history-item-actions,.ai-history-item:focus-within .ai-history-item-actions { opacity:1; }
+    .ai-history-item-actions button { color:#c8c8c8; }
+    .ai-history-item-actions button:hover { background:#3a3a3a; color:#fff; }
+    .ai-history-empty { color:#aaa; }
+    .ai-history-foot { padding:.58rem .72rem .7rem; border-color:rgba(255,255,255,.08); background:#1e1e1e; }
+    .ai-history-retention { margin:0 0 .48rem; color:#999; font-size:.62rem; }
+    .ai-history-delete-all { min-height:38px; padding:.5rem; font-size:.68rem; }
+    body:not([data-theme="dark"]) .ai-history-panel { background:#f7f4f0; color:#241f1b; border-color:rgba(70,50,35,.12); }
+    body:not([data-theme="dark"]) .ai-history-tabs,
+    body:not([data-theme="dark"]) .ai-history-search input { background:#ebe6e0; color:#241f1b; }
+    body:not([data-theme="dark"]) .ai-history-tab.is-active,
+    body:not([data-theme="dark"]) .ai-history-item:hover,
+    body:not([data-theme="dark"]) .ai-history-item.is-active,
+    body:not([data-theme="dark"]) .ai-history-primary-action:hover { background:#e5ded7; color:#241f1b; }
+    body:not([data-theme="dark"]) .ai-history-primary-action,
+    body:not([data-theme="dark"]) .ai-history-item { color:#241f1b; }
+    body:not([data-theme="dark"]) .ai-history-foot { background:#f7f4f0; border-color:rgba(70,50,35,.12); }
+    .ai-confirm { position:fixed; inset:0; z-index:14000; display:grid; place-items:center; padding:1rem; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .18s ease,visibility 0s linear .18s; }
+    .ai-confirm.is-open { opacity:1; visibility:visible; pointer-events:auto; transition-delay:0s; }
+    .ai-confirm-backdrop { position:absolute; inset:0; border:0; background:rgba(0,0,0,.66); backdrop-filter:blur(5px); cursor:default; }
+    .ai-confirm-card { position:relative; width:min(400px,100%); padding:1.25rem; border:1px solid color-mix(in srgb,var(--se-primary) 32%,var(--border)); border-radius:20px; background:color-mix(in srgb,var(--surface) 96%,var(--se-primary-soft)); box-shadow:0 24px 70px rgba(0,0,0,.45); color:var(--text); transform:translateY(8px) scale(.98); transition:transform .18s ease; }
+    .ai-confirm.is-open .ai-confirm-card { transform:translateY(0) scale(1); }
+    .ai-confirm-icon { width:42px; height:42px; display:grid; place-items:center; margin-bottom:.9rem; border-radius:13px; background:color-mix(in srgb,#dc2626 12%,var(--surface)); color:#ef4444; }
+    .ai-confirm-icon svg { width:20px; height:20px; }
+    .ai-confirm-card h3 { margin:0 0 .4rem; font-size:1rem; line-height:1.35; }
+    .ai-confirm-card p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.55; }
+    .ai-confirm-actions { display:flex; justify-content:flex-end; gap:.55rem; margin-top:1.2rem; }
+    .ai-confirm-button { min-height:40px; padding:.55rem 1rem; border:1px solid color-mix(in srgb,var(--text) 16%,transparent); border-radius:12px; background:transparent; color:var(--text); font:inherit; font-size:.76rem; font-weight:750; cursor:pointer; }
+    .ai-confirm-button:hover { background:color-mix(in srgb,var(--text) 7%,transparent); }
+    .ai-confirm-button--danger { border-color:color-mix(in srgb,#dc2626 60%,transparent); background:#b4232d; color:#fff; }
+    .ai-confirm-button--danger:hover { background:#991f27; }
+    .ai-confirm-button:focus-visible { outline:2px solid var(--se-primary); outline-offset:2px; }
     body.admin-ai-helper-page { overflow:hidden !important; }
     body.admin-ai-helper-page .main-scroll-viewport { overflow:hidden !important; }
     body.admin-ai-helper-page .main-scroll-inner { height:100%; min-height:0; overflow:hidden; }
@@ -741,8 +905,9 @@
     body.admin-ai-helper-page .app-footer { display:none !important; }
     body.admin-ai-helper-page .ai-admin,body.admin-ai-helper-page .ai-admin>.ai-panel:first-child { min-height:0 !important; height:100% !important; }
     @media(max-width:640px){
+        .ai-history-backdrop { background:rgba(0,0,0,.16); }
         body.admin-ai-helper-page .page-body { padding:.4rem .55rem .7rem !important; }
-        .ai-admin > .ai-panel:first-child { min-height:0 !important; height:100% !important; grid-template-rows:minmax(0,1fr) auto auto !important; }
+        .ai-admin > .ai-panel:first-child { min-height:0 !important; height:100% !important; grid-template-rows:auto minmax(0,1fr) auto auto !important; }
         .ai-chat-log { min-height:0 !important; height:auto !important; overflow-y:auto !important; padding:.7rem .2rem .55rem !important; overscroll-behavior:contain; }
         .ai-empty-state { min-height:0 !important; padding:2rem .45rem 1rem; align-content:start; }
         .ai-empty-state h3 { font-size:clamp(1.55rem,7vw,2rem); line-height:1.12; }
@@ -760,14 +925,18 @@
         .ai-admin--student .ai-compose-row { grid-template-columns:minmax(0,1fr) 44px !important; padding-left:10px; }
         .ai-admin--student .ai-input { padding-left:12px !important; }
         .ai-hint { display:none; }
-        .ai-admin .ai-toolbar { margin:.25rem auto .45rem; }
+        .ai-admin .ai-toolbar { display:none !important; }
         .ai-admin .ai-toolbar .ai-btn { width:38px; height:38px; min-height:38px; padding:0; justify-content:center; }
         .ai-admin .ai-toolbar .ai-btn span { display:none; }
+        .ai-message-action span { display:none; }
+        .ai-message-action { width:32px; height:32px; padding:0; justify-content:center; }
         .msg.ai,.msg.user { max-width:92% !important; }
-        .ai-history-trigger { top:8px; left:8px; width:40px; padding:0; justify-content:center; }
-        .ai-history-trigger span { display:none; }
-        .ai-history-panel { top:72px; bottom:8px; left:-105vw; width:calc(100vw - 16px); }
-        .ai-history-panel.is-open { left:8px; }
+        .ai-admin .msg.ai.is-report { width:96%; max-width:96% !important; padding:.8rem !important; }
+        .ai-top-actions { gap:.35rem; margin:8px 8px 0; }
+        .ai-history-trigger,.ai-new-chat-trigger { width:40px; padding:0; }
+        .ai-history-trigger span,.ai-new-chat-trigger span { display:none; }
+        .ai-history-panel { top:8px; right:8px; bottom:8px; left:auto; width:calc(100% - 16px); height:auto; border-radius:18px; }
+        .ai-history-panel.is-open { right:8px; left:auto; transform:translateX(0); }
         .ai-admin > aside.ai-panel { top:72px !important; right:-105vw !important; bottom:8px !important; width:calc(100vw - 16px) !important; }
         .ai-admin > aside.ai-panel.is-open { right:8px !important; }
     }
@@ -802,11 +971,18 @@
      data-ai-enabled="{{ $aiEnabled ? '1' : '0' }}"
      data-ai-provider="{{ $aiProvider }}"
      data-ai-model="{{ $aiModel }}"
+     data-can-edit-ai="{{ $studentAiMode ? '0' : '1' }}"
+     data-ai-session-key="studentedge.ai.active.{{ $studentAiMode ? 'student' : ($lecturerAiMode ? 'lecturer' : 'admin') }}.{{ (int) session('auth_user.id') }}"
      data-conversations-url="{{ url($studentAiMode ? '/student/ai-helper/conversations' : ($lecturerAiMode ? '/lecturer/ai-helper/conversations' : '/admin/ai-helper/conversations')) }}">
     <section class="ai-panel">
-        <button type="button" class="ai-history-trigger" id="aiHistoryTrigger" aria-expanded="false" aria-controls="aiHistoryPanel" aria-label="{{ __('Conversation history') }}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>{{ __('History') }}</span>
-        </button>
+        <div class="ai-top-actions">
+            <button type="button" class="ai-new-chat-trigger" id="aiNewConversation" aria-label="{{ __('New chat') }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg><span>{{ __('New chat') }}</span>
+            </button>
+            <button type="button" class="ai-history-trigger" id="aiHistoryTrigger" aria-expanded="false" aria-controls="aiHistoryPanel" aria-label="{{ __('Conversation history') }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>{{ __('History') }}</span>
+            </button>
+        </div>
         <div class="ai-head">
             <div>
                 <h3>{{ __('StudentEdge AI') }}</h3>
@@ -842,17 +1018,11 @@
             </div>
         </div>
 
-        <div class="ai-toolbar">
-            <button type="button" class="ai-btn" id="aiCopyBtn" aria-label="{{ __('Copy') }}" title="{{ __('Copy') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span>{{ __('Copy') }}</span></button>
-            <button type="button" class="ai-btn" id="aiClearBtn" aria-label="{{ __('Clear') }}" title="{{ __('Clear') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg><span>{{ __('Clear') }}</span></button>
-            @unless($textOnlyAiMode)<button type="button" class="ai-btn" id="aiDraftAnnouncementBtn" aria-label="{{ __('Create Draft Announcement') }}" title="{{ __('Create Draft Announcement') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 13V7l12-3v12L4 13Z"/><path d="M8 14v5h4l1-4M18 8a3 3 0 0 1 0 4"/></svg><span>{{ __('Create Draft Announcement') }}</span></button>@endunless
-            <button type="button" class="ai-btn" id="aiRegenerateBtn" aria-label="{{ __('Regenerate') }}" title="{{ __('Regenerate') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66L20 14"/><path d="M20 7v4h-4"/></svg><span>{{ __('Regenerate') }}</span></button>
-        </div>
-
         <div class="ai-compose">
             <div class="ai-compose-frame">
+            <div class="ai-compose-context" id="aiComposeContext" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h12m-4-4 4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg><blockquote id="aiComposeContextText"></blockquote><button type="button" id="aiComposeContextClear" aria-label="{{ __('Remove selected context') }}">&times;</button></div>
             @if($canUploadAiFiles)
-            <input id="reportAttachment" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" multiple hidden>
+            <input id="reportAttachment" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,text/csv,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx" multiple hidden>
             <div class="ai-compose-attachments" id="attachmentPreview" aria-live="polite"></div>
             @endif
             <div class="ai-compose-row">
@@ -891,12 +1061,16 @@
     <button type="button" class="ai-history-backdrop" id="aiHistoryBackdrop" aria-label="{{ __('Close conversation history') }}"></button>
     <aside class="ai-history-panel" id="aiHistoryPanel" aria-hidden="true">
         <div class="ai-history-head">
-            <h3>{{ __('Your AI conversations') }}</h3>
-            <div class="ai-history-actions">
-                <button type="button" class="ai-history-icon-btn" id="aiNewConversation" aria-label="{{ __('New conversation') }}">＋</button>
+            <div class="ai-history-brand">
+                <strong>@include('partials.ai_helper_icon') <span>StudentEdge AI</span></strong>
                 <button type="button" class="ai-history-icon-btn" id="aiHistoryClose" aria-label="{{ __('Close') }}">×</button>
             </div>
         </div>
+        <div class="ai-history-primary-actions">
+            <button type="button" class="ai-history-primary-action" id="aiHistorySearchButton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4" stroke-linecap="round"/></svg><span>{{ __('Search chats') }}</span></button>
+        </div>
+        <label class="ai-history-search" id="aiHistorySearch"><input id="aiHistorySearchInput" type="search" placeholder="{{ __('Search conversations') }}" autocomplete="off"></label>
+        <div class="ai-history-section-label">{{ __('Recents') }}</div>
         <div class="ai-history-list" id="aiHistoryList">
             @forelse($aiConversations ?? [] as $conversation)
             <div class="ai-history-item" data-conversation-id="{{ $conversation['id'] }}" data-title="{{ $conversation['title'] }}">
@@ -913,6 +1087,24 @@
             <button type="button" class="ai-history-delete-all" id="aiDeleteAllHistory">{{ __('Delete all AI history') }}</button>
         </div>
     </aside>
+
+    <div class="ai-selection-tools" id="aiSelectionTools" role="toolbar" aria-label="{{ __('AI text actions') }}" aria-hidden="true">
+        <button type="button" id="aiAskSelection">{{ __('Ask StudentEdge AI') }}</button>
+        <button type="button" id="aiWriteSelection">{{ __('Start writing') }}</button>
+    </div>
+
+    <div class="ai-confirm" id="aiConfirmDialog" role="dialog" aria-modal="true" aria-labelledby="aiConfirmTitle" aria-describedby="aiConfirmMessage" aria-hidden="true">
+        <button type="button" class="ai-confirm-backdrop" data-confirm-cancel tabindex="-1" aria-label="{{ __('Cancel') }}"></button>
+        <div class="ai-confirm-card">
+            <div class="ai-confirm-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <h3 id="aiConfirmTitle">{{ __('Delete conversation?') }}</h3>
+            <p id="aiConfirmMessage"></p>
+            <div class="ai-confirm-actions">
+                <button type="button" class="ai-confirm-button" data-confirm-cancel>{{ __('Cancel') }}</button>
+                <button type="button" class="ai-confirm-button ai-confirm-button--danger" id="aiConfirmAccept">{{ __('Delete') }}</button>
+            </div>
+        </div>
+    </div>
 
     @unless($textOnlyAiMode)
     <button type="button" class="ai-tools-backdrop" id="aiToolsBackdrop" aria-label="{{ __('Close report tools') }}"></button>
@@ -975,7 +1167,7 @@
                 <h4 class="ops-title">{{ __('Report Source') }}</h4>
                 <label class="ai-upload-drop" for="reportAttachment">
                     <span class="ai-upload-title">＋ {{ __('Attach a document or image') }}</span>
-                    <span class="ai-upload-note">{{ __('Up to 10 PDF, JPG, PNG or WebP files · Maximum 10 MB each. Gemini will inspect every attachment.') }}</span>
+                    <span class="ai-upload-note">{{ __('Up to 10 PDF, CSV, XLSX, JPG, PNG or WebP files · Maximum 10 MB each. Gemini will inspect every attachment.') }}</span>
                 </label>
             </section>
 
@@ -1015,10 +1207,6 @@
     const chatLog = document.getElementById('aiChatLog');
     const input = document.getElementById('aiInput');
     const sendBtn = document.getElementById('aiSendBtn');
-    const copyBtn = document.getElementById('aiCopyBtn');
-    const clearBtn = document.getElementById('aiClearBtn');
-    const regenerateBtn = document.getElementById('aiRegenerateBtn');
-    const draftBtn = document.getElementById('aiDraftAnnouncementBtn');
     const reportMonth = document.getElementById('reportMonth');
     const statusFilter = document.getElementById('statusFilter');
     const matricFilter = document.getElementById('matricFilter');
@@ -1042,11 +1230,56 @@
     const historyList = document.getElementById('aiHistoryList');
     const newConversationBtn = document.getElementById('aiNewConversation');
     const deleteAllHistoryBtn = document.getElementById('aiDeleteAllHistory');
+    const historySearchButton = document.getElementById('aiHistorySearchButton');
+    const historySearch = document.getElementById('aiHistorySearch');
+    const historySearchInput = document.getElementById('aiHistorySearchInput');
+    const confirmDialog = document.getElementById('aiConfirmDialog');
+    const confirmTitle = document.getElementById('aiConfirmTitle');
+    const confirmMessage = document.getElementById('aiConfirmMessage');
+    const confirmAccept = document.getElementById('aiConfirmAccept');
+    const selectionTools = document.getElementById('aiSelectionTools');
+    const askSelection = document.getElementById('aiAskSelection');
+    const writeSelection = document.getElementById('aiWriteSelection');
+    const composeContext = document.getElementById('aiComposeContext');
+    const composeContextText = document.getElementById('aiComposeContextText');
+    const composeContextClear = document.getElementById('aiComposeContextClear');
     const locale = @json(app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB');
     let lastRequest = null;
     let lastAnswer = '';
     let currentConversationId = null;
+    let requestInFlight = false;
+    let selectedAiText = '';
+    let selectedAiArticle = null;
+    let composerSelectionContext = '';
     const emptyStateMarkup = chatLog?.innerHTML || '';
+    let confirmResolver = null;
+
+    const closeConfirm = (accepted = false) => {
+        if (!confirmDialog?.classList.contains('is-open')) return;
+        confirmDialog.classList.remove('is-open');
+        confirmDialog.setAttribute('aria-hidden', 'true');
+        const resolve = confirmResolver;
+        confirmResolver = null;
+        resolve?.(accepted);
+    };
+    const requestConfirmation = ({title, message, acceptLabel}) => new Promise(resolve => {
+        if (!confirmDialog) return resolve(false);
+        confirmResolver = resolve;
+        confirmTitle.textContent = title;
+        confirmMessage.textContent = message;
+        confirmAccept.textContent = acceptLabel;
+        confirmDialog.classList.add('is-open');
+        confirmDialog.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => confirmAccept.focus());
+    });
+    confirmDialog?.querySelectorAll('[data-confirm-cancel]').forEach(button => button.addEventListener('click', () => closeConfirm(false)));
+    confirmAccept?.addEventListener('click', () => closeConfirm(true));
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && confirmDialog?.classList.contains('is-open')) {
+            event.preventDefault();
+            closeConfirm(false);
+        }
+    });
 
     const tick = () => {
         const now = new Date();
@@ -1080,13 +1313,35 @@
     const modelText = root.dataset.aiModel || '-';
     const metaText = `${scopeText} · ${providerText} / ${modelText}`;
 
+    const syncChatFades = () => {
+        const maxScroll = Math.max(0, chatLog.scrollHeight - chatLog.clientHeight);
+        chatLog.classList.toggle('can-scroll-up', chatLog.scrollTop > 6);
+        chatLog.classList.toggle('can-scroll-down', chatLog.scrollTop < maxScroll - 6);
+    };
     const scrollChat = () => {
         chatLog.scrollTop = chatLog.scrollHeight;
+        requestAnimationFrame(syncChatFades);
+    };
+    chatLog.addEventListener('scroll', syncChatFades, { passive:true });
+    window.addEventListener('resize', syncChatFades, { passive:true });
+    const attachmentTypeLabel = file => {
+        const extension = file.name.split('.').pop()?.toLowerCase();
+        if (extension === 'pdf') return 'PDF';
+        if (extension === 'csv') return 'CSV';
+        if (extension === 'xlsx') return 'XLSX';
+        return file.type.startsWith('image/') ? (file.type.split('/')[1] || 'IMAGE').toUpperCase() : 'FILE';
     };
 
-    const addMessage = (type, text, meta = '', attachments = []) => {
+    const addMessage = (type, text, meta = '', attachments = [], messageId = null) => {
         const article = document.createElement('article');
         article.className = `msg ${type}`;
+        const messageText = String(text || '');
+        const isReport = type === 'ai' && (messageText.length > 650 || /(?:report|summary|findings|recommendations|laporan|ringkasan|cadangan)/iu.test(messageText));
+        if (messageId) article.dataset.messageId = String(messageId);
+        if (type === 'ai') {
+            article.dataset.rawContent = messageText;
+            article.classList.add(isReport ? 'is-report' : 'is-conversation');
+        }
         if (type === 'ai') {
             article.classList.add('msg-rich');
             const lines = String(text).replace(/\r\n?/g, '\n').split('\n');
@@ -1159,7 +1414,7 @@
                 attachments.forEach(file => {
                     const card = document.createElement('div');
                     card.className = 'ai-sent-attachment';
-                    const fileType = file.type === 'application/pdf' ? 'PDF' : (file.type.split('/')[1] || 'FILE').toUpperCase();
+                    const fileType = attachmentTypeLabel(file);
                     const typeNode = document.createElement('span'); typeNode.className = 'ai-sent-attachment-type'; typeNode.textContent = fileType;
                     const nameNode = document.createElement('span'); nameNode.className = 'ai-sent-attachment-name'; nameNode.textContent = file.name;
                     if (file.type.startsWith('image/')) {
@@ -1181,16 +1436,58 @@
             metaNode.textContent = meta;
             article.appendChild(metaNode);
         }
+        if (isReport) {
+            const content = document.createElement('div');
+            content.className = 'ai-report-content';
+            while (article.firstChild) content.appendChild(article.firstChild);
+            const kicker = document.createElement('div');
+            kicker.className = 'ai-report-kicker';
+            kicker.textContent = @json(__('StudentEdge AI report'));
+            article.append(kicker, content);
+            if (messageText.length > 900) {
+                article.classList.add('is-collapsed');
+                const toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'ai-report-toggle';
+                toggle.dataset.toggleReport = '';
+                toggle.textContent = @json(__('Show full report'));
+                article.appendChild(toggle);
+            }
+        }
+        if (type === 'ai') {
+            chatLog.querySelectorAll('.ai-message-actions').forEach(actions => { actions.hidden = true; });
+            const actions = document.createElement('div');
+            actions.className = 'ai-message-actions';
+            actions.innerHTML = `<button type="button" class="ai-message-action" data-copy-ai-message><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span>${@json(__('Copy'))}</span></button>${root.dataset.canEditAi === '1' && messageId ? `<button type="button" class="ai-message-action" data-edit-ai-message><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg><span>${@json(__('Edit'))}</span></button>` : ''}<button type="button" class="ai-message-action" data-regenerate-ai-message><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 1 0-2.34 5.66L20 14"/><path d="M20 7v4h-4"/></svg><span>${@json(__('Regenerate'))}</span></button>`;
+            article.appendChild(actions);
+        }
         chatLog.appendChild(article);
         scrollChat();
         return article;
     };
 
-    const resetChat = () => {
+    const activeConversationStorageKey = root.dataset.aiSessionKey;
+    const rememberActiveConversation = id => {
+        try {
+            if (id) sessionStorage.setItem(activeConversationStorageKey, String(id));
+            else sessionStorage.removeItem(activeConversationStorageKey);
+        } catch (_) {}
+    };
+    const rememberedConversation = () => {
+        try { return sessionStorage.getItem(activeConversationStorageKey); }
+        catch (_) { return null; }
+    };
+
+    const resetChat = (forgetActive = true) => {
+        closeExpandedEditor();
         currentConversationId = null;
+        lastRequest = null;
+        lastAnswer = '';
+        if (forgetActive) rememberActiveConversation(null);
         historyList?.querySelectorAll('.ai-history-item').forEach(item => item.classList.remove('is-active'));
         root.classList.remove('has-chat');
         chatLog.innerHTML = root.dataset.aiEnabled === '1' ? emptyStateMarkup : '';
+        syncChatFades();
         if (root.dataset.aiEnabled !== '1') addMessage('error', initialMessage, metaText);
     };
 
@@ -1219,17 +1516,20 @@
         historyList.querySelectorAll('.ai-history-item').forEach(node => node.classList.toggle('is-active', String(node.dataset.conversationId) === String(currentConversationId)));
     };
     const loadConversation = async id => {
+        closeExpandedEditor();
         const response = await fetch(conversationUrl(id), {headers:{'Accept':'application/json'},credentials:'same-origin'});
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(payload.message || @json(__('Conversation could not be loaded.')));
         currentConversationId = payload.conversation.id;
+        rememberActiveConversation(currentConversationId);
         root.classList.add('has-chat');
         chatLog.innerHTML = '';
         lastAnswer = '';
         (payload.messages || []).forEach(message => {
             const type = message.role === 'assistant' ? 'ai' : 'user';
-            addMessage(type, message.content);
+            addMessage(type, message.content, '', [], message.id);
             if (type === 'ai') lastAnswer = message.content;
+            if (type === 'user') lastRequest = {message: message.content, template: null, filters: filters()};
         });
         upsertConversation(payload.conversation);
         setHistoryOpen(false);
@@ -1239,6 +1539,142 @@
     historyClose?.addEventListener('click', () => setHistoryOpen(false));
     historyBackdrop?.addEventListener('click', () => setHistoryOpen(false));
     newConversationBtn?.addEventListener('click', () => { resetChat(); setHistoryOpen(false); input.focus(); });
+    historySearchButton?.addEventListener('click', () => {
+        historySearch?.classList.toggle('is-visible');
+        if (historySearch?.classList.contains('is-visible')) historySearchInput?.focus();
+    });
+    historySearchInput?.addEventListener('input', () => {
+        const query = historySearchInput.value.trim().toLocaleLowerCase();
+        historyList?.querySelectorAll('.ai-history-item').forEach(item => {
+            item.hidden = query !== '' && !String(item.dataset.title || '').toLocaleLowerCase().includes(query);
+        });
+    });
+    const hideSelectionTools = () => {
+        selectionTools?.classList.remove('is-open');
+        selectionTools?.setAttribute('aria-hidden', 'true');
+    };
+    const openMessageEditor = (article, selectedText = '') => {
+        const raw = article.dataset.rawContent || '';
+        hideSelectionTools();
+        window.getSelection()?.removeAllRanges();
+        article.classList.add('is-writing');
+        article.innerHTML = `<div class="ai-writing-head"><span class="ai-writing-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>${@json(__('Edit'))}</span><div class="ai-writing-tools"><button type="button" data-copy-writing aria-label="${@json(__('Copy'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button><button type="button" data-expand-writing aria-label="${@json(__('Open editor'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></svg></button></div></div><div class="ai-writing-body"><div class="ai-edit-prompt"><input type="text" placeholder="${@json(__('Ask for changes'))}" aria-label="${@json(__('Ask for changes'))}"><button type="button" data-request-ai-edit aria-label="${@json(__('Apply AI changes'))}">↑</button></div><textarea class="ai-message-editor" aria-label="${@json(__('Edit AI response'))}"></textarea><div class="ai-edit-actions"><button type="button" data-cancel-ai-edit>${@json(__('Cancel'))}</button><button type="button" class="is-primary" data-save-ai-edit>${@json(__('Save changes'))}</button></div></div>`;
+        const editor = article.querySelector('.ai-message-editor');
+        editor.value = raw;
+        editor.focus();
+        const start = selectedText ? raw.indexOf(selectedText) : -1;
+        if (start >= 0) editor.setSelectionRange(start, start + selectedText.length);
+    };
+    const closeExpandedEditor = () => {
+        chatLog?.querySelectorAll('.msg.ai.is-writing.is-expanded').forEach(article => article.classList.remove('is-expanded'));
+        document.body.classList.remove('ai-writing-expanded');
+    };
+    chatLog?.addEventListener('mouseup', () => {
+        if (root.dataset.canEditAi !== '1') return;
+        requestAnimationFrame(() => {
+            const selection = window.getSelection();
+            const text = selection?.toString().trim() || '';
+            const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+            const article = range?.commonAncestorContainer?.nodeType === Node.ELEMENT_NODE
+                ? range.commonAncestorContainer.closest?.('.msg.ai[data-message-id]')
+                : range?.commonAncestorContainer?.parentElement?.closest('.msg.ai[data-message-id]');
+            if (!text || !range || !article || article.querySelector('.ai-message-editor')) return hideSelectionTools();
+            selectedAiText = text;
+            selectedAiArticle = article;
+            const rect = range.getBoundingClientRect();
+            selectionTools.style.left = `${Math.max(8, Math.min(window.innerWidth - 250, rect.left + (rect.width / 2) - 120))}px`;
+            selectionTools.style.top = `${Math.max(8, rect.top - 48)}px`;
+            selectionTools.classList.add('is-open');
+            selectionTools.setAttribute('aria-hidden', 'false');
+        });
+    });
+    askSelection?.addEventListener('click', () => {
+        if (!selectedAiText) return;
+        composerSelectionContext = selectedAiText;
+        composeContextText.textContent = `“${selectedAiText}”`;
+        composeContext.hidden = false;
+        composeContext.classList.add('is-visible');
+        hideSelectionTools();
+        window.getSelection()?.removeAllRanges();
+        input.value = '';
+        input.placeholder = @json(__('Ask StudentEdge AI about the selected text'));
+        input.focus();
+    });
+    composeContextClear?.addEventListener('click', () => {
+        composerSelectionContext = '';
+        composeContext.classList.remove('is-visible');
+        composeContext.hidden = true;
+        composeContextText.textContent = '';
+        input.placeholder = @json(__('Ask StudentEdge AI anything'));
+        input.focus();
+    });
+    writeSelection?.addEventListener('click', () => {
+        if (selectedAiArticle) openMessageEditor(selectedAiArticle, selectedAiText);
+    });
+    chatLog?.addEventListener('scroll', hideSelectionTools, {passive:true});
+    document.addEventListener('mousedown', event => {
+        if (!selectionTools?.contains(event.target) && !event.target.closest?.('.msg.ai[data-message-id]')) hideSelectionTools();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && document.body.classList.contains('ai-writing-expanded')) closeExpandedEditor();
+    });
+    chatLog?.addEventListener('click', async event => {
+        const article = event.target.closest('.msg.ai');
+        if (!article) return;
+        if (event.target.closest('[data-toggle-report]')) {
+            const collapsed = article.classList.toggle('is-collapsed');
+            event.target.closest('[data-toggle-report]').textContent = collapsed ? @json(__('Show full report')) : @json(__('Show less'));
+            syncChatFades();
+            return;
+        }
+        if (event.target.closest('[data-copy-ai-message]')) {
+            await navigator.clipboard?.writeText(article.dataset.rawContent || '').catch(() => {});
+            return;
+        }
+        if (event.target.closest('[data-regenerate-ai-message]')) {
+            if (!requestInFlight && lastRequest) send(lastRequest.message, lastRequest.template, lastRequest.selectedContext || '');
+            return;
+        }
+        if (event.target.closest('[data-edit-ai-message]')) {
+            if (root.dataset.canEditAi === '1' && article.dataset.messageId) openMessageEditor(article);
+            return;
+        }
+        if (root.dataset.canEditAi !== '1') return;
+        if (event.target.closest('[data-copy-writing]')) {
+            await navigator.clipboard?.writeText(article.querySelector('.ai-message-editor')?.value || '').catch(() => {});
+            return;
+        }
+        if (event.target.closest('[data-expand-writing]')) {
+            const expanded = !article.classList.contains('is-expanded');
+            closeExpandedEditor();
+            article.classList.toggle('is-expanded', expanded);
+            document.body.classList.toggle('ai-writing-expanded', expanded);
+            return;
+        }
+        if (event.target.closest('[data-cancel-ai-edit]')) {
+            if (currentConversationId) await loadConversation(currentConversationId);
+            return;
+        }
+        if (event.target.closest('[data-request-ai-edit]')) {
+            const instruction = article.querySelector('.ai-edit-prompt input')?.value.trim();
+            const context = article.querySelector('.ai-message-editor')?.value.trim();
+            if (!instruction || !context || !currentConversationId || requestInFlight) return;
+            await loadConversation(currentConversationId);
+            send(instruction, null, context);
+            return;
+        }
+        if (event.target.closest('[data-save-ai-edit]')) {
+            const editor = article.querySelector('.ai-message-editor');
+            const content = editor?.value.trim();
+            if (!content || !currentConversationId) return;
+            const save = event.target.closest('[data-save-ai-edit]');
+            save.disabled = true;
+            const response = await fetch(`${conversationUrl(currentConversationId)}/messages/${article.dataset.messageId}`, {method:'PATCH',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':csrfToken},credentials:'same-origin',body:JSON.stringify({content})});
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) { save.disabled = false; return addMessage('error', payload.message || @json(__('AI response could not be updated.'))); }
+            await loadConversation(currentConversationId);
+        }
+    });
     historyList?.addEventListener('click', async event => {
         const item = event.target.closest('.ai-history-item');
         if (!item) return;
@@ -1246,7 +1682,11 @@
         try {
             if (event.target.closest('[data-history-delete]')) {
                 event.stopPropagation();
-                if (!confirm(@json(__('Delete this AI conversation?')))) return;
+                if (!await requestConfirmation({
+                    title: @json(__('Delete conversation?')),
+                    message: @json(__('This conversation and all of its messages will be permanently deleted.')),
+                    acceptLabel: @json(__('Delete conversation')),
+                })) return;
                 const response = await fetch(conversationUrl(id), {method:'DELETE',headers:{'Accept':'application/json','X-CSRF-TOKEN':csrfToken},credentials:'same-origin'});
                 if (!response.ok) throw new Error(@json(__('Conversation could not be deleted.')));
                 item.remove();
@@ -1268,7 +1708,11 @@
         } catch (error) { addMessage('error', error.message || aiText.failed); }
     });
     deleteAllHistoryBtn?.addEventListener('click', async () => {
-        if (!confirm(@json(__('Delete all your AI conversation history?')))) return;
+        if (!await requestConfirmation({
+            title: @json(__('Delete all AI history?')),
+            message: @json(__('This permanently deletes every AI conversation in your history. This action cannot be undone.')),
+            acceptLabel: @json(__('Delete all history')),
+        })) return;
         const response = await fetch(root.dataset.conversationsUrl, {method:'DELETE',headers:{'Accept':'application/json','X-CSRF-TOKEN':csrfToken},credentials:'same-origin'});
         if (!response.ok) return addMessage('error', @json(__('AI history could not be deleted.')));
         historyList.innerHTML = `<p class="ai-history-empty">${@json(__('Your AI conversations will appear here after you send a message.'))}</p>`;
@@ -1322,7 +1766,7 @@
         files.forEach((file, index) => {
             const card = document.createElement('article'); card.className = 'ai-compose-attachment';
             const thumb = document.createElement('div'); thumb.className = 'ai-compose-attachment-thumb';
-            const fileType = file.type === 'application/pdf' ? 'PDF' : (file.type.split('/')[1] || 'FILE').toUpperCase();
+            const fileType = attachmentTypeLabel(file);
             thumb.textContent = fileType;
             if (file.type.startsWith('image/')) {
                 card.classList.add('is-image');
@@ -1368,15 +1812,21 @@
     });
 
     const setBusy = (busy) => {
+        requestInFlight = busy;
         sendBtn.disabled = busy || root.dataset.aiEnabled !== '1';
         document.querySelectorAll('.task-btn').forEach((button) => button.disabled = busy);
         input.disabled = busy;
+        chatLog.querySelectorAll('[data-regenerate-ai-message]').forEach(button => {
+            button.disabled = busy || !lastRequest;
+            button.setAttribute('aria-busy', busy ? 'true' : 'false');
+        });
     };
 
-    const send = async (message = input.value.trim(), template = null) => {
-        if (!message || root.dataset.aiEnabled !== '1') return;
+    const send = async (message = input.value.trim(), template = null, context = composerSelectionContext) => {
+        if (requestInFlight || !message || root.dataset.aiEnabled !== '1') return;
 
-        lastRequest = { message, template, filters: filters() };
+        const selectedContext = context;
+        lastRequest = { message, template, filters: filters(), selectedContext };
         if (!root.classList.contains('has-chat')) {
             root.classList.add('has-chat');
             chatLog.innerHTML = '';
@@ -1393,12 +1843,14 @@
         try {
             const requestBody = new FormData();
             requestBody.append('message', lastRequest.message);
+            if (selectedContext) requestBody.append('selected_context', selectedContext);
             if (currentConversationId) requestBody.append('conversation_id', currentConversationId);
             if (lastRequest.template) requestBody.append('template', lastRequest.template);
             Object.entries(lastRequest.filters).forEach(([key, value]) => {
                 if (value) requestBody.append(`filters[${key}]`, value);
             });
             sentAttachments.forEach(attachment => requestBody.append('attachments[]', attachment));
+            if (selectedContext) composeContextClear?.click();
 
             const response = await fetch(root.dataset.aiUrl, {
                 method: 'POST',
@@ -1420,9 +1872,10 @@
             lastAnswer = payload.answer || '';
             if (payload.conversation) {
                 currentConversationId = payload.conversation.id;
+                rememberActiveConversation(currentConversationId);
                 upsertConversation(payload.conversation);
             }
-            addMessage('ai', lastAnswer || aiText.empty);
+            addMessage('ai', lastAnswer || aiText.empty, '', [], payload.assistant_message_id);
         } catch (error) {
             loading.remove();
             addMessage('error', error.message || aiText.unreachable);
@@ -1432,7 +1885,11 @@
         }
     };
 
-    resetChat();
+    resetChat(false);
+    const activeConversationId = rememberedConversation();
+    if (activeConversationId) {
+        loadConversation(activeConversationId).catch(() => resetChat());
+    }
 
     sendBtn.addEventListener('click', () => send());
     input.addEventListener('keydown', (event) => {
@@ -1452,21 +1909,6 @@
         send(template, template);
     });
 
-    copyBtn?.addEventListener('click', async () => {
-        if (!lastAnswer) return;
-        await navigator.clipboard?.writeText(lastAnswer).catch(() => {});
-    });
-
-    clearBtn?.addEventListener('click', resetChat);
-
-    regenerateBtn?.addEventListener('click', () => {
-        if (lastRequest) send(lastRequest.message, lastRequest.template);
-    });
-
-    draftBtn?.addEventListener('click', () => {
-        input.value = aiText.draftPrompt;
-        input.focus();
-    });
 })();
 </script>
 @endpush

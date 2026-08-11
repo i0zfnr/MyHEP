@@ -202,6 +202,9 @@ Route::get('/admin/ai-helper/conversations/{conversation}', [AdminAiHelperContro
 Route::patch('/admin/ai-helper/conversations/{conversation}', [AdminAiHelperController::class, 'renameConversation'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
     ->name('admin.ai-helper.conversations.rename');
+Route::patch('/admin/ai-helper/conversations/{conversation}/messages/{message}', [AdminAiHelperController::class, 'updateMessage'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.messages.update');
 Route::delete('/admin/ai-helper/conversations/{conversation}', [AdminAiHelperController::class, 'deleteConversation'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
     ->name('admin.ai-helper.conversations.delete');
@@ -215,6 +218,7 @@ Route::prefix('/lecturer/ai-helper')->middleware(['auth.session:admin', 'admin.s
     Route::get('/', [AdminAiHelperController::class, 'index'])->name('index');
     Route::get('/conversations/{conversation}', [AdminAiHelperController::class, 'conversation'])->name('conversations.show');
     Route::patch('/conversations/{conversation}', [AdminAiHelperController::class, 'renameConversation'])->name('conversations.rename');
+    Route::patch('/conversations/{conversation}/messages/{message}', [AdminAiHelperController::class, 'updateMessage'])->name('messages.update');
     Route::delete('/conversations/{conversation}', [AdminAiHelperController::class, 'deleteConversation'])->name('conversations.delete');
     Route::delete('/conversations', [AdminAiHelperController::class, 'deleteAllConversations'])->name('conversations.delete-all');
     Route::post('/', [AdminAiHelperController::class, 'ask'])->middleware('throttle:20,1')->name('ask');

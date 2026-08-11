@@ -203,6 +203,46 @@ class AiHelperFeatureControlTest extends TestCase
         });
     }
 
+    public function test_admin_can_attach_csv_and_gemini_receives_its_cells(): void
+    {
+        config(['services.gemini.key' => 'test-key', 'services.gemini.url' => 'https://example.test', 'services.gemini.model' => 'gemini-test']);
+        Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => 'Spreadsheet summary']]]]]])]);
+
+        $this->actingAsSystemAdmin()->post('/admin/ai-helper', [
+            'message' => 'Summarize this spreadsheet',
+            'attachments' => [UploadedFile::fake()->createWithContent('research.csv', "Name,Score\nAina,92\nRavi,88")],
+        ], ['Accept' => 'application/json'])->assertOk()
+            ->assertJsonPath('answer', 'Spreadsheet summary')
+            ->assertJsonPath('attachment_name', 'research.csv');
+
+        Http::assertSent(function ($request): bool {
+            $parts = data_get($request->data(), 'contents.0.parts', []);
+            $spreadsheet = (string) data_get($parts, '1.text');
+
+            return str_contains($spreadsheet, 'Spreadsheet attachment research.csv extracted content')
+                && str_contains($spreadsheet, 'Name | Score')
+                && str_contains($spreadsheet, 'Aina | 92');
+        });
+    }
+
+    public function test_admin_greeting_is_conversational_without_system_context(): void
+    {
+        config(['services.gemini.key' => 'test-key', 'services.gemini.url' => 'https://example.test', 'services.gemini.model' => 'gemini-test']);
+        Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => 'Hey! How can I help?']]]]]])]);
+
+        $this->actingAsSystemAdmin()->postJson('/admin/ai-helper', ['message' => 'Hey there'])
+            ->assertOk()->assertJsonPath('answer', 'Hey! How can I help?');
+
+        Http::assertSent(function ($request): bool {
+            $prompt = (string) data_get($request->data(), 'contents.0.parts.0.text');
+
+            return str_contains($prompt, 'CONVERSATION MODE')
+                && str_contains($prompt, 'Available system context: intentionally omitted')
+                && ! str_contains($prompt, '"students":602')
+                && ! str_contains($prompt, 'Operational Summary');
+        });
+    }
+
     public function test_admin_ai_conversations_are_persisted_and_owner_scoped(): void
     {
         config(['services.gemini.key' => 'test-key', 'services.gemini.url' => 'https://example.test', 'services.gemini.model' => 'gemini-test']);

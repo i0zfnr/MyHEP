@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'studentedge-pwa-v12';
+const CACHE_VERSION = 'studentedge-pwa-v13';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = '/offline.html';
@@ -46,7 +46,21 @@ self.addEventListener('fetch', (event) => {
             || url.pathname.startsWith('/student/')
             || url.pathname.startsWith('/notifications/')
             || url.pathname.startsWith('/push/'))) {
-        event.respondWith(fetch(event.request));
+        event.respondWith(
+            fetch(event.request).catch(async () => {
+                if (event.request.mode === 'navigate') {
+                    return (await caches.match(OFFLINE_URL)) || new Response('StudentEdge is currently offline.', {
+                        status: 503,
+                        headers: {'Content-Type': 'text/plain; charset=utf-8'},
+                    });
+                }
+
+                return new Response(null, {
+                    status: 503,
+                    statusText: 'Service Unavailable',
+                });
+            })
+        );
         return;
     }
 

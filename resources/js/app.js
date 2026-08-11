@@ -712,12 +712,12 @@ const registerPwaPromptUi = () => {
     let deferredPrompt = null;
 
     window.addEventListener('beforeinstallprompt', (event) => {
-        event.preventDefault();
-        deferredPrompt = event;
-
         if (!['/student/dashboard', '/admin/dashboard'].includes(window.location.pathname)) {
             return;
         }
+
+        event.preventDefault();
+        deferredPrompt = event;
 
         showPrompt({
             kicker: 'Install App',
@@ -1546,6 +1546,21 @@ const registerBackToTop = () => {
     sync();
 };
 
+const registerAiSessionCleanup = () => {
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || !form.action.endsWith('/logout')) return;
+
+        try {
+            Object.keys(sessionStorage)
+                .filter((key) => key.startsWith('studentedge.ai.active.'))
+                .forEach((key) => sessionStorage.removeItem(key));
+        } catch (_) {
+            // Logout must continue even when browser storage is unavailable.
+        }
+    });
+};
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
@@ -1555,7 +1570,7 @@ if ('serviceWorker' in navigator) {
             return;
         }
 
-        navigator.serviceWorker.register('/sw.js?v=12').catch(() => {
+        navigator.serviceWorker.register('/sw.js?v=13').catch(() => {
             // Keep the app usable even if PWA registration fails.
         });
     });
@@ -1576,6 +1591,7 @@ window.addEventListener('DOMContentLoaded', () => {
     registerMainSmoothScroll();
     registerDocumentSmoothScroll();
     registerBackToTop();
+    registerAiSessionCleanup();
     registerPwaPromptUi();
     registerPushPromptUi();
     registerLogoutPushCleanup();
