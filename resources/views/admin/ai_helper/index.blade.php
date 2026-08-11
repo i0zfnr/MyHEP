@@ -562,12 +562,13 @@
     .ai-admin--lecturer .ai-compose-row { grid-template-columns:46px minmax(0,1fr) 46px !important; gap:.35rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
     .ai-admin.ai-admin--lecturer .ai-compose-row textarea.ai-input { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; }
     body[data-theme="dark"] .ai-admin--lecturer .ai-compose-row { background:#1f1f1f !important; }
-    .ai-compose-frame { overflow:visible; padding:.52rem; border:1px solid color-mix(in srgb,var(--se-primary) 22%,var(--border)); border-radius:28px; background:color-mix(in srgb,var(--surface) 94%,#202124); box-shadow:0 14px 34px color-mix(in srgb,var(--se-primary) 10%,transparent); }
-    body[data-theme="dark"] .ai-compose-frame { background:#202124; }
-    .ai-compose-frame .ai-compose-row { background:transparent !important; border:0 !important; box-shadow:none !important; }
-    .ai-compose-attachments { display:none; flex-wrap:nowrap; gap:.5rem; max-width:100%; margin:0; padding:.05rem .05rem .5rem; overflow-x:auto; overscroll-behavior-inline:contain; }
+    .ai-compose-frame { width:min(100%,620px); margin:0 auto; overflow:visible; padding:0; border:0; border-radius:30px; background:transparent; box-shadow:none; }
+    .ai-compose-frame .ai-compose-row { min-height:58px; padding:5px 7px 5px 10px; border:0 !important; border-radius:999px !important; background:#1f1f1f !important; box-shadow:none !important; }
+    .ai-compose-frame:has(.ai-compose-attachments.is-visible) { padding:.55rem; border:1px solid color-mix(in srgb,var(--se-primary) 20%,var(--border)); border-radius:26px; background:#202124; }
+    .ai-compose-frame:has(.ai-compose-attachments.is-visible) .ai-compose-row { min-height:54px; }
+    .ai-compose-attachments { display:none; flex-wrap:nowrap; gap:.5rem; max-width:100%; margin:0; padding:0 .05rem .45rem; overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:thin; }
     .ai-compose-attachments.is-visible { display:flex; }
-    .ai-compose-attachment { position:relative; flex:0 0 104px; width:104px; height:104px; display:flex; align-items:flex-end; overflow:visible; padding:.62rem; border:0; border-radius:17px; background:color-mix(in srgb,var(--surface) 70%,#5f6368); box-shadow:none; }
+    .ai-compose-attachment { position:relative; flex:0 0 104px; width:104px; height:104px; display:flex; align-items:flex-end; overflow:visible; padding:.62rem; border:1px solid color-mix(in srgb,var(--text) 7%,transparent); border-radius:17px; background:color-mix(in srgb,var(--surface) 72%,#3c4043); box-shadow:none; }
     .ai-compose-attachment-thumb { position:absolute; inset:0; overflow:hidden; padding:.62rem; border-radius:17px; color:color-mix(in srgb,var(--text) 78%,transparent); font-size:.66rem; font-weight:850; background-position:center; background-size:cover; }
     .ai-compose-attachment.is-image .ai-compose-attachment-thumb::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 42%,rgba(0,0,0,.68)); }
     .ai-compose-attachment-copy { position:relative; z-index:1; min-width:0; width:100%; display:grid; gap:.1rem; }
@@ -578,10 +579,21 @@
     .ai-compose-attachment-remove { position:absolute !important; z-index:3; top:6px; right:6px; width:25px !important; min-width:25px !important; max-width:25px !important; height:25px !important; min-height:25px !important; max-height:25px !important; aspect-ratio:1/1; display:grid !important; place-items:center; margin:0 !important; padding:0 !important; border:1px solid color-mix(in srgb,var(--text) 28%,transparent) !important; border-radius:999px !important; background:color-mix(in srgb,var(--surface) 88%,#202124) !important; color:var(--text) !important; font:700 15px/1 system-ui !important; cursor:pointer; box-sizing:border-box !important; }
     .ai-compose-attachment-remove:hover { background:var(--se-primary-soft) !important; color:var(--se-primary-strong) !important; border-color:var(--se-primary) !important; }
     .ai-compose-attachment-limit { flex:1 0 100%; color:var(--se-danger); font-size:.68rem; font-weight:750; }
+    .ai-admin .msg.user { width:auto; max-width:min(78%,620px); padding:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important; display:grid; justify-items:end; gap:.42rem; }
+    .ai-admin .msg.user pre { width:auto; max-width:100%; margin:0; padding:.72rem 1.05rem; border:0; border-radius:999px; background:#171717; color:#f1f1f1; box-shadow:none; white-space:pre-wrap; font-family:inherit; font-size:.88rem; font-weight:500; line-height:1.35; }
+    body:not([data-theme="dark"]) .ai-admin .msg.user pre { background:color-mix(in srgb,var(--text) 90%,#171717); color:var(--surface); }
+    .ai-sent-attachments { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.42rem; max-width:100%; }
+    .ai-sent-attachment { position:relative; width:102px; height:102px; display:flex; align-items:flex-end; overflow:hidden; padding:.62rem; border:1px solid color-mix(in srgb,var(--text) 7%,transparent); border-radius:17px; background:color-mix(in srgb,var(--surface) 72%,#3c4043); color:var(--text); box-sizing:border-box; }
+    .ai-sent-attachment-type { position:absolute; top:.62rem; left:.62rem; font-size:.66rem; font-weight:850; color:color-mix(in srgb,var(--text) 78%,transparent); }
+    .ai-sent-attachment-name { position:relative; z-index:1; display:-webkit-box; overflow:hidden; -webkit-line-clamp:2; -webkit-box-orient:vertical; font-size:.68rem; line-height:1.25; font-weight:800; overflow-wrap:anywhere; }
+    .ai-sent-attachment.is-image { background-position:center; background-size:cover; }
+    .ai-sent-attachment.is-image::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 42%,rgba(0,0,0,.7)); }
+    .ai-sent-attachment.is-image .ai-sent-attachment-type { display:none; }
+    .ai-sent-attachment.is-image .ai-sent-attachment-name { color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.75); }
     .ai-format-pill { max-width:185px; overflow:hidden; text-overflow:ellipsis; }
-    .ai-format-pill { min-height:40px; display:inline-flex; align-items:center; gap:.42rem; padding:.52rem .72rem; border:1px solid transparent; background:transparent; }
-    .ai-format-pill::before { content:'≡'; width:22px; height:22px; display:grid; place-items:center; border-radius:7px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.75rem; }
-    .ai-format-pill:hover,.ai-format-pill[aria-expanded="true"] { border-color:color-mix(in srgb,var(--se-primary) 28%,var(--border)); background:var(--se-primary-soft); color:var(--se-primary-strong); }
+    .ai-format-pill { min-height:38px; display:inline-flex; align-items:center; gap:.42rem; padding:.48rem .75rem; border:0; border-radius:999px; background:#2b2b2b; color:#ededed; }
+    .ai-format-pill::before { display:none; }
+    .ai-format-pill:hover,.ai-format-pill[aria-expanded="true"] { border-color:transparent; background:#343434; color:#fff; }
     .ai-format-menu { position:absolute; right:48px; bottom:62px; width:235px; display:none; gap:.25rem; padding:.55rem; border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:16px; background:color-mix(in srgb,var(--surface) 96%,transparent); box-shadow:0 20px 50px rgba(0,0,0,.28); backdrop-filter:blur(20px); }
     .ai-format-menu.is-open { display:grid; }
     .ai-format-option { display:flex; justify-content:space-between; align-items:center; gap:.5rem; width:100%; padding:.65rem .72rem; border:0; border-radius:10px; background:transparent; color:var(--text); font:inherit; font-size:.76rem; font-weight:750; text-align:left; cursor:pointer; }
@@ -654,10 +666,12 @@
         box-shadow:0 12px 26px color-mix(in srgb,var(--se-primary) 18%,transparent);
     }
     .ai-admin .msg.user {
-        background:linear-gradient(135deg,var(--se-primary-button-start),var(--se-primary-button-end)) !important;
-        border-color:color-mix(in srgb,var(--se-primary) 70%,var(--border)) !important;
-        color:var(--se-primary-button-text) !important;
-        box-shadow:0 12px 28px color-mix(in srgb,var(--se-primary) 22%,transparent) !important;
+        padding:0 !important;
+        border:0 !important;
+        border-radius:0 !important;
+        background:transparent !important;
+        color:var(--text) !important;
+        box-shadow:none !important;
     }
     .ai-admin .msg.ai {
         background:linear-gradient(145deg,color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft)),var(--surface)) !important;
@@ -791,7 +805,7 @@
             <div class="ai-empty-state" id="aiEmptyState">
                 <span class="ai-empty-orb">@include('partials.ai_helper_icon')</span>
                 <h3>{{ __('What should we focus on?') }}</h3>
-                <p>{{ $studentAiMode ? __('Ask about your own StudentEdge records or get general student portal guidance.') : ($lecturerAiMode ? __('Ask for lecturer guidance or a summary of the anonymized records available to your category.') : __('Ask about StudentEdge records, create a written report, or attach a document or image as report evidence.')) }}</p>
+                <p>{{ $lecturerAiMode ? __('Research any topic, analyze attached documents, or summarize the anonymized records available to your lecturer category.') : __('Research any topic, analyze attached documents, or work with authorized StudentEdge records.') }}</p>
                 <div class="ai-empty-chips">
                     @if($studentAiMode)
                     <button type="button" class="ai-empty-chip" data-template="{{ __('What can the AI Helper help me with?') }}">{{ __('Overview') }}</button>
@@ -827,7 +841,7 @@
                 @if($canUploadAiFiles)
                 <button type="button" class="ai-compose-icon" id="aiAddBtn" aria-expanded="false" aria-controls="aiAddMenu" aria-label="{{ __('Add report source') }}">＋</button>
                 @endif
-                <textarea class="ai-input" id="aiInput" rows="1" placeholder="{{ __('Ask StudentEdge AI') }}"></textarea>
+                <textarea class="ai-input" id="aiInput" rows="1" placeholder="{{ __('Ask StudentEdge AI anything') }}"></textarea>
                 @unless($textOnlyAiMode)
                 <button type="button" class="ai-format-pill" id="aiFormatBtn" aria-expanded="false" aria-controls="aiFormatMenu">{{ __('Auto format') }}⌄</button>
                 <div class="ai-format-menu" id="aiFormatMenu">
@@ -1052,7 +1066,7 @@
         chatLog.scrollTop = chatLog.scrollHeight;
     };
 
-    const addMessage = (type, text, meta = '') => {
+    const addMessage = (type, text, meta = '', attachments = []) => {
         const article = document.createElement('article');
         article.className = `msg ${type}`;
         if (type === 'ai') {
@@ -1120,6 +1134,25 @@
                 const node = document.createElement(isTitle ? 'h3' : 'p'); appendInline(node, clean); article.appendChild(node); list = null; metaGrid = null; hasContent = true;
             });
         } else {
+            if (type === 'user' && attachments.length) {
+                article.classList.add('has-attachments');
+                const attachmentList = document.createElement('div');
+                attachmentList.className = 'ai-sent-attachments';
+                attachments.forEach(file => {
+                    const card = document.createElement('div');
+                    card.className = 'ai-sent-attachment';
+                    const fileType = file.type === 'application/pdf' ? 'PDF' : (file.type.split('/')[1] || 'FILE').toUpperCase();
+                    const typeNode = document.createElement('span'); typeNode.className = 'ai-sent-attachment-type'; typeNode.textContent = fileType;
+                    const nameNode = document.createElement('span'); nameNode.className = 'ai-sent-attachment-name'; nameNode.textContent = file.name;
+                    if (file.type.startsWith('image/')) {
+                        card.classList.add('is-image');
+                        card.style.backgroundImage = `url(${URL.createObjectURL(file)})`;
+                    }
+                    card.append(typeNode, nameNode);
+                    attachmentList.appendChild(card);
+                });
+                article.appendChild(attachmentList);
+            }
             const pre = document.createElement('pre');
             pre.textContent = text;
             article.appendChild(pre);
@@ -1295,6 +1328,14 @@
             attachmentPreview.appendChild(notice);
         }
     };
+    const clearComposerAttachments = () => {
+        selectedAttachments = [];
+        attachmentObjectUrls.forEach(url => URL.revokeObjectURL(url));
+        attachmentObjectUrls = [];
+        if (attachmentInput) attachmentInput.value = '';
+        attachmentPreview?.replaceChildren();
+        attachmentPreview?.classList.remove('is-visible');
+    };
     attachmentInput?.addEventListener('change', () => {
         const incomingFiles = Array.from(attachmentInput.files || []);
         const seen = new Set(selectedAttachments.map(file => `${file.name}:${file.size}:${file.lastModified}:${file.type}`));
@@ -1322,7 +1363,11 @@
             root.classList.add('has-chat');
             chatLog.innerHTML = '';
         }
-        addMessage('user', message);
+        // Snapshot the File objects for the request and move their visual cards
+        // out of the composer before waiting for the AI response.
+        const sentAttachments = [...selectedAttachments];
+        clearComposerAttachments();
+        addMessage('user', message, '', sentAttachments);
         input.value = '';
         setBusy(true);
         const loading = addMessage('ai loading', aiText.thinking);
@@ -1335,7 +1380,7 @@
             Object.entries(lastRequest.filters).forEach(([key, value]) => {
                 if (value) requestBody.append(`filters[${key}]`, value);
             });
-            selectedAttachments.forEach(attachment => requestBody.append('attachments[]', attachment));
+            sentAttachments.forEach(attachment => requestBody.append('attachments[]', attachment));
 
             const response = await fetch(root.dataset.aiUrl, {
                 method: 'POST',

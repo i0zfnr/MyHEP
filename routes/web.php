@@ -24,7 +24,6 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NotificationFeedController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\Student\AiHelperController as StudentAiHelperController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\DocumentController as StudentDocumentController;
 use App\Http\Controllers\Student\MovementController as StudentMovementController;
@@ -103,24 +102,6 @@ Route::post('/student/profile', [ProfileController::class, 'update'])
 Route::post('/student/profile/password', [ProfileController::class, 'updatePassword'])
     ->middleware('auth.session:student')
     ->name('student.profile.password.update');
-Route::get('/student/ai-helper', [StudentAiHelperController::class, 'index'])
-    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
-    ->name('student.ai-helper.index');
-Route::get('/student/ai-helper/conversations/{conversation}', [StudentAiHelperController::class, 'conversation'])
-    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
-    ->name('student.ai-helper.conversations.show');
-Route::patch('/student/ai-helper/conversations/{conversation}', [StudentAiHelperController::class, 'renameConversation'])
-    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
-    ->name('student.ai-helper.conversations.rename');
-Route::delete('/student/ai-helper/conversations/{conversation}', [StudentAiHelperController::class, 'deleteConversation'])
-    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
-    ->name('student.ai-helper.conversations.delete');
-Route::delete('/student/ai-helper/conversations', [StudentAiHelperController::class, 'deleteAllConversations'])
-    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
-    ->name('student.ai-helper.conversations.delete-all');
-Route::post('/student/ai-helper', [StudentAiHelperController::class, 'ask'])
-    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper', 'throttle:20,1'])
-    ->name('student.ai-helper.ask');
 Route::get('/student/movements', [StudentMovementController::class, 'index'])
     ->middleware('auth.session:student')
     ->name('student.movements.index');

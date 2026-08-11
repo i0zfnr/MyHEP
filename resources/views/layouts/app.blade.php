@@ -2460,14 +2460,6 @@
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2 7-7 7 7"/></svg>
                         {{ __('Index') }}
                     </a>
-                    @if($studentAiHelperEnabled)
-                    <a href="{{ route('student.ai-helper.index') }}" class="nav-link {{ request()->routeIs('student.ai-helper.*') ? 'active' : '' }}">
-                        @include('partials.ai_helper_icon', ['class' => 'nav-icon'])
-                        {{ __('AI Helper') }}
-                    </a>
-                    @else
-                    <span class="nav-link" style="opacity:.55;cursor:not-allowed" aria-disabled="true">{{ __('AI Helper') }} · {{ __('Unavailable') }}</span>
-                    @endif
                 </nav>
 
                 @if($studentOnScholarship)

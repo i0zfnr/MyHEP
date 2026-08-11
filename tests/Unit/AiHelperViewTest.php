@@ -65,6 +65,12 @@ class AiHelperViewTest extends TestCase
         $this->assertStringContainsString('border-radius:999px !important', $view);
         $this->assertStringContainsString('aspect-ratio:1/1', $view);
         $this->assertStringContainsString("requestBody.append('attachments[]', attachment)", $view);
+        $this->assertStringContainsString("addMessage('user', message, '', sentAttachments)", $view);
+        $this->assertStringContainsString("article.classList.add('has-attachments')", $view);
+        $this->assertStringContainsString('className = \'ai-sent-attachment\'', $view);
+        $this->assertStringContainsString('const clearComposerAttachments = () => {', $view);
+        $this->assertStringContainsString("attachmentPreview?.classList.remove('is-visible')", $view);
+        $this->assertStringContainsString("const sentAttachments = [...selectedAttachments];\n        clearComposerAttachments();\n        addMessage('user'", $view);
         $this->assertStringContainsString('.ai-admin--lecturer .ai-compose-row', $view);
     }
 

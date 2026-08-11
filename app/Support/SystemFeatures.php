@@ -12,10 +12,6 @@ class SystemFeatures
             'label' => 'Document Centre',
             'description' => 'Student document archive and private document downloads.',
         ],
-        'student_ai_helper' => [
-            'label' => 'AI Helper for Students',
-            'description' => 'Allow students to use AI guidance based only on their own records.',
-        ],
         'lecturer_ai_helper' => [
             'label' => 'AI Helper for Lecturers',
             'description' => 'Allow lecturers to use AI guidance with lecturer-appropriate context and attach PDF or image report sources.',

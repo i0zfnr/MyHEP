@@ -96,16 +96,10 @@ class AiHelperFeatureControlTest extends TestCase
         $this->actingAsRegularAdmin()->get('/admin/ai-helper')->assertStatus(503);
     }
 
-    public function test_student_ai_helper_has_an_independent_control(): void
+    public function test_student_ai_helper_is_not_available(): void
     {
-        $this->actingAsSystemAdmin()
-            ->patch('/admin/features/student_ai_helper', ['enabled' => 0])
-            ->assertRedirect('/admin/features');
-
-        $this->assertDatabaseHas('system_features', [
-            'feature_key' => 'student_ai_helper',
-            'enabled' => false,
-        ]);
+        $this->actingAsStudent()->get('/student/ai-helper')->assertNotFound();
+        $this->actingAsStudent()->postJson('/student/ai-helper', ['message' => 'Help me'])->assertNotFound();
     }
 
     public function test_lecturer_ai_helper_has_an_independent_system_admin_control(): void
@@ -145,7 +139,7 @@ class AiHelperFeatureControlTest extends TestCase
         $this->actingAsRegularAdmin()->getJson("/lecturer/ai-helper/conversations/{$conversationId}")->assertForbidden();
         Http::assertSent(fn ($request): bool => str_contains(
             (string) data_get($request->data(), 'contents.0.parts.0.text'),
-            'Attached report sources: source-1.pdf'
+            'Attached research sources: source-1.pdf'
         ));
 
         $tooMany = collect(range(1, 11))->map(fn (int $number) =>
@@ -155,82 +149,6 @@ class AiHelperFeatureControlTest extends TestCase
             'message' => 'Review these files',
             'attachments' => $tooMany,
         ], ['Accept' => 'application/json'])->assertStatus(422)->assertJsonValidationErrors('attachments');
-    }
-
-    public function test_student_ai_helper_uses_admin_workspace_without_upload_controls(): void
-    {
-        $this->actingAsStudent()->get('/student/ai-helper')
-            ->assertOk()
-            ->assertSee('What should we focus on?')
-            ->assertSee('My scholarship')
-            ->assertDontSee('id="reportAttachment"', false)
-            ->assertDontSee('Upload PDF or image');
-    }
-
-    public function test_student_ai_helper_rejects_uploads_and_image_generation_requests(): void
-    {
-        Http::fake();
-
-        $this->actingAsStudent()->post('/student/ai-helper', [
-            'message' => 'Please explain this document.',
-            'attachment' => UploadedFile::fake()->create('records.pdf', 20, 'application/pdf'),
-        ], ['Accept' => 'application/json'])
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('attachment');
-
-        $this->actingAsStudent()->post('/student/ai-helper', [
-            'message' => 'Generate an image for my scholarship.',
-        ], ['Accept' => 'application/json'])->assertStatus(422)
-            ->assertJsonPath('message', 'Student AI Helper provides text guidance only. Image generation requests are not supported.');
-
-        Http::assertNothingSent();
-    }
-
-    public function test_student_ai_conversations_are_persisted_and_owner_scoped(): void
-    {
-        config([
-            'services.gemini.key' => 'test-key',
-            'services.gemini.url' => 'https://generativelanguage.googleapis.com/v1beta',
-            'services.gemini.model' => 'gemini-test',
-        ]);
-        Http::fake(['*' => Http::response([
-            'candidates' => [['content' => ['parts' => [['text' => 'Your scholarship is pending.']]]]],
-        ])]);
-
-        $created = $this->actingAsStudent()->post('/student/ai-helper', [
-            'message' => 'What is my scholarship status?',
-        ], ['Accept' => 'application/json'])->assertOk();
-
-        $conversationId = (int) $created->json('conversation.id');
-        $this->assertGreaterThan(0, $conversationId);
-        $this->assertDatabaseHas('student_ai_conversations', ['id' => $conversationId, 'student_id' => 99]);
-        $this->assertDatabaseHas('student_ai_messages', ['conversation_id' => $conversationId, 'role' => 'user']);
-        $this->assertDatabaseHas('student_ai_messages', ['conversation_id' => $conversationId, 'role' => 'assistant']);
-
-        $this->actingAsStudent()->getJson("/student/ai-helper/conversations/{$conversationId}")
-            ->assertOk()->assertJsonCount(2, 'messages');
-
-        $this->withSession(['auth_user' => ['id' => 100, 'role' => 'student', 'name' => 'Other Student']])
-            ->getJson("/student/ai-helper/conversations/{$conversationId}")->assertNotFound();
-    }
-
-    public function test_student_can_rename_and_delete_only_their_ai_conversation(): void
-    {
-        $conversationId = DB::table('student_ai_conversations')->insertGetId([
-            'student_id' => 99,
-            'title' => 'Old title',
-            'last_message_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $this->actingAsStudent()->patchJson("/student/ai-helper/conversations/{$conversationId}", [
-            'title' => 'Scholarship question',
-        ])->assertOk()->assertJsonPath('conversation.title', 'Scholarship question');
-
-        $this->actingAsStudent()->deleteJson("/student/ai-helper/conversations/{$conversationId}")
-            ->assertOk()->assertJsonPath('deleted', true);
-        $this->assertDatabaseMissing('student_ai_conversations', ['id' => $conversationId]);
     }
 
     public function test_admin_can_attach_an_image_for_gemini_report_generation(): void
@@ -266,7 +184,9 @@ class AiHelperFeatureControlTest extends TestCase
 
             return $hasImage
                 && str_contains($prompt, 'Return a formal report with title')
-                && str_contains($prompt, 'inspect an attached image strictly as evidence');
+                && str_contains($prompt, 'ATTACHMENT-ONLY MODE')
+                && str_contains($prompt, 'system context: intentionally omitted')
+                && ! str_contains($prompt, '"students":');
         });
     }
 
