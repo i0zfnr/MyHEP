@@ -1514,6 +1514,38 @@ const registerDocumentSmoothScroll = () => {
     sync();
 };
 
+const registerBackToTop = () => {
+    const button = document.getElementById('seBackToTop');
+    const viewport = document.querySelector('[data-lenis-main]');
+
+    if (!(button instanceof HTMLButtonElement) || !(viewport instanceof HTMLElement)) {
+        return;
+    }
+
+    let frame = 0;
+    const sync = () => {
+        frame = 0;
+        const threshold = Math.max(360, viewport.clientHeight * .55);
+        const visible = viewport.scrollTop > threshold;
+        button.classList.toggle('is-visible', visible);
+        button.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        button.tabIndex = visible ? 0 : -1;
+    };
+
+    viewport.addEventListener('scroll', () => {
+        if (!frame) frame = window.requestAnimationFrame(sync);
+    }, { passive: true });
+
+    button.addEventListener('click', () => {
+        viewport.scrollTo({
+            top: 0,
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        });
+    });
+
+    sync();
+};
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
@@ -1543,6 +1575,7 @@ window.addEventListener('DOMContentLoaded', () => {
     registerProfilePhotoCropper();
     registerMainSmoothScroll();
     registerDocumentSmoothScroll();
+    registerBackToTop();
     registerPwaPromptUi();
     registerPushPromptUi();
     registerLogoutPushCleanup();

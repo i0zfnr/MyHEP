@@ -106,6 +106,18 @@ Route::post('/student/profile/password', [ProfileController::class, 'updatePassw
 Route::get('/student/ai-helper', [StudentAiHelperController::class, 'index'])
     ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
     ->name('student.ai-helper.index');
+Route::get('/student/ai-helper/conversations/{conversation}', [StudentAiHelperController::class, 'conversation'])
+    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
+    ->name('student.ai-helper.conversations.show');
+Route::patch('/student/ai-helper/conversations/{conversation}', [StudentAiHelperController::class, 'renameConversation'])
+    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
+    ->name('student.ai-helper.conversations.rename');
+Route::delete('/student/ai-helper/conversations/{conversation}', [StudentAiHelperController::class, 'deleteConversation'])
+    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
+    ->name('student.ai-helper.conversations.delete');
+Route::delete('/student/ai-helper/conversations', [StudentAiHelperController::class, 'deleteAllConversations'])
+    ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper'])
+    ->name('student.ai-helper.conversations.delete-all');
 Route::post('/student/ai-helper', [StudentAiHelperController::class, 'ask'])
     ->middleware(['auth.session:student', 'feature.enabled:student_ai_helper', 'throttle:20,1'])
     ->name('student.ai-helper.ask');
@@ -184,9 +196,29 @@ Route::get('/admin/student-scholarship-status/documents/{id}/download', [Student
 Route::get('/admin/ai-helper', [AdminAiHelperController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
     ->name('admin.ai-helper.index');
+Route::get('/admin/ai-helper/conversations/{conversation}', [AdminAiHelperController::class, 'conversation'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.conversations.show');
+Route::patch('/admin/ai-helper/conversations/{conversation}', [AdminAiHelperController::class, 'renameConversation'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.conversations.rename');
+Route::delete('/admin/ai-helper/conversations/{conversation}', [AdminAiHelperController::class, 'deleteConversation'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.conversations.delete');
+Route::delete('/admin/ai-helper/conversations', [AdminAiHelperController::class, 'deleteAllConversations'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.conversations.delete-all');
 Route::post('/admin/ai-helper', [AdminAiHelperController::class, 'ask'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
     ->name('admin.ai-helper.ask');
+Route::prefix('/lecturer/ai-helper')->middleware(['auth.session:admin', 'admin.scope:reports', 'feature.enabled:lecturer_ai_helper'])->name('lecturer.ai-helper.')->group(function (): void {
+    Route::get('/', [AdminAiHelperController::class, 'index'])->name('index');
+    Route::get('/conversations/{conversation}', [AdminAiHelperController::class, 'conversation'])->name('conversations.show');
+    Route::patch('/conversations/{conversation}', [AdminAiHelperController::class, 'renameConversation'])->name('conversations.rename');
+    Route::delete('/conversations/{conversation}', [AdminAiHelperController::class, 'deleteConversation'])->name('conversations.delete');
+    Route::delete('/conversations', [AdminAiHelperController::class, 'deleteAllConversations'])->name('conversations.delete-all');
+    Route::post('/', [AdminAiHelperController::class, 'ask'])->middleware('throttle:20,1')->name('ask');
+});
 Route::get('/admin/movements', [AdminMovementController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:movement'])
     ->name('admin.movements.index');
@@ -492,7 +524,7 @@ Route::post('/admin/scholarship-announcements', function (Request $request) {
     ]);
 
     return redirect()->route('admin.scholarship-announcements.index')
-        ->with('success', __('Pengumuman scholarship berjaya ditambah.'));
+        ->with('success', __('messages.scholarship_announcement_added'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarship-announcements.store');
 
 Route::get('/admin/scholarship-announcements/{id}/edit', function (int $id) {
@@ -532,7 +564,7 @@ Route::put('/admin/scholarship-announcements/{id}', function (Request $request, 
         ]);
 
     return redirect()->route('admin.scholarship-announcements.index')
-        ->with('success', __('Pengumuman scholarship berjaya dikemaskini.'));
+        ->with('success', __('messages.scholarship_announcement_updated'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarship-announcements.update');
 
 Route::delete('/admin/scholarship-announcements/{id}', function (int $id) {
@@ -544,7 +576,7 @@ Route::delete('/admin/scholarship-announcements/{id}', function (int $id) {
     auditLog('scholarship_announcements.delete', 'scholarship_announcements', $id, 'Padam pengumuman scholarship');
 
     return redirect()->route('admin.scholarship-announcements.index')
-        ->with('success', __('Pengumuman scholarship berjaya dipadam.'));
+        ->with('success', __('messages.scholarship_announcement_deleted'));
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarship-announcements.destroy');
 
 Route::get('/admin/discipline-announcements', function (Request $request) {
@@ -646,7 +678,7 @@ Route::post('/admin/discipline-announcements', function (Request $request) {
     ]);
 
     return redirect()->route('admin.discipline-announcements.index')
-        ->with('success', __('Pengumuman disiplin berjaya ditambah.'));
+        ->with('success', __('messages.discipline_announcement_added'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.discipline-announcements.store');
 
 Route::get('/admin/discipline-announcements/{id}/edit', function (int $id) {
@@ -680,7 +712,7 @@ Route::put('/admin/discipline-announcements/{id}', function (Request $request, i
         ]);
 
     return redirect()->route('admin.discipline-announcements.index')
-        ->with('success', __('Pengumuman disiplin berjaya dikemaskini.'));
+        ->with('success', __('messages.discipline_announcement_updated'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.discipline-announcements.update');
 
 Route::delete('/admin/discipline-announcements/{id}', function (int $id) {
@@ -692,7 +724,7 @@ Route::delete('/admin/discipline-announcements/{id}', function (int $id) {
     auditLog('discipline_announcements.delete', 'discipline_announcements', $id, 'Padam pengumuman disiplin');
 
     return redirect()->route('admin.discipline-announcements.index')
-        ->with('success', __('Pengumuman disiplin berjaya dipadam.'));
+        ->with('success', __('messages.discipline_announcement_deleted'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.discipline-announcements.destroy');
 
 Route::get('/admin/rules', function (Request $request) {
@@ -818,7 +850,7 @@ Route::post('/admin/rules', function (Request $request) {
     ]);
 
     return redirect()->route('admin.rules.index')
-        ->with('success', __('Peraturan berjaya ditambah.'));
+        ->with('success', __('messages.rule_added'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.rules.store');
 
 Route::get('/admin/rules/{id}/edit', function (int $id) {
@@ -861,7 +893,7 @@ Route::put('/admin/rules/{id}', function (Request $request, int $id) {
         ]);
 
     return redirect()->route('admin.rules.index')
-        ->with('success', __('Peraturan berjaya dikemaskini.'));
+        ->with('success', __('messages.rule_updated'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.rules.update');
 
 Route::delete('/admin/rules/{id}', function (int $id) {
@@ -872,7 +904,7 @@ Route::delete('/admin/rules/{id}', function (int $id) {
     }
 
     return redirect()->route('admin.rules.index')
-        ->with('success', __('Peraturan berjaya dipadam.'));
+        ->with('success', __('messages.rule_deleted'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.rules.destroy');
 
 Route::get('/admin/offenses', function (Request $request) {
@@ -1039,7 +1071,7 @@ Route::get('/admin/offenses/{id}/print', function (int $id) {
 
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+            ->withErrors(['offense' => __('messages.offense_not_found')]);
     }
 
     myhepAttachOffenseEvidence([$offense]);
@@ -1085,7 +1117,7 @@ Route::get('/admin/offenses/{id}/pdf', function (int $id) {
 
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+            ->withErrors(['offense' => __('messages.offense_not_found')]);
     }
 
     myhepAttachOffenseEvidence([$offense]);
@@ -1224,20 +1256,20 @@ Route::post('/admin/offenses', function (Request $request) {
     if ($request->expectsJson()) {
         return response()->json([
             'ok' => true,
-            'message' => __('Rekod kesalahan berjaya disimpan.'),
+            'message' => __('messages.offense_saved'),
             'redirect' => $redirect,
         ]);
     }
 
     return redirect($redirect)
-        ->with('success', __('Rekod kesalahan berjaya disimpan.'));
+        ->with('success', __('messages.offense_saved'));
 })->middleware(['auth.session:admin', 'admin.scope:offense.register', 'lecturer.page:offense_register'])->name('admin.offenses.store');
 
 Route::get('/admin/offenses/{id}/edit', function (int $id) {
     $offense = DB::table('offenses')->where('id', $id)->first();
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+            ->withErrors(['offense' => __('messages.offense_not_found')]);
     }
 
     $students = DB::table('students')
@@ -1276,7 +1308,7 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
     $offense = DB::table('offenses')->where('id', $id)->first();
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+            ->withErrors(['offense' => __('messages.offense_not_found')]);
     }
 
     $validated = $request->validate([
@@ -1332,7 +1364,7 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
         }
 
         throw \Illuminate\Validation\ValidationException::withMessages([
-            'evidence_photos' => __('You can upload up to 3 evidence images only.'),
+            'evidence_photos' => __('messages.evidence_image_limit'),
         ]);
     }
 
@@ -1405,13 +1437,13 @@ Route::put('/admin/offenses/{id}', function (Request $request, int $id) {
     if ($request->expectsJson()) {
         return response()->json([
             'ok' => true,
-            'message' => __('Rekod kesalahan berjaya dikemaskini.'),
+            'message' => __('messages.offense_updated'),
             'redirect' => route('admin.offenses.index'),
         ]);
     }
 
     return redirect()->route('admin.offenses.index')
-        ->with('success', __('Rekod kesalahan berjaya dikemaskini.'));
+        ->with('success', __('messages.offense_updated'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.update');
 
 Route::post('/admin/offenses/{id}/mark-paid', function (int $id) {
@@ -1422,7 +1454,7 @@ Route::post('/admin/offenses/{id}/mark-paid', function (int $id) {
 
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+            ->withErrors(['offense' => __('messages.offense_not_found')]);
     }
 
     $updated = DB::table('offenses')
@@ -1446,7 +1478,7 @@ Route::post('/admin/offenses/{id}/mark-paid', function (int $id) {
     ]);
 
     return redirect()->route('admin.offenses.index')
-        ->with('success', __('Status kesalahan telah ditetapkan kepada paid.'));
+        ->with('success', __('messages.offense_marked_paid'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.mark-paid');
 
 Route::delete('/admin/offenses/{id}', function (int $id) {
@@ -1457,7 +1489,7 @@ Route::delete('/admin/offenses/{id}', function (int $id) {
 
     if (!$offense) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+            ->withErrors(['offense' => __('messages.offense_not_found')]);
     }
 
     $extraPaths = Schema::hasTable('offense_evidence_photos')
@@ -1467,7 +1499,7 @@ Route::delete('/admin/offenses/{id}', function (int $id) {
     $deleted = DB::table('offenses')->where('id', $id)->delete();
     if (!$deleted) {
         return redirect()->route('admin.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+            ->withErrors(['offense' => __('messages.offense_not_found')]);
     }
 
     $pathsToDelete = array_values(array_filter(array_merge(
@@ -1480,7 +1512,7 @@ Route::delete('/admin/offenses/{id}', function (int $id) {
     auditLog('offenses.delete', 'offenses', $id, 'Padam rekod kesalahan');
 
     return redirect()->route('admin.offenses.index')
-        ->with('success', __('Rekod kesalahan berjaya dipadam.'));
+        ->with('success', __('messages.offense_deleted'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.offenses.destroy');
 
 Route::get('/student/offenses', function () {
@@ -1553,7 +1585,7 @@ Route::get('/student/offenses/{id}/print', function (int $id) {
 
     if (!$offense) {
         return redirect()->route('student.offenses.index')
-            ->withErrors(['offense' => __('Rekod kesalahan tidak dijumpai.')]);
+            ->withErrors(['offense' => __('messages.offense_not_found')]);
     }
 
     myhepAttachOffenseEvidence([$offense]);
@@ -1767,7 +1799,7 @@ Route::post('/student/vehicle-stickers', function (Request $request) {
     ]);
 
     return redirect()->route('student.vehicle-stickers.index')
-        ->with('success', __('Permohonan sticker kenderaan berjaya dihantar.'));
+        ->with('success', __('messages.vehicle_sticker_submitted'));
 })->middleware('auth.session:student')->name('student.vehicle-stickers.store');
 
 Route::post('/student/fine-applications', function (Request $request) {
@@ -1837,7 +1869,7 @@ Route::post('/student/fine-applications', function (Request $request) {
     ]);
 
     return redirect()->route('student.offenses.index')
-        ->with('success', __('Permohonan pembayaran berjaya dihantar.'));
+        ->with('success', __('messages.payment_application_submitted'));
 })->middleware('auth.session:student')->name('student.fine-applications.store');
 
 Route::get('/admin/fine-applications', function (Request $request) {
@@ -1997,7 +2029,7 @@ Route::post('/admin/vehicle-stickers/{id}/decision', function (Request $request,
     ]);
 
     return redirect()->route('admin.vehicle-stickers.index')
-        ->with('success', __('Status permohonan sticker berjaya dikemaskini.'));
+        ->with('success', __('messages.sticker_application_updated'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.vehicle-stickers.decision');
 
 Route::delete('/admin/vehicle-stickers/{id}', function (int $id) {
@@ -2025,7 +2057,7 @@ Route::delete('/admin/vehicle-stickers/{id}', function (int $id) {
     auditLog('vehicle_stickers.delete', 'vehicle_sticker_applications', $id, 'Deleted vehicle sticker application');
 
     return redirect()->route('admin.vehicle-stickers.index')
-        ->with('success', __('Permohonan sticker berjaya dipadam.'));
+        ->with('success', __('messages.sticker_application_deleted'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.vehicle-stickers.destroy');
 
 Route::post('/admin/fine-applications/{id}/decision', function (Request $request, int $id) {
@@ -2070,6 +2102,6 @@ Route::post('/admin/fine-applications/{id}/decision', function (Request $request
     ]);
 
     return redirect()->route('admin.offenses.index', ['status' => 'applied'])
-        ->with('success', __('Status permohonan berjaya dikemaskini.'));
+        ->with('success', __('messages.application_status_updated'));
 })->middleware(['auth.session:admin', 'admin.scope:discipline'])->name('admin.fine-applications.decision');
  

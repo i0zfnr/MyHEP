@@ -1,9 +1,13 @@
 @php
     $studentAiMode = $studentAiMode ?? false;
+    $lecturerAiMode = $lecturerAiMode ?? false;
+    $textOnlyAiMode = $studentAiMode || $lecturerAiMode;
+    $canUploadAiFiles = ! $studentAiMode;
+    $aiPageTitle = $studentAiMode ? __('AI Helper (Student)') : ($lecturerAiMode ? __('AI Helper (Lecturer)') : __('AI Helper (Admin)'));
 @endphp
 @extends('layouts.app')
 
-@section('title', $studentAiMode ? __('AI Helper (Student)') : __('AI Helper (Admin)'))
+@section('title', $aiPageTitle)
 
 @push('styles')
 <style>
@@ -446,6 +450,7 @@
     .ai-chat-log { min-height:430px; padding:2rem max(1rem,8%); background:radial-gradient(ellipse 52% 45% at 50% 52%,color-mix(in srgb,var(--se-primary) 18%,transparent),transparent 72%); border-radius:28px; align-content:start; }
     .ai-empty-state { min-height:390px; display:grid; place-content:center; justify-items:center; text-align:center; gap:.7rem; color:var(--text); }
     .ai-empty-orb { width:52px; height:52px; display:grid; place-items:center; border-radius:18px; color:var(--se-primary-button-text); background:linear-gradient(145deg,var(--se-primary-button-start),var(--se-primary-button-end)); box-shadow:0 18px 45px color-mix(in srgb,var(--se-primary) 28%,transparent); font-size:1.45rem; }
+    .ai-empty-orb svg { width:27px; height:27px; }
     .ai-empty-state h3 { margin:.45rem 0 0; font-size:clamp(1.65rem,3vw,2.3rem); font-weight:550; letter-spacing:-.035em; }
     .ai-empty-state p { max-width:520px; margin:0; color:var(--text-muted); line-height:1.6; }
     .ai-empty-chips { display:flex; flex-wrap:wrap; justify-content:center; gap:.5rem; margin-top:.55rem; }
@@ -462,11 +467,12 @@
     .ai-format-pill:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
     .ai-send { width:42px; height:42px; padding:0; border-radius:50%; font-size:1.05rem; }
     .ai-hint { text-align:center; margin:.48rem 0 0; }
-    .ai-add-menu { position:absolute; left:0; bottom:58px; width:245px; padding:.55rem; display:none; gap:.25rem; border:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); border-radius:17px; background:color-mix(in srgb,var(--surface) 96%,transparent); box-shadow:0 20px 50px rgba(0,0,0,.24); backdrop-filter:blur(20px); }
+    .ai-add-menu { position:absolute; z-index:24; left:10px; bottom:calc(100% + 8px); width:236px; padding:.55rem; display:none; gap:.15rem; border:1px solid color-mix(in srgb,var(--se-primary) 18%,var(--border)); border-radius:18px; background:color-mix(in srgb,var(--surface) 96%,#202124); box-shadow:0 22px 55px rgba(0,0,0,.32); backdrop-filter:blur(22px); }
     .ai-add-menu.is-open { display:grid; }
-    .ai-add-action { display:flex; align-items:center; gap:.65rem; width:100%; padding:.68rem .7rem; border:0; border-radius:11px; background:transparent; color:var(--text); font:inherit; font-size:.78rem; font-weight:750; text-align:left; cursor:pointer; }
+    .ai-add-action { display:flex; align-items:center; gap:.7rem; width:100%; min-height:42px; padding:.58rem .65rem; border:0; border-radius:10px; background:transparent; color:var(--text); font:inherit; font-size:.77rem; font-weight:700; text-align:left; cursor:pointer; }
     .ai-add-action:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
-    .ai-add-action span { width:28px; height:28px; display:grid; place-items:center; border-radius:9px; background:color-mix(in srgb,var(--se-primary-soft) 80%,var(--surface)); }
+    .ai-add-action span { width:22px; height:22px; flex:0 0 22px; display:grid; place-items:center; border-radius:0; background:transparent; color:var(--text-muted); font-size:.9rem; }
+    .ai-add-action + .ai-add-action { border-top:1px solid color-mix(in srgb,var(--se-primary) 10%,var(--border)); }
     .ai-tools-backdrop { position:fixed; inset:0; z-index:1070; border:0; background:rgba(0,0,0,.3); opacity:0; visibility:hidden; transition:.2s ease; }
     .ai-tools-backdrop.is-open { opacity:1; visibility:visible; }
     .ai-admin > aside.ai-panel { position:fixed; z-index:1071; top:18px; right:18px; bottom:18px; width:min(390px,calc(100vw - 28px)); max-height:none; overflow:auto; transform:translateX(calc(100% + 36px)); transition:transform .24s ease; border-radius:22px; }
@@ -506,12 +512,25 @@
 
     .msg.ai { max-width:min(92%,760px); }
     .msg.user { max-width:min(78%,620px); }
-    .msg-rich { white-space:normal; }
-    .msg-rich h4 { margin:.1rem 0 .65rem; font-size:1rem; line-height:1.35; color:inherit; }
-    .msg-rich p { margin:.35rem 0; }
-    .msg-rich ul { margin:.35rem 0 .7rem; padding-left:1.25rem; }
-    .msg-rich li { margin:.22rem 0; }
-    .msg-rich strong { font-weight:850; }
+    .msg-rich { white-space:normal; overflow-wrap:anywhere; }
+    .msg-rich h3 { margin:0 0 .85rem; padding-bottom:.65rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); font-size:1.05rem; line-height:1.35; letter-spacing:.015em; color:var(--text); }
+    .msg-rich h4 { margin:1rem 0 .45rem; font-size:.94rem; line-height:1.4; color:var(--se-primary-muted); }
+    .msg-rich h4:first-child { margin-top:0; }
+    .msg-rich p { margin:.42rem 0; line-height:1.7; }
+    .msg-rich hr { height:1px; margin:.85rem 0; border:0; background:color-mix(in srgb,var(--se-primary) 25%,var(--border)); }
+    .msg-rich ul,.msg-rich ol { margin:.4rem 0 .75rem; padding-left:1.35rem; }
+    .msg-rich li { margin:.28rem 0; padding-left:.15rem; }
+    .msg-rich strong { font-weight:850; color:var(--text); }
+    .msg-rich code { padding:.1rem .32rem; border-radius:5px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.86em; }
+    .msg-rich .report-meta { display:grid; grid-template-columns:minmax(105px,auto) 1fr; gap:.3rem .7rem; margin:.25rem 0; padding:.58rem .7rem; border:1px solid color-mix(in srgb,var(--se-primary) 22%,var(--border)); border-radius:10px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); }
+    .msg-rich .report-meta-label { color:var(--text-muted); font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.035em; }
+    .msg-rich .report-meta-value { color:var(--text); font-weight:700; }
+    .msg-rich .report-table-wrap { max-width:100%; margin:.7rem 0; overflow-x:auto; border:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); border-radius:10px; }
+    .msg-rich table { width:100%; border-collapse:collapse; background:transparent !important; font-size:.78rem; }
+    .msg-rich th,.msg-rich td { padding:.55rem .65rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 18%,var(--border)); text-align:left; vertical-align:top; }
+    .msg-rich th { background:var(--se-primary-soft) !important; color:var(--se-primary-strong); font-weight:850; }
+    .msg-rich tr:last-child td { border-bottom:0; }
+    @media(max-width:640px){ .msg-rich .report-meta { grid-template-columns:1fr; gap:.08rem; } }
     .ai-input:focus,.ops-field input:focus,.ops-field select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent); }
 
     /* Final layout safeguards against global admin form and panel rules. */
@@ -527,43 +546,239 @@
     .ai-compose-row .ai-send:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 14px 30px color-mix(in srgb,var(--se-primary) 38%,transparent) !important; }
     .ai-admin--student .ai-compose-row { grid-template-columns:minmax(0,1fr) 46px !important; gap:.45rem; padding-left:18px; }
     .ai-admin--student .ai-input { min-width:0 !important; padding-left:14px !important; padding-right:10px !important; }
+    .ai-admin.ai-admin--student .ai-compose-row textarea.ai-input,
+    .ai-admin.ai-admin--student .ai-compose-row textarea.ai-input:hover,
+    .ai-admin.ai-admin--student .ai-compose-row textarea.ai-input:focus,
+    .ai-admin.ai-admin--student .ai-compose-row textarea.ai-input:focus-visible { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; appearance:none; -webkit-appearance:none; }
+    .ai-admin--student .ai-compose-row { background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
+    body[data-theme="dark"] .ai-admin--student .ai-compose-row { background:#1f1f1f !important; }
+    .ai-admin.ai-admin--admin .ai-compose-row textarea.ai-input,
+    .ai-admin.ai-admin--admin .ai-compose-row textarea.ai-input:hover,
+    .ai-admin.ai-admin--admin .ai-compose-row textarea.ai-input:focus,
+    .ai-admin.ai-admin--admin .ai-compose-row textarea.ai-input:focus-visible { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; appearance:none; -webkit-appearance:none; }
+    .ai-admin--admin .ai-compose-row { background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
+    body[data-theme="dark"] .ai-admin--admin .ai-compose-row { background:#1f1f1f !important; }
     .ai-admin--student .ai-send { justify-self:end; }
+    .ai-admin--lecturer .ai-compose-row { grid-template-columns:46px minmax(0,1fr) 46px !important; gap:.35rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
+    .ai-admin.ai-admin--lecturer .ai-compose-row textarea.ai-input { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; }
+    body[data-theme="dark"] .ai-admin--lecturer .ai-compose-row { background:#1f1f1f !important; }
+    .ai-compose-frame { overflow:visible; padding:.52rem; border:1px solid color-mix(in srgb,var(--se-primary) 22%,var(--border)); border-radius:28px; background:color-mix(in srgb,var(--surface) 94%,#202124); box-shadow:0 14px 34px color-mix(in srgb,var(--se-primary) 10%,transparent); }
+    body[data-theme="dark"] .ai-compose-frame { background:#202124; }
+    .ai-compose-frame .ai-compose-row { background:transparent !important; border:0 !important; box-shadow:none !important; }
+    .ai-compose-attachments { display:none; flex-wrap:nowrap; gap:.5rem; max-width:100%; margin:0; padding:.05rem .05rem .5rem; overflow-x:auto; overscroll-behavior-inline:contain; }
+    .ai-compose-attachments.is-visible { display:flex; }
+    .ai-compose-attachment { position:relative; flex:0 0 104px; width:104px; height:104px; display:flex; align-items:flex-end; overflow:visible; padding:.62rem; border:0; border-radius:17px; background:color-mix(in srgb,var(--surface) 70%,#5f6368); box-shadow:none; }
+    .ai-compose-attachment-thumb { position:absolute; inset:0; overflow:hidden; padding:.62rem; border-radius:17px; color:color-mix(in srgb,var(--text) 78%,transparent); font-size:.66rem; font-weight:850; background-position:center; background-size:cover; }
+    .ai-compose-attachment.is-image .ai-compose-attachment-thumb::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 42%,rgba(0,0,0,.68)); }
+    .ai-compose-attachment-copy { position:relative; z-index:1; min-width:0; width:100%; display:grid; gap:.1rem; }
+    .ai-compose-attachment-name { display:-webkit-box; overflow:hidden; -webkit-line-clamp:2; -webkit-box-orient:vertical; color:var(--text); font-size:.68rem; line-height:1.25; font-weight:800; overflow-wrap:anywhere; }
+    .ai-compose-attachment.is-image .ai-compose-attachment-name { color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.7); }
+    .ai-compose-attachment-meta { display:none; }
+    .ai-compose-attachment.is-image .ai-compose-attachment-meta { color:rgba(255,255,255,.82); }
+    .ai-compose-attachment-remove { position:absolute !important; z-index:3; top:6px; right:6px; width:25px !important; min-width:25px !important; max-width:25px !important; height:25px !important; min-height:25px !important; max-height:25px !important; aspect-ratio:1/1; display:grid !important; place-items:center; margin:0 !important; padding:0 !important; border:1px solid color-mix(in srgb,var(--text) 28%,transparent) !important; border-radius:999px !important; background:color-mix(in srgb,var(--surface) 88%,#202124) !important; color:var(--text) !important; font:700 15px/1 system-ui !important; cursor:pointer; box-sizing:border-box !important; }
+    .ai-compose-attachment-remove:hover { background:var(--se-primary-soft) !important; color:var(--se-primary-strong) !important; border-color:var(--se-primary) !important; }
+    .ai-compose-attachment-limit { flex:1 0 100%; color:var(--se-danger); font-size:.68rem; font-weight:750; }
     .ai-format-pill { max-width:185px; overflow:hidden; text-overflow:ellipsis; }
+    .ai-format-pill { min-height:40px; display:inline-flex; align-items:center; gap:.42rem; padding:.52rem .72rem; border:1px solid transparent; background:transparent; }
+    .ai-format-pill::before { content:'≡'; width:22px; height:22px; display:grid; place-items:center; border-radius:7px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.75rem; }
+    .ai-format-pill:hover,.ai-format-pill[aria-expanded="true"] { border-color:color-mix(in srgb,var(--se-primary) 28%,var(--border)); background:var(--se-primary-soft); color:var(--se-primary-strong); }
+    .ai-format-menu { position:absolute; right:48px; bottom:62px; width:235px; display:none; gap:.25rem; padding:.55rem; border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:16px; background:color-mix(in srgb,var(--surface) 96%,transparent); box-shadow:0 20px 50px rgba(0,0,0,.28); backdrop-filter:blur(20px); }
+    .ai-format-menu.is-open { display:grid; }
+    .ai-format-option { display:flex; justify-content:space-between; align-items:center; gap:.5rem; width:100%; padding:.65rem .72rem; border:0; border-radius:10px; background:transparent; color:var(--text); font:inherit; font-size:.76rem; font-weight:750; text-align:left; cursor:pointer; }
+    .ai-format-option:hover,.ai-format-option.is-selected { background:var(--se-primary-soft); color:var(--se-primary-strong); }
+    .ai-format-option.is-selected::after { content:'✓'; }
     .ai-hint { margin:.42rem 0 0; opacity:.78; }
     .ai-tools-backdrop { z-index:11990 !important; }
     .ai-admin > aside.ai-panel { z-index:12000 !important; top:88px !important; right:-460px !important; bottom:18px !important; width:min(420px,calc(100vw - 28px)) !important; max-height:none !important; position:fixed !important; visibility:hidden; pointer-events:none; transform:none !important; transition:right .24s ease,visibility .24s ease !important; box-shadow:-24px 0 70px rgba(0,0,0,.3); }
+    .ai-admin > aside.ai-panel { scrollbar-width:none; -ms-overflow-style:none; }
+    .ai-admin > aside.ai-panel::-webkit-scrollbar { display:none; width:0; }
     .ai-admin > aside.ai-panel.is-open { right:18px !important; visibility:visible; pointer-events:auto; }
     .ai-admin > aside.ai-panel .ai-head { padding:.9rem 1rem; background:color-mix(in srgb,var(--surface) 92%,var(--se-primary-soft)); }
     .ai-admin > aside.ai-panel .ai-sub { display:block; }
+
+    /* Keep the admin tools drawer visually tied to the System Admin accent. */
+    .ai-admin--admin > aside.ai-panel {
+        border-color:color-mix(in srgb,var(--se-primary) 48%,var(--border)) !important;
+        background:
+            radial-gradient(420px circle at 100% 0%,color-mix(in srgb,var(--se-primary) 24%,transparent),transparent 68%),
+            linear-gradient(165deg,color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)),var(--surface)) !important;
+        box-shadow:-24px 0 70px rgba(0,0,0,.3),0 0 0 1px color-mix(in srgb,var(--se-primary) 12%,transparent) !important;
+    }
+    .ai-admin--admin > aside.ai-panel .ai-head {
+        border-color:color-mix(in srgb,var(--se-primary) 32%,var(--border)) !important;
+        background:linear-gradient(145deg,color-mix(in srgb,var(--surface) 74%,var(--se-primary-soft)),color-mix(in srgb,var(--surface) 94%,var(--se-primary))) !important;
+    }
+    .ai-admin--admin #aiToolsClose {
+        border-color:color-mix(in srgb,var(--se-primary) 62%,var(--border));
+        background:var(--se-primary-soft);
+        color:var(--se-primary-strong);
+    }
+    .ai-admin--admin #aiToolsClose:hover {
+        background:linear-gradient(135deg,var(--se-primary-button-start),var(--se-primary-button-end));
+        color:var(--se-primary-button-text);
+        box-shadow:0 10px 24px color-mix(in srgb,var(--se-primary) 28%,transparent);
+    }
+    .ai-admin--admin .ops-card {
+        border-color:color-mix(in srgb,var(--se-primary) 34%,var(--border)) !important;
+        background:linear-gradient(145deg,color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft)),color-mix(in srgb,var(--surface) 96%,var(--se-primary))) !important;
+        box-shadow:inset 3px 0 0 color-mix(in srgb,var(--se-primary) 78%,transparent),0 12px 28px color-mix(in srgb,var(--se-primary) 10%,transparent) !important;
+    }
+    .ai-admin--admin .ops-title { color:var(--se-primary-muted) !important; }
+    .ai-admin--admin .task-btn {
+        border-color:color-mix(in srgb,var(--se-primary) 36%,var(--border)) !important;
+        background:color-mix(in srgb,var(--surface) 78%,var(--se-primary-soft)) !important;
+    }
+    .ai-admin--admin .task-btn:hover,
+    .ai-admin--admin .task-btn:focus-visible {
+        border-color:var(--se-primary) !important;
+        background:var(--se-primary-soft) !important;
+        color:var(--se-primary-strong) !important;
+        box-shadow:0 10px 22px color-mix(in srgb,var(--se-primary) 20%,transparent) !important;
+        outline:none;
+    }
+    .ai-admin--admin .ops-field input,
+    .ai-admin--admin .ops-field select {
+        border-color:color-mix(in srgb,var(--se-primary) 30%,var(--border)) !important;
+        background:color-mix(in srgb,var(--surface) 92%,var(--se-primary-soft)) !important;
+    }
+    .ai-admin--admin .ops-field input:focus,
+    .ai-admin--admin .ops-field select:focus {
+        border-color:var(--se-primary) !important;
+        box-shadow:0 0 0 3px color-mix(in srgb,var(--se-primary) 20%,transparent) !important;
+    }
+    .ai-admin--admin .ai-upload-drop {
+        border-color:color-mix(in srgb,var(--se-primary) 62%,var(--border)) !important;
+        background:linear-gradient(145deg,var(--se-primary-soft),color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft))) !important;
+    }
+    .ai-admin--admin .ai-upload-drop:hover {
+        box-shadow:0 12px 26px color-mix(in srgb,var(--se-primary) 18%,transparent);
+    }
+    .ai-admin .msg.user {
+        background:linear-gradient(135deg,var(--se-primary-button-start),var(--se-primary-button-end)) !important;
+        border-color:color-mix(in srgb,var(--se-primary) 70%,var(--border)) !important;
+        color:var(--se-primary-button-text) !important;
+        box-shadow:0 12px 28px color-mix(in srgb,var(--se-primary) 22%,transparent) !important;
+    }
+    .ai-admin .msg.ai {
+        background:linear-gradient(145deg,color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft)),var(--surface)) !important;
+        border-color:color-mix(in srgb,var(--se-primary) 34%,var(--border)) !important;
+        color:var(--text) !important;
+        box-shadow:0 12px 28px color-mix(in srgb,var(--se-primary) 10%,transparent) !important;
+    }
+    .ai-admin .msg-meta { color:var(--text-muted) !important; }
+    .ai-admin .ai-toolbar {
+        width:max-content;
+        max-width:100%;
+        margin:.35rem auto .75rem;
+        padding:.3rem !important;
+        gap:.2rem;
+        border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)) !important;
+        border-radius:999px;
+        background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important;
+        box-shadow:0 12px 30px color-mix(in srgb,var(--se-primary) 12%,transparent);
+    }
+    .ai-admin .ai-toolbar .ai-btn {
+        min-height:36px;
+        gap:.4rem;
+        padding:.48rem .68rem;
+        border:0 !important;
+        border-radius:999px;
+        background:transparent !important;
+        color:var(--text-muted) !important;
+        box-shadow:none !important;
+    }
+    .ai-admin .ai-toolbar .ai-btn svg { width:15px; height:15px; flex:0 0 15px; }
+    .ai-admin .ai-toolbar .ai-btn:hover,
+    .ai-admin .ai-toolbar .ai-btn:focus-visible {
+        transform:none;
+        background:var(--se-primary-soft) !important;
+        color:var(--se-primary-strong) !important;
+        outline:none;
+        box-shadow:0 5px 14px color-mix(in srgb,var(--se-primary) 14%,transparent) !important;
+    }
+    .ai-history-trigger { position:absolute; z-index:8; top:12px; left:12px; display:inline-flex; align-items:center; gap:.45rem; min-height:40px; padding:.5rem .72rem; border:1px solid color-mix(in srgb,var(--se-primary) 34%,var(--border)); border-radius:13px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); color:var(--se-primary-strong); font:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
+    .ai-history-trigger svg { width:17px; height:17px; }
+    .ai-history-trigger:hover { background:var(--se-primary-soft); border-color:var(--se-primary); }
+    .ai-history-backdrop { position:fixed; inset:0; z-index:11990; border:0; background:rgba(0,0,0,.34); opacity:0; visibility:hidden; transition:.2s ease; }
+    .ai-history-backdrop.is-open { opacity:1; visibility:visible; }
+    .ai-history-panel { position:fixed; z-index:12000; top:88px; bottom:18px; left:-390px; width:min(360px,calc(100vw - 28px)); display:grid; grid-template-rows:auto minmax(0,1fr) auto; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:22px; overflow:hidden; background:linear-gradient(165deg,color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)),var(--surface)); box-shadow:24px 0 70px rgba(0,0,0,.3); transition:left .24s ease; }
+    .ai-history-panel.is-open { left:18px; }
+    .ai-history-head { display:flex; align-items:center; justify-content:space-between; gap:.65rem; padding:1rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); }
+    .ai-history-head h3 { margin:0; color:var(--text); font-size:1rem; }
+    .ai-history-actions { display:flex; gap:.4rem; }
+    .ai-history-icon-btn { width:36px; height:36px; display:grid; place-items:center; border:1px solid color-mix(in srgb,var(--se-primary) 34%,var(--border)); border-radius:11px; background:var(--se-primary-soft); color:var(--se-primary-strong); cursor:pointer; }
+    .ai-history-list { min-height:0; overflow:auto; display:grid; align-content:start; gap:.45rem; padding:.75rem; }
+    .ai-history-empty { padding:1.5rem .75rem; text-align:center; color:var(--text-muted); font-size:.8rem; line-height:1.5; }
+    .ai-history-item { position:relative; display:grid; gap:.25rem; padding:.72rem 4.8rem .72rem .78rem; border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); border-radius:13px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); color:var(--text); cursor:pointer; }
+    .ai-history-item:hover,.ai-history-item.is-active { border-color:var(--se-primary); background:var(--se-primary-soft); box-shadow:inset 3px 0 0 var(--se-primary); }
+    .ai-history-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.78rem; font-weight:800; }
+    .ai-history-time { color:var(--text-muted); font-size:.67rem; }
+    .ai-history-item-actions { position:absolute; top:50%; right:.45rem; transform:translateY(-50%); display:flex; gap:.2rem; }
+    .ai-history-item-actions button { width:30px; height:30px; border:0; border-radius:9px; background:transparent; color:var(--text-muted); cursor:pointer; }
+    .ai-history-item-actions button:hover { background:color-mix(in srgb,var(--se-primary) 18%,transparent); color:var(--se-primary-strong); }
+    .ai-history-foot { padding:.75rem; border-top:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); }
+    .ai-history-retention { margin:0 0 .6rem; color:var(--text-muted); font-size:.67rem; line-height:1.45; text-align:center; }
+    .ai-history-delete-all { width:100%; padding:.65rem; border:1px solid color-mix(in srgb,#dc2626 45%,var(--border)); border-radius:11px; background:color-mix(in srgb,#dc2626 9%,var(--surface)); color:#ef4444; font:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
+    body.admin-ai-helper-page { overflow:hidden !important; }
+    body.admin-ai-helper-page .main-scroll-viewport { overflow:hidden !important; }
+    body.admin-ai-helper-page .main-scroll-inner { height:100%; min-height:0; overflow:hidden; }
+    body.admin-ai-helper-page .page-header { flex:0 0 auto; }
+    body.admin-ai-helper-page .page-body { flex:1 1 auto; height:auto !important; min-height:0; overflow:hidden !important; padding-bottom:0 !important; box-sizing:border-box; }
+    body.admin-ai-helper-page .app-footer { display:none !important; }
+    body.admin-ai-helper-page .ai-admin,body.admin-ai-helper-page .ai-admin>.ai-panel:first-child { min-height:0 !important; height:100% !important; }
     @media(max-width:640px){
-        .ai-admin > .ai-panel:first-child { min-height:calc(100vh - 132px) !important; grid-template-rows:minmax(350px,1fr) auto auto !important; }
-        .ai-chat-log { min-height:360px !important; }
-        .ai-compose { bottom:78px; padding:0 2px !important; }
-        .ai-compose-row { grid-template-columns:44px minmax(0,1fr) 44px; }
+        body.admin-ai-helper-page .page-body { padding:.45rem .75rem 0 !important; }
+        .ai-admin > .ai-panel:first-child { min-height:0 !important; height:100% !important; grid-template-rows:minmax(0,1fr) auto auto !important; }
+        .ai-chat-log { min-height:0 !important; height:auto !important; overflow-y:auto !important; padding:1rem .25rem .7rem !important; overscroll-behavior:contain; }
+        .ai-empty-state { min-height:100% !important; }
+        .ai-compose { position:relative !important; bottom:auto !important; margin:0 auto .35rem !important; padding:0 !important; }
+        .ai-admin--admin .ai-compose-row { grid-template-columns:42px minmax(0,1fr) 42px !important; }
+        .ai-admin--lecturer .ai-compose-row { grid-template-columns:42px minmax(0,1fr) 42px !important; }
+        .ai-compose-frame { border-radius:24px; }
+        .ai-format-pill { display:none !important; }
         .ai-admin--student .ai-compose-row { grid-template-columns:minmax(0,1fr) 44px !important; padding-left:10px; }
         .ai-admin--student .ai-input { padding-left:12px !important; }
+        .ai-hint { margin:.35rem .5rem 0 !important; font-size:.61rem !important; line-height:1.35; }
+        .ai-admin .ai-toolbar { margin:.25rem auto .45rem; }
+        .ai-admin .ai-toolbar .ai-btn { width:38px; height:38px; min-height:38px; padding:0; justify-content:center; }
+        .ai-admin .ai-toolbar .ai-btn span { display:none; }
+        .msg.ai,.msg.user { max-width:92% !important; }
+        .ai-history-trigger { top:8px; left:8px; width:40px; padding:0; justify-content:center; }
+        .ai-history-trigger span { display:none; }
+        .ai-history-panel { top:72px; bottom:8px; left:-105vw; width:calc(100vw - 16px); }
+        .ai-history-panel.is-open { left:8px; }
         .ai-admin > aside.ai-panel { top:72px !important; right:-105vw !important; bottom:8px !important; width:calc(100vw - 16px) !important; }
         .ai-admin > aside.ai-panel.is-open { right:8px !important; }
+    }
+    @media (max-width:767px) and (display-mode:standalone),
+           (max-width:767px) and (display-mode:fullscreen),
+           (max-width:767px) and (display-mode:minimal-ui),
+           (max-width:767px) and (display-mode:window-controls-overlay) {
+        body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(5.8rem + env(safe-area-inset-bottom,0px)) !important; }
     }
 
 </style>
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--text);">{{ $studentAiMode ? __('AI Helper (Student)') : __('AI Helper (Admin)') }}</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--text);">{{ $aiPageTitle }}</h2>
 @endsection
 
 @section('content')
-<div class="ai-admin {{ $studentAiMode ? 'ai-admin--student' : 'ai-admin--admin' }}"
-     data-ai-url="{{ route($studentAiMode ? 'student.ai-helper.ask' : 'admin.ai-helper.ask') }}"
+<div class="ai-admin {{ $studentAiMode ? 'ai-admin--student' : ($lecturerAiMode ? 'ai-admin--lecturer' : 'ai-admin--admin') }}"
+     data-ai-url="{{ route($studentAiMode ? 'student.ai-helper.ask' : ($lecturerAiMode ? 'lecturer.ai-helper.ask' : 'admin.ai-helper.ask')) }}"
      data-ai-enabled="{{ $aiEnabled ? '1' : '0' }}"
      data-ai-provider="{{ $aiProvider }}"
-     data-ai-model="{{ $aiModel }}">
+     data-ai-model="{{ $aiModel }}"
+     data-conversations-url="{{ url($studentAiMode ? '/student/ai-helper/conversations' : ($lecturerAiMode ? '/lecturer/ai-helper/conversations' : '/admin/ai-helper/conversations')) }}">
     <section class="ai-panel">
+        <button type="button" class="ai-history-trigger" id="aiHistoryTrigger" aria-expanded="false" aria-controls="aiHistoryPanel" aria-label="{{ __('Conversation history') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>{{ __('History') }}</span>
+        </button>
         <div class="ai-head">
             <div>
                 <h3>{{ __('StudentEdge AI') }}</h3>
-                <p class="ai-sub">{{ $studentAiMode ? __('Ask about your scholarship, offenses, payments, rules, or student portal steps.') : __('Use templates and filters to generate actionable admin outputs quickly.') }}</p>
+                <p class="ai-sub">{{ $studentAiMode ? __('Ask about your scholarship, offenses, payments, rules, or student portal steps.') : ($lecturerAiMode ? __('Get text guidance and summaries from records available to your lecturer category.') : __('Use templates and filters to generate actionable admin outputs quickly.')) }}</p>
             </div>
             <div class="ai-badges">
                 <span class="ai-badge">BETA</span>
@@ -574,14 +789,18 @@
 
         <div class="ai-chat-log" id="aiChatLog" aria-live="polite">
             <div class="ai-empty-state" id="aiEmptyState">
-                <span class="ai-empty-orb" aria-hidden="true">✦</span>
+                <span class="ai-empty-orb">@include('partials.ai_helper_icon')</span>
                 <h3>{{ __('What should we focus on?') }}</h3>
-                <p>{{ $studentAiMode ? __('Ask about your own StudentEdge records or get general student portal guidance.') : __('Ask about StudentEdge records, create a written report, or attach a document or image as report evidence.') }}</p>
+                <p>{{ $studentAiMode ? __('Ask about your own StudentEdge records or get general student portal guidance.') : ($lecturerAiMode ? __('Ask for lecturer guidance or a summary of the anonymized records available to your category.') : __('Ask about StudentEdge records, create a written report, or attach a document or image as report evidence.')) }}</p>
                 <div class="ai-empty-chips">
                     @if($studentAiMode)
                     <button type="button" class="ai-empty-chip" data-template="{{ __('What can the AI Helper help me with?') }}">{{ __('Overview') }}</button>
                     <button type="button" class="ai-empty-chip" data-template="{{ __('What is my current scholarship status?') }}">{{ __('My scholarship') }}</button>
                     <button type="button" class="ai-empty-chip" data-template="{{ __('Explain my offense and payment records.') }}">{{ __('Payments') }}</button>
+                    @elseif($lecturerAiMode)
+                    <button type="button" class="ai-empty-chip" data-template="{{ __('Summarize the records available to my lecturer category.') }}">{{ __('Category summary') }}</button>
+                    <button type="button" class="ai-empty-chip" data-template="{{ __('What lecturer tasks can you help me with?') }}">{{ __('Lecturer guidance') }}</button>
+                    <button type="button" class="ai-empty-chip" data-template="{{ __('Prepare an anonymized monthly summary.') }}">{{ __('Monthly summary') }}</button>
                     @else
                     <button type="button" class="ai-empty-chip" data-template="{{ __('Generate Monthly Report') }}">{{ __('Monthly report') }}</button>
                     <button type="button" class="ai-empty-chip" data-template="{{ __('Review Pending Fine Applications') }}">{{ __('Pending fines') }}</button>
@@ -592,34 +811,78 @@
         </div>
 
         <div class="ai-toolbar">
-            <button type="button" class="ai-btn" id="aiCopyBtn">{{ __('Copy') }}</button>
-            <button type="button" class="ai-btn" id="aiClearBtn">{{ __('Clear') }}</button>
-            @unless($studentAiMode)<button type="button" class="ai-btn" id="aiDraftAnnouncementBtn">{{ __('Create Draft Announcement') }}</button>@endunless
-            <button type="button" class="ai-btn" id="aiRegenerateBtn">{{ __('Regenerate') }}</button>
+            <button type="button" class="ai-btn" id="aiCopyBtn" aria-label="{{ __('Copy') }}" title="{{ __('Copy') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span>{{ __('Copy') }}</span></button>
+            <button type="button" class="ai-btn" id="aiClearBtn" aria-label="{{ __('Clear') }}" title="{{ __('Clear') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg><span>{{ __('Clear') }}</span></button>
+            @unless($textOnlyAiMode)<button type="button" class="ai-btn" id="aiDraftAnnouncementBtn" aria-label="{{ __('Create Draft Announcement') }}" title="{{ __('Create Draft Announcement') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 13V7l12-3v12L4 13Z"/><path d="M8 14v5h4l1-4M18 8a3 3 0 0 1 0 4"/></svg><span>{{ __('Create Draft Announcement') }}</span></button>@endunless
+            <button type="button" class="ai-btn" id="aiRegenerateBtn" aria-label="{{ __('Regenerate') }}" title="{{ __('Regenerate') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66L20 14"/><path d="M20 7v4h-4"/></svg><span>{{ __('Regenerate') }}</span></button>
         </div>
 
         <div class="ai-compose">
+            <div class="ai-compose-frame">
+            @if($canUploadAiFiles)
+            <input id="reportAttachment" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" multiple hidden>
+            <div class="ai-compose-attachments" id="attachmentPreview" aria-live="polite"></div>
+            @endif
             <div class="ai-compose-row">
-                @unless($studentAiMode)
+                @if($canUploadAiFiles)
                 <button type="button" class="ai-compose-icon" id="aiAddBtn" aria-expanded="false" aria-controls="aiAddMenu" aria-label="{{ __('Add report source') }}">＋</button>
-                <div class="ai-add-menu" id="aiAddMenu">
-                    <button type="button" class="ai-add-action" id="aiUploadShortcut"><span>↥</span>{{ __('Upload PDF or image') }}</button>
-                    <button type="button" class="ai-add-action" id="aiReportToolsShortcut"><span>☷</span>{{ __('Report tools and filters') }}</button>
-                    <button type="button" class="ai-add-action" data-template="{{ __('Generate Monthly Report') }}"><span>▤</span>{{ __('Generate monthly report') }}</button>
-                    <button type="button" class="ai-add-action" data-template="{{ __('Review Pending Fine Applications') }}"><span>!</span>{{ __('Review pending fines') }}</button>
-                </div>
-                @endunless
+                @endif
                 <textarea class="ai-input" id="aiInput" rows="1" placeholder="{{ __('Ask StudentEdge AI') }}"></textarea>
-                @unless($studentAiMode)
-                <button type="button" class="ai-format-pill" id="aiFormatBtn">{{ __('Auto format') }}⌄</button>
+                @unless($textOnlyAiMode)
+                <button type="button" class="ai-format-pill" id="aiFormatBtn" aria-expanded="false" aria-controls="aiFormatMenu">{{ __('Auto format') }}⌄</button>
+                <div class="ai-format-menu" id="aiFormatMenu">
+                    <button type="button" class="ai-format-option is-selected" data-format="auto">{{ __('Auto format') }}</button>
+                    <button type="button" class="ai-format-option" data-format="formal_report">{{ __('Formal report') }}</button>
+                    <button type="button" class="ai-format-option" data-format="executive_summary">{{ __('Executive summary') }}</button>
+                    <button type="button" class="ai-format-option" data-format="table">{{ __('Table format') }}</button>
+                    <button type="button" class="ai-format-option" data-format="csv">CSV</button>
+                    <button type="button" class="ai-format-option" data-format="json">JSON</button>
+                </div>
                 @endunless
                 <button type="button" class="ai-send" id="aiSendBtn" aria-label="{{ __('Send') }}" @disabled(!$aiEnabled)>↑</button>
             </div>
+            </div>
+            @if($canUploadAiFiles)
+            <div class="ai-add-menu" id="aiAddMenu">
+                <button type="button" class="ai-add-action" id="aiUploadShortcut"><span>↥</span>{{ __('Upload PDF or image') }}</button>
+                @unless($lecturerAiMode)
+                <button type="button" class="ai-add-action" id="aiReportToolsShortcut"><span>☷</span>{{ __('Report tools and filters') }}</button>
+                <button type="button" class="ai-add-action" data-template="{{ __('Generate Monthly Report') }}"><span>▤</span>{{ __('Generate monthly report') }}</button>
+                <button type="button" class="ai-add-action" data-template="{{ __('Review Pending Fine Applications') }}"><span>!</span>{{ __('Review pending fines') }}</button>
+                @endunless
+            </div>
+            @endif
             <p class="ai-hint">{{ __('Enter sends. Shift+Enter adds newline. Independently verify AI-generated conclusions.') }}</p>
         </div>
     </section>
 
-    @unless($studentAiMode)
+    <button type="button" class="ai-history-backdrop" id="aiHistoryBackdrop" aria-label="{{ __('Close conversation history') }}"></button>
+    <aside class="ai-history-panel" id="aiHistoryPanel" aria-hidden="true">
+        <div class="ai-history-head">
+            <h3>{{ __('Your AI conversations') }}</h3>
+            <div class="ai-history-actions">
+                <button type="button" class="ai-history-icon-btn" id="aiNewConversation" aria-label="{{ __('New conversation') }}">＋</button>
+                <button type="button" class="ai-history-icon-btn" id="aiHistoryClose" aria-label="{{ __('Close') }}">×</button>
+            </div>
+        </div>
+        <div class="ai-history-list" id="aiHistoryList">
+            @forelse($aiConversations ?? [] as $conversation)
+            <div class="ai-history-item" data-conversation-id="{{ $conversation['id'] }}" data-title="{{ $conversation['title'] }}">
+                <span class="ai-history-title">{{ $conversation['title'] }}</span>
+                <span class="ai-history-time">{{ $conversation['last_message_at'] ?? $conversation['updated_at'] }}</span>
+                <span class="ai-history-item-actions"><button type="button" data-history-rename aria-label="{{ __('Rename') }}">✎</button><button type="button" data-history-delete aria-label="{{ __('Delete') }}">×</button></span>
+            </div>
+            @empty
+            <p class="ai-history-empty">{{ __('Your AI conversations will appear here after you send a message.') }}</p>
+            @endforelse
+        </div>
+        <div class="ai-history-foot">
+            <p class="ai-history-retention">{{ __('Inactive conversations are automatically deleted after :days days.', ['days' => config('ai.conversation_retention_days', 30)]) }}</p>
+            <button type="button" class="ai-history-delete-all" id="aiDeleteAllHistory">{{ __('Delete all AI history') }}</button>
+        </div>
+    </aside>
+
+    @unless($textOnlyAiMode)
     <button type="button" class="ai-tools-backdrop" id="aiToolsBackdrop" aria-label="{{ __('Close report tools') }}"></button>
     <aside class="ai-panel" id="aiToolsPanel" aria-hidden="true">
         <div class="ai-head">
@@ -680,14 +943,8 @@
                 <h4 class="ops-title">{{ __('Report Source') }}</h4>
                 <label class="ai-upload-drop" for="reportAttachment">
                     <span class="ai-upload-title">＋ {{ __('Attach a document or image') }}</span>
-                    <span class="ai-upload-note">{{ __('PDF, JPG, PNG or WebP · Maximum 10 MB. Gemini will inspect the attachment when generating the report.') }}</span>
-                    <input id="reportAttachment" type="file" accept="application/pdf,image/jpeg,image/png,image/webp">
+                    <span class="ai-upload-note">{{ __('Up to 10 PDF, JPG, PNG or WebP files · Maximum 10 MB each. Gemini will inspect every attachment.') }}</span>
                 </label>
-                <div class="ai-upload-preview" id="attachmentPreview">
-                    <div class="ai-upload-thumb" id="attachmentThumb">PDF</div>
-                    <div class="ai-upload-copy"><span class="ai-upload-name" id="attachmentName"></span><span class="ai-upload-size" id="attachmentSize"></span></div>
-                    <button type="button" class="ai-upload-remove" id="attachmentRemove" aria-label="{{ __('Remove attachment') }}">×</button>
-                </div>
             </section>
 
             <section class="ops-card">
@@ -736,10 +993,8 @@
     const outputFormat = document.getElementById('outputFormat');
     const attachmentInput = document.getElementById('reportAttachment');
     const attachmentPreview = document.getElementById('attachmentPreview');
-    const attachmentThumb = document.getElementById('attachmentThumb');
-    const attachmentName = document.getElementById('attachmentName');
-    const attachmentSize = document.getElementById('attachmentSize');
-    const attachmentRemove = document.getElementById('attachmentRemove');
+    let selectedAttachments = [];
+    let attachmentObjectUrls = [];
     const addBtn = document.getElementById('aiAddBtn');
     const addMenu = document.getElementById('aiAddMenu');
     const uploadShortcut = document.getElementById('aiUploadShortcut');
@@ -748,9 +1003,17 @@
     const toolsPanel = document.getElementById('aiToolsPanel');
     const toolsBackdrop = document.getElementById('aiToolsBackdrop');
     const toolsClose = document.getElementById('aiToolsClose');
+    const historyTrigger = document.getElementById('aiHistoryTrigger');
+    const historyPanel = document.getElementById('aiHistoryPanel');
+    const historyBackdrop = document.getElementById('aiHistoryBackdrop');
+    const historyClose = document.getElementById('aiHistoryClose');
+    const historyList = document.getElementById('aiHistoryList');
+    const newConversationBtn = document.getElementById('aiNewConversation');
+    const deleteAllHistoryBtn = document.getElementById('aiDeleteAllHistory');
     const locale = @json(app()->getLocale() === 'ms' ? 'ms-MY' : 'en-GB');
     let lastRequest = null;
     let lastAnswer = '';
+    let currentConversationId = null;
     const emptyStateMarkup = chatLog?.innerHTML || '';
 
     const tick = () => {
@@ -794,25 +1057,67 @@
         article.className = `msg ${type}`;
         if (type === 'ai') {
             article.classList.add('msg-rich');
-            const lines = String(text).split(/\r?\n/);
+            const lines = String(text).replace(/\r\n?/g, '\n').split('\n');
             let list = null;
+            let metaGrid = null;
+            let hasContent = false;
             const appendInline = (node, value) => {
-                String(value).split(/(\*\*[^*]+\*\*)/g).filter(Boolean).forEach(part => {
-                    if (part.startsWith('**') && part.endsWith('**')) {
+                String(value).split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean).forEach(part => {
+                    if (part.startsWith('`') && part.endsWith('`')) {
+                        const code = document.createElement('code');
+                        code.textContent = part.slice(1, -1);
+                        node.appendChild(code);
+                    } else if (part.startsWith('**') && part.endsWith('**')) {
                         const strong = document.createElement('strong');
                         strong.textContent = part.slice(2, -2);
                         node.appendChild(strong);
+                    } else if (part.startsWith('*') && part.endsWith('*')) {
+                        const em = document.createElement('em');
+                        em.textContent = part.slice(1, -1);
+                        node.appendChild(em);
                     } else node.appendChild(document.createTextNode(part));
                 });
             };
-            lines.forEach(raw => {
+            const appendTable = (start) => {
+                const rows = [];
+                let cursor = start;
+                while (cursor < lines.length && /^\s*\|.+\|\s*$/.test(lines[cursor])) {
+                    rows.push(lines[cursor].trim().slice(1, -1).split('|').map(cell => cell.trim()));
+                    cursor++;
+                }
+                if (rows.length < 2 || !rows[1].every(cell => /^:?-{3,}:?$/.test(cell))) return start;
+                const wrap = document.createElement('div'); wrap.className = 'report-table-wrap';
+                const table = document.createElement('table');
+                const thead = document.createElement('thead'); const headRow = document.createElement('tr');
+                rows[0].forEach(value => { const th = document.createElement('th'); appendInline(th, value); headRow.appendChild(th); });
+                thead.appendChild(headRow); table.appendChild(thead);
+                const tbody = document.createElement('tbody');
+                rows.slice(2).forEach(row => { const tr = document.createElement('tr'); row.forEach(value => { const td = document.createElement('td'); appendInline(td, value); tr.appendChild(td); }); tbody.appendChild(tr); });
+                table.appendChild(tbody); wrap.appendChild(table); article.appendChild(wrap); hasContent = true;
+                return cursor - 1;
+            };
+            lines.forEach((raw, index) => {
                 const line = raw.trim();
-                if (!line) { list = null; return; }
-                const heading = line.match(/^\*\*(.+)\*\*$/);
-                if (heading) { const h = document.createElement('h4'); h.textContent = heading[1]; article.appendChild(h); list = null; return; }
+                if (!line) { list = null; metaGrid = null; return; }
+                if (/^\s*\|.+\|\s*$/.test(raw)) { if (index > 0 && /^\s*\|.+\|\s*$/.test(lines[index - 1])) return; appendTable(index); list = null; metaGrid = null; return; }
+                if (/^(?:-{3,}|_{3,}|\*{3,})$/.test(line)) { article.appendChild(document.createElement('hr')); list = null; metaGrid = null; hasContent = true; return; }
+                const markdownHeading = line.match(/^(#{1,4})\s+(.+)$/);
+                if (markdownHeading) { const h = document.createElement(markdownHeading[1].length === 1 ? 'h3' : 'h4'); appendInline(h, markdownHeading[2]); article.appendChild(h); list = null; metaGrid = null; hasContent = true; return; }
+                const boldHeading = line.match(/^\*\*(.+)\*\*$/);
+                if (boldHeading) { const h = document.createElement(hasContent ? 'h4' : 'h3'); h.textContent = boldHeading[1]; article.appendChild(h); list = null; metaGrid = null; hasContent = true; return; }
+                const metadata = line.match(/^\*{1,2}([^:*]{2,40}):\*{1,2}\s*(.+)$/) || line.match(/^\*\*([^:*]{2,40}):\*\*\s*(.+)$/);
+                if (metadata) {
+                    if (!metaGrid) { metaGrid = document.createElement('div'); metaGrid.className = 'report-meta'; article.appendChild(metaGrid); }
+                    const label = document.createElement('span'); label.className = 'report-meta-label'; label.textContent = metadata[1];
+                    const value = document.createElement('span'); value.className = 'report-meta-value'; appendInline(value, metadata[2]);
+                    metaGrid.append(label, value); list = null; hasContent = true; return;
+                }
                 const bullet = line.match(/^[-*]\s*(.+)$/);
-                if (bullet) { if (!list) { list = document.createElement('ul'); article.appendChild(list); } const li = document.createElement('li'); appendInline(li, bullet[1]); list.appendChild(li); return; }
-                const p = document.createElement('p'); appendInline(p, line.replace(/^\*|\*$/g, '')); article.appendChild(p); list = null;
+                const numbered = line.match(/^\d+[.)]\s+(.+)$/);
+                if (bullet || numbered) { const tag = numbered ? 'ol' : 'ul'; if (!list || list.tagName.toLowerCase() !== tag) { list = document.createElement(tag); article.appendChild(list); } const li = document.createElement('li'); appendInline(li, (bullet || numbered)[1]); list.appendChild(li); metaGrid = null; hasContent = true; return; }
+                const clean = line.replace(/^\*([^*].*):\*\*\s*/, '$1: ');
+                const isTitle = !hasContent && clean.length <= 100 && !/[.!?]$/.test(clean);
+                const node = document.createElement(isTitle ? 'h3' : 'p'); appendInline(node, clean); article.appendChild(node); list = null; metaGrid = null; hasContent = true;
             });
         } else {
             const pre = document.createElement('pre');
@@ -831,10 +1136,94 @@
     };
 
     const resetChat = () => {
+        currentConversationId = null;
+        historyList?.querySelectorAll('.ai-history-item').forEach(item => item.classList.remove('is-active'));
         root.classList.remove('has-chat');
         chatLog.innerHTML = root.dataset.aiEnabled === '1' ? emptyStateMarkup : '';
         if (root.dataset.aiEnabled !== '1') addMessage('error', initialMessage, metaText);
     };
+
+    const setHistoryOpen = (open) => {
+        historyPanel?.classList.toggle('is-open', open);
+        historyBackdrop?.classList.toggle('is-open', open);
+        historyPanel?.setAttribute('aria-hidden', open ? 'false' : 'true');
+        historyTrigger?.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const conversationUrl = id => `${root.dataset.conversationsUrl}/${id}`;
+    const upsertConversation = conversation => {
+        if (!historyList || !conversation) return;
+        historyList.querySelector('.ai-history-empty')?.remove();
+        let item = historyList.querySelector(`[data-conversation-id="${conversation.id}"]`);
+        if (!item) {
+            item = document.createElement('div');
+            item.className = 'ai-history-item';
+            item.dataset.conversationId = conversation.id;
+            item.innerHTML = '<span class="ai-history-title"></span><span class="ai-history-time"></span><span class="ai-history-item-actions"><button type="button" data-history-rename aria-label="Rename">✎</button><button type="button" data-history-delete aria-label="Delete">×</button></span>';
+        }
+        item.dataset.title = conversation.title || '';
+        item.querySelector('.ai-history-title').textContent = conversation.title || @json(__('Untitled conversation'));
+        item.querySelector('.ai-history-time').textContent = conversation.last_message_at || conversation.updated_at || '';
+        historyList.prepend(item);
+        historyList.querySelectorAll('.ai-history-item').forEach(node => node.classList.toggle('is-active', String(node.dataset.conversationId) === String(currentConversationId)));
+    };
+    const loadConversation = async id => {
+        const response = await fetch(conversationUrl(id), {headers:{'Accept':'application/json'},credentials:'same-origin'});
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.message || @json(__('Conversation could not be loaded.')));
+        currentConversationId = payload.conversation.id;
+        root.classList.add('has-chat');
+        chatLog.innerHTML = '';
+        lastAnswer = '';
+        (payload.messages || []).forEach(message => {
+            const type = message.role === 'assistant' ? 'ai' : 'user';
+            addMessage(type, message.content);
+            if (type === 'ai') lastAnswer = message.content;
+        });
+        upsertConversation(payload.conversation);
+        setHistoryOpen(false);
+        input.focus();
+    };
+    historyTrigger?.addEventListener('click', () => setHistoryOpen(true));
+    historyClose?.addEventListener('click', () => setHistoryOpen(false));
+    historyBackdrop?.addEventListener('click', () => setHistoryOpen(false));
+    newConversationBtn?.addEventListener('click', () => { resetChat(); setHistoryOpen(false); input.focus(); });
+    historyList?.addEventListener('click', async event => {
+        const item = event.target.closest('.ai-history-item');
+        if (!item) return;
+        const id = item.dataset.conversationId;
+        try {
+            if (event.target.closest('[data-history-delete]')) {
+                event.stopPropagation();
+                if (!confirm(@json(__('Delete this AI conversation?')))) return;
+                const response = await fetch(conversationUrl(id), {method:'DELETE',headers:{'Accept':'application/json','X-CSRF-TOKEN':csrfToken},credentials:'same-origin'});
+                if (!response.ok) throw new Error(@json(__('Conversation could not be deleted.')));
+                item.remove();
+                if (String(currentConversationId) === String(id)) resetChat();
+                if (!historyList.querySelector('.ai-history-item')) historyList.innerHTML = `<p class="ai-history-empty">${@json(__('Your AI conversations will appear here after you send a message.'))}</p>`;
+                return;
+            }
+            if (event.target.closest('[data-history-rename]')) {
+                event.stopPropagation();
+                const title = prompt(@json(__('Rename conversation')), item.dataset.title || '');
+                if (!title?.trim()) return;
+                const response = await fetch(conversationUrl(id), {method:'PATCH',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':csrfToken},credentials:'same-origin',body:JSON.stringify({title:title.trim()})});
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(payload.message || @json(__('Conversation could not be renamed.')));
+                upsertConversation(payload.conversation);
+                return;
+            }
+            await loadConversation(id);
+        } catch (error) { addMessage('error', error.message || aiText.failed); }
+    });
+    deleteAllHistoryBtn?.addEventListener('click', async () => {
+        if (!confirm(@json(__('Delete all your AI conversation history?')))) return;
+        const response = await fetch(root.dataset.conversationsUrl, {method:'DELETE',headers:{'Accept':'application/json','X-CSRF-TOKEN':csrfToken},credentials:'same-origin'});
+        if (!response.ok) return addMessage('error', @json(__('AI history could not be deleted.')));
+        historyList.innerHTML = `<p class="ai-history-empty">${@json(__('Your AI conversations will appear here after you send a message.'))}</p>`;
+        resetChat();
+        setHistoryOpen(false);
+    });
 
     const setToolsOpen = (open) => {
         toolsPanel?.classList.toggle('is-open', open);
@@ -849,7 +1238,7 @@
     };
     addBtn?.addEventListener('click', event => { event.stopPropagation(); setAddOpen(!addMenu?.classList.contains('is-open')); });
     document.addEventListener('click', event => { if (!addMenu?.contains(event.target) && event.target !== addBtn) setAddOpen(false); });
-    uploadShortcut?.addEventListener('click', () => { setAddOpen(false); attachmentInput?.click(); });
+    uploadShortcut?.addEventListener('click', () => { setAddOpen(false); if (attachmentInput) attachmentInput.value = ''; attachmentInput?.click(); });
     reportToolsShortcut?.addEventListener('click', () => { setAddOpen(false); setToolsOpen(true); });
     formatBtn?.addEventListener('click', () => setToolsOpen(true));
     toolsClose?.addEventListener('click', () => setToolsOpen(false));
@@ -866,25 +1255,57 @@
         output_format: outputFormat?.value || 'auto',
     });
 
-    const showAttachment = () => {
-        const file = attachmentInput?.files?.[0];
-        attachmentPreview?.classList.toggle('is-visible', Boolean(file));
-        if (!file) return;
-        attachmentName.textContent = file.name;
-        attachmentSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-        if (file.type.startsWith('image/')) {
-            attachmentThumb.textContent = '';
-            attachmentThumb.style.backgroundImage = `url(${URL.createObjectURL(file)})`;
-            attachmentThumb.style.backgroundSize = 'cover';
-        } else {
-            attachmentThumb.style.backgroundImage = '';
-            attachmentThumb.textContent = 'PDF';
+    const setAttachmentFiles = files => {
+        if (!attachmentInput || typeof DataTransfer === 'undefined') return;
+        const transfer = new DataTransfer();
+        files.forEach(file => transfer.items.add(file));
+        attachmentInput.files = transfer.files;
+    };
+    const showAttachments = (limitReached = false) => {
+        if (!attachmentPreview) return;
+        attachmentObjectUrls.forEach(url => URL.revokeObjectURL(url));
+        attachmentObjectUrls = [];
+        attachmentPreview.replaceChildren();
+        const files = selectedAttachments;
+        attachmentPreview.classList.toggle('is-visible', files.length > 0 || limitReached);
+        files.forEach((file, index) => {
+            const card = document.createElement('article'); card.className = 'ai-compose-attachment';
+            const thumb = document.createElement('div'); thumb.className = 'ai-compose-attachment-thumb';
+            const fileType = file.type === 'application/pdf' ? 'PDF' : (file.type.split('/')[1] || 'FILE').toUpperCase();
+            thumb.textContent = fileType;
+            if (file.type.startsWith('image/')) {
+                card.classList.add('is-image');
+                const objectUrl = URL.createObjectURL(file); attachmentObjectUrls.push(objectUrl);
+                thumb.textContent = ''; thumb.style.backgroundImage = `url(${objectUrl})`;
+            }
+            const copy = document.createElement('div'); copy.className = 'ai-compose-attachment-copy';
+            const name = document.createElement('span'); name.className = 'ai-compose-attachment-name'; name.textContent = file.name;
+            const details = document.createElement('span'); details.className = 'ai-compose-attachment-meta'; details.textContent = `${fileType} · ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            copy.append(name, details);
+            const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'ai-compose-attachment-remove'; remove.setAttribute('aria-label', @json(__('Remove attachment'))); remove.textContent = '×';
+            remove.addEventListener('click', () => {
+                selectedAttachments = selectedAttachments.filter((_, fileIndex) => fileIndex !== index);
+                setAttachmentFiles(selectedAttachments);
+                showAttachments();
+            });
+            card.append(thumb, copy, remove); attachmentPreview.appendChild(card);
+        });
+        if (limitReached) {
+            const notice = document.createElement('span'); notice.className = 'ai-compose-attachment-limit'; notice.textContent = @json(__('Only the first 10 files were selected.'));
+            attachmentPreview.appendChild(notice);
         }
     };
-    attachmentInput?.addEventListener('change', showAttachment);
-    attachmentRemove?.addEventListener('click', () => {
-        attachmentInput.value = '';
-        showAttachment();
+    attachmentInput?.addEventListener('change', () => {
+        const incomingFiles = Array.from(attachmentInput.files || []);
+        const seen = new Set(selectedAttachments.map(file => `${file.name}:${file.size}:${file.lastModified}:${file.type}`));
+        incomingFiles.forEach(file => {
+            const key = `${file.name}:${file.size}:${file.lastModified}:${file.type}`;
+            if (!seen.has(key)) { selectedAttachments.push(file); seen.add(key); }
+        });
+        const limitReached = selectedAttachments.length > 10;
+        selectedAttachments = selectedAttachments.slice(0, 10);
+        setAttachmentFiles(selectedAttachments);
+        showAttachments(limitReached);
     });
 
     const setBusy = (busy) => {
@@ -909,12 +1330,12 @@
         try {
             const requestBody = new FormData();
             requestBody.append('message', lastRequest.message);
+            if (currentConversationId) requestBody.append('conversation_id', currentConversationId);
             if (lastRequest.template) requestBody.append('template', lastRequest.template);
             Object.entries(lastRequest.filters).forEach(([key, value]) => {
                 if (value) requestBody.append(`filters[${key}]`, value);
             });
-            const attachment = attachmentInput?.files?.[0];
-            if (attachment) requestBody.append('attachment', attachment);
+            selectedAttachments.forEach(attachment => requestBody.append('attachments[]', attachment));
 
             const response = await fetch(root.dataset.aiUrl, {
                 method: 'POST',
@@ -934,7 +1355,11 @@
             }
 
             lastAnswer = payload.answer || '';
-            addMessage('ai', lastAnswer || aiText.empty, `${(payload.provider || 'ai').toUpperCase()} / ${payload.model || ''} - ${payload.generated_at || ''}`);
+            if (payload.conversation) {
+                currentConversationId = payload.conversation.id;
+                upsertConversation(payload.conversation);
+            }
+            addMessage('ai', lastAnswer || aiText.empty);
         } catch (error) {
             loading.remove();
             addMessage('error', error.message || aiText.unreachable);

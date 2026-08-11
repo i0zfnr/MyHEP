@@ -2399,6 +2399,7 @@
     $showStaffBottomNav = $isLecturerAdmin;
     $systemFeatures = app(\App\Support\SystemFeatures::class);
     $studentAiHelperEnabled = $systemFeatures->enabled('student_ai_helper');
+    $lecturerAiHelperEnabled = $systemFeatures->enabled('lecturer_ai_helper');
     $adminAiHelperEnabled = $adminScope === 'system_admin' || $systemFeatures->enabled('admin_ai_helper');
     $adminLiquidDesignEnabled = ! $isAdmin || $systemFeatures->adminLiquidDesignEnabled($adminScope);
     $studentMoreActive = request()->routeIs('student.movements.index')
@@ -2416,6 +2417,7 @@
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar ' : '') .
         (! $adminLiquidDesignEnabled ? 'admin-liquid-disabled ' : '') .
         ($adminOnDashboard ? 'admin-dashboard-page ' : '') .
+        (request()->routeIs('admin.ai-helper.*', 'student.ai-helper.*', 'lecturer.ai-helper.*') ? 'admin-ai-helper-page ' : '') .
         ($adminOnDashboard && $adminScope === 'system_admin' ? 'system-admin-dashboard' : '')
     );
 @endphp
@@ -2460,7 +2462,7 @@
                     </a>
                     @if($studentAiHelperEnabled)
                     <a href="{{ route('student.ai-helper.index') }}" class="nav-link {{ request()->routeIs('student.ai-helper.*') ? 'active' : '' }}">
-                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-2.846.813a1.125 1.125 0 000 2.124L9 22.5l.813 2.846a1.125 1.125 0 002.124 0L12.75 22.5l2.846-.813a1.125 1.125 0 000-2.124L12.75 18.75l-.813-2.846a1.125 1.125 0 00-2.124 0zM18.75 8.25l-.433 1.517L16.8 10.2a.75.75 0 000 1.44l1.517.433.433 1.517a.75.75 0 001.44 0l.433-1.517 1.517-.433a.75.75 0 000-1.44l-1.517-.433-.433-1.517a.75.75 0 00-1.44 0zM2.25 4.5l.433 1.517L4.2 6.45a.75.75 0 010 1.44l-1.517.433L2.25 9.84a.75.75 0 01-1.44 0L.377 8.323-1.14 7.89a.75.75 0 010-1.44l1.517-.433L.81 4.5a.75.75 0 011.44 0z"/></svg>
+                        @include('partials.ai_helper_icon', ['class' => 'nav-icon'])
                         {{ __('AI Helper') }}
                     </a>
                     @else
@@ -2605,9 +2607,14 @@
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v18h16.5M7.5 15l3-3 2.25 2.25L16.5 9"/></svg>
                             {{ __('ui.monthly_report') }}
                         </a>
-                        @if(!$isLecturerAdmin && $adminAiHelperEnabled)
+                        @if($isLecturerAdmin && $lecturerAiHelperEnabled)
+                            <a href="{{ route('lecturer.ai-helper.index') }}" class="nav-link {{ request()->routeIs('lecturer.ai-helper.*') ? 'active' : '' }}">
+                                @include('partials.ai_helper_icon', ['class' => 'nav-icon'])
+                                {{ __('AI Helper') }}
+                            </a>
+                        @elseif(!$isLecturerAdmin && $adminAiHelperEnabled)
                             <a href="{{ route('admin.ai-helper.index') }}" class="nav-link {{ request()->routeIs('admin.ai-helper.*') ? 'active' : '' }}">
-                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-2.846.813a1.125 1.125 0 000 2.124L9 22.5l.813 2.846a1.125 1.125 0 002.124 0L12.75 22.5l2.846-.813a1.125 1.125 0 000-2.124L12.75 18.75l-.813-2.846a1.125 1.125 0 00-2.124 0zM18.75 8.25l-.433 1.517L16.8 10.2a.75.75 0 000 1.44l1.517.433.433 1.517a.75.75 0 001.44 0l.433-1.517 1.517-.433a.75.75 0 000-1.44l-1.517-.433-.433-1.517a.75.75 0 00-1.44 0zM2.25 4.5l.433 1.517L4.2 6.45a.75.75 0 010 1.44l-1.517.433L2.25 9.84a.75.75 0 01-1.44 0L.377 8.323-1.14 7.89a.75.75 0 010-1.44l1.517-.433L.81 4.5a.75.75 0 011.44 0z"/></svg>
+                                @include('partials.ai_helper_icon', ['class' => 'nav-icon'])
                                 {{ __('AI Helper') }}
                             </a>
                         @endif
@@ -3156,6 +3163,12 @@
 </div>
 
 <div class="se-page-progress" aria-hidden="true"><span></span></div>
+
+@if($isAdmin && !$isGuardAdmin)
+<button type="button" class="se-back-to-top {{ $isLecturerAdmin ? 'is-lecturer' : 'is-admin' }}" id="seBackToTop" aria-label="{{ __('Back to top') }}" title="{{ __('Back to top') }}" aria-hidden="true" tabindex="-1">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg>
+</button>
+@endif
 
 @if($isAdmin && !$isGuardAdmin && !$isLecturerAdmin && $adminAiHelperEnabled && !request()->routeIs('admin.ai-helper.*'))
     @include('partials.admin_ai_chatbox')

@@ -74,3 +74,18 @@ Artisan::command('notifications:send-reminders', function (): void {
 })->purpose('Send document-expiry and movement return-deadline push reminders');
 
 Schedule::command('notifications:send-reminders')->everyFiveMinutes()->withoutOverlapping();
+
+Artisan::command('ai:prune-conversations', function (): void {
+    $cutoff = now()->subDays((int) config('ai.conversation_retention_days', 30));
+    $deleted = 0;
+
+    foreach (['student_ai_conversations', 'admin_ai_conversations'] as $table) {
+        if (Schema::hasTable($table)) {
+            $deleted += DB::table($table)->where('updated_at', '<', $cutoff)->delete();
+        }
+    }
+
+    $this->info("Deleted {$deleted} inactive AI conversation(s) older than {$cutoff->toDateString()}.");
+})->purpose('Delete inactive student and admin AI conversations');
+
+Schedule::command('ai:prune-conversations')->dailyAt('02:15')->withoutOverlapping();
