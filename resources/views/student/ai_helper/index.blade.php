@@ -586,6 +586,12 @@
             font-size: .78rem;
         }
     }
+    .st-ai-messages { display:grid; gap:10px; margin-bottom:14px; }
+    .st-ai-message { padding:12px 14px; border-radius:14px; line-height:1.55; white-space:pre-wrap; }
+    .st-ai-message--user { justify-self:end; max-width:85%; background:#4c6580; color:#fff; }
+    .st-ai-message--ai { background:var(--surface); border:1px solid var(--border); color:var(--text); }
+    .st-ai-message--error { background:#fff1f0; border:1px solid #ef9a94; color:#b42318; }
+    .st-ai-send:disabled, .st-ai-input:disabled { opacity:.55; cursor:not-allowed; }
 </style>
 @endpush
 
@@ -594,7 +600,11 @@
 @endsection
 
 @section('content')
-<div class="st-ai">
+<div class="st-ai" id="studentAiHelper"
+     data-ai-url="{{ route('student.ai-helper.ask') }}"
+     data-ai-enabled="{{ $aiEnabled ? '1' : '0' }}"
+     data-ai-provider="{{ $aiProvider }}"
+     data-ai-model="{{ $aiModel }}">
     <section class="st-ai-shell">
         <div class="st-ai-hero">
             <div class="st-ai-hero-top">
@@ -630,8 +640,8 @@
                     </div>
                 </div>
                 <div class="st-ai-compose">
-                    <input class="st-ai-input" type="text" value="" placeholder="{{ __('Ask Changxie something') }}" disabled>
-                    <button type="button" class="st-ai-send" aria-label="{{ __('Voice input') }}" disabled>
+                    <input class="st-ai-input" id="studentAiInput" type="text" value="" maxlength="1200" placeholder="{{ __('Ask Changxie something') }}" @disabled(!$aiEnabled)>
+                    <button type="button" class="st-ai-send" id="studentAiSend" aria-label="{{ __('Send') }}" @disabled(!$aiEnabled)>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"></path>
                             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -640,11 +650,12 @@
                         </svg>
                     </button>
                 </div>
+                <div class="st-ai-messages" id="studentAiMessages" aria-live="polite"></div>
                 <p class="st-ai-disclaimer">{{ __('Beta: Changxie is still learning. Independently verify before use.') }}</p>
             </div>
 
             <div class="st-ai-prompts">
-                <a href="#" class="st-ai-chip">
+                <a href="#" class="st-ai-chip" data-prompt="{{ __('What can you help me with in StudentEdge?') }}">
                     <span class="st-ai-chip-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -658,7 +669,7 @@
                     <span class="st-ai-chip-arrow" aria-hidden="true">-></span>
                 </a>
 
-                <a href="#" class="st-ai-chip">
+                <a href="#" class="st-ai-chip" data-prompt="{{ __('Summarize my scholarship status and explain the next step.') }}">
                     <span class="st-ai-chip-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="4" width="18" height="16" rx="2"></rect>
@@ -674,7 +685,7 @@
                     <span class="st-ai-chip-arrow" aria-hidden="true">-></span>
                 </a>
 
-                <a href="#" class="st-ai-chip">
+                <a href="#" class="st-ai-chip" data-prompt="{{ __('Explain my fines and payment application status.') }}">
                     <span class="st-ai-chip-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 1v22"></path>
@@ -689,7 +700,7 @@
                     <span class="st-ai-chip-arrow" aria-hidden="true">-></span>
                 </a>
 
-                <a href="#" class="st-ai-chip">
+                <a href="#" class="st-ai-chip" data-prompt="{{ __('Explain the student rules and procedures relevant to my records.') }}">
                     <span class="st-ai-chip-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
@@ -724,6 +735,59 @@
     };
     tick();
     setInterval(tick, 1000);
+})();
+
+(() => {
+    const root = document.getElementById('studentAiHelper');
+    const input = document.getElementById('studentAiInput');
+    const sendButton = document.getElementById('studentAiSend');
+    const messages = document.getElementById('studentAiMessages');
+    if (!root || !input || !sendButton || !messages) return;
+
+    const addMessage = (type, text) => {
+        const node = document.createElement('div');
+        node.className = `st-ai-message st-ai-message--${type}`;
+        node.textContent = text;
+        messages.appendChild(node);
+        node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    if (root.dataset.aiEnabled !== '1') {
+        addMessage('error', @json(__('AI API key is not configured on the server.')));
+    }
+
+    const send = async (preset = null) => {
+        const message = (preset || input.value).trim();
+        if (!message || root.dataset.aiEnabled !== '1') return;
+        addMessage('user', message);
+        input.value = '';
+        input.disabled = true;
+        sendButton.disabled = true;
+        try {
+            const response = await fetch(root.dataset.aiUrl, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': @json(csrf_token())},
+                body: JSON.stringify({message})
+            });
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload.message || @json(__('AI service could not be reached.')));
+            addMessage('ai', payload.answer || @json(__('No answer was returned.')));
+        } catch (error) {
+            addMessage('error', error.message || @json(__('AI service could not be reached.')));
+        } finally {
+            input.disabled = false;
+            sendButton.disabled = false;
+            input.focus();
+        }
+    };
+
+    sendButton.addEventListener('click', () => send());
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') { event.preventDefault(); send(); }
+    });
+    document.querySelectorAll('.st-ai-chip[data-prompt]').forEach(chip => {
+        chip.addEventListener('click', event => { event.preventDefault(); send(chip.dataset.prompt); });
+    });
 })();
 </script>
 @endpush

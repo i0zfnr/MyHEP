@@ -12,9 +12,13 @@ class SystemFeatures
             'label' => 'Document Centre',
             'description' => 'Student document archive and private document downloads.',
         ],
-        'ai_helper' => [
-            'label' => 'AI Helper',
-            'description' => 'AI-assisted back-office guidance for authorized administrators.',
+        'student_ai_helper' => [
+            'label' => 'AI Helper for Students',
+            'description' => 'Allow students to use AI guidance based only on their own records.',
+        ],
+        'admin_ai_helper' => [
+            'label' => 'AI Helper for Administrators',
+            'description' => 'Allow regular authorized administrators to use the AI Helper. System administrators always retain access.',
         ],
         'admin_liquid_design' => [
             'label' => 'Liquid Design for Administrators',

@@ -11,9 +11,13 @@ class EnsureFeatureEnabled
 {
     public function __construct(private readonly SystemFeatures $features) {}
 
-    public function handle(Request $request, Closure $next, string $feature): Response
+    public function handle(Request $request, Closure $next, string $feature, string $allowSystemAdmin = 'false'): Response
     {
-        if ($this->features->enabled($feature)) {
+        $systemAdminOverride = $allowSystemAdmin === 'system_admin'
+            && session('auth_user.role') === 'admin'
+            && session('auth_user.admin_role') === 'system_admin';
+
+        if ($systemAdminOverride || $this->features->enabled($feature)) {
             return $next($request);
         }
 
