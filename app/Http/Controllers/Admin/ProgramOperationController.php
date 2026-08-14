@@ -83,7 +83,6 @@ class ProgramOperationController extends Controller
         $canManageAttendance = ($isDirector || $hasOversight) && in_array($program->status, ['active', 'approved', 'scheduled'], true);
         $attendanceSetup = [
             'venue' => filled($program->venue),
-            'coordinates' => $program->latitude !== null && $program->longitude !== null,
             'questionnaire' => ! $program->questionnaire_enabled || ($survey && $survey->status === 'published'),
         ];
         $attendanceReady = ! in_array(false, $attendanceSetup, true);
@@ -127,9 +126,9 @@ class ProgramOperationController extends Controller
             ->where('status', 'published')
             ->exists();
 
-        if (blank($program->venue) || $program->latitude === null || $program->longitude === null || ($program->questionnaire_enabled && ! $publishedSurveyExists)) {
+        if (blank($program->venue) || ($program->questionnaire_enabled && ! $publishedSurveyExists)) {
             return back()->withErrors([
-                'attendance' => __('Set the venue coordinates and, when enabled, publish a questionnaire before opening attendance.'),
+                'attendance' => __('Set the venue and, when enabled, publish a questionnaire before opening attendance.'),
             ]);
         }
 
@@ -495,6 +494,7 @@ class ProgramOperationController extends Controller
             abort(404);
         }
         abort_unless($program->status === 'active' && $program->attendance_status === 'open', 404);
+        $usesGeofence = $program->latitude !== null && $program->longitude !== null;
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:180',
@@ -505,15 +505,11 @@ class ProgramOperationController extends Controller
             'feedback_comments' => 'nullable|string|max:1000',
             'answers' => 'nullable|array',
             'answers.*' => 'nullable|string|max:5000',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            'location_accuracy_m' => 'required|numeric|min:0|max:5000',
-            'location_captured_at' => 'required|date|before_or_equal:now|after:'.now()->subMinutes(5)->toDateTimeString(),
+            'latitude' => ($usesGeofence ? 'required' : 'nullable').'|numeric|between:-90,90',
+            'longitude' => ($usesGeofence ? 'required' : 'nullable').'|numeric|between:-180,180',
+            'location_accuracy_m' => ($usesGeofence ? 'required' : 'nullable').'|numeric|min:0|max:5000',
+            'location_captured_at' => ($usesGeofence ? 'required' : 'nullable').'|date|before_or_equal:now|after:'.now()->subMinutes(5)->toDateTimeString(),
         ]);
-
-        if ($program->latitude === null || $program->longitude === null) {
-            return back()->withInput()->withErrors(['location' => __('Venue coordinates are not configured. Attendance cannot be recorded.')]);
-        }
 
         $identifier = trim($validated['identifier']);
         $duplicateExists = DB::table('program_attendances')
@@ -526,15 +522,16 @@ class ProgramOperationController extends Controller
             return back()->withInput()->withErrors(['identifier' => __('Attendance has already been submitted for this participant.')]);
         }
 
-        $distance = $this->distanceMeters(
+        $distance = $usesGeofence ? $this->distanceMeters(
             (float) $program->latitude,
             (float) $program->longitude,
             (float) $validated['latitude'],
             (float) $validated['longitude']
-        );
-        $accuracy = (float) $validated['location_accuracy_m'];
-        $withinRadius = $distance <= (int) $program->geofence_radius_m;
-        $validationStatus = ! $withinRadius ? 'invalid_outside_radius' : ($accuracy > 100 ? 'needs_review_accuracy' : 'valid');
+        ) : null;
+        $accuracy = $usesGeofence ? (float) $validated['location_accuracy_m'] : null;
+        $validationStatus = ! $usesGeofence
+            ? 'valid'
+            : ($distance > (int) $program->geofence_radius_m ? 'invalid_outside_radius' : ($accuracy > 100 ? 'needs_review_accuracy' : 'valid'));
 
         $survey = DB::table('program_surveys')
             ->where('program_id', $program->id)
@@ -581,13 +578,13 @@ class ProgramOperationController extends Controller
             'email' => $validated['email'] ?? null,
             'institution_or_unit' => $validated['institution_or_unit'] ?? null,
             'checked_in_at' => now(),
-            'latitude' => $validated['latitude'],
-            'longitude' => $validated['longitude'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'geofence_valid' => $validationStatus === 'valid',
             'validation_status' => $validationStatus,
-            'distance_m' => round($distance, 2),
-            'location_accuracy_m' => round($accuracy, 2),
-            'location_captured_at' => $validated['location_captured_at'],
+            'distance_m' => $distance === null ? null : round($distance, 2),
+            'location_accuracy_m' => $accuracy === null ? null : round($accuracy, 2),
+            'location_captured_at' => $validated['location_captured_at'] ?? null,
             'satisfaction_rating' => $validated['satisfaction_rating'] ?? null,
             'feedback_comments' => $validated['feedback_comments'] ?? null,
             'created_at' => now(),

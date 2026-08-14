@@ -78,15 +78,18 @@
 .pmr-source-item strong { display:block; margin-top:.3rem; color:var(--text,#241d16); font-size:.9rem; }
 .pmr-source-item.is-ready { border-color:color-mix(in srgb,#21835a 35%,var(--border,#eadac8)); background:color-mix(in srgb,#21835a 5%,var(--surface,#fff)); }
 .pmr-report-lock { margin-top:1rem; padding:.75rem .9rem; border-radius:10px; background:color-mix(in srgb,var(--pm-accent) 7%,var(--surface,#fff)); color:var(--text-muted,#746b62); font-size:.85rem; }
-.pmr-roster-empty { min-height:230px; display:grid; place-items:center; padding:2rem 1rem; text-align:center; background:linear-gradient(180deg,color-mix(in srgb,var(--pm-accent) 3%,var(--surface,#fff)),var(--surface,#fff)); }
+.pmr-roster-empty { min-height:230px; display:grid; place-items:center; padding:2.25rem 1rem; text-align:center; background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--pm-accent) 9%,transparent),transparent 42%); }
 .pmr-roster-empty__inner { max-width:520px; }
-.pmr-roster-empty__icon { width:56px; height:56px; display:grid; place-items:center; margin:0 auto .85rem; border:1px solid color-mix(in srgb,var(--pm-accent) 34%,var(--border,#eadac8)); border-radius:16px; background:color-mix(in srgb,var(--pm-accent) 10%,var(--surface,#fff)); color:var(--pm-accent-strong,#8b6a34); }
+.pmr-roster-empty__icon { width:52px; height:52px; display:grid; place-items:center; margin:0 auto .9rem; border:1px solid color-mix(in srgb,var(--pm-accent) 30%,var(--border,#eadac8)); border-radius:15px; background:color-mix(in srgb,var(--pm-accent) 8%,var(--surface,#fff)); color:var(--pm-accent-strong,#8b6a34); box-shadow:0 10px 24px color-mix(in srgb,var(--pm-accent) 12%,transparent); }
 .pmr-roster-empty__icon svg { width:27px; height:27px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .pmr-roster-empty h3 { margin:0 0 .35rem; font-size:1rem; }
 .pmr-roster-empty p { max-width:480px; margin:0 auto; font-size:.84rem; line-height:1.5; }
-.pmr-roster-empty__status { display:inline-flex; align-items:center; gap:.4rem; margin-top:.85rem; padding:.35rem .6rem; border-radius:999px; background:color-mix(in srgb,var(--pm-accent) 8%,var(--surface,#fff)); color:var(--pm-accent-strong,#8b6a34); font-size:.7rem; font-weight:850; text-transform:uppercase; letter-spacing:.04em; }
+.pmr-roster-empty__toolbar { width:fit-content; max-width:100%; display:flex; align-items:center; justify-content:center; gap:.5rem; margin:1rem auto 0; padding:.4rem; border:1px solid color-mix(in srgb,var(--pm-accent) 22%,var(--border,#eadac8)); border-radius:14px; background:color-mix(in srgb,var(--surface,#fff) 94%,var(--pm-accent) 6%); box-shadow:0 10px 24px color-mix(in srgb,var(--pm-accent) 8%,transparent); }
+.pmr-roster-empty__status { display:inline-flex; align-items:center; gap:.4rem; min-height:40px; padding:.35rem .7rem; border-radius:10px; background:color-mix(in srgb,var(--pm-accent) 8%,var(--surface,#fff)); color:var(--pm-accent-strong,#8b6a34); font-size:.7rem; font-weight:850; text-transform:uppercase; letter-spacing:.04em; }
 .pmr-roster-empty__status::before { content:''; width:7px; height:7px; border-radius:50%; background:currentColor; }
-.pmr-roster-empty .pmr-actions { display:inline-flex; justify-content:center; margin-top:1rem; flex-wrap:wrap; }
+.pmr-roster-empty .pmr-actions { display:inline-flex; justify-content:center; flex-wrap:wrap; padding:0; border:0; background:transparent; }
+.pmr-roster-empty .pmr-btn { min-height:40px; }
+@media (max-width:620px) { .pmr-roster-empty__toolbar { width:100%; align-items:stretch; flex-direction:column; box-sizing:border-box; } .pmr-roster-empty__status { justify-content:center; } .pmr-roster-empty .pmr-actions { display:grid; grid-template-columns:1fr; } }
 .pmr-attendance-control { padding:0; overflow:hidden; }
 .pmr-attendance-control__header { padding:1rem 1.35rem; border-bottom:1px solid color-mix(in srgb,var(--pm-accent) 18%,var(--border,#eadac8)); }
 .pmr-attendance-control__body { display:flex; align-items:center; justify-content:space-between; gap:1.5rem; padding:1.25rem 1.35rem; }
@@ -292,7 +295,6 @@
                 <span>
                 {{ __('Required before opening:') }}
                 @if(!$attendanceSetup['venue']) {{ __('venue') }}; @endif
-                @if(!$attendanceSetup['coordinates']) {{ __('venue coordinates') }}; @endif
                 @if(!$attendanceSetup['questionnaire']) {{ __('published questionnaire') }}. @endif
                 </span>
             </p>
@@ -619,11 +621,13 @@
                     <div class="pmr-roster-empty__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="4"/><path d="M17 8v6m-3-3h6"/></svg></div>
                     <h3>{{ __('Waiting for participants') }}</h3>
                     <p>{{ $program->attendance_status === 'open' ? __('Attendance is open. Share the public check-in link or display the QR code so participants can record attendance.') : __('Attendance is currently closed. Open attendance when you are ready to receive participant check-ins.') }}</p>
-                    <span class="pmr-roster-empty__status">{{ $program->attendance_status === 'open' ? __('Attendance Open') : __('Attendance Closed') }}</span>
-                    <div class="pmr-actions">
+                    <div class="pmr-roster-empty__toolbar">
+                        <span class="pmr-roster-empty__status">{{ $program->attendance_status === 'open' ? __('Attendance Open') : __('Attendance Closed') }}</span>
                         @if($program->attendance_status === 'open')
+                        <div class="pmr-actions">
                             <a class="pmr-btn public-checkin" href="{{ $publicCheckinUrl }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="m10 14 9-9"/><path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>{{ __('Open Public Check-in') }}</a>
                             <button class="pmr-btn" type="button" onclick="navigator.clipboard.writeText(@js($publicCheckinUrl)); this.textContent='{{ __('Copied') }}'">{{ __('Copy Check-in Link') }}</button>
+                        </div>
                         @endif
                     </div>
                 </div>

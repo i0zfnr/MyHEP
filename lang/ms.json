@@ -1701,6 +1701,8 @@
     "Session timeout updated.": "Tamat masa sesi dikemas kini.",
     "Set a new password for your account.": "Tetapkan kata laluan baharu untuk akaun anda.",
     "Set the venue coordinates and, when enabled, publish a questionnaire before opening attendance.": "Tetapkan koordinat tempat dan, apabila didayakan, terbitkan soal selidik sebelum membuka kehadiran.",
+    "Set the venue and, when enabled, publish a questionnaire before opening attendance.": "Tetapkan tempat dan, apabila didayakan, terbitkan soal selidik sebelum membuka kehadiran.",
+    "GPS verification is not enabled for this program. You can submit attendance now.": "Pengesahan GPS tidak diaktifkan untuk program ini. Anda boleh menghantar kehadiran sekarang.",
     "Set the venue used for participant check-in. Coordinates are optional and enable geofence validation.": "Tetapkan tempat yang digunakan untuk daftar masuk peserta. Koordinat adalah pilihan dan membolehkan pengesahan geofence.",
     "Set the venue and attendance distance in metres. GPS coordinates are an optional secondary setting.": "Tetapkan tempat dan jarak kehadiran dalam meter. Koordinat GPS ialah tetapan kedua yang tidak wajib.",
     "Optional GPS coordinates": "Koordinat GPS pilihan",

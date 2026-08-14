@@ -18,23 +18,30 @@
         }
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: var(--se-bg);
             color: var(--se-text);
             margin: 0;
-            padding: 16px;
+            min-height: 100vh;
+            padding: 28px 16px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            box-sizing: border-box;
+            background: radial-gradient(circle at 50% -10%, rgba(153,112,45,.12), transparent 34%), var(--se-bg);
         }
         .checkin-card {
+            position: relative;
+            overflow: hidden;
             background: var(--se-card);
             border: 1px solid var(--se-border);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(153, 112, 45, 0.08);
+            border-radius: 22px;
+            box-shadow: 0 22px 55px rgba(74, 50, 27, 0.12);
             max-width: 540px;
             width: 100%;
-            padding: 24px 28px;
+            padding: 0 28px 26px;
             box-sizing: border-box;
         }
+        .checkin-card::before { content:''; display:block; height:5px; margin:0 -28px 22px; background:linear-gradient(90deg,#76521f,var(--se-primary),#d3b476); }
+        .checkin-head { padding-bottom:18px; margin-bottom:20px; border-bottom:1px solid var(--se-border); }
         .checkin-eyebrow {
             font-size: 0.72rem;
             font-weight: 800;
@@ -42,8 +49,8 @@
             letter-spacing: 0.1em;
             color: var(--se-primary);
         }
-        .checkin-card h1 { font-size: 1.6rem; margin: 4px 0 8px; font-weight: 800; }
-        .checkin-meta { font-size: 0.88rem; color: var(--se-muted); margin-bottom: 20px; }
+        .checkin-card h1 { font-size: 1.65rem; margin: 5px 0 9px; font-weight: 800; letter-spacing:-.025em; }
+        .checkin-meta { display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size: 0.82rem; color: var(--se-muted); }
 
         .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
         .form-group label { font-size: 0.85rem; font-weight: 700; }
@@ -54,43 +61,54 @@
             border-radius: 12px;
             font-size: 0.95rem;
             font-family: inherit;
-            background: var(--se-bg);
+            background: #fff;
+            color:var(--se-text);
+            transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
         }
-        .form-group input:focus, .form-group textarea:focus {
+        .form-group input:hover, .form-group textarea:hover, .form-group select:hover { border-color:color-mix(in srgb,var(--se-primary) 38%,var(--se-border)); }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             outline: none;
             border-color: var(--se-primary);
             background: #fff;
+            box-shadow:0 0 0 3px rgba(153,112,45,.12);
         }
         .btn-submit {
             width: 100%;
             padding: 14px;
             border: none;
-            border-radius: 12px;
-            background: var(--se-primary);
+            border-radius: 13px;
+            background: linear-gradient(135deg,#8b6225,#ad8137);
             color: #ffffff;
             font-weight: 800;
             font-size: 1rem;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 8px;
+            box-shadow:0 10px 22px rgba(153,112,45,.22);
+            transition:transform .16s ease,box-shadow .16s ease,opacity .16s ease;
         }
-        .btn-submit:hover { opacity: 0.9; }
+        .btn-submit:hover { transform:translateY(-1px); box-shadow:0 14px 28px rgba(153,112,45,.28); }
         .btn-submit:disabled { cursor: not-allowed; opacity: .55; }
-        .location-status { padding: 12px; border-radius: 12px; margin: 14px 0; font-size: .86rem; font-weight: 700; background: #fff5df; color: #8a5717; }
-        .location-status.ready { background: #e7f7ee; color: #18734a; }
+        .location-status { display:flex; align-items:flex-start; gap:9px; padding:11px 12px; border:1px solid #f0d7a7; border-radius:11px; margin:16px 0; font-size:.8rem; line-height:1.45; font-weight:700; background:#fff8e9; color:#8a5717; }
+        .location-status::before { content:'i'; display:grid; place-items:center; flex:0 0 20px; width:20px; height:20px; border-radius:50%; background:currentColor; color:#fff; font-size:.7rem; font-weight:900; }
+        .location-status.ready { border-color:#bfe4d1; background:#edf9f2; color:#18734a; }
         .location-status.error { background: #fff0ee; color: #b42318; }
 
         .star-rating { display: flex; gap: 8px; font-size: 1.5rem; cursor: pointer; }
         .alert-success { background: #e7f7ee; color: #18734a; padding: 14px; border-radius: 12px; font-weight: 700; margin-bottom: 16px; }
+        @media(max-width:560px){ body{padding:0;background:var(--se-bg)} .checkin-card{min-height:100vh;border:0;border-radius:0;padding:0 20px 24px;box-shadow:none}.checkin-card::before{margin:0 -20px 20px}.checkin-head{margin-bottom:18px}.form-group{margin-bottom:13px} }
     </style>
 </head>
 <body>
 
 <main class="checkin-card">
-    <span class="checkin-eyebrow">{{ __('PROGRAM CHECK-IN & FEEDBACK') }}</span>
-    <h1>{{ $program->title }}</h1>
-    <div class="checkin-meta">
-        📍 {{ $program->venue ?: __('Politeknik Besut') }} &middot;
-        🕒 {{ $program->starts_at ? \Illuminate\Support\Carbon::parse($program->starts_at)->format('d M Y, g:i A') : __('Today') }}
+    <div class="checkin-head">
+        <span class="checkin-eyebrow">{{ __('PROGRAM CHECK-IN & FEEDBACK') }}</span>
+        <h1>{{ $program->title }}</h1>
+        <div class="checkin-meta">
+            <span>📍 {{ $program->venue ?: __('Politeknik Besut') }}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span>🕒 {{ $program->starts_at ? \Illuminate\Support\Carbon::parse($program->starts_at)->format('d M Y, g:i A') : __('Today') }}</span>
+        </div>
     </div>
 
     @if(session('success'))
@@ -177,13 +195,21 @@
         </div>
         @endif
 
-        <div id="locationStatus" class="location-status" role="status">
-            {{ __('Location permission is required. Please allow GPS access to submit attendance.') }}
-        </div>
-        <button class="btn-submit" id="attendanceSubmit" type="submit" disabled>{{ $program->questionnaire_enabled ? __('Check In & Submit Feedback') : __('Submit Attendance') }}</button>
+        @if($program->latitude !== null && $program->longitude !== null)
+            <div id="locationStatus" class="location-status" role="status">
+                {{ __('Location permission is required. Please allow GPS access to submit attendance.') }}
+            </div>
+            <button class="btn-submit" id="attendanceSubmit" type="submit" disabled>{{ $program->questionnaire_enabled ? __('Check In & Submit Feedback') : __('Submit Attendance') }}</button>
+        @else
+            <div id="locationStatus" class="location-status ready" role="status">
+                {{ __('GPS verification is not enabled for this program. You can submit attendance now.') }}
+            </div>
+            <button class="btn-submit" id="attendanceSubmit" type="submit">{{ $program->questionnaire_enabled ? __('Check In & Submit Feedback') : __('Submit Attendance') }}</button>
+        @endif
     </form>
 </main>
 
+@if($program->latitude !== null && $program->longitude !== null)
 <script>
 (() => {
     const status = document.getElementById('locationStatus');
@@ -215,6 +241,7 @@
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
 })();
 </script>
+@endif
 
 </body>
 </html>

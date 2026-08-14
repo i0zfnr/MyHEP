@@ -432,6 +432,41 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->assertDatabaseHas('programs', ['id' => $programId, 'attendance_status' => 'closed']);
     }
 
+    public function test_program_without_coordinates_can_open_and_record_attendance_without_gps(): void
+    {
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1,
+            'title' => 'Attendance Without GPS',
+            'paperwork_method' => 'none',
+            'questionnaire_enabled' => false,
+            'status' => 'active',
+            'attendance_status' => 'closed',
+            'venue' => 'Dewan Kuliah',
+            'geofence_radius_m' => 50,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->signIn(1, 'lecturer')
+            ->post(route('admin.programs.attendance.open', $programId))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('programs', ['id' => $programId, 'attendance_status' => 'open']);
+
+        $this->post(route('public.programs.qr_checkin.store', $programId), [
+            'full_name' => 'Student Without GPS',
+            'identifier' => 'NO-GPS-ALLOWED',
+        ])->assertSessionHas('success');
+
+        $this->assertDatabaseHas('program_attendances', [
+            'program_id' => $programId,
+            'identifier' => 'NO-GPS-ALLOWED',
+            'validation_status' => 'valid',
+            'geofence_valid' => true,
+            'distance_m' => null,
+        ]);
+    }
+
     public function test_server_marks_attendance_outside_the_geofence_as_invalid_and_blocks_duplicates(): void
     {
         $programId = DB::table('programs')->insertGetId([

@@ -1581,6 +1581,8 @@
     "Sesuai untuk bantuan kewangan tambahan, sokongan kebajikan, atau bantuan khas pelajar.": "Suitable for additional financial aid, welfare support, or special student assistance.",
     "Sesuai untuk makluman tajaan, pinjaman pendidikan, atau peluang pembiayaan pengajian.": "Suitable for sponsorship notices, education loans, or study funding opportunities.",
     "Set the venue coordinates and, when enabled, publish a questionnaire before opening attendance.": "Set the venue coordinates and, when enabled, publish a questionnaire before opening attendance.",
+    "Set the venue and, when enabled, publish a questionnaire before opening attendance.": "Set the venue and, when enabled, publish a questionnaire before opening attendance.",
+    "GPS verification is not enabled for this program. You can submit attendance now.": "GPS verification is not enabled for this program. You can submit attendance now.",
     "Set the venue used for participant check-in. Coordinates are optional and enable geofence validation.": "Set the venue used for participant check-in. Coordinates are optional and enable geofence validation.",
     "Set the venue and attendance distance in metres. GPS coordinates are an optional secondary setting.": "Set the venue and attendance distance in metres. GPS coordinates are an optional secondary setting.",
     "Optional GPS coordinates": "Optional GPS coordinates",

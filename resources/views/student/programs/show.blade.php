@@ -18,13 +18,20 @@
             @else<textarea name="answers[{{ $question->id }}]" rows="5" @required($question->is_required) style="padding:.8rem;border:1px solid var(--border);border-radius:10px;" placeholder="{{ __('Type your answer here...') }}">{{ old('answers.'.$question->id) }}</textarea>@endif
         </div>
         @endforeach
+        @if($program->latitude !== null && $program->longitude !== null)
         <div id="paStatus" class="alert alert-warning">{{ __('Location permission is required before submission.') }}</div>
         <button id="paSubmit" class="btn btn-primary" type="submit" disabled>{{ __('Submit Attendance & Questionnaire') }}</button>
+        @else
+        <div id="paStatus" class="alert alert-success">{{ __('GPS verification is not enabled for this program. You can submit attendance now.') }}</div>
+        <button id="paSubmit" class="btn btn-primary" type="submit">{{ __('Submit Attendance & Questionnaire') }}</button>
+        @endif
     </form>
     @endif
 </section></main>
+@if($program->latitude !== null && $program->longitude !== null)
 <script>
 (() => { const status=document.getElementById('paStatus'),button=document.getElementById('paSubmit'); if(!status||!navigator.geolocation)return;
 navigator.geolocation.getCurrentPosition(p=>{document.getElementById('paLat').value=p.coords.latitude;document.getElementById('paLng').value=p.coords.longitude;document.getElementById('paAccuracy').value=p.coords.accuracy;document.getElementById('paCaptured').value=new Date(p.timestamp).toISOString();status.textContent=`{{ __('Location captured') }} (${Math.round(p.coords.accuracy)}m)`;status.className='alert alert-success';button.disabled=false;},()=>{status.textContent='{{ __('Location access failed. Enable GPS permission and reload this page.') }}';status.className='alert alert-danger';},{enableHighAccuracy:true,timeout:15000,maximumAge:0}); })();
 </script>
+@endif
 @endsection

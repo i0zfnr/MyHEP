@@ -81,14 +81,14 @@ class ProgramActivityController extends Controller
             return back()->withErrors(['attendance' => __('You have already submitted attendance for this program.')]);
         }
 
+        $usesGeofence = $program->latitude !== null && $program->longitude !== null;
         $validated = $request->validate([
             'answers' => ['nullable', 'array'], 'answers.*' => ['nullable', 'string', 'max:5000'],
-            'latitude' => ['required', 'numeric', 'between:-90,90'],
-            'longitude' => ['required', 'numeric', 'between:-180,180'],
-            'location_accuracy_m' => ['required', 'numeric', 'min:0', 'max:5000'],
-            'location_captured_at' => ['required', 'date', 'before_or_equal:now', 'after:'.now()->subMinutes(5)->toDateTimeString()],
+            'latitude' => [$usesGeofence ? 'required' : 'nullable', 'numeric', 'between:-90,90'],
+            'longitude' => [$usesGeofence ? 'required' : 'nullable', 'numeric', 'between:-180,180'],
+            'location_accuracy_m' => [$usesGeofence ? 'required' : 'nullable', 'numeric', 'min:0', 'max:5000'],
+            'location_captured_at' => [$usesGeofence ? 'required' : 'nullable', 'date', 'before_or_equal:now', 'after:'.now()->subMinutes(5)->toDateTimeString()],
         ]);
-        abort_unless($program->latitude !== null && $program->longitude !== null, 422);
 
         $questions = $survey && $program->questionnaire_enabled
             ? DB::table('program_survey_questions')->where('program_survey_id', $survey->id)->orderBy('sort_order')->get()
@@ -102,17 +102,17 @@ class ProgramActivityController extends Controller
             return back()->withInput()->withErrors(['answers.'.(int) $missing->id => __('Please answer the required question: :question', ['question' => $missing->question_text])]);
         }
 
-        $distance = $this->distanceMeters((float) $program->latitude, (float) $program->longitude, (float) $validated['latitude'], (float) $validated['longitude']);
-        $accuracy = (float) $validated['location_accuracy_m'];
-        $status = $distance > (int) $program->geofence_radius_m ? 'invalid_outside_radius' : ($accuracy > 100 ? 'needs_review_accuracy' : 'valid');
+        $distance = $usesGeofence ? $this->distanceMeters((float) $program->latitude, (float) $program->longitude, (float) $validated['latitude'], (float) $validated['longitude']) : null;
+        $accuracy = $usesGeofence ? (float) $validated['location_accuracy_m'] : null;
+        $status = ! $usesGeofence ? 'valid' : ($distance > (int) $program->geofence_radius_m ? 'invalid_outside_radius' : ($accuracy > 100 ? 'needs_review_accuracy' : 'valid'));
 
         DB::transaction(function () use ($program, $student, $survey, $questions, $answers, $validated, $distance, $accuracy, $status): void {
             $attendanceId = DB::table('program_attendances')->insertGetId([
                 'program_id' => $program->id, 'student_id' => $student->id, 'attendee_type' => 'internal',
                 'full_name' => $student->full_name, 'identifier' => $student->matric_no, 'institution_or_unit' => $student->program,
-                'checked_in_at' => now(), 'latitude' => $validated['latitude'], 'longitude' => $validated['longitude'],
-                'geofence_valid' => $status === 'valid', 'validation_status' => $status, 'distance_m' => round($distance, 2),
-                'location_accuracy_m' => round($accuracy, 2), 'location_captured_at' => $validated['location_captured_at'],
+                'checked_in_at' => now(), 'latitude' => $validated['latitude'] ?? null, 'longitude' => $validated['longitude'] ?? null,
+                'geofence_valid' => $status === 'valid', 'validation_status' => $status, 'distance_m' => $distance === null ? null : round($distance, 2),
+                'location_accuracy_m' => $accuracy === null ? null : round($accuracy, 2), 'location_captured_at' => $validated['location_captured_at'] ?? null,
                 'created_at' => now(), 'updated_at' => now(),
             ]);
             foreach ($questions as $question) {
