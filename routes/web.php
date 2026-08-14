@@ -178,6 +178,7 @@ Route::prefix('/admin/programs')->middleware('auth.session:admin')->name('admin.
     Route::post('/{program}/report/submit', [ProgramOperationController::class, 'submitReport'])->name('report.submit');
     Route::post('/{program}/report/review', [ProgramOperationController::class, 'reviewReport'])->name('report.review');
     Route::post('/{program}/certificates/generate', [ProgramCertificateController::class, 'generate'])->name('certificates.generate');
+    Route::post('/{program}/certificates/generate-test', [ProgramCertificateController::class, 'generateTest'])->name('certificates.generate-test');
 });
 Route::get('/admin/program-certificates', [ProgramCertificateController::class, 'index'])->middleware('auth.session:admin')->name('admin.program-certificates.index');
 Route::get('/admin/program-certificates/{certificate}/download', [ProgramCertificateController::class, 'download'])->middleware('auth.session:admin')->name('admin.program-certificates.download');

@@ -626,6 +626,7 @@
                     </select>
                     <p>{{ __('More official certificate templates can be added later. The selected design is saved when generation starts.') }}</p>
                     <div class="pmr-actions">
+                        @if($canManageCertificates)<button class="pmr-btn" type="submit" formaction="{{ route('admin.programs.certificates.generate-test',$program->id) }}">{{ __('Generate Test Certificate') }}</button>@endif
                         @if($canManageCertificates)<button class="pmr-btn primary" type="submit">{{ __('Generate All Eligible Certificates') }}</button>@endif
                         <a class="pmr-btn" href="{{ route('admin.program-certificates.index',['program_id'=>$program->id]) }}">{{ __('Search Certificate Records') }}</a>
                     </div>

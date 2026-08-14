@@ -1,172 +1,24 @@
-PROJECT HANDOFF - StudentEdge
-Date: 2026-08-14
-Path: C:\laragon\www\e-biasiswa
+STUDENTEDGE PROJECT HANDOFF
+Baseline: 14 August 2026
 
-SUMMARY
--------
-StudentEdge is a Laravel 13 student-affairs application covering student profiles,
-scholarship, discipline, fines, vehicle stickers, announcements, campus movement,
-private documents, notifications, reports, administration, and system controls.
+The current documentation has been consolidated under docs/README.md. Read it before changing workflows or permissions.
 
-CURRENT IMPLEMENTATION
-----------------------
-- Custom student/admin session authentication with password reset and linked role mode.
-- Active device/session tracking through account_sessions. Users can revoke one other
-  session or every other session from Settings.
-- Central AdminPermissions abilities. Guard can list/search students but cannot view
-  sensitive detail, export, create, edit, delete, import, or reset passwords.
-- IC numbers are masked outside sensitive-detail contexts.
-- Private student_documents disk and metadata table. Students download only their own
-  documents; Head of Student Affairs and System Admin can review and download them.
-- Scholarship declarations can upload a private offer letter linked to the document
-  workflow. Replacing/removing metadata also handles the stored file.
-- System Admin can enable/disable document_centre; middleware enforces the state.
-- Admin profile photo upload supports browser crop, zoom, rotate, reset, and preview.
-- Movement feed uses cursor batches and bounded DOM virtualization. Lenis smooths
-  mouse-wheel scrolling while touch and nested interactive regions stay native.
-- PWA install prompts appear only on student/admin dashboards.
-- The audited interface contains 160 named application functions: 23 public/shared,
-  21 student, and 116 admin. See docs/FUNCTION_INVENTORY.md for the reproducible count.
-- Lecturer accounts receive only individually enabled offense pages and limited AJAX
-  student lookup; they do not receive the general student directory.
-- System Admin can configure session lifetime, test push delivery to their own device,
-  and broadcast scheduled maintenance notices to subscribed students and admins.
-- Password-reset codes use the configured Resend API transport and remain email-only;
-  push is a security alert after reset completion. System Admin has a throttled email
-  delivery test that reports provider acceptance with a troubleshooting reference.
-- Dedicated staff/guard management enforces category/page access, active state,
-  audit logs, and session revocation. Staff can borrow/return JHEP laptops by QR;
-  Head of Student Affairs and System Admin can view inventory and loan history.
-- Admin and Lecturer dashboards currently provide one responsive 3D-styled summary
-  graph with a persistent Show/Hide control. In the current 2026-08-10 build,
-  visualization mode adds the graph above the metric cards instead of replacing
-  those cards. Every Lecturer receives the Discipline Admin-style aggregate
-  overview without gaining unrestricted access to student or offense pages.
-- Monthly Report uses lightweight accent-led KPI cards, six-month trend charts,
-  status donuts, compact empty states, and print-safe layouts. Decorative corner
-  curves were removed, while subtle elevation and matching dark-theme surfaces
-  preserve hierarchy. Every Lecturer can open Discipline Monthly Analytics;
-  scholarship analytics remain limited to scholarship-authorized roles.
-- Lecturer offense registration is enabled by default, but System Admin can disable
-  `offense_register` per lecturer. `offense_list` is a separate per-account control.
-- Register Student Offense restores the 23 default violated-rule choices through
-  an idempotent migration when an environment is missing the original SQL seed.
-- Student List, Offense List, and Vehicle Sticker use debounced automatic AJAX
-  result updates; Student Movement retains its existing AJAX feed. Status and
-  advanced dropdowns update automatically, including the Offense List status.
-- Authorized student searches cover name, matric number, and NRIC. Movement NRIC
-  search remains limited to roles allowed to access sensitive student identity.
-- Light-theme sidebar navigation uses stronger text contrast when liquid glass
-  transparency reaches 70% or higher, without changing the liquid design.
-- Program Management workspace (`admin.programs.*`) aligns with Liquid Glass tokens,
-  44px min-height touch targets, and light/dark theme adaptation. Accent color authorization
-  is strictly enforced: custom accent themes (`candy_blue`, `lavender`, `orchid`, `violet`, `gold`)
-  apply only to Student and System Admin sessions; non-system admin staff roles lock to the canonical gold (#C8A96A).
-- English and Malay UI catalogues are synchronized from literal translation calls
-  across Blade, application, and route PHP sources. The localization utilities in
-  `tools/` preserve reviewed terminology, report unresolved values, and prevent
-  ordinary copy containing periods from being mistaken for grouped Laravel keys.
-  The 2026-08-14 audit covered 100 Blade templates with no missing EN/MS literal
-  keys, placeholder mismatches, or outstanding manual-review entries.
+Current application baseline:
+- Laravel 13 / PHP 8.3+
+- 220 registered web routes
+- 37 automated test files
+- Role-scoped student, scholarship/welfare, discipline, movement, laptop, program, report, certificate, AI, and administration modules
 
-IMPORTANT FILES
----------------
-- routes/web.php: routes and remaining inline legacy workflows.
-- app/Support/AdminPermissions.php: authoritative ability-to-role mapping.
-- app/Support/AccountSessionManager.php: device registration and revocation.
-- app/Support/SystemFeatures.php: registered feature flags.
-- app/Http/Controllers/Admin/StudentDocumentController.php: document review/download.
-- app/Http/Controllers/Student/DocumentController.php: owned document list/download.
-- app/Http/Controllers/Admin/MaintenanceController.php: maintenance, push, and email tests.
-- app/Http/Controllers/Admin/LaptopController.php: transactional QR borrow/return.
-- app/Mail/SystemEmailTest.php: administrative delivery-test email.
-- config/filesystems.php: public storage and private student_documents disk.
-- resources/js/app.js: PWA, cropper, overlays, Lenis, and movement feed behavior.
-- tools/sync_translation_catalogues.py: literal-key catalogue synchronization and
-  reviewed StudentEdge terminology.
-- tools/translate_missing_catalogue_values.py: incremental unresolved-value translation.
-- tools/localize_blade_literals.py: guarded Blade literal localization utility.
-- docs/SYSTEM_DOCUMENTATION.md: expanded functional and technical reference.
-- docs/FUNCTION_INVENTORY.md: route-backed role/module function count and inventory.
-- docs/PROJECT_PROGRESS_AND_NEXT_STEPS.md: current risks and release plan.
+Important implementation rules:
+1. Source code, migrations, permissions, and tests are authoritative.
+2. Keep private student documents and generated records behind authorized controller downloads.
+3. Program reports are drafts until a human checks content, formatting, blank pages, images, names, dates, and signatures.
+4. Queue workers are required for background certificate processing.
+5. Update both lang/en.json and lang/ms.json for every user-visible workflow change.
+6. Preserve native nested scrolling in dialogs, tables, scanners, and file drop zones.
+7. Run `php artisan view:clear`, `php artisan test`, and `npm run build` before release.
 
-MIGRATIONS ADDED FOR THE CURRENT FEATURE SET
---------------------------------------------
-- 2026_07_31_120000_create_account_sessions_table.php
-- 2026_07_31_130000_create_student_documents_table.php
-- 2026_07_31_150000_add_source_to_student_documents_table.php
-- 2026_07_31_160000_create_system_features_table.php
-- 2026_08_06_090000_add_lecturer_role_and_page_access.php
-- 2026_08_06_100000_create_system_settings_table.php
-- 2026_08_06_110000_normalize_student_program_identifiers.php
-- 2026_08_08_090000_create_push_notification_markers_table.php
-- 2026_08_08_120000_add_staff_profile_fields_to_admins_table.php
-- 2026_08_08_130000_create_jhep_laptop_tables.php
+Known current report finding:
+The generated AKJ DOCX opens. Its paired 12-page PDF opens, but pages 2, 3, 5, and 9 appear blank/mostly blank and must be checked against the official report template.
 
-RELEASE BLOCKERS / RISKS
-------------------------
-1. The 2026-08-02 Composer audit reports 28 advisories across 10 packages,
-   including high-severity Laravel/Symfony findings. Update dependencies separately.
-2. Make movement QR consumption and active checkout creation concurrency-safe.
-3. Run real-role desktop/mobile UAT and broaden legacy workflow tests.
-4. Rehearse encrypted database plus public/private file backup and restore.
-5. Verify production HTTPS, debug, cookies, proxy, queue, scheduler, Resend sender
-   domain/API key, email delivery, logs, permissions, and rollback configuration.
-6. routes/web.php still contains large workflow closures.
-
-PLANNED ONLY
-------------
-- Revise the dashboard visualization toggle into two mutually exclusive modes:
-  Card mode shows the existing metric cards and hides dashboard graphs; Graph mode
-  hides the metric cards and replaces them with a multi-graph analytics layout.
-- Graph mode must contain a full suite of complementary visuals across 4 categories:
-  1. Composition / Distribution Charts:
-     - Pie Chart / Donut Chart for gender distribution & user roles (2-4 categories).
-     - Treemap for dense multi-category breakdowns (e.g. offense counts categorized by specific rules broken).
-     - Stacked Bar for comparing fractional student statuses across class years/programs.
-  2. Comparison & Category Metrics:
-     - Horizontal Bar Chart for ranking specific long-label offense types (e.g., "Late Returns", "Outsiders").
-     - Vertical Column Chart for standard comparison across discrete categories.
-     - Grouped Bar Chart for side-by-side comparisons (e.g. comparing offenses this month vs last month).
-  3. Trends Over Time (Chronological):
-     - Line Chart showing 6-month micro-fluctuations and volume trajectories.
-     - Area Chart highlighting cumulative volume spikes over timelines.
-     - Calendar Heatmap visualizing peak activity days throughout the semester to spot behavioral patterns.
-  4. Status Indicators & Summary Widgets:
-     - KPI Metric Card: Giant number paired with percent change metrics.
-     - Progress Gauge / Radial Bar tracking progress against fixed ceiling metrics or safety targets.
-     - Sparkline: Micro-line charts embedded in summary rows to show direction without massive graph containers.
-- Apply the replacement behavior consistently to Admin and Lecturer dashboards.
-  Each role must see only aggregate datasets already permitted for that role. Keep
-  the saved toggle state, responsive/mobile layout, dark theme, reduced-motion
-  handling, meaningful zero-data states, and accessible chart labels/data summaries.
-- The screenshots `Screenshot 2026-08-10 201342.png` and `Screenshot 2026-08-10
-  201348.png` are the handoff evidence for the current state to be replaced.
-- Password-change clarification: Students can change their own password while
-  signed in from Student Profile by entering the current password and a confirmed
-  new password; this does not request an email code. Admin and Lecturer profiles do
-  not currently provide an in-system self-service password-change form. Their
-  available self-service path is Forgot Password, which sends a six-digit email
-  verification code. Authorized account managers can also set/reset staff passwords
-  through administration; that administrative action does not email a reset code.
-- iPayment receipt authenticity verification is not implemented or confirmed.
-  OCR or reading an unknown QR is not proof. Require an official API or documented
-  verification contract before automating authenticity; retain human review.
-- Student AI and AI-assisted write actions remain disabled pending privacy,
-  authorization, approval, audit, and testing requirements.
-
-VERIFICATION
-------------
-Run before deployment or release:
-
-  git status --short --branch
-  git diff --check
-  php artisan test
-  php artisan route:list --except-vendor
-  php artisan migrate:status
-  php artisan view:cache
-  npm run build
-  composer audit --locked
-
-Do not commit .env, credentials, student data, database dumps containing real data,
-or uploaded public/private files. Do not discard unrelated working-tree changes.
+Documentation index: docs/README.md

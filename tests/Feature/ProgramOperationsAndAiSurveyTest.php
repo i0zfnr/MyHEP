@@ -7,6 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use App\Jobs\GenerateProgramCertificate;
 use Tests\TestCase;
 
@@ -556,7 +557,11 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
                 base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
             )],
             'output_format' => 'both',
-        ])->assertRedirect()->assertSessionHasNoErrors();
+        ])->assertRedirect()->assertSessionHasNoErrors()->assertSessionHas('generated_report', function (array $result) use ($programId): bool {
+            return $result['program_title'] === 'Student Leadership & Service Program'
+                && str_contains((string) $result['docx_url'], "/admin/programs/{$programId}/report/download/docx")
+                && str_contains((string) $result['pdf_url'], "/admin/programs/{$programId}/report/download/pdf");
+        });
         $this->assertDatabaseHas('program_reports', ['program_id' => $programId, 'status' => 'draft']);
 
         $docxPath = DB::table('program_reports')->where('program_id', $programId)->value('docx_path');
@@ -641,6 +646,27 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->signIn(1,'lecturer')->post(route('admin.programs.certificates.generate',$programId))->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseHas('program_certificates',['program_id'=>$programId,'program_attendance_id'=>$attendanceId,'student_id'=>$studentId,'matric_no'=>'PB22001','status'=>'pending']);
         Queue::assertPushed(GenerateProgramCertificate::class,1);
+    }
+
+    public function test_program_director_can_generate_one_test_certificate_immediately(): void
+    {
+        Storage::fake('local');
+        $studentId = DB::table('students')->insertGetId(['full_name'=>'Preview Student','matric_no'=>'PB22009','program'=>'DIT','created_at'=>now(),'updated_at'=>now()]);
+        $programId = DB::table('programs')->insertGetId(['created_by'=>1,'title'=>'Certificate Preview Program','paperwork_method'=>'none','questionnaire_enabled'=>false,'certificate_enabled'=>true,'certificate_template'=>'standard_placeholder','status'=>'completed','created_at'=>now(),'updated_at'=>now()]);
+        $attendanceId = DB::table('program_attendances')->insertGetId(['program_id'=>$programId,'student_id'=>$studentId,'attendee_type'=>'internal','full_name'=>'Preview Student','identifier'=>'PB22009','checked_in_at'=>now(),'geofence_valid'=>true,'validation_status'=>'valid','created_at'=>now(),'updated_at'=>now()]);
+
+        $this->signIn(1,'lecturer')->post(route('admin.programs.certificates.generate-test',$programId), [
+            'certificate_template' => 'standard_placeholder',
+        ])->assertRedirect(route('admin.program-certificates.index', ['program_id'=>$programId,'q'=>'PB22009']))
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $certificate = DB::table('program_certificates')->where('program_id',$programId)->where('student_id',$studentId)->first();
+        $this->assertNotNull($certificate);
+        $this->assertSame($attendanceId, (int) $certificate->program_attendance_id);
+        $this->assertSame('ready', $certificate->status);
+        $this->assertNotNull($certificate->generated_at);
+        Storage::disk('local')->assertExists($certificate->path);
     }
 
     public function test_points_only_program_does_not_queue_certificates(): void

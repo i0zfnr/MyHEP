@@ -2205,5 +2205,15 @@
     "Drop a PDF or DOCX here, or click Add paperwork.": "Lepaskan fail PDF atau DOCX di sini, atau klik Tambah kertas kerja.",
     "Drop activity images here, or click Add images.": "Lepaskan gambar aktiviti di sini, atau klik Tambah gambar.",
     "Only JPG, PNG, and WEBP images are accepted. Unsupported files were not added.": "Hanya gambar JPG, PNG dan WEBP diterima. Fail yang tidak disokong tidak ditambah.",
-    "Only PDF or DOCX paperwork is accepted.": "Hanya kertas kerja PDF atau DOCX diterima."
+    "Only PDF or DOCX paperwork is accepted.": "Hanya kertas kerja PDF atau DOCX diterima.",
+    "Program report generated successfully": "Laporan program berjaya dijana",
+    "Your report files were saved successfully. Download and review them before submitting the final report for approval.": "Fail laporan anda berjaya disimpan. Muat turun dan semak fail sebelum menghantar laporan akhir untuk kelulusan.",
+    "Download editable DOCX": "Muat turun DOCX boleh sunting",
+    "Download review PDF": "Muat turun PDF semakan",
+    "Generation creates a draft. Check the content, formatting, blank pages, names, dates, images, and signatures before submission.": "Penjanaan menghasilkan draf. Semak kandungan, format, halaman kosong, nama, tarikh, gambar dan tandatangan sebelum dihantar.",
+    "Review report workflow": "Semak aliran kerja laporan",
+    "View program": "Lihat program",
+    "Generate Test Certificate": "Jana Sijil Ujian",
+    "Test certificate generated successfully and is ready to download.": "Sijil ujian berjaya dijana dan sedia untuk dimuat turun.",
+    "The test certificate could not be generated. Please check the application log and try again.": "Sijil ujian tidak dapat dijana. Sila semak log aplikasi dan cuba lagi."
 }

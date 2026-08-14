@@ -904,6 +904,9 @@
     .ai-confirm-icon svg { width:20px; height:20px; }
     .ai-confirm-card h3 { margin:0 0 .4rem; font-size:1rem; line-height:1.35; }
     .ai-confirm-card p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.55; }
+    #programReportDialog { align-items:center; overflow:hidden; }
+    #programReportDialog .ai-confirm-card { max-height:calc(100dvh - 2rem); overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; -webkit-overflow-scrolling:touch; }
+    #programReportDialog .ai-confirm-actions { position:sticky; bottom:-1.25rem; z-index:3; margin-inline:-1.25rem; padding:.8rem 1.25rem 1.25rem; background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--surface) 98%,var(--se-primary-soft)) 24%); }
     .program-report-form { display:grid; gap:.9rem; margin-top:1rem; }
     .program-report-upload { display:grid; gap:.48rem; }
     .program-report-upload-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
@@ -949,6 +952,18 @@
     .ai-confirm-button--danger { border-color:color-mix(in srgb,#dc2626 60%,transparent); background:#b4232d; color:#fff; }
     .ai-confirm-button--danger:hover { background:#991f27; }
     .ai-confirm-button:focus-visible { outline:2px solid var(--se-primary); outline-offset:2px; }
+    .program-report-complete-card { width:min(520px,100%); text-align:left; }
+    .program-report-complete-icon { width:52px; height:52px; display:grid; place-items:center; margin-bottom:1rem; border-radius:16px; background:color-mix(in srgb,#21835a 14%,var(--surface)); color:#21835a; box-shadow:0 8px 22px color-mix(in srgb,#21835a 18%,transparent); }
+    .program-report-complete-icon svg { width:27px; height:27px; }
+    .program-report-complete-card h3 { font-size:1.15rem; }
+    .program-report-complete-program { display:flex; align-items:center; gap:.55rem; margin-top:1rem; padding:.75rem .85rem; border:1px solid color-mix(in srgb,var(--se-primary) 22%,var(--border)); border-radius:12px; background:color-mix(in srgb,var(--surface) 90%,var(--se-primary-soft)); color:var(--text); font-size:.8rem; font-weight:800; }
+    .program-report-complete-files { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.55rem; margin-top:.8rem; }
+    .program-report-complete-files a { min-height:44px; display:flex; align-items:center; justify-content:center; gap:.45rem; padding:.65rem .8rem; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:11px; background:color-mix(in srgb,var(--surface) 86%,var(--se-primary-soft)); color:var(--se-primary-strong); font-size:.76rem; font-weight:850; text-decoration:none; }
+    .program-report-complete-files a:hover,.program-report-complete-files a:focus-visible { border-color:var(--se-primary); background:var(--se-primary-soft); outline:none; }
+    .program-report-complete-note { margin-top:.8rem !important; padding:.72rem .8rem; border-left:3px solid var(--se-primary); border-radius:8px; background:color-mix(in srgb,var(--surface) 91%,var(--se-primary-soft)); }
+    .program-report-complete-card .ai-confirm-actions a { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; }
+    .program-report-complete-card .ai-confirm-actions .is-primary { border-color:var(--se-primary); background:var(--se-primary); color:#fff; box-shadow:0 10px 24px color-mix(in srgb,var(--se-primary) 24%,transparent); }
+    @media(max-width:520px){ .program-report-complete-files { grid-template-columns:1fr; } }
     body.admin-ai-helper-page { overflow:hidden !important; }
     body.admin-ai-helper-page .main-scroll-viewport { overflow:hidden !important; }
     body.admin-ai-helper-page .main-scroll-inner { height:100%; min-height:0; overflow:hidden; }
@@ -1186,7 +1201,7 @@
     @if(!$studentAiMode)
     <div class="ai-confirm" id="programReportDialog" role="dialog" aria-modal="true" aria-labelledby="programReportDialogTitle" aria-hidden="true">
         <button type="button" class="ai-confirm-backdrop" data-program-report-close tabindex="-1" aria-label="{{ __('Close') }}"></button>
-        <div class="ai-confirm-card" style="width:min(620px,calc(100vw - 2rem));text-align:left;">
+        <div class="ai-confirm-card" data-lenis-prevent style="width:min(620px,calc(100vw - 2rem));text-align:left;">
             <h3 id="programReportDialogTitle">{{ __('Program Report Template') }}</h3>
             <p>{{ __('Choose your program and source files. StudentEdge adds its attendance and questionnaire records automatically and saves the generated report under the selected program.') }}</p>
             <form id="programReportForm" class="program-report-form" method="post" enctype="multipart/form-data">@csrf
@@ -1215,6 +1230,29 @@
                 </div>
                 <div class="ai-confirm-actions"><button type="button" class="ai-confirm-button" data-program-report-close>{{ __('Cancel') }}</button><button id="programReportSubmit" type="submit" class="ai-confirm-button">{{ __('Generate Program Report') }}</button></div>
             </form>
+        </div>
+    </div>
+    @endif
+
+    @if(session('generated_report'))
+    @php($generatedReport = session('generated_report'))
+    <div class="ai-confirm is-open" id="programReportCompleteDialog" role="dialog" aria-modal="true" aria-labelledby="programReportCompleteTitle" aria-describedby="programReportCompleteDescription" aria-hidden="false">
+        <button type="button" class="ai-confirm-backdrop" data-program-report-complete-close tabindex="-1" aria-label="{{ __('Close') }}"></button>
+        <div class="ai-confirm-card program-report-complete-card" data-lenis-prevent>
+            <div class="program-report-complete-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4.2 4.2L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <h3 id="programReportCompleteTitle">{{ __('Program report generated successfully') }}</h3>
+            <p id="programReportCompleteDescription">{{ __('Your report files were saved successfully. Download and review them before submitting the final report for approval.') }}</p>
+            <div class="program-report-complete-program"><span>{{ __('Program') }}</span><span aria-hidden="true">&middot;</span><strong>{{ $generatedReport['program_title'] }}</strong></div>
+            <div class="program-report-complete-files">
+                @if($generatedReport['docx_url'])<a href="{{ $generatedReport['docx_url'] }}">{{ __('Download editable DOCX') }}</a>@endif
+                @if($generatedReport['pdf_url'])<a href="{{ $generatedReport['pdf_url'] }}">{{ __('Download review PDF') }}</a>@endif
+            </div>
+            <p class="program-report-complete-note">{{ __('Generation creates a draft. Check the content, formatting, blank pages, names, dates, images, and signatures before submission.') }}</p>
+            <div class="ai-confirm-actions">
+                <button type="button" class="ai-confirm-button" data-program-report-complete-close>{{ __('Close') }}</button>
+                <a class="ai-confirm-button is-primary" href="{{ $generatedReport['operations_url'] }}">{{ __('Review report workflow') }}</a>
+                <a class="ai-confirm-button" href="{{ $generatedReport['details_url'] }}">{{ __('View program') }}</a>
+            </div>
         </div>
     </div>
     @endif
@@ -2114,6 +2152,11 @@
     programReportProgram?.addEventListener('change', syncProgramReportRequirements);
     programReportShortcut?.addEventListener('click', () => setProgramReportOpen(true));
     document.querySelectorAll('[data-program-report-close]').forEach(button => button.addEventListener('click', () => setProgramReportOpen(false)));
+    const programReportCompleteDialog = document.getElementById('programReportCompleteDialog');
+    document.querySelectorAll('[data-program-report-complete-close]').forEach(button => button.addEventListener('click', () => {
+        programReportCompleteDialog?.classList.remove('is-open');
+        programReportCompleteDialog?.setAttribute('aria-hidden', 'true');
+    }));
     programReportForm?.addEventListener('submit', event => {
         const action = programReportProgram?.selectedOptions?.[0]?.dataset.action;
         if (!action) { event.preventDefault(); return; }

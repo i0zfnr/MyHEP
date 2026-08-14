@@ -1,88 +1,41 @@
 # StudentEdge
 
-StudentEdge is a Laravel student-affairs management system for Politeknik Besut. It brings scholarship, discipline, fines, vehicle stickers, campus movement, student documents, JHEP laptop lending, notifications, reporting, and role-scoped administration into one responsive installable web application.
+StudentEdge is a Laravel 13 student-affairs platform for Politeknik Besut. It combines student records, scholarship and welfare management, discipline, student movement, JHEP laptop loans, program attendance, questionnaires, participation points, certificates, AI-assisted reporting, notifications, and operational administration.
 
-## Documentation
+## Current baseline
 
-- [System documentation](docs/SYSTEM_DOCUMENTATION.md)
-- [Implemented function inventory - 167 functions](docs/FUNCTION_INVENTORY.md)
-- [Word function inventory (reference snapshot)](docs/StudentEdge_Function_Inventory.docx)
-- [Project progress and next steps](docs/PROJECT_PROGRESS_AND_NEXT_STEPS.md)
-- [Team presentation guide](docs/TEAM_PRESENTATION_GUIDE.md)
-- [Panel coding Q&A guide](docs/PANEL_CODING_QA_GUIDE.md)
-- [UAT checklist](docs/UAT_CHECKLIST.md)
-- [Deployment checklist](docs/DEPLOYMENT_CHECKLIST.md)
-- [Backup and restore SOP](docs/BACKUP_RESTORE_SOP.md)
-- [Product and engineering context](Document%20Context/PRD.md)
+- PHP 8.3+, Laravel 13, MySQL/MariaDB
+- Vite 8 and Tailwind CSS 4
+- PHPWord for editable DOCX reports and Dompdf for PDF output
+- Queue-backed bulk certificate generation and email/push integrations
+- English and Bahasa Melayu user interfaces
+- 220 registered routes and 37 automated test files as of 14 August 2026
 
-## Main capabilities
-
-- Custom student/admin authentication, Resend-backed password reset, active-device tracking, remote session revocation, and System Admin Active Visitors monitoring
-- Central admin permissions with separate student list, sensitive-data, export, management, document, scholarship, discipline, movement, back-office, and system abilities
-- 167 named application functions: 26 public/shared, 21 student, and 120 admin
-- Lecturer/staff accounts with category-derived scholarship, discipline, and movement access plus System Admin-controlled page gates
-- Student CRUD, profile photos, search, CSV/XLSX import, CSV export, identity masking, pagination, session revocation, and guarded System Admin bulk deletion
-- Scholarship records, B40 TVET import/export, announcements, declarations, and private offer-letter upload/review
-- Offenses, evidence, fines, payment receipts, rules, discipline announcements, and vehicle-sticker decisions
-- QR-based campus checkout/return, guard views, movement reports, cursor batches, and virtualized long lists
-- Private Student Document Centre with review, authenticated downloads, and a system-admin feature toggle
-- Synchronized English/Malay UI catalogues with incremental translation-audit tools,
-  light/dark theme, beta accent themes, Live Glass transparency, responsive PWA shell,
-  Android/iPhone install guidance, notifications, browser push, and reduced-motion support
-- Public and authenticated problem reporting with screenshots, email delivery state, System Admin review, status notes, and push updates
-- Staff/guard account management, public and authenticated QR laptop borrowing/return, borrower CSV import, printable QR labels, monthly analytics, monitoring, maintenance/cache controls, configurable session lifetime, push broadcasts, email-delivery testing, and audit logs
-
-## Technology
-
-| Technology | Requirement / version |
-| --- | --- |
-| PHP | `^8.3` |
-| Laravel | `^13.0` |
-| MySQL / MariaDB | Supported relational database |
-| Node.js | Current LTS recommended |
-| Vite | `^8.0` |
-| Tailwind CSS | `^4.0` |
-| Cropper.js | `^1.6.2` |
-| Lenis | `1.3.25` |
-
-## Local installation
+## Local setup
 
 ```powershell
-git clone https://github.com/i0zfnr/MyHEP.git
-Set-Location MyHEP
 composer install
 Copy-Item .env.example .env
 php artisan key:generate
-```
-
-Create the database from `StudentEdge.sql`, configure `.env`, then apply incremental migrations and build the frontend:
-
-```powershell
 php artisan migrate
-php artisan storage:link
 npm install
 npm run build
-php artisan serve
+php artisan storage:link
 ```
 
-Private student documents are stored under `storage/app/private/student_documents`; do not expose that directory through `public/storage`.
+For development, run `composer run dev`. A queue worker must be running for queued work such as bulk certificate generation.
 
-## Production readiness notes
-
-- Import `StudentEdge.sql` before incremental migrations; migrations do not reconstruct the complete original schema by themselves.
-- Remove the temporary student IC-number password fallback before using real client data.
-- Review the service worker so authenticated pages and private downloads are never retained in browser Cache Storage.
-- Treat the public laptop NRIC flow and the global student-deletion action as high-risk workflows requiring explicit institutional approval, throttling, backup, audit review, and UAT.
-- Rotate production secrets, set `APP_DEBUG=false`, run the full test suite, and review all Composer advisories before deployment.
-
-## Verification
+## Validation
 
 ```powershell
+php artisan view:clear
 php artisan test
-php artisan route:list --except-vendor
-php artisan view:cache
 npm run build
-git diff --check
+php artisan route:list
 ```
 
-See the deployment checklist before production use. Never commit `.env`, production credentials, personal student data, or uploaded documents.
+Never commit `.env`, production credentials, generated private reports, student documents, or database backups.
+
+## Documentation
+
+Start at [docs/README.md](docs/README.md). The documentation is source-aligned and split into system overview, access control, workflows, developer architecture, operations, testing, and current status.

@@ -2047,5 +2047,15 @@
     "Drop a PDF or DOCX here, or click Add paperwork.": "Drop a PDF or DOCX here, or click Add paperwork.",
     "Drop activity images here, or click Add images.": "Drop activity images here, or click Add images.",
     "Only JPG, PNG, and WEBP images are accepted. Unsupported files were not added.": "Only JPG, PNG, and WEBP images are accepted. Unsupported files were not added.",
-    "Only PDF or DOCX paperwork is accepted.": "Only PDF or DOCX paperwork is accepted."
+    "Only PDF or DOCX paperwork is accepted.": "Only PDF or DOCX paperwork is accepted.",
+    "Program report generated successfully": "Program report generated successfully",
+    "Your report files were saved successfully. Download and review them before submitting the final report for approval.": "Your report files were saved successfully. Download and review them before submitting the final report for approval.",
+    "Download editable DOCX": "Download editable DOCX",
+    "Download review PDF": "Download review PDF",
+    "Generation creates a draft. Check the content, formatting, blank pages, names, dates, images, and signatures before submission.": "Generation creates a draft. Check the content, formatting, blank pages, names, dates, images, and signatures before submission.",
+    "Review report workflow": "Review report workflow",
+    "View program": "View program",
+    "Generate Test Certificate": "Generate Test Certificate",
+    "Test certificate generated successfully and is ready to download.": "Test certificate generated successfully and is ready to download.",
+    "The test certificate could not be generated. Please check the application log and try again.": "The test certificate could not be generated. Please check the application log and try again."
 }

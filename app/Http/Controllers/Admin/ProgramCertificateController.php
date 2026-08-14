@@ -81,6 +81,67 @@ class ProgramCertificateController extends Controller
         return back()->with('success', trans_choice(':count certificate queued.|:count certificates queued.',count($queued),['count'=>count($queued)]));
     }
 
+    public function generateTest(Request $request, int $program): RedirectResponse
+    {
+        $validated = $request->validate([
+            'certificate_template' => ['nullable', Rule::in(['standard_placeholder'])],
+        ]);
+        $templateKey = $validated['certificate_template'] ?? 'standard_placeholder';
+        $item = DB::table('programs')->where('id', $program)->first();
+        abort_unless($item, 404);
+
+        $authId = (int) session('auth_user.id');
+        $role = (string) session('auth_user.admin_role');
+        abort_unless((int) $item->created_by === $authId || in_array($role, ['system_admin', 'student_affairs_head'], true), 403);
+        if (! (bool) ($item->certificate_enabled ?? true)) {
+            return back()->withErrors(['certificates' => __('This program awards participation points only and does not provide certificates.')]);
+        }
+
+        $student = DB::table('program_attendances')
+            ->join('students', 'students.id', '=', 'program_attendances.student_id')
+            ->where('program_attendances.program_id', $program)
+            ->where('program_attendances.attendee_type', 'internal')
+            ->where('program_attendances.validation_status', 'valid')
+            ->whereNotNull('students.matric_no')
+            ->select('program_attendances.id as attendance_id', 'students.id as student_id', 'students.matric_no', 'students.full_name')
+            ->orderBy('program_attendances.id')
+            ->first();
+        if (! $student) {
+            return back()->withErrors(['certificates' => __('No eligible internal students with valid attendance were found.')]);
+        }
+
+        DB::table('programs')->where('id', $program)->update(['certificate_template' => $templateKey, 'updated_at' => now()]);
+        $existing = DB::table('program_certificates')->where('program_id', $program)->where('student_id', $student->student_id)->first();
+        $certificateId = $existing?->id ?? DB::table('program_certificates')->insertGetId([
+            'program_id' => $program, 'program_attendance_id' => $student->attendance_id, 'student_id' => $student->student_id,
+            'matric_no' => $student->matric_no, 'student_name' => $student->full_name,
+            'serial_no' => 'SE-'.date('Y').'-'.str_pad((string) $program, 5, '0', STR_PAD_LEFT).'-'.str_pad((string) $student->student_id, 6, '0', STR_PAD_LEFT),
+            'template_key' => $templateKey, 'status' => 'pending', 'disk' => 'local', 'generated_by' => $authId,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        if ($existing) {
+            if ($existing->path) Storage::disk($existing->disk ?: 'local')->delete($existing->path);
+            DB::table('program_certificates')->where('id', $certificateId)->update([
+                'program_attendance_id' => $student->attendance_id, 'matric_no' => $student->matric_no,
+                'student_name' => $student->full_name, 'template_key' => $templateKey, 'status' => 'pending',
+                'path' => null, 'failure_reason' => null, 'generated_by' => $authId, 'generated_at' => null, 'updated_at' => now(),
+            ]);
+        }
+
+        try {
+            (new GenerateProgramCertificate($certificateId))->handle();
+        } catch (\Throwable $exception) {
+            (new GenerateProgramCertificate($certificateId))->failed($exception);
+            report($exception);
+
+            return back()->withErrors(['certificates' => __('The test certificate could not be generated. Please check the application log and try again.')]);
+        }
+
+        return redirect()->route('admin.program-certificates.index', ['program_id' => $program, 'q' => $student->matric_no])
+            ->with('success', __('Test certificate generated successfully and is ready to download.'));
+    }
+
     public function download(int $certificate)
     {
         $item = DB::table('program_certificates')->where('id',$certificate)->first();

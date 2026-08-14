@@ -252,7 +252,16 @@ class ProgramOperationController extends Controller
         DB::table('program_reports')->updateOrInsert(['program_id' => $program->id], $reportValues);
         auditLog('program_reports.generate', 'programs', $program->id, 'Post-program report draft generated');
 
-        return back()->with('success', __('Report draft generated. Review and edit it before submission to TPSA.'));
+        return back()->with([
+            'success' => __('Report draft generated. Review and edit it before submission to TPSA.'),
+            'generated_report' => [
+                'program_title' => $program->title,
+                'docx_url' => $files['docx_path'] ? route('admin.programs.report.download', [$program->id, 'docx']) : null,
+                'pdf_url' => $files['pdf_path'] ? route('admin.programs.report.download', [$program->id, 'pdf']) : null,
+                'details_url' => route('admin.programs.show', $program->id),
+                'operations_url' => route('admin.programs.operations', $program->id),
+            ],
+        ]);
     }
 
     public function downloadReport(int $id, string $format)
