@@ -1235,7 +1235,9 @@
     @endif
 
     @if(session('generated_report'))
-    @php($generatedReport = session('generated_report'))
+    @php
+        $generatedReport = session('generated_report');
+    @endphp
     <div class="ai-confirm is-open" id="programReportCompleteDialog" role="dialog" aria-modal="true" aria-labelledby="programReportCompleteTitle" aria-describedby="programReportCompleteDescription" aria-hidden="false">
         <button type="button" class="ai-confirm-backdrop" data-program-report-complete-close tabindex="-1" aria-label="{{ __('Close') }}"></button>
         <div class="ai-confirm-card program-report-complete-card" data-lenis-prevent>
