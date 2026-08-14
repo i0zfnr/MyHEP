@@ -11,6 +11,10 @@ use App\Http\Controllers\Admin\LaptopController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\ProgramController;
+use App\Http\Controllers\Admin\ProgramOperationController;
+use App\Http\Controllers\Admin\ProgramCertificateController;
+use App\Http\Controllers\Admin\ProgramParticipationPointController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\StudentController;
@@ -25,6 +29,7 @@ use App\Http\Controllers\NotificationFeedController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\ProgramActivityController as StudentProgramActivityController;
 use App\Http\Controllers\Student\AiHelperController as StudentAiHelperController;
 use App\Http\Controllers\Student\DocumentController as StudentDocumentController;
 use App\Http\Controllers\Student\MovementController as StudentMovementController;
@@ -88,6 +93,10 @@ Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'destroy'])
 Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
     ->middleware('auth.session:student')
     ->name('student.dashboard');
+Route::get('/student/programs', [StudentProgramActivityController::class, 'index'])->middleware('auth.session:student')->name('student.programs.index');
+Route::get('/student/programs/{program}', [StudentProgramActivityController::class, 'show'])->middleware('auth.session:student')->name('student.programs.show');
+Route::post('/student/programs/{program}/attendance', [StudentProgramActivityController::class, 'store'])->middleware(['auth.session:student', 'throttle:10,1'])->name('student.programs.attendance.store');
+Route::get('/student/certificates/{certificate}/download', [StudentProgramActivityController::class, 'downloadCertificate'])->middleware('auth.session:student')->name('student.certificates.download');
 Route::get('/student/scholarship-status', [ScholarshipStatusController::class, 'edit'])
     ->middleware('auth.session:student')
     ->name('student.scholarship-status.form');
@@ -133,6 +142,9 @@ Route::post('/student/movements', [StudentMovementController::class, 'store'])
 Route::get('/student/documents', [StudentDocumentController::class, 'index'])
     ->middleware(['auth.session:student', 'feature.enabled:document_centre'])
     ->name('student.documents.index');
+Route::post('/student/documents', [StudentDocumentController::class, 'store'])
+    ->middleware(['auth.session:student', 'feature.enabled:document_centre', 'throttle:10,1'])
+    ->name('student.documents.store');
 Route::get('/student/documents/{id}/download', [StudentDocumentController::class, 'download'])
     ->middleware(['auth.session:student', 'feature.enabled:document_centre'])
     ->name('student.documents.download');
@@ -140,6 +152,38 @@ Route::get('/student/documents/{id}/download', [StudentDocumentController::class
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
     ->name('admin.dashboard');
+Route::get('/admin/program-participation-points', [ProgramParticipationPointController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.program-participation-points.index');
+Route::prefix('/admin/programs')->middleware('auth.session:admin')->name('admin.programs.')->group(function (): void {
+    Route::get('/', [ProgramController::class, 'index'])->name('index');
+    Route::get('/create', [ProgramController::class, 'create'])->name('create');
+    Route::post('/', [ProgramController::class, 'store'])->name('store');
+    Route::get('/{program}', [ProgramController::class, 'show'])->name('show');
+    Route::get('/{program}/edit', [ProgramController::class, 'edit'])->name('edit');
+    Route::put('/{program}', [ProgramController::class, 'update'])->name('update');
+    Route::delete('/{program}', [ProgramController::class, 'destroy'])->name('destroy');
+    Route::get('/{program}/paperworks/{paperwork}/download', [ProgramController::class, 'download'])->name('paperworks.download');
+
+    Route::get('/{program}/operations', [ProgramOperationController::class, 'operations'])->name('operations');
+    Route::post('/{program}/ai-questionnaire', [ProgramOperationController::class, 'generateAiQuestionnaire'])->name('ai-questionnaire');
+    Route::post('/{program}/survey/save', [ProgramOperationController::class, 'saveSurvey'])->name('survey.save');
+    Route::post('/{program}/survey/publish', [ProgramOperationController::class, 'publishSurvey'])->name('survey.publish');
+    Route::put('/{program}/questionnaire-setting', [ProgramOperationController::class, 'updateQuestionnaireSetting'])->name('questionnaire-setting.update');
+    Route::post('/{program}/attendance/open', [ProgramOperationController::class, 'openAttendance'])->name('attendance.open');
+    Route::post('/{program}/attendance/close', [ProgramOperationController::class, 'closeAttendance'])->name('attendance.close');
+    Route::post('/{program}/report/generate', [ProgramOperationController::class, 'generateReport'])->name('report.generate');
+    Route::get('/{program}/report/download/{format}', [ProgramOperationController::class, 'downloadReport'])->name('report.download');
+    Route::post('/{program}/report/upload-edited', [ProgramOperationController::class, 'uploadEditedReport'])->name('report.upload-edited');
+    Route::post('/{program}/report/submit', [ProgramOperationController::class, 'submitReport'])->name('report.submit');
+    Route::post('/{program}/report/review', [ProgramOperationController::class, 'reviewReport'])->name('report.review');
+    Route::post('/{program}/certificates/generate', [ProgramCertificateController::class, 'generate'])->name('certificates.generate');
+});
+Route::get('/admin/program-certificates', [ProgramCertificateController::class, 'index'])->middleware('auth.session:admin')->name('admin.program-certificates.index');
+Route::get('/admin/program-certificates/{certificate}/download', [ProgramCertificateController::class, 'download'])->middleware('auth.session:admin')->name('admin.program-certificates.download');
+
+Route::get('/programs/{program}/qr-checkin', [ProgramOperationController::class, 'publicCheckin'])->name('public.programs.qr_checkin');
+Route::post('/programs/{program}/qr-checkin', [ProgramOperationController::class, 'storePublicCheckin'])->name('public.programs.qr_checkin.store');
 Route::get('/laptop-borrow/{token}', [LaptopController::class, 'borrowForm'])
     ->whereUuid('token')
     ->name('laptops.borrow');
@@ -376,6 +420,9 @@ Route::post('/admin/students/{id}/reset-password', [StudentController::class, 'r
 Route::get('/admin/scholarships', [ScholarshipController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.scholarships.index');
+Route::get('/admin/welfare', [ScholarshipController::class, 'welfare'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.welfare.index');
 Route::get('/admin/scholarships/export', [ScholarshipController::class, 'export'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.scholarships.export');

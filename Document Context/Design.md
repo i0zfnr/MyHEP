@@ -1,6 +1,6 @@
 # StudentEdge Design System
 
-Last updated: 2026-08-09
+Last updated: 2026-08-14
 
 ## Design Intent
 
@@ -9,7 +9,7 @@ StudentEdge is an operational student-affairs product. It should feel calm, prem
 ## Core Principles
 
 1. Prioritize scanning and repeated work over decorative presentation.
-2. Use Liquid Glass selectively for navigation, menus, sheets, dialogs, and transient controls.
+2. Use Liquid Glass selectively for navigation, menus, sheets, dialogs, transient controls, and workspace hero cards.
 3. Keep content cards lightweight so scrolling remains responsive on phones.
 4. Preserve clear hierarchy in both light and dark themes.
 5. Never let decoration reduce contrast, obscure text, or interfere with interaction.
@@ -92,6 +92,7 @@ Use design tokens from `resources/css/design-system.css`; do not scatter replace
 - Theme and locale save automatically.
 - Beta accent themes are available only to students and System Admins: `gold`, `candy_blue`, `lavender`, `orchid`, and `violet`.
 - Accent colors may style identity and primary actions, but semantic success, warning, error, and destructive colors remain invariant.
+- Module templates (e.g. Program Management workspace) must check session identity (`student` or `system_admin`) before allowing custom accent variables (`var(--se-primary)`); non-system admin staff roles are locked to the default brand gold (`#C8A96A`).
 - The canonical setting name is **Live Glass Transparency**. It controls surface opacity from 10% to 65% in 1% increments and saves automatically.
 - Keep the accepted Apple-inspired control design: compact live-preview row, subtle percentage badge, thin accent track, small solid/clear endpoint icons, and a restrained frosted capsule thumb.
 - Do not add nested decorative panels around the slider or expand the control into a large showcase.
@@ -109,6 +110,26 @@ Use design tokens from `resources/css/design-system.css`; do not scatter replace
 - Global student deletion belongs in a clearly separated danger zone with the exact phrase `DELETE ALL STUDENTS`, an irreversible-action warning, and System Admin-only authorization.
 - Student list rows show a compact circular profile photo with initials fallback.
 - Authenticated problem reporting uses the normal application shell; anonymous reporting retains the standalone public layout.
+- Program Management workspace views (`admin.programs.*`) use Liquid Glass cards and hero banners, 44px min-height touch targets, light/dark theme badge adaptations, and role-restricted accent color authorization.
+- Monthly analytics use accent-led KPI cards with a left status edge, compact icons,
+  restrained elevation, and stable content surfaces. Do not add decorative corner
+  circles or curves inside cards. Module headings remain directly on the page
+  background instead of being nested inside another card.
+- Trend, status, and empty-state panels must share the active role accent, remain
+  readable in dark mode, and fall back to flat, shadow-free A4 print styling.
+
+## Localization
+
+- Every user-facing static label must use Laravel translation calls and exist in
+  both `lang/en.json` and `lang/ms.json`.
+- Malay copy must be complete Malay; avoid mixed phrases such as `Rekod Scholarship`,
+  `Kesalahan Unpaid`, or `Permohonan Pending`.
+- Preserve Laravel placeholders exactly across locales.
+- Run `tools/sync_translation_catalogues.py` after adding or changing interface copy.
+  Use `tools/translate_missing_catalogue_values.py` only for values listed as unresolved,
+  then manually review institutional and workflow terminology.
+- Automated Blade localization must not rewrite JavaScript, CSS, Blade expressions,
+  route names, translation namespaces, or stored database values.
 
 ## Verification
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class ReportController extends Controller
@@ -20,6 +21,13 @@ class ReportController extends Controller
         $month = preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $monthInput) ? $monthInput : now()->format('Y-m');
         $start = Carbon::createFromFormat('Y-m-d', "{$month}-01")->startOfDay();
         $end = $start->copy()->endOfMonth()->endOfDay();
+
+        if ((session('auth_user.admin_role') ?? null) === 'lecturer') {
+            $staffId = (int) session('auth_user.id');
+            $programSummary = $this->staffProgramSummary($staffId, $start, $end);
+
+            return view('admin.reports.program_monthly', compact('month', 'start', 'end', 'programSummary'));
+        }
 
         $disciplineSummary = null;
         $scholarshipSummary = null;
@@ -110,6 +118,45 @@ class ReportController extends Controller
     private function percentage(int $value, int $total): float
     {
         return $total > 0 ? round(($value / $total) * 100, 1) : 0.0;
+    }
+
+    private function staffProgramSummary(int $staffId, Carbon $start, Carbon $end): array
+    {
+        if (! Schema::hasTable('programs')) {
+            return ['counts' => [], 'statuses' => [], 'trend' => [], 'recent' => collect(), 'approval_rate' => 0.0];
+        }
+
+        $owned = DB::table('programs')->where('created_by', $staffId);
+        $createdThisMonth = (clone $owned)->whereBetween('created_at', [$start, $end])->count();
+        $approvedThisMonth = (clone $owned)->where('status', 'approved')->whereBetween('director_reviewed_at', [$start, $end])->count();
+        $rejectedThisMonth = (clone $owned)->where('status', 'rejected')->whereBetween('updated_at', [$start, $end])->count();
+        $statuses = collect(['draft', 'pending_deputy', 'pending_director', 'approved', 'in_progress', 'completed', 'rejected'])
+            ->map(fn (string $status): array => ['status' => $status, 'value' => (clone $owned)->where('status', $status)->count()])
+            ->all();
+
+        $trend = $this->sixMonthTrend(
+            $start,
+            fn (Carbon $periodStart, Carbon $periodEnd): int => (clone $owned)->whereBetween('created_at', [$periodStart, $periodEnd])->count(),
+            fn (Carbon $periodStart, Carbon $periodEnd): int => (clone $owned)->where('status', 'approved')->whereBetween('director_reviewed_at', [$periodStart, $periodEnd])->count()
+        );
+
+        return [
+            'counts' => [
+                'created' => $createdThisMonth,
+                'submitted' => (clone $owned)->whereIn('status', ['pending_deputy', 'pending_director'])->whereBetween('updated_at', [$start, $end])->count(),
+                'approved' => $approvedThisMonth,
+                'completed' => (clone $owned)->where('status', 'completed')->whereBetween('updated_at', [$start, $end])->count(),
+                'current_total' => (clone $owned)->count(),
+                'review_tasks' => DB::table('programs')->where(function ($query) use ($staffId): void {
+                    $query->where(fn ($q) => $q->where('status', 'pending_deputy')->where('deputy_reviewer_id', $staffId))
+                        ->orWhere(fn ($q) => $q->where('status', 'pending_director')->where('director_reviewer_id', $staffId));
+                })->count(),
+            ],
+            'approval_rate' => $this->percentage($approvedThisMonth, $approvedThisMonth + $rejectedThisMonth),
+            'statuses' => $statuses,
+            'trend' => $trend,
+            'recent' => (clone $owned)->whereBetween('updated_at', [$start, $end])->select('id', 'title', 'status', 'starts_at', 'approval_branch')->orderByDesc('updated_at')->limit(10)->get(),
+        ];
     }
 
     private function sixMonthTrend(Carbon $selectedMonth, callable $primaryQuery, callable $secondaryQuery): array

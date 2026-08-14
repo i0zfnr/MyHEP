@@ -9,7 +9,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Verifikasi Kod Reset</title>
+    <title>{{ __('Verifikasi Kod Reset') }}</title>
     @include('partials.brand_icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -42,7 +42,7 @@
 <body data-theme="{{ session('theme', 'light') }}">
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
 <div class="card">
-    <h1>Verifikasi Kod</h1>
+    <h1>{{ __('Verifikasi Kod') }}</h1>
     <p>Masukkan kod 6 digit yang dihantar ke {{ $maskedEmail }}.</p>
 
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
@@ -52,12 +52,12 @@
         @csrf
         <input type="hidden" name="ref" value="{{ $ref }}">
 
-        <label for="code">Kod Verifikasi</label>
+        <label for="code">{{ __('Kod Verifikasi') }}</label>
         <input id="code" name="code" type="text" inputmode="numeric" maxlength="6" value="{{ old('code') }}" required>
 
         <div class="actions">
-            <button class="btn btn-primary" type="submit">Sahkan Kod</button>
-            <a class="btn" href="{{ route('password.forgot') }}">Hantar Semula</a>
+            <button class="btn btn-primary" type="submit">{{ __('Sahkan Kod') }}</button>
+            <a class="btn" href="{{ route('password.forgot') }}">{{ __('Hantar Semula') }}</a>
         </div>
     </form>
 </div>

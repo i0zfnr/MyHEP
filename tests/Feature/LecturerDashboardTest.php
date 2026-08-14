@@ -40,6 +40,12 @@ class LecturerDashboardTest extends TestCase
             $table->date('meeting_date')->nullable();
             $table->timestamps();
         });
+        Schema::create('programs', function (Blueprint $table): void {
+            $table->id(); $table->unsignedBigInteger('created_by'); $table->string('title'); $table->string('status');
+            $table->string('approval_branch')->nullable(); $table->unsignedBigInteger('deputy_reviewer_id')->nullable();
+            $table->unsignedBigInteger('director_reviewer_id')->nullable(); $table->timestamp('director_reviewed_at')->nullable();
+            $table->dateTime('starts_at')->nullable(); $table->timestamps();
+        });
 
         DB::table('admins')->insert([
             'id' => 1,
@@ -49,7 +55,7 @@ class LecturerDashboardTest extends TestCase
         ]);
     }
 
-    public function test_every_lecturer_receives_discipline_dashboard_metrics_and_visualization(): void
+    public function test_staff_receives_program_dashboard_without_student_discipline_metrics(): void
     {
         $response = $this->withSession([
             'auth_user' => [
@@ -62,8 +68,10 @@ class LecturerDashboardTest extends TestCase
         ])->get('/admin/dashboard');
 
         $response->assertOk()
-            ->assertSee('data-dashboard-viz-toggle', false)
-            ->assertSee('data-dashboard-viz', false)
-            ->assertSee('class="stat-card blue"', false);
+            ->assertDontSee('data-dashboard-visualization-toggle', false)
+            ->assertSee('My Program Overview')
+            ->assertSee('Program Status Distribution')
+            ->assertSee('Program Activity')
+            ->assertDontSee('Jumlah Pelajar');
     }
 }

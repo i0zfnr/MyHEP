@@ -175,7 +175,7 @@ if (!function_exists('adminRoleLabel')) {
     {
         return match ($role) {
             'guard' => __('Guard'),
-            'lecturer' => __('Lecturer'),
+            'lecturer' => __('Staff'),
             'scholarship_admin' => __('Scholarship Admin'),
             'discipline_admin' => __('Discipline Admin'),
             'student_affairs_head' => __('Ketua Hal Ehwal Pelajar'),

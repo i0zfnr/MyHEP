@@ -197,7 +197,7 @@ class StudentController extends Controller
                 'semester', 'academic_session', 'date_of_birth', 'religion', 'race', 'parliament', 'dun',
                 'address', 'study_address', 'residence_status', 'room_number', 'guardian_name',
                 'guardian_ic_no', 'guardian_phone', 'mother_ic_no', 'guardian_occupation',
-                'family_income', 'guardian_address',
+                'family_income', 'guardian_address', 'oku_status', 'oku_registration_no', 'oku_category',
             ])
             ->where('id', $id)
             ->first();

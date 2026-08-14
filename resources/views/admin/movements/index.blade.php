@@ -459,7 +459,6 @@
         <div
             class="mv-virtual-scroll"
             data-movement-virtual
-            data-lenis-prevent
             data-endpoint="{{ route('admin.movements.index', request()->except('cursor')) }}"
             data-empty-label="{{ __('No movement records found.') }}"
             data-loading-label="{{ __('Loading more movement records...') }}"

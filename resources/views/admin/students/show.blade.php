@@ -77,6 +77,9 @@
                 <div class="profile-field"><span>{{ __('Mother IC') }}</span><b>{{ maskIdentityNumber($student->mother_ic_no) }}</b></div>
                 <div class="profile-field"><span>{{ __('Occupation') }}</span><b>{{ $student->guardian_occupation ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Family Income') }}</span><b>{{ $student->family_income !== null ? 'RM ' . number_format((float) $student->family_income, 2) : '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('OKU Status') }}</span><b>{{ $student->oku_status === 'yes' ? __('Yes') : ($student->oku_status === 'no' ? __('No') : '-') }}</b></div>
+                <div class="profile-field"><span>{{ __('OKU Registration No.') }}</span><b>{{ $student->oku_registration_no ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('OKU Category') }}</span><b>{{ $student->oku_category ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Guardian Address') }}</span><b>{{ $student->guardian_address ?: '-' }}</b></div>
             </div>
         </div>

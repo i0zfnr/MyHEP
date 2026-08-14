@@ -28,7 +28,7 @@ class AdminAiChatboxViewTest extends TestCase
 
         $this->assertStringContainsString('M5.5 18.2 3.8 21l4.2-1.2', $icon);
         $this->assertStringContainsString('m12 8.7 1.05 2.25L15.3 12', $icon);
-        $this->assertSame(2, substr_count($layout, "@include('partials.ai_helper_icon', ['class' => 'nav-icon'])"));
+        $this->assertSame(3, substr_count($layout, "@include('partials.ai_helper_icon', ['class' => 'nav-icon'])"));
         $this->assertStringContainsString("@include('partials.ai_helper_icon')", $workspace);
         $this->assertSame(2, substr_count($chatbox, "partials.ai_helper_icon"));
         $this->assertStringNotContainsString('>✦</span>', $workspace.$chatbox);

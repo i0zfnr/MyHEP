@@ -1,7 +1,5 @@
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import Lenis from 'lenis';
-import 'lenis/dist/lenis.css';
 
 const initializeLiveFilters = () => {
     document.querySelectorAll('[data-live-filter-form]').forEach((form) => {
@@ -31,6 +29,7 @@ const initializeLiveFilters = () => {
                 const current = document.querySelector('[data-live-filter-results]');
                 if (!next || !current) throw new Error('Search results missing');
                 current.replaceWith(next);
+                registerVirtualTables();
                 window.history.replaceState({}, '', `${url.pathname}${url.search}`);
                 if (status) status.textContent = 'Results updated';
             } catch (error) {
@@ -50,39 +49,73 @@ const initializeLiveFilters = () => {
     });
 };
 
+const registerVirtualTables = () => {
+    document.querySelectorAll('.student-table-wrap, .account-table-wrap, .laptop-table-wrap, .admin-doc-table-wrap, [data-virtual-table]').forEach((wrap) => {
+        if (!(wrap instanceof HTMLElement) || wrap.dataset.virtualizedReady === 'true') return;
+        if (wrap.hasAttribute('data-no-virtual')) return;
+        const table = wrap.querySelector('table');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+
+        const rows = Array.from(tbody.children).filter((child) => child.tagName === 'TR' && !child.classList.contains('virtual-spacer'));
+        if (rows.length <= 15) return;
+
+        wrap.dataset.virtualizedReady = 'true';
+
+        const sampleRow = rows[0];
+        const rowHeight = Math.max(38, Math.round(sampleRow.getBoundingClientRect().height || 52));
+        const totalItems = rows.length;
+        const rowTemplates = rows.map((r) => r.outerHTML);
+
+        wrap.style.position = 'relative';
+        wrap.style.maxHeight = '680px';
+        wrap.style.overflowY = 'auto';
+        wrap.style.willChange = 'transform';
+
+        let ticking = false;
+        const renderSlice = () => {
+            const scrollTop = wrap.scrollTop;
+            const viewportHeight = wrap.clientHeight || 680;
+            const buffer = 6;
+
+            const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - buffer);
+            const endIndex = Math.min(totalItems, Math.ceil((scrollTop + viewportHeight) / rowHeight) + buffer);
+
+            const topPad = startIndex * rowHeight;
+            const bottomPad = Math.max(0, (totalItems - endIndex) * rowHeight);
+
+            const visibleRowsHtml = rowTemplates.slice(startIndex, endIndex).join('');
+
+            tbody.innerHTML = `
+                <tr class="virtual-spacer" style="height:${topPad}px; border:none!important; background:transparent!important;"><td colspan="100%" style="padding:0;border:none!important;background:transparent!important;"></td></tr>
+                ${visibleRowsHtml}
+                <tr class="virtual-spacer" style="height:${bottomPad}px; border:none!important; background:transparent!important;"><td colspan="100%" style="padding:0;border:none!important;background:transparent!important;"></td></tr>
+            `;
+
+            ticking = false;
+        };
+
+        wrap.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(renderSlice);
+                ticking = true;
+            }
+        }, { passive: true });
+
+        renderSlice();
+    });
+};
+
 const PWA_PROMPT_KEY = 'studentedge-pwa-dismissed-v1';
 const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
 const THEME_KEY = 'studentedge-theme';
 const ACCENT_THEME_KEY = 'studentedge-accent-theme';
 const GLASS_TRANSPARENCY_KEY = 'studentedge-glass-transparency';
-const SMOOTH_SCROLL_KEY = 'studentedge-smooth-scroll';
 
 const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
 const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet'].includes(theme) ? theme : 'gold';
 const normalizeGlassTransparency = (value) => Math.min(80, Math.max(10, Number(value) || 40));
-const isSmoothScrollEnabled = () => window.localStorage.getItem(SMOOTH_SCROLL_KEY) !== 'off';
-
-const registerSmoothScrollPreference = () => {
-    const update = () => {
-        const enabled = isSmoothScrollEnabled();
-        document.documentElement.dataset.smoothScrollPreference = enabled ? 'on' : 'off';
-        document.querySelectorAll('[data-smooth-scroll-toggle]').forEach((button) => {
-            button.setAttribute('aria-checked', enabled ? 'true' : 'false');
-            const status = button.querySelector('[data-smooth-scroll-status]');
-            if (status) status.textContent = enabled ? 'On' : 'Off';
-        });
-    };
-
-    document.querySelectorAll('[data-smooth-scroll-toggle]').forEach((button) => {
-        button.addEventListener('click', () => {
-            window.localStorage.setItem(SMOOTH_SCROLL_KEY, isSmoothScrollEnabled() ? 'off' : 'on');
-            update();
-            window.dispatchEvent(new CustomEvent('studentedge:smooth-scroll-change'));
-        });
-    });
-    update();
-};
-
 const updateGlassControls = (value) => {
     const transparency = normalizeGlassTransparency(value);
 
@@ -1197,7 +1230,10 @@ const registerLoadingUi = () => {
         if (button) {
             button.classList.add('is-submit-loading');
             button.setAttribute('aria-busy', 'true');
-            button.disabled = true;
+            button.style.pointerEvents = 'none';
+            setTimeout(() => {
+                button.disabled = true;
+            }, 0);
         }
 
         const target = form?.closest('.ui-card, .card, .panel, .data-card, .bugs-card, .settings-panel');
@@ -1395,128 +1431,9 @@ const registerProfilePhotoCropper = () => {
     });
 };
 
-const shouldKeepNativeScroll = (node) => node.matches([
-    '[data-lenis-prevent]',
-    '[data-profile-crop-modal]',
-    '.cropper-container',
-    '.se-notification-list',
-    '.se-filter-sheet-body',
-    '.table-wrap',
-    '.ui-table-wrap',
-    '.student-table-wrap',
-    '.move-scanner',
-    '#qr-reader',
-    '[data-qr-reader]',
-    '[role="dialog"]',
-    'input',
-    'textarea',
-    'select',
-    '[contenteditable="true"]',
-].join(','));
-
-const registerMainSmoothScroll = () => {
-    const wrapper = document.querySelector('[data-lenis-main]');
-    const content = wrapper?.querySelector(':scope > .main-scroll-inner');
-
-    if (!(wrapper instanceof HTMLElement) || !(content instanceof HTMLElement)) {
-        return;
-    }
-
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let lenis = null;
-
-    const destroy = () => {
-        lenis?.destroy();
-        lenis = null;
-        delete wrapper.dataset.smoothScroll;
-    };
-
-    const sync = () => {
-        if (reducedMotion.matches || !isSmoothScrollEnabled()) {
-            destroy();
-            return;
-        }
-
-        if (lenis) {
-            lenis.resize();
-            return;
-        }
-
-        lenis = new Lenis({
-            wrapper,
-            content,
-            eventsTarget: wrapper,
-            autoRaf: true,
-            autoResize: true,
-            smoothWheel: true,
-            syncTouch: false,
-            lerp: 0.42,
-            wheelMultiplier: 1,
-            overscroll: false,
-            allowNestedScroll: true,
-            prevent: shouldKeepNativeScroll,
-        });
-
-        wrapper.dataset.smoothScroll = 'wheel';
-    };
-
-    reducedMotion.addEventListener?.('change', sync);
-    window.addEventListener('studentedge:smooth-scroll-change', sync);
-    window.addEventListener('pagehide', destroy, { once: true });
-    sync();
-};
-
-const registerDocumentSmoothScroll = () => {
-    if (document.querySelector('[data-lenis-main]')) {
-        return;
-    }
-
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let lenis = null;
-
-    const destroy = () => {
-        lenis?.destroy();
-        lenis = null;
-        delete document.documentElement.dataset.smoothScroll;
-    };
-
-    const sync = () => {
-        if (reducedMotion.matches || !isSmoothScrollEnabled()) {
-            destroy();
-            return;
-        }
-
-        if (lenis) {
-            lenis.resize();
-            return;
-        }
-
-        lenis = new Lenis({
-            autoRaf: true,
-            autoResize: true,
-            smoothWheel: true,
-            syncTouch: false,
-            lerp: 0.32,
-            wheelMultiplier: 1,
-            overscroll: true,
-            allowNestedScroll: true,
-            anchors: true,
-            stopInertiaOnNavigate: true,
-            prevent: shouldKeepNativeScroll,
-        });
-
-        document.documentElement.dataset.smoothScroll = 'wheel';
-    };
-
-    reducedMotion.addEventListener?.('change', sync);
-    window.addEventListener('studentedge:smooth-scroll-change', sync);
-    window.addEventListener('pagehide', destroy, { once: true });
-    sync();
-};
-
 const registerBackToTop = () => {
     const button = document.getElementById('seBackToTop');
-    const viewport = document.querySelector('[data-lenis-main]');
+    const viewport = document.querySelector('[data-main-scroll]') || document.querySelector('[data-lenis-main]');
 
     if (!(button instanceof HTMLButtonElement) || !(viewport instanceof HTMLElement)) {
         return;
@@ -1577,19 +1494,17 @@ if ('serviceWorker' in navigator) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    registerVirtualTables();
     initializeLiveFilters();
     syncPwaDisplayMode();
     registerThemeUi();
     registerLiquidGlassUi();
-    registerSmoothScrollPreference();
     registerNotificationCenter();
     registerMediaViewer();
     registerLiquidFilterSheets();
     registerLoadingUi();
     registerTabMotionUi();
     registerProfilePhotoCropper();
-    registerMainSmoothScroll();
-    registerDocumentSmoothScroll();
     registerBackToTop();
     registerAiSessionCleanup();
     registerPwaPromptUi();

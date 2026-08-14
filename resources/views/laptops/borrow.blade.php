@@ -18,14 +18,14 @@
             <p>{{ $laptop->asset_code }} · JHEP laptop borrowing</p>
         </header>
         <section class="borrow-body">
-            <div class="borrow-status">Enter your NRIC to borrow this laptop or return it if it is already assigned to you.</div>
+            <div class="borrow-status">{{ __('Enter your NRIC to borrow this laptop or return it if it is already assigned to you.') }}</div>
             <form id="borrowForm">
-                <div class="borrow-field"><label for="nric">NRIC number</label><input id="nric" name="nric" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="e.g. 900101011234" required></div>
-                <p class="borrow-help" id="borrowHelp">Enter your NRIC to confirm that you are eligible to borrow.</p>
-                <button class="borrow-button" id="borrowButton" type="submit" disabled>Take This Laptop</button>
+                <div class="borrow-field"><label for="nric">{{ __('NRIC number') }}</label><input id="nric" name="nric" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="e.g. 900101011234" required></div>
+                <p class="borrow-help" id="borrowHelp">{{ __('Enter your NRIC to confirm that you are eligible to borrow.') }}</p>
+                <button class="borrow-button" id="borrowButton" type="submit" disabled>{{ __('Take This Laptop') }}</button>
             </form>
             <div class="borrow-result" id="borrowResult" hidden></div>
-            <p class="borrow-note">Only staff included in the JHEP laptop borrower registry can take a laptop. Your NRIC is used only to verify this loan.</p>
+            <p class="borrow-note">{{ __('Only staff included in the JHEP laptop borrower registry can take a laptop. Your NRIC is used only to verify this loan.') }}</p>
         </section>
     </main>
     <script>

@@ -32,24 +32,24 @@
 <div class="visitors">
     <div class="visitors-head">
         <div>
-            <h1>Active Visitors</h1>
+            <h1>{{ __('Active Visitors') }}</h1>
             <p>Authenticated accounts active within the last {{ config('session.lifetime', 120) }} minutes.</p>
         </div>
     </div>
     <div class="visitor-stats">
-        <div class="visitor-stat"><span>Active now</span><strong>{{ $activeCount }}</strong></div>
-        <div class="visitor-stat"><span>Students</span><strong>{{ $studentCount }}</strong></div>
-        <div class="visitor-stat"><span>Admins & staff</span><strong>{{ $adminCount }}</strong></div>
+        <div class="visitor-stat"><span>{{ __('Active now') }}</span><strong>{{ $activeCount }}</strong></div>
+        <div class="visitor-stat"><span>{{ __('Students') }}</span><strong>{{ $studentCount }}</strong></div>
+        <div class="visitor-stat"><span>{{ __('Admins & staff') }}</span><strong>{{ $adminCount }}</strong></div>
     </div>
     <div class="visitor-card">
         <form class="visitor-tools" method="GET" action="{{ route('admin.active-visitors.index') }}">
-            <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search name or IP address" aria-label="Search active visitors">
+            <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Search name or IP address') }}" aria-label="{{ __('Search active visitors') }}">
         </form>
         @if($sessions->isEmpty())
-            <div class="visitor-empty">No authenticated visitors are currently active.</div>
+            <div class="visitor-empty">{{ __('No authenticated visitors are currently active.') }}</div>
         @else
             <table class="visitor-table">
-                <thead><tr><th>Account</th><th>Role</th><th>IP address</th><th>Device</th><th>Logged in</th><th>Last seen</th></tr></thead>
+                <thead><tr><th>{{ __('Account') }}</th><th>{{ __('Role') }}</th><th>{{ __('IP address') }}</th><th>{{ __('Device') }}</th><th>{{ __('Logged in') }}</th><th>{{ __('Last seen') }}</th></tr></thead>
                 <tbody>
                     @foreach($sessions as $session)
                         <tr>

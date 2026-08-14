@@ -150,11 +150,11 @@
 
     @if(empty($isPdf))
         <div class="actions">
-            <button class="btn" onclick="window.print()">Cetak Saman</button>
+            <button class="btn" onclick="window.print()">{{ __('Cetak Saman') }}</button>
             @if(!empty($pdfRoute))
-                <a class="btn" href="{{ $pdfRoute }}">Muat Turun PDF</a>
+                <a class="btn" href="{{ $pdfRoute }}">{{ __('Muat Turun PDF') }}</a>
             @endif
-            <a class="btn" href="{{ $backRoute ?? url()->previous() }}">Kembali</a>
+            <a class="btn" href="{{ $backRoute ?? url()->previous() }}">{{ __('Kembali') }}</a>
         </div>
     @endif
 
@@ -162,14 +162,14 @@
         <div class="header">
             <div class="header-cell header-left">
                 @if($logoDataUri)
-                    <img src="{{ $logoDataUri }}" alt="Logo Politeknik Besut Terengganu" class="logo">
+                    <img src="{{ $logoDataUri }}" alt="{{ __('Logo Politeknik Besut Terengganu') }}" class="logo">
                 @else
                     <div class="logo-fallback">StudentEdge</div>
                 @endif
             </div>
             <div class="header-cell header-mid">
-                <div class="title-top">POLITEKNIK BESUT TERENGGANU</div>
-                <div class="title-sub">NOTIS DENDA KESALAHAN TATATERTIB</div>
+                <div class="title-top">{{ __('POLITEKNIK BESUT TERENGGANU') }}</div>
+                <div class="title-sub">{{ __('NOTIS DENDA KESALAHAN TATATERTIB') }}</div>
                 <div class="title-meta">No. Saman: {{ $offense->id }} | Tarikh Cetakan: {{ now()->format('Y-m-d H:i') }}</div>
             </div>
             <div class="header-cell header-right">
@@ -178,38 +178,38 @@
         </div>
 
         <p class="statement">
-            Bahawasanya saya mempunyai sebab-sebab yang munasabah untuk mempercayai bahawa pelajar berikut telah melakukan kesalahan tatatertib seperti dinyatakan di bawah.
+            {{ __('Bahawasanya saya mempunyai sebab-sebab yang munasabah untuk mempercayai bahawa pelajar berikut telah melakukan kesalahan tatatertib seperti dinyatakan di bawah.') }}
         </p>
 
         <div class="card">
-            <h3>Maklumat Pelajar</h3>
+            <h3>{{ __('Maklumat Pelajar') }}</h3>
             <table class="grid">
-                <tr><th style="width:180px;">Nama Pelajar</th><td>{{ $offense->student_name }}</td></tr>
-                <tr><th>No. Pendaftaran</th><td>{{ $offense->matric_no }}</td></tr>
-                <tr><th>No. KP</th><td>{{ maskIdentityNumber($offense->ic_no) }}</td></tr>
-                <tr><th>Program</th><td>{{ $offense->program }}</td></tr>
+                <tr><th style="width:180px;">{{ __('Nama Pelajar') }}</th><td>{{ $offense->student_name }}</td></tr>
+                <tr><th>{{ __('No. Pendaftaran') }}</th><td>{{ $offense->matric_no }}</td></tr>
+                <tr><th>{{ __('No. KP') }}</th><td>{{ maskIdentityNumber($offense->ic_no) }}</td></tr>
+                <tr><th>{{ __('Program') }}</th><td>{{ $offense->program }}</td></tr>
             </table>
         </div>
 
         <div class="card">
-            <h3>Maklumat Kesalahan</h3>
+            <h3>{{ __('Maklumat Kesalahan') }}</h3>
             <table class="grid">
-                <tr><th style="width:180px;">Tarikh Kesalahan</th><td>{{ $offense->offense_date }}</td></tr>
-                <tr><th>Masa</th><td>{{ $offense->offense_time }}</td></tr>
-                <tr><th>Tempat</th><td>{{ $offense->place }}</td></tr>
+                <tr><th style="width:180px;">{{ __('Tarikh Kesalahan') }}</th><td>{{ $offense->offense_date }}</td></tr>
+                <tr><th>{{ __('Masa') }}</th><td>{{ $offense->offense_time }}</td></tr>
+                <tr><th>{{ __('Tempat') }}</th><td>{{ $offense->place }}</td></tr>
                 <tr><th>Jumlah Denda (RM)</th><td>{{ number_format((float) $offense->fine_amount, 2) }}</td></tr>
-                <tr><th>Dikeluarkan Oleh</th><td>{{ $offense->issued_by ?? '-' }}</td></tr>
+                <tr><th>{{ __('Dikeluarkan Oleh') }}</th><td>{{ $offense->issued_by ?? '-' }}</td></tr>
             </table>
         </div>
 
         <div class="card">
-            <h3>Peraturan Dilanggar</h3>
+            <h3>{{ __('Peraturan Dilanggar') }}</h3>
             <table class="grid">
                 <thead>
                     <tr>
-                        <th style="width:120px;">Rujukan</th>
-                        <th>Perincian</th>
-                        <th style="width:220px;">Nota</th>
+                        <th style="width:120px;">{{ __('Rujukan') }}</th>
+                        <th>{{ __('Perincian') }}</th>
+                        <th style="width:220px;">{{ __('Nota') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -220,7 +220,7 @@
                             <td>{{ $item->note ?: '-' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" style="text-align:center;">Tiada item kesalahan.</td></tr>
+                        <tr><td colspan="3" style="text-align:center;">{{ __('Tiada item kesalahan.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -228,20 +228,20 @@
 
         <div class="sign-wrap">
             <div class="sign-box">
-                <div class="sign-label">Dikeluarkan oleh:</div>
+                <div class="sign-label">{{ __('Dikeluarkan oleh:') }}</div>
                 <div class="sign-line"></div>
                 <div class="sign-meta">
                     (T/Tangan Pegawai)<br>
-                    Nama: <strong>{{ $offense->issued_by ?? '-' }}</strong>
+                    {{ __('Nama:') }} <strong>{{ $offense->issued_by ?? '-' }}</strong>
                 </div>
             </div>
             <div class="sign-box">
-                <div class="sign-label">Saya mengaku / tidak mengaku bersalah*</div>
+                <div class="sign-label">{{ __('Saya mengaku / tidak mengaku bersalah*') }}</div>
                 <div class="sign-line"></div>
                 <div class="sign-meta">
                     (T/Tangan Pelajar)<br>
-                    Nama: <strong>{{ $offense->student_name }}</strong><br>
-                    No. Pendaftaran: <strong>{{ $offense->matric_no }}</strong>
+                    {{ __('Nama:') }} <strong>{{ $offense->student_name }}</strong><br>
+                    {{ __('No. Pendaftaran:') }} <strong>{{ $offense->matric_no }}</strong>
                 </div>
             </div>
         </div>

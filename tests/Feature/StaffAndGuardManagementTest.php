@@ -24,6 +24,7 @@ class StaffAndGuardManagementTest extends TestCase
             $table->string('role');
             $table->string('staff_category')->nullable();
             $table->string('staff_department')->nullable();
+            $table->string('reporting_branch')->nullable();
             $table->string('position')->nullable();
             $table->boolean('is_active')->default(true);
             $table->string('photo')->nullable();
@@ -74,6 +75,35 @@ class StaffAndGuardManagementTest extends TestCase
         $this->assertSame('lecturer', DB::table('admins')->where('id', $id)->value('role'));
         $this->assertSame('discipline', DB::table('admins')->where('id', $id)->value('staff_category'));
         $this->assertDatabaseHas('lecturer_page_access', ['admin_id' => $id, 'page_key' => 'guard_management', 'enabled' => 1]);
+    }
+
+    public function test_head_and_system_admin_can_set_each_staff_members_page_access(): void
+    {
+        $this->signIn(2, 'student_affairs_head')->put('/admin/staff/5', [
+            'full_name' => 'Scholarship Lecturer',
+            'ic_no' => 'IC5',
+            'email' => 'user5@example.test',
+            'staff_category' => 'scholarship',
+            'is_active' => '1',
+            'lecturer_pages' => ['offense_list'],
+        ])->assertRedirect('/admin/staff');
+
+        $this->assertDatabaseHas('lecturer_page_access', ['admin_id' => 5, 'page_key' => 'offense_list', 'enabled' => 1]);
+        $this->assertDatabaseHas('lecturer_page_access', ['admin_id' => 5, 'page_key' => 'offense_register', 'enabled' => 0]);
+        $this->assertDatabaseHas('lecturer_page_access', ['admin_id' => 5, 'page_key' => 'guard_management', 'enabled' => 0]);
+
+        $this->signIn(1, 'system_admin')->put('/admin/staff/4', [
+            'full_name' => 'Cik Lan',
+            'ic_no' => 'IC4',
+            'email' => 'user4@example.test',
+            'staff_category' => 'discipline',
+            'is_active' => '1',
+            'lecturer_pages' => ['offense_register', 'guard_management'],
+        ])->assertRedirect('/admin/staff');
+
+        $this->assertDatabaseHas('lecturer_page_access', ['admin_id' => 4, 'page_key' => 'offense_list', 'enabled' => 0]);
+        $this->assertDatabaseHas('lecturer_page_access', ['admin_id' => 4, 'page_key' => 'offense_register', 'enabled' => 1]);
+        $this->assertDatabaseHas('lecturer_page_access', ['admin_id' => 4, 'page_key' => 'guard_management', 'enabled' => 1]);
     }
 
     public function test_system_admin_can_create_an_admin_with_a_formatted_new_nric(): void
@@ -172,6 +202,15 @@ class StaffAndGuardManagementTest extends TestCase
             ->assertSee('student-bottom-nav-eligible', false);
     }
 
+    public function test_sidebar_profile_card_shows_the_staff_members_own_position(): void
+    {
+        DB::table('admins')->where('id', 4)->update(['position' => 'PENSYARAH DH 48 (M)']);
+
+        $this->signIn(4, 'lecturer', 'discipline')->get('/admin/guards')
+            ->assertOk()
+            ->assertSee('Staff - PENSYARAH DH 48 (M)');
+    }
+
     public function test_staff_csv_import_creates_accounts_in_the_matching_departments(): void
     {
         $csv = "Bahagian,Nama,No IC,Jawatan,Email\nJTMK,Nur Aina,900101-01-1001,Pensyarah,nur.aina@example.test\nUnit Pengurusan Kewangan,Siti Aminah,900202-02-2002,Pegawai Kewangan,siti.aminah@example.test\n";
@@ -221,7 +260,7 @@ class StaffAndGuardManagementTest extends TestCase
     private function officialStyleStaffWorkbook(): UploadedFile
     {
         $path = tempnam(sys_get_temp_dir(), 'staff-xlsx-');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $zip->addFromString('[Content_Types].xml', '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>');
         $zip->addFromString('xl/workbook.xml', '<?xml version="1.0"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Staff" sheetId="1" r:id="rId1"/></sheets></workbook>');

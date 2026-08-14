@@ -311,7 +311,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Pengumuman Scholarship</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Pengumuman Scholarship') }}</h2>
 @endsection
 
 @section('content')
@@ -321,29 +321,29 @@
 
     <div class="card">
         <div class="head">
-            <h1 style="margin:0;font-size:20px;">Pengurusan Pengumuman Scholarship</h1>
+            <h1 style="margin:0;font-size:20px;">{{ __('Pengurusan Pengumuman Scholarship') }}</h1>
             <div class="ann-head-actions">
-                <a class="btn" href="{{ route('admin.dashboard') }}">Dashboard</a>
-                <a class="btn" href="{{ route('admin.scholarship-announcements.export', request()->query()) }}">Export CSV</a>
-                <a class="btn" href="{{ route('admin.scholarship-announcements.create') }}">Tambah Pengumuman</a>
+                <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                <a class="btn" href="{{ route('admin.scholarship-announcements.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                <a class="btn" href="{{ route('admin.scholarship-announcements.create') }}">{{ __('Tambah Pengumuman') }}</a>
             </div>
         </div>
 
         <div class="filters" data-filter-sheet data-filter-title="{{ __('Announcement filters') }}">
             <form method="GET" action="{{ route('admin.scholarship-announcements.index') }}">
                 <div class="filter-grid">
-                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Cari tajuk/penerangan"></div>
+                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari tajuk/penerangan') }}"></div>
                     <div>
                         <select name="type">
-                            <option value="">Semua jenis</option>
+                            <option value="">{{ __('Semua jenis') }}</option>
                             @foreach(['scholarship','welfare','general'] as $type)
                                 <option value="{{ $type }}" {{ ($filters['type'] ?? '') === $type ? 'selected' : '' }}>{{ $type }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn" type="submit">Filter</button>
-                        <a class="btn" href="{{ route('admin.scholarship-announcements.index') }}">Reset</a>
+                        <button class="btn" type="submit">{{ __('Filter') }}</button>
+                        <a class="btn" href="{{ route('admin.scholarship-announcements.index') }}">{{ __('Reset') }}</a>
                     </div>
                 </div>
             </form>
@@ -353,12 +353,12 @@
             <table class="announcement-table">
                 <thead>
                     <tr>
-                        <th>Tajuk</th>
-                        <th>Jenis</th>
-                        <th>Penerangan</th>
-                        <th>Link</th>
-                        <th>Dicipta Oleh</th>
-                        <th>Tindakan</th>
+                        <th>{{ __('Tajuk') }}</th>
+                        <th>{{ __('Jenis') }}</th>
+                        <th>{{ __('Penerangan') }}</th>
+                        <th>{{ __('Link') }}</th>
+                        <th>{{ __('Dicipta Oleh') }}</th>
+                        <th>{{ __('Tindakan') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -377,7 +377,7 @@
                             <td data-label="Dicipta Oleh">{{ $item->admin_name }}</td>
                             <td class="ann-actions" data-label="Tindakan">
                                 <div class="actions-cell">
-                                    <a class="btn" href="{{ route('admin.scholarship-announcements.edit', $item->id) }}">Edit</a>
+                                    <a class="btn" href="{{ route('admin.scholarship-announcements.edit', $item->id) }}">{{ __('Edit') }}</a>
                                     <form method="POST" action="{{ route('admin.scholarship-announcements.destroy', $item->id) }}" style="margin:0;"
                                         data-confirm-title="{{ __('Delete announcement') }}"
                                         data-confirm-message="{{ __('Delete this announcement?') }}"
@@ -385,13 +385,13 @@
                                         data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-danger" type="submit">Delete</button>
+                                        <button class="btn btn-danger" type="submit">{{ __('Delete') }}</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td class="ann-empty" colspan="6">Tiada pengumuman scholarship.</td></tr>
+                        <tr><td class="ann-empty" colspan="6">{{ __('Tiada pengumuman scholarship.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

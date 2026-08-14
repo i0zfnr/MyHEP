@@ -180,7 +180,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Tambah Pengumuman Scholarship</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Tambah Pengumuman Scholarship') }}</h2>
 @endsection
 
 @section('content')
@@ -190,15 +190,15 @@
     <form method="POST" action="{{ route('admin.scholarship-announcements.store') }}">
         @csrf
         <div class="card">
-            <h2>Maklumat Pengumuman</h2>
+            <h2>{{ __('Maklumat Pengumuman') }}</h2>
             <div class="body">
                 <div class="grid grid-2">
                     <div>
-                        <label for="title">Tajuk</label>
+                        <label for="title">{{ __('Tajuk') }}</label>
                         <input id="title" type="text" name="title" value="{{ old('title') }}" required>
                     </div>
                     <div>
-                        <label for="type">Jenis</label>
+                        <label for="type">{{ __('Jenis') }}</label>
                         <select id="type" name="type" required>
                             @foreach(['scholarship','welfare','general'] as $type)
                                 <option value="{{ $type }}" {{ old('type','general') === $type ? 'selected' : '' }}>{{ $type }}</option>
@@ -208,7 +208,7 @@
                 </div>
 
                 <div style="margin-top:12px;">
-                    <label for="body">Penerangan</label>
+                    <label for="body">{{ __('Penerangan') }}</label>
                     <textarea id="body" name="body" rows="7" required>{{ old('body') }}</textarea>
                 </div>
 
@@ -219,15 +219,15 @@
                     </div>
                     <div>
                         <label for="link_label">Label Butang Link (optional)</label>
-                        <input id="link_label" type="text" name="link_label" value="{{ old('link_label') }}" placeholder="Contoh: Mohon Sekarang">
+                        <input id="link_label" type="text" name="link_label" value="{{ old('link_label') }}" placeholder="{{ __('Contoh: Mohon Sekarang') }}">
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" type="submit">Simpan Pengumuman</button>
-            <a class="btn" href="{{ route('admin.scholarship-announcements.index') }}">Batal</a>
+            <button class="btn btn-primary" type="submit">{{ __('Simpan Pengumuman') }}</button>
+            <a class="btn" href="{{ route('admin.scholarship-announcements.index') }}">{{ __('Batal') }}</a>
         </div>
     </form>
 </div>

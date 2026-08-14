@@ -42,6 +42,7 @@ class DashboardController extends Controller
         $pendingScholarships = 0;
         $recentScholarshipRecords = collect();
         $recentScholarshipAnnouncements = collect();
+        $programDashboard = $isLecturer ? $this->buildStaffProgramDashboard($lecturerId) : null;
 
         if ($hasMovementAccess) {
             $totalStudents = DB::table('students')->count();
@@ -159,18 +160,29 @@ class DashboardController extends Controller
             ? systemCacheRemember('myhep.dashboard.system_monitoring', 10, fn () => $this->buildSystemMonitoring())
             : null;
 
+        $canViewAnalytics = ! $isLecturer;
         $analyticsScope = implode('.', array_map(
             fn (bool $enabled) => $enabled ? '1' : '0',
-            [$hasDisciplineAccess, $hasMovementAccess, $hasScholarshipAccess]
+            [
+                $canViewAnalytics && $hasDisciplineAccess,
+                $canViewAnalytics && $hasMovementAccess,
+                $canViewAnalytics && $hasScholarshipAccess,
+            ]
         ));
         $analytics = systemCacheRemember(
             'myhep.dashboard.analytics.payload.' . app()->getLocale() . '.' . $analyticsScope,
             300,
-            fn () => $this->buildAnalytics($hasDisciplineAccess, $hasMovementAccess, $hasScholarshipAccess)
+            fn () => $this->buildAnalytics(
+                $canViewAnalytics && $hasDisciplineAccess,
+                $canViewAnalytics && $hasMovementAccess,
+                $canViewAnalytics && $hasScholarshipAccess,
+            )
         );
 
         return view('dashboard.admin', compact(
             'authUser',
+            'isLecturer',
+            'programDashboard',
             'showSystemMonitoring',
             'systemMonitoring',
             'analytics',
@@ -196,6 +208,70 @@ class DashboardController extends Controller
             'recentScholarshipRecords',
             'recentScholarshipAnnouncements'
         ));
+    }
+
+    private function buildStaffProgramDashboard(int $staffId): array
+    {
+        if (! Schema::hasTable('programs')) {
+            return ['counts' => [], 'status_distribution' => [], 'trend' => [], 'recent' => collect()];
+        }
+
+        $owned = DB::table('programs')->where('created_by', $staffId);
+        $reviewTasks = DB::table('programs')->where(function ($query) use ($staffId): void {
+            $query->where(function ($deputy) use ($staffId): void {
+                $deputy->where('status', 'pending_deputy')->where('deputy_reviewer_id', $staffId);
+            })->orWhere(function ($director) use ($staffId): void {
+                $director->where('status', 'pending_director')->where('director_reviewer_id', $staffId);
+            });
+        });
+
+        $statuses = ['draft', 'pending_deputy', 'pending_director', 'approved', 'in_progress', 'completed', 'rejected'];
+        $distribution = collect($statuses)->map(function (string $status) use ($owned): array {
+            return ['status' => $status, 'value' => (clone $owned)->where('status', $status)->count()];
+        })->all();
+
+        $trend = [];
+        for ($offset = 5; $offset >= 0; $offset--) {
+            $start = now()->subMonthsNoOverflow($offset)->startOfMonth();
+            $end = $start->copy()->endOfMonth();
+            $trend[] = [
+                'label' => $start->format('M'),
+                'created' => (clone $owned)->whereBetween('created_at', [$start, $end])->count(),
+                'approved' => (clone $owned)->where('status', 'approved')->whereBetween('director_reviewed_at', [$start, $end])->count(),
+            ];
+        }
+        $trendMax = max(1, ...collect($trend)->flatMap(fn ($item) => [$item['created'], $item['approved']])->all());
+        $trend = collect($trend)->map(function (array $item) use ($trendMax): array {
+            $item['created_height'] = round(($item['created'] / $trendMax) * 100, 2);
+            $item['approved_height'] = round(($item['approved'] / $trendMax) * 100, 2);
+            return $item;
+        })->all();
+
+        $recent = DB::table('programs')
+            ->where(function ($query) use ($staffId): void {
+                $query->where('created_by', $staffId)
+                    ->orWhere('deputy_reviewer_id', $staffId)
+                    ->orWhere('director_reviewer_id', $staffId);
+            })
+            ->select('id', 'title', 'status', 'starts_at', 'approval_branch', 'updated_at')
+            ->orderByDesc('updated_at')->limit(6)->get();
+
+        return [
+            'counts' => [
+                'total_students' => DB::table('students')->count(),
+                'total' => (clone $owned)->count(),
+                'draft' => (clone $owned)->where('status', 'draft')->count(),
+                'pending_deputy' => (clone $owned)->where('status', 'pending_deputy')->count(),
+                'pending_director' => (clone $owned)->where('status', 'pending_director')->count(),
+                'approved' => (clone $owned)->where('status', 'approved')->count(),
+                'in_progress' => (clone $owned)->where('status', 'in_progress')->count(),
+                'completed' => (clone $owned)->where('status', 'completed')->count(),
+                'review_tasks' => (clone $reviewTasks)->count(),
+            ],
+            'status_distribution' => $distribution,
+            'trend' => $trend,
+            'recent' => $recent,
+        ];
     }
 
     public function live(): JsonResponse
@@ -523,10 +599,10 @@ class DashboardController extends Controller
                 'active' => $totalOffenses > 0,
             ],
             'kpis' => [
-                $this->kpi(__('Total Offenses'), number_format($totalOffenses), __('All registered offense records'), 'slate', $six['values']),
-                $this->kpi(__('Unpaid Offenses'), number_format($unpaidOffenses), __('Awaiting payment'), 'red', $unpaidSix['values']),
-                $this->kpi(__('Pending Fine Applications'), number_format($pendingFine), __('Awaiting decision'), 'gold', $pendingSix['values']),
-                $this->kpi(__('Total Students'), number_format($totalStudents), __('Registered students'), 'blue', $studentSix['values']),
+                $this->kpi(__('Total Offenses'), number_format($totalOffenses), __('All registered offense records'), 'slate', $six['values'], 'offense'),
+                $this->kpi(__('Unpaid Offenses'), number_format($unpaidOffenses), __('Awaiting payment'), 'red', $unpaidSix['values'], 'payment'),
+                $this->kpi(__('Pending Fine Applications'), number_format($pendingFine), __('Awaiting decision'), 'gold', $pendingSix['values'], 'review'),
+                $this->kpi(__('Total Students'), number_format($totalStudents), __('Registered students'), 'blue', $studentSix['values'], 'students'),
             ],
         ];
     }
@@ -546,9 +622,9 @@ class DashboardController extends Controller
         $lateSix = $this->monthlyCounts('student_movements', 'checkout_at', 6, 'rule_status', 'late');
 
         return [
-            $this->kpi(__('Outside Now'), number_format($outsideNow), __('Active checkouts without return'), 'green', $checkoutsSix['values']),
-            $this->kpi(__('Check-Outs Today'), number_format($checkoutsToday), __('Movements started today'), 'blue', $checkoutsSix['values']),
-            $this->kpi(__('Late Returns'), number_format($lateReturns), __('Returned past the allowance'), 'red', $lateSix['values']),
+            $this->kpi(__('Outside Now'), number_format($outsideNow), __('Active checkouts without return'), 'green', $checkoutsSix['values'], 'outside'),
+            $this->kpi(__('Check-Outs Today'), number_format($checkoutsToday), __('Movements started today'), 'blue', $checkoutsSix['values'], 'movement'),
+            $this->kpi(__('Late Returns'), number_format($lateReturns), __('Returned past the allowance'), 'red', $lateSix['values'], 'late'),
         ];
     }
 
@@ -570,10 +646,10 @@ class DashboardController extends Controller
             : 0;
 
         return [
-            $this->kpi(__('Total Scholarship Records'), number_format($total), __('All aid records'), 'slate', $totalSix['values']),
-            $this->kpi(__('Active Aid'), number_format($active), __('Confirmed scholarship, welfare, and sponsorship'), 'green', $totalSix['values']),
-            $this->kpi(__('Pending Records'), number_format($pending), __('Awaiting decision'), 'gold', $pendingSix['values']),
-            $this->kpi(__('Announcements'), (string) array_sum($announcementsSix['values']), __('Published in the last 6 months'), 'violet', $announcementsSix['values']),
+            $this->kpi(__('Total Scholarship Records'), number_format($total), __('All aid records'), 'slate', $totalSix['values'], 'records'),
+            $this->kpi(__('Active Aid'), number_format($active), __('Confirmed scholarship, welfare, and sponsorship'), 'green', $totalSix['values'], 'aid'),
+            $this->kpi(__('Pending Records'), number_format($pending), __('Awaiting decision'), 'gold', $pendingSix['values'], 'pending'),
+            $this->kpi(__('Announcements'), (string) array_sum($announcementsSix['values']), __('Published in the last 6 months'), 'violet', $announcementsSix['values'], 'announcement'),
         ];
     }
 
@@ -649,7 +725,7 @@ class DashboardController extends Controller
         ];
     }
 
-    private function kpi(string $label, string $value, string $sub, string $tone, array $spark): array
+    private function kpi(string $label, string $value, string $sub, string $tone, array $spark, string $icon): array
     {
         return [
             'label' => $label,
@@ -657,6 +733,7 @@ class DashboardController extends Controller
             'sub' => $sub,
             'tone' => $tone,
             'spark' => $spark,
+            'icon' => $icon,
             'delta' => $this->deltaPercent($spark),
         ];
     }

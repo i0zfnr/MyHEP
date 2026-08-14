@@ -66,16 +66,16 @@ class StudentDataPermissionTest extends TestCase
         ]);
     }
 
-    public function test_lecturer_can_register_offense_by_default_but_individual_page_control_can_disable_it(): void
+    public function test_lecturer_cannot_register_offense_until_individual_page_access_is_enabled(): void
     {
         $this->signIn(4, 'lecturer', 'General Lecturer')
             ->get('/admin/offenses/create')
-            ->assertOk();
+            ->assertForbidden();
 
         DB::table('lecturer_page_access')->insert([
             'admin_id' => 4,
             'page_key' => 'offense_register',
-            'enabled' => false,
+            'enabled' => true,
             'updated_by' => 3,
             'created_at' => now(),
             'updated_at' => now(),
@@ -83,7 +83,7 @@ class StudentDataPermissionTest extends TestCase
 
         $this->signIn(4, 'lecturer', 'General Lecturer')
             ->get('/admin/offenses/create')
-            ->assertForbidden();
+            ->assertOk();
     }
 
     public function test_guard_can_use_basic_directory_without_receiving_sensitive_fields_or_actions(): void

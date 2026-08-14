@@ -12,6 +12,17 @@
     .account-hero-stat strong{color:#fff!important}
     .account-hero-stat span{color:#fff0de!important}
     .account-toolbar-actions{display:flex;gap:.55rem;flex-wrap:wrap}.account-table .account-department-row td,body.admin-liquid-disabled .account-table .account-department-row td{padding:.72rem 1rem!important;background:linear-gradient(135deg,#65442e,#7d5639)!important;color:#fff8ef!important;border-bottom-color:#513520!important;font-size:.75rem!important;font-weight:900!important;letter-spacing:.07em;text-shadow:0 1px 1px rgba(32,20,12,.28)!important;text-transform:uppercase}.account-position{color:var(--text);font-weight:700}.account-import-dialog{position:fixed;inset:0;width:min(620px,calc(100% - 2rem));max-height:calc(100dvh - 2rem);margin:auto;padding:0;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);box-shadow:0 24px 70px rgba(28,20,14,.28)}.account-import-dialog::backdrop{background:rgba(28,24,20,.52);backdrop-filter:blur(3px)}.account-import-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:1.2rem 1.25rem;border-bottom:1px solid var(--border)}.account-import-head h2{margin:0;font-size:1.1rem}.account-import-head p{margin:.3rem 0 0;color:var(--text-muted);line-height:1.5}.account-import-close{width:40px;min-height:40px!important;padding:0}.account-import-body{display:grid;gap:1rem;padding:1.25rem}.account-import-body input[type=file]{width:100%;min-height:48px;border:1px solid var(--border);border-radius:11px;background:var(--surface-soft);color:var(--text)}.account-import-notes{margin:0;padding-left:1.15rem;color:var(--text-muted);font-size:.78rem;line-height:1.65}.account-import-actions{display:flex;justify-content:flex-end;gap:.6rem}.account-import-errors{margin:0 0 1rem;padding:.85rem 1rem;border:1px solid color-mix(in srgb,var(--danger) 40%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--danger) 7%,var(--surface));color:var(--text);font-size:.8rem}.account-import-errors ul{margin:.4rem 0 0;padding-left:1.1rem}@media(max-width:760px){.account-toolbar-actions{width:100%}.account-toolbar-actions .account-btn{flex:1}.account-department-row td{display:block!important}.account-import-actions{display:grid;grid-template-columns:1fr 1fr}.account-import-actions .account-btn{width:100%}}
+    .account-table-wrap{width:100%;max-height:none;overflow-x:auto;overflow-y:visible;overscroll-behavior-x:contain;scrollbar-gutter:auto}
+    .account-table{border-collapse:collapse;table-layout:fixed}
+    .account-table thead{position:static}
+    .account-table thead th{position:static;z-index:auto;background:color-mix(in srgb,var(--primary) 7%,var(--surface,#fff))!important;box-shadow:0 1px 0 var(--glass-line)}
+    .account-table th:nth-child(1){width:22%}.account-table th:nth-child(2){width:9%}.account-table th:nth-child(3){width:27%}.account-table th:nth-child(4){width:22%}.account-table th:nth-child(5){width:7%}.account-table th:nth-child(6){width:13%}
+    .account-table td{overflow-wrap:anywhere}
+    .account-table .account-category{max-width:100%;white-space:normal;line-height:1.25}
+    .account-table .account-actions{flex-wrap:nowrap;justify-content:flex-start}
+    .account-table .account-actions .account-btn{min-height:38px;padding:.5rem .7rem}
+    .account-table td{vertical-align:middle}
+    .account-table .account-department-row{position:relative;z-index:1}
     .account-table .account-department-row td,
     body.admin-liquid-disabled .account-table .account-department-row td {
         padding:.62rem 1rem!important;
@@ -35,11 +46,11 @@
 <div class="account-wrap">
     @if(session('success'))<div class="msg-ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="msg-err">{{ $errors->first() }}</div>@endif
-    @if(session('import_errors'))<div class="account-import-errors"><strong>Some rows need attention</strong><ul>@foreach(session('import_errors') as $importError)<li>{{ $importError }}</li>@endforeach</ul></div>@endif
+    @if(session('import_errors'))<div class="account-import-errors"><strong>{{ __('Some rows need attention') }}</strong><ul>@foreach(session('import_errors') as $importError)<li>{{ $importError }}</li>@endforeach</ul></div>@endif
 
     <section class="account-hero">
         <div class="account-hero-copy">
-            <span class="account-eyebrow">Account administration</span>
+            <span class="account-eyebrow">{{ __('Account administration') }}</span>
             <h1>{{ $title }}</h1>
             <p>{{ $description }}</p>
         </div>
@@ -49,37 +60,37 @@
     <section class="account-card">
         <div class="account-toolbar">
             <div class="account-toolbar-head">
-                <div><h2>Find {{ $mode === 'staff' ? 'staff members' : 'guards' }}</h2><p>Search and manage account access from one place.</p></div>
+                <div><h2>Find {{ $mode === 'staff' ? 'staff members' : 'guards' }}</h2><p>{{ __('Search and manage account access from one place.') }}</p></div>
                 <div class="account-toolbar-actions">
-                    @if($mode === 'staff')<button class="account-btn" type="button" data-staff-import-open>Import Staff</button>@endif
+                    @if($mode === 'staff')<button class="account-btn" type="button" data-staff-import-open>{{ __('Import Staff') }}</button>@endif
                     <a class="account-btn primary" href="{{ $createRoute }}">+ Add {{ $mode === 'staff' ? 'Staff' : 'Guard' }}</a>
                 </div>
             </div>
             <form method="GET" class="account-filters {{ $mode === 'guard' ? 'guard' : '' }}" data-live-filter-form data-live-filter-delay="300">
                 <div class="account-field">
-                    <label for="search">Search</label>
-                    <input id="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Name, IC, email, or position">
+                    <label for="search">{{ __('Search') }}</label>
+                    <input id="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('Name, IC, email, or position') }}">
                 </div>
                 @if($mode === 'staff')
                     <div class="account-field">
-                        <label for="department">Department / Unit</label>
+                        <label for="department">{{ __('Department / Unit') }}</label>
                         <select id="department" name="department">
-                            <option value="">All departments</option>
+                            <option value="">{{ __('All departments') }}</option>
                             @foreach($departments as $value => $label)
                                 <option value="{{ $value }}" @selected(($filters['department'] ?? '') === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                 @endif
-                <button class="account-btn" type="submit">Filter</button>
-                @if(!empty($filters['search']) || !empty($filters['department']))<a class="account-btn" href="{{ url()->current() }}">Clear</a>@endif
+                <button class="account-btn" type="submit">{{ __('Filter') }}</button>
+                @if(!empty($filters['search']) || !empty($filters['department']))<a class="account-btn" href="{{ url()->current() }}">{{ __('Clear') }}</a>@endif
             </form>
         </div>
 
         <div data-live-filter-results>
-        <div class="account-table-wrap">
+        <div class="account-table-wrap" data-no-virtual>
             <table class="account-table">
-                <thead><tr><th>{{ $mode === 'staff' ? 'Staff member' : 'Account' }}</th><th>IC Number</th>@if($mode === 'staff')<th>Position</th><th>Department / Unit</th>@endif<th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>{{ $mode === 'staff' ? 'Staff member' : 'Account' }}</th><th>{{ __('IC Number') }}</th>@if($mode === 'staff')<th>{{ __('Position') }}</th><th>{{ __('Department / Unit') }}</th>@endif<th>{{ __('Status') }}</th><th>{{ __('Actions') }}</th></tr></thead>
                 <tbody>
                     @php($currentDepartment = null)
                     @forelse($accounts as $account)
@@ -93,9 +104,9 @@
                             @if($mode === 'staff')<td data-label="Position"><span class="account-position">{{ $account->position ?: 'Not specified' }}</span></td><td data-label="Department"><span class="account-category">{{ $departments[$account->staff_department] ?? 'Other Staff' }}</span></td>@endif
                             <td data-label="Status"><span class="account-status {{ $account->is_active ? 'active' : 'inactive' }}">{{ $account->is_active ? 'Active' : 'Inactive' }}</span></td>
                             <td data-label="Actions"><div class="account-actions">
-                                <a class="account-btn" href="{{ $mode === 'staff' ? route('admin.staff.edit',$account->id) : route('admin.guards.edit',$account->id) }}">Edit</a>
-                                <form method="POST" action="{{ $mode === 'staff' ? route('admin.staff.reset-password',$account->id) : route('admin.guards.reset-password',$account->id) }}" data-confirm-title="Reset password" data-confirm-message="Reset this account password to its default value?" data-confirm-action="Reset">@csrf<button class="account-btn" type="submit">Reset</button></form>
-                                <form method="POST" action="{{ $mode === 'staff' ? route('admin.staff.destroy',$account->id) : route('admin.guards.destroy',$account->id) }}" data-confirm-title="Delete account" data-confirm-message="Permanently delete this account?" data-confirm-action="Delete" data-confirm-tone="danger">@csrf @method('DELETE')<button class="account-btn danger" type="submit">Delete</button></form>
+                                <a class="account-btn" href="{{ $mode === 'staff' ? route('admin.staff.edit',$account->id) : route('admin.guards.edit',$account->id) }}">{{ __('Edit') }}</a>
+                                <form method="POST" action="{{ $mode === 'staff' ? route('admin.staff.reset-password',$account->id) : route('admin.guards.reset-password',$account->id) }}" data-confirm-title="{{ __('Reset password') }}" data-confirm-message="Reset this account password to its default value?" data-confirm-action="Reset">@csrf<button class="account-btn" type="submit">{{ __('Reset') }}</button></form>
+                                <form method="POST" action="{{ $mode === 'staff' ? route('admin.staff.destroy',$account->id) : route('admin.guards.destroy',$account->id) }}" data-confirm-title="{{ __('Delete account') }}" data-confirm-message="Permanently delete this account?" data-confirm-action="Delete" data-confirm-tone="danger">@csrf @method('DELETE')<button class="account-btn danger" type="submit">{{ __('Delete') }}</button></form>
                             </div></td>
                         </tr>
                     @empty
@@ -111,12 +122,12 @@
 
 @if($mode === 'staff')
 <dialog class="account-import-dialog" data-staff-import-dialog>
-    <div class="account-import-head"><div><h2>Import Staff</h2><p>Upload the official staff workbook or a structured CSV file.</p></div><button class="account-btn account-import-close" type="button" data-staff-import-close aria-label="Close import window">×</button></div>
+    <div class="account-import-head"><div><h2>{{ __('Import Staff') }}</h2><p>{{ __('Upload the official staff workbook or a structured CSV file.') }}</p></div><button class="account-btn account-import-close" type="button" data-staff-import-close aria-label="{{ __('Close import window') }}">×</button></div>
     <form class="account-import-body" method="POST" action="{{ route('admin.staff.import') }}" enctype="multipart/form-data">
         @csrf
-        <div class="account-field"><label for="staff_file">Staff file</label><input id="staff_file" type="file" name="staff_file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" required></div>
-        <ul class="account-import-notes"><li>Accepted formats: XLSX and CSV, up to 20 MB.</li><li>Recognized fields: Nama, No IC, Jawatan, Email, and Bahagian/Jabatan/Unit.</li><li>Department headings in the official Politeknik Besut workbook are detected automatically.</li><li>New accounts use <strong>Staff@12345</strong>. Existing IC records are updated.</li></ul>
-        <div class="account-import-actions"><button class="account-btn" type="button" data-staff-import-close>Cancel</button><button class="account-btn primary" type="submit">Import Staff</button></div>
+        <div class="account-field"><label for="staff_file">{{ __('Staff file') }}</label><input id="staff_file" type="file" name="staff_file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" required></div>
+        <ul class="account-import-notes"><li>{{ __('Accepted formats: XLSX and CSV, up to 20 MB.') }}</li><li>{{ __('Recognized fields: Nama, No IC, Jawatan, Email, and Bahagian/Jabatan/Unit.') }}</li><li>{{ __('Department headings in the official Politeknik Besut workbook are detected automatically.') }}</li><li>{{ __('New accounts use') }} <strong>Staff@12345</strong>{{ __('. Existing IC records are updated.') }}</li></ul>
+        <div class="account-import-actions"><button class="account-btn" type="button" data-staff-import-close>{{ __('Cancel') }}</button><button class="account-btn primary" type="submit">{{ __('Import Staff') }}</button></div>
     </form>
 </dialog>
 @endif

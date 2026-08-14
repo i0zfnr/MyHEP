@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Dashboard Admin')
+@section('title', ($isLecturer ?? false) ? __('Staff Dashboard') : __('Admin Dashboard'))
 
 @push('styles')
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -924,10 +924,17 @@
     .adash :is(.portal-card,.stat-card,.data-card,.monitor-card,.monitor-kpi):hover { transform:none; border-color:var(--c-border-strong); box-shadow:0 5px 16px rgba(25,20,16,.065); }
     .dash-hero { min-height:116px; padding:22px 24px; border-color:var(--c-border)!important; background:linear-gradient(135deg,var(--c-surface),color-mix(in srgb,var(--se-primary-soft) 35%,var(--c-surface)))!important; }
     .dash-hero::before { background:radial-gradient(320px circle at 100% 0%,color-mix(in srgb,var(--se-primary) 16%,transparent),transparent 68%)!important; }
-    .dash-hero :is(h3,p,.dash-hero-date) { color:#fffaf4!important; }
+    .dash-hero :is(h3,p,.dash-hero-date) { color:var(--se-text)!important; }
     .dash-hero h3 { font-family:inherit; font-size:1.55rem; font-weight:850; letter-spacing:-.035em; }
-    .dash-hero p { color:rgba(255,250,244,.9)!important; font-weight:650; }
-    .dash-hero-date { color:rgba(255,250,244,.88)!important; font-weight:700; }
+    .dash-hero p { color:var(--se-text-muted)!important; font-weight:600; }
+    .dash-hero-actions { padding:0!important; border:0!important; background:transparent!important; box-shadow:none!important; }
+    .viz-mode { gap:3px; padding:4px; border-color:color-mix(in srgb,var(--se-primary) 32%,var(--se-border)); border-radius:12px; background:var(--se-surface); box-shadow:0 2px 7px rgba(35,43,47,.07); }
+    .viz-mode-btn { min-height:38px; padding:8px 13px; border-radius:8px; color:var(--se-text-muted); }
+    .viz-mode-btn:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
+    .viz-mode-btn[aria-pressed="true"] { background:var(--se-primary); color:var(--se-primary-button-text,#fff); box-shadow:0 4px 12px color-mix(in srgb,var(--se-primary) 24%,transparent); }
+    body.system-admin-shell .adash .dash-hero .dash-hero-date { min-height:42px; display:inline-flex; align-items:center; gap:8px; padding:0 13px; border:1px solid color-mix(in srgb,var(--se-primary) 38%,var(--se-border)); border-radius:10px; background:color-mix(in srgb,var(--se-primary-soft) 68%,var(--se-surface)); color:var(--se-primary-strong)!important; font-size:.76rem; font-weight:800; line-height:1; letter-spacing:.01em; text-shadow:none!important; box-shadow:0 2px 5px rgba(35,43,47,.055); opacity:1; -webkit-backdrop-filter:none; backdrop-filter:none; }
+    body.system-admin-shell .adash .dash-hero .dash-hero-date svg { width:15px; height:15px; flex:0 0 15px; display:block; color:var(--se-primary-strong)!important; stroke:currentColor; margin:0!important; filter:none; }
+    body[data-theme="dark"].system-admin-shell .adash .dash-hero .dash-hero-date { background:color-mix(in srgb,var(--se-primary-soft) 54%,var(--se-surface)); color:var(--se-primary)!important; }
     .dash-hero-label { background:var(--se-primary-soft)!important; color:var(--se-primary-strong)!important; }
     .stats-grid { grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr)); gap:12px; }
     .stat-card { min-height:106px; padding:15px 17px; border-left:0; overflow:hidden; position:relative; }
@@ -970,7 +977,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1rem;font-weight:600;color:var(--c-text-primary,#1A1714);">Dashboard Admin</h2>
+    <h2 style="margin:0;font-size:1rem;font-weight:600;color:var(--c-text-primary,#1A1714);">{{ ($isLecturer ?? false) ? __('Staff Dashboard') : __('Admin Dashboard') }}</h2>
 @endsection
 
 @section('content')
@@ -983,25 +990,27 @@
     {{-- ── Hero ── --}}
     <div class="dash-hero">
         <div class="dash-hero-text">
-            <span class="dash-hero-label">Overview</span>
-            <h3>Dashboard Admin</h3>
-            <p style="color:#fffaf3!important;font-weight:700!important;opacity:1!important;text-shadow:0 1px 2px rgba(0,0,0,.24)!important;">
-                @if($hasDisciplineAccess && $hasScholarshipAccess)
-                    Gambaran keseluruhan modul disiplin dan scholarship.
+            <span class="dash-hero-label">{{ __('Overview') }}</span>
+            <h3>{{ ($isLecturer ?? false) ? __('Staff Dashboard') : __('Admin Dashboard') }}</h3>
+            <p>
+                @if($isLecturer ?? false)
+                    {{ __('Overview of your programs, approval workflow, and assigned reviews.') }}
+                @elseif($hasDisciplineAccess && $hasScholarshipAccess)
+                    {{ __('Overview of the discipline and scholarship modules.') }}
                 @elseif($hasMovementAccess && !$hasDisciplineAccess && !$hasScholarshipAccess)
-                    Gambaran keseluruhan pemantauan guard house dan pergerakan pelajar.
+                    {{ __('Overview of guard house monitoring and student movement.') }}
                 @elseif($hasDisciplineAccess)
-                    Gambaran keseluruhan modul disiplin pelajar.
+                    {{ __('Overview of the student discipline module.') }}
                 @elseif($hasScholarshipAccess)
-                    Gambaran keseluruhan modul scholarship pelajar.
+                    {{ __('Overview of the student scholarship module.') }}
                 @else
-                    Akaun ini tiada akses modul.
+                    {{ __('This account has no module access.') }}
                 @endif
             </p>
         </div>
         <div class="dash-hero-actions">
             @if(!empty($analytics['domains']))
-            <div class="viz-mode" role="group" aria-label="{{ __('Dashboard view mode') }}">
+            <div class="viz-mode" data-dashboard-visualization-toggle role="group" aria-label="{{ __('Dashboard view mode') }}">
                 <button type="button" class="viz-mode-btn" data-dashboard-mode="cards" aria-pressed="true">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 17a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zm10-6a1 1 0 011-1h4a1 1 0 011 1v8a1 1 0 01-1 1h-4a1 1 0 01-1-1v-8z"/></svg>
                     {{ __('Cards') }}
@@ -1021,56 +1030,56 @@
 
     {{-- ── Portal Utama ── --}}
     <div class="portal-card liquid-command-bar">
-        <div class="portal-card-head">Portal Utama</div>
+        <div class="portal-card-head">{{ __('Portal Utama') }}</div>
         <div class="portal-links">
             @if((session('auth_user.admin_role') ?? null) !== 'guard')
                 <a href="{{ route('admin.reports.monthly') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Laporan Bulanan
+                    {{ __('Laporan Bulanan') }}
                 </a>
             @endif
             @if($canAccessMovementModule)
                 <a href="{{ route('admin.movements.qr') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zm-12 12h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zM9 6h6M6 9v6M18 9v6M9 18h6"/></svg>
-                    Guard House QR
+                    {{ __('Guard House QR') }}
                 </a>
                 <a href="{{ route('admin.movements.index') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
-                    Student Movement
+                    {{ __('Student Movement') }}
                 </a>
                 <a href="{{ route('admin.students.index') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                    Senarai Pelajar
+                    {{ __('Senarai Pelajar') }}
                 </a>
             @endif
             @if($hasDisciplineAccess)
                 @if($canRegisterOffense)
                 <a href="{{ route('admin.offenses.create') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    Daftar Kesalahan
+                    {{ __('Daftar Kesalahan') }}
                 </a>
                 @endif
                 @if($canViewOffenseList)
                 <a href="{{ route('admin.offenses.index') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                    Senarai Kesalahan
+                    {{ __('Senarai Kesalahan') }}
                 </a>
                 @endif
             @endif
             @if($hasScholarshipAccess)
                 <a href="{{ route('admin.scholarships.index') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0-6l-3.5-2M12 20l-9-5"/></svg>
-                    Rekod Scholarship
+                    {{ __('Rekod Scholarship') }}
                 </a>
                 @unless($hasMovementAccess)
                     <a href="{{ route('admin.students.index') }}" class="portal-link">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                        Senarai Pelajar
+                        {{ __('Senarai Pelajar') }}
                     </a>
                 @endunless
                 <a href="{{ route('admin.scholarship-announcements.index') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                    Pengumuman Scholarship
+                    {{ __('Pengumuman Scholarship') }}
                 </a>
             @endif
         </div>
@@ -1079,7 +1088,7 @@
     @include('dashboard.partials.admin_analytics', ['analytics' => $analytics])
 
     @if(($showSystemMonitoring ?? false) && !empty($systemMonitoring))
-        <p class="section-heading">System Monitoring</p>
+        <p class="section-heading">{{ __('System Monitoring') }}</p>
         @php
             $cpuPercent = $systemMonitoring['cpu_percent'];
             $ramPercent = $systemMonitoring['ram_percent'];
@@ -1106,15 +1115,15 @@
             <div class="monitor-kpi-grid">
                 <div class="monitor-kpi">
                     <div class="monitor-kpi-top">
-                        <span class="monitor-kpi-label">CPU Usage</span>
+                        <span class="monitor-kpi-label">{{ __('CPU Usage') }}</span>
                         <span class="monitor-pill {{ $cpuState ?: 'ok' }}" data-monitor="cpu-pill">{{ $cpuPercent !== null ? number_format($cpuPercent, 1) . '%' : 'N/A' }}</span>
                     </div>
                     <div class="monitor-kpi-value" data-monitor="cpu-value">{{ $cpuPercent !== null ? number_format($cpuPercent, 1) . '%' : 'N/A' }}</div>
-                    <div class="monitor-kpi-sub">Current processing load</div>
+                    <div class="monitor-kpi-sub">{{ __('Current processing load') }}</div>
                 </div>
                 <div class="monitor-kpi">
                     <div class="monitor-kpi-top">
-                        <span class="monitor-kpi-label">Memory Usage</span>
+                        <span class="monitor-kpi-label">{{ __('Memory Usage') }}</span>
                         <span class="monitor-pill {{ $ramState ?: 'ok' }}" data-monitor="ram-pill">{{ $ramPercent !== null ? number_format($ramPercent, 1) . '%' : 'N/A' }}</span>
                     </div>
                     <div class="monitor-kpi-value" data-monitor="ram-value">{{ $systemMonitoring['ram_usage_text'] }}</div>
@@ -1122,7 +1131,7 @@
                 </div>
                 <div class="monitor-kpi">
                     <div class="monitor-kpi-top">
-                        <span class="monitor-kpi-label">Disk Usage</span>
+                        <span class="monitor-kpi-label">{{ __('Disk Usage') }}</span>
                         <span class="monitor-pill {{ $diskState ?: 'ok' }}" data-monitor="disk-pill">{{ $diskPercent !== null ? number_format($diskPercent, 1) . '%' : 'N/A' }}</span>
                     </div>
                     <div class="monitor-kpi-value" data-monitor="disk-value">{{ $systemMonitoring['disk_used_text'] }}</div>
@@ -1130,7 +1139,7 @@
                 </div>
                 <div class="monitor-kpi">
                     <div class="monitor-kpi-top">
-                        <span class="monitor-kpi-label">Database</span>
+                        <span class="monitor-kpi-label">{{ __('Database') }}</span>
                         <span class="monitor-pill {{ $systemMonitoring['db_status'] === 'ok' ? 'ok' : 'error' }}" data-monitor="db-pill">DB {{ strtoupper($systemMonitoring['db_status']) }}</span>
                     </div>
                     <div class="monitor-kpi-value" data-monitor="db-value">{{ $systemMonitoring['maintenance'] ? 'Maintenance ON' : 'Healthy' }}</div>
@@ -1141,7 +1150,7 @@
             <div class="monitor-two-up">
                 <div class="monitor-card">
                     <div class="monitor-head">
-                        <span class="monitor-title">System Performance</span>
+                        <span class="monitor-title">{{ __('System Performance') }}</span>
                         <span class="monitor-pill {{ $systemMonitoring['maintenance'] ? 'warn' : 'ok' }}" data-monitor="maintenance-pill">
                             {{ $systemMonitoring['maintenance'] ? 'Maintenance ON' : 'Maintenance OFF' }}
                         </span>
@@ -1151,28 +1160,28 @@
                         <div class="perf-circle" data-monitor="overall-circle" style="--angle: {{ max(0, min(360, ($overallLoad / 100) * 360)) }}deg;">
                             <div class="perf-circle-text">
                                 <strong data-monitor="overall-value">{{ number_format($overallLoad, 1) }}%</strong>
-                                <span>Overall Load</span>
+                                <span>{{ __('Overall Load') }}</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="meter-wrap">
                         <div class="meter-row">
-                            <span class="meter-label">CPU Usage</span>
+                            <span class="meter-label">{{ __('CPU Usage') }}</span>
                             <span class="meter-value" data-monitor="cpu-meter-value">{{ $cpuPercent !== null ? number_format($cpuPercent, 1) . '%' : 'N/A' }}</span>
                         </div>
                         <div class="meter-track"><div class="meter-fill {{ $cpuState }}" data-monitor="cpu-meter" style="width: {{ $cpuPercent !== null ? max(1, min(100, $cpuPercent)) : 0 }}%;"></div></div>
                     </div>
                     <div class="meter-wrap">
                         <div class="meter-row">
-                            <span class="meter-label">Memory</span>
+                            <span class="meter-label">{{ __('Memory') }}</span>
                             <span class="meter-value" data-monitor="ram-meter-value">{{ $ramPercent !== null ? number_format($ramPercent, 1) . '%' : 'N/A' }}</span>
                         </div>
                         <div class="meter-track"><div class="meter-fill {{ $ramState }}" data-monitor="ram-meter" style="width: {{ $ramPercent !== null ? max(1, min(100, $ramPercent)) : 0 }}%;"></div></div>
                     </div>
                     <div class="meter-wrap" style="margin-bottom:0;">
                         <div class="meter-row">
-                            <span class="meter-label">Disk</span>
+                            <span class="meter-label">{{ __('Disk') }}</span>
                             <span class="meter-value" data-monitor="disk-meter-value">{{ $diskPercent !== null ? number_format($diskPercent, 1) . '%' : 'N/A' }}</span>
                         </div>
                         <div class="meter-track"><div class="meter-fill {{ $diskState }}" data-monitor="disk-meter" style="width: {{ $diskPercent !== null ? max(1, min(100, $diskPercent)) : 0 }}%;"></div></div>
@@ -1182,7 +1191,7 @@
                 <div class="monitor-card">
                     <div class="trend-head">
                         <span class="trend-title">Resource Trend (Weekly)</span>
-                        <span class="trend-meta">Last 7 Days</span>
+                        <span class="trend-meta">{{ __('Last 7 Days') }}</span>
                     </div>
                     <div class="trend-chart">
                         @foreach($trend as $i => $bar)
@@ -1196,38 +1205,42 @@
                     </div>
 
                     <div class="monitor-list" style="margin-top:.75rem;">
-                        <div class="monitor-item"><span class="monitor-key">Server Time</span><span class="monitor-val" data-monitor="server-time">{{ $systemMonitoring['server_time'] }}</span></div>
-                        <div class="monitor-item"><span class="monitor-key">PHP Version</span><span class="monitor-val" data-monitor="php-version">{{ $systemMonitoring['php_version'] }}</span></div>
-                        <div class="monitor-item"><span class="monitor-key">Laravel Version</span><span class="monitor-val" data-monitor="laravel-version">{{ $systemMonitoring['laravel_version'] }}</span></div>
-                        <div class="monitor-item"><span class="monitor-key">OS</span><span class="monitor-val" data-monitor="os">{{ $systemMonitoring['os'] }}</span></div>
-                        <div class="monitor-item"><span class="monitor-key">1-min Load Avg</span><span class="monitor-val" data-monitor="load-1m">{{ $systemMonitoring['load_1m'] !== null ? number_format($systemMonitoring['load_1m'], 2) : 'N/A' }}</span></div>
-                        <div class="monitor-item"><span class="monitor-key">RAM Peak</span><span class="monitor-val" data-monitor="ram-peak">{{ $systemMonitoring['ram_peak_text'] }}</span></div>
+                        <div class="monitor-item"><span class="monitor-key">{{ __('Server Time') }}</span><span class="monitor-val" data-monitor="server-time">{{ $systemMonitoring['server_time'] }}</span></div>
+                        <div class="monitor-item"><span class="monitor-key">{{ __('PHP Version') }}</span><span class="monitor-val" data-monitor="php-version">{{ $systemMonitoring['php_version'] }}</span></div>
+                        <div class="monitor-item"><span class="monitor-key">{{ __('Laravel Version') }}</span><span class="monitor-val" data-monitor="laravel-version">{{ $systemMonitoring['laravel_version'] }}</span></div>
+                        <div class="monitor-item"><span class="monitor-key">{{ __('OS') }}</span><span class="monitor-val" data-monitor="os">{{ $systemMonitoring['os'] }}</span></div>
+                        <div class="monitor-item"><span class="monitor-key">{{ __('1-min Load Avg') }}</span><span class="monitor-val" data-monitor="load-1m">{{ $systemMonitoring['load_1m'] !== null ? number_format($systemMonitoring['load_1m'], 2) : 'N/A' }}</span></div>
+                        <div class="monitor-item"><span class="monitor-key">{{ __('RAM Peak') }}</span><span class="monitor-val" data-monitor="ram-peak">{{ $systemMonitoring['ram_peak_text'] }}</span></div>
                     </div>
                 </div>
             </div>
         </div>
     @endif
 
+    @if($isLecturer ?? false)
+        @include('dashboard.partials.staff_program_dashboard')
+    @endif
+
     {{-- ── Discipline Module ── --}}
-    @if($hasMovementAccess)
-        <p class="section-heading">{{ $hasDisciplineAccess ? 'Disiplin' : 'Student Movement' }}</p>
+    @if(!$isLecturer && $hasMovementAccess)
+        <p class="section-heading">{{ $hasDisciplineAccess ? __('Discipline') : __('Student Movement') }}</p>
 
         <div class="stats-grid">
             <div class="stat-card accent">
-                <div class="stat-label">Jumlah Pelajar</div>
+                <div class="stat-label">{{ __('Jumlah Pelajar') }}</div>
                 <div class="stat-value">{{ $totalStudents }}</div>
             </div>
             @if($hasDisciplineAccess)
                 <div class="stat-card blue">
-                    <div class="stat-label">Jumlah Kesalahan</div>
+                    <div class="stat-label">{{ __('Jumlah Kesalahan') }}</div>
                     <div class="stat-value">{{ $totalOffenses }}</div>
                 </div>
                 <div class="stat-card red">
-                    <div class="stat-label">Kes Unpaid</div>
+                    <div class="stat-label">{{ __('Kes Unpaid') }}</div>
                     <div class="stat-value">{{ $unpaidOffenses }}</div>
                 </div>
                 <div class="stat-card gold">
-                    <div class="stat-label">Rekod Belum Disahkan</div>
+                    <div class="stat-label">{{ __('Rekod Belum Disahkan') }}</div>
                     <div class="stat-value">{{ $pendingFineApplications }}</div>
                 </div>
             @endif
@@ -1253,25 +1266,25 @@
         <div class="two-col">
             <div class="data-card">
                 <div class="data-card-head">
-                    <strong>Rekod Kesalahan Terkini</strong>
+                    <strong>{{ __('Rekod Kesalahan Terkini') }}</strong>
                     @if($canViewOffenseList)<a class="btn-ghost" href="{{ route('admin.offenses.index') }}">
-                        Lihat Semua
+                        {{ __('Lihat Semua') }}
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>@endif
                 </div>
                 @if($recentOffenses->isEmpty())
                     <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        Tiada rekod kesalahan.
+                        {{ __('Tiada rekod kesalahan.') }}
                     </div>
                 @else
                     <div style="overflow-x:auto;">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Pelajar</th>
-                                    <th>No Matrik</th>
-                                    <th>Status</th>
+                                    <th>{{ __('Pelajar') }}</th>
+                                    <th>{{ __('No Matrik') }}</th>
+                                    <th>{{ __('Status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1290,25 +1303,25 @@
 
             <div class="data-card">
                 <div class="data-card-head">
-                    <strong>Resit Bayaran Terkini</strong>
+                    <strong>{{ __('Resit Bayaran Terkini') }}</strong>
                     @if($canViewOffenseList)<a class="btn-ghost" href="{{ route('admin.offenses.index', ['status' => 'applied']) }}">
-                        Buka Senarai Kesalahan
+                        {{ __('Buka Senarai Kesalahan') }}
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>@endif
                 </div>
                 @if($recentFineApplications->isEmpty())
                     <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                        Tiada resit bayaran terbaru.
+                        {{ __('Tiada resit bayaran terbaru.') }}
                     </div>
                 @else
                     <div style="overflow-x:auto;">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Pelajar</th>
-                                    <th>Lokasi</th>
-                                    <th>Status</th>
+                                    <th>{{ __('Pelajar') }}</th>
+                                    <th>{{ __('Lokasi') }}</th>
+                                    <th>{{ __('Status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1329,29 +1342,29 @@
         <div class="two-col">
             <div class="data-card">
                 <div class="data-card-head">
-                    <strong>Guard House Access</strong>
+                    <strong>{{ __('Guard House Access') }}</strong>
                     <a class="btn-ghost" href="{{ route('admin.movements.qr') }}">
-                        Buka QR
+                        {{ __('Buka QR') }}
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
                 <div class="empty-state">
                     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zm-12 12h4.5v4.5h-4.5zm12 0h4.5v4.5h-4.5zM9 6h6M6 9v6M18 9v6M9 18h6"/></svg>
-                    Buka paparan QR guard house untuk tayangan monitor dan pengesahan imbasan pelajar.
+                    {{ __('Buka paparan QR guard house untuk tayangan monitor dan pengesahan imbasan pelajar.') }}
                 </div>
             </div>
 
             <div class="data-card">
                 <div class="data-card-head">
-                    <strong>Live Monitoring</strong>
+                    <strong>{{ __('Live Monitoring') }}</strong>
                     <a class="btn-ghost" href="{{ route('admin.movements.outside') }}">
-                        Pantau
+                        {{ __('Pantau') }}
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
                 <div class="empty-state">
                     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
-                    Pantau pelajar di luar kampus, semak kelewatan, dan buka senarai pelajar untuk semakan pantas di pondok pengawal.
+                    {{ __('Pantau pelajar di luar kampus, semak kelewatan, dan buka senarai pelajar untuk semakan pantas di pondok pengawal.') }}
                 </div>
             </div>
         </div>
@@ -1359,24 +1372,24 @@
     @endif
 
     {{-- ── Scholarship Module ── --}}
-    @if($hasScholarshipAccess)
-        <p class="section-heading">Scholarship</p>
+    @if(!$isLecturer && $hasScholarshipAccess)
+        <p class="section-heading">{{ __('Scholarship') }}</p>
 
         <div class="stats-grid">
             <div class="stat-card accent">
-                <div class="stat-label">Jumlah Rekod Scholarship</div>
+                <div class="stat-label">{{ __('Jumlah Rekod Scholarship') }}</div>
                 <div class="stat-value">{{ $totalScholarshipRecords }}</div>
             </div>
             <div class="stat-card blue">
-                <div class="stat-label">Scholarship Aktif</div>
+                <div class="stat-label">{{ __('Scholarship Aktif') }}</div>
                 <div class="stat-value">{{ $activeScholarships }}</div>
             </div>
             <div class="stat-card gold">
-                <div class="stat-label">Rekod Belum Disahkan</div>
+                <div class="stat-label">{{ __('Rekod Belum Disahkan') }}</div>
                 <div class="stat-value">{{ $pendingScholarships }}</div>
             </div>
             <div class="stat-card" style="border-left:3px solid var(--c-text-muted);">
-                <div class="stat-label">Pengumuman Terkini</div>
+                <div class="stat-label">{{ __('Pengumuman Terkini') }}</div>
                 <div class="stat-value">{{ $recentScholarshipAnnouncements->count() }}</div>
             </div>
         </div>
@@ -1384,26 +1397,26 @@
         <div class="two-col">
             <div class="data-card">
                 <div class="data-card-head">
-                    <strong>Rekod Scholarship Terkini</strong>
+                    <strong>{{ __('Rekod Scholarship Terkini') }}</strong>
                     <a class="btn-ghost" href="{{ route('admin.scholarships.index') }}">
-                        Lihat Semua
+                        {{ __('Lihat Semua') }}
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
                 @if($recentScholarshipRecords->isEmpty())
                     <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6"/></svg>
-                        Tiada rekod scholarship.
+                        {{ __('Tiada rekod scholarship.') }}
                     </div>
                 @else
                     <div style="overflow-x:auto;">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Pelajar</th>
-                                    <th>No Matrik</th>
-                                    <th>Jenis</th>
-                                    <th>Status</th>
+                                    <th>{{ __('Pelajar') }}</th>
+                                    <th>{{ __('No Matrik') }}</th>
+                                    <th>{{ __('Jenis') }}</th>
+                                    <th>{{ __('Status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1423,25 +1436,25 @@
 
             <div class="data-card">
                 <div class="data-card-head">
-                    <strong>Pengumuman Scholarship Terkini</strong>
+                    <strong>{{ __('Pengumuman Scholarship Terkini') }}</strong>
                     <a class="btn-ghost" href="{{ route('admin.scholarship-announcements.index') }}">
-                        Semak
+                        {{ __('Semak') }}
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
                 @if($recentScholarshipAnnouncements->isEmpty())
                     <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                        Tiada pengumuman scholarship.
+                        {{ __('Tiada pengumuman scholarship.') }}
                     </div>
                 @else
                     <div style="overflow-x:auto;">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Tajuk</th>
-                                    <th>Jenis</th>
-                                    <th>Tarikh</th>
+                                    <th>{{ __('Tajuk') }}</th>
+                                    <th>{{ __('Jenis') }}</th>
+                                    <th>{{ __('Tarikh') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1460,13 +1473,13 @@
         </div>
     @endif
 
-    @if(!$hasDisciplineAccess && !$hasScholarshipAccess && !$hasMovementAccess)
+    @if(!$isLecturer && !$hasDisciplineAccess && !$hasScholarshipAccess && !$hasMovementAccess)
         <div class="no-access">
             <div class="icon-wrap">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" style="color:#9E9892;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </div>
-            <strong style="font-size:0.9rem;color:var(--c-text-primary);">Tiada Akses Modul</strong>
-            <p>Akses modul untuk akaun ini belum dikonfigurasi.</p>
+            <strong style="font-size:0.9rem;color:var(--c-text-primary);">{{ __('Tiada Akses Modul') }}</strong>
+            <p>{{ __('Akses modul untuk akaun ini belum dikonfigurasi.') }}</p>
         </div>
     @endif
 

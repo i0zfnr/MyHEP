@@ -54,19 +54,9 @@
         border: 1px solid var(--admin-line);
         border-radius: 16px;
         background: linear-gradient(180deg, #fff 0%, #fffdfa 100%);
-        box-shadow:
-            0 1px 2px rgba(36, 26, 18, 0.07),
-            0 10px 26px rgba(61, 46, 34, 0.06);
+        box-shadow: 0 8px 22px rgba(61, 46, 34, 0.06);
         overflow: hidden;
-        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
-    }
-    .card:hover,
-    .panel:hover {
-        transform: translateY(-2px);
-        border-color: #dfccb6;
-        box-shadow:
-            0 4px 14px rgba(36, 26, 18, 0.10),
-            0 18px 34px rgba(61, 46, 34, 0.10);
+        contain: paint;
     }
     .head,
     .card h2 {
@@ -96,13 +86,11 @@
         background: linear-gradient(180deg, #ffffff 0%, #f9f3ec 100%);
         color: #6e5745;
         font-weight: 700;
-        transition: transform 170ms ease, box-shadow 170ms ease, background-color 170ms ease, border-color 170ms ease, color 170ms ease;
+        transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
     }
     .btn:hover {
-        transform: translateY(-1px);
         border-color: #bb9c7d;
         color: #5d4737;
-        box-shadow: 0 8px 18px rgba(98, 74, 53, 0.14);
     }
     .btn:focus-visible {
         outline: none;
@@ -144,6 +132,7 @@
     }
     table {
         width: 100%;
+        table-layout: fixed;
     }
     th {
         background: #f9f1e8 !important;
@@ -156,6 +145,13 @@
     table tbody tr:hover {
         background: #fcf7f1;
     }
+    th,td{padding:.72rem .8rem}
+    th:nth-child(1){width:27%}th:nth-child(2){width:12%}th:nth-child(3){width:16%}th:nth-child(4){width:13%}th:nth-child(5){width:32%}
+    td{vertical-align:middle}
+    .actions{flex-wrap:nowrap}
+    .actions .btn{min-height:38px;padding:.55rem .75rem}
+    .admin-table-scroll{overflow-x:auto;overflow-y:visible;overscroll-behavior-x:contain;content-visibility:auto;contain-intrinsic-size:720px}
+    @media (prefers-reduced-motion:reduce){.card,.panel,.btn,table tbody tr{transition:none!important}}
     .ok,
     .msg-ok {
         border-radius: 12px;
@@ -206,20 +202,20 @@
             </div>
         </div>
 
-        <form class="admin-search" method="GET" role="search" data-live-filter-form data-live-filter-delay="300">
-            <input type="search" name="search" value="{{ $search }}" placeholder="Search name, IC, or email" aria-label="Search admin and lecturer accounts">
-            <button class="btn" type="submit">Search</button>
-            @if($search !== '')<a class="btn" href="{{ route('admin.admin-users.index') }}">Clear</a>@endif
+        <form class="admin-search" method="GET" role="search" data-live-filter-form data-live-filter-delay="500">
+            <input type="search" name="search" value="{{ $search }}" placeholder="{{ __('Search name, IC, or email') }}" aria-label="{{ __('Search admin and lecturer accounts') }}">
+            <button class="btn" type="submit">{{ __('Search') }}</button>
+            @if($search !== '')<a class="btn" href="{{ route('admin.admin-users.index') }}">{{ __('Clear') }}</a>@endif
         </form>
 
         <div data-live-filter-results>
-        <div style="overflow-x:auto;">
+        <div class="admin-table-scroll">
             <table>
                 <thead>
                     <tr>
                         <th>{{ __('Nama') }}</th>
                         <th>IC</th>
-                        <th>Role</th>
+                        <th>{{ __('Role') }}</th>
                         <th>{{ __('Tarikh Cipta') }}</th>
                         <th>{{ __('Tindakan') }}</th>
                     </tr>

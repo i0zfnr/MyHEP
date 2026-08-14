@@ -17,7 +17,7 @@ class SystemFeatures
             'description' => 'Allow students to use text guidance based only on their own records. File upload and broad administrative research remain unavailable.',
         ],
         'lecturer_ai_helper' => [
-            'label' => 'AI Helper for Lecturers',
+            'label' => 'AI Helper for Staff',
             'description' => 'Allow lecturers to use AI guidance with lecturer-appropriate context and attach PDF or image report sources.',
         ],
         'admin_ai_helper' => [

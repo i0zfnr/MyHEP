@@ -263,15 +263,15 @@
                             <td>
                                 <div class="actions-cell">
                                     @if($canManageOffenses)
-                                        <a class="btn" href="{{ route('admin.offenses.edit', $offense->id) }}">Edit</a>
+                                        <a class="btn" href="{{ route('admin.offenses.edit', $offense->id) }}">{{ __('Edit') }}</a>
                                     @endif
-                                    <a class="btn" href="{{ route('admin.offenses.print', $offense->id) }}" target="_blank">Print</a>
+                                    <a class="btn" href="{{ route('admin.offenses.print', $offense->id) }}" target="_blank">{{ __('Print') }}</a>
                                     <a class="btn" href="{{ route('admin.offenses.pdf', $offense->id) }}">PDF</a>
 
                                     @if($canManageOffenses && $offense->status !== 'paid')
                                         <form method="POST" action="{{ route('admin.offenses.mark-paid', $offense->id) }}" style="margin:0;">
                                             @csrf
-                                            <button class="btn btn-success" type="submit">Mark Paid</button>
+                                            <button class="btn btn-success" type="submit">{{ __('Mark Paid') }}</button>
                                         </form>
                                     @endif
 
@@ -283,14 +283,14 @@
                                             data-confirm-tone="danger">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-danger" type="submit">Delete</button>
+                                            <button class="btn btn-danger" type="submit">{{ __('Delete') }}</button>
                                         </form>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" style="text-align:center;color:#7a6555;">Tiada rekod kesalahan.</td></tr>
+                        <tr><td colspan="9" style="text-align:center;color:#7a6555;">{{ __('Tiada rekod kesalahan.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -27,6 +27,10 @@
     @if(session('success'))<div class="se-feedback se-feedback--success">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="se-feedback se-feedback--error">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
+    @if($limitedToInsurancePayments ?? false)
+        <div class="se-feedback se-feedback--info">{{ __('Discipline Administration can view and review only student insurance-payment documents. Other document categories remain private to their authorized reviewers.') }}</div>
+    @endif
+
     <div class="admin-doc-stats">
         <div class="admin-doc-stat"><span>{{ __('Total') }}</span><strong>{{ (int) ($counts->total ?? 0) }}</strong></div>
         <div class="admin-doc-stat"><span>{{ __('Pending') }}</span><strong>{{ (int) ($counts->pending ?? 0) }}</strong></div>
@@ -54,7 +58,7 @@
                 <td><span class="ui-status status-{{ $tone }}">{{ \App\Support\StudentDocumentOptions::statusLabel($document->status) }}</span>@if($document->reviewer_name)<br><span class="admin-doc-meta">{{ $document->reviewer_name }} · {{ \Illuminate\Support\Carbon::parse($document->reviewed_at)->diffForHumans() }}</span>@endif</td>
                 <td>
                     @if($document->status === 'pending')
-                        <form method="POST" action="{{ route('admin.documents.review', $document->id) }}" class="admin-doc-review">@csrf @method('PATCH')<textarea name="review_note" rows="2" maxlength="1000" placeholder="{{ __('Review note (required for rejection)') }}"></textarea><div class="admin-doc-review-actions"><button class="ui-btn primary" name="status" value="approved" type="submit">{{ __('Approve') }}</button><button class="ui-btn btn-danger" name="status" value="rejected" type="submit">{{ __('Reject') }}</button></div></form>
+                        <form method="POST" action="{{ route('admin.documents.review', $document->id) }}" class="admin-doc-review">@csrf @method('PATCH')<input type="hidden" name="status" value=""><textarea name="review_note" rows="2" maxlength="1000" placeholder="{{ __('Review note (required for rejection)') }}"></textarea><div class="admin-doc-review-actions"><button class="ui-btn primary" name="status" value="approved" type="submit" onclick="var h=this.form.querySelector('input[name=status]');if(h)h.value='approved'">{{ __('Approve') }}</button><button class="ui-btn btn-danger" name="status" value="rejected" type="submit" onclick="var h=this.form.querySelector('input[name=status]');if(h)h.value='rejected'">{{ __('Reject') }}</button></div></form>
                     @else
                         {{ $document->review_note ?: '-' }}
                     @endif

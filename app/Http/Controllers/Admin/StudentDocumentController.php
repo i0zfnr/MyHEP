@@ -16,9 +16,11 @@ class StudentDocumentController extends Controller
 {
     public function index(Request $request): View
     {
+        $adminRole = (string) session('auth_user.admin_role');
+        $categories = StudentDocumentOptions::categoriesForAdmin($adminRole);
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:150'],
-            'category' => ['nullable', Rule::in(array_keys(StudentDocumentOptions::CATEGORIES))],
+            'category' => ['nullable', Rule::in(array_keys($categories))],
             'status' => ['nullable', Rule::in(array_keys(StudentDocumentOptions::STATUSES))],
             'expiry' => ['nullable', Rule::in(['no_expiry', 'valid', 'expiring_30', 'expired'])],
         ]);
@@ -26,6 +28,7 @@ class StudentDocumentController extends Controller
             ->join('students', 'students.id', '=', 'student_documents.student_id')
             ->leftJoin('admins', 'admins.id', '=', 'student_documents.reviewed_by')
             ->select('student_documents.*', 'students.full_name as student_name', 'students.matric_no', 'admins.full_name as reviewer_name');
+        $this->scopeVisibleDocuments($query, $adminRole);
 
         if (! empty($filters['q'])) {
             $q = trim($filters['q']);
@@ -55,7 +58,9 @@ class StudentDocumentController extends Controller
             ->orderByDesc('student_documents.created_at')
             ->paginate(20)
             ->withQueryString();
-        $counts = DB::table('student_documents')
+        $countsQuery = DB::table('student_documents');
+        $this->scopeVisibleDocuments($countsQuery, $adminRole);
+        $counts = $countsQuery
             ->selectRaw('COUNT(*) as total')
             ->selectRaw("SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending")
             ->selectRaw("SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved")
@@ -66,13 +71,15 @@ class StudentDocumentController extends Controller
             'documents' => $documents,
             'counts' => $counts,
             'filters' => $filters,
-            'categories' => StudentDocumentOptions::CATEGORIES,
+            'categories' => $categories,
+            'limitedToInsurancePayments' => $adminRole === 'discipline_admin',
         ]);
     }
 
     public function download(int $id): StreamedResponse
     {
         $document = DB::table('student_documents')->where('id', $id)->first();
+        abort_unless($document && $this->canAccessCategory((string) $document->category), 404);
         abort_unless($document && $document->disk === 'student_documents', 404);
         abort_unless(Storage::disk('student_documents')->exists($document->path), 404);
 
@@ -94,7 +101,7 @@ class StudentDocumentController extends Controller
 
         $document = DB::transaction(function () use ($id, $validated) {
             $document = DB::table('student_documents')->where('id', $id)->lockForUpdate()->first();
-            if (! $document || $document->status !== 'pending') {
+            if (! $document || ! $this->canAccessCategory((string) $document->category) || $document->status !== 'pending') {
                 return null;
             }
 
@@ -125,5 +132,20 @@ class StudentDocumentController extends Controller
         ]);
 
         return redirect()->route('admin.documents.index')->with('success', __('Document review saved.'));
+    }
+
+    private function scopeVisibleDocuments($query, string $adminRole): void
+    {
+        if ($adminRole === 'discipline_admin') {
+            $query->where('student_documents.category', 'insurance_payment');
+        }
+    }
+
+    private function canAccessCategory(string $category): bool
+    {
+        return StudentDocumentOptions::adminCanAccessCategory(
+            (string) session('auth_user.admin_role'),
+            $category,
+        );
     }
 }

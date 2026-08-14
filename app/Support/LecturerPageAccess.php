@@ -11,10 +11,12 @@ class LecturerPageAccess
         'offense_list' => [
             'label' => 'Offense List',
             'description' => 'Allow lecturer to view offense records and print offense documents.',
+            'default' => false,
         ],
         'offense_register' => [
             'label' => 'Register Offense',
             'description' => 'Allow lecturer to register a new offense for a student.',
+            'default' => false,
         ],
         'guard_management' => [
             'label' => 'Guard Management',
@@ -31,7 +33,7 @@ class LecturerPageAccess
     public function enabled(int $adminId, string $page): bool
     {
         if (! $this->exists($page) || ! Schema::hasTable('lecturer_page_access')) {
-            return $this->exists($page) && (bool) (self::PAGES[$page]['default'] ?? true);
+            return $this->exists($page) && (bool) (self::PAGES[$page]['default'] ?? false);
         }
 
         $value = DB::table('lecturer_page_access')
@@ -39,7 +41,7 @@ class LecturerPageAccess
             ->where('page_key', $page)
             ->value('enabled');
 
-        return $value === null ? (bool) (self::PAGES[$page]['default'] ?? true) : (bool) $value;
+        return $value === null ? (bool) (self::PAGES[$page]['default'] ?? false) : (bool) $value;
     }
 
     public function allFor(int $adminId): array

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Support\AccountSessionManager;
 use App\Support\LecturerPageAccess;
 use App\Support\Nric;
+use App\Support\ProgramApprovalRouting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class StaffManagementController extends Controller
         $totalAccounts = DB::table('admins')->whereNotNull('staff_category')->count();
 
         $staff = DB::table('admins')
-            ->select('id', 'full_name', 'ic_no', 'email', 'staff_category', 'staff_department', 'position', 'is_active', 'created_at')
+            ->select('id', 'full_name', 'ic_no', 'email', 'staff_category', 'staff_department', 'reporting_branch', 'position', 'is_active', 'created_at')
             ->where('role', 'lecturer')
             ->when($search !== '', fn ($query) => $query->where(function ($nested) use ($search): void {
                 $nested->where('full_name', 'like', "%{$search}%")
@@ -85,7 +86,7 @@ class StaffManagementController extends Controller
             'created_at' => now(),
         ]);
         $pages->sync($id, array_values($validated['lecturer_pages'] ?? []), (int) session('auth_user.id'));
-        auditLog('staff.create', 'admins', $id, 'Created lecturer/staff account');
+        auditLog('staff.create', 'admins', $id, 'Created lecturer/staff account with page access: '.implode(', ', $validated['lecturer_pages'] ?? []));
 
         return redirect()->route('admin.staff.index')->with('success', 'Staff account created successfully.');
     }
@@ -114,6 +115,7 @@ class StaffManagementController extends Controller
                 if ($nric === '' || $name === '' || $department === null) {
                     $result['skipped']++;
                     $result['errors'][] = 'Skipped a row with a missing name, IC, or recognized department.';
+
                     continue;
                 }
 
@@ -121,6 +123,7 @@ class StaffManagementController extends Controller
                 if ($existing && $existing->role !== 'lecturer') {
                     $result['skipped']++;
                     $result['errors'][] = "{$name}: IC is already assigned to a non-staff administrator.";
+
                     continue;
                 }
 
@@ -128,6 +131,7 @@ class StaffManagementController extends Controller
                 if ($email && DB::table('admins')->where('email', $email)->when($existing, fn ($query) => $query->where('id', '!=', $existing->id))->exists()) {
                     $result['skipped']++;
                     $result['errors'][] = "{$name}: email is already assigned to another account.";
+
                     continue;
                 }
 
@@ -136,6 +140,7 @@ class StaffManagementController extends Controller
                     'email' => $email,
                     'staff_category' => 'general',
                     'staff_department' => $department,
+                    'reporting_branch' => ProgramApprovalRouting::inferBranch($department, $row['position'] ?? null),
                     'position' => filled($row['position'] ?? null) ? Str::limit(trim((string) $row['position']), 180, '') : null,
                     'is_active' => true,
                     'updated_at' => now(),
@@ -186,7 +191,7 @@ class StaffManagementController extends Controller
             || $staff->staff_category !== $payload['staff_category']) {
             $sessions->revokeAccount('admin', $id);
         }
-        auditLog('staff.update', 'admins', $id, 'Updated lecturer/staff account');
+        auditLog('staff.update', 'admins', $id, 'Updated lecturer/staff account with page access: '.implode(', ', $validated['lecturer_pages'] ?? []));
 
         return redirect()->route('admin.staff.index')->with('success', 'Staff account updated successfully.');
     }
@@ -254,6 +259,7 @@ class StaffManagementController extends Controller
             'email' => filled($validated['email'] ?? null) ? strtolower(trim($validated['email'])) : null,
             'staff_category' => $validated['staff_category'],
             'staff_department' => $validated['staff_department'] ?? null,
+            'reporting_branch' => ProgramApprovalRouting::inferBranch($validated['staff_department'] ?? null, $validated['position'] ?? null),
             'position' => filled($validated['position'] ?? null) ? trim($validated['position']) : null,
             'is_active' => (bool) $validated['is_active'],
             'updated_at' => now(),
@@ -293,7 +299,7 @@ class StaffManagementController extends Controller
 
     private function staffRowsFromXlsx(string $path): array
     {
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($path) !== true) {
             return [];
         }
@@ -383,6 +389,7 @@ class StaffManagementController extends Controller
             $name = trim((string) ($row[$nameColumn] ?? ''));
             if ($headingDepartment !== null && preg_replace('/[^0-9]/', '', $nric) === '') {
                 $currentDepartment = $headingDepartment;
+
                 continue;
             }
 
@@ -482,6 +489,7 @@ class StaffManagementController extends Controller
         foreach ($shared->si as $item) {
             if (isset($item->t)) {
                 $strings[] = (string) $item->t;
+
                 continue;
             }
             $parts = [];

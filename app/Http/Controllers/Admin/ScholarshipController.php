@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\MalaysianIdentityNormalizer;
 use App\Support\ProgramIdentifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,6 +40,52 @@ class ScholarshipController extends Controller
             ->withQueryString();
 
         return view('admin.scholarships.index', compact('records', 'filters'));
+    }
+
+    public function welfare(Request $request): View
+    {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:150'],
+            'status' => ['nullable', Rule::in(['pending', 'confirmed', 'rejected'])],
+            'group' => ['nullable', Rule::in(['all', 'oku', 'b40'])],
+        ]);
+
+        $query = DB::table('scholarships')
+            ->join('students', 'students.id', '=', 'scholarships.student_id')
+            ->where('scholarships.type', 'welfare')
+            ->select(
+                'scholarships.id', 'scholarships.provider_name', 'scholarships.amount',
+                'scholarships.status', 'scholarships.created_at', 'students.id as student_id',
+                'students.full_name', 'students.matric_no', 'students.program',
+                'students.family_income', 'students.oku_status', 'students.oku_category'
+            );
+
+        if (filled($filters['q'] ?? null)) {
+            $q = trim((string) $filters['q']);
+            $query->where(function ($nested) use ($q): void {
+                $nested->where('students.full_name', 'like', "%{$q}%")
+                    ->orWhere('students.matric_no', 'like', "%{$q}%")
+                    ->orWhere('students.program', 'like', "%{$q}%");
+            });
+        }
+        if (filled($filters['status'] ?? null)) {
+            $query->where('scholarships.status', $filters['status']);
+        }
+        if (($filters['group'] ?? 'all') === 'oku') {
+            $query->where('students.oku_status', 'yes');
+        } elseif (($filters['group'] ?? 'all') === 'b40') {
+            $query->whereNotNull('students.family_income')->where('students.family_income', '<=', 5249);
+        }
+
+        $records = $query->orderByDesc('scholarships.created_at')->paginate(20)->withQueryString();
+        $summary = [
+            'total' => DB::table('scholarships')->where('type', 'welfare')->count(),
+            'confirmed' => DB::table('scholarships')->where('type', 'welfare')->where('status', 'confirmed')->count(),
+            'pending' => DB::table('scholarships')->where('type', 'welfare')->where('status', 'pending')->count(),
+            'total_amount' => (float) DB::table('scholarships')->where('type', 'welfare')->where('status', 'confirmed')->sum('amount'),
+        ];
+
+        return view('admin.scholarships.welfare', compact('records', 'filters', 'summary'));
     }
 
     public function b40Tvet(Request $request): View
@@ -598,8 +645,9 @@ class ScholarshipController extends Controller
                 $result['matched_politeknik_besut']++;
 
                 $fullName = $this->rowValue($row, ['nama pelajar', 'nama penuh', 'nama', 'student name', 'full name', 'name']);
-                $icNo = $this->cleanIdentity($this->rowValue($row, ['no ic', 'no. ic', 'no kad pengenalan', 'nombor kad pengenalan', 'ic no', 'ic number', 'mykad', 'kad pengenalan']));
-                $program = $this->rowValue($row, ['program', 'nama program', 'kursus', 'course']) ?: 'UNKNOWN';
+                $icNo = MalaysianIdentityNormalizer::ic($this->rowValue($row, ['no ic', 'no. ic', 'no kp', 'no. kp', 'nombor kp', 'no kad pengenalan', 'nombor kad pengenalan', 'ic no', 'ic number', 'mykad', 'kad pengenalan']));
+                $matricNo = $this->cleanIdentity($this->rowValue($row, ['no matrik', 'no. matrik', 'nombor matrik', 'no pend', 'no. pend', 'matric no', 'matric number', 'id pelajar', 'student id', 'no pendaftaran', 'nombor pendaftaran']));
+                $program = $this->rowValue($row, ['program', 'nama program', 'kursus', 'kod kursus', 'course', 'course code', 'kelas', 'class']) ?: 'UNKNOWN';
 
                 if ($fullName === '' || $icNo === '') {
                     $result['skipped']++;
@@ -607,15 +655,13 @@ class ScholarshipController extends Controller
                     continue;
                 }
 
-                $student = DB::table('students')
-                    ->where('ic_no', $icNo)
-                    ->first();
+                $student = $this->findStudentByIdentity($icNo, $matricNo);
 
                 $studentPayload = [
                     'full_name' => Str::upper($fullName),
-                    'matric_no' => null,
+                    'matric_no' => $matricNo !== '' ? $matricNo : ($student->matric_no ?? null),
                     'ic_no' => $icNo,
-                    'program' => ProgramIdentifier::from(null, $program),
+                    'program' => ProgramIdentifier::from($matricNo !== '' ? $matricNo : ($student->matric_no ?? null), $program),
                     'updated_at' => $now,
                 ];
 
@@ -691,6 +737,25 @@ class ScholarshipController extends Controller
         $haystack = $institution !== '' ? $institution : implode(' ', array_values($row));
 
         return str_contains($this->normalizeSearchText($haystack), self::B40_TVET_INSTITUTION);
+    }
+
+    private function findStudentByIdentity(string $icNo, string $matricNo): ?object
+    {
+        return DB::table('students')
+            ->where(function ($query) use ($icNo, $matricNo): void {
+                $query->whereRaw($this->normalizedIdentitySql('ic_no').' = ?', [$icNo]);
+                if ($matricNo !== '') {
+                    $query->orWhereRaw($this->normalizedIdentitySql('matric_no').' = ?', [$matricNo]);
+                }
+            })
+            ->orderByRaw('CASE WHEN matric_no IS NULL OR matric_no = ? THEN 1 ELSE 0 END', [''])
+            ->orderBy('id')
+            ->first();
+    }
+
+    private function normalizedIdentitySql(string $column): string
+    {
+        return "UPPER(REPLACE(REPLACE(REPLACE(REPLACE({$column}, '-', ''), ' ', ''), '/', ''), '.', ''))";
     }
 
     private function rowValue(array $row, array $aliases): string

@@ -31,7 +31,9 @@ class AiHelperViewTest extends TestCase
         $view = file_get_contents(__DIR__ . '/../../resources/views/admin/ai_helper/index.blade.php');
 
         $this->assertStringContainsString("What should we focus on?", $view);
-        $this->assertStringContainsString('id="aiAddMenu"', $view);
+        $this->assertStringNotContainsString('id="aiAddMenu"', $view);
+        $this->assertStringNotContainsString('id="aiAddBtn"', $view);
+        $this->assertStringContainsString('class="ai-quick-action" id="aiUploadShortcut"', $view);
         $this->assertStringContainsString('id="aiToolsPanel" aria-hidden="true"', $view);
         $this->assertStringContainsString('id="aiUploadShortcut"', $view);
     }
@@ -52,7 +54,7 @@ class AiHelperViewTest extends TestCase
         $this->assertStringContainsString("'lecturer.ai-helper.ask'", $view);
         $this->assertStringContainsString("'/lecturer/ai-helper/conversations'", $view);
         $this->assertStringContainsString('@unless($textOnlyAiMode)', $view);
-        $this->assertStringContainsString("__('AI Helper (Lecturer)')", $view);
+        $this->assertStringContainsString("__('AI Helper (Staff)')", $view);
         $this->assertStringContainsString("__('Category summary')", $view);
         $this->assertStringContainsString('$canUploadAiFiles = ! $studentAiMode', $view);
         $this->assertStringContainsString('class="ai-compose-attachments" id="attachmentPreview"', $view);
@@ -114,7 +116,7 @@ class AiHelperViewTest extends TestCase
         $this->assertStringContainsString('position:fixed !important;', $view);
         $this->assertStringContainsString('.ai-hint { display:none; }', $view);
         $this->assertStringContainsString('.ai-message-action span { display:none; }', $view);
-        $this->assertStringContainsString('.ai-admin--admin .ai-compose-row { grid-template-columns:42px minmax(0,1fr) 42px !important;', $view);
+        $this->assertStringContainsString('.ai-admin--admin .ai-compose-row { grid-template-columns:minmax(0,1fr) 42px !important;', $view);
         $this->assertStringContainsString('.ai-format-pill { display:none !important; }', $view);
     }
 
@@ -131,7 +133,7 @@ class AiHelperViewTest extends TestCase
         $this->assertStringContainsString('class="ai-top-actions"', $view);
         $this->assertSame(1, substr_count($view, 'id="aiNewConversation"'));
         $this->assertStringContainsString('grid-template-rows:auto minmax(390px,1fr) auto auto !important;', $view);
-        $this->assertStringContainsString('justify-self:end; width:max-content;', $view);
+        $this->assertStringContainsString('justify-self:stretch; width:calc(100% - 24px);', $view);
         $this->assertStringContainsString('border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:999px;', $view);
         $this->assertStringContainsString('id="aiDeleteAllHistory"', $view);
         $this->assertStringContainsString('id="aiHistorySearchButton"', $view);

@@ -43,9 +43,20 @@ class RequireSessionRole
             $request->session()->put('auth_user', $authUser);
         }
 
-        if ($role === 'student' && $this->studentProfileIncomplete((int) ($authUser['id'] ?? 0)) && !$this->isAllowedProfileRoute($request)) {
-            return redirect()->route('student.profile')
-                ->withErrors(['profile' => __('Please complete your profile and upload a profile photo before using the system.')]);
+        if ($role === 'student') {
+            $studentId = (int) ($authUser['id'] ?? 0);
+
+            if ($this->studentProfileIncomplete($studentId) && !$this->isAllowedProfileRoute($request)) {
+                return redirect()->route('student.profile')
+                    ->withErrors(['profile' => __('Please complete all required profile and guardian information before using the system.')]);
+            }
+
+            if (!$this->studentProfileIncomplete($studentId)
+                && !$this->studentScholarshipStatusComplete($studentId)
+                && !$this->isAllowedOnboardingRoute($request)) {
+                return redirect()->route('student.scholarship-status.form')
+                    ->withErrors(['scholarship_status' => __('Please complete the scholarship status form before using the system.')]);
+            }
         }
 
         return $next($request);
@@ -57,7 +68,13 @@ class RequireSessionRole
             return false;
         }
 
-        $columns = ['photo'];
+        // Residence status, room number and current study address are intentionally optional.
+        $columns = [
+            'photo', 'email', 'semester', 'academic_session', 'phone', 'address',
+            'religion', 'parliament', 'dun', 'race', 'date_of_birth',
+            'guardian_name', 'guardian_ic_no', 'guardian_address', 'guardian_phone',
+            'mother_ic_no', 'guardian_occupation', 'family_income', 'oku_status',
+        ];
 
         $select = array_values(array_filter($columns, fn (string $column) => Schema::hasColumn('students', $column)));
         if ($select === []) {
@@ -82,6 +99,18 @@ class RequireSessionRole
         return false;
     }
 
+    private function studentScholarshipStatusComplete(int $studentId): bool
+    {
+        if ($studentId <= 0 || !Schema::hasTable('student_scholarship_status_forms')) {
+            return true;
+        }
+
+        return DB::table('student_scholarship_status_forms')
+            ->where('student_id', $studentId)
+            ->whereNotNull('submitted_at')
+            ->exists();
+    }
+
     private function isAllowedProfileRoute(Request $request): bool
     {
         return $request->routeIs(
@@ -94,6 +123,14 @@ class RequireSessionRole
             'notifications.feed',
             'push.subscribe',
             'push.unsubscribe',
+        );
+    }
+
+    private function isAllowedOnboardingRoute(Request $request): bool
+    {
+        return $this->isAllowedProfileRoute($request) || $request->routeIs(
+            'student.scholarship-status.form',
+            'student.scholarship-status.submit',
         );
     }
 }

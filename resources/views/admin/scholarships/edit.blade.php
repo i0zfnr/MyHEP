@@ -180,7 +180,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">Edit Rekod Scholarship</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Edit Rekod Scholarship') }}</h2>
 @endsection
 
 @section('content')
@@ -191,18 +191,18 @@
         @csrf
         @method('PUT')
         <div class="card">
-            <h2>Maklumat Rekod</h2>
+            <h2>{{ __('Maklumat Rekod') }}</h2>
             <div class="body">
                 <div class="grid grid-2">
                     <div>
-                        <label for="student_search">Cari Pelajar</label>
-                        <input id="student_search" type="text" placeholder="Taip nama atau nombor matrik">
-                        <div style="margin-top:6px;font-size:12px;color:#7a6555;">Taip sekurang-kurangnya 2 huruf untuk cari pelajar melalui AJAX.</div>
+                        <label for="student_search">{{ __('Cari Pelajar') }}</label>
+                        <input id="student_search" type="text" placeholder="{{ __('Taip nama atau nombor matrik') }}">
+                        <div style="margin-top:6px;font-size:12px;color:#7a6555;">{{ __('Taip sekurang-kurangnya 2 huruf untuk cari pelajar melalui AJAX.') }}</div>
                     </div>
                     <div>
-                        <label for="student_id">Pelajar</label>
+                        <label for="student_id">{{ __('Pelajar') }}</label>
                         <select id="student_id" name="student_id" required>
-                            <option value="">Pilih pelajar</option>
+                            <option value="">{{ __('Pilih pelajar') }}</option>
                             @if($selectedStudent)
                                 <option value="{{ $selectedStudent->id }}" selected>{{ $selectedStudent->full_name }} ({{ $selectedStudent->matric_no }})</option>
                             @endif
@@ -212,15 +212,15 @@
 
                 <div class="grid grid-2" style="margin-top:12px;">
                     <div>
-                        <label for="provider_name">Penyedia</label>
-                        <input id="provider_name" type="text" name="provider_name" value="{{ old('provider_name', $record->provider_name) }}" placeholder="Contoh: JPA / MARA">
+                        <label for="provider_name">{{ __('Penyedia') }}</label>
+                        <input id="provider_name" type="text" name="provider_name" value="{{ old('provider_name', $record->provider_name) }}" placeholder="{{ __('Contoh: JPA / MARA') }}">
                     </div>
                     <div></div>
                 </div>
 
                 <div class="grid grid-3" style="margin-top:12px;">
                     <div>
-                        <label for="type">Jenis</label>
+                        <label for="type">{{ __('Jenis') }}</label>
                         <select id="type" name="type" required>
                             @foreach(['scholarship','welfare','sponsorship','none'] as $type)
                                 <option value="{{ $type }}" {{ old('type', $record->type) === $type ? 'selected' : '' }}>{{ $type }}</option>
@@ -232,7 +232,7 @@
                         <input id="amount" type="number" step="0.01" min="0" name="amount" value="{{ old('amount', $record->amount) }}">
                     </div>
                     <div>
-                        <label for="status">Status</label>
+                        <label for="status">{{ __('Status') }}</label>
                         <select id="status" name="status" required>
                             @foreach(['pending','confirmed','rejected'] as $status)
                                 <option value="{{ $status }}" {{ old('status', $record->status) === $status ? 'selected' : '' }}>{{ __($status) }}</option>
@@ -243,14 +243,14 @@
 
                 <div style="margin-top:12px;">
                     <label for="proof_file">Path Fail Bukti (optional)</label>
-                    <input id="proof_file" type="text" name="proof_file" value="{{ old('proof_file', $record->proof_file) }}" placeholder="Contoh: uploads/proof/file.pdf">
+                    <input id="proof_file" type="text" name="proof_file" value="{{ old('proof_file', $record->proof_file) }}" placeholder="{{ __('Contoh: uploads/proof/file.pdf') }}">
                 </div>
             </div>
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" type="submit">Simpan Perubahan</button>
-            <a class="btn" href="{{ route('admin.scholarships.index') }}">Batal</a>
+            <button class="btn btn-primary" type="submit">{{ __('Simpan Perubahan') }}</button>
+            <a class="btn" href="{{ route('admin.scholarships.index') }}">{{ __('Batal') }}</a>
         </div>
     </form>
 </div>

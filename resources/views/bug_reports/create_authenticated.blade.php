@@ -41,9 +41,9 @@
 @section('content')
 <div class="report-page">
     <header class="report-hero">
-        <span class="report-kicker">Support</span>
+        <span class="report-kicker">{{ __('Support') }}</span>
         <h1>{{ __('bug_reports.public_heading') }}</h1>
-        <p>Send a clear report directly to the StudentEdge system administrators. Your account details are attached automatically.</p>
+        <p>{{ __('Send a clear report directly to the StudentEdge system administrators. Your account details are attached automatically.') }}</p>
     </header>
 
     <div class="report-grid">
@@ -56,8 +56,8 @@
                     <div class="report-field"><label for="reporter_name">{{ __('bug_reports.form_name') }}</label><input id="reporter_name" name="reporter_name" value="{{ old('reporter_name', $authenticatedReporter?->full_name) }}" required readonly></div>
                     <div class="report-field"><label for="reporter_email">{{ __('bug_reports.form_email') }}</label><input id="reporter_email" name="reporter_email" type="email" value="{{ old('reporter_email', $authenticatedReporter?->email) }}" required @if($authenticatedReporter?->email) readonly @endif></div>
                     <div class="report-field"><label for="category">{{ __('bug_reports.form_category') }}</label><select id="category" name="category" required>@foreach($categories as $category)<option value="{{ $category }}" @selected(old('category', 'bug') === $category)>{{ __('bug_reports.category_' . $category) }}</option>@endforeach</select></div>
-                    <div class="report-field full"><label for="subject">{{ __('bug_reports.form_subject') }}</label><input id="subject" name="subject" value="{{ old('subject') }}" required placeholder="Briefly describe the issue"></div>
-                    <div class="report-field full"><label for="description">{{ __('bug_reports.form_description') }}</label><textarea id="description" name="description" required placeholder="What happened? What did you expect to happen?">{{ old('description') }}</textarea><span class="report-hint">{{ __('bug_reports.form_description_hint') }}</span></div>
+                    <div class="report-field full"><label for="subject">{{ __('bug_reports.form_subject') }}</label><input id="subject" name="subject" value="{{ old('subject') }}" required placeholder="{{ __('Briefly describe the issue') }}"></div>
+                    <div class="report-field full"><label for="description">{{ __('bug_reports.form_description') }}</label><textarea id="description" name="description" required placeholder="{{ __('What happened? What did you expect to happen?') }}">{{ old('description') }}</textarea><span class="report-hint">{{ __('bug_reports.form_description_hint') }}</span></div>
                     <div class="report-field full"><label for="screenshot">{{ __('bug_reports.form_screenshot') }}</label><input id="screenshot" name="screenshot" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"><span class="report-hint">{{ __('bug_reports.form_screenshot_hint') }}</span></div>
                 </div>
                 <div class="report-actions"><a class="report-button" href="{{ ($authenticatedReporter && session('auth_user.role') === 'admin') ? route('admin.dashboard') : route('student.dashboard') }}">{{ __('bug_reports.form_cancel') }}</a><button class="report-button primary" type="submit">{{ __('bug_reports.form_submit') }}</button></div>
@@ -65,7 +65,7 @@
         </section>
         <aside class="report-aside">
             <div class="report-tip"><h2>{{ __('bug_reports.help_title') }}</h2><ul><li>{{ __('bug_reports.help_point_1') }}</li><li>{{ __('bug_reports.help_point_2') }}</li><li>{{ __('bug_reports.help_point_3') }}</li></ul></div>
-            <div class="report-tip"><h2>Privacy</h2><p>Do not include passwords, bank details, or other sensitive information in your report or screenshot.</p></div>
+            <div class="report-tip"><h2>{{ __('Privacy') }}</h2><p>{{ __('Do not include passwords, bank details, or other sensitive information in your report or screenshot.') }}</p></div>
         </aside>
     </div>
 </div>

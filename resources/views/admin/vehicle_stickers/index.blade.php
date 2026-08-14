@@ -242,7 +242,7 @@
                                 @endif
                                 @if($app->vehicle_photo_path)
                                     <a class="doc-link" href="{{ asset('storage/' . $app->vehicle_photo_path) }}" target="_blank">{{ __('Gambar Kenderaan') }}</a>
-                                    <img src="{{ asset('storage/' . $app->vehicle_photo_path) }}" alt="Vehicle plate image" class="doc-thumb">
+                                    <img src="{{ asset('storage/' . $app->vehicle_photo_path) }}" alt="{{ __('Vehicle plate image') }}" class="doc-thumb">
                                 @endif
                             </td>
                             <td><span class="status {{ $app->status }}">{{ __($app->status) }}</span></td>
@@ -255,12 +255,12 @@
                                         <form method="POST" action="{{ route('admin.vehicle-stickers.decision', $app->id) }}">
                                             @csrf
                                             <input type="hidden" name="status" value="approved">
-                                            <button class="btn btn-primary" type="submit">Lulus</button>
+                                            <button class="btn btn-primary" type="submit">{{ __('Lulus') }}</button>
                                         </form>
                                         <form method="POST" action="{{ route('admin.vehicle-stickers.decision', $app->id) }}">
                                             @csrf
                                             <input type="hidden" name="status" value="rejected">
-                                            <button class="btn btn-danger" type="submit">Tolak</button>
+                                            <button class="btn btn-danger" type="submit">{{ __('Tolak') }}</button>
                                         </form>
                                     </div>
                                 @endif
@@ -271,13 +271,13 @@
                                         data-confirm-tone="danger">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-danger" type="submit">Delete</button>
+                                        <button class="btn btn-danger" type="submit">{{ __('Delete') }}</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" style="text-align:center;color:#7a6555;">Tiada permohonan sticker.</td></tr>
+                        <tr><td colspan="7" style="text-align:center;color:#7a6555;">{{ __('Tiada permohonan sticker.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -1,12 +1,16 @@
 @if ($paginator->hasPages())
     <nav class="se-pagination" role="navigation" aria-label="{{ __('ui.pagination_navigation') }}">
         <p class="se-pagination-summary">
-            {{ __('ui.pagination_showing') }}
-            <strong>{{ $paginator->firstItem() }}</strong>
-            {{ __('ui.pagination_to') }}
-            <strong>{{ $paginator->lastItem() }}</strong>
-            {{ __('ui.pagination_of') }}
-            <strong>{{ $paginator->total() }}</strong>
+            <span class="se-pagination-summary-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5h12M4 10h12M4 14.5h8" stroke-linecap="round"/></svg>
+            </span>
+            <span>
+                {{ __('ui.pagination_showing') }}
+                <strong>{{ $paginator->firstItem() }}–{{ $paginator->lastItem() }}</strong>
+                {{ __('ui.pagination_of') }}
+                <strong>{{ $paginator->total() }}</strong>
+                <span class="se-pagination-record-label">{{ __('records') }}</span>
+            </span>
         </p>
 
         <div class="se-pagination-controls">

@@ -1,5 +1,5 @@
 PROJECT HANDOFF - StudentEdge
-Date: 2026-08-10
+Date: 2026-08-14
 Path: C:\laragon\www\e-biasiswa
 
 SUMMARY
@@ -42,9 +42,11 @@ CURRENT IMPLEMENTATION
   visualization mode adds the graph above the metric cards instead of replacing
   those cards. Every Lecturer receives the Discipline Admin-style aggregate
   overview without gaining unrestricted access to student or offense pages.
-- Monthly Report uses 3D-styled KPI cards, trend columns, and status donuts. Every
-  Lecturer can open Discipline Monthly Analytics; scholarship analytics remain
-  limited to scholarship-authorized roles.
+- Monthly Report uses lightweight accent-led KPI cards, six-month trend charts,
+  status donuts, compact empty states, and print-safe layouts. Decorative corner
+  curves were removed, while subtle elevation and matching dark-theme surfaces
+  preserve hierarchy. Every Lecturer can open Discipline Monthly Analytics;
+  scholarship analytics remain limited to scholarship-authorized roles.
 - Lecturer offense registration is enabled by default, but System Admin can disable
   `offense_register` per lecturer. `offense_list` is a separate per-account control.
 - Register Student Offense restores the 23 default violated-rule choices through
@@ -56,6 +58,16 @@ CURRENT IMPLEMENTATION
   search remains limited to roles allowed to access sensitive student identity.
 - Light-theme sidebar navigation uses stronger text contrast when liquid glass
   transparency reaches 70% or higher, without changing the liquid design.
+- Program Management workspace (`admin.programs.*`) aligns with Liquid Glass tokens,
+  44px min-height touch targets, and light/dark theme adaptation. Accent color authorization
+  is strictly enforced: custom accent themes (`candy_blue`, `lavender`, `orchid`, `violet`, `gold`)
+  apply only to Student and System Admin sessions; non-system admin staff roles lock to the canonical gold (#C8A96A).
+- English and Malay UI catalogues are synchronized from literal translation calls
+  across Blade, application, and route PHP sources. The localization utilities in
+  `tools/` preserve reviewed terminology, report unresolved values, and prevent
+  ordinary copy containing periods from being mistaken for grouped Laravel keys.
+  The 2026-08-14 audit covered 100 Blade templates with no missing EN/MS literal
+  keys, placeholder mismatches, or outstanding manual-review entries.
 
 IMPORTANT FILES
 ---------------
@@ -70,6 +82,10 @@ IMPORTANT FILES
 - app/Mail/SystemEmailTest.php: administrative delivery-test email.
 - config/filesystems.php: public storage and private student_documents disk.
 - resources/js/app.js: PWA, cropper, overlays, Lenis, and movement feed behavior.
+- tools/sync_translation_catalogues.py: literal-key catalogue synchronization and
+  reviewed StudentEdge terminology.
+- tools/translate_missing_catalogue_values.py: incremental unresolved-value translation.
+- tools/localize_blade_literals.py: guarded Blade literal localization utility.
 - docs/SYSTEM_DOCUMENTATION.md: expanded functional and technical reference.
 - docs/FUNCTION_INVENTORY.md: route-backed role/module function count and inventory.
 - docs/PROJECT_PROGRESS_AND_NEXT_STEPS.md: current risks and release plan.

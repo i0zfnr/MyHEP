@@ -725,7 +725,7 @@
             object-fit: cover;
         }
         .sb-user-name { font-size: .8125rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .sb-user-role { font-size: .72rem; color: #7e6857; margin-top: 1px; font-weight: 600; }
+        .sb-user-role { font-size: .72rem; color: #7e6857; margin-top: 1px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .sb-role-badge { display: inline-flex; align-items: center; margin-top: .5rem; padding: .2rem .65rem; border-radius: 99px; font-size: .65rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
         .sb-role-badge.student { background: #e5f1f1; color: #1f5559; border: 1px solid #b9ddde; }
         .sb-role-badge.admin { background: var(--primary-hover); color: var(--primary-dark); border: 1px solid var(--primary-light); }
@@ -2323,6 +2323,84 @@
                 padding: 0 !important;
             }
         }
+
+        /* Compact student mobile shell: safe-area aware and intentionally simple. */
+        @media (max-width: 767px) {
+            body.student-mobile-shell .sidebar {
+                width: min(86vw, 320px);
+                height: 100dvh;
+                min-height: 100dvh;
+                padding-top: var(--app-safe-top);
+                box-sizing: border-box;
+                background: var(--surface, #fff);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+            body.student-mobile-shell .sb-header { height: 58px; padding-inline: .9rem; }
+            body.student-mobile-shell .sb-user { margin:.7rem; padding:.72rem; border-radius:14px; }
+            body.student-mobile-shell .sb-overlay { background:rgba(25,20,16,.42); backdrop-filter:blur(2px); }
+
+            body.student-mobile-shell .topbar {
+                gap:.5rem;
+                padding-right:max(.65rem,env(safe-area-inset-right,0px));
+                padding-left:max(.65rem,env(safe-area-inset-left,0px));
+                background:var(--surface,#fff);
+                backdrop-filter:none;
+                -webkit-backdrop-filter:none;
+                box-shadow:0 1px 0 var(--border,rgba(0,0,0,.08));
+            }
+            body.student-mobile-shell .btn-ham { width:36px; height:36px; border:0; border-radius:9px; }
+            body.student-mobile-shell .topbar-brand { gap:.5rem; }
+            body.student-mobile-shell .topbar-brand-mark { width:30px; height:30px; border:0; border-radius:8px; box-shadow:none; background:transparent; }
+            body.student-mobile-shell .topbar-brand-mark img { width:26px; height:26px; }
+            body.student-mobile-shell .topbar-title { font-size:.96rem; }
+            body.student-mobile-shell .topbar-subtitle { display:none; }
+            body.student-mobile-shell .topbar-actions .header-user { min-height:36px; padding:.18rem; border:0; background:transparent; box-shadow:none; }
+            body.student-mobile-shell .topbar-actions .header-user-avatar { width:32px; height:32px; }
+            body.student-mobile-shell .topbar-actions .header-user-meta { display:none; }
+            body.student-mobile-shell .se-notification-trigger--topbar { width:36px; height:36px; min-width:36px; }
+
+            body.student-mobile-shell .page-header {
+                width:100%;
+                min-height:48px;
+                margin:0;
+                padding:.55rem .85rem;
+                border-width:0 0 1px;
+                border-radius:0;
+                box-shadow:none;
+                background:var(--surface,#fff);
+            }
+            body.student-mobile-shell .page-header-kicker { font-size:.58rem; }
+            body.student-mobile-shell .page-header-title h2 { font-size:.94rem !important; line-height:1.15; }
+
+            body.has-student-bottom-nav .mobile-bottom-nav {
+                bottom:max(.55rem,env(safe-area-inset-bottom));
+                width:min(calc(100vw - 1rem),390px);
+                padding:.3rem .38rem;
+                border-color:var(--border,rgba(0,0,0,.1));
+                border-radius:20px;
+                background:var(--surface,#fff);
+                box-shadow:0 8px 24px rgba(45,31,20,.12);
+                backdrop-filter:none;
+                -webkit-backdrop-filter:none;
+            }
+            .mobile-bottom-nav :is(a,button) { min-height:48px; gap:.15rem; border-radius:14px; font-size:.58rem; }
+            .mobile-bottom-nav .mobile-nav-icon { width:24px; height:24px; border:0; background:transparent; box-shadow:none; }
+            .mobile-bottom-nav .mobile-scan-tab,
+            .mobile-bottom-nav .mobile-scan-tab.active {
+                min-height:54px;
+                margin-top:-.45rem;
+                border:0;
+                border-radius:16px;
+                background:var(--primary,#9b7548);
+                box-shadow:0 6px 14px rgba(73,50,29,.18);
+                backdrop-filter:none;
+                -webkit-backdrop-filter:none;
+            }
+            .mobile-bottom-nav .mobile-scan-tab::before { display:none; }
+            .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon,
+            .mobile-bottom-nav .mobile-scan-tab.active .mobile-nav-icon { width:28px; height:28px; border:0; background:transparent; box-shadow:none; }
+        }
         .password-input-wrap{position:relative}
         .password-input-wrap input{padding-right:3rem!important}
         .password-visibility-toggle{position:absolute;top:50%;right:.45rem;transform:translateY(-50%)!important;width:2.25rem;height:2.25rem;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;background:transparent;color:#715c4c;cursor:pointer;transition:none!important;box-shadow:none!important}
@@ -2342,6 +2420,7 @@
     $adminScope = $authUser['admin_role'] ?? null;
     $authInitials = strtoupper(substr(trim((string) ($authUser['name'] ?? 'U')), 0, 2));
     $authAvatarUrl = null;
+    $authStaffPosition = null;
     $authTable = $isAdmin ? 'admins' : ($isStudent ? 'students' : null);
     if ($authTable
         && !empty($authUser['id'])
@@ -2354,12 +2433,24 @@
             $authAvatarUrl = asset('storage/' . ltrim($authPhotoPath, '/'));
         }
     }
+    if ($isAdmin
+        && !empty($authUser['id'])
+        && \Illuminate\Support\Facades\Schema::hasTable('admins')
+        && \Illuminate\Support\Facades\Schema::hasColumn('admins', 'position')) {
+        $authStaffPosition = trim((string) \Illuminate\Support\Facades\DB::table('admins')
+            ->where('id', $authUser['id'])
+            ->value('position'));
+    }
+    $sidebarRoleLabel = $isAdmin && $adminScope
+        ? ($authStaffPosition !== '' ? $authStaffPosition : adminRoleLabel($adminScope))
+        : null;
     $isScholarshipAdmin = $isAdmin && adminCan('scholarship');
     $isDisciplineAdmin = $isAdmin && adminCan('discipline');
     $isMovementAdmin = $isAdmin && adminCan('movement');
     $isDocumentAdmin = $isAdmin && adminCan('documents');
     $isGuardAdmin = $isAdmin && $adminScope === 'guard';
     $isLecturerAdmin = $isAdmin && $adminScope === 'lecturer';
+    $sidebarAccountType = $isLecturerAdmin ? __('Staff') : ($authUser['role'] ?? '-');
     $hasStaffOverride = $isLecturerAdmin && (bool) ($authUser['staff_override'] ?? false) && !empty($authUser['linked_admin_id']);
     $isStudentAffairsHead = $isAdmin && $adminScope === 'student_affairs_head';
     $lecturerPages = $isLecturerAdmin ? app(\App\Support\LecturerPageAccess::class) : null;
@@ -2380,16 +2471,15 @@
         || request()->routeIs('student.vehicle-stickers.*')
         || request()->routeIs('student.movements.*')
         || request()->routeIs('student.discipline-announcements.*');
-    $adminOnDiscipline = (($adminScope === 'discipline_admin' || $adminScope === 'student_affairs_head') && request()->routeIs('admin.students.*'))
-        || request()->routeIs('admin.offenses.*')
+    $adminOnDiscipline = request()->routeIs('admin.offenses.*')
         || request()->routeIs('admin.vehicle-stickers.*')
         || request()->routeIs('admin.movements.*')
+        || request()->routeIs('admin.program-participation-points.*')
         || request()->routeIs('admin.discipline-announcements.*')
         || request()->routeIs('admin.rules.*');
     $adminOnScholarship = request()->routeIs('admin.scholarships.*')
         || request()->routeIs('admin.student-scholarship-status.*')
-        || request()->routeIs('admin.scholarship-announcements.*')
-        || ($adminScope === 'scholarship_admin' && request()->routeIs('admin.students.*'));
+        || request()->routeIs('admin.scholarship-announcements.*');
     // The student dashboard keeps its desktop canvas clear, but still provides
     // the normal sidebar drawer and hamburger control on mobile.
     $showSidebar = $isAdmin || $isStudent;
@@ -2415,10 +2505,10 @@
         (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-eligible' : '') . ' ' .
         (request()->routeIs('student.movements.scan', 'admin.laptops.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar ' : '') .
+        ($isAdmin && $adminScope === 'system_admin' ? 'system-admin-shell ' : '') .
         (! $adminLiquidDesignEnabled ? 'admin-liquid-disabled ' : '') .
         ($adminOnDashboard ? 'admin-dashboard-page ' : '') .
-        (request()->routeIs('admin.ai-helper.*', 'student.ai-helper.*', 'lecturer.ai-helper.*') ? 'admin-ai-helper-page ' : '') .
-        ($adminOnDashboard && $adminScope === 'system_admin' ? 'system-admin-dashboard' : '')
+        (request()->routeIs('admin.ai-helper.*', 'student.ai-helper.*', 'lecturer.ai-helper.*') ? 'admin-ai-helper-page ' : '')
     );
 @endphp
 <body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" class="{{ $bodyClasses }}">
@@ -2429,9 +2519,9 @@
         <div class="sb-header">
             <a href="{{ route('home') }}" class="sb-brand">
                 <div class="sb-brand-icon">
-                    <img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt="Logo StudentEdge">
+                    <img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt="{{ __('Logo StudentEdge') }}">
                 </div>
-                <div><div class="sb-brand-name">StudentEdge</div><div class="sb-brand-sub">Student Affairs</div></div>
+                <div><div class="sb-brand-name">StudentEdge</div><div class="sb-brand-sub">{{ __('Student Affairs') }}</div></div>
             </a>
             <button class="sb-close" id="sbClose" aria-label="{{ __('Tutup sidebar') }}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
@@ -2441,17 +2531,17 @@
                 @include('partials.auth_avatar', ['class' => 'sb-avatar', 'url' => $authAvatarUrl, 'initials' => $authInitials])
                 <div style="min-width:0">
                     <div class="sb-user-name">{{ $authUser['name'] ?? __('Pengguna') }}</div>
-                    <div class="sb-user-role">{{ $authUser['role'] ?? '-' }}{{ $isAdmin && $adminScope ? ' - '.adminRoleLabel($adminScope) : '' }}</div>
+                    <div class="sb-user-role" @if($sidebarRoleLabel) title="{{ $sidebarAccountType.' - '.$sidebarRoleLabel }}" @endif>{{ $sidebarAccountType }}{{ $sidebarRoleLabel ? ' - '.$sidebarRoleLabel : '' }}</div>
                 </div>
             </div>
             @if($isStudent)
                 <span class="sb-role-badge student">{{ __('Pelajar') }}</span>
             @elseif($isAdmin)
-                <span class="sb-role-badge admin">{{ __('Admin') }}</span>
+                <span class="sb-role-badge admin">{{ $isLecturerAdmin ? __('Staff') : __('Admin') }}</span>
             @endif
         </div>
 
-        <div class="sb-scroll" data-lenis-sidebar tabindex="0" role="region" aria-label="{{ __('Navigasi utama') }}">
+        <div class="sb-scroll" tabindex="0" role="region" aria-label="{{ __('Navigasi utama') }}" data-lenis-prevent>
             <div class="sb-scroll-inner">
             @if($isStudent)
                 <div class="nav-label">{{ __('ui.main_menu') }}</div>
@@ -2459,6 +2549,10 @@
                     <a href="{{ route('student.dashboard') }}" class="nav-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2 7-7 7 7"/></svg>
                         {{ __('Index') }}
+                    </a>
+                    <a href="{{ route('student.programs.index') }}" class="nav-link {{ request()->routeIs('student.programs.*') ? 'active' : '' }}">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4zM8 3v6m8-6v6"/></svg>
+                        {{ __('Program Activities') }}
                     </a>
                     @if($studentAiHelperEnabled)
                     <a href="{{ route('student.ai-helper.index') }}" class="nav-link {{ request()->routeIs('student.ai-helper.*') ? 'active' : '' }}">
@@ -2602,6 +2696,10 @@
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2 7-7 7 7"/></svg>
                         {{ __('ui.dashboard') }}
                     </a>
+                    <a href="{{ route('admin.programs.index') }}" class="nav-link {{ request()->routeIs('admin.programs.*') ? 'active' : '' }}">
+                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75A2.25 2.25 0 016 4.5h4.5l1.5 1.5h6A2.25 2.25 0 0120.25 8.25v9A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25z"/><path stroke-linecap="round" d="M8.25 12h7.5m-7.5 3h4.5"/></svg>
+                        {{ __('Program Management') }}
+                    </a>
                     @if(!$isGuardAdmin)
                         <a href="{{ route('admin.reports.monthly') }}" class="nav-link {{ request()->routeIs('admin.reports.monthly') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v18h16.5M7.5 15l3-3 2.25 2.25L16.5 9"/></svg>
@@ -2618,6 +2716,12 @@
                                 {{ __('AI Helper') }}
                             </a>
                         @endif
+                    @endif
+                    @if(adminCan('students.list'))
+                        <a href="{{ route('admin.students.index') }}" data-sidebar-student-list class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
+                            {{ __('Senarai Pelajar') }}
+                        </a>
                     @endif
                 </nav>
 
@@ -2639,10 +2743,6 @@
                         <a href="{{ route('admin.movements.violations') }}" class="nav-link {{ request()->routeIs('admin.movements.violations') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008M4.5 19.5h15l-7.5-15-7.5 15z"/></svg>
                             {{ __('Violations') }}
-                        </a>
-                        <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                            {{ __('Pelajar') }}
                         </a>
                     </nav>
                 @endif
@@ -2672,16 +2772,10 @@
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
                                     {{ __('Data Status Biasiswa') }}
                                 </a>
-                                @if($adminScope === 'scholarship_admin')
-                                    <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                                        {{ __('Pelajar') }}
-                                    </a>
-                                @endif
-                                <span class="nav-link" style="opacity:.55; cursor:not-allowed;" aria-disabled="true" title="Unavailable">
+                                <a href="{{ route('admin.welfare.index') }}" class="nav-link {{ request()->routeIs('admin.welfare.*') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                    Unavailable
-                                </span>
+                                    {{ __('Kebajikan Pelajar') }}
+                                </a>
                                 <a href="{{ route('admin.scholarship-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.scholarship-announcements.index') || request()->routeIs('admin.scholarship-announcements.edit') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
                                     {{ __('Pengumuman') }}
@@ -2710,12 +2804,6 @@
                         @else
                             <div>
                         @endif
-                                @if($adminScope !== 'system_admin')
-                                    <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                                        {{ __('Pelajar') }}
-                                    </a>
-                                @endif
                                 <a href="{{ route('admin.offenses.index') }}" class="nav-link {{ request()->routeIs('admin.offenses.index') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6"/></svg>
                                     {{ __('Senarai Kesalahan') }}
@@ -2731,6 +2819,10 @@
                                 <a href="{{ route('admin.movements.index') }}" class="nav-link {{ request()->routeIs('admin.movements.*') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
                                     {{ __('Student Movement') }}
+                                </a>
+                                <a href="{{ route('admin.program-participation-points.index') }}" class="nav-link {{ request()->routeIs('admin.program-participation-points.*') ? 'active' : '' }}">
+                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.4 4.86 5.36.78-3.88 3.78.92 5.34L12 15.24 7.2 17.76l.92-5.34L4.24 8.64l5.36-.78L12 3z"/></svg>
+                                    {{ __('Program Participation Points') }}
                                 </a>
                                 <a href="{{ route('admin.discipline-announcements.index') }}" class="nav-link {{ request()->routeIs('admin.discipline-announcements.index') || request()->routeIs('admin.discipline-announcements.edit') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h5.25M3.75 6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v10.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25V6.75z"/></svg>
@@ -2752,7 +2844,7 @@
                 @endif
 
                 @if($isLecturerAdmin && ($lecturerCanListOffenses || $lecturerCanRegisterOffense))
-                    <div class="nav-label">{{ __('Lecturer') }}</div>
+                    <div class="nav-label">{{ __('Staff') }}</div>
                     <nav>
                         @if($lecturerCanListOffenses)
                             <a href="{{ route('admin.offenses.index') }}" class="nav-link {{ request()->routeIs('admin.offenses.index') ? 'active' : '' }}">
@@ -2800,10 +2892,6 @@
                             <a href="{{ route('admin.admin-users.index') }}" class="nav-link {{ request()->routeIs('admin.admin-users.*') ? 'active' : '' }}">
                                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3.75a4.5 4.5 0 014.5 4.5v1.5h.75A2.25 2.25 0 0119.5 12v6.75A2.25 2.25 0 0117.25 21H6.75A2.25 2.25 0 014.5 18.75V12a2.25 2.25 0 012.25-2.25h.75v-1.5a4.5 4.5 0 014.5-4.5z"/></svg>
                                 {{ __('Admin Management') }}
-                            </a>
-                            <a href="{{ route('admin.students.index') }}" class="nav-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>
-                                {{ __('Student Management') }}
                             </a>
                             <a href="{{ route('admin.active-visitors.index') }}" class="nav-link {{ request()->routeIs('admin.active-visitors.*') ? 'active' : '' }}">
                                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M12 12a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75zM3.75 20.25a8.25 8.25 0 0116.5 0"/></svg>
@@ -2859,7 +2947,7 @@
                             <input type="hidden" name="mode" value="admin">
                             <button type="submit" class="nav-link nav-system-controls" style="width:100%;cursor:pointer;font:inherit;">
                                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7 4 12l5 5"/><path d="M4 12h10a6 6 0 0 0 6-6"/></svg>
-                                Return to System Admin
+                                {{ __('Return to System Admin') }}
                             </button>
                         </form>
                     @endif
@@ -2913,7 +3001,7 @@
         </div>
         @endif
 
-        <div class="main-scroll-viewport" data-lenis-main>
+        <div class="main-scroll-viewport" data-main-scroll>
         <div class="main-scroll-inner">
 
         @hasSection('header')
@@ -3011,35 +3099,35 @@
 @endif
 
 @if($showStudentBottomNav)
-    <button type="button" class="mobile-more-backdrop" id="mobileMoreBackdrop" aria-label="Close menu" aria-hidden="true" tabindex="-1"></button>
+    <button type="button" class="mobile-more-backdrop" id="mobileMoreBackdrop" aria-label="{{ __('Close menu') }}" aria-hidden="true" tabindex="-1"></button>
     <div class="mobile-more-sheet" id="mobileMoreSheet" aria-hidden="true">
         <a href="{{ route('student.movements.index') }}" class="mobile-more-link">
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 0 0-14 0c0 6.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
-            Campus Movement
+            {{ __('Campus Movement') }}
         </a>
         <a href="{{ route('student.vehicle-stickers.index') }}" class="mobile-more-link">
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17h14l-1.5-6h-11z"/><path d="M7 17v2"/><path d="M17 17v2"/><path d="M7 11l1.5-4h7L17 11"/></svg></span>
-            Vehicle Sticker
+            {{ __('Vehicle Sticker') }}
         </a>
         <a href="{{ route('student.rules.index') }}" class="mobile-more-link">
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
-            Rules
+            {{ __('Rules') }}
         </a>
         <a href="{{ route('student.discipline-announcements.index') }}" class="mobile-more-link">
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 13z"/><path d="M11 14v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6"/></svg></span>
-            Announcements
+            {{ __('Announcements') }}
         </a>
         <a href="{{ route('student.documents.index') }}" class="mobile-more-link">
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M9 11h6M9 15h6"/></svg></span>
-            Document Centre
+            {{ __('Document Centre') }}
         </a>
         <a href="{{ route('bug-reports.create') }}" class="mobile-more-link">
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>
-            Report a Problem
+            {{ __('Report a Problem') }}
         </a>
         <a href="{{ route('settings.show') }}" class="mobile-more-link">
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2 2 0 1 1-2.83 2.83l-.04-.04A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1 .6 1.8 1.8 0 0 0-.4 1.4V21a2 2 0 1 1-4 0v-.06a1.8 1.8 0 0 0-.4-1.4 1.8 1.8 0 0 0-1-.6 1.8 1.8 0 0 0-1.98.36l-.04.04a2 2 0 1 1-2.83-2.83l.04-.04A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-.6-1 1.8 1.8 0 0 0-1.4-.4H2a2 2 0 1 1 0-4h.06a1.8 1.8 0 0 0 1.4-.4 1.8 1.8 0 0 0 .6-1 1.8 1.8 0 0 0-.36-1.98l-.04-.04a2 2 0 1 1 2.83-2.83l.04.04A1.8 1.8 0 0 0 9 4.6a1.8 1.8 0 0 0 1-.6 1.8 1.8 0 0 0 .4-1.4V2a2 2 0 1 1 4 0v.06a1.8 1.8 0 0 0 .4 1.4 1.8 1.8 0 0 0 1 .6 1.8 1.8 0 0 0 1.98-.36l.04-.04a2 2 0 1 1 2.83 2.83l-.04.04A1.8 1.8 0 0 0 19.4 9c.25.36.6.66 1 .8.42.13.9.13 1.4 0H22a2 2 0 1 1 0 4h-.06a1.8 1.8 0 0 0-1.4.4c-.4.34-.66.7-.8 1Z"/></svg></span>
-            Settings
+            {{ __('Settings') }}
         </a>
         @if($hasAdminOverride)
             <form method="POST" action="{{ route('settings.role-mode.update') }}">
@@ -3053,36 +3141,36 @@
         @endif
     </div>
 
-    <nav class="mobile-bottom-nav mobile-bottom-nav--student" aria-label="Student mobile navigation">
+    <nav class="mobile-bottom-nav mobile-bottom-nav--student" aria-label="{{ __('Student mobile navigation') }}">
         <a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
             </span>
-            <span>Home</span>
+            <span>{{ __('Home') }}</span>
         </a>
         <a href="{{ route('student.offenses.index') }}" data-liquid-link="fines" class="{{ request()->routeIs('student.offenses.*') ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
             </span>
-            <span>Fines</span>
+            <span>{{ __('Fines') }}</span>
         </a>
         <a href="{{ route('student.movements.scan') }}" class="mobile-scan-tab {{ request()->routeIs('student.movements.scan') ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2"/><path d="M18 14h2"/><path d="M14 18h6"/></svg>
             </span>
-            <span>Scan QR</span>
+            <span>{{ __('Scan QR') }}</span>
         </a>
         <a href="{{ route('student.scholarships.index') }}" data-liquid-link="aid" class="{{ $studentOnScholarship ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M19 7V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v2"/><path d="M3 6v12a2 2 0 0 0 2 2h16v-6h-5a2 2 0 0 1 0-4h5V8"/><path d="M16 14h.01"/></svg>
             </span>
-            <span>Aid</span>
+            <span>{{ __('Aid') }}</span>
         </a>
         <button type="button" id="mobileMoreToggle" class="{{ $studentMoreActive ? 'active' : '' }}" aria-expanded="false" aria-controls="mobileMoreSheet">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M5 12h.01"/><path d="M12 12h.01"/><path d="M19 12h.01"/></svg>
             </span>
-            <span>More</span>
+            <span>{{ __('More') }}</span>
         </button>
     </nav>
 @endif
@@ -3101,27 +3189,27 @@
             default => false,
         };
     @endphp
-    <nav class="mobile-bottom-nav mobile-bottom-nav--staff" aria-label="Staff mobile navigation">
+    <nav class="mobile-bottom-nav mobile-bottom-nav--staff" aria-label="{{ __('Staff mobile navigation') }}">
         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span>Home</span>
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span>{{ __('Home') }}</span>
         </a>
         <a href="{{ $staffWorkRoute }}" class="{{ $staffWorkActive ? 'active' : '' }}">
-            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>Work</span>
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>{{ __('Work') }}</span>
         </a>
         <a href="{{ route('admin.laptops.scan') }}" class="mobile-scan-tab {{ request()->routeIs('admin.laptops.scan*') ? 'active' : '' }}">
-            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2M18 14h2M14 18h6"/></svg></span><span>Scan QR</span>
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2M18 14h2M14 18h6"/></svg></span><span>{{ __('Scan QR') }}</span>
         </a>
         @if($lecturerCanManageGuards)
             <a href="{{ route('admin.guards.index') }}" class="{{ request()->routeIs('admin.guards.*') ? 'active' : '' }}">
-                <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4-2.8 7.5-7 9-4.2-1.5-7-5-7-9V6z"/></svg></span><span>Guards</span>
+                <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4-2.8 7.5-7 9-4.2-1.5-7-5-7-9V6z"/></svg></span><span>{{ __('Guards') }}</span>
             </a>
         @else
             <a href="{{ route('settings.show') }}" class="{{ request()->routeIs('settings.*') ? 'active' : '' }}">
-                <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12h2M3 12h2M12 3v2m0 14v2"/></svg></span><span>Settings</span>
+                <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12h2M3 12h2M12 3v2m0 14v2"/></svg></span><span>{{ __('Settings') }}</span>
             </a>
         @endif
         <a href="{{ route('admin.profile') }}" class="{{ request()->routeIs('admin.profile*') ? 'active' : '' }}">
-            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg></span><span>Profile</span>
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg></span><span>{{ __('Profile') }}</span>
         </a>
     </nav>
 @endif

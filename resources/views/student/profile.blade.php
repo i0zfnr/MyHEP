@@ -385,6 +385,26 @@
                     <textarea id="guardian_address" name="guardian_address" rows="3" placeholder="{{ __('Alamat penjaga') }}">{{ old('guardian_address', data_get($student, 'guardian_address')) }}</textarea>
                 </div>
 
+                <div class="section-title">{{ __('Maklumat Kebajikan') }}</div>
+                <div class="grid grid-2" style="margin-top:12px;">
+                    <div>
+                        <label for="oku_status">{{ __('Status OKU') }}</label>
+                        <select id="oku_status" name="oku_status" required>
+                            <option value="">{{ __('Sila pilih') }}</option>
+                            <option value="no" @selected(old('oku_status', data_get($student, 'oku_status')) === 'no')>{{ __('Tidak') }}</option>
+                            <option value="yes" @selected(old('oku_status', data_get($student, 'oku_status')) === 'yes')>{{ __('Ya') }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="oku_registration_no">{{ __('No. Pendaftaran OKU') }}</label>
+                        <input id="oku_registration_no" type="text" name="oku_registration_no" value="{{ old('oku_registration_no', data_get($student, 'oku_registration_no')) }}">
+                    </div>
+                </div>
+                <div style="margin-top:12px;">
+                    <label for="oku_category">{{ __('Kategori OKU') }}</label>
+                    <input id="oku_category" type="text" name="oku_category" value="{{ old('oku_category', data_get($student, 'oku_category')) }}">
+                </div>
+
                 <div class="section-title">{{ __('Maklumat Tempat Tinggal Semasa Pengajian') }}</div>
                 <div class="grid grid-2" style="margin-top:12px;">
                     <div>
@@ -467,4 +487,3 @@
     </section>
 </div>
 @endsection
-

@@ -3,7 +3,7 @@
     $lecturerAiMode = $lecturerAiMode ?? false;
     $textOnlyAiMode = $studentAiMode || $lecturerAiMode;
     $canUploadAiFiles = ! $studentAiMode;
-    $aiPageTitle = $studentAiMode ? __('AI Helper (Student)') : ($lecturerAiMode ? __('AI Helper (Lecturer)') : __('AI Helper (Admin)'));
+    $aiPageTitle = $studentAiMode ? __('AI Helper (Student)') : ($lecturerAiMode ? __('AI Helper (Staff)') : __('AI Helper (Admin)'));
 @endphp
 @extends('layouts.app')
 
@@ -623,7 +623,8 @@
     .ai-admin--admin .ai-compose-row { background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
     body[data-theme="dark"] .ai-admin--admin .ai-compose-row { background:#1f1f1f !important; }
     .ai-admin--student .ai-send { justify-self:end; }
-    .ai-admin--lecturer .ai-compose-row { grid-template-columns:46px minmax(0,1fr) 46px !important; gap:.35rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
+    .ai-admin--admin .ai-compose-row { grid-template-columns:minmax(0,1fr) auto 46px !important; gap:.35rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
+    .ai-admin--lecturer .ai-compose-row { grid-template-columns:minmax(0,1fr) 46px !important; gap:.35rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
     .ai-admin.ai-admin--lecturer .ai-compose-row textarea.ai-input { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; }
     body[data-theme="dark"] .ai-admin--lecturer .ai-compose-row { background:#1f1f1f !important; }
     .ai-compose-frame { width:min(100%,620px); margin:0 auto; overflow:visible; padding:0; border:0; border-radius:30px; background:transparent; box-shadow:none; }
@@ -814,11 +815,19 @@
         outline:none;
         box-shadow:0 5px 14px color-mix(in srgb,var(--se-primary) 14%,transparent) !important;
     }
-    .ai-top-actions { position:relative; z-index:8; justify-self:end; width:max-content; display:flex; align-items:center; gap:.45rem; margin:12px 12px 0; }
-    .ai-history-trigger,.ai-new-chat-trigger { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:.45rem; min-height:40px; padding:.5rem .72rem; border:1px solid color-mix(in srgb,var(--se-primary) 34%,var(--border)); border-radius:13px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); color:var(--se-primary-strong); font:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
+    .ai-top-actions { position:relative; z-index:8; justify-self:center; width:min(1180px,calc(100% - 32px)); display:flex; align-items:stretch; justify-content:center; flex-wrap:wrap; gap:.5rem; margin:14px auto 0; padding:.55rem; overflow:visible; border:1px solid color-mix(in srgb,var(--se-primary) 20%,var(--border)); border-radius:16px; background:color-mix(in srgb,var(--surface) 94%,var(--se-primary-soft)); box-shadow:0 8px 24px rgba(30,38,43,.06); }
+    .ai-history-trigger,.ai-new-chat-trigger,.ai-quick-action { position:relative; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; min-height:42px; padding:.55rem .82rem; border:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); border-radius:10px; background:var(--surface); color:var(--se-primary-strong); font:inherit; font-size:.74rem; font-weight:800; line-height:1.2; cursor:pointer; white-space:nowrap; box-shadow:0 1px 2px rgba(30,38,43,.04); }
     .ai-history-trigger svg { width:17px; height:17px; }
     .ai-new-chat-trigger svg { width:16px; height:16px; }
-    .ai-history-trigger:hover,.ai-new-chat-trigger:hover { background:var(--se-primary-soft); border-color:var(--se-primary); }
+    .ai-history-trigger:hover,.ai-new-chat-trigger:hover,.ai-quick-action:hover { background:var(--se-primary-soft); border-color:var(--se-primary); }
+    .ai-new-chat-trigger,.ai-history-trigger { min-width:108px; border-color:color-mix(in srgb,var(--se-primary) 48%,var(--border)); }
+    .ai-new-chat-trigger { background:var(--se-primary); border-color:var(--se-primary); color:#fff; box-shadow:0 5px 14px color-mix(in srgb,var(--se-primary) 24%,transparent); }
+    .ai-new-chat-trigger:hover { background:var(--se-primary-strong); border-color:var(--se-primary-strong); color:#fff; }
+    .ai-history-trigger { background:color-mix(in srgb,var(--surface) 78%,var(--se-primary-soft)); }
+    .ai-top-actions::after { content:''; align-self:stretch; width:1px; margin:2px .12rem; background:color-mix(in srgb,var(--se-primary) 20%,var(--border)); order:-1; }
+    .ai-new-chat-trigger,.ai-history-trigger { order:-2; }
+    .ai-quick-action-icon { width:20px; height:20px; flex:0 0 20px; display:grid; place-items:center; border-radius:6px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.82rem; }
+    body[data-theme="dark"] .ai-top-actions { background:color-mix(in srgb,var(--surface) 90%,var(--se-primary-soft)); box-shadow:0 10px 28px rgba(0,0,0,.2); }
     .ai-history-backdrop { position:absolute; inset:0; z-index:11990; border:0; border-radius:inherit; background:transparent; opacity:0; visibility:hidden; transition:opacity .18s ease,visibility 0s linear .18s; }
     .ai-history-backdrop.is-open { opacity:1; visibility:visible; }
     .ai-history-panel { position:fixed; z-index:12000; top:88px; bottom:18px; left:-390px; width:min(360px,calc(100vw - 28px)); display:grid; grid-template-rows:auto minmax(0,1fr) auto; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:22px; overflow:hidden; background:linear-gradient(165deg,color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)),var(--surface)); box-shadow:24px 0 70px rgba(0,0,0,.3); transition:left .24s ease; }
@@ -891,6 +900,15 @@
     .ai-confirm-icon svg { width:20px; height:20px; }
     .ai-confirm-card h3 { margin:0 0 .4rem; font-size:1rem; line-height:1.35; }
     .ai-confirm-card p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.55; }
+    .program-report-progress { display:none; margin-top:1rem; padding:.9rem; border:1px solid var(--border); border-radius:14px; background:color-mix(in srgb,var(--primary) 5%,var(--surface)); }
+    .program-report-progress.is-active { display:block; }
+    .program-report-progress strong { display:block; margin-bottom:.65rem; font-size:.86rem; }
+    .program-report-progress ol { display:grid; gap:.45rem; margin:0; padding:0; list-style:none; }
+    .program-report-progress li { display:flex; align-items:center; gap:.55rem; color:var(--text-muted); font-size:.8rem; }
+    .program-report-progress li::before { content:''; width:9px; height:9px; border:2px solid var(--border); border-radius:50%; background:var(--surface); }
+    .program-report-progress li.is-active { color:var(--text); font-weight:800; }
+    .program-report-progress li.is-active::before { border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 14%,transparent); }
+    .program-report-progress li.is-done::before { border-color:#21835a; background:#21835a; }
     .ai-confirm-actions { display:flex; justify-content:flex-end; gap:.55rem; margin-top:1.2rem; }
     .ai-confirm-button { min-height:40px; padding:.55rem 1rem; border:1px solid color-mix(in srgb,var(--text) 16%,transparent); border-radius:12px; background:transparent; color:var(--text); font:inherit; font-size:.76rem; font-weight:750; cursor:pointer; }
     .ai-confirm-button:hover { background:color-mix(in srgb,var(--text) 7%,transparent); }
@@ -919,8 +937,8 @@
         .ai-compose-frame .ai-compose-row { min-height:54px; padding:4px 6px 4px 8px; }
         .ai-input { height:42px !important; min-height:42px !important; max-height:42px !important; font-size:.82rem !important; }
         .ai-compose-icon,.ai-send { width:40px !important; height:40px !important; }
-        .ai-admin--admin .ai-compose-row { grid-template-columns:42px minmax(0,1fr) 42px !important; }
-        .ai-admin--lecturer .ai-compose-row { grid-template-columns:42px minmax(0,1fr) 42px !important; }
+        .ai-admin--admin .ai-compose-row { grid-template-columns:minmax(0,1fr) 42px !important; }
+        .ai-admin--lecturer .ai-compose-row { grid-template-columns:minmax(0,1fr) 42px !important; }
         .ai-format-pill { display:none !important; }
         .ai-admin--student .ai-compose-row { grid-template-columns:minmax(0,1fr) 44px !important; padding-left:10px; }
         .ai-admin--student .ai-input { padding-left:12px !important; }
@@ -932,9 +950,12 @@
         .ai-message-action { width:32px; height:32px; padding:0; justify-content:center; }
         .msg.ai,.msg.user { max-width:92% !important; }
         .ai-admin .msg.ai.is-report { width:96%; max-width:96% !important; padding:.8rem !important; }
-        .ai-top-actions { gap:.35rem; margin:8px 8px 0; }
-        .ai-history-trigger,.ai-new-chat-trigger { width:40px; padding:0; }
-        .ai-history-trigger span,.ai-new-chat-trigger span { display:none; }
+        .ai-top-actions { width:calc(100% - 16px); justify-content:flex-start; flex-wrap:nowrap; gap:.35rem; margin:8px 8px 0; padding:.4rem; overflow-x:auto; scrollbar-width:none; }
+        .ai-top-actions::-webkit-scrollbar { display:none; }
+        .ai-history-trigger,.ai-new-chat-trigger { width:auto; min-width:max-content; padding:.48rem .7rem; }
+        .ai-history-trigger span,.ai-new-chat-trigger span { display:inline; }
+        .ai-top-actions::after { flex:0 0 1px; }
+        .ai-quick-action { min-height:40px; padding:.48rem .62rem; }
         .ai-history-panel { top:8px; right:8px; bottom:8px; left:auto; width:calc(100% - 16px); height:auto; border-radius:18px; }
         .ai-history-panel.is-open { right:8px; left:auto; transform:translateX(0); }
         .ai-admin > aside.ai-panel { top:72px !important; right:-105vw !important; bottom:8px !important; width:calc(100vw - 16px) !important; }
@@ -956,6 +977,41 @@
         body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(10.8rem + env(safe-area-inset-bottom,0px)) !important; }
         body.student-bottom-nav-eligible.admin-ai-helper-page .ai-compose { bottom:calc(6.65rem + env(safe-area-inset-bottom,0px)) !important; }
         body.student-bottom-nav-eligible.admin-ai-helper-page .ai-chat-log { padding-bottom:4.5rem !important; }
+    }
+    @media(max-width:767px){
+        body.student-mobile-shell.admin-ai-helper-page .page-header { display:none !important; }
+        body.student-mobile-shell.admin-ai-helper-page .page-body {
+            padding:.35rem .55rem calc(6.3rem + env(safe-area-inset-bottom,0px)) !important;
+        }
+        body.student-mobile-shell.admin-ai-helper-page .ai-admin > .ai-panel:first-child {
+            grid-template-rows:auto minmax(0,1fr) auto !important;
+        }
+        body.student-mobile-shell.admin-ai-helper-page .ai-top-actions {
+            width:100%;
+            min-height:42px;
+            margin:0;
+            padding:.15rem 0 .35rem;
+            justify-content:flex-end;
+        }
+        body.student-mobile-shell.admin-ai-helper-page .ai-chat-log {
+            padding:.55rem .2rem .7rem !important;
+            scrollbar-width:none;
+        }
+        body.student-mobile-shell.admin-ai-helper-page .ai-chat-log::-webkit-scrollbar { display:none; }
+        body.student-mobile-shell.admin-ai-helper-page .ai-empty-state {
+            min-height:100% !important;
+            padding:1.25rem .6rem;
+            align-content:center;
+        }
+        body.student-mobile-shell.admin-ai-helper-page .ai-empty-state h3 { font-size:1.45rem; }
+        body.student-mobile-shell.admin-ai-helper-page .ai-empty-state p { font-size:.82rem; line-height:1.45; }
+        body.student-mobile-shell.admin-ai-helper-page .ai-compose-frame {
+            border-radius:16px;
+            box-shadow:0 6px 18px rgba(45,31,20,.1);
+        }
+        body.student-mobile-shell.admin-ai-helper-page .ai-compose-frame .ai-compose-row { min-height:48px; }
+        body.student-mobile-shell.admin-ai-helper-page .ai-input { height:38px !important; min-height:38px !important; max-height:92px !important; }
+        body.student-mobile-shell.admin-ai-helper-page .ai-send { width:36px !important; height:36px !important; }
     }
 
 </style>
@@ -982,6 +1038,15 @@
             <button type="button" class="ai-history-trigger" id="aiHistoryTrigger" aria-expanded="false" aria-controls="aiHistoryPanel" aria-label="{{ __('Conversation history') }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>{{ __('History') }}</span>
             </button>
+            @if($canUploadAiFiles)
+            <button type="button" class="ai-quick-action" id="aiUploadShortcut" aria-label="{{ __('Upload PDF or image') }}"><span class="ai-quick-action-icon">↥</span><span class="ai-quick-label">{{ __('Upload PDF or image') }}</span></button>
+            @if(!$studentAiMode)<button type="button" class="ai-quick-action" id="programReportTemplateShortcut"><span class="ai-quick-action-icon">▤</span><span class="ai-quick-label">{{ __('Program Report Template') }}</span></button>@endif
+            @unless($lecturerAiMode)
+            <button type="button" class="ai-quick-action" id="aiReportToolsShortcut"><span class="ai-quick-action-icon">☷</span><span class="ai-quick-label">{{ __('Report tools and filters') }}</span></button>
+            <button type="button" class="ai-quick-action" data-template="{{ __('Generate Monthly Report') }}"><span class="ai-quick-action-icon">▤</span><span class="ai-quick-label">{{ __('Generate monthly report') }}</span></button>
+            <button type="button" class="ai-quick-action" data-template="{{ __('Review Pending Fine Applications') }}"><span class="ai-quick-action-icon">!</span><span class="ai-quick-label">{{ __('Review pending fines') }}</span></button>
+            @endunless
+            @endif
         </div>
         <div class="ai-head">
             <div>
@@ -1022,38 +1087,16 @@
             <div class="ai-compose-frame">
             <div class="ai-compose-context" id="aiComposeContext" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h12m-4-4 4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg><blockquote id="aiComposeContextText"></blockquote><button type="button" id="aiComposeContextClear" aria-label="{{ __('Remove selected context') }}">&times;</button></div>
             @if($canUploadAiFiles)
-            <input id="reportAttachment" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,text/csv,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx" multiple hidden>
+            <input id="reportAttachment" type="file" accept="application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp,text/csv,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx" multiple hidden>
             <div class="ai-compose-attachments" id="attachmentPreview" aria-live="polite"></div>
             @endif
             <div class="ai-compose-row">
-                @if($canUploadAiFiles)
-                <button type="button" class="ai-compose-icon" id="aiAddBtn" aria-expanded="false" aria-controls="aiAddMenu" aria-label="{{ __('Add report source') }}">＋</button>
-                @endif
                 <textarea class="ai-input" id="aiInput" rows="1" placeholder="{{ __('Ask StudentEdge AI anything') }}"></textarea>
                 @unless($textOnlyAiMode)
-                <button type="button" class="ai-format-pill" id="aiFormatBtn" aria-expanded="false" aria-controls="aiFormatMenu">{{ __('Auto format') }}⌄</button>
-                <div class="ai-format-menu" id="aiFormatMenu">
-                    <button type="button" class="ai-format-option is-selected" data-format="auto">{{ __('Auto format') }}</button>
-                    <button type="button" class="ai-format-option" data-format="formal_report">{{ __('Formal report') }}</button>
-                    <button type="button" class="ai-format-option" data-format="executive_summary">{{ __('Executive summary') }}</button>
-                    <button type="button" class="ai-format-option" data-format="table">{{ __('Table format') }}</button>
-                    <button type="button" class="ai-format-option" data-format="csv">CSV</button>
-                    <button type="button" class="ai-format-option" data-format="json">JSON</button>
-                </div>
                 @endunless
                 <button type="button" class="ai-send" id="aiSendBtn" aria-label="{{ __('Send') }}" @disabled(!$aiEnabled)>↑</button>
             </div>
             </div>
-            @if($canUploadAiFiles)
-            <div class="ai-add-menu" id="aiAddMenu">
-                <button type="button" class="ai-add-action" id="aiUploadShortcut"><span>↥</span>{{ __('Upload PDF or image') }}</button>
-                @unless($lecturerAiMode)
-                <button type="button" class="ai-add-action" id="aiReportToolsShortcut"><span>☷</span>{{ __('Report tools and filters') }}</button>
-                <button type="button" class="ai-add-action" data-template="{{ __('Generate Monthly Report') }}"><span>▤</span>{{ __('Generate monthly report') }}</button>
-                <button type="button" class="ai-add-action" data-template="{{ __('Review Pending Fine Applications') }}"><span>!</span>{{ __('Review pending fines') }}</button>
-                @endunless
-            </div>
-            @endif
             <p class="ai-hint">{{ __('Enter sends. Shift+Enter adds newline. Independently verify AI-generated conclusions.') }}</p>
         </div>
     </section>
@@ -1062,7 +1105,7 @@
     <aside class="ai-history-panel" id="aiHistoryPanel" aria-hidden="true">
         <div class="ai-history-head">
             <div class="ai-history-brand">
-                <strong>@include('partials.ai_helper_icon') <span>StudentEdge AI</span></strong>
+                <strong>@include('partials.ai_helper_icon') <span>{{ __('StudentEdge AI') }}</span></strong>
                 <button type="button" class="ai-history-icon-btn" id="aiHistoryClose" aria-label="{{ __('Close') }}">×</button>
             </div>
         </div>
@@ -1106,6 +1149,32 @@
         </div>
     </div>
 
+    @if(!$studentAiMode)
+    <div class="ai-confirm" id="programReportDialog" role="dialog" aria-modal="true" aria-labelledby="programReportDialogTitle" aria-hidden="true">
+        <button type="button" class="ai-confirm-backdrop" data-program-report-close tabindex="-1" aria-label="{{ __('Close') }}"></button>
+        <div class="ai-confirm-card" style="width:min(620px,calc(100vw - 2rem));text-align:left;">
+            <h3 id="programReportDialogTitle">{{ __('Program Report Template') }}</h3>
+            <p>{{ __('Choose your program and source files. StudentEdge adds its attendance and questionnaire records automatically and saves the generated report under the selected program.') }}</p>
+            <form id="programReportForm" method="post" enctype="multipart/form-data">@csrf
+                <div class="ops-field"><label for="programReportProgram">{{ __('My program') }}</label><select id="programReportProgram" required><option value="">{{ __('Choose a program') }}</option>@foreach($ownedPrograms as $ownedProgram)<option value="{{ $ownedProgram->id }}" data-action="{{ route('admin.programs.report.generate', $ownedProgram->id) }}" data-requires-paperwork="{{ ($ownedProgram->registration_type ?? 'approved_program') === 'attendance_only_activity' ? '0' : '1' }}">{{ $ownedProgram->title }}</option>@endforeach</select></div>
+                <div class="ops-field" id="programReportPaperworkField"><label for="programReportPaperwork">{{ __('Approved paperwork') }}</label><input id="programReportPaperwork" name="paperwork_file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"><small>{{ __('Required for approved programs. Attendance-only activities do not require paperwork.') }}</small></div>
+                <div class="ops-field"><label for="programReportImages">{{ __('Images after the program') }}</label><input id="programReportImages" name="program_images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple required><small>{{ __('Up to 8 activity images.') }}</small></div>
+                <div class="ops-field"><label for="programReportOutput">{{ __('Create report as') }}</label><select id="programReportOutput" name="output_format" required><option value="docx">DOCX</option><option value="pdf">PDF</option><option value="both">{{ __('DOCX and PDF') }}</option></select></div>
+                <div class="program-report-progress" id="programReportProgress" role="status" aria-live="polite">
+                    <strong>{{ __('Generating your official report') }}</strong>
+                    <ol>
+                        <li data-report-progress-step>{{ __('Uploading source files') }}</li>
+                        <li data-report-progress-step>{{ __('Analysing program records') }}</li>
+                        <li data-report-progress-step>{{ __('Creating the official report') }}</li>
+                        <li data-report-progress-step>{{ __('Saving report files') }}</li>
+                    </ol>
+                </div>
+                <div class="ai-confirm-actions"><button type="button" class="ai-confirm-button" data-program-report-close>{{ __('Cancel') }}</button><button id="programReportSubmit" type="submit" class="ai-confirm-button">{{ __('Generate Program Report') }}</button></div>
+            </form>
+        </div>
+    </div>
+    @endif
+
     @unless($textOnlyAiMode)
     <button type="button" class="ai-tools-backdrop" id="aiToolsBackdrop" aria-label="{{ __('Close report tools') }}"></button>
     <aside class="ai-panel" id="aiToolsPanel" aria-hidden="true">
@@ -1148,7 +1217,7 @@
                 </div>
                 <div class="ops-field">
                     <label for="matricFilter">{{ __('Matric Number') }}</label>
-                    <input id="matricFilter" type="text" placeholder="23DIB23F1001">
+                    <input id="matricFilter" type="text" placeholder="{{ __('23DIB23F1001') }}">
                 </div>
                 <div class="ops-field">
                     <label for="outputFormat">{{ __('Report Format') }}</label>
@@ -1215,9 +1284,16 @@
     const attachmentPreview = document.getElementById('attachmentPreview');
     let selectedAttachments = [];
     let attachmentObjectUrls = [];
-    const addBtn = document.getElementById('aiAddBtn');
-    const addMenu = document.getElementById('aiAddMenu');
     const uploadShortcut = document.getElementById('aiUploadShortcut');
+    const programReportShortcut = document.getElementById('programReportTemplateShortcut');
+    const programReportDialog = document.getElementById('programReportDialog');
+    const programReportProgram = document.getElementById('programReportProgram');
+    const programReportForm = document.getElementById('programReportForm');
+    const programReportPaperwork = document.getElementById('programReportPaperwork');
+    const programReportPaperworkField = document.getElementById('programReportPaperworkField');
+    const programReportImages = document.getElementById('programReportImages');
+    const programReportProgress = document.getElementById('programReportProgress');
+    const programReportSubmit = document.getElementById('programReportSubmit');
     const reportToolsShortcut = document.getElementById('aiReportToolsShortcut');
     const formatBtn = document.getElementById('aiFormatBtn');
     const toolsPanel = document.getElementById('aiToolsPanel');
@@ -1727,18 +1803,12 @@
         document.body.classList.toggle('ai-tools-open', open);
         if (open) reportMonth?.focus();
     };
-    const setAddOpen = (open) => {
-        addMenu?.classList.toggle('is-open', open);
-        addBtn?.setAttribute('aria-expanded', open ? 'true' : 'false');
-    };
-    addBtn?.addEventListener('click', event => { event.stopPropagation(); setAddOpen(!addMenu?.classList.contains('is-open')); });
-    document.addEventListener('click', event => { if (!addMenu?.contains(event.target) && event.target !== addBtn) setAddOpen(false); });
-    uploadShortcut?.addEventListener('click', () => { setAddOpen(false); if (attachmentInput) attachmentInput.value = ''; attachmentInput?.click(); });
-    reportToolsShortcut?.addEventListener('click', () => { setAddOpen(false); setToolsOpen(true); });
+    uploadShortcut?.addEventListener('click', () => { if (attachmentInput) attachmentInput.value = ''; attachmentInput?.click(); });
+    reportToolsShortcut?.addEventListener('click', () => setToolsOpen(true));
     formatBtn?.addEventListener('click', () => setToolsOpen(true));
     toolsClose?.addEventListener('click', () => setToolsOpen(false));
     toolsBackdrop?.addEventListener('click', () => setToolsOpen(false));
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') { setAddOpen(false); setToolsOpen(false); } });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') setToolsOpen(false); });
     outputFormat?.addEventListener('change', () => {
         if (formatBtn) formatBtn.textContent = `${outputFormat.options[outputFormat.selectedIndex]?.text || @json(__('Auto format'))}⌄`;
     });
@@ -1810,6 +1880,43 @@
         setAttachmentFiles(selectedAttachments);
         showAttachments(limitReached);
     });
+    const setProgramReportOpen = open => {
+        programReportDialog?.classList.toggle('is-open', open);
+        programReportDialog?.setAttribute('aria-hidden', open ? 'false' : 'true');
+    };
+    const syncProgramReportRequirements = () => {
+        const requiresPaperwork = programReportProgram?.selectedOptions?.[0]?.dataset.requiresPaperwork === '1';
+        if (programReportPaperwork) programReportPaperwork.required = requiresPaperwork;
+        if (programReportPaperworkField) programReportPaperworkField.hidden = !requiresPaperwork && Boolean(programReportProgram?.value);
+    };
+    programReportProgram?.addEventListener('change', syncProgramReportRequirements);
+    programReportShortcut?.addEventListener('click', () => setProgramReportOpen(true));
+    document.querySelectorAll('[data-program-report-close]').forEach(button => button.addEventListener('click', () => setProgramReportOpen(false)));
+    programReportForm?.addEventListener('submit', event => {
+        const action = programReportProgram?.selectedOptions?.[0]?.dataset.action;
+        if (!action) { event.preventDefault(); return; }
+        programReportForm.action = action;
+        programReportSubmit.disabled = true;
+        programReportSubmit.textContent = @json(__('Generating...'));
+        programReportProgress?.classList.add('is-active');
+        const progressSteps = Array.from(programReportProgress?.querySelectorAll('[data-report-progress-step]') || []);
+        progressSteps.forEach(step => step.classList.remove('is-active', 'is-done'));
+        progressSteps[0]?.classList.add('is-active');
+        [900, 2200, 4200].forEach((delay, index) => window.setTimeout(() => {
+            progressSteps[index]?.classList.remove('is-active');
+            progressSteps[index]?.classList.add('is-done');
+            progressSteps[index + 1]?.classList.add('is-active');
+        }, delay));
+    });
+    const requestedProgramReport = new URLSearchParams(window.location.search).get('program_report');
+    if (requestedProgramReport && programReportProgram) {
+        const option = Array.from(programReportProgram.options).find(item => item.value === requestedProgramReport);
+        if (option) {
+            programReportProgram.value = requestedProgramReport;
+            syncProgramReportRequirements();
+            setProgramReportOpen(true);
+        }
+    }
 
     const setBusy = (busy) => {
         requestInFlight = busy;
@@ -1903,7 +2010,6 @@
         const button = event.target.closest('[data-template]');
         if (!button || !root.contains(button)) return;
         const template = button.dataset.template;
-        setAddOpen(false);
         setToolsOpen(false);
         input.value = template;
         send(template, template);

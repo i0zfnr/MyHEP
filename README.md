@@ -26,7 +26,9 @@ StudentEdge is a Laravel student-affairs management system for Politeknik Besut.
 - Offenses, evidence, fines, payment receipts, rules, discipline announcements, and vehicle-sticker decisions
 - QR-based campus checkout/return, guard views, movement reports, cursor batches, and virtualized long lists
 - Private Student Document Centre with review, authenticated downloads, and a system-admin feature toggle
-- English/Malay UI, light/dark theme, beta accent themes, Live Glass transparency, responsive PWA shell, Android/iPhone install guidance, notifications, browser push, and reduced-motion support
+- Synchronized English/Malay UI catalogues with incremental translation-audit tools,
+  light/dark theme, beta accent themes, Live Glass transparency, responsive PWA shell,
+  Android/iPhone install guidance, notifications, browser push, and reduced-motion support
 - Public and authenticated problem reporting with screenshots, email delivery state, System Admin review, status notes, and push updates
 - Staff/guard account management, public and authenticated QR laptop borrowing/return, borrower CSV import, printable QR labels, monthly analytics, monitoring, maintenance/cache controls, configurable session lifetime, push broadcasts, email-delivery testing, and audit logs
 

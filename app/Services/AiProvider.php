@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 
 class AiProvider
@@ -38,14 +39,26 @@ class AiProvider
         };
     }
 
-    private function askGemini(string $prompt): string
+    public function askWithAttachments(string $prompt, array $attachments): string
+    {
+        if ($this->name() !== 'gemini' || $attachments === []) return $this->ask($prompt);
+
+        return $this->askGemini($prompt, $attachments);
+    }
+
+    private function askGemini(string $prompt, array $attachments = []): string
     {
         $url = rtrim((string) config('services.gemini.url'), '/')
             .'/models/'.$this->model().':generateContent';
-        $response = Http::acceptJson()->timeout(45)
+        $parts = [['text' => $prompt]];
+        foreach ($attachments as $attachment) {
+            if (! $attachment instanceof UploadedFile) continue;
+            $parts[] = ['inlineData' => ['mimeType' => (string) $attachment->getMimeType(), 'data' => base64_encode((string) file_get_contents($attachment->getRealPath()))]];
+        }
+        $response = Http::acceptJson()->timeout(90)
             ->post($url.'?key='.urlencode((string) config('services.gemini.key')), [
                 'systemInstruction' => ['parts' => [['text' => 'You are a careful student support assistant.']]],
-                'contents' => [['role' => 'user', 'parts' => [['text' => $prompt]]]],
+                'contents' => [['role' => 'user', 'parts' => $parts]],
             ])->throw()->json();
 
         return trim(collect(data_get($response, 'candidates.0.content.parts', []))

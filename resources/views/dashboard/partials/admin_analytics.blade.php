@@ -398,45 +398,22 @@
         .an-grid-3 > .an-card:last-child:nth-child(odd) { grid-column:1 / -1; }
     }
 
-    /* System Admin graph mode uses a restrained liquid-glass layer. */
-    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
-        border-color:color-mix(in srgb,var(--se-primary) 18%,var(--se-border));
-        background:
-            linear-gradient(145deg,rgba(255,255,255,.68),rgba(255,255,255,.42)),
-            color-mix(in srgb,var(--se-surface) 78%,transparent);
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 8px 24px rgba(70,52,34,.075);
-        -webkit-backdrop-filter:blur(6px) saturate(115%)!important;
-        backdrop-filter:blur(6px) saturate(115%)!important;
+    /* Graph mode is intentionally paint-contained. Large charts below the
+       viewport are skipped until needed, and static surfaces avoid costly
+       full-card recompositing during every scroll frame. */
+    .adash[data-dashboard-mode="graphs"] .analytics-dashboard > :not(.an-overview-head) {
+        content-visibility:auto;
+        contain:layout paint style;
+        contain-intrinsic-size:auto 360px;
     }
-    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured)::after {
-        pointer-events:none;
+    .adash[data-dashboard-mode="graphs"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
+        transform:translateZ(0);
     }
-    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard .an-card {
-        position:relative;
-    }
-    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard .an-card::before {
-        content:'';
-        position:absolute;
-        inset:0 0 auto;
-        z-index:0;
-        height:42%;
-        background:linear-gradient(180deg,rgba(255,255,255,.16),transparent);
-        border-radius:inherit;
-        pointer-events:none;
-    }
-    body.system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard .an-card > * {
-        position:relative;
-        z-index:1;
-    }
-    body[data-theme="dark"].system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
-        border-color:color-mix(in srgb,var(--se-primary) 22%,var(--se-border));
-        background:
-            linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018)),
-            color-mix(in srgb,var(--se-surface) 82%,transparent);
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 28px rgba(0,0,0,.18);
-    }
-    body[data-theme="dark"].system-admin-dashboard .adash[data-dashboard-mode="graphs"] .analytics-dashboard .an-card::before {
-        background:linear-gradient(180deg,rgba(255,255,255,.045),transparent);
+    .adash[data-dashboard-mode="graphs"] .analytics-dashboard > *,
+    .adash[data-dashboard-mode="graphs"] .an-daily-bar,
+    .adash[data-dashboard-mode="graphs"] .an-donut,
+    .adash[data-dashboard-mode="graphs"] .an-gauge {
+        animation:none!important;
     }
 
     /* Modern analytics finish: stronger hierarchy without visual noise. */
@@ -494,6 +471,178 @@
         .an-statistics-head { align-items:flex-start; flex-direction:column; }
         .an-statistics-metrics { grid-template-columns:1fr; }
         .an-statistics-pies { grid-template-columns:1fr; }
+    }
+    /* Warm monitoring visual language shared with System Performance. */
+    .analytics-dashboard {
+        --an-blue:var(--se-primary);
+        --an-blue-soft:var(--se-primary-soft);
+        --an-ink:var(--se-text);
+        --an-muted:var(--se-text-muted);
+        gap:18px;
+        padding:0;
+        background:transparent;
+    }
+    .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
+        border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--se-border));
+        border-radius:18px;
+        background:linear-gradient(145deg,var(--se-surface) 0%,color-mix(in srgb,var(--se-primary-soft) 18%,var(--se-surface)) 100%);
+        box-shadow:0 2px 5px rgba(50,37,24,.055),0 16px 38px rgba(50,37,24,.09),inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .analytics-dashboard :is(.an-card,.an-kpi,.an-featured):hover {
+        transform:none;
+        border-color:color-mix(in srgb,var(--se-primary) 44%,var(--se-border));
+        box-shadow:0 3px 7px rgba(50,37,24,.065),0 18px 42px rgba(50,37,24,.105),inset 0 1px 0 rgba(255,255,255,.85);
+    }
+    .an-kpi { min-height:108px; padding:16px 18px; }
+    .an-kpi::before { height:0; }
+    .an-kpi::after { content:none!important; display:none!important; }
+    .an-kpi-label,.an-card-kicker { color:color-mix(in srgb,var(--se-primary-strong) 78%,var(--se-text-muted)); }
+    .an-kpi-value { margin-top:7px; font-size:1.8rem; }
+    .an-card-head { padding:18px 20px 0; }
+    .an-card-body { padding:18px 20px 20px; }
+    .an-overview-head { padding:2px 2px 0; }
+    .an-range { border:1px solid color-mix(in srgb,var(--se-primary) 20%,var(--se-border)); background:var(--se-surface-soft); }
+    .an-range button.active { background:var(--se-surface); color:var(--se-primary-strong); box-shadow:0 2px 7px rgba(83,59,34,.1); }
+    .an-featured-head { padding:20px 22px 8px; }
+    .an-featured-chart { padding:8px 20px 20px; }
+    .an-featured-bars,.an-daily-plot,.an-columns {
+        border-bottom-color:color-mix(in srgb,var(--se-primary) 18%,var(--se-border));
+        background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - 1px),color-mix(in srgb,var(--se-primary) 10%,transparent) 25%);
+    }
+    .an-featured-bar,.an-daily-bar,.an-col-bar,.an-hbar-fill,.an-group-bar {
+        background:linear-gradient(180deg,color-mix(in srgb,var(--se-primary) 72%,#fff),var(--se-primary));
+        box-shadow:none;
+    }
+    .an-trend-line,.an-active-line { stroke:var(--se-primary); }
+    .an-trend-dot { fill:var(--se-surface); stroke:var(--se-primary); }
+    /* Use the same layered circular treatment as the System Performance gauge. */
+    .analytics-dashboard .an-donut,
+    .analytics-dashboard .an-gauge {
+        isolation:isolate;
+        -webkit-mask:none;
+        mask:none;
+        animation:none;
+        border:1px solid rgba(255,255,255,.68);
+        box-shadow:0 16px 34px color-mix(in srgb,var(--se-primary) 22%,transparent),inset 0 0 0 1px rgba(255,255,255,.58);
+        filter:none;
+    }
+    .analytics-dashboard .an-donut::before,
+    .analytics-dashboard .an-gauge::before { display:none; }
+    .analytics-dashboard .an-donut::after,
+    .analytics-dashboard .an-gauge::after {
+        inset:15px;
+        background:rgba(255,255,255,.78);
+        border:1px solid rgba(255,255,255,.88);
+        box-shadow:inset 0 1px 3px rgba(55,42,30,.06),0 1px 0 rgba(255,255,255,.75);
+        backdrop-filter:blur(10px);
+        -webkit-backdrop-filter:blur(10px);
+    }
+    .analytics-dashboard .an-donut-centre strong,
+    .analytics-dashboard .an-gauge-centre strong {
+        color:var(--se-primary-strong);
+        font-size:1.5rem;
+        line-height:1.1;
+        font-weight:800;
+        letter-spacing:-.035em;
+        text-shadow:none;
+    }
+    .analytics-dashboard .an-donut-centre span,
+    .analytics-dashboard .an-gauge-centre span {
+        margin-top:4px;
+        color:var(--se-text-muted);
+        font-size:.66rem;
+        line-height:1.2;
+        font-weight:650;
+        letter-spacing:.045em;
+        text-transform:uppercase;
+    }
+    body[data-theme="dark"] .analytics-dashboard .an-donut,
+    body[data-theme="dark"] .analytics-dashboard .an-gauge {
+        border-color:rgba(255,255,255,.10);
+        box-shadow:0 18px 38px rgba(0,0,0,.30),inset 0 0 0 1px rgba(255,255,255,.10);
+    }
+    body[data-theme="dark"] .analytics-dashboard .an-donut::after,
+    body[data-theme="dark"] .analytics-dashboard .an-gauge::after {
+        background:rgba(10,9,8,.78);
+        border-color:rgba(255,255,255,.10);
+        box-shadow:inset 0 1px 3px rgba(0,0,0,.35);
+    }
+    body[data-theme="dark"] .analytics-dashboard .an-donut-centre strong,
+    body[data-theme="dark"] .analytics-dashboard .an-gauge-centre strong { color:var(--se-primary); }
+    .an-statistics-icon,.an-statistics-empty .an-statistics-empty-icon { background:var(--se-primary-soft); border-color:color-mix(in srgb,var(--se-primary) 26%,var(--se-border)); box-shadow:none; }
+    .an-statistics-metric,.an-statistics-pie,.an-active-chart { border-color:color-mix(in srgb,var(--se-primary) 22%,var(--se-border)); background:linear-gradient(150deg,var(--se-surface),color-mix(in srgb,var(--se-primary-soft) 18%,var(--se-surface))); box-shadow:0 10px 26px rgba(50,37,24,.07),inset 0 1px 0 rgba(255,255,255,.75); }
+    .an-active-svg { filter:drop-shadow(0 7px 9px color-mix(in srgb,var(--se-primary) 16%,transparent)); }
+    .an-stack-track { height:18px; border:1px solid color-mix(in srgb,var(--se-primary) 12%,var(--se-border)); box-shadow:inset 0 2px 4px rgba(38,28,19,.11),0 5px 12px rgba(38,28,19,.045); }
+    .an-stack-seg { box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(0,0,0,.09); }
+    .an-ranked-row { border-bottom-color:color-mix(in srgb,var(--se-primary) 11%,var(--se-border)); }
+    .an-report-link { border-color:color-mix(in srgb,var(--se-primary) 28%,var(--se-border)); background:var(--se-surface); color:var(--se-primary-strong); }
+    .an-live-dot { background:var(--se-success); box-shadow:0 0 0 5px color-mix(in srgb,var(--se-success) 14%,transparent); animation:none; }
+    body[data-theme="dark"] .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
+        background:linear-gradient(145deg,var(--se-surface),color-mix(in srgb,var(--se-primary-soft) 16%,var(--se-surface)));
+        box-shadow:0 3px 10px rgba(0,0,0,.14),0 12px 28px rgba(0,0,0,.12);
+    }
+
+    /* Refined KPI and trend presentation: compact cards with a contained plot. */
+    .analytics-dashboard .an-kpis { grid-template-columns:repeat(4,minmax(210px,1fr)); gap:12px; }
+    .analytics-dashboard .an-kpi {
+        min-height:124px;
+        padding:17px 18px 15px;
+        overflow:hidden;
+        border-color:color-mix(in srgb,var(--kpi-accent,var(--se-primary)) 20%,var(--se-border));
+        border-radius:16px;
+        background:linear-gradient(145deg,var(--se-surface),color-mix(in srgb,var(--kpi-accent,var(--se-primary)) 5%,var(--se-surface)));
+        box-shadow:0 2px 5px rgba(38,31,24,.045),0 12px 28px rgba(38,31,24,.075),inset 0 1px 0 rgba(255,255,255,.82);
+    }
+    .analytics-dashboard .an-kpi::before {
+        content:'';
+        position:absolute;
+        inset:0 auto 0 0;
+        width:3px;
+        height:auto;
+        border-radius:16px 0 0 16px;
+        background:var(--kpi-accent,var(--se-primary));
+    }
+    .analytics-dashboard .an-kpi-label { color:color-mix(in srgb,var(--kpi-accent,var(--se-primary)) 56%,var(--se-text)); font-size:.7rem; font-weight:800; }
+    .analytics-dashboard .an-kpi-heading { display:flex; min-width:0; align-items:center; gap:9px; }
+    .analytics-dashboard .an-kpi-icon { width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border:1px solid color-mix(in srgb,var(--kpi-accent,var(--se-primary)) 28%,var(--se-border)); border-radius:9px; background:color-mix(in srgb,var(--kpi-accent,var(--se-primary)) 10%,var(--se-surface)); color:var(--kpi-accent,var(--se-primary)); }
+    .analytics-dashboard .an-kpi-icon svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .analytics-dashboard .an-kpi-value { margin-top:10px; font-size:1.9rem; font-weight:800; }
+    .analytics-dashboard .an-kpi-bottom { min-height:28px; margin-top:10px; }
+    .analytics-dashboard .an-kpi-sub { max-width:76%; color:var(--se-text-muted); }
+    .analytics-dashboard .an-spark { width:64px; height:24px; padding-bottom:2px; }
+
+    .analytics-dashboard .an-statistics-chart,
+    .analytics-dashboard .an-card-body:has(> .an-trend-svg) {
+        position:relative;
+        margin-top:18px;
+        padding:18px 16px 12px;
+        overflow:hidden;
+        border:1px solid color-mix(in srgb,var(--se-primary) 18%,var(--se-border));
+        border-radius:14px;
+        background:linear-gradient(180deg,color-mix(in srgb,var(--se-primary-soft) 20%,var(--se-surface)),var(--se-surface));
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 8px 20px rgba(43,34,25,.055);
+    }
+    .analytics-dashboard .an-statistics-chart { padding-bottom:10px; }
+    .analytics-dashboard .an-statistics-chart .an-active-svg { height:200px; }
+    .analytics-dashboard .an-trend-svg { height:178px; }
+    .analytics-dashboard :is(.an-trend-svg,.an-active-svg) .an-gridline {
+        stroke:color-mix(in srgb,var(--se-primary) 18%,var(--se-border));
+        stroke-width:.45;
+        stroke-dasharray:1.4 1.8;
+    }
+    .analytics-dashboard :is(.an-trend-line,.an-active-line) { stroke-width:1.1; filter:drop-shadow(0 4px 5px color-mix(in srgb,var(--se-primary) 18%,transparent)); }
+    .analytics-dashboard :is(.an-trend-dot,.an-active-node) { stroke-width:1.8; filter:drop-shadow(0 2px 2px rgba(30,42,48,.12)); }
+    .analytics-dashboard :is(.an-trend-labels,.an-statistics-labels) { padding:8px 2px 0; color:var(--se-text-muted); font-size:.68rem; font-weight:700; }
+    body[data-theme="dark"] .analytics-dashboard :is(.an-statistics-chart,.an-card-body:has(> .an-trend-svg)) {
+        border-color:color-mix(in srgb,var(--se-primary) 20%,var(--se-border));
+        background:linear-gradient(180deg,color-mix(in srgb,var(--se-primary-soft) 18%,var(--se-surface)),var(--se-surface));
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 24px rgba(0,0,0,.15);
+    }
+    @media (max-width:1180px) { .analytics-dashboard .an-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:640px) {
+        .analytics-dashboard .an-kpis { grid-template-columns:1fr; }
+        .analytics-dashboard .an-statistics-chart,
+        .analytics-dashboard .an-card-body:has(> .an-trend-svg) { padding-inline:10px; }
     }
     @media (prefers-reduced-motion:reduce) { .analytics-dashboard > *, .an-daily-bar, .an-trend-line, .an-active-line, .an-donut, .an-gauge, .an-live-dot { animation:none!important; } .an-kpi, .an-donut, .an-gauge { transform:none; } }
 </style>
@@ -605,7 +754,21 @@
         @foreach ($analytics['kpis'] as $kpi)
         <article class="an-kpi tone-{{ $kpi['tone'] }}">
             <div class="an-kpi-top">
-                <span class="an-kpi-label">{{ $kpi['label'] }}</span>
+                <span class="an-kpi-heading"><span class="an-kpi-icon" aria-hidden="true">
+                    @switch($kpi['icon'] ?? 'announcement')
+                        @case('offense')<svg viewBox="0 0 24 24"><path d="M12 3 3.5 7.5v5c0 4.7 3.6 7.3 8.5 8.5 4.9-1.2 8.5-3.8 8.5-8.5v-5L12 3Z"/><path d="M12 8v5m0 3h.01"/></svg>@break
+                        @case('payment')<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18m-5 5h2"/></svg>@break
+                        @case('review')<svg viewBox="0 0 24 24"><path d="M8 4h8l3 3v13H5V4h3Z"/><path d="M9 12h6m-6 4h4M14 4v4h4"/></svg>@break
+                        @case('students')<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.5-4 2.3-6 5.5-6s5 2 5.5 6M16 7.5a2.5 2.5 0 0 1 0 5M16.5 14c2.4.5 3.7 2.2 4 5"/></svg>@break
+                        @case('outside')<svg viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4m4-4H9"/></svg>@break
+                        @case('movement')<svg viewBox="0 0 24 24"><path d="M4 7h13m0 0-3-3m3 3-3 3M20 17H7m0 0 3 3m-3-3 3-3"/></svg>@break
+                        @case('late')<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg>@break
+                        @case('records')<svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 7h6m-6 4h6m-6 4h4"/></svg>@break
+                        @case('aid')<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/><path d="M9 12h6m-3-3v6"/></svg>@break
+                        @case('pending')<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>@break
+                        @default<svg viewBox="0 0 24 24"><path d="M5 18h14V6H5zM8 3v3m8-3v3M8 10h8m-8 4h5"/></svg>
+                    @endswitch
+                </span><span class="an-kpi-label">{{ $kpi['label'] }}</span></span>
                 @if ($kpi['delta'])
                 <span class="an-delta {{ $kpi['delta']['dir'] }}" aria-label="{{ $kpi['delta']['text'] }}">{{ $kpi['delta']['text'] }}</span>
                 @endif

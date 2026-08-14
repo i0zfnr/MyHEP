@@ -275,12 +275,12 @@
 
     @if(session('auth_user.admin_role') === 'system_admin')
         <details class="bulk-delete">
-            <summary>Danger zone: delete every student record</summary>
-            <form method="POST" action="{{ route('admin.students.destroy-all') }}" data-confirm-title="Delete all student data" data-confirm-message="This permanently deletes every student, their documents, photos, sessions, scholarship, discipline, and movement records. This cannot be undone." data-confirm-action="Delete All Students" data-confirm-tone="danger">
+            <summary>{{ __('Danger zone: delete every student record') }}</summary>
+            <form method="POST" action="{{ route('admin.students.destroy-all') }}" data-confirm-title="{{ __('Delete all student data') }}" data-confirm-message="This permanently deletes every student, their documents, photos, sessions, scholarship, discipline, and movement records. This cannot be undone." data-confirm-action="Delete All Students" data-confirm-tone="danger">
                 @csrf
                 @method('DELETE')
-                <input name="confirmation" required autocomplete="off" placeholder="Type DELETE ALL STUDENTS to confirm" aria-label="Confirmation">
-                <button class="btn btn-danger" type="submit">Delete All Students</button>
+                <input name="confirmation" required autocomplete="off" placeholder="{{ __('Type DELETE ALL STUDENTS to confirm') }}" aria-label="{{ __('Confirmation') }}">
+                <button class="btn btn-danger" type="submit">{{ __('Delete All Students') }}</button>
             </form>
         </details>
     @endif
@@ -294,8 +294,8 @@
                         <label for="student_file">{{ __('Import & Update Data Pelajar') }}</label>
                         <input id="student_file" type="file" name="student_file" accept=".csv,.txt,.xlsx" required>
                         <div class="import-hint">
-                            Upload satu senarai pelajar terkini dalam CSV atau Excel sehingga 50 MB. Pelajar baharu akan ditambah, manakala pelajar yang sepadan melalui No. Kad Pengenalan atau No. Matrik akan dikemaskini, termasuk Semester dan Sesi Akademik.
-                            Header yang disokong termasuk Nama Pelajar, No Kad Pengenalan, No Matrik, Nama Program, Telefon, Email, Semester dan Sesi Akademik. Jika No Matrik kosong, sistem akan simpan sebagai kosong.
+                            {{ __('Upload satu senarai pelajar terkini dalam CSV atau Excel sehingga 50 MB. Pelajar baharu akan ditambah, manakala pelajar yang sepadan melalui No. Kad Pengenalan atau No. Matrik akan dikemaskini, termasuk Semester dan Sesi Akademik.
+                            Header yang disokong termasuk Nama Pelajar, No Kad Pengenalan, No Matrik, Nama Program, Telefon, Email, Semester dan Sesi Akademik. Jika No Matrik kosong, sistem akan simpan sebagai kosong.') }}
                         </div>
                     </div>
                     <button class="btn btn-primary" type="submit">{{ __('Import & Update') }}</button>
@@ -305,10 +305,10 @@
             @if(session('import_result'))
                 @php($result = session('import_result'))
                 <div class="import-summary">
-                    <div><span>Total rows</span><strong>{{ $result['total_rows'] ?? 0 }}</strong></div>
-                    <div><span>Created</span><strong>{{ $result['students_created'] ?? 0 }}</strong></div>
-                    <div><span>Updated</span><strong>{{ $result['students_updated'] ?? 0 }}</strong></div>
-                    <div><span>Skipped</span><strong>{{ $result['skipped'] ?? 0 }}</strong></div>
+                    <div><span>{{ __('Total rows') }}</span><strong>{{ $result['total_rows'] ?? 0 }}</strong></div>
+                    <div><span>{{ __('Created') }}</span><strong>{{ $result['students_created'] ?? 0 }}</strong></div>
+                    <div><span>{{ __('Updated') }}</span><strong>{{ $result['students_updated'] ?? 0 }}</strong></div>
+                    <div><span>{{ __('Skipped') }}</span><strong>{{ $result['skipped'] ?? 0 }}</strong></div>
                 </div>
                 @if(!empty($result['errors']))
                     <ul class="error-list">
@@ -378,15 +378,15 @@
             <table class="students-table">
                 <thead>
                     <tr>
-                        <th>Nama</th>
-                        <th>No Matrik</th>
+                        <th>{{ __('Nama') }}</th>
+                        <th>{{ __('No Matrik') }}</th>
                         @if($canViewSensitiveStudents)<th class="col-ic">IC</th>@endif
-                        <th class="col-program">Program</th>
+                        <th class="col-program">{{ __('Program') }}</th>
                         @if($canViewSensitiveStudents)
-                            <th class="col-phone">Telefon</th>
-                            <th class="col-password">Status Kata Laluan</th>
+                            <th class="col-phone">{{ __('Telefon') }}</th>
+                            <th class="col-password">{{ __('Status Kata Laluan') }}</th>
                         @endif
-                        @if($hasStudentActions)<th>Tindakan</th>@endif
+                        @if($hasStudentActions)<th>{{ __('Tindakan') }}</th>@endif
                     </tr>
                 </thead>
                 <tbody>
@@ -413,25 +413,25 @@
                                 <td class="col-phone">{{ $student->phone ?: '-' }}</td>
                                 <td class="col-password">
                                     @if((int) $student->has_custom_password === 1)
-                                        <span class="pwd-badge pwd-custom">Custom Password</span>
+                                        <span class="pwd-badge pwd-custom">{{ __('Custom Password') }}</span>
                                     @else
-                                        <span class="pwd-badge pwd-default">Default IC</span>
+                                        <span class="pwd-badge pwd-default">{{ __('Default IC') }}</span>
                                     @endif
                                 </td>
                             @endif
                             @if($hasStudentActions)<td>
                                 <div class="actions-cell">
                                     @if($canViewSensitiveStudents)
-                                        <a class="btn" href="{{ route('admin.students.show', $student->id) }}">View Profile</a>
+                                        <a class="btn" href="{{ route('admin.students.show', $student->id) }}">{{ __('View Profile') }}</a>
                                     @endif
                                     @if($canManageStudents)
-                                        <a class="btn manage-action" href="{{ route('admin.students.edit', $student->id) }}">Edit</a>
+                                        <a class="btn manage-action" href="{{ route('admin.students.edit', $student->id) }}">{{ __('Edit') }}</a>
                                         <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;"
                                             data-confirm-title="{{ __('Reset password') }}"
                                             data-confirm-message="{{ __('Reset this student password to NRIC?') }}"
                                             data-confirm-action="{{ __('Reset Password') }}">
                                             @csrf
-                                            <button class="btn btn-warn" type="submit">Reset Password</button>
+                                            <button class="btn btn-warn" type="submit">{{ __('Reset Password') }}</button>
                                         </form>
                                         <form method="POST" action="{{ route('admin.students.destroy', $student->id) }}" style="margin:0;"
                                             data-confirm-title="{{ __('Delete student') }}"
@@ -440,14 +440,14 @@
                                             data-confirm-tone="danger">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-danger" type="submit">Delete</button>
+                                            <button class="btn btn-danger" type="submit">{{ __('Delete') }}</button>
                                         </form>
                                     @endif
                                 </div>
                             </td>@endif
                         </tr>
                     @empty
-                        <tr><td colspan="{{ $canViewSensitiveStudents ? 7 : 3 }}" style="text-align:center;color:#7a6555;">Tiada rekod pelajar.</td></tr>
+                        <tr><td colspan="{{ $canViewSensitiveStudents ? 7 : 3 }}" style="text-align:center;color:#7a6555;">{{ __('Tiada rekod pelajar.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

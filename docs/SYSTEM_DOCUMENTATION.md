@@ -376,7 +376,11 @@ The system provides:
 - Monthly report page.
 - Admin dashboard metrics.
 - Current dashboard visualization behavior: Admin and Lecturer dashboards have one responsive 3D-styled horizontal summary graph with a saved Show/Hide control. When enabled, the graph is currently added above the metric cards. A documented follow-up must make Card and Graph modes mutually exclusive and replace the cards with several complementary graphs in Graph mode. Every Lecturer sees the Discipline Admin-style aggregate overview, but page links and write actions still follow individual permissions.
-- Monthly Report uses 3D-styled KPI cards, six-month columns, and status donuts. Every Lecturer can view Discipline Monthly Analytics; scholarship analytics remain role-scoped.
+- Monthly Report uses lightweight accent-led KPI cards, six-month trend charts,
+  status donuts, compact zero-data states, and print-safe layouts. Decorative card
+  corner curves are intentionally omitted; light and dark themes use restrained
+  elevation. Every Lecturer can view Discipline Monthly Analytics; scholarship
+  analytics remain role-scoped.
 - Live system monitoring for system admins.
 - Maintenance mode controls.
 - System cache controls.
@@ -605,8 +609,22 @@ Relevant files:
 - `app/Http/Middleware/SetLocale.php`
 - `app/Http/Middleware/TranslateFrontendContent.php`
 - `resources/views/settings/index.blade.php`
+- `tools/sync_translation_catalogues.py`
+- `tools/translate_missing_catalogue_values.py`
+- `tools/localize_blade_literals.py`
 
 Users can change locale and theme from settings. The selected values are stored in session.
+
+Literal translation calls in Blade, application, and route PHP sources are synchronized
+into both JSON catalogues. Existing reviewed values take priority. The incremental
+translation helper processes only values reported as unresolved, preserves Laravel
+placeholders, and reapplies reviewed StudentEdge terminology. Grouped Laravel keys are
+excluded without excluding ordinary labels that contain periods, such as `No. Bilik`.
+
+The 2026-08-14 catalogue audit covered 100 Blade templates and reported zero missing
+English keys, zero missing Malay keys, zero placeholder mismatches, and zero outstanding
+manual-review entries. A second mixed-language review corrected Malay values containing
+English workflow terms such as scholarship, unpaid, and pending.
 
 ## 10. File Uploads and Storage
 

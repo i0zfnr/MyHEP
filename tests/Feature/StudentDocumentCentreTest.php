@@ -126,19 +126,39 @@ class StudentDocumentCentreTest extends TestCase
         $this->get("/student/documents/{$otherId}/download")->assertNotFound();
     }
 
-    public function test_document_archive_has_no_generic_upload_or_delete_routes(): void
+    public function test_student_can_upload_payment_document_but_cannot_delete_it_from_archive(): void
     {
-        $documentId = $this->insertDocument(1, 'Read Only', '1/read-only.pdf');
-        $this->studentSession(1)->post('/student/documents')->assertStatus(405);
+        $this->studentSession(1)->post('/student/documents', [
+            'title' => 'Insurance Payment 2026',
+            'category' => 'insurance_payment',
+            'document' => UploadedFile::fake()->create('insurance.pdf', 128, 'application/pdf'),
+        ])->assertRedirect('/student/documents');
+
+        $document = DB::table('student_documents')->where('title', 'Insurance Payment 2026')->first();
+        $this->assertNotNull($document);
+        $this->assertSame('insurance_payment', $document->category);
+        $this->assertSame('pending', $document->status);
+        Storage::disk('student_documents')->assertExists($document->path);
+
+        $documentId = (int) $document->id;
         $this->delete("/student/documents/{$documentId}")->assertNotFound();
         $this->assertDatabaseHas('student_documents', ['id' => $documentId]);
     }
 
     public function test_only_authorized_admin_roles_can_access_document_review(): void
     {
+        $insuranceId = $this->insertDocument(1, 'Insurance Receipt', '1/insurance.pdf', category: 'insurance_payment');
+        $letterId = $this->insertDocument(1, 'Private Letter', '1/private.pdf');
+        Storage::disk('student_documents')->put('1/insurance.pdf', 'insurance-content');
+        Storage::disk('student_documents')->put('1/private.pdf', 'letter-content');
+
         $this->adminSession(11, 'discipline_admin', 'Discipline Officer')
             ->get('/admin/documents')
-            ->assertForbidden();
+            ->assertOk()
+            ->assertSee('Insurance Receipt')
+            ->assertDontSee('Private Letter');
+        $this->get("/admin/documents/{$insuranceId}/download")->assertOk();
+        $this->get("/admin/documents/{$letterId}/download")->assertNotFound();
 
         $this->adminSession(10, 'student_affairs_head', 'HEP Head')
             ->get('/admin/documents')
@@ -199,14 +219,14 @@ class StudentDocumentCentreTest extends TestCase
         return $this->withSession(['auth_user' => ['id' => $id, 'role' => 'admin', 'admin_role' => $role, 'name' => $name]]);
     }
 
-    private function insertDocument(int $studentId, string $title, string $path, ?string $sourceType = null, ?int $sourceId = null): int
+    private function insertDocument(int $studentId, string $title, string $path, ?string $sourceType = null, ?int $sourceId = null, ?string $category = null): int
     {
         return DB::table('student_documents')->insertGetId([
             'student_id' => $studentId,
             'source_type' => $sourceType,
             'source_id' => $sourceId,
             'title' => $title,
-            'category' => $sourceType === 'scholarship_status' ? 'scholarship' : 'letters',
+            'category' => $category ?? ($sourceType === 'scholarship_status' ? 'scholarship' : 'letters'),
             'disk' => 'student_documents',
             'path' => $path,
             'original_name' => basename($path),

@@ -221,7 +221,7 @@
     <div class="scan-vignette" aria-hidden="true"></div>
 
     <div class="scan-topbar">
-        <a href="{{ route('student.movements.index') }}" class="scan-icon-btn" aria-label="Close scanner">
+        <a href="{{ route('student.movements.index') }}" class="scan-icon-btn" aria-label="{{ __('Close scanner') }}">
             <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </a>
         <div class="scan-clock" id="scanClock">--:--</div>
@@ -238,12 +238,12 @@
         <div class="scan-status" id="scanStatus" role="status" aria-live="polite">
             {{ __('Opening camera. Point it at the guard house QR code.') }}
         </div>
-        <div class="scan-mode" aria-label="Scan mode">
+        <div class="scan-mode" aria-label="{{ __('Scan mode') }}">
             <span class="active">
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2"/><path d="M18 14h2"/><path d="M14 18h6"/></svg>
-                Scan QR
+                {{ __('Scan QR') }}
             </span>
-            <span>Student Movement</span>
+            <span>{{ __('Student Movement') }}</span>
         </div>
     </div>
 </div>

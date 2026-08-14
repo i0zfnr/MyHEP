@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Scan Laptop QR')
-@section('header')<h2 style="margin:0;font-size:1rem;font-weight:700;">Scan Laptop QR</h2>@endsection
+@section('header')<h2 style="margin:0;font-size:1rem;font-weight:700;">{{ __('Scan Laptop QR') }}</h2>@endsection
 
 @push('styles')
 <style>
@@ -25,7 +25,7 @@
     .staff-scan-bottom{position:absolute;left:calc(1rem + env(safe-area-inset-left,0px));right:calc(1rem + env(safe-area-inset-right,0px));bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:4;display:grid;gap:.7rem}
     .staff-scan-status{justify-self:center;width:min(100%,430px);padding:.8rem 1rem;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:rgba(12,9,7,.54);color:#fff3df;font-size:.82rem;font-weight:700;line-height:1.45;text-align:center;box-shadow:0 18px 44px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.12);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%)}
     .staff-scan-status.success{border-color:rgba(110,231,164,.48);color:#cffbdd}.staff-scan-status.error{border-color:rgba(252,165,165,.5);color:#fecaca}
-    .staff-scan-mode{width:min(100%,430px);justify-self:center;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem;padding:.35rem;border-radius:999px;background:rgba(12,9,7,.56);box-shadow:0 18px 44px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(24px) saturate(155%);-webkit-backdrop-filter:blur(24px) saturate(155%)}
+    .staff-scan-mode{width:min(100%,430px);justify-self:center;display:grid;padding:.35rem;border-radius:999px;background:rgba(12,9,7,.56);box-shadow:0 18px 44px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.14);backdrop-filter:blur(24px) saturate(155%);-webkit-backdrop-filter:blur(24px) saturate(155%)}
     .staff-scan-mode span{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border-radius:999px;color:rgba(255,255,255,.72);font-size:.8rem;font-weight:850;text-align:center}.staff-scan-mode .active{background:#fffaf5;color:#7d582f}
     .staff-token-confirm{width:min(100%,430px);min-height:46px;justify-self:center;border:1px solid rgba(255,255,255,.3);border-radius:14px;background:#fffaf5;color:#5b3e22;font:inherit;font-weight:850;cursor:pointer}.staff-token-confirm[hidden]{display:none}
     .staff-scan-canvas{display:none}
@@ -34,12 +34,12 @@
 
 @section('content')
 <div class="staff-scan-page">
-    <video class="staff-scan-video" id="laptopScannerVideo" playsinline muted autoplay aria-label="Laptop QR scanner camera preview"></video>
+    <video class="staff-scan-video" id="laptopScannerVideo" playsinline muted autoplay aria-label="{{ __('Laptop QR scanner camera preview') }}"></video>
     <canvas class="staff-scan-canvas" id="laptopScannerCanvas"></canvas>
     <div class="staff-scan-vignette" aria-hidden="true"></div>
 
     <div class="staff-scan-topbar">
-        <a href="{{ route('admin.dashboard') }}" class="staff-scan-icon" aria-label="Close scanner">
+        <a href="{{ route('admin.dashboard') }}" class="staff-scan-icon" aria-label="{{ __('Close scanner') }}">
             <svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </a>
         <div class="staff-scan-clock" id="staffScanClock">--:--</div>
@@ -49,15 +49,14 @@
     <div class="staff-scan-frame" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
     <div class="staff-scan-bottom">
-        <div class="staff-scan-status" id="laptopScanResult" role="status" aria-live="polite">Opening camera. Point it at a JHEP laptop QR code.</div>
-        <button type="button" class="staff-token-confirm" id="confirmLaptopToken" {{ $initialToken === '' ? 'hidden' : '' }}>Confirm Laptop Scan</button>
-        <div class="staff-scan-mode" aria-label="Scan mode">
-            <span class="active">Scan QR</span>
-            <span>JHEP Staff · {{ $currentLoans->count() }} active</span>
+        <div class="staff-scan-status" id="laptopScanResult" role="status" aria-live="polite">{{ __('Opening camera. Point it at a JHEP laptop QR code.') }}</div>
+        <button type="button" class="staff-token-confirm" id="confirmLaptopToken" {{ $initialToken === '' ? 'hidden' : '' }}>{{ __('Confirm Laptop Scan') }}</button>
+        <div class="staff-scan-mode" aria-label="{{ __('Scan mode') }}">
+            <span class="active">{{ __('Scan QR') }}</span>
         </div>
     </div>
 </div>
-<span class="sr-only">Borrow or return a laptop</span>
+<span class="sr-only">{{ __('Borrow or return a laptop') }}</span>
 @endsection
 
 @push('scripts')

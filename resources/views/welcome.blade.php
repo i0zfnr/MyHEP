@@ -990,7 +990,7 @@
 
         <form method="POST" action="{{ route('locale.update') }}" class="lang-switch">
             @csrf
-            <select name="locale" onchange="this.form.submit()" aria-label="Select language">
+            <select name="locale" onchange="this.form.submit()" aria-label="{{ __('Select language') }}">
                 <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>EN</option>
                 <option value="ms" {{ app()->getLocale() === 'ms' ? 'selected' : '' }}>BM</option>
             </select>
@@ -999,7 +999,7 @@
         <div class="hero-content">
 
             <div class="brand">
-                <img src="{{ asset('images/logo-politeknik-besut.png') }}" alt="Logo Politeknik Besut" class="brand-logo">
+                <img src="{{ asset('images/logo-politeknik-besut.png') }}" alt="{{ __('Logo Politeknik Besut') }}" class="brand-logo">
                 <div class="brand-divider" aria-hidden="true"></div>
                 <div class="brand-text">
                     <h1>{{ __('home.brand_name') }}</h1>
@@ -1018,19 +1018,19 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
                     {{ __('home.login_button') }}
                 </a>
-                <div class="stat-pill" data-home-live data-live-url="{{ route('system-overview.live') }}" aria-label="System status: online">
+                <div class="stat-pill" data-home-live data-live-url="{{ route('system-overview.live') }}" aria-label="{{ __('System status: online') }}">
                     <span class="dot" aria-hidden="true"></span>
                     <span data-home-stat="system-status">{{ __('home.official_label') }} · StudentEdge · {{ __('home.live_label') }}</span>
                 </div>
             </div>
-            <div class="pwa-options" aria-label="Install StudentEdge" hidden>
+            <div class="pwa-options" aria-label="{{ __('Install StudentEdge') }}" hidden>
                 <button type="button" class="pwa-option" id="androidInstallButton" hidden>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
-                    Install on Android
+                    {{ __('Install on Android') }}
                 </button>
                 <button type="button" class="pwa-option" id="iosInstallButton" hidden>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 16V3m0 0 4 4m-4-4L8 7M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>
-                    Add to iPhone Home Screen
+                    {{ __('Add to iPhone Home Screen') }}
                 </button>
             </div>
 
@@ -1068,9 +1068,9 @@
 
     <dialog class="pwa-install-dialog" id="pwaInstallDialog" aria-labelledby="pwaInstallTitle">
         <div class="pwa-install-dialog-inner">
-            <h2 id="pwaInstallTitle">Install StudentEdge</h2>
+            <h2 id="pwaInstallTitle">{{ __('Install StudentEdge') }}</h2>
             <div id="pwaInstallInstructions"></div>
-            <button type="button" class="pwa-install-dialog-close" id="pwaInstallClose">Close</button>
+            <button type="button" class="pwa-install-dialog-close" id="pwaInstallClose">{{ __('Close') }}</button>
         </div>
     </dialog>
 
@@ -1106,7 +1106,7 @@
             <div class="support-grid">
                 <article class="support-box"><h5>{{ __('home.support_email') }}</h5><p>support@polibesut.edu.my</p></article>
                 <article class="support-box"><h5>{{ __('home.support_office') }}</h5><p>{{ __('home.support_office_value') }}</p></article>
-                <article class="support-box"><h5>{{ __('home.support_phone') }}</h5><p>+60 XXX XXX XXX</p></article>
+                <article class="support-box"><h5>{{ __('home.support_phone') }}</h5><p>{{ __('+60 XXX XXX XXX') }}</p></article>
             </div>
         </section>
 
@@ -1143,7 +1143,7 @@
 
     <footer class="welcome-footer">
         <div class="footer-meta">
-            <nav class="footer-links" aria-label="Footer navigation">
+            <nav class="footer-links" aria-label="{{ __('Footer navigation') }}">
                 <a href="#">{{ __('home.privacy_policy') }}</a>
                 <a href="#">{{ __('home.terms_use') }}</a>
             </nav>

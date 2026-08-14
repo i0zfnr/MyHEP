@@ -151,12 +151,12 @@
 
             @if($canAdjustAccentTheme)
                 <section class="settings-section settings-section--beta" role="group" aria-labelledby="settingsAccentTitle">
-                    <div class="settings-beta-label">Beta</div>
+                    <div class="settings-beta-label">{{ __('Beta') }}</div>
                     <h3 class="settings-section-title" id="settingsAccentTitle">
                         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path stroke-linecap="round" d="M12 4v16M4 12h16"/></svg>
-                        Accent color
+                        {{ __('Accent color') }}
                     </h3>
-                    <p class="settings-section-copy">Choose a curated color mood for StudentEdge. Status and safety colors stay unchanged.</p>
+                    <p class="settings-section-copy">{{ __('Choose a curated color mood for StudentEdge. Status and safety colors stay unchanged.') }}</p>
                     <div class="settings-options settings-options--accent">
                         @foreach(['gold' => ['StudentEdge Gold', 'accent-preview--gold'], 'candy_blue' => ['Candy Blue', 'accent-preview--candy-blue'], 'lavender' => ['Lavender', 'accent-preview--lavender'], 'orchid' => ['Orchid', 'accent-preview--orchid'], 'violet' => ['Violet', 'accent-preview--violet']] as $value => [$label, $previewClass])
                             <label class="settings-option settings-option--accent">
@@ -213,21 +213,9 @@
                 </section>
             @endif
 
-            <section class="settings-section smooth-scroll-section" role="group" aria-labelledby="settingsSmoothScrollTitle">
-                <h3 class="settings-section-title" id="settingsSmoothScrollTitle">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7l4-4 4 4M16 17l-4 4-4-4M12 3v18"/></svg>
-                    Smooth scrolling
-                </h3>
-                <p class="settings-section-copy">Turn Lenis scrolling on for fluid wheel movement, or off to use native browser scrolling.</p>
-                <button class="smooth-scroll-toggle" type="button" role="switch" aria-checked="true" data-smooth-scroll-toggle>
-                    <span class="smooth-scroll-toggle-copy"><strong>Lenis scroll</strong><small data-smooth-scroll-status>On</small></span>
-                    <span class="smooth-scroll-switch" aria-hidden="true"><i></i></span>
-                </button>
-            </section>
-
             <div class="settings-actions">
                 <a class="btn" href="{{ route($backRoute) }}">{{ __('ui.back_dashboard') }}</a>
-                <span class="settings-autosave" data-settings-autosave aria-live="polite">Changes save automatically</span>
+                <span class="settings-autosave" data-settings-autosave aria-live="polite">{{ __('Changes save automatically') }}</span>
             </div>
         </div>
     </form>
@@ -312,7 +300,7 @@
                         <form method="POST" action="{{ route('settings.role-mode.update') }}">
                             @csrf
                             <input type="hidden" name="mode" value="general_staff">
-                            <button class="btn {{ $roleMode['is_general_staff_mode'] ? 'btn-primary' : '' }}" type="submit">PBT Staff</button>
+                            <button class="btn {{ $roleMode['is_general_staff_mode'] ? 'btn-primary' : '' }}" type="submit">{{ __('PBT Staff') }}</button>
                         </form>
                     @endif
 

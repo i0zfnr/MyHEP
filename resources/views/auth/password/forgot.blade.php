@@ -9,7 +9,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Lupa Kata Laluan</title>
+    <title>{{ __('Lupa Kata Laluan') }}</title>
     @include('partials.brand_icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -43,8 +43,8 @@
 <body data-theme="{{ session('theme', 'light') }}">
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
 <div class="card">
-    <h1>Lupa Kata Laluan</h1>
-    <p>Masukkan maklumat akaun dan email berdaftar untuk menerima kod verifikasi.</p>
+    <h1>{{ __('Lupa Kata Laluan') }}</h1>
+    <p>{{ __('Masukkan maklumat akaun dan email berdaftar untuk menerima kod verifikasi.') }}</p>
 
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if(session('delivery_info'))<div class="warn">{{ session('delivery_info') }}</div>@endif
@@ -52,21 +52,21 @@
 
     <form method="POST" action="{{ route('password.forgot.send') }}">
         @csrf
-        <label for="role">Peranan</label>
+        <label for="role">{{ __('Peranan') }}</label>
         <select id="role" name="role" required>
-            <option value="student" {{ old('role', 'student') === 'student' ? 'selected' : '' }}>Pelajar</option>
-            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+            <option value="student" {{ old('role', 'student') === 'student' ? 'selected' : '' }}>{{ __('Pelajar') }}</option>
+            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
         </select>
 
         <label for="identifier">ID Akaun (No. Matrik pelajar / No. IC admin)</label>
         <input id="identifier" name="identifier" type="text" value="{{ old('identifier') }}" required>
 
-        <label for="email">Email berdaftar</label>
+        <label for="email">{{ __('Email berdaftar') }}</label>
         <input id="email" name="email" type="email" value="{{ old('email') }}" required>
 
         <div class="actions">
-            <button class="btn btn-primary" type="submit">Hantar Kod Verifikasi</button>
-            <a class="btn" href="{{ route('login') }}">Kembali Login</a>
+            <button class="btn btn-primary" type="submit">{{ __('Hantar Kod Verifikasi') }}</button>
+            <a class="btn" href="{{ route('login') }}">{{ __('Kembali Login') }}</a>
         </div>
     </form>
 </div>

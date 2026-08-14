@@ -306,7 +306,7 @@
                                 <span class="bug-email-state {{ $emailState }}">Email: {{ ucfirst($emailState) }}</span>
                             </div>
                             @if($emailState === 'failed' && $bugReport->email_notification_error)
-                                <div class="bug-email-error"><strong>Email delivery error:</strong> {{ $bugReport->email_notification_error }}</div>
+                                <div class="bug-email-error"><strong>{{ __('Email delivery error:') }}</strong> {{ $bugReport->email_notification_error }}</div>
                             @endif
                         </div>
                         <div class="bug-date">{{ \Illuminate\Support\Carbon::parse($bugReport->created_at)->format('d M Y, h:i A') }}</div>

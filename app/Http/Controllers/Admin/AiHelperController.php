@@ -25,6 +25,9 @@ class AiHelperController extends Controller
             'aiModel' => $this->modelName(),
             'aiConversations' => $this->conversationSummaries($adminId),
             'lecturerAiMode' => $this->lecturerMode(),
+            'ownedPrograms' => Schema::hasTable('programs')
+                ? DB::table('programs')->where('created_by', $adminId)->orderByDesc('updated_at')->get(['id', 'title', 'starts_at', 'venue'])
+                : collect(),
         ]);
     }
 
@@ -39,9 +42,9 @@ class AiHelperController extends Controller
             'filters.status' => ['nullable', 'string', 'max:40'],
             'filters.matric_no' => ['nullable', 'string', 'max:40'],
             'filters.output_format' => ['nullable', 'in:auto,formal_report,executive_summary,table,csv,json'],
-            'attachment' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp,csv,xlsx', 'max:10240'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,docx,jpg,jpeg,png,webp,csv,xlsx', 'max:10240'],
             'attachments' => ['nullable', 'array', 'max:10'],
-            'attachments.*' => ['file', 'mimes:pdf,jpg,jpeg,png,webp,csv,xlsx', 'max:10240'],
+            'attachments.*' => ['file', 'mimes:pdf,docx,jpg,jpeg,png,webp,csv,xlsx', 'max:10240'],
             'conversation_id' => ['nullable', 'integer'],
             'selected_context' => ['nullable', 'string', 'max:10000'],
         ]);

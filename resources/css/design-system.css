@@ -1132,14 +1132,37 @@ body[data-theme="dark"] .page-body :where(.btn-primary, .ui-btn.primary, .bugs-b
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    min-height: 70px;
+    padding: .8rem 1rem;
+    border-top: 1px solid var(--se-border);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--se-primary-soft) 18%, var(--se-surface)), var(--se-surface));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 70%, transparent);
 }
 
 .se-pagination-summary {
     margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
     color: var(--se-text-soft);
     font-size: .78rem;
     line-height: 1.4;
 }
+
+.se-pagination-summary-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border: 1px solid color-mix(in srgb, var(--se-primary) 25%, var(--se-border));
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--se-primary-soft) 58%, var(--se-surface));
+    color: var(--se-primary-strong);
+}
+
+.se-pagination-summary-icon svg { width: 17px; height: 17px; }
+.se-pagination-record-label { color: var(--se-text-muted); }
 
 .se-pagination-summary strong {
     color: var(--se-text);
@@ -1152,24 +1175,31 @@ body[data-theme="dark"] .page-body :where(.btn-primary, .ui-btn.primary, .bugs-b
     gap: .4rem;
 }
 
+.se-pagination-controls {
+    padding: .3rem;
+    border: 1px solid color-mix(in srgb, var(--se-primary) 18%, var(--se-border));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--se-surface) 88%, transparent);
+    box-shadow: 0 7px 20px rgba(45, 32, 18, .07), inset 0 1px 0 color-mix(in srgb, #fff 72%, transparent);
+}
+
 .se-page-nav,
 .se-page-number,
 .se-page-ellipsis {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px;
-    min-height: 40px;
+    min-width: 38px;
+    min-height: 38px;
     border: 1px solid var(--liquid-stroke-soft);
-    border-radius: 12px;
-    background:
-        linear-gradient(145deg, var(--liquid-highlight), transparent 52%),
-        var(--liquid-surface-strong);
+    border-radius: 10px;
+    background: var(--se-surface);
     color: var(--se-text);
     text-decoration: none;
     font-size: .78rem;
     font-weight: 800;
-    box-shadow: inset 0 1px 0 var(--liquid-highlight);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 70%, transparent);
+    transition: background-color .14s ease, border-color .14s ease, color .14s ease, box-shadow .14s ease;
 }
 
 .se-page-nav {
@@ -1187,14 +1217,14 @@ body[data-theme="dark"] .page-body :where(.btn-primary, .ui-btn.primary, .bugs-b
     border-color: var(--se-primary);
     background: var(--se-primary-soft);
     color: var(--se-primary-strong);
-    transform: translateY(-1px);
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--se-primary) 12%, transparent);
 }
 
 .se-page-number.is-current {
     border-color: var(--se-primary);
     background: linear-gradient(135deg, var(--se-primary-button-start), var(--se-primary-button-end));
     color: var(--se-primary-button-text);
-    box-shadow: 0 8px 18px rgba(112, 77, 36, .18);
+    box-shadow: 0 6px 15px color-mix(in srgb, var(--se-primary) 26%, transparent);
 }
 
 html[data-theme="dark"] .se-page-number.is-current,
@@ -1203,8 +1233,10 @@ body[data-theme="dark"] .se-page-number.is-current {
 }
 
 .se-page-nav.is-disabled {
-    opacity: .42;
+    opacity: .48;
     cursor: not-allowed;
+    background: var(--se-surface-soft);
+    box-shadow: none;
 }
 
 .se-page-ellipsis {
@@ -1327,15 +1359,6 @@ body[data-theme="dark"] .se-page-number.is-current {
     font-size: .75rem;
 }
 
-.smooth-scroll-toggle { width:100%; min-height:58px; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.75rem .9rem; border:1px solid var(--se-border); border-radius:13px; background:var(--se-surface-soft); color:var(--se-text); font:inherit; text-align:left; cursor:pointer; }
-.smooth-scroll-toggle-copy { display:grid; gap:3px; }
-.smooth-scroll-toggle-copy strong { font-size:.82rem; }
-.smooth-scroll-toggle-copy small { color:var(--se-text-muted); font-size:.72rem; }
-.smooth-scroll-switch { width:44px; height:24px; flex:0 0 44px; padding:3px; border-radius:999px; background:var(--se-surface-muted); box-shadow:inset 0 0 0 1px var(--se-border); transition:background .18s ease; }
-.smooth-scroll-switch i { display:block; width:18px; height:18px; border-radius:50%; background:var(--se-surface); box-shadow:0 1px 4px rgba(0,0,0,.2); transition:transform .18s ease; }
-.smooth-scroll-toggle[aria-checked="true"] .smooth-scroll-switch { background:var(--se-primary); }
-.smooth-scroll-toggle[aria-checked="true"] .smooth-scroll-switch i { transform:translateX(20px); }
-.smooth-scroll-toggle:focus-visible { outline:none; box-shadow:var(--se-ring); }
 
 .theme-preview {
     height: 74px;
@@ -1661,6 +1684,7 @@ body[data-theme="dark"] footer {
     .se-pagination {
         align-items: stretch;
         flex-direction: column;
+        padding: .8rem;
     }
 
     .se-pagination-summary {
@@ -3673,6 +3697,135 @@ body[data-theme="dark"] .app-layout .sidebar {
         18px 0 64px rgba(0, 0, 0, .46),
         inset -1px 0 0 rgba(255, 239, 215, .08),
         inset 0 1px 0 var(--liquid-rim) !important;
+}
+
+/* System-admin consistency layer. Older modules used fixed brown or blue
+   identities; system administrators should see their selected accent across
+   every hero, surface, action, badge, form and data card. */
+body.system-admin-shell {
+    --admin-page-accent:var(--se-primary);
+    --admin-page-accent-strong:var(--se-primary-strong);
+    --admin-page-soft:var(--se-primary-soft);
+}
+/* Carry the selected system-admin accent through the light navigation shell. */
+body.system-admin-shell:not([data-theme="dark"]) .sidebar {
+    border-right-color:color-mix(in srgb,var(--admin-page-accent) 24%,var(--se-border))!important;
+    background:
+        radial-gradient(22rem circle at -15% 5%,color-mix(in srgb,var(--admin-page-accent) 10%,transparent),transparent 66%),
+        linear-gradient(180deg,color-mix(in srgb,var(--admin-page-soft) 14%,var(--se-surface)),var(--se-surface))!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .sb-user {
+    border-color:color-mix(in srgb,var(--admin-page-accent) 34%,var(--se-border))!important;
+    background:
+        radial-gradient(circle at 100% 0%,color-mix(in srgb,var(--admin-page-accent) 14%,transparent),transparent 44%),
+        linear-gradient(145deg,var(--se-surface),color-mix(in srgb,var(--admin-page-soft) 48%,var(--se-surface)))!important;
+    box-shadow:0 8px 22px color-mix(in srgb,var(--admin-page-accent) 9%,transparent)!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar :is(.nav-icon,.nav-chevron) {
+    color:var(--admin-page-accent-strong)!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .nav-label {
+    color:color-mix(in srgb,var(--admin-page-accent-strong) 62%,var(--se-text-muted))!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .nav-link:not(.nav-system-controls):hover {
+    border-color:color-mix(in srgb,var(--admin-page-accent) 28%,var(--se-border))!important;
+    background:color-mix(in srgb,var(--admin-page-soft) 56%,var(--se-surface))!important;
+    color:var(--se-text)!important;
+    box-shadow:0 6px 16px color-mix(in srgb,var(--admin-page-accent) 8%,transparent)!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .nav-link.active {
+    border-color:color-mix(in srgb,var(--admin-page-accent) 46%,var(--se-border))!important;
+    background:linear-gradient(100deg,color-mix(in srgb,var(--admin-page-soft) 88%,var(--se-surface)),color-mix(in srgb,var(--admin-page-soft) 30%,var(--se-surface)))!important;
+    color:var(--admin-page-accent-strong)!important;
+    box-shadow:0 7px 18px color-mix(in srgb,var(--admin-page-accent) 12%,transparent)!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .nav-link.active::before {
+    background:var(--admin-page-accent)!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .sb-role-badge.admin {
+    border-color:color-mix(in srgb,var(--admin-page-accent) 44%,var(--se-border))!important;
+    background:var(--admin-page-soft)!important;
+    color:var(--admin-page-accent-strong)!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .se-theme-toggle {
+    border-color:color-mix(in srgb,var(--admin-page-accent) 34%,var(--se-border))!important;
+    background:var(--se-surface)!important;
+    color:var(--se-text)!important;
+    box-shadow:0 2px 8px color-mix(in srgb,var(--admin-page-accent) 7%,transparent)!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .se-theme-toggle:hover {
+    border-color:var(--admin-page-accent)!important;
+    background:var(--admin-page-soft)!important;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .sb-scroll {
+    scrollbar-color:var(--admin-page-accent) transparent;
+}
+body.system-admin-shell:not([data-theme="dark"]) .sidebar .sb-scroll::-webkit-scrollbar-thumb {
+    background:var(--admin-page-accent)!important;
+}
+body.system-admin-shell .page-body :is(
+    .dash-hero,.pmr-hero,.report-hero,.maint-hero,.account-hero,.laptop-hero,
+    .settings-intro,.report-hero,.visitors-head
+) {
+    border:1px solid color-mix(in srgb,var(--admin-page-accent) 34%,var(--se-border))!important;
+    border-radius:20px!important;
+    background:
+        radial-gradient(32rem circle at 100% -20%,color-mix(in srgb,var(--admin-page-accent) 20%,transparent),transparent 66%),
+        linear-gradient(135deg,var(--se-surface),color-mix(in srgb,var(--admin-page-soft) 46%,var(--se-surface)))!important;
+    color:var(--se-text)!important;
+    box-shadow:0 3px 8px rgba(43,32,21,.055),0 16px 36px color-mix(in srgb,var(--admin-page-accent) 10%,transparent)!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+}
+body.system-admin-shell .page-body :is(.account-hero,.laptop-hero,.visitors-head) { padding:1.45rem 1.55rem; }
+body.system-admin-shell .page-body :is(.dash-hero,.account-hero,.laptop-hero,.maint-hero,.report-hero,.pmr-hero,.settings-intro,.visitors-head) :is(h1,h2,h3,p,strong,span) { text-shadow:none!important; }
+body.system-admin-shell .page-body :is(.dash-hero,.account-hero,.laptop-hero) :is(h1,h2,h3) { color:var(--se-text)!important; }
+body.system-admin-shell .page-body :is(.dash-hero,.account-hero,.laptop-hero) p { color:var(--se-text-muted)!important; }
+body.system-admin-shell .page-body :is(.dash-hero-label,.account-eyebrow,.laptop-kicker,.pmr-eyebrow,.report-eyebrow,.an-card-kicker) { color:var(--admin-page-accent-strong)!important; }
+body.system-admin-shell .page-body :is(.account-hero-stat,.laptop-scan-link) {
+    border-color:color-mix(in srgb,var(--admin-page-accent) 34%,var(--se-border))!important;
+    background:color-mix(in srgb,var(--admin-page-soft) 48%,var(--se-surface))!important;
+    color:var(--admin-page-accent-strong)!important;
+}
+body.system-admin-shell .page-body :is(.account-hero-stat strong,.account-hero-stat span,.laptop-scan-link) { color:var(--admin-page-accent-strong)!important; }
+body.system-admin-shell .page-body :is(
+    .pmr-card,.pmr-kpi,.report-card,.report-module,.maint-card,.account-card,
+    .laptop-card,.laptop-panel,.laptop-filter,.visitor-stat,.visitor-card,
+    .settings-panel,.settings-option,.report-form,.report-aside-card
+) {
+    border-color:color-mix(in srgb,var(--admin-page-accent) 24%,var(--se-border))!important;
+    background:linear-gradient(145deg,var(--se-surface),color-mix(in srgb,var(--admin-page-soft) 18%,var(--se-surface)))!important;
+    box-shadow:0 2px 5px rgba(43,32,21,.04),0 12px 28px color-mix(in srgb,var(--admin-page-accent) 7%,transparent)!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+}
+body.system-admin-shell .page-body :is(
+    .pmr-btn.primary,.report-btn.primary,.account-btn.primary,.manage-btn.primary,
+    .laptop-btn.primary,.btn-primary,.report-submit
+) {
+    border-color:var(--admin-page-accent)!important;
+    background:var(--admin-page-accent)!important;
+    color:var(--se-primary-button-text,#fff)!important;
+    box-shadow:0 7px 18px color-mix(in srgb,var(--admin-page-accent) 25%,transparent)!important;
+}
+body.system-admin-shell .page-body :is(input,select,textarea):focus {
+    border-color:var(--admin-page-accent)!important;
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--admin-page-accent) 18%,transparent)!important;
+}
+body.system-admin-shell .page-body :is(.visitor-badge,.maint-eyebrow.off,.role.system_admin) {
+    border-color:color-mix(in srgb,var(--admin-page-accent) 34%,var(--se-border))!important;
+    background:color-mix(in srgb,var(--admin-page-soft) 72%,var(--se-surface))!important;
+    color:var(--admin-page-accent-strong)!important;
+}
+body.system-admin-shell .page-body .visitors-head { align-items:center; margin-bottom:1rem; }
+body.system-admin-shell .page-body .visitors-head h1 { font-size:clamp(1.5rem,2.4vw,2rem); }
+body[data-theme="dark"].system-admin-shell .page-body :is(
+    .dash-hero,.pmr-hero,.report-hero,.maint-hero,.account-hero,.laptop-hero,
+    .settings-intro,.visitors-head
+) {
+    background:linear-gradient(135deg,var(--se-surface),color-mix(in srgb,var(--admin-page-soft) 34%,var(--se-surface)))!important;
 }
 
 html[data-theme="dark"] :is(
@@ -6463,4 +6616,35 @@ body[data-theme="dark"].admin-liquid-disabled .app-layout .sidebar.is-open {
 body.admin-liquid-disabled .app-layout :is(.sidebar, .topbar, .page-header, .sb-user)::before,
 body.admin-liquid-disabled .app-layout :is(.sidebar, .topbar, .page-header, .sb-user)::after {
     display: none !important;
+}
+
+/* Sidebar performance: scrolling a long navigation list must not repaint a
+   full-height backdrop blur on every wheel frame. Keep the same palette using
+   opaque gradients and reserve blur for transient overlays only. */
+.app-layout .sidebar {
+    background:
+        radial-gradient(30rem circle at 20% 8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 62%),
+        linear-gradient(180deg, color-mix(in srgb, var(--se-surface) 94%, var(--se-primary)), color-mix(in srgb, var(--se-bg) 95%, var(--se-primary-muted))) !important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    contain:paint;
+}
+.app-layout .sidebar :is(.sb-header,.sb-footer,.sb-user,.se-theme-toggle,.btn-logout) {
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+}
+.app-layout .sidebar .sb-scroll {
+    scroll-behavior:auto!important;
+    -webkit-overflow-scrolling:touch;
+    will-change:scroll-position;
+    transform:translateZ(0);
+    contain:layout paint style;
+}
+.app-layout .sidebar .nav-link {
+    transition:background-color .12s ease,color .12s ease,border-color .12s ease!important;
+}
+body[data-theme="dark"] .app-layout .sidebar {
+    background:
+        radial-gradient(30rem circle at 20% 8%, color-mix(in srgb,var(--se-atmosphere-primary) 14%,transparent),transparent 62%),
+        linear-gradient(180deg,color-mix(in srgb,var(--se-surface) 96%,#000),color-mix(in srgb,var(--se-bg) 97%,var(--se-primary-muted)))!important;
 }

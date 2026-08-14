@@ -40,6 +40,12 @@ class MonthlyReportTest extends TestCase
             $table->id();
             $table->timestamps();
         });
+        Schema::create('programs', function (Blueprint $table): void {
+            $table->id(); $table->unsignedBigInteger('created_by'); $table->string('title'); $table->string('status');
+            $table->string('approval_branch')->nullable(); $table->unsignedBigInteger('deputy_reviewer_id')->nullable();
+            $table->unsignedBigInteger('director_reviewer_id')->nullable(); $table->timestamp('director_reviewed_at')->nullable();
+            $table->dateTime('starts_at')->nullable(); $table->timestamps();
+        });
 
         \Illuminate\Support\Facades\DB::table('admins')->insert([
             'id' => 1,
@@ -73,7 +79,7 @@ class MonthlyReportTest extends TestCase
             ->assertSee('href="#scholarshipReport"', false);
     }
 
-    public function test_every_lecturer_can_view_discipline_monthly_analytics(): void
+    public function test_staff_monthly_report_uses_program_analytics(): void
     {
         $response = $this->withSession([
             'auth_user' => [
@@ -86,8 +92,10 @@ class MonthlyReportTest extends TestCase
         ])->get('/admin/reports/monthly?month=2026-08');
 
         $response->assertOk()
-            ->assertSee('Discipline Operations')
-            ->assertSee('Discipline Activity Trends')
+            ->assertSee('Monthly Program Performance')
+            ->assertSee('Program Creation and Approval Trend')
+            ->assertSee('Program Status Distribution')
+            ->assertDontSee('Discipline Operations')
             ->assertDontSee('Scholarship Operations');
     }
 }

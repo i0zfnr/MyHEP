@@ -126,7 +126,7 @@ class AiHelperFeatureControlTest extends TestCase
         $this->actingAsSystemAdmin()->patch('/admin/features/lecturer_ai_helper', ['enabled' => 1]);
         $this->actingAsSystemAdmin()->get('/lecturer/ai-helper')->assertForbidden();
         $this->actingAsLecturer()->get('/lecturer/ai-helper')
-            ->assertOk()->assertSee('AI Helper (Lecturer)')->assertSee('Upload PDF or image');
+            ->assertOk()->assertSee('AI Helper (Staff)')->assertSee('Upload PDF or image');
     }
 
     public function test_lecturer_ai_helper_accepts_report_sources_and_persists_private_history(): void
