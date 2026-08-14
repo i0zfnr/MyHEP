@@ -623,7 +623,7 @@
     .ai-admin--admin .ai-compose-row { background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
     body[data-theme="dark"] .ai-admin--admin .ai-compose-row { background:#1f1f1f !important; }
     .ai-admin--student .ai-send { justify-self:end; }
-    .ai-admin--admin .ai-compose-row { grid-template-columns:minmax(0,1fr) auto 46px !important; gap:.35rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
+    .ai-admin--admin .ai-compose-row { grid-template-columns:minmax(0,1fr) 46px !important; gap:.45rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
     .ai-admin--lecturer .ai-compose-row { grid-template-columns:minmax(0,1fr) 46px !important; gap:.35rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
     .ai-admin.ai-admin--lecturer .ai-compose-row textarea.ai-input { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; }
     body[data-theme="dark"] .ai-admin--lecturer .ai-compose-row { background:#1f1f1f !important; }
@@ -645,6 +645,10 @@
         border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important;
         background:color-mix(in srgb,#fff 94%,var(--se-primary-soft)) !important;
         box-shadow:0 12px 30px rgba(82,58,42,.1),inset 0 1px 0 rgba(255,255,255,.92) !important;
+    }
+    .ai-compose-frame .ai-compose-row:focus-within {
+        border-color:color-mix(in srgb,var(--se-primary) 62%,var(--border)) !important;
+        box-shadow:0 12px 30px color-mix(in srgb,var(--se-primary) 14%,transparent),0 0 0 3px color-mix(in srgb,var(--se-primary) 12%,transparent) !important;
     }
     body:not([data-theme="dark"]) .ai-compose-frame:has(.ai-compose-attachments.is-visible) {
         border-color:color-mix(in srgb,var(--se-primary) 28%,var(--border));

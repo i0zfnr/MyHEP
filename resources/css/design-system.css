@@ -3791,7 +3791,7 @@ body.system-admin-shell .page-body :is(.account-hero-stat,.laptop-scan-link) {
 }
 body.system-admin-shell .page-body :is(.account-hero-stat strong,.account-hero-stat span,.laptop-scan-link) { color:var(--admin-page-accent-strong)!important; }
 body.system-admin-shell .page-body :is(
-    .pmr-card,.pmr-kpi,.report-card,.report-module,.maint-card,.account-card,
+    .pmr-card,.pmr-kpi,.report-card,.maint-card,.account-card,
     .laptop-card,.laptop-panel,.laptop-filter,.visitor-stat,.visitor-card,
     .settings-panel,.settings-option,.report-form,.report-aside-card
 ) {

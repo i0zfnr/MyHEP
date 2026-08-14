@@ -132,6 +132,31 @@
     outline: none;
     border-color: var(--pm-accent);
 }
+.pmr-optional-location {
+    grid-column: 1 / -1;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--pm-accent) 18%, var(--border, #eadac8));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--surface, #fff) 94%, var(--pm-accent-soft));
+}
+.pmr-optional-location summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 48px;
+    padding: .72rem .9rem;
+    color: var(--text, #241d16);
+    font-size: .85rem;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+}
+.pmr-optional-location summary::-webkit-details-marker { display: none; }
+.pmr-optional-location summary::after { content: '+'; color: var(--pm-accent); font-size: 1.15rem; }
+.pmr-optional-location[open] summary::after { content: '\2212'; }
+.pmr-optional-location-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; padding: 0 .9rem .9rem; }
+.pmr-optional-location-note { grid-column: 1 / -1; margin: 0; color: var(--text-secondary, #746b62); font-size: .78rem; line-height: 1.5; }
 
 .pmr-actions-row {
     display: flex;
@@ -144,6 +169,9 @@
     .pmr-hero { flex-direction: column; align-items: flex-start; }
     .pmr-methods, .pmr-grid { grid-template-columns: 1fr; }
     .pmr-field.full { grid-column: auto; }
+    .pmr-optional-location { grid-column: auto; }
+    .pmr-optional-location-fields { grid-template-columns: 1fr; }
+    .pmr-optional-location-note { grid-column: auto; }
 }
 </style>
 @endpush
@@ -271,24 +299,30 @@
 
         <section class="pmr-card">
             <h2>{{ __('Attendance location settings') }}</h2>
-            <p>{{ __('Set the venue used for participant check-in. Coordinates are optional and enable geofence validation.') }}</p>
+            <p>{{ __('Set the venue and attendance distance in metres. GPS coordinates are an optional secondary setting.') }}</p>
             <div class="pmr-grid">
                 <div class="pmr-field full">
                     <label for="venue">{{ __('Venue') }} <span>*</span></label>
                     <input id="venue" name="venue" required maxlength="180" value="{{ old('venue', $program->venue ?? '') }}">
                 </div>
-                <div class="pmr-field">
-                    <label for="latitude">{{ __('Venue latitude') }}</label>
-                    <input id="latitude" type="number" step="0.0000001" name="latitude" value="{{ old('latitude', $program->latitude ?? '') }}">
-                </div>
-                <div class="pmr-field">
-                    <label for="longitude">{{ __('Venue longitude') }}</label>
-                    <input id="longitude" type="number" step="0.0000001" name="longitude" value="{{ old('longitude', $program->longitude ?? '') }}">
-                </div>
                 <div class="pmr-field full">
                     <label for="geofence_radius_m">{{ __('Geofence radius (metres)') }} <span>*</span></label>
                     <input id="geofence_radius_m" type="number" min="20" max="1000" name="geofence_radius_m" required value="{{ old('geofence_radius_m', $program->geofence_radius_m ?? 50) }}">
                 </div>
+                <details class="pmr-optional-location" @if(old('latitude', $program->latitude ?? null) !== null || old('longitude', $program->longitude ?? null) !== null || $errors->has('latitude') || $errors->has('longitude')) open @endif>
+                    <summary>{{ __('Optional GPS coordinates') }}</summary>
+                    <div class="pmr-optional-location-fields">
+                        <div class="pmr-field">
+                            <label for="latitude">{{ __('Venue latitude') }}</label>
+                            <input id="latitude" type="number" step="0.0000001" name="latitude" value="{{ old('latitude', $program->latitude ?? '') }}">
+                        </div>
+                        <div class="pmr-field">
+                            <label for="longitude">{{ __('Venue longitude') }}</label>
+                            <input id="longitude" type="number" step="0.0000001" name="longitude" value="{{ old('longitude', $program->longitude ?? '') }}">
+                        </div>
+                        <p class="pmr-optional-location-note">{{ __('Leave both fields empty when registering the program. Coordinates can be added later before GPS attendance is opened.') }}</p>
+                    </div>
+                </details>
             </div>
         </section>
 
