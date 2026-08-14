@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Support\LecturerPageAccess;
+use App\Support\ProgramIdentifier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Schema;
@@ -454,10 +455,16 @@ class DashboardController extends Controller
             return null;
         }
 
+        $rows = $rows->map(function (array $row): array {
+            $row['program'] = ProgramIdentifier::from(null, $row['program']);
+            $row['semester'] = trim((string) $row['semester']);
+
+            return $row;
+        });
+
         $semesters = $rows->pluck('semester')
             ->unique()
-            ->filter(fn ($value) => $value !== null && $value !== '')
-            ->sort()
+            ->sortBy(fn ($value) => $value === '' ? '999' : str_pad((string) $value, 3, '0', STR_PAD_LEFT))
             ->values();
 
         $series = $rows->groupBy('program')->sortKeys()->map(function ($group) use ($semesters, $palette) {
@@ -469,7 +476,7 @@ class DashboardController extends Controller
                 $count = $row ? (int) $row['c'] : 0;
                 $total += $count;
                 $segments[] = [
-                    'label' => __('Sem') . ' ' . $semester,
+                    'label' => $semester === '' ? __('Not set') : __('Sem') . ' ' . $semester,
                     'value' => $count,
                     'color' => $palette[$index % count($palette)],
                 ];

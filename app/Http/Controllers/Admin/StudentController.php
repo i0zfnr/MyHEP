@@ -155,6 +155,7 @@ class StudentController extends Controller
         }
 
         $result = $this->importStudentRows($rows);
+        clearSystemCaches();
         auditLog('students.import', 'students', null, json_encode($result));
 
         return redirect()->route('admin.students.index')

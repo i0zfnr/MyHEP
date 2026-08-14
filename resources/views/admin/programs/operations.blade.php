@@ -78,6 +78,19 @@
 .pmr-source-item strong { display:block; margin-top:.3rem; color:var(--text,#241d16); font-size:.9rem; }
 .pmr-source-item.is-ready { border-color:color-mix(in srgb,#21835a 35%,var(--border,#eadac8)); background:color-mix(in srgb,#21835a 5%,var(--surface,#fff)); }
 .pmr-report-lock { margin-top:1rem; padding:.75rem .9rem; border-radius:10px; background:color-mix(in srgb,var(--pm-accent) 7%,var(--surface,#fff)); color:var(--text-muted,#746b62); font-size:.85rem; }
+.pmr-certificate-layout { display:grid; grid-template-columns:minmax(0,.85fr) minmax(320px,1.15fr); gap:1rem; margin-top:1rem; }
+.pmr-certificate-settings { display:grid; align-content:start; gap:.75rem; padding:1rem; border:1px solid color-mix(in srgb,var(--pm-accent) 22%,var(--border,#eadac8)); border-radius:14px; background:color-mix(in srgb,var(--surface,#fff) 94%,var(--pm-accent) 6%); }
+.pmr-certificate-settings label { color:var(--text,#241d16); font-size:.78rem; font-weight:850; }
+.pmr-certificate-settings select { width:100%; min-height:44px; padding:.65rem .8rem; border:1px solid var(--border,#eadac8); border-radius:10px; background:var(--surface,#fff); color:var(--text,#241d16); font:inherit; }
+.pmr-certificate-preview { position:relative; aspect-ratio:1.414/1; display:grid; place-items:center; overflow:hidden; padding:1rem; border:1px solid color-mix(in srgb,var(--pm-accent) 32%,var(--border,#eadac8)); border-radius:14px; background:#fffdf8; color:#342619; box-shadow:0 12px 28px color-mix(in srgb,var(--pm-accent) 14%,transparent); text-align:center; }
+.pmr-certificate-preview::before { content:''; position:absolute; inset:10px; border:4px solid color-mix(in srgb,var(--pm-accent) 72%,#b99150); pointer-events:none; }
+.pmr-certificate-preview__inner { position:relative; z-index:1; width:80%; }
+.pmr-certificate-preview__brand { color:#8b6934; font-size:.58rem; font-weight:850; letter-spacing:.16em; }
+.pmr-certificate-preview__title { margin:.6rem 0 .35rem; font-family:Georgia,serif; font-size:clamp(1.05rem,2.4vw,1.7rem); font-weight:800; }
+.pmr-certificate-preview__name { margin:.65rem 0 .35rem; padding-bottom:.25rem; border-bottom:1px solid #d9bf8d; color:#8b6934; font-family:Georgia,serif; font-size:clamp(.9rem,1.8vw,1.3rem); font-weight:800; }
+.pmr-certificate-preview__meta { color:#695c50; font-size:.65rem; line-height:1.45; }
+.pmr-points-only { margin-top:1rem; padding:1rem; border:1px solid color-mix(in srgb,var(--pm-accent) 24%,var(--border,#eadac8)); border-radius:14px; background:color-mix(in srgb,var(--pm-accent) 7%,var(--surface,#fff)); }
+@media (max-width:820px) { .pmr-certificate-layout { grid-template-columns:1fr; } }
 .pmr-roster-empty { min-height:230px; display:grid; place-items:center; padding:2.25rem 1rem; text-align:center; background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--pm-accent) 9%,transparent),transparent 42%); }
 .pmr-roster-empty__inner { max-width:520px; }
 .pmr-roster-empty__icon { width:52px; height:52px; display:grid; place-items:center; margin:0 auto .9rem; border:1px solid color-mix(in srgb,var(--pm-accent) 30%,var(--border,#eadac8)); border-radius:15px; background:color-mix(in srgb,var(--pm-accent) 8%,var(--surface,#fff)); color:var(--pm-accent-strong,#8b6a34); box-shadow:0 10px 24px color-mix(in srgb,var(--pm-accent) 12%,transparent); }
@@ -601,14 +614,36 @@
     <!-- Bottom: Real-Time Attendee Roster -->
     <section class="pmr-card" style="margin-bottom:1.25rem;">
         <span class="pmr-eyebrow">{{ __('CERTIFICATES') }}</span>
-        <h2>{{ __('Bulk Certificate Generation') }}</h2>
-        <p>{{ __('Generate private PDF certificates for every eligible Politeknik Besut student. Certificates are linked to matric numbers and processed safely in the background.') }}</p>
-        <div class="pmr-actions" style="margin-top:1rem;">
-            @if($canManageCertificates)
-                <form method="post" action="{{ route('admin.programs.certificates.generate',$program->id) }}">@csrf<button class="pmr-btn primary" type="submit">{{ __('Generate All Eligible Certificates') }}</button></form>
-            @endif
-            <a class="pmr-btn" href="{{ route('admin.program-certificates.index',['program_id'=>$program->id]) }}">{{ __('Search Certificate Records') }}</a>
-        </div>
+        @if($program->certificate_enabled ?? true)
+            <h2>{{ __('Choose Certificate Design') }}</h2>
+            <p>{{ __('Review the certificate design before generating private PDFs for eligible Politeknik Besut students.') }}</p>
+            <div class="pmr-certificate-layout">
+                <form class="pmr-certificate-settings" method="post" action="{{ route('admin.programs.certificates.generate',$program->id) }}">
+                    @csrf
+                    <label for="certificateTemplate">{{ __('Certificate template') }}</label>
+                    <select id="certificateTemplate" name="certificate_template" required>
+                        <option value="standard_placeholder" @selected(($program->certificate_template ?? 'standard_placeholder') === 'standard_placeholder')>{{ __('Standard certificate — temporary design') }}</option>
+                    </select>
+                    <p>{{ __('More official certificate templates can be added later. The selected design is saved when generation starts.') }}</p>
+                    <div class="pmr-actions">
+                        @if($canManageCertificates)<button class="pmr-btn primary" type="submit">{{ __('Generate All Eligible Certificates') }}</button>@endif
+                        <a class="pmr-btn" href="{{ route('admin.program-certificates.index',['program_id'=>$program->id]) }}">{{ __('Search Certificate Records') }}</a>
+                    </div>
+                </form>
+                <div class="pmr-certificate-preview" aria-label="{{ __('Certificate design preview') }}">
+                    <div class="pmr-certificate-preview__inner">
+                        <div class="pmr-certificate-preview__brand">STUDENTEDGE · POLITEKNIK BESUT</div>
+                        <div class="pmr-certificate-preview__title">{{ __('SIJIL PENYERTAAN') }}</div>
+                        <div class="pmr-certificate-preview__meta">{{ __('Dengan ini diperakui bahawa') }}</div>
+                        <div class="pmr-certificate-preview__name">{{ __('NAMA PELAJAR') }}</div>
+                        <div class="pmr-certificate-preview__meta">{{ __('Preview only') }} · {{ $program->title }}</div>
+                    </div>
+                </div>
+            </div>
+        @else
+            <h2>{{ __('Points-only program') }}</h2>
+            <div class="pmr-points-only"><strong>{{ __('Certificates are not provided for this program.') }}</strong><p>{{ __('Students with valid attendance will still receive the participation points configured by the Program Director.') }}</p></div>
+        @endif
     </section>
 
     <section class="pmr-card">

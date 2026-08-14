@@ -198,6 +198,8 @@ class ProgramController extends Controller
             'target_participants' => ['required', 'string', 'max:255'],
             'estimated_participants' => ['nullable', 'integer', 'between:1,100000'],
             'participation_points' => ['required', 'integer', 'between:0,100'],
+            'certificate_enabled' => ['sometimes', 'boolean'],
+            'certificate_template' => ['sometimes', 'nullable', Rule::in(['standard_placeholder'])],
             'paperwork_method' => ['required', Rule::in(self::METHODS)],
             'paperwork_file' => ['nullable', 'file', 'mimes:pdf,docx', 'max:20480', Rule::requiredIf(fn () => $request->isMethod('post') && $request->input('registration_type') === 'approved_program')],
         ]);

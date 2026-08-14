@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\AiProvider;
 use App\Services\OfficialProgramReportExporter;
+use App\Services\ProgramReportContent;
 use App\Support\ProgramApprovalRouting;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -156,7 +157,7 @@ class ProgramOperationController extends Controller
         return back()->with('success', __('Attendance is closed. New submissions are no longer accepted.'));
     }
 
-    public function generateReport(Request $request, int $id, AiProvider $ai, OfficialProgramReportExporter $exporter): RedirectResponse
+    public function generateReport(Request $request, int $id, AiProvider $ai, OfficialProgramReportExporter $exporter, ProgramReportContent $reportContent): RedirectResponse
     {
         $program = $this->ownedActiveProgram($id);
         $request->merge(['output_format' => $request->input('output_format', 'docx')]);
@@ -195,18 +196,22 @@ class ProgramOperationController extends Controller
 
         try {
             $attachments = array_values(array_filter([$request->file('paperwork_file'), ...$activityImages]));
-            $content = $ai->enabled() ? trim($ai->askWithAttachments($prompt, $attachments)) : $this->fallbackReport($program, $data);
+            $aiResponse = $ai->enabled() ? trim($ai->askWithAttachments($prompt, $attachments)) : '';
+            $structuredReport = $ai->enabled()
+                ? $reportContent->fromAiResponse($aiResponse, $program, $data)
+                : $reportContent->fallback($program, $data);
         } catch (\Throwable $exception) {
             report($exception);
-            $content = $this->fallbackReport($program, $data);
+            $structuredReport = $reportContent->fallback($program, $data);
         }
+        $content = $reportContent->toPlainText($structuredReport);
 
         $imagePaths = [];
         foreach ($activityImages as $image) {
             $path = $image->store('program-report-media/'.$program->id, 'local');
             $imagePaths[] = Storage::disk('local')->path($path);
         }
-        $files = $exporter->export($program, $data, $content, $validated['output_format'], $imagePaths);
+        $files = $exporter->export($program, $data, $structuredReport, $validated['output_format'], $imagePaths);
 
         $reportValues = [
                 'content' => $content,
@@ -648,6 +653,7 @@ class ProgramOperationController extends Controller
     private function reportData(object $program): array
     {
         $attendances = DB::table('program_attendances')->where('program_id', $program->id)->get();
+        $owner = DB::table('admins')->where('id', $program->created_by)->first();
         $survey = DB::table('program_surveys')->where('program_id', $program->id)->where('status', 'published')->latest('id')->first();
         $responseCount = $survey ? DB::table('program_survey_responses')->where('program_survey_id', $survey->id)
             ->distinct('program_attendance_id')->count('program_attendance_id') : 0;
@@ -667,32 +673,21 @@ class ProgramOperationController extends Controller
             'average_rating' => $ratings->isNotEmpty() ? round((float) $ratings->avg(), 2) : 0,
             'comments' => $attendances->pluck('feedback_comments')->filter()->take(30)->values()->all(),
             'questionnaire_answers' => $answers,
+            'prepared_by' => $owner?->full_name ?: 'Tidak direkodkan',
+            'prepared_by_position' => $owner?->position ?: 'Pengarah Program',
+            'organizer' => $owner?->staff_department ?: 'Tidak direkodkan',
         ];
     }
 
     private function reportPrompt(object $program, array $data): string
     {
-        return "Prepare a formal post-program report in Bahasa Melayu for internal Polytechnic management. "
-            ."Use only the supplied facts; do not invent outcomes. Include Ringkasan Eksekutif, Maklumat Program, Objektif, "
-            ."Kehadiran, Maklum Balas Peserta, Pencapaian, Isu, Cadangan Penambahbaikan, and Kesimpulan.\n\n"
+        return "Analyze the supplied program records for the official Politeknik Besut report template. "
+            ."Return valid JSON only, without Markdown or code fences. Use formal Bahasa Melayu, use only supplied facts, and never invent outcomes or identify people from photographs. "
+            .'The exact JSON schema is: {"executive_summary":"string","objectives":["string"],"survey_summary":"string","achievements":["string"],"issues":["string"],"improvements":["string"],"conclusion":"string"}. '
+            ."The backend controls all DOCX design, tables, branding and image placement.\n\n"
             .'Program: '.json_encode((array) $program, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n"
             .'Recorded attendance and questionnaire results: '.json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n"
             .'Analyze the attached approved paperwork and activity photographs. Describe only visible or documented activities and do not identify people from images.';
-    }
-
-    private function fallbackReport(object $program, array $data): string
-    {
-        $comments = $data['comments'] === [] ? 'Tiada komen bertulis direkodkan.' : implode("\n- ", $data['comments']);
-
-        return "LAPORAN PROGRAM: {$program->title}\n\n"
-            ."1. Ringkasan Eksekutif\nProgram telah dilaksanakan berdasarkan rekod program yang diluluskan.\n\n"
-            ."2. Maklumat Program\nTarikh: ".($program->starts_at ?: 'Tidak direkodkan')."\nTempat: ".($program->venue ?: 'Tidak direkodkan')."\n\n"
-            ."3. Objektif\n".($program->objectives ?: 'Tidak direkodkan')."\n\n"
-            ."4. Kehadiran\nJumlah peserta: {$data['attendance_total']}\nPelajar dalaman: {$data['internal_total']}\nTetamu luar: {$data['external_total']}\n\n"
-            ."5. Maklum Balas Peserta\nJumlah respons: {$data['survey_responses']}\nPurata penilaian: {$data['average_rating']} / 5\n- {$comments}\n\n"
-            ."6. Pencapaian dan Isu\nSila dilengkapkan oleh Pengarah Program berdasarkan bukti pelaksanaan.\n\n"
-            ."7. Cadangan Penambahbaikan\nSila dilengkapkan oleh Pengarah Program.\n\n"
-            ."8. Kesimpulan\nLaporan ini disediakan daripada data kehadiran dan maklum balas yang direkodkan dalam StudentEdge.";
     }
 
     private function isReviewer(object $program, int $authId): bool

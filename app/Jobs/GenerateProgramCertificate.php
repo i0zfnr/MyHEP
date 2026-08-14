@@ -38,7 +38,11 @@ class GenerateProgramCertificate implements ShouldQueue
         $options->set('isRemoteEnabled', false);
         $pdf = new Dompdf($options);
         $pdf->setPaper('A4', 'landscape');
-        $pdf->loadHtml(view('admin.programs.certificate_pdf', compact('certificate', 'program'))->render());
+        $templateView = match ($certificate->template_key ?? 'standard_placeholder') {
+            'standard_placeholder' => 'admin.programs.certificate_pdf',
+            default => throw new \RuntimeException('Unsupported certificate template.'),
+        };
+        $pdf->loadHtml(view($templateView, compact('certificate', 'program'))->render());
         $pdf->render();
         Storage::disk('local')->put($path, $pdf->output());
 

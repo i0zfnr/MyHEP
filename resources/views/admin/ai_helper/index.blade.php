@@ -904,6 +904,36 @@
     .ai-confirm-icon svg { width:20px; height:20px; }
     .ai-confirm-card h3 { margin:0 0 .4rem; font-size:1rem; line-height:1.35; }
     .ai-confirm-card p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.55; }
+    .program-report-form { display:grid; gap:.9rem; margin-top:1rem; }
+    .program-report-upload { display:grid; gap:.48rem; }
+    .program-report-upload-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+    .program-report-upload-head label { margin:0; }
+    .program-report-file-input { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .program-report-add-file { min-height:38px; display:inline-flex; align-items:center; justify-content:center; gap:.45rem; padding:.52rem .72rem; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:10px; background:color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft)); color:var(--se-primary-strong); font-size:.73rem; font-weight:800; cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease; }
+    .program-report-add-file:hover,.program-report-add-file:focus-visible { border-color:var(--se-primary); background:var(--se-primary-soft); outline:none; box-shadow:0 5px 14px color-mix(in srgb,var(--se-primary) 15%,transparent); }
+    .program-report-add-file svg { width:16px; height:16px; }
+    .program-report-attachments { min-height:76px; display:flex; flex-wrap:wrap; align-items:stretch; gap:.55rem; padding:.55rem; border:1px dashed color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:13px; background:color-mix(in srgb,var(--surface) 92%,var(--se-primary-soft)); }
+    .program-report-attachments.is-empty { align-items:center; }
+    .program-report-attachments[data-drop-zone] { cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease; }
+    .program-report-attachments[data-drop-zone]:hover { border-color:color-mix(in srgb,var(--se-primary) 62%,var(--border)); background:color-mix(in srgb,var(--surface) 84%,var(--se-primary-soft)); }
+    .program-report-attachments.is-dragging { border-color:var(--se-primary); border-style:solid; background:var(--se-primary-soft); box-shadow:0 0 0 3px color-mix(in srgb,var(--se-primary) 15%,transparent),0 12px 24px color-mix(in srgb,var(--se-primary) 12%,transparent); transform:translateY(-1px); }
+    .program-report-attachments-empty { width:100%; margin:0; color:var(--text-muted); font-size:.72rem; text-align:center; }
+    .program-report-attachments-empty.is-error { color:#dc2626; font-weight:700; }
+    .program-report-attachment { position:relative; width:126px; min-height:94px; display:grid; grid-template-rows:42px auto; gap:.42rem; padding:.62rem 2rem .58rem .62rem; overflow:hidden; border:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); border-radius:13px; background:var(--surface); box-shadow:0 5px 14px rgba(30,38,43,.07); }
+    .program-report-attachment-preview { width:42px; height:42px; display:grid; place-items:center; overflow:hidden; border-radius:9px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.59rem; font-weight:850; letter-spacing:.035em; }
+    .program-report-attachment-preview img { width:100%; height:100%; object-fit:cover; }
+    .program-report-attachment-name { min-width:0; overflow:hidden; color:var(--text); font-size:.68rem; font-weight:750; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+    .program-report-attachment-size { display:block; margin-top:.1rem; color:var(--text-muted); font-size:.6rem; font-weight:600; }
+    .program-report-attachment-remove { appearance:none !important; position:absolute; top:.48rem; right:.48rem; width:24px !important; min-width:24px !important; max-width:24px !important; height:24px !important; min-height:24px !important; max-height:24px !important; display:grid !important; place-items:center; margin:0 !important; padding:0 !important; border:1px solid color-mix(in srgb,var(--text) 14%,var(--border)) !important; border-radius:50% !important; background:color-mix(in srgb,var(--surface) 92%,var(--se-primary-soft)) !important; color:var(--text-muted) !important; line-height:1 !important; cursor:pointer; box-shadow:0 2px 7px rgba(30,38,43,.1) !important; transform:none !important; }
+    .program-report-attachment-remove:hover,.program-report-attachment-remove:focus-visible { border-color:#dc2626 !important; background:#dc2626 !important; color:#fff !important; outline:none; box-shadow:0 4px 10px color-mix(in srgb,#dc2626 24%,transparent) !important; }
+    .program-report-attachment-remove svg { display:block; width:12px !important; height:12px !important; pointer-events:none; }
+    .program-report-upload-status { min-height:1em; margin:0; color:var(--text-muted); font-size:.67rem; }
+    .program-report-upload-status.is-error { color:#dc2626; font-weight:700; }
+    @media (max-width:560px) {
+        .program-report-upload-head { align-items:flex-start; flex-direction:column; }
+        .program-report-add-file { width:100%; }
+        .program-report-attachment { width:calc(50% - .3rem); box-sizing:border-box; }
+    }
     .program-report-progress { display:none; margin-top:1rem; padding:.9rem; border:1px solid var(--border); border-radius:14px; background:color-mix(in srgb,var(--primary) 5%,var(--surface)); }
     .program-report-progress.is-active { display:block; }
     .program-report-progress strong { display:block; margin-bottom:.65rem; font-size:.86rem; }
@@ -1159,10 +1189,20 @@
         <div class="ai-confirm-card" style="width:min(620px,calc(100vw - 2rem));text-align:left;">
             <h3 id="programReportDialogTitle">{{ __('Program Report Template') }}</h3>
             <p>{{ __('Choose your program and source files. StudentEdge adds its attendance and questionnaire records automatically and saves the generated report under the selected program.') }}</p>
-            <form id="programReportForm" method="post" enctype="multipart/form-data">@csrf
+            <form id="programReportForm" class="program-report-form" method="post" enctype="multipart/form-data">@csrf
                 <div class="ops-field"><label for="programReportProgram">{{ __('My program') }}</label><select id="programReportProgram" required><option value="">{{ __('Choose a program') }}</option>@foreach($ownedPrograms as $ownedProgram)<option value="{{ $ownedProgram->id }}" data-action="{{ route('admin.programs.report.generate', $ownedProgram->id) }}" data-requires-paperwork="{{ ($ownedProgram->registration_type ?? 'approved_program') === 'attendance_only_activity' ? '0' : '1' }}">{{ $ownedProgram->title }}</option>@endforeach</select></div>
-                <div class="ops-field" id="programReportPaperworkField"><label for="programReportPaperwork">{{ __('Approved paperwork') }}</label><input id="programReportPaperwork" name="paperwork_file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"><small>{{ __('Required for approved programs. Attendance-only activities do not require paperwork.') }}</small></div>
-                <div class="ops-field"><label for="programReportImages">{{ __('Images after the program') }}</label><input id="programReportImages" name="program_images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple required><small>{{ __('Up to 8 activity images.') }}</small></div>
+                <div class="ops-field program-report-upload" id="programReportPaperworkField">
+                    <div class="program-report-upload-head"><label for="programReportPaperwork">{{ __('Approved paperwork') }}</label><label class="program-report-add-file" for="programReportPaperwork"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ __('Add paperwork') }}</label></div>
+                    <input class="program-report-file-input" id="programReportPaperwork" name="paperwork_file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                    <div class="program-report-attachments is-empty" id="programReportPaperworkPreview" data-drop-zone="paperwork" role="button" tabindex="0" aria-label="{{ __('Add or drop approved paperwork') }}" aria-live="polite"></div>
+                    <small>{{ __('Required for approved programs. Attendance-only activities do not require paperwork.') }}</small>
+                </div>
+                <div class="ops-field program-report-upload">
+                    <div class="program-report-upload-head"><label for="programReportImages">{{ __('Images after the program') }}</label><label class="program-report-add-file" for="programReportImages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-linecap="round"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>{{ __('Add images') }}</label></div>
+                    <input class="program-report-file-input" id="programReportImages" name="program_images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
+                    <div class="program-report-attachments is-empty" id="programReportImagesPreview" data-drop-zone="images" role="button" tabindex="0" aria-label="{{ __('Add or drop activity images') }}" aria-live="polite"></div>
+                    <small class="program-report-upload-status" id="programReportImagesStatus">{{ __('Add up to 8 activity images. You can choose more images again without replacing the current selection.') }}</small>
+                </div>
                 <div class="ops-field"><label for="programReportOutput">{{ __('Create report as') }}</label><select id="programReportOutput" name="output_format" required><option value="docx">DOCX</option><option value="pdf">PDF</option><option value="both">{{ __('DOCX and PDF') }}</option></select></div>
                 <div class="program-report-progress" id="programReportProgress" role="status" aria-live="polite">
                     <strong>{{ __('Generating your official report') }}</strong>
@@ -1295,9 +1335,14 @@
     const programReportForm = document.getElementById('programReportForm');
     const programReportPaperwork = document.getElementById('programReportPaperwork');
     const programReportPaperworkField = document.getElementById('programReportPaperworkField');
+    const programReportPaperworkPreview = document.getElementById('programReportPaperworkPreview');
     const programReportImages = document.getElementById('programReportImages');
+    const programReportImagesPreview = document.getElementById('programReportImagesPreview');
+    const programReportImagesStatus = document.getElementById('programReportImagesStatus');
     const programReportProgress = document.getElementById('programReportProgress');
     const programReportSubmit = document.getElementById('programReportSubmit');
+    let programReportSelectedImages = [];
+    let programReportImageUrls = [];
     const reportToolsShortcut = document.getElementById('aiReportToolsShortcut');
     const formatBtn = document.getElementById('aiFormatBtn');
     const toolsPanel = document.getElementById('aiToolsPanel');
@@ -1884,6 +1929,179 @@
         setAttachmentFiles(selectedAttachments);
         showAttachments(limitReached);
     });
+    const programReportFileKey = file => `${file.name}:${file.size}:${file.lastModified}:${file.type}`;
+    const programReportFileSize = bytes => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    };
+    const setProgramReportInputFiles = (inputNode, files) => {
+        if (!inputNode || typeof DataTransfer === 'undefined') return;
+        const transfer = new DataTransfer();
+        files.forEach(file => transfer.items.add(file));
+        inputNode.files = transfer.files;
+    };
+    const createProgramReportAttachment = (file, index, kind) => {
+        const card = document.createElement('article');
+        card.className = 'program-report-attachment';
+
+        const preview = document.createElement('span');
+        preview.className = 'program-report-attachment-preview';
+        if (kind === 'image') {
+            const imageUrl = URL.createObjectURL(file);
+            programReportImageUrls.push(imageUrl);
+            const image = document.createElement('img');
+            image.src = imageUrl;
+            image.alt = '';
+            preview.appendChild(image);
+        } else {
+            preview.textContent = (file.name.split('.').pop() || 'FILE').slice(0, 5).toUpperCase();
+        }
+
+        const details = document.createElement('span');
+        const name = document.createElement('span');
+        name.className = 'program-report-attachment-name';
+        name.textContent = file.name;
+        const size = document.createElement('span');
+        size.className = 'program-report-attachment-size';
+        size.textContent = programReportFileSize(file.size);
+        details.append(name, size);
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'program-report-attachment-remove';
+        remove.setAttribute('aria-label', `${@json(__('Remove'))} ${file.name}`);
+        remove.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>';
+        remove.addEventListener('click', () => {
+            if (kind === 'image') {
+                programReportSelectedImages.splice(index, 1);
+                setProgramReportInputFiles(programReportImages, programReportSelectedImages);
+                renderProgramReportImages();
+            } else {
+                programReportPaperwork.value = '';
+                renderProgramReportPaperwork();
+            }
+        });
+
+        card.append(preview, details, remove);
+        return card;
+    };
+    const renderProgramReportPaperwork = () => {
+        if (!programReportPaperworkPreview) return;
+        programReportPaperworkPreview.replaceChildren();
+        const file = programReportPaperwork?.files?.[0];
+        programReportPaperworkPreview.classList.toggle('is-empty', !file);
+        if (file) {
+            programReportPaperworkPreview.appendChild(createProgramReportAttachment(file, 0, 'paperwork'));
+            return;
+        }
+        const empty = document.createElement('p');
+        empty.className = 'program-report-attachments-empty';
+        empty.textContent = @json(__('Drop a PDF or DOCX here, or click Add paperwork.'));
+        programReportPaperworkPreview.appendChild(empty);
+    };
+    const renderProgramReportImages = () => {
+        if (!programReportImagesPreview) return;
+        programReportImageUrls.forEach(url => URL.revokeObjectURL(url));
+        programReportImageUrls = [];
+        programReportImagesPreview.replaceChildren();
+        programReportImagesPreview.classList.toggle('is-empty', programReportSelectedImages.length === 0);
+        if (programReportSelectedImages.length) {
+            programReportSelectedImages.forEach((file, index) => programReportImagesPreview.appendChild(createProgramReportAttachment(file, index, 'image')));
+        } else {
+            const empty = document.createElement('p');
+            empty.className = 'program-report-attachments-empty';
+            empty.textContent = @json(__('Drop activity images here, or click Add images.'));
+            programReportImagesPreview.appendChild(empty);
+        }
+        if (programReportImagesStatus) {
+            programReportImagesStatus.classList.remove('is-error');
+            programReportImagesStatus.textContent = programReportSelectedImages.length
+                ? `${programReportSelectedImages.length} / 8 ${@json(__('images selected'))}`
+                : @json(__('Add up to 8 activity images. You can choose more images again without replacing the current selection.'));
+        }
+    };
+    const addProgramReportImages = incoming => {
+        const seen = new Set(programReportSelectedImages.map(programReportFileKey));
+        let rejectedForLimit = 0;
+        let rejectedForType = 0;
+        incoming.forEach(file => {
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                rejectedForType += 1;
+                return;
+            }
+            const key = programReportFileKey(file);
+            if (!seen.has(key) && programReportSelectedImages.length < 8) {
+                programReportSelectedImages.push(file);
+                seen.add(key);
+            } else if (!seen.has(key)) {
+                rejectedForLimit += 1;
+            }
+        });
+        setProgramReportInputFiles(programReportImages, programReportSelectedImages);
+        renderProgramReportImages();
+        if ((rejectedForLimit > 0 || rejectedForType > 0) && programReportImagesStatus) {
+            programReportImagesStatus.classList.add('is-error');
+            programReportImagesStatus.textContent = rejectedForType > 0
+                ? @json(__('Only JPG, PNG, and WEBP images are accepted. Unsupported files were not added.'))
+                : @json(__('Maximum 8 activity images. Extra files were not added.'));
+        }
+    };
+    programReportPaperwork?.addEventListener('change', renderProgramReportPaperwork);
+    programReportImages?.addEventListener('change', () => {
+        addProgramReportImages(Array.from(programReportImages.files || []));
+    });
+    const bindProgramReportDropZone = (zone, inputNode, kind) => {
+        if (!zone || !inputNode) return;
+        const stopDragEvent = event => {
+            event.preventDefault();
+            event.stopPropagation();
+        };
+        ['dragenter', 'dragover'].forEach(type => zone.addEventListener(type, event => {
+            stopDragEvent(event);
+            zone.classList.add('is-dragging');
+            if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+        }));
+        ['dragleave', 'drop'].forEach(type => zone.addEventListener(type, event => {
+            stopDragEvent(event);
+            zone.classList.remove('is-dragging');
+        }));
+        zone.addEventListener('drop', event => {
+            const files = Array.from(event.dataTransfer?.files || []);
+            if (!files.length) return;
+            if (kind === 'images') {
+                addProgramReportImages(files);
+                return;
+            }
+            const file = files[0];
+            const isPaperwork = file.type === 'application/pdf'
+                || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                || /\.(pdf|docx)$/i.test(file.name);
+            if (!isPaperwork) {
+                renderProgramReportPaperwork();
+                const error = document.createElement('p');
+                error.className = 'program-report-attachments-empty is-error';
+                error.textContent = @json(__('Only PDF or DOCX paperwork is accepted.'));
+                programReportPaperworkPreview.appendChild(error);
+                return;
+            }
+            setProgramReportInputFiles(programReportPaperwork, [file]);
+            renderProgramReportPaperwork();
+        });
+        zone.addEventListener('click', event => {
+            if (!event.target.closest('.program-report-attachment-remove')) inputNode.click();
+        });
+        zone.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                inputNode.click();
+            }
+        });
+    };
+    bindProgramReportDropZone(programReportPaperworkPreview, programReportPaperwork, 'paperwork');
+    bindProgramReportDropZone(programReportImagesPreview, programReportImages, 'images');
+    renderProgramReportPaperwork();
+    renderProgramReportImages();
     const setProgramReportOpen = open => {
         programReportDialog?.classList.toggle('is-open', open);
         programReportDialog?.setAttribute('aria-hidden', open ? 'false' : 'true');

@@ -37,11 +37,23 @@ class ProgramCertificateController extends Controller
 
     public function generate(Request $request, int $program): RedirectResponse
     {
+        $validated = $request->validate([
+            'certificate_template' => ['nullable', Rule::in(['standard_placeholder'])],
+        ]);
+        $templateKey = $validated['certificate_template'] ?? 'standard_placeholder';
         $item = DB::table('programs')->where('id',$program)->first();
         abort_unless($item,404);
         $authId = (int) session('auth_user.id');
         $role = (string) session('auth_user.admin_role');
         abort_unless((int)$item->created_by === $authId || in_array($role,['system_admin','student_affairs_head'],true),403);
+        if (! (bool) ($item->certificate_enabled ?? true)) {
+            return back()->withErrors(['certificates' => __('This program awards participation points only and does not provide certificates.')]);
+        }
+
+        DB::table('programs')->where('id', $program)->update([
+            'certificate_template' => $templateKey,
+            'updated_at' => now(),
+        ]);
 
         $eligible = DB::table('program_attendances')->join('students','students.id','=','program_attendances.student_id')
             ->where('program_attendances.program_id',$program)->where('program_attendances.attendee_type','internal')
@@ -50,7 +62,7 @@ class ProgramCertificateController extends Controller
         if ($eligible->isEmpty()) return back()->withErrors(['certificates'=>__('No eligible internal students with valid attendance were found.')]);
 
         $queued = [];
-        DB::transaction(function () use ($eligible,$item,$authId,&$queued): void {
+        DB::transaction(function () use ($eligible,$item,$authId,$templateKey,&$queued): void {
             foreach ($eligible as $student) {
                 $existing = DB::table('program_certificates')->where('program_id',$item->id)->where('student_id',$student->student_id)->first();
                 if ($existing && $existing->status === 'ready') continue;
@@ -58,9 +70,10 @@ class ProgramCertificateController extends Controller
                     'program_id'=>$item->id,'program_attendance_id'=>$student->attendance_id,'student_id'=>$student->student_id,
                     'matric_no'=>$student->matric_no,'student_name'=>$student->full_name,
                     'serial_no'=>'SE-'.date('Y').'-'.str_pad((string)$item->id,5,'0',STR_PAD_LEFT).'-'.str_pad((string)$student->student_id,6,'0',STR_PAD_LEFT),
+                    'template_key'=>$templateKey,
                     'status'=>'pending','disk'=>'local','generated_by'=>$authId,'created_at'=>now(),'updated_at'=>now(),
                 ]);
-                if ($existing) DB::table('program_certificates')->where('id',$id)->update(['status'=>'pending','failure_reason'=>null,'updated_at'=>now()]);
+                if ($existing) DB::table('program_certificates')->where('id',$id)->update(['template_key'=>$templateKey,'status'=>'pending','failure_reason'=>null,'updated_at'=>now()]);
                 $queued[]=$id;
             }
         });

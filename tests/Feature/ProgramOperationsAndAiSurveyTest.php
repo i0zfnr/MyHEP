@@ -48,6 +48,8 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->string('target_participants')->nullable();
             $table->unsignedInteger('estimated_participants')->nullable();
             $table->unsignedSmallInteger('participation_points')->default(0);
+            $table->boolean('certificate_enabled')->default(true);
+            $table->string('certificate_template')->default('standard_placeholder');
             $table->boolean('questionnaire_enabled')->default(true);
             $table->decimal('estimated_budget', 12, 2)->nullable();
             $table->string('paperwork_method')->default('manual');
@@ -146,6 +148,10 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->string('ai_model')->nullable();
             $table->unsignedBigInteger('generated_by');
             $table->timestamp('generated_at');
+            $table->string('output_format', 12)->nullable();
+            $table->string('docx_path')->nullable();
+            $table->string('pdf_path')->nullable();
+            $table->json('source_summary')->nullable();
             $table->unsignedBigInteger('tpsa_reviewer_id')->nullable();
             $table->timestamp('tpsa_reviewed_at')->nullable();
             $table->text('tpsa_review_note')->nullable();
@@ -161,7 +167,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         Schema::create('program_certificates', function (Blueprint $table): void {
             $table->id(); $table->unsignedBigInteger('program_id'); $table->unsignedBigInteger('program_attendance_id');
             $table->unsignedBigInteger('student_id'); $table->string('matric_no'); $table->string('student_name');
-            $table->string('serial_no')->unique(); $table->string('status')->default('pending'); $table->string('disk')->default('local');
+            $table->string('serial_no')->unique(); $table->string('template_key')->default('standard_placeholder'); $table->string('status')->default('pending'); $table->string('disk')->default('local');
             $table->string('path')->nullable(); $table->text('failure_reason')->nullable(); $table->unsignedBigInteger('generated_by');
             $table->timestamp('generated_at')->nullable(); $table->timestamps(); $table->unique(['program_id','student_id']);
         });
@@ -534,7 +540,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
     {
         config(['services.gemini.key' => null, 'services.openai.key' => null, 'services.deepseek.key' => null]);
         $programId = DB::table('programs')->insertGetId([
-            'created_by' => 1, 'registration_type' => 'attendance_only_activity', 'title' => 'Student Leadership Program', 'paperwork_method' => 'none',
+            'created_by' => 1, 'registration_type' => 'attendance_only_activity', 'title' => 'Student Leadership & Service Program', 'paperwork_method' => 'none',
             'questionnaire_enabled' => false,
             'status' => 'active', 'created_at' => now(), 'updated_at' => now(),
         ]);
@@ -549,9 +555,31 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
                 'activity.png',
                 base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
             )],
-            'output_format' => 'docx',
+            'output_format' => 'both',
         ])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseHas('program_reports', ['program_id' => $programId, 'status' => 'draft']);
+
+        $docxPath = DB::table('program_reports')->where('program_id', $programId)->value('docx_path');
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open(\Illuminate\Support\Facades\Storage::disk('local')->path($docxPath)) === true);
+        $documentXml = $zip->getFromName('word/document.xml');
+        $zip->close();
+        $this->assertIsString($documentXml);
+        $this->assertNotFalse(simplexml_load_string($documentXml), 'Generated DOCX document.xml must be valid XML.');
+        $this->assertStringContainsString('STUDENT LEADERSHIP &amp; SERVICE PROGRAM', $documentXml);
+        $this->assertStringNotContainsString('[NAMA KURSUS/PROGRAM]', $documentXml);
+        $this->assertStringNotContainsString('LAMPIRAN: RINGKASAN LAPORAN DIJANA AI', $documentXml);
+        $this->assertSame(5, substr_count($documentXml, '<w:tbl>'), 'The official five-table report layout must remain intact.');
+
+        $pdfPath = DB::table('program_reports')->where('program_id', $programId)->value('pdf_path');
+        $this->assertNotNull($pdfPath);
+        $this->assertStringStartsWith('%PDF-', (string) file_get_contents(
+            \Illuminate\Support\Facades\Storage::disk('local')->path($pdfPath),
+            false,
+            null,
+            0,
+            5
+        ));
 
         $this->signIn(1, 'lecturer')->post(route('admin.programs.report.submit', $programId))->assertRedirect();
         $this->assertDatabaseHas('program_reports', ['status' => 'pending_tpsa', 'tpsa_reviewer_id' => 2, 'director_reviewer_id' => 3, 'kj_hep_reviewer_id' => 4]);
@@ -613,6 +641,21 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->signIn(1,'lecturer')->post(route('admin.programs.certificates.generate',$programId))->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseHas('program_certificates',['program_id'=>$programId,'program_attendance_id'=>$attendanceId,'student_id'=>$studentId,'matric_no'=>'PB22001','status'=>'pending']);
         Queue::assertPushed(GenerateProgramCertificate::class,1);
+    }
+
+    public function test_points_only_program_does_not_queue_certificates(): void
+    {
+        Queue::fake();
+        $studentId = DB::table('students')->insertGetId(['full_name'=>'Points Student','matric_no'=>'PB22002','program'=>'DIT','created_at'=>now(),'updated_at'=>now()]);
+        $programId = DB::table('programs')->insertGetId(['created_by'=>1,'title'=>'Points Only Program','paperwork_method'=>'none','questionnaire_enabled'=>false,'certificate_enabled'=>false,'participation_points'=>10,'status'=>'completed','created_at'=>now(),'updated_at'=>now()]);
+        DB::table('program_attendances')->insert(['program_id'=>$programId,'student_id'=>$studentId,'attendee_type'=>'internal','full_name'=>'Points Student','identifier'=>'PB22002','checked_in_at'=>now(),'geofence_valid'=>true,'validation_status'=>'valid','created_at'=>now(),'updated_at'=>now()]);
+
+        $this->signIn(1,'lecturer')->post(route('admin.programs.certificates.generate',$programId), [
+            'certificate_template' => 'standard_placeholder',
+        ])->assertRedirect()->assertSessionHasErrors('certificates');
+
+        $this->assertDatabaseCount('program_certificates', 0);
+        Queue::assertNothingPushed();
     }
 
     public function test_logged_in_politeknik_besut_student_can_submit_internal_attendance_and_earn_points(): void

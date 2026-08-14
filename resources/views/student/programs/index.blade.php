@@ -18,7 +18,8 @@
                 <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
                     @if($program->checked_in_at)
                         <span class="badge">{{ __(str_replace('_',' ',$program->validation_status)) }}</span>
-                        @if($program->validation_status !== 'valid')<span class="badge">{{ __('Certificate: Not eligible') }}</span>
+                        @if(!($program->certificate_enabled ?? true))<span class="badge">{{ __('Points only — no certificate') }}</span>
+                        @elseif($program->validation_status !== 'valid')<span class="badge">{{ __('Certificate: Not eligible') }}</span>
                         @elseif(($program->certificate_status ?? null) === 'ready')<a class="btn btn-primary" href="{{ route('student.certificates.download',$program->certificate_id) }}">{{ __('Download Certificate') }}</a>
                         @elseif(in_array(($program->certificate_status ?? null),['pending','generating'],true))<span class="badge">{{ __('Certificate: Generating') }}</span>
                         @elseif(($program->certificate_status ?? null) === 'failed')<span class="badge">{{ __('Certificate: Failed') }}</span>

@@ -294,6 +294,15 @@
                     <input id="participation_points" type="number" min="0" max="100" name="participation_points" required value="{{ old('participation_points', $program->participation_points ?? 0) }}">
                     <small>{{ __('Points awarded to Politeknik Besut students with valid attendance.') }}</small>
                 </div>
+                <div class="pmr-field">
+                    <label for="certificate_enabled">{{ __('Certificate availability') }} <span>*</span></label>
+                    <select id="certificate_enabled" name="certificate_enabled" required>
+                        <option value="1" @selected((string) old('certificate_enabled', $program->certificate_enabled ?? 1) === '1')>{{ __('Points and certificate') }}</option>
+                        <option value="0" @selected((string) old('certificate_enabled', $program->certificate_enabled ?? 1) === '0')>{{ __('Points only — no certificate') }}</option>
+                    </select>
+                    <small>{{ __('Students still receive participation points when certificates are disabled.') }}</small>
+                </div>
+                <input type="hidden" name="certificate_template" value="{{ old('certificate_template', $program->certificate_template ?? 'standard_placeholder') }}">
             </div>
         </section>
 
