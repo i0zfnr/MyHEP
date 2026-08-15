@@ -467,9 +467,13 @@ Route::get('/admin/scholarship-announcements', function (Request $request) {
             'scholarship_announcements.type',
             'scholarship_announcements.link_url',
             'scholarship_announcements.link_label',
+            'scholarship_announcements.poster_image',
+            'scholarship_announcements.contact_email',
+            'scholarship_announcements.contact_phone',
             'scholarship_announcements.created_at',
             'admins.full_name as admin_name'
         );
+
 
     if (!empty($filters['q'])) {
         $q = trim($filters['q']);
@@ -549,22 +553,33 @@ Route::get('/admin/scholarship-announcements/create', function () {
 
 Route::post('/admin/scholarship-announcements', function (Request $request) {
     $validated = $request->validate([
-        'title' => ['required', 'string', 'max:200'],
-        'body' => ['required', 'string'],
-        'type' => ['required', Rule::in(['scholarship', 'welfare', 'general'])],
-        'link_url' => ['nullable', 'url', 'max:500'],
-        'link_label' => ['nullable', 'string', 'max:100'],
+        'title'         => ['required', 'string', 'max:200'],
+        'body'          => ['required', 'string'],
+        'type'          => ['required', Rule::in(['scholarship', 'welfare', 'general'])],
+        'link_url'      => ['nullable', 'url', 'max:500'],
+        'link_label'    => ['nullable', 'string', 'max:100'],
+        'contact_email' => ['nullable', 'email', 'max:200'],
+        'contact_phone' => ['nullable', 'string', 'max:30'],
+        'poster_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
     ]);
 
+    $posterPath = null;
+    if ($request->hasFile('poster_image')) {
+        $posterPath = $request->file('poster_image')->store('scholarship-posters', 'public');
+    }
+
     $announcementId = DB::table('scholarship_announcements')->insertGetId([
-        'admin_id' => session('auth_user.id'),
-        'title' => $validated['title'],
-        'body' => $validated['body'],
-        'type' => $validated['type'],
-        'link_url' => $validated['link_url'] ?? null,
-        'link_label' => $validated['link_label'] ?? null,
-        'created_at' => now(),
-        'updated_at' => now(),
+        'admin_id'      => session('auth_user.id'),
+        'title'         => $validated['title'],
+        'body'          => $validated['body'],
+        'type'          => $validated['type'],
+        'link_url'      => $validated['link_url'] ?? null,
+        'link_label'    => $validated['link_label'] ?? null,
+        'poster_image'  => $posterPath,
+        'contact_email' => $validated['contact_email'] ?? null,
+        'contact_phone' => $validated['contact_phone'] ?? null,
+        'created_at'    => now(),
+        'updated_at'    => now(),
     ]);
 
     myhepSendPushToAllStudents([
@@ -597,22 +612,45 @@ Route::put('/admin/scholarship-announcements/{id}', function (Request $request, 
     }
 
     $validated = $request->validate([
-        'title' => ['required', 'string', 'max:200'],
-        'body' => ['required', 'string'],
-        'type' => ['required', Rule::in(['scholarship', 'welfare', 'general'])],
-        'link_url' => ['nullable', 'url', 'max:500'],
-        'link_label' => ['nullable', 'string', 'max:100'],
+        'title'         => ['required', 'string', 'max:200'],
+        'body'          => ['required', 'string'],
+        'type'          => ['required', Rule::in(['scholarship', 'welfare', 'general'])],
+        'link_url'      => ['nullable', 'url', 'max:500'],
+        'link_label'    => ['nullable', 'string', 'max:100'],
+        'contact_email' => ['nullable', 'email', 'max:200'],
+        'contact_phone' => ['nullable', 'string', 'max:30'],
+        'poster_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        'remove_poster' => ['nullable', 'boolean'],
     ]);
+
+    $posterPath = $announcement->poster_image;
+
+    if ($request->boolean('remove_poster')) {
+        if ($posterPath) {
+            Storage::disk('public')->delete($posterPath);
+        }
+        $posterPath = null;
+    }
+
+    if ($request->hasFile('poster_image')) {
+        if ($posterPath) {
+            Storage::disk('public')->delete($posterPath);
+        }
+        $posterPath = $request->file('poster_image')->store('scholarship-posters', 'public');
+    }
 
     DB::table('scholarship_announcements')
         ->where('id', $id)
         ->update([
-            'title' => $validated['title'],
-            'body' => $validated['body'],
-            'type' => $validated['type'],
-            'link_url' => $validated['link_url'] ?? null,
-            'link_label' => $validated['link_label'] ?? null,
-            'updated_at' => now(),
+            'title'         => $validated['title'],
+            'body'          => $validated['body'],
+            'type'          => $validated['type'],
+            'link_url'      => $validated['link_url'] ?? null,
+            'link_label'    => $validated['link_label'] ?? null,
+            'poster_image'  => $posterPath,
+            'contact_email' => $validated['contact_email'] ?? null,
+            'contact_phone' => $validated['contact_phone'] ?? null,
+            'updated_at'    => now(),
         ]);
 
     return redirect()->route('admin.scholarship-announcements.index')
@@ -620,11 +658,15 @@ Route::put('/admin/scholarship-announcements/{id}', function (Request $request, 
 })->middleware(['auth.session:admin', 'admin.scope:scholarship'])->name('admin.scholarship-announcements.update');
 
 Route::delete('/admin/scholarship-announcements/{id}', function (int $id) {
-    $deleted = DB::table('scholarship_announcements')->where('id', $id)->delete();
-    if (!$deleted) {
+    $announcement = DB::table('scholarship_announcements')->where('id', $id)->first();
+    if (!$announcement) {
         return redirect()->route('admin.scholarship-announcements.index')
             ->withErrors(['announcement' => 'Pengumuman tidak dijumpai.']);
     }
+    if ($announcement->poster_image) {
+        Storage::disk('public')->delete($announcement->poster_image);
+    }
+    DB::table('scholarship_announcements')->where('id', $id)->delete();
     auditLog('scholarship_announcements.delete', 'scholarship_announcements', $id, 'Padam pengumuman scholarship');
 
     return redirect()->route('admin.scholarship-announcements.index')

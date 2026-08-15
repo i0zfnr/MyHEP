@@ -355,6 +355,8 @@
                     <tr>
                         <th>{{ __('Tajuk') }}</th>
                         <th>{{ __('Jenis') }}</th>
+                        <th>{{ __('Poster') }}</th>
+                        <th>{{ __('Hubungi') }}</th>
                         <th>{{ __('Penerangan') }}</th>
                         <th>{{ __('Link') }}</th>
                         <th>{{ __('Dicipta Oleh') }}</th>
@@ -366,7 +368,19 @@
                         <tr>
                             <td class="ann-title" data-label="Tajuk">{{ $item->title }}</td>
                             <td data-label="Jenis"><span class="pill {{ $item->type }}">{{ $item->type }}</span></td>
-                            <td class="ann-description" data-label="Penerangan">{{ $item->body }}</td>
+                            <td data-label="Poster">
+                                @if($item->poster_image)
+                                    <img src="{{ Storage::disk('public')->url($item->poster_image) }}" alt="Poster" style="max-width:80px;max-height:52px;border-radius:6px;border:1px solid #dfceb9;object-fit:cover;display:block;">
+                                @else
+                                    <span style="color:#b49a87;font-size:12px;">—</span>
+                                @endif
+                            </td>
+                            <td data-label="Hubungi">
+                                @if($item->contact_email)<a href="mailto:{{ $item->contact_email }}" style="display:block;font-size:12px;">{{ $item->contact_email }}</a>@endif
+                                @if($item->contact_phone)<a href="tel:{{ $item->contact_phone }}" style="display:block;font-size:12px;margin-top:2px;">{{ $item->contact_phone }}</a>@endif
+                                @if(!$item->contact_email && !$item->contact_phone)<span style="color:#b49a87;font-size:12px;">—</span>@endif
+                            </td>
+                            <td class="ann-description" data-label="Penerangan">{{ Str::limit($item->body, 100) }}</td>
                             <td class="ann-link" data-label="Link">
                                 @if($item->link_url)
                                     <a href="{{ $item->link_url }}" target="_blank" rel="noopener">{{ $item->link_label ?: 'Buka Link' }}</a>
@@ -391,7 +405,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td class="ann-empty" colspan="6">{{ __('Tiada pengumuman scholarship.') }}</td></tr>
+                        <tr><td class="ann-empty" colspan="8">{{ __('Tiada pengumuman scholarship.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
