@@ -79,10 +79,14 @@ class OfficialProgramReportExporter
         }
 
         $xml = $zip->getFromName('word/document.xml');
-        if ($xml === false) {
+        $rels = $zip->getFromName('word/_rels/document.xml.rels');
+        if ($xml === false || $rels === false) {
             $zip->close();
             return;
         }
+
+        // 1. Convert all red text styling to professional black
+        $xml = preg_replace('/<w:color w:val="[fF]{2}0000"\/>/u', '<w:color w:val="000000"/>', $xml);
 
         $date = ($program->starts_at ?? null)
             ? date('d.m.Y', strtotime($program->starts_at)).' ('.mb_strtoupper(date('l', strtotime($program->starts_at))).')'
@@ -105,6 +109,7 @@ class OfficialProgramReportExporter
         $jawatankuasa = $report['jawatankuasa'] ?? [];
         $penceramah = $report['penceramah'] ?? [];
 
+        // 2. Perform exact string replacements for all placeholders
         $replacements = [
             '[NAMA KURSUS/PROGRAM]' => mb_strtoupper($program->title),
             '[05.02.2025 (RABU)]' => $date,
@@ -145,17 +150,93 @@ class OfficialProgramReportExporter
             $xml = str_replace($search, $escapedReplace, $xml);
         }
 
-        $zip->addFromString('word/document.xml', $xml);
+        // 3. Mark KPI Cluster in Header Table
+        $kpiKey = strtolower($report['kluster_kpi'] ?? 'kemahiran dan inovasi');
+        $paraIdMap = [
+            'sukarelawan' => '00000012',
+            'patriot' => '00000013',
+            'perpaduan' => '00000014',
+            'kepimpinan' => '00000015',
+            'komunikasi' => '00000016',
+            'kebudayaan' => '00000017',
+            'kesenian' => '00000017',
+            'warisan' => '00000017',
+            'kerohanian' => '00000018',
+            'rohani' => '00000018',
+            'psikologi' => '00000019',
+            'sukan' => '0000001A',
+            'kesihatan' => '0000001B',
+            'kemahiran' => '0000001C',
+            'inovasi' => '0000001C',
+            'kelab' => '0000001D',
+            'persatuan' => '0000001D',
+            'niche' => '0000001E',
+        ];
+        $targetParaId = '0000001C'; // Default to Kemahiran dan Inovasi
+        foreach ($paraIdMap as $keyword => $pId) {
+            if (str_contains($kpiKey, $keyword)) {
+                $targetParaId = $pId;
+                break;
+            }
+        }
+        $checkSearch = '<w:p w14:paraId="'.$targetParaId.'"';
+        $checkReplace = '<w:p w14:paraId="'.$targetParaId.'"><w:pPr><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Arial" w:cs="Arial" w:eastAsia="Arial" w:hAnsi="Arial"/><w:b w:val="1"/><w:color w:val="000000"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:cs="Arial" w:eastAsia="Arial" w:hAnsi="Arial"/><w:b w:val="1"/><w:color w:val="000000"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr><w:t>/</w:t></w:r></w:p>';
+        if (str_contains($xml, $checkSearch)) {
+            $xml = preg_replace('/<w:p [^>]*w14:paraId="'.$targetParaId.'".*?<\/w:p>/s', $checkReplace, $xml, 1);
+        }
 
-        // Replace activity image in word/media/image3.png
+        // 4. Handle Section 12: Activity Images (Gambar Aktiviti)
         $imagePaths = array_values(array_filter($imagePaths, 'is_file'));
         if ($imagePaths !== []) {
             $sheet = $this->createPhotoSheet(array_slice($imagePaths, 0, 8));
             if ($sheet !== null) {
-                $zip->addFromString('word/media/image3.png', $sheet);
+                // Add activity_photos.png into media folder
+                $zip->addFromString('word/media/activity_photos.png', $sheet);
+
+                // Add relationship if not already added
+                if (! str_contains($rels, 'rIdActivityPhotos')) {
+                    $rels = str_replace('</Relationships>', '<Relationship Id="rIdActivityPhotos" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/activity_photos.png"/></Relationships>', $rels);
+                    $zip->addFromString('word/_rels/document.xml.rels', $rels);
+                }
+
+                // Insert DrawingML image paragraph right after "GAMBAR AKTIVITI/PROGRAM :"
+                $imageXml = '<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">'
+                    .'<w:pPr><w:jc w:val="center"/><w:spacing w:before="140" w:after="200"/></w:pPr>'
+                    .'<w:r><w:drawing>'
+                    .'<wp:inline distT="0" distB="0" distL="0" distR="0">'
+                    .'<wp:extent cx="5400000" cy="4000000"/>'
+                    .'<wp:docPr id="9991" name="ActivityPhotos"/>'
+                    .'<wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr>'
+                    .'<a:graphic>'
+                    .'<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">'
+                    .'<pic:pic>'
+                    .'<pic:nvPicPr>'
+                    .'<pic:cNvPr id="9991" name="activity_photos.png"/>'
+                    .'<pic:cNvPicPr/>'
+                    .'</pic:nvPicPr>'
+                    .'<pic:blipFill>'
+                    .'<a:blip r:embed="rIdActivityPhotos"/>'
+                    .'<a:stretch><a:fillRect/></a:stretch>'
+                    .'</pic:blipFill>'
+                    .'<pic:spPr>'
+                    .'<a:xfrm><a:off x="0" y="0"/><a:ext cx="5400000" cy="4000000"/></a:xfrm>'
+                    .'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
+                    .'</pic:spPr>'
+                    .'</pic:pic>'
+                    .'</a:graphicData>'
+                    .'</a:graphic>'
+                    .'</wp:inline>'
+                    .'</w:drawing></w:r>'
+                    .'</w:p>';
+
+                $targetHeading = '<w:t xml:space="preserve"> GAMBAR AKTIVITI/PROGRAM :</w:t></w:r></w:p>';
+                if (str_contains($xml, $targetHeading)) {
+                    $xml = str_replace($targetHeading, $targetHeading.$imageXml, $xml);
+                }
             }
         }
 
+        $zip->addFromString('word/document.xml', $xml);
         $zip->close();
     }
 
