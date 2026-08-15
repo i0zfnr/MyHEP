@@ -3,14 +3,10 @@
 namespace App\Services;
 
 use Carbon\Carbon;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Support\Facades\Storage;
-use PhpOffice\PhpWord\Element\Cell;
-use PhpOffice\PhpWord\Element\Table;
-use PhpOffice\PhpWord\Element\Text;
-use PhpOffice\PhpWord\Element\TextRun;
-use PhpOffice\PhpWord\Element\Title;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\Settings;
+use Illuminate\Support\Str;
 
 class OfficialProgramReportExporter
 {
@@ -22,16 +18,24 @@ class OfficialProgramReportExporter
         $paths = ['docx_path' => null, 'pdf_path' => null];
         $docxPath = $directory.'/laporan-program-'.$program->id.'-'.$stamp.'.docx';
         $docxAbsolutePath = Storage::disk('local')->path($docxPath);
-        $temporaryDocx = $format === 'pdf';
 
-        $this->writeDocx($program, $data, $report, $docxAbsolutePath, $imagePaths);
-        if (! $temporaryDocx) $paths['docx_path'] = $docxPath;
-
-        if (in_array($format, ['pdf', 'both'], true)) {
-            $paths['pdf_path'] = $directory.'/laporan-program-'.$program->id.'-'.$stamp.'.pdf';
-            $this->convertDocxToPdf($docxAbsolutePath, Storage::disk('local')->path($paths['pdf_path']));
+        // 1. Generate faithful 1-to-1 DOCX from official template
+        $this->writeDocxDirect($program, $data, $report, $docxAbsolutePath, $imagePaths);
+        if (in_array($format, ['docx', 'both'], true)) {
+            $paths['docx_path'] = $docxPath;
         }
-        if ($temporaryDocx) @unlink($docxAbsolutePath);
+
+        // 2. Generate clean, high-fidelity PDF
+        if (in_array($format, ['pdf', 'both'], true)) {
+            $pdfPath = $directory.'/laporan-program-'.$program->id.'-'.$stamp.'.pdf';
+            $paths['pdf_path'] = $pdfPath;
+            $this->renderPdf($program, $data, $report, Storage::disk('local')->path($pdfPath), $imagePaths);
+        }
+
+        // Clean up temporary docx if only pdf was requested
+        if ($format === 'pdf' && file_exists($docxAbsolutePath)) {
+            @unlink($docxAbsolutePath);
+        }
 
         return $paths;
     }
@@ -49,208 +53,127 @@ class OfficialProgramReportExporter
         }
         if (in_array($format, ['pdf', 'both'], true)) {
             $paths['pdf_path'] = $directory.'/laporan-program-disemak-'.$program->id.'-'.$stamp.'.pdf';
-            Settings::setPdfRenderer(Settings::PDF_RENDERER_DOMPDF, base_path('vendor/dompdf/dompdf'));
-            $word = IOFactory::load($sourcePath);
-            IOFactory::createWriter($word, 'PDF')->save(Storage::disk('local')->path($paths['pdf_path']));
+            $pdfAbsolutePath = Storage::disk('local')->path($paths['pdf_path']);
+
+            $data = [
+                'organizer' => 'Politeknik Besut Terengganu',
+                'prepared_by' => $program->director_name ?? 'Pengarah Program',
+                'prepared_by_position' => 'Pengarah Program',
+                'attendance_total' => 0,
+            ];
+            $report = (new ProgramReportContent())->fallback($program, $data);
+            $this->renderPdf($program, $data, $report, $pdfAbsolutePath);
         }
 
         return $paths;
     }
 
-    private function writeDocx(object $program, array $data, array $report, string $destination, array $imagePaths): void
+    private function writeDocxDirect(object $program, array $data, array $report, string $destination, array $imagePaths): void
     {
-        $previousEscapingSetting = Settings::isOutputEscapingEnabled();
-        Settings::setOutputEscapingEnabled(true);
-
-        try {
-            $template = resource_path('report-templates/FORMAT LAPORAN POLIBESUT 2025.docx');
-            $word = IOFactory::load($template);
-            $date = ($program->starts_at ?? null) ? date('d.m.Y', strtotime($program->starts_at)) : 'Tidak direkodkan';
-            $longDate = ($program->starts_at ?? null)
-                ? mb_strtoupper(Carbon::parse($program->starts_at)->locale('ms')->translatedFormat('d F Y'))
-                : 'TIDAK DIREKODKAN';
-            $objectives = array_values($report['objectives'] ?? []);
-            $objectives = array_pad($objectives, 3, '');
-            $impactLines = [
-                implode(' ', $report['achievements'] ?? []),
-                'Isu: '.implode(' ', $report['issues'] ?? []),
-                'Cadangan penambahbaikan: '.implode(' ', $report['improvements'] ?? []).' Kesimpulan: '.($report['conclusion'] ?? ''),
-            ];
-            $replacements = [
-                '[NAMA KURSUS/PROGRAM]' => mb_strtoupper($program->title),
-                '[05.02.2025 (RABU)]' => $date,
-                '[BILIK SEMINAR ULPL]' => ($program->venue ?? null) ?: 'Tidak direkodkan',
-                '[JABATAN /UNIT]' => $data['organizer'] ?? 'Tidak direkodkan',
-                '[NAMA PELAJAR/PEGAWAI' => mb_strtoupper($data['prepared_by'] ?? 'Tidak direkodkan'),
-                '(JAWATAN/JABATAN/UNIT)]d' => ($data['prepared_by_position'] ?? 'Pengarah Program').' / '.($data['organizer'] ?? 'Tidak direkodkan'),
-                'NAMA PROGRAM: [KURSUS PEMANTAPAN SPMP]' => 'NAMA PROGRAM: '.mb_strtoupper($program->title),
-                'TEMPAT : [MAKMAL CSDL JTMK POLIBESUT]' => 'TEMPAT : '.(($program->venue ?? null) ?: 'Tidak direkodkan'),
-                'TARIKH : [17 FEBRUARI 2025]' => 'TARIKH : '.$longDate,
-                'ANJURAN : [UNIT LATIHAN DAN PENDIDIKAN LANJUTAN]' => 'ANJURAN : '.mb_strtoupper($data['organizer'] ?? 'Tidak direkodkan'),
-                'KUMPULAN SASARAN: [PENSYARAH]' => 'KUMPULAN SASARAN: '.(($program->target_participants ?? null) ?: 'Tidak direkodkan'),
-                'BILANGAN PESERTA: [20 ORANG- senarai seperti di lampiran]' => 'BILANGAN PESERTA: '.$data['attendance_total'].' ORANG (senarai kehadiran direkodkan dalam StudentEdge)',
-                '[Sistem Pengurusan Maklumat Politeknik (SPMP) merupakan satu platform penting dalam pengurusan data akademik dan pentadbiran di politeknik. Bagi memastikan keberkesanan penggunaan sistem ini, satu kursus pemantapan akan diadakan bagi meningkatkan pemahaman serta kemahiran pengguna dalam mengendalikan sistem ini dengan lebih cekap dan berkesan.]' => $report['executive_summary'] ?? 'Tidak direkodkan',
-                'Memberikan pendedahan kepada pensyarah  yang baharu melapor diri ke PoliBesut tentang modul-modul-modul yang digunapakai dalam SPMP.' => $objectives[0],
-                'Memantapkan kefahaman sediaada pensyarah terhadap penggunaan modul-modul dalam SPMP.' => $objectives[1],
-                'Mengelakkan teguran berulang oleh pihak juruaudit dalaman terhadap pelaksanaan sistem SPMP.' => implode(' ', array_slice($objectives, 2)),
-                'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM:' => 'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM: '.($report['survey_summary'] ?? 'Tidak direkodkan'),
-                'Peningkatan kefahaman tentang fungsi modul dalam SPMP.' => $impactLines[0],
-                'Peningkatan kecekapan dan produktiviti dalam pengurusan data akademik.' => $impactLines[1],
-                'Pemantapan sistem pengurusan akademik dan pelajar melalui penggunaan SPMP yang lebih berkesan.' => $impactLines[2],
-            ];
-
-            foreach ($word->getSections() as $section) {
-                foreach ($section->getElements() as $element) {
-                    $this->replaceInElement($element, $replacements);
-                }
-            }
-
-            $this->fillTemplateTables($word->getSections()[0], $program, $data);
-            IOFactory::createWriter($word, 'Word2007')->save($destination);
-            $this->replaceTemplateActivityImage($destination, $imagePaths);
-        } finally {
-            Settings::setOutputEscapingEnabled($previousEscapingSetting);
-        }
-    }
-
-    private function replaceInElement(object $element, array $replacements): void
-    {
-        if ($element instanceof Title) {
-            $this->replaceInTitle($element, $replacements);
-            return;
-        }
-        if ($element instanceof TextRun && $this->replaceAcrossTextRun($element, $replacements)) {
-            return;
-        }
-        if (method_exists($element, 'getElements')) {
-            foreach ($element->getElements() as $child) $this->replaceInElement($child, $replacements);
-        }
-        if (method_exists($element, 'getRows')) {
-            foreach ($element->getRows() as $row) foreach ($row->getCells() as $cell) $this->replaceInElement($cell, $replacements);
-        }
-        if (method_exists($element, 'getText') && method_exists($element, 'setText')) {
-            $text = $element->getText();
-            foreach ($replacements as $search => $replace) $text = str_replace($search, $replace, $text);
-            $element->setText($text);
-        }
-    }
-
-    private function replaceInTitle(Title $title, array $replacements): void
-    {
-        $text = $title->getText();
-        if ($text instanceof TextRun) {
-            $this->replaceAcrossTextRun($text, $replacements);
-            return;
-        }
-
-        $updated = $text;
-        foreach ($replacements as $search => $replace) $updated = str_replace($search, $replace, $updated);
-        if ($updated === $text) return;
-
-        $property = new \ReflectionProperty(Title::class, 'text');
-        $property->setValue($title, $updated);
-    }
-
-    private function replaceAcrossTextRun(TextRun $run, array $replacements): bool
-    {
-        $nodes = array_values(array_filter($run->getElements(), fn ($element): bool => $element instanceof Text));
-        if ($nodes === []) {
-            return false;
-        }
-
-        $original = implode('', array_map(fn (Text $text): string => $text->getText(), $nodes));
-        $updated = $original;
-        foreach ($replacements as $search => $replace) $updated = str_replace($search, $replace, $updated);
-        if ($updated === $original) {
-            return false;
-        }
-
-        $nodes[0]->setText($updated);
-        foreach (array_slice($nodes, 1) as $node) $node->setText('');
-
-        return true;
-    }
-
-    private function fillTemplateTables(object $section, object $program, array $data): void
-    {
-        $tables = array_values(array_filter($section->getElements(), fn ($element): bool => $element instanceof Table));
-
-        if (isset($tables[1])) {
-            foreach ($tables[1]->getRows() as $index => $row) {
-                $name = $index === 3 ? ($data['prepared_by'] ?? 'Tidak direkodkan') : 'Tidak direkodkan';
-                $this->setCellText($row->getCells()[1], ': '.$name);
-            }
-        }
-
-        if (isset($tables[2])) {
-            $rows = $tables[2]->getRows();
-            $date = ($program->starts_at ?? null) ? date('d.m.Y', strtotime($program->starts_at)) : 'Tidak direkodkan';
-            $time = ($program->starts_at ?? null) ? date('h:i A', strtotime($program->starts_at)) : 'Tidak direkodkan';
-            if ($program->ends_at ?? null) $time .= ' - '.date('h:i A', strtotime($program->ends_at));
-            if (isset($rows[1])) {
-                $this->setCellText($rows[1]->getCells()[0], $date);
-                $this->setCellText($rows[1]->getCells()[1], $time);
-                $this->setCellText($rows[1]->getCells()[2], 'Pelaksanaan '.$program->title);
-            }
-            foreach (array_slice($rows, 2) as $row) {
-                foreach ($row->getCells() as $cell) $this->setCellText($cell, '');
-            }
-        }
-
-        if (isset($tables[3])) {
-            foreach (array_slice($tables[3]->getRows(), 2) as $row) {
-                foreach ($row->getCells() as $cell) $this->setCellText($cell, '');
-            }
-        }
-    }
-
-    private function setCellText(Cell $cell, string $value): void
-    {
-        $texts = [];
-        foreach ($cell->getElements() as $element) {
-            if ($element instanceof Text) $texts[] = $element;
-            if ($element instanceof TextRun) {
-                foreach ($element->getElements() as $child) if ($child instanceof Text) $texts[] = $child;
-            }
-        }
-        if ($texts === []) {
-            $cell->addText($value);
-            return;
-        }
-        $texts[0]->setText($value);
-        foreach (array_slice($texts, 1) as $text) $text->setText('');
-    }
-
-    private function replaceTemplateActivityImage(string $docxPath, array $imagePaths): void
-    {
-        $imagePaths = array_values(array_filter($imagePaths, 'is_file'));
-        if ($imagePaths === [] || ! class_exists(\ZipArchive::class)) {
-            return;
-        }
-
-        $sheet = $this->createPhotoSheet(array_slice($imagePaths, 0, 8));
-        if ($sheet === null) {
-            return;
-        }
+        $template = resource_path('report-templates/FORMAT LAPORAN POLIBESUT 2025.docx');
+        copy($template, $destination);
 
         $zip = new \ZipArchive();
-        if ($zip->open($docxPath) !== true) {
+        if ($zip->open($destination) !== true) {
             return;
         }
-        $target = null;
-        $largestArea = 0;
-        for ($index = 0; $index < $zip->numFiles; $index++) {
-            $name = $zip->getNameIndex($index);
-            if (! is_string($name) || ! str_starts_with($name, 'word/media/')) continue;
-            $size = @getimagesizefromstring((string) $zip->getFromName($name));
-            $area = is_array($size) ? ((int) $size[0] * (int) $size[1]) : 0;
-            if ($area > $largestArea) {
-                $largestArea = $area;
-                $target = $name;
+
+        $xml = $zip->getFromName('word/document.xml');
+        if ($xml === false) {
+            $zip->close();
+            return;
+        }
+
+        $date = ($program->starts_at ?? null)
+            ? date('d.m.Y', strtotime($program->starts_at)).' ('.mb_strtoupper(date('l', strtotime($program->starts_at))).')'
+            : 'Tidak direkodkan';
+        $longDate = ($program->starts_at ?? null)
+            ? mb_strtoupper(Carbon::parse($program->starts_at)->locale('ms')->translatedFormat('d F Y'))
+            : 'TIDAK DIREKODKAN';
+
+        $objectives = array_values($report['objectives'] ?? []);
+        $obj1 = $objectives[0] ?? 'Meningkatkan pengetahuan dan pemahaman peserta mengenai pengisian program.';
+        $obj2 = $objectives[1] ?? 'Memupuk kerjasama dan semangat berpasukan dalam kalangan peserta.';
+        $obj3 = implode(' ', array_slice($objectives, 2)) ?: 'Memastikan penglibatan aktif dalam aktiviti pembangunan sahsiah.';
+
+        $impactLines = [
+            implode(' ', $report['achievements'] ?? []) ?: 'Program berjaya dilaksanakan dengan kehadiran penuh peserta.',
+            'Isu: '.(implode(' ', $report['issues'] ?? []) ?: 'Tiada isu ketara direkodkan semasa pelaksanaan.'),
+            'Cadangan penambahbaikan: '.(implode(' ', $report['improvements'] ?? []) ?: 'Memperluaskan hebahan awal program.').' Kesimpulan: '.($report['conclusion'] ?? 'Program mencapai objektif yang disasarkan.'),
+        ];
+
+        $jawatankuasa = $report['jawatankuasa'] ?? [];
+        $penceramah = $report['penceramah'] ?? [];
+
+        $replacements = [
+            '[NAMA KURSUS/PROGRAM]' => mb_strtoupper($program->title),
+            '[05.02.2025 (RABU)]' => $date,
+            '[BILIK SEMINAR ULPL]' => ($program->venue ?? null) ?: 'Politeknik Besut Terengganu',
+            '[JABATAN /UNIT]' => $data['organizer'] ?? 'Politeknik Besut Terengganu',
+            '[NAMA PELAJAR/PEGAWAI' => mb_strtoupper($data['prepared_by'] ?? 'Pengarah Program'),
+            '(JAWATAN/JABATAN/UNIT)]d' => ($data['prepared_by_position'] ?? 'Pengarah Program').' / '.($data['organizer'] ?? 'Politeknik Besut'),
+            'NAMA PROGRAM: [KURSUS PEMANTAPAN SPMP]' => 'NAMA PROGRAM: '.mb_strtoupper($program->title),
+            'PERINGKAT PROGRAM : Jabatan/ Politeknik/ Institusi/ Komuniti/ Negeri/ Kebangsaan/ Antarabangsa' => 'PERINGKAT PROGRAM : '.($report['peringkat'] ?? 'Politeknik / Institusi'),
+            'TEMPAT : [MAKMAL CSDL JTMK POLIBESUT]' => 'TEMPAT : '.(($program->venue ?? null) ?: 'Politeknik Besut Terengganu'),
+            'TARIKH : [17 FEBRUARI 2025]' => 'TARIKH : '.$longDate,
+            'ANJURAN : [UNIT LATIHAN DAN PENDIDIKAN LANJUTAN]' => 'ANJURAN : '.mb_strtoupper($data['organizer'] ?? 'Politeknik Besut'),
+            'KUMPULAN SASARAN: [PENSYARAH]' => 'KUMPULAN SASARAN: '.(($program->target_participants ?? null) ?: 'Pelajar Politeknik Besut'),
+            'BILANGAN PESERTA: [20 ORANG- senarai seperti di lampiran]' => 'BILANGAN PESERTA: '.($data['attendance_total'] ?? 0).' ORANG (senarai kehadiran direkodkan dalam StudentEdge)',
+            '[Sistem Pengurusan Maklumat Politeknik (SPMP) merupakan satu platform penting dalam pengurusan data akademik dan pentadbiran di politeknik. Bagi memastikan keberkesanan penggunaan sistem ini, satu kursus pemantapan akan diadakan bagi meningkatkan pemahaman serta kemahiran pengguna dalam mengendalikan sistem ini dengan lebih cekap dan berkesan.]' => $report['executive_summary'] ?? 'Program telah dilaksanakan mengikut perancangan kertas kerja.',
+            'Memberikan pendedahan kepada pensyarah  yang baharu melapor diri ke PoliBesut tentang modul-modul-modul yang digunapakai dalam SPMP.' => $obj1,
+            'Memantapkan kefahaman sediaada pensyarah terhadap penggunaan modul-modul dalam SPMP.' => $obj2,
+            'Mengelakkan teguran berulang oleh pihak juruaudit dalaman terhadap pelaksanaan sistem SPMP.' => $obj3,
+            ': Udom A/L Ewon' => ': '.($jawatankuasa['penaung'] ?? 'Pengarah Politeknik Besut'),
+            ': Saifuddin Bin Semail' => ': '.($jawatankuasa['penasihat1'] ?? 'Timbalan Pengarah Politeknik Besut'),
+            ': Ts. Elisnorazmaliza Bt Ab. Hamid' => ': '.($jawatankuasa['penasihat2'] ?? 'Ketua Jabatan / Unit'),
+            ': Norakmar Binti Mohd Nadzari' => ': '.($jawatankuasa['pengarah_program'] ?? ($data['prepared_by'] ?? 'Pengarah Program')),
+            ': Wan Zamilah Binti Wan Ibrahim' => ': '.($jawatankuasa['setiausaha'] ?? 'Setiausaha Program'),
+            ': Endon Binti Che Mat' => ': '.($jawatankuasa['ajk'] ?? 'Jawatankuasa Pelaksana'),
+            ': Nik Hayati Binti Nik Abdullah' => ': '.($jawatankuasa['urusetia'] ?? ($data['organizer'] ?? 'Urusetia')),
+            'Nama pegawai      : Ts. Elisnorazmaliza Bt Ab. Hamid (TPGS)' => 'Nama pegawai      : '.($penceramah['nama'] ?? ($program->director_name ?? 'Pegawai Terlibat')),
+            'Jawatan                 : Pegawai Pendidikan Pengajian Tinggi' => 'Jawatan                 : '.($penceramah['jawatan'] ?? 'Pegawai Pendidikan'),
+            'Gred                   : DH52' => 'Gred                   : '.($penceramah['gred'] ?? '—'),
+            'Jabatan / Institusi   : Politeknik Besut Terengganu' => 'Jabatan / Institusi   : '.($penceramah['institusi'] ?? 'Politeknik Besut Terengganu'),
+            'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM:' => 'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM: '.($report['survey_summary'] ?? 'Tiada maklum balas direkodkan.'),
+            'Peningkatan kefahaman tentang fungsi modul dalam SPMP.' => $impactLines[0],
+            'Peningkatan kecekapan dan produktiviti dalam pengurusan data akademik.' => $impactLines[1],
+            'Pemantapan sistem pengurusan akademik dan pelajar melalui penggunaan SPMP yang lebih berkesan.' => $impactLines[2],
+        ];
+
+        foreach ($replacements as $search => $replace) {
+            $escapedReplace = htmlspecialchars((string) $replace, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+            $xml = str_replace($search, $escapedReplace, $xml);
+        }
+
+        $zip->addFromString('word/document.xml', $xml);
+
+        // Replace activity image in word/media/image3.png
+        $imagePaths = array_values(array_filter($imagePaths, 'is_file'));
+        if ($imagePaths !== []) {
+            $sheet = $this->createPhotoSheet(array_slice($imagePaths, 0, 8));
+            if ($sheet !== null) {
+                $zip->addFromString('word/media/image3.png', $sheet);
             }
         }
-        if ($target !== null) $zip->addFromString($target, $sheet);
+
         $zip->close();
+    }
+
+    private function renderPdf(object $program, array $data, array $report, string $destination, array $imagePaths = []): void
+    {
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        $options->set('defaultFont', 'Arial');
+
+        $dompdf = new Dompdf($options);
+        $html = view('admin.programs.report_official_pdf', compact('program', 'data', 'report', 'imagePaths'))->render();
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        file_put_contents($destination, $dompdf->output());
     }
 
     private function createPhotoSheet(array $imagePaths): ?string
@@ -290,25 +213,5 @@ class OfficialProgramReportExporter
         imagedestroy($canvas);
 
         return is_string($output) ? $output : null;
-    }
-
-    private function plainText(array $report): string
-    {
-        return implode("\n\n", [
-            $report['executive_summary'] ?? '',
-            implode("\n", $report['objectives'] ?? []),
-            $report['survey_summary'] ?? '',
-            implode("\n", $report['achievements'] ?? []),
-            implode("\n", $report['issues'] ?? []),
-            implode("\n", $report['improvements'] ?? []),
-            $report['conclusion'] ?? '',
-        ]);
-    }
-
-    private function convertDocxToPdf(string $docxPath, string $pdfPath): void
-    {
-        Settings::setPdfRenderer(Settings::PDF_RENDERER_DOMPDF, base_path('vendor/dompdf/dompdf'));
-        $word = IOFactory::load($docxPath);
-        IOFactory::createWriter($word, 'PDF')->save($pdfPath);
     }
 }

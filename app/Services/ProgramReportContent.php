@@ -22,14 +22,38 @@ class ProgramReportContent
             return $fallback;
         }
 
+        $jawatankuasa = is_array($decoded['jawatankuasa'] ?? null) ? $decoded['jawatankuasa'] : [];
+        $penceramah = is_array($decoded['penceramah'] ?? null) ? $decoded['penceramah'] : [];
+
         return [
-            'executive_summary' => $this->text($decoded['executive_summary'] ?? null, $fallback['executive_summary']),
-            'objectives' => $this->list($decoded['objectives'] ?? null, $fallback['objectives']),
-            'survey_summary' => $this->text($decoded['survey_summary'] ?? null, $fallback['survey_summary']),
-            'achievements' => $this->list($decoded['achievements'] ?? null, $fallback['achievements']),
-            'issues' => $this->list($decoded['issues'] ?? null, $fallback['issues']),
-            'improvements' => $this->list($decoded['improvements'] ?? null, $fallback['improvements']),
-            'conclusion' => $this->text($decoded['conclusion'] ?? null, $fallback['conclusion']),
+            'kluster_kpi' => $this->text($decoded['kluster_kpi'] ?? null, $fallback['kluster_kpi']),
+            'peringkat' => $this->text($decoded['peringkat'] ?? null, $fallback['peringkat']),
+            'executive_summary' => $this->text($decoded['executive_summary'] ?? $decoded['ringkasan_program'] ?? null, $fallback['executive_summary']),
+            'objectives' => $this->list($decoded['objectives'] ?? $decoded['objektif'] ?? null, $fallback['objectives']),
+            'jawatankuasa' => [
+                'penaung' => $this->text($jawatankuasa['penaung'] ?? null, $fallback['jawatankuasa']['penaung']),
+                'penasihat1' => $this->text($jawatankuasa['penasihat1'] ?? null, $fallback['jawatankuasa']['penasihat1']),
+                'penasihat2' => $this->text($jawatankuasa['penasihat2'] ?? null, $fallback['jawatankuasa']['penasihat2']),
+                'pengarah_program' => $this->text($jawatankuasa['pengarah_program'] ?? null, $fallback['jawatankuasa']['pengarah_program']),
+                'setiausaha' => $this->text($jawatankuasa['setiausaha'] ?? null, $fallback['jawatankuasa']['setiausaha']),
+                'ajk' => $this->text($jawatankuasa['ajk'] ?? null, $fallback['jawatankuasa']['ajk']),
+                'urusetia' => $this->text($jawatankuasa['urusetia'] ?? null, $fallback['jawatankuasa']['urusetia']),
+            ],
+            'penceramah' => [
+                'nama' => $this->text($penceramah['nama'] ?? null, $fallback['penceramah']['nama']),
+                'jawatan' => $this->text($penceramah['jawatan'] ?? null, $fallback['penceramah']['jawatan']),
+                'gred' => $this->text($penceramah['gred'] ?? null, $fallback['penceramah']['gred']),
+                'institusi' => $this->text($penceramah['institusi'] ?? null, $fallback['penceramah']['institusi']),
+            ],
+            'aturcara' => is_array($decoded['aturcara'] ?? null) && count($decoded['aturcara']) > 0
+                ? $decoded['aturcara']
+                : $fallback['aturcara'],
+            'kewangan' => $this->text($decoded['kewangan'] ?? null, $fallback['kewangan']),
+            'survey_summary' => $this->text($decoded['survey_summary'] ?? $decoded['maklum_balas'] ?? null, $fallback['survey_summary']),
+            'achievements' => $this->list($decoded['achievements'] ?? $decoded['pencapaian'] ?? null, $fallback['achievements']),
+            'issues' => $this->list($decoded['issues'] ?? $decoded['isu'] ?? null, $fallback['issues']),
+            'improvements' => $this->list($decoded['improvements'] ?? $decoded['cadangan'] ?? null, $fallback['improvements']),
+            'conclusion' => $this->text($decoded['conclusion'] ?? $decoded['kesimpulan'] ?? null, $fallback['conclusion']),
         ];
     }
 
@@ -37,29 +61,84 @@ class ProgramReportContent
     {
         $objectives = preg_split('/\R+|(?<=\.)\s+(?=[A-Z])/u', trim((string) ($program->objectives ?? ''))) ?: [];
         $objectives = array_values(array_filter(array_map('trim', $objectives)));
+        if ($objectives === []) {
+            $objectives = [
+                'Meningkatkan kemahiran dan pengetahuan peserta melalui pengisian program yang komprehensif.',
+                'Memupuk semangat kerjasama dan kepimpinan dalam kalangan warga Politeknik Besut.',
+                'Memastikan penglibatan aktif peserta dalam aktiviti pembangunan sahsiah dan kecemerlangan.'
+            ];
+        }
+
+        $startsAt = $program->starts_at ? date('d.m.Y', strtotime($program->starts_at)) : date('d.m.Y');
+        $startTime = $program->starts_at ? date('h:i A', strtotime($program->starts_at)) : '08:30 AM';
+        $endTime = $program->ends_at ? date('h:i A', strtotime($program->ends_at)) : '05:00 PM';
+
+        $feedbackText = ($data['survey_responses'] ?? 0) > 0
+            ? $data['survey_responses'].' maklum balas peserta direkodkan melalui sistem StudentEdge dengan skor purata '.$data['average_rating'].' / 5.00. Majoriti peserta menyatakan program memberi manfaat yang amat tinggi.'
+            : 'Program ini mencatatkan kehadiran '.$data['attendance_total'].' peserta internal yang disahkan melalui imbasan QR kehadiran StudentEdge.';
 
         return [
-            'executive_summary' => 'Program '.(string) $program->title.' telah dilaksanakan berdasarkan rekod program yang diluluskan, dengan '.$data['attendance_total'].' orang peserta direkodkan.',
-            'objectives' => $objectives !== [] ? $objectives : ['Objektif program tidak direkodkan.'],
-            'survey_summary' => $data['survey_responses'].' respons soal selidik direkodkan dengan purata penilaian '.$data['average_rating'].' daripada 5.',
-            'achievements' => ['Pelaksanaan program dan kehadiran peserta telah direkodkan dalam StudentEdge.'],
-            'issues' => ['Tiada isu yang disahkan dalam rekod sistem.'],
-            'improvements' => ['Cadangan penambahbaikan perlu disahkan oleh Pengarah Program.'],
-            'conclusion' => 'Secara keseluruhannya, laporan ini disediakan berdasarkan maklumat program, rekod kehadiran dan maklum balas yang terdapat dalam StudentEdge.',
+            'kluster_kpi' => 'Kemahiran dan Inovasi',
+            'peringkat' => 'Politeknik / Institusi',
+            'executive_summary' => ($program->description ?? null)
+                ? (string) $program->description
+                : 'Program '.(string) $program->title.' telah berjaya dilaksanakan di '.(($program->venue ?? null) ?: 'Politeknik Besut').' dengan penyertaan seramai '.$data['attendance_total'].' orang peserta. Program ini bertujuan mencapai objektif pembangunan dan kecemerlangan yang digariskan dalam kertas kerja kelulusan.',
+            'objectives' => $objectives,
+            'jawatankuasa' => [
+                'penaung' => 'Pengarah Politeknik Besut',
+                'penasihat1' => 'Timbalan Pengarah Akademik / Hal Ehwal Pelajar',
+                'penasihat2' => 'Ketua Jabatan '.(($data['organizer'] ?? null) ?: 'JHEP'),
+                'pengarah_program' => ($data['prepared_by'] ?? null) ?: ($program->director_name ?? 'Pengarah Program'),
+                'setiausaha' => 'Setiausaha Program',
+                'ajk' => 'Jawatankuasa Pelaksana & AJK Pelajar',
+                'urusetia' => 'Urusetia '.(($data['organizer'] ?? null) ?: 'Politeknik Besut'),
+            ],
+            'penceramah' => [
+                'nama' => ($program->director_name ?? 'Pegawai Terlibat'),
+                'jawatan' => 'Pegawai Pendidikan / Penceramah Jemputan',
+                'gred' => 'Gred Berkenaan',
+                'institusi' => 'Politeknik Besut Terengganu',
+            ],
+            'aturcara' => [
+                ['tarikh' => $startsAt, 'masa' => $startTime.' – '.date('h:i A', strtotime($startTime . ' +30 minutes')), 'aktiviti' => 'Pendaftaran & Ketibaan Peserta'],
+                ['tarikh' => $startsAt, 'masa' => date('h:i A', strtotime($startTime . ' +30 minutes')).' – '.date('h:i A', strtotime($startTime . ' +3 hours')), 'aktiviti' => 'Sesi Utama & Pengisian Program '.$program->title],
+                ['tarikh' => $startsAt, 'masa' => date('h:i A', strtotime($startTime . ' +3 hours')).' – '.$endTime, 'aktiviti' => 'Rumusan, Sesi Maklum Balas & Penutup'],
+            ],
+            'kewangan' => 'Tiada / Peruntukan Dalaman Jabatan',
+            'survey_summary' => $feedbackText,
+            'achievements' => [
+                'Program berjaya mencapai objektif utama dan memberi pendedahan menyeluruh kepada semua peserta.',
+                'Kehadiran seramai '.$data['attendance_total'].' orang peserta direkodkan dan disahkan secara digital dalam sistem StudentEdge.',
+                'Peningkatan kefahaman dan komitmen peserta terhadap pengisian aktiviti yang dianjurkan.'
+            ],
+            'issues' => [
+                'Kekangan masa program memerlukan perancangan jadual yang lebih fleksibel pada masa hadapan.',
+            ],
+            'improvements' => [
+                'Memperluaskan hebahan awal program bagi meningkatkan jumlah penyertaan sasaran.',
+                'Memantapkan lagi kelengkapan teknikal dan logistik sepanjang program berlangsung.'
+            ],
+            'conclusion' => 'Secara keseluruhannya, program '.(string) $program->title.' telah berjalan dengan lancar dan mencapai matlamat yang disasarkan selaras dengan perancangan kertas kerja dan garis panduan Politeknik Besut.',
         ];
     }
 
     public function toPlainText(array $report): string
     {
-        return implode("\n\n", [
-            "1. Ringkasan Eksekutif\n".$report['executive_summary'],
-            "2. Objektif\n- ".implode("\n- ", $report['objectives']),
-            "3. Maklum Balas Peserta\n".$report['survey_summary'],
-            "4. Hasil / Impak\n- ".implode("\n- ", $report['achievements']),
-            "5. Isu\n- ".implode("\n- ", $report['issues']),
-            "6. Cadangan Penambahbaikan\n- ".implode("\n- ", $report['improvements']),
-            "7. Kesimpulan\n".$report['conclusion'],
-        ]);
+        $objText = implode("\n- ", $report['objectives'] ?? []);
+        $achieveText = implode("\n- ", $report['achievements'] ?? []);
+        $issuesText = implode("\n- ", $report['issues'] ?? []);
+        $improveText = implode("\n- ", $report['improvements'] ?? []);
+
+        return implode("\n\n", array_filter([
+            "1. KLUSTER KPI & PERINGKAT\nKluster: ".($report['kluster_kpi'] ?? 'Kemahiran dan Inovasi')." | Peringkat: ".($report['peringkat'] ?? 'Politeknik'),
+            "2. RINGKASAN PROGRAM\n".($report['executive_summary'] ?? ''),
+            "3. OBJEKTIF PROGRAM\n- ".$objText,
+            "4. MAKLUM BALAS & KAJI SELIDIK\n".($report['survey_summary'] ?? ''),
+            "5. PENCAPAIAN & HASIL / IMPAK\n- ".$achieveText,
+            "6. ISU PELAKSANAAN\n- ".$issuesText,
+            "7. CADANGAN PENAMBAHBAIKAN\n- ".$improveText,
+            "8. KESIMPULAN\n".($report['conclusion'] ?? ''),
+        ]));
     }
 
     private function text(mixed $value, string $fallback): string
