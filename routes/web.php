@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
 use App\Http\Controllers\Admin\FeatureController;
 use App\Http\Controllers\Admin\GuardManagementController;
 use App\Http\Controllers\Admin\LaptopController;
-use App\Http\Controllers\Admin\MaintenanceController;j
+use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ProgramController;
