@@ -174,16 +174,25 @@
                         {{ $q->question_text }}
                         @if($q->is_required)<span>*</span>@endif
                     </label>
-                    @if($q->question_type === 'rating_5')
+                    @if($q->question_type === 'rating_4')
                         <select name="answers[{{ $q->id }}]" @required($q->is_required)>
-                            <option value="5">5 / 5</option>
-                            <option value="4">4 / 5</option>
-                            <option value="3">3 / 5</option>
-                            <option value="2">2 / 5</option>
-                            <option value="1">1 / 5</option>
+                            <option value="">{{ __('— Sila pilih skor penilaian —') }}</option>
+                            <option value="4" @selected(old('answers.'.$q->id) === '4')>4 — Sangat Setuju</option>
+                            <option value="3" @selected(old('answers.'.$q->id) === '3')>3 — Setuju</option>
+                            <option value="2" @selected(old('answers.'.$q->id) === '2')>2 — Tidak Setuju</option>
+                            <option value="1" @selected(old('answers.'.$q->id) === '1')>1 — Sangat Tidak Setuju</option>
+                        </select>
+                    @elseif($q->question_type === 'rating_5')
+                        <select name="answers[{{ $q->id }}]" @required($q->is_required)>
+                            <option value="">{{ __('— Sila pilih skor (1-5) —') }}</option>
+                            <option value="5" @selected(old('answers.'.$q->id) === '5')>5 / 5 ★</option>
+                            <option value="4" @selected(old('answers.'.$q->id) === '4')>4 / 5 ★</option>
+                            <option value="3" @selected(old('answers.'.$q->id) === '3')>3 / 5 ★</option>
+                            <option value="2" @selected(old('answers.'.$q->id) === '2')>2 / 5 ★</option>
+                            <option value="1" @selected(old('answers.'.$q->id) === '1')>1 / 5 ★</option>
                         </select>
                     @else
-                        <textarea name="answers[{{ $q->id }}]" rows="5" @required($q->is_required) placeholder="{{ __('Describe what you learned or gained from this program...') }}">{{ old('answers.'.$q->id) }}</textarea>
+                        <textarea name="answers[{{ $q->id }}]" rows="4" @required($q->is_required) placeholder="{{ __('Sila nyatakan ulasan / pandangan anda...') }}">{{ old('answers.'.$q->id) }}</textarea>
                     @endif
                 </div>
             @endforeach

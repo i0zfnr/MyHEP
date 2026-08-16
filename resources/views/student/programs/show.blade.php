@@ -14,8 +14,9 @@
         @if(!$program->questionnaire_enabled)<div class="alert alert-success">{{ __('This program uses attendance-only mode. No questionnaire is required.') }}</div>@endif
         @foreach($questions as $question)
         <div style="display:grid;gap:.4rem;margin-bottom:1rem;"><label style="font-weight:800;">{{ $question->question_text }} @if($question->is_required)<span style="color:#b42318">*</span>@endif</label>
-            @if($question->question_type === 'rating_5')<select name="answers[{{ $question->id }}]" @required($question->is_required) style="padding:.8rem;border:1px solid var(--border);border-radius:10px;"><option value="">{{ __('Choose rating') }}</option>@for($i=5;$i>=1;$i--)<option value="{{ $i }}">{{ $i }} / 5</option>@endfor</select>
-            @else<textarea name="answers[{{ $question->id }}]" rows="5" @required($question->is_required) style="padding:.8rem;border:1px solid var(--border);border-radius:10px;" placeholder="{{ __('Type your answer here...') }}">{{ old('answers.'.$question->id) }}</textarea>@endif
+            @if($question->question_type === 'rating_4')<select name="answers[{{ $question->id }}]" @required($question->is_required) style="padding:.8rem;border:1px solid var(--border);border-radius:10px;"><option value="">{{ __('— Pilih Skor —') }}</option><option value="4">4 — Sangat Setuju</option><option value="3">3 — Setuju</option><option value="2">2 — Tidak Setuju</option><option value="1">1 — Sangat Tidak Setuju</option></select>
+            @elseif($question->question_type === 'rating_5')<select name="answers[{{ $question->id }}]" @required($question->is_required) style="padding:.8rem;border:1px solid var(--border);border-radius:10px;"><option value="">{{ __('— Pilih Rating —') }}</option>@for($i=5;$i>=1;$i--)<option value="{{ $i }}">{{ $i }} / 5 ★</option>@endfor</select>
+            @else<textarea name="answers[{{ $question->id }}]" rows="4" @required($question->is_required) style="padding:.8rem;border:1px solid var(--border);border-radius:10px;" placeholder="{{ __('Sila taip jawapan / ulasan anda...') }}">{{ old('answers.'.$question->id) }}</textarea>@endif
         </div>
         @endforeach
         @if($program->latitude !== null && $program->longitude !== null)

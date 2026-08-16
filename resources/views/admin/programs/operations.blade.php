@@ -1,108 +1,65 @@
 @extends('layouts.app')
-@section('title', __('Operations & Attendance Workspace - ').$program->title)
-@section('header')<h2 style="margin:0;font-size:1.15rem;font-weight:800;">{{ __('Program Operations & Attendance Workspace') }}</h2>@endsection
+
+@section('title', __('Program Operations & Attendance - ').$program->title)
 
 @push('styles')
-@php
-    $canUseAccent = (session('auth_user.role') === 'student' || session('auth_user.admin_role') === 'system_admin');
-@endphp
 <style>
-.pmr {
-    --pm-accent: {{ $canUseAccent ? 'var(--se-primary, #C8A96A)' : '#C8A96A' }};
-    display: grid;
-    gap: 1.25rem;
-    color: var(--text, #241d16);
-    max-width: 1360px;
-    margin: 0 auto;
-    padding: 1.5rem 1rem;
-    font-family: inherit;
-}
-.pmr-hero, .pmr-card, .pmr-kpi {
-    background: var(--surface, #fff);
-    border: 1px solid color-mix(in srgb, var(--pm-accent) 22%, var(--border, #eadac8));
-    border-radius: 18px;
-    box-shadow: var(--glass-shadow, 0 14px 36px rgba(0,0,0,0.06));
-    backdrop-filter: blur(var(--glass-blur, 16px));
-}
+.pmr { max-width: 1300px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
 .pmr-hero {
-    padding: 1.75rem;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-start;
     gap: 1.5rem;
-    background: linear-gradient(135deg, var(--surface, #fff), color-mix(in srgb, var(--pm-accent) 10%, var(--surface, #fff)));
-}
-.pmr-eyebrow {
-    font-size: .72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    color: var(--pm-accent);
-}
-.pmr h1 { font-size: 2rem; margin: .35rem 0; font-weight: 800; color: var(--text, #241d16); }
-.pmr p { color: var(--text-muted, #746b62); margin: .25rem 0; font-size: 0.92rem; }
-.pmr-card { padding: 1.5rem 1.75rem; }
-.pmr-card h2, .pmr-card h3 { margin: 0 0 .85rem 0; font-weight: 800; color: var(--text, #241d16); }
-
-.pmr-actions { display:flex; align-items:stretch; gap:.35rem; flex-wrap:wrap; padding:.4rem; border:1px solid color-mix(in srgb,var(--pm-accent) 20%,var(--border,#eadac8)); border-radius:14px; background:color-mix(in srgb,var(--surface,#fff) 92%,var(--pm-accent) 8%); }
-.pmr-btn {
-    min-height: 42px;
-    border: 1px solid var(--border, #eadac8);
-    border-radius: 9px;
-    padding: .7rem 1.1rem;
+    padding: 1.5rem 1.75rem;
+    border-radius: 18px;
     background: var(--surface, #fff);
-    color: var(--text, #241d16);
-    font-weight: 800;
-    cursor: pointer;
-    text-decoration: none;
+    border: 1px solid var(--border, #eadac8);
+    box-shadow: 0 10px 28px rgba(36,26,18,0.06);
+}
+.pmr-hero h1 { margin: 0.2rem 0 0.25rem; font-size: 1.45rem; font-weight: 850; color: var(--text, #241d16); }
+.pmr-hero p { margin: 0; font-size: 0.85rem; color: var(--text-muted, #746b62); }
+.pmr-eyebrow { font-size: 0.72rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pm-accent, #b99150); }
+.pmr-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.pmr-btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    font-size: 0.88rem;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    gap: 0.45rem;
+    padding: 0.55rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border, #eadac8);
+    background: var(--surface, #fff);
+    color: var(--text, #241d16);
+    font-size: 0.85rem;
+    font-weight: 750;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
-.pmr-btn:hover { background: color-mix(in srgb, var(--pm-accent) 8%, var(--surface, #fff)); }
-.pmr-btn.primary { background: var(--pm-accent); color: #fff; border-color: var(--pm-accent); box-shadow: 0 4px 14px color-mix(in srgb, var(--pm-accent) 30%, transparent); }
-.pmr-btn.primary:hover { background: color-mix(in srgb, var(--pm-accent) 85%, #000); color: #fff; }
-.pmr-btn svg { width:16px; height:16px; flex:0 0 16px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
-.pmr-btn.public-checkin { border-color:color-mix(in srgb,var(--pm-accent) 48%,var(--border,#eadac8)); color:var(--pm-accent-strong,#8b6a34); background:color-mix(in srgb,var(--pm-accent) 5%,var(--surface,#fff)); }
-.pmr-btn.public-checkin:hover { border-color:var(--pm-accent); background:color-mix(in srgb,var(--pm-accent) 13%,var(--surface,#fff)); color:var(--pm-accent-strong,#8b6a34); }
+.pmr-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(36,26,18,0.08); background: var(--surface-hover, #fdfbf7); }
+.pmr-btn.primary {
+    background: var(--pm-accent, #b99150);
+    border-color: var(--pm-accent, #b99150);
+    color: #fff;
+}
+.pmr-btn.primary:hover { background: color-mix(in srgb, var(--pm-accent, #b99150) 88%, #000); }
+.pmr-btn.public-checkin {
+    background: #0284c7;
+    border-color: #0284c7;
+    color: #fff;
+}
+.pmr-btn.public-checkin:hover { background: #0369a1; }
+.pmr-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-.pmr-mode-panel { margin-top:1.1rem; padding:1rem; border:1px solid var(--border, #eadac8); border-radius:14px; background:color-mix(in srgb, var(--pm-accent) 4%, var(--surface, #fff)); }
-.pmr-mode-panel label { display:block; margin-bottom:.55rem; color:var(--text, #241d16); font-size:.9rem; font-weight:800; }
-.pmr-mode-panel select { width:100%; min-height:46px; padding:.7rem 2.6rem .7rem .9rem; border:1px solid var(--border, #dcc7ad); border-radius:10px; background:var(--surface, #fff); color:var(--text, #241d16); font:inherit; transition:border-color .15s ease, box-shadow .15s ease; }
-.pmr-mode-panel select:focus { outline:none; border-color:var(--pm-accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--pm-accent) 18%, transparent); }
-.pmr-source-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.7rem; margin:1rem 0; }
-.pmr-source-item { padding:.85rem; border:1px solid var(--border,#eadac8); border-radius:12px; background:var(--surface,#fff); }
-.pmr-source-item span { display:block; color:var(--text-muted,#746b62); font-size:.72rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
-.pmr-source-item strong { display:block; margin-top:.3rem; color:var(--text,#241d16); font-size:.9rem; }
-.pmr-source-item.is-ready { border-color:color-mix(in srgb,#21835a 35%,var(--border,#eadac8)); background:color-mix(in srgb,#21835a 5%,var(--surface,#fff)); }
-.pmr-report-lock { margin-top:1rem; padding:.75rem .9rem; border-radius:10px; background:color-mix(in srgb,var(--pm-accent) 7%,var(--surface,#fff)); color:var(--text-muted,#746b62); font-size:.85rem; }
-.pmr-certificate-layout { display:grid; grid-template-columns:minmax(0,.85fr) minmax(320px,1.15fr); gap:1rem; margin-top:1rem; }
-.pmr-certificate-settings { display:grid; align-content:start; gap:.75rem; padding:1rem; border:1px solid color-mix(in srgb,var(--pm-accent) 22%,var(--border,#eadac8)); border-radius:14px; background:color-mix(in srgb,var(--surface,#fff) 94%,var(--pm-accent) 6%); }
-.pmr-certificate-settings label { color:var(--text,#241d16); font-size:.78rem; font-weight:850; }
-.pmr-certificate-settings select { width:100%; min-height:44px; padding:.65rem .8rem; border:1px solid var(--border,#eadac8); border-radius:10px; background:var(--surface,#fff); color:var(--text,#241d16); font:inherit; }
-.pmr-certificate-preview { position:relative; aspect-ratio:1.414/1; display:grid; place-items:center; overflow:hidden; padding:1rem; border:1px solid color-mix(in srgb,var(--pm-accent) 32%,var(--border,#eadac8)); border-radius:14px; background:#fffdf8; color:#342619; box-shadow:0 12px 28px color-mix(in srgb,var(--pm-accent) 14%,transparent); text-align:center; }
-.pmr-certificate-preview::before { content:''; position:absolute; inset:10px; border:4px solid color-mix(in srgb,var(--pm-accent) 72%,#b99150); pointer-events:none; }
-.pmr-certificate-preview__inner { position:relative; z-index:1; width:80%; }
-.pmr-certificate-preview__brand { color:#8b6934; font-size:.58rem; font-weight:850; letter-spacing:.16em; }
-.pmr-certificate-preview__title { margin:.6rem 0 .35rem; font-family:Georgia,serif; font-size:clamp(1.05rem,2.4vw,1.7rem); font-weight:800; }
-.pmr-certificate-preview__name { margin:.65rem 0 .35rem; padding-bottom:.25rem; border-bottom:1px solid #d9bf8d; color:#8b6934; font-family:Georgia,serif; font-size:clamp(.9rem,1.8vw,1.3rem); font-weight:800; }
-.pmr-certificate-preview__meta { color:#695c50; font-size:.65rem; line-height:1.45; }
-.pmr-points-only { margin-top:1rem; padding:1rem; border:1px solid color-mix(in srgb,var(--pm-accent) 24%,var(--border,#eadac8)); border-radius:14px; background:color-mix(in srgb,var(--pm-accent) 7%,var(--surface,#fff)); }
-@media (max-width:820px) { .pmr-certificate-layout { grid-template-columns:1fr; } }
-.pmr-roster-empty { min-height:230px; display:grid; place-items:center; padding:2.25rem 1rem; text-align:center; background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--pm-accent) 9%,transparent),transparent 42%); }
-.pmr-roster-empty__inner { max-width:520px; }
-.pmr-roster-empty__icon { width:52px; height:52px; display:grid; place-items:center; margin:0 auto .9rem; border:1px solid color-mix(in srgb,var(--pm-accent) 30%,var(--border,#eadac8)); border-radius:15px; background:color-mix(in srgb,var(--pm-accent) 8%,var(--surface,#fff)); color:var(--pm-accent-strong,#8b6a34); box-shadow:0 10px 24px color-mix(in srgb,var(--pm-accent) 12%,transparent); }
-.pmr-roster-empty__icon svg { width:27px; height:27px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-.pmr-roster-empty h3 { margin:0 0 .35rem; font-size:1rem; }
-.pmr-roster-empty p { max-width:480px; margin:0 auto; font-size:.84rem; line-height:1.5; }
-.pmr-roster-empty__toolbar { width:fit-content; max-width:100%; display:flex; align-items:center; justify-content:center; gap:.5rem; margin:1rem auto 0; padding:.4rem; border:1px solid color-mix(in srgb,var(--pm-accent) 22%,var(--border,#eadac8)); border-radius:14px; background:color-mix(in srgb,var(--surface,#fff) 94%,var(--pm-accent) 6%); box-shadow:0 10px 24px color-mix(in srgb,var(--pm-accent) 8%,transparent); }
-.pmr-roster-empty__status { display:inline-flex; align-items:center; gap:.4rem; min-height:40px; padding:.35rem .7rem; border-radius:10px; background:color-mix(in srgb,var(--pm-accent) 8%,var(--surface,#fff)); color:var(--pm-accent-strong,#8b6a34); font-size:.7rem; font-weight:850; text-transform:uppercase; letter-spacing:.04em; }
-.pmr-roster-empty__status::before { content:''; width:7px; height:7px; border-radius:50%; background:currentColor; }
-.pmr-roster-empty .pmr-actions { display:inline-flex; justify-content:center; flex-wrap:wrap; padding:0; border:0; background:transparent; }
-.pmr-roster-empty .pmr-btn { min-height:40px; }
-@media (max-width:620px) { .pmr-roster-empty__toolbar { width:100%; align-items:stretch; flex-direction:column; box-sizing:border-box; } .pmr-roster-empty__status { justify-content:center; } .pmr-roster-empty .pmr-actions { display:grid; grid-template-columns:1fr; } }
+.pmr-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #eadac8);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 18px rgba(36,26,18,0.04);
+}
+.pmr-card h2 { margin: 0.2rem 0 0.4rem; font-size: 1.15rem; font-weight: 800; }
+.pmr-card p { margin: 0 0 1rem; font-size: 0.85rem; color: var(--text-muted, #746b62); }
+
 .pmr-attendance-control { padding:0; overflow:hidden; }
 .pmr-attendance-control__header { padding:1rem 1.35rem; border-bottom:1px solid color-mix(in srgb,var(--pm-accent) 18%,var(--border,#eadac8)); }
 .pmr-attendance-control__body { display:flex; align-items:center; justify-content:space-between; gap:1.5rem; padding:1.25rem 1.35rem; }
@@ -118,33 +75,6 @@
 .pmr-attendance-warning { display:flex; align-items:flex-start; gap:.55rem; margin:0 1.35rem 1.15rem !important; padding:.65rem .75rem; border-radius:10px; background:#fff8e9; color:#8a5a13 !important; font-size:.8rem !important; }
 .pmr-attendance-warning::before { content:'!'; display:grid; place-items:center; flex:0 0 20px; width:20px; height:20px; border-radius:50%; background:#f3d79f; font-weight:900; }
 @media (max-width:720px) { .pmr-attendance-control__body { align-items:stretch; flex-direction:column; } .pmr-attendance-control__actions { justify-content:flex-start; } }
-.pmr-mode-actions { display:flex; align-items:center; gap:.85rem; margin-top:.8rem; flex-wrap:wrap; }
-.pmr-mode-status { display:inline-flex; align-items:flex-start; gap:.5rem; margin:0 !important; font-size:.84rem !important; }
-.pmr-mode-status::before { content:'!'; display:grid; place-items:center; flex:0 0 20px; width:20px; height:20px; border-radius:50%; background:#fff1d6; color:#8a5a13; font-size:.72rem; font-weight:900; }
-.pmr-attendance-mode {
-    display:flex;
-    align-items:center;
-    gap:.55rem;
-    margin-top:.75rem;
-    padding:.55rem .7rem;
-    border:1px solid color-mix(in srgb, var(--pm-accent) 28%, var(--border, #eadac8));
-    border-radius:9px;
-    background:color-mix(in srgb, var(--pm-accent) 7%, var(--surface, #fff));
-}
-.pmr-attendance-mode__icon {
-    display:grid;
-    place-items:center;
-    flex:0 0 24px;
-    width:24px;
-    height:24px;
-    border-radius:7px;
-    background:var(--pm-accent);
-    color:#fff;
-    font-size:.75rem;
-    font-weight:900;
-}
-.pmr-attendance-mode strong { color:var(--text, #241d16); font-size:.84rem; }
-.pmr-attendance-mode p { display:inline; margin:0 0 0 .35rem; font-size:.8rem; line-height:1.35; }
 
 /* KPI Grid */
 .pmr-kpis {
@@ -178,39 +108,7 @@
 .pmr-kpi strong { display: block; font-size: 1.8rem; margin-top: .45rem; font-weight: 800; color: var(--text, #241d16); }
 
 /* 2-Column Grid */
-.pmr-grid-2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.25rem; }
-
-.pmr-q-item {
-    border: 1px solid color-mix(in srgb, var(--pm-accent) 20%, var(--border, #eadac8));
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 0.85rem;
-    background: var(--surface, #fff);
-    color: var(--text, #241d16);
-}
-.pmr-q-head { display:flex; justify-content:space-between; align-items:center; gap:.75rem; margin-bottom:.75rem; }
-.pmr-q-title { display:flex; align-items:center; gap:.6rem; font-size:.9rem; }
-.pmr-q-number { display:grid; place-items:center; width:27px; height:27px; border-radius:8px; background:color-mix(in srgb,var(--pm-accent) 12%,var(--surface,#fff)); color:var(--pm-accent-strong); font-size:.75rem; font-weight:900; }
-.pmr-q-field { display:grid; gap:.35rem; margin-top:.7rem; }
-.pmr-q-field > span { color:var(--text-muted,#746b62); font-size:.68rem; font-weight:800; letter-spacing:.045em; text-transform:uppercase; }
-.pmr-q-required { display:flex; align-items:center; gap:.6rem; width:fit-content; margin-top:.8rem; font-size:.82rem; font-weight:750; cursor:pointer; }
-.pmr-q-required input[type="checkbox"] { appearance:none; width:34px !important; height:20px; margin:0 !important; border:1px solid var(--border,#eadac8); border-radius:999px !important; background:var(--border,#eadac8); position:relative; cursor:pointer; transition:.15s ease; }
-.pmr-q-required input[type="checkbox"]::after { content:''; position:absolute; width:14px; height:14px; left:2px; top:2px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.18); transition:transform .15s ease; }
-.pmr-q-required input[type="checkbox"]:checked { border-color:var(--pm-accent); background:var(--pm-accent); }
-.pmr-q-required input[type="checkbox"]:checked::after { transform:translateX(14px); }
-.pmr-remove { display:inline-flex; align-items:center; gap:.35rem; min-height:34px; padding:.35rem .55rem; border:0; border-radius:8px; background:transparent; color:var(--se-danger,#b42318); font:inherit; font-size:.76rem; font-weight:800; cursor:pointer; }
-.pmr-remove:hover { background:color-mix(in srgb,var(--se-danger,#b42318) 8%,transparent); }
-.pmr-remove svg { width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; }
-.pmr-q-item input[type="text"], .pmr-q-item select {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border, #eadac8);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    margin-top: 0;
-    background: var(--surface, #fff);
-    color: var(--text, #241d16);
-}
+.pmr-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 
 .pmr-qr-box {
     text-align: center;
@@ -230,14 +128,199 @@
 }
 .pmr-table th { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted, #746b62); font-weight: 800; background: color-mix(in srgb, var(--pm-accent) 5%, var(--surface, #fff)); }
 
+/* Constrain all icons inside PMR */
+.pmr svg { max-width: 100%; }
+
+/* Participant Roster Empty State */
+.pmr-roster-empty {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: color-mix(in srgb, var(--pm-accent, #b99150) 4%, var(--surface, #fff));
+    border-radius: 14px;
+    border: 1px dashed color-mix(in srgb, var(--pm-accent, #b99150) 24%, var(--border, #eadac8));
+    margin-top: 0.75rem;
+}
+.pmr-roster-empty__inner {
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.pmr-roster-empty__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--pm-accent, #b99150) 12%, var(--surface, #fff));
+    color: var(--pm-accent, #b99150);
+    margin-bottom: 1rem;
+    border: 1px solid color-mix(in srgb, var(--pm-accent, #b99150) 28%, var(--border, #eadac8));
+}
+.pmr-roster-empty__icon svg {
+    width: 26px !important;
+    height: 26px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.8 !important;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.pmr-roster-empty h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text, #241d16);
+}
+.pmr-roster-empty p {
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted, #746b62);
+    line-height: 1.45;
+}
+.pmr-roster-empty__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+.pmr-roster-empty__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 36px;
+    padding: 0.35rem 0.75rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--pm-accent, #b99150) 8%, var(--surface, #fff));
+    color: var(--pm-accent-strong, #8b6a34);
+    font-size: 0.72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 1px solid color-mix(in srgb, var(--pm-accent, #b99150) 20%, var(--border, #eadac8));
+}
+.pmr-roster-empty__status::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Report Sources Checklist */
+.pmr-source-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+.pmr-source-item {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface, #fff) 94%, var(--pm-accent, #b99150));
+    border: 1px solid var(--border, #eadac8);
+}
+.pmr-source-item.is-ready {
+    border-color: color-mix(in srgb, #21835a 30%, var(--border, #eadac8));
+    background: color-mix(in srgb, #21835a 6%, var(--surface, #fff));
+}
+.pmr-source-item span {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted, #746b62);
+    display: block;
+}
+.pmr-source-item strong {
+    font-size: 0.95rem;
+    color: var(--text, #241d16);
+    display: block;
+    margin-top: 2px;
+}
+.pmr-source-item.is-ready strong {
+    color: #187048;
+}
+
+/* Certificate Layout & Preview */
+.pmr-certificate-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    margin-top: 0.75rem;
+}
+.pmr-certificate-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.pmr-certificate-settings select {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--border, #eadac8);
+    font-size: 0.9rem;
+    background: #fff;
+}
+.pmr-certificate-preview {
+    border-radius: 14px;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #1e1b18, #2a241f);
+    border: 2px solid color-mix(in srgb, var(--pm-accent, #b99150) 60%, transparent);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    color: #fff;
+    text-align: center;
+}
+.pmr-certificate-preview__inner {
+    border: 1px dashed color-mix(in srgb, var(--pm-accent, #b99150) 50%, #fff);
+    padding: 1.25rem 1rem;
+    border-radius: 10px;
+}
+.pmr-certificate-preview__brand {
+    font-size: 0.65rem;
+    font-weight: 850;
+    letter-spacing: 0.12em;
+    color: var(--pm-accent, #c8a96a);
+    text-transform: uppercase;
+}
+.pmr-certificate-preview__title {
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    margin: 0.4rem 0 0.3rem;
+    color: #fff;
+}
+.pmr-certificate-preview__name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--pm-accent, #c8a96a);
+    text-decoration: underline;
+    margin: 0.3rem 0;
+}
+.pmr-certificate-preview__meta {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.7);
+}
+.pmr-points-only {
+    padding: 1rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--pm-accent) 6%, var(--surface, #fff));
+    border: 1px solid var(--border, #eadac8);
+    margin-top: 0.5rem;
+}
+
 @media (max-width: 1050px) {
     .pmr-kpis { grid-template-columns: repeat(3, 1fr); }
     .pmr-grid-2 { grid-template-columns: 1fr; }
-    .pmr-source-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .pmr-certificate-layout { grid-template-columns: 1fr; }
+    .pmr-source-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 620px) { .pmr-source-grid { grid-template-columns:1fr; } }
+@media (max-width: 620px) { .pmr-source-grid { grid-template-columns: 1fr; } }
 </style>
 @endpush
+
 @push('styles')
 @include('admin.programs.partials.design-system')
 @endpush
@@ -264,9 +347,10 @@
         </div>
         <div class="pmr-actions">
             <a class="pmr-btn" href="{{ route('admin.programs.show', $program->id) }}">{{ __('Back to Details') }}</a>
-            <button class="pmr-btn primary" type="button" onclick="document.getElementById('aiQuestionnaireModal').scrollIntoView({behavior: 'smooth'})">
+            <a class="pmr-btn primary" href="{{ route('admin.programs.questionnaire', $program->id) }}">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"/></svg>
                 {{ __('Questionnaire Builder') }}
-            </button>
+            </a>
             <a class="pmr-btn public-checkin" href="{{ $publicCheckinUrl }}" target="_blank" rel="noopener">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="m10 14 9-9"/><path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>
                 {{ __('Open Public Check-in') }}
@@ -274,6 +358,7 @@
         </div>
     </header>
 
+    <!-- Attendance Control Card -->
     <section class="pmr-card pmr-attendance-control">
         <div class="pmr-attendance-control__header">
             <span class="pmr-eyebrow">{{ __('ATTENDANCE CONTROL') }}</span>
@@ -338,123 +423,50 @@
         </article>
     </section>
 
-    <!-- 2-Column Workspace Grid -->
+    <!-- 2-Column Workspace Grid: Questionnaire Summary + QR Code -->
     <section class="pmr-grid-2">
-        <!-- Left: Program Owner Questionnaire Workspace -->
-        <article class="pmr-card" id="aiQuestionnaireModal">
-            <span class="pmr-eyebrow">{{ __('QUESTIONNAIRE BUILDER') }}</span>
-            <h2>{{ __('Program Learning & Feedback') }}</h2>
-            <p>{{ __('Create the questionnaire for your program. Written answers are recommended, and AI suggestions are optional.') }}</p>
-
-            <form method="post" action="{{ route('admin.programs.questionnaire-setting.update', $program->id) }}" class="pmr-mode-panel">
-                @csrf @method('put')
-                <label for="participationMode">{{ __('Participation mode') }}</label>
-                <select id="participationMode" name="questionnaire_enabled" data-saved-mode="{{ $program->questionnaire_enabled ? '1' : '0' }}" @disabled($program->attendance_status === 'open')>
-                    <option value="1" @selected($program->questionnaire_enabled)>{{ __('Attendance + Questionnaire') }}</option>
-                    <option value="0" @selected(!$program->questionnaire_enabled)>{{ __('Attendance Only') }}</option>
-                </select>
-                <div class="pmr-mode-actions">
-                    <button class="pmr-btn primary" type="submit" @disabled($program->attendance_status === 'open')>{{ __('Save Participation Mode') }}</button>
-                    @if($program->attendance_status === 'open')<p class="pmr-mode-status">{{ __('Close attendance before changing this setting.') }}</p>@endif
-                    <p id="participationModeNotice" class="pmr-mode-status" style="display:none;color:#8a5a13;">{{ __('Save this selection to continue with the chosen setup.') }}</p>
-                </div>
-            </form>
-
-            <div id="questionnaireBuilderContent" @if(!$program->questionnaire_enabled) hidden @endif>
-
-            <div class="pmr-control-panel">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <label style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">{{ __('Feedback Focus') }}</label>
-                        <select id="aiFocus" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); margin-top: 4px;">
-                            <option value="satisfaction">{{ __('Overall Satisfaction') }}</option>
-                            <option value="logistics">{{ __('Event Logistics & Venue') }}</option>
-                            <option value="effectiveness">{{ __('Program Effectiveness') }}</option>
-                            <option value="general">{{ __('General Feedback') }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">{{ __('Question Count') }}</label>
-                        <select id="aiCount" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); margin-top: 4px;">
-                            <option value="3">3 {{ __('Questions') }}</option>
-                            <option value="5" selected>5 {{ __('Questions') }}</option>
-                            <option value="8">8 {{ __('Questions') }}</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="button" class="pmr-btn primary" id="btnGenerateAi" style="width: 100%; margin-top: 12px;">
-                    {{ __('Suggest Questions with AI') }}
-                </button>
-            </div>
-
-            <!-- Survey Form -->
-            <form method="post" action="{{ route('admin.programs.survey.save', $program->id) }}">
-                @csrf
-                <div style="margin-bottom: 1rem;">
-                    <label style="font-weight: 800; font-size: 0.85rem;">{{ __('Questionnaire Title') }}</label>
-                    <input name="title" required value="{{ old('title', $survey->title ?? __('Feedback Survey - ').$program->title) }}" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); margin-top: 4px;">
-                </div>
-
-                <div id="questionsContainer">
-                    @forelse($questions as $index => $q)
-                        <div class="pmr-q-item">
-                            <div class="pmr-q-head">
-                                <strong class="pmr-q-title"><span class="pmr-q-number">{{ $index + 1 }}</span>{{ __('Question') }}</strong>
-                                <button class="pmr-remove" type="button" onclick="this.closest('.pmr-q-item').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg>{{ __('Remove') }}</button>
-                            </div>
-                            <label class="pmr-q-field"><span>{{ __('Question text') }}</span><input name="questions[{{ $index }}][question_text]" value="{{ $q->question_text }}" required placeholder="{{ __('Enter question text') }}"></label>
-                            <label class="pmr-q-field"><span>{{ __('Answer type') }}</span><select name="questions[{{ $index }}][question_type]">
-                                <option value="text" @selected($q->question_type === 'text')>{{ __('Long Written Answer') }}</option>
-                                <option value="rating_5" @selected($q->question_type === 'rating_5')>{{ __('Rating 1-5 Stars') }}</option>
-                            </select></label>
-                            <label class="pmr-q-required">
-                                <input type="hidden" name="questions[{{ $index }}][is_required]" value="0">
-                                <input type="checkbox" name="questions[{{ $index }}][is_required]" value="1" @checked($q->is_required) style="width:auto;margin:0;">
-                                {{ __('Required question') }}
-                            </label>
-                        </div>
-                    @empty
-                        <div class="pmr-q-item">
-                            <div class="pmr-q-head"><strong class="pmr-q-title"><span class="pmr-q-number">1</span>{{ __('Question') }}</strong></div>
-                            <label class="pmr-q-field"><span>{{ __('Question text') }}</span><input type="text" name="questions[0][question_text]" value="{{ __('What did you learn from this program?') }}" required></label>
-                            <label class="pmr-q-field"><span>{{ __('Answer type') }}</span><select name="questions[0][question_type]">
-                                <option value="text">{{ __('Long Written Answer') }}</option>
-                                <option value="rating_5">{{ __('Rating 1-5 Stars') }}</option>
-                            </select></label>
-                            <label class="pmr-q-required">
-                                <input type="hidden" name="questions[0][is_required]" value="0">
-                                <input type="checkbox" name="questions[0][is_required]" value="1" checked style="width:auto;margin:0;">
-                                {{ __('Required question') }}
-                            </label>
-                        </div>
-                    @endforelse
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 1rem;">
-                    <button type="button" class="pmr-btn" onclick="addQuestionRow()">+ {{ __('Add Question') }}</button>
-                    <button type="submit" class="pmr-btn primary">{{ __('Save Questionnaire Draft') }}</button>
-                </div>
-            </form>
-
-            @if($survey && $survey->status !== 'published')
-                <form method="post" action="{{ route('admin.programs.survey.publish', $program->id) }}" style="margin-top: 10px;">
-                    @csrf
-                    <button type="submit" class="pmr-btn primary" style="width: 100%;">
-                        {{ __('Post / Publish Questionnaire to Students') }}
-                    </button>
-                </form>
-            @elseif($survey && $survey->status === 'published')
-                <div class="pmr-published">
-                    {{ __('Questionnaire is live & published to participants.') }}
-                </div>
-            @endif
-            </div>
-            <div id="attendanceOnlyMessage" class="pmr-attendance-mode" @if($program->questionnaire_enabled) hidden @endif>
-                <span class="pmr-attendance-mode__icon" aria-hidden="true">&#10003;</span>
+        <!-- Left: Questionnaire & Participation Setup Status -->
+        <article class="pmr-card" style="display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;">
                 <div>
-                    <strong>{{ __('Attendance-only mode saved') }}</strong>
-                    <p>{{ __('Students can check in using their account and GPS. No questionnaire is required.') }}</p>
+                    <span class="pmr-eyebrow">{{ __('QUESTIONNAIRE & PARTICIPATION') }}</span>
+                    <h2>{{ __('Questionnaire Setup') }}</h2>
                 </div>
+                @if(!$program->questionnaire_enabled)
+                    <span class="pmr-live-status is-closed">{{ __('Attendance Only') }}</span>
+                @elseif($survey && $survey->status === 'published')
+                    <span class="pmr-live-status">{{ __('Published & Live') }}</span>
+                @else
+                    <span class="pmr-live-status is-closed">{{ __('Draft') }}</span>
+                @endif
+            </div>
+
+            <p style="margin:.5rem 0 1.25rem;font-size:.88rem;color:var(--text-muted,#746b62);line-height:1.45;">
+                @if(!$program->questionnaire_enabled)
+                    {{ __('This program is configured for attendance-only check-in. Participants do not need to fill out a survey.') }}
+                @elseif($survey && $survey->status === 'published')
+                    {{ __('The questionnaire is published and active. Participants answer questions during check-in.') }}
+                @else
+                    {{ __('The questionnaire is in draft. Configure questions and publish it before opening participant check-in.') }}
+                @endif
+            </p>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
+                <div style="padding:.75rem 1rem;background:color-mix(in srgb,var(--pm-accent) 6%,var(--surface,#fff));border-radius:10px;border:1px solid var(--border,#eadac8);">
+                    <span style="font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--text-muted,#746b62);display:block;margin-bottom:2px;">{{ __('Configured Questions') }}</span>
+                    <strong style="font-size:1.15rem;color:var(--text,#241d16);">{{ count($questions) }} {{ __('Questions') }}</strong>
+                </div>
+                <div style="padding:.75rem 1rem;background:color-mix(in srgb,var(--pm-accent) 6%,var(--surface,#fff));border-radius:10px;border:1px solid var(--border,#eadac8);">
+                    <span style="font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--text-muted,#746b62);display:block;margin-bottom:2px;">{{ __('Survey Responses') }}</span>
+                    <strong style="font-size:1.15rem;color:var(--pm-accent,#b99150);">{{ number_format($surveyResponsesCount) }}</strong>
+                </div>
+            </div>
+
+            <div class="pmr-actions" style="margin-top:auto;">
+                <a class="pmr-btn primary" href="{{ route('admin.programs.questionnaire', $program->id) }}" style="width:100%;justify-content:center;min-height:42px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    {{ __('Open Questionnaire Builder') }}
+                </a>
             </div>
         </article>
 
@@ -466,8 +478,7 @@
 
             <div class="pmr-qr-box">
                 <div class="pmr-qr-image">
-                    <!-- Generated QR Code via Google Chart API SVG -->
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data={{ urlencode($publicCheckinUrl) }}" alt="{{ __('Program Attendance QR Code') }}" style="width: 200px; height: 200px;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data={{ urlencode($publicCheckinUrl) }}" alt="{{ __('Program Attendance QR Code') }}" style="width: 180px; height: 180px;">
                 </div>
                 <div style="margin-top: 12px; font-weight: 800; font-size: 0.95rem; color: var(--pm-accent);">
                     {{ $program->title }}
@@ -611,7 +622,7 @@
         @endif
     </section>
 
-    <!-- Bottom: Real-Time Attendee Roster -->
+    <!-- Bottom: Certificates & Real-Time Attendee Roster -->
     <section class="pmr-card" style="margin-bottom:1.25rem;">
         <span class="pmr-eyebrow">{{ __('CERTIFICATES') }}</span>
         @if($program->certificate_enabled ?? true)
@@ -654,7 +665,7 @@
         @if($attendances->isEmpty())
             <div class="pmr-roster-empty">
                 <div class="pmr-roster-empty__inner">
-                    <div class="pmr-roster-empty__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="4"/><path d="M17 8v6m-3-3h6"/></svg></div>
+                    <div class="pmr-roster-empty__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="4"/><path d="M17 8v6m-3-3h6"/></svg></div>
                     <h3>{{ __('Waiting for participants') }}</h3>
                     <p>{{ $program->attendance_status === 'open' ? __('Attendance is open. Share the public check-in link or display the QR code so participants can record attendance.') : __('Attendance is currently closed. Open attendance when you are ready to receive participant check-ins.') }}</p>
                     <div class="pmr-roster-empty__toolbar">
@@ -719,91 +730,4 @@
         @endif
     </section>
 </main>
-
-<script>
-let questionCounter = {{ count($questions) ?: 1 }};
-
-function escapeQuestionValue(value) {
-    return String(value).replace(/[&<>'"]/g, character => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
-    })[character]);
-}
-
-function addQuestionRow(text = '', type = 'text', required = true) {
-    const container = document.getElementById('questionsContainer');
-    const div = document.createElement('div');
-    div.className = 'pmr-q-item';
-    div.innerHTML = `
-        <div class="pmr-q-head">
-            <strong class="pmr-q-title"><span class="pmr-q-number">${questionCounter + 1}</span>Question</strong>
-            <button class="pmr-remove" type="button" onclick="this.closest('.pmr-q-item').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg>Remove</button>
-        </div>
-        <label class="pmr-q-field"><span>Question text</span><input type="text" name="questions[${questionCounter}][question_text]" value="${escapeQuestionValue(text)}" required placeholder="Enter question text"></label>
-        <label class="pmr-q-field"><span>Answer type</span><select name="questions[${questionCounter}][question_type]">
-            <option value="text" ${type === 'text' ? 'selected' : ''}>Long Written Answer</option>
-            <option value="rating_5" ${type === 'rating_5' ? 'selected' : ''}>Rating 1-5 Stars</option>
-        </select></label>
-        <label class="pmr-q-required">
-            <input type="hidden" name="questions[${questionCounter}][is_required]" value="0">
-            <input type="checkbox" name="questions[${questionCounter}][is_required]" value="1" ${required ? 'checked' : ''}>
-            Required question
-        </label>
-    `;
-    container.appendChild(div);
-    questionCounter++;
-}
-
-document.getElementById('btnGenerateAi')?.addEventListener('click', async () => {
-    const focus = document.getElementById('aiFocus').value;
-    const count = document.getElementById('aiCount').value;
-    const btn = document.getElementById('btnGenerateAi');
-
-    btn.disabled = true;
-    btn.innerText = 'AI is generating questions...';
-
-    try {
-        const response = await fetch('{{ route("admin.programs.ai-questionnaire", $program->id) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ focus: focus, question_count: count })
-        });
-
-        const data = await response.json();
-        if (data.success && Array.isArray(data.questions)) {
-            const container = document.getElementById('questionsContainer');
-            container.innerHTML = '';
-            questionCounter = 0;
-
-            data.questions.forEach(q => {
-                addQuestionRow(q.question_text, q.question_type, q.is_required !== false);
-            });
-        }
-    } catch (e) {
-        alert('Could not generate questions automatically. Please key in questions manually.');
-    } finally {
-        btn.disabled = false;
-        btn.innerText = 'Suggest Questions with AI';
-    }
-});
-
-const participationMode = document.getElementById('participationMode');
-const questionnaireBuilderContent = document.getElementById('questionnaireBuilderContent');
-const attendanceOnlyMessage = document.getElementById('attendanceOnlyMessage');
-const participationModeNotice = document.getElementById('participationModeNotice');
-
-function syncParticipationMode() {
-    if (!participationMode) return;
-    const questionnaireSelected = participationMode.value === '1';
-    const selectionSaved = participationMode.value === participationMode.dataset.savedMode;
-    if (questionnaireBuilderContent) questionnaireBuilderContent.hidden = !questionnaireSelected || !selectionSaved;
-    if (attendanceOnlyMessage) attendanceOnlyMessage.hidden = questionnaireSelected || !selectionSaved;
-    if (participationModeNotice) participationModeNotice.style.display = selectionSaved ? 'none' : 'block';
-}
-
-participationMode?.addEventListener('change', syncParticipationMode);
-syncParticipationMode();
-</script>
 @endsection

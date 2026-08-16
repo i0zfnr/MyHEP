@@ -119,6 +119,46 @@ class ProgramOperationController extends Controller
         ));
     }
 
+    public function questionnaire(int $id): View
+    {
+        $program = $this->ownedActiveProgram($id);
+
+        $latestPaperwork = DB::table('program_paperworks')
+            ->where('program_id', $program->id)
+            ->orderByDesc('version')
+            ->first();
+
+        $survey = DB::table('program_surveys')
+            ->where('program_id', $program->id)
+            ->orderByDesc('id')
+            ->first();
+
+        $questions = $survey
+            ? DB::table('program_survey_questions')
+                ->where('program_survey_id', $survey->id)
+                ->orderBy('sort_order')
+                ->get()
+            : collect();
+
+        $surveyResponsesCount = $survey
+            ? DB::table('program_survey_responses')
+                ->where('program_survey_id', $survey->id)
+                ->distinct('program_attendance_id')
+                ->count('program_attendance_id')
+            : 0;
+
+        $publicCheckinUrl = route('public.programs.qr_checkin', $program->id);
+
+        return view('admin.programs.questionnaire', compact(
+            'program',
+            'latestPaperwork',
+            'survey',
+            'questions',
+            'surveyResponsesCount',
+            'publicCheckinUrl'
+        ));
+    }
+
     public function openAttendance(int $id): RedirectResponse
     {
         $program = $this->ownedActiveProgram($id);
@@ -374,8 +414,8 @@ class ProgramOperationController extends Controller
         $program = $this->ownedActiveProgram($id);
         abort_unless((bool) $program->questionnaire_enabled, 403);
 
-        $focus = (string) $request->input('focus', 'satisfaction');
-        $questionCount = max(3, min(10, (int) $request->input('question_count', 5)));
+        $focus = (string) $request->input('focus', 'official_sa04_1');
+        $questionCount = max(3, min(15, (int) $request->input('question_count', 11)));
 
         $latestPaperwork = DB::table('program_paperworks')
             ->where('program_id', $program->id)
@@ -422,7 +462,7 @@ class ProgramOperationController extends Controller
             'description' => 'nullable|string|max:1000',
             'questions' => 'required|array|min:1',
             'questions.*.question_text' => 'required|string|max:255',
-            'questions.*.question_type' => 'required|string|in:rating_5,multiple_choice,text',
+            'questions.*.question_type' => 'required|string|in:rating_4,rating_5,multiple_choice,text',
             'questions.*.is_required' => 'nullable|boolean',
         ]);
 
@@ -449,7 +489,7 @@ class ProgramOperationController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.programs.operations', $program->id)
+        return redirect()->back()
             ->with('success', __('Questionnaire draft saved successfully. Review and click Publish to post it to students.'));
     }
 
@@ -473,7 +513,7 @@ class ProgramOperationController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('admin.programs.operations', $program->id)
+        return redirect()->back()
             ->with('success', __('Questionnaire published successfully! Students can now access and answer it during check-in.'));
     }
 
@@ -757,40 +797,92 @@ class ProgramOperationController extends Controller
 
     private function buildAiQuestions(object $program, string $paperwork, string $focus, int $count): array
     {
-        $questions = [];
-
-        $questions[] = [
-            'question_text' => __('What did you learn from this program?'),
-            'question_type' => 'text',
-            'is_required' => true,
-        ];
-
-        $questions[] = [
-            'question_text' => __('Were the objectives of ').$program->title.__(' clearly achieved?'),
-            'question_type' => 'rating_5',
-            'is_required' => true,
-        ];
-
-        if ($program->venue) {
-            $questions[] = [
-                'question_text' => __('How comfortable and suitable was the venue (').$program->venue.')?',
-                'question_type' => 'rating_5',
-                'is_required' => true,
+        // 1. Official Borang SA-04(1) - Penilaian Peserta (Standard Politeknik Besut)
+        if ($focus === 'official_sa04_1' || $focus === 'template_sa04_1' || $focus === 'official_sa04' || $focus === 'sa04') {
+            return [
+                ['question_text' => 'Objektif latihan / program tercapai.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Kandungan latihan / pengisian adalah sesuai.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Penyampaian penceramah / fasilitator yang baik dan berkesan.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Penggunaan alat bantuan mengajar / modul dengan berkesan.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Suasana tempat latihan / lokasi program yang sesuai dan kondusif.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Perancangan dan pelaksanaan program telah dibuat dengan lancar.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Masa yang diperuntukkan bagi setiap modul / slot adalah sesuai.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Meningkatkan pengetahuan dan pemahaman peserta.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Lebih berkeyakinan menjalankan tugas berkaitan / mengaplikasi apa yang dipelajari.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Pada keseluruhannya latihan / program ini adalah berjaya dan bermanfaat.', 'question_type' => 'rating_4', 'is_required' => true],
+                ['question_text' => 'Kesediaan untuk berkongsi ilmu yang diperolehi berkaitan latihan (Sila nyatakan YA atau TIDAK berserta ulasan jika TIDAK).', 'question_type' => 'text', 'is_required' => false],
             ];
         }
 
-        $questions[] = [
-            'question_text' => __('How effective were the speakers and facilitators during the program?'),
-            'question_type' => 'rating_5',
-            'is_required' => true,
+        // 2. Official Borang SA-04(3) - Penilaian Keberkesanan Terhadap Staf
+        if ($focus === 'official_sa04_3' || $focus === 'template_sa04_3') {
+            return [
+                ['question_text' => 'Staf menunjukkan peningkatan dalam menjalankan tugas.', 'question_type' => 'rating_5', 'is_required' => true],
+                ['question_text' => 'Staf berkongsi kemahiran yang diperolehi dengan staf yang lain.', 'question_type' => 'rating_5', 'is_required' => true],
+                ['question_text' => 'Keyakinan diri melaksanakan tugas meningkat.', 'question_type' => 'rating_5', 'is_required' => true],
+                ['question_text' => 'Staf menunjukkan perubahan sikap dan penampilan yang sangat positif.', 'question_type' => 'rating_5', 'is_required' => true],
+                ['question_text' => 'Peningkatan kerjasama dengan semua peringkat.', 'question_type' => 'rating_5', 'is_required' => true],
+                ['question_text' => 'Menyumbang kepada peningkatan prestasi jabatan / unit secara keseluruhan.', 'question_type' => 'rating_5', 'is_required' => true],
+                ['question_text' => 'Mengaplikasikan ilmu / kemahiran dalam melaksanakan tugas.', 'question_type' => 'rating_5', 'is_required' => true],
+                ['question_text' => 'Ulasan / Komen Tahap Keberkesanan Latihan Terhadap Staf.', 'question_type' => 'text', 'is_required' => false],
+            ];
+        }
+
+        // 3. AI Generation Grounded on Borang SA-04 and Program Paperwork
+        $ai = app(AiProvider::class);
+        if ($ai->enabled()) {
+            try {
+                $prompt = "Anda adalah AI Pembantu Politeknik Besut (StudentEdge). Hasilkan soalan kaji selidik soal selidik maklum balas program berpandukan TEMPLAT RASMI BORANG SA-04(1) POLITEKNIK BESUT:\n"
+                    ."Struktur Borang SA-04:\n"
+                    ."- Penilaian Penceramah/Fasilitator (Objektif, Kandungan, Penyampaian, Alat Bantuan)\n"
+                    ."- Penilaian Pelaksanaan (Tempat/Kondusif, Perancangan Kelancaran, Masa Modul)\n"
+                    ."- Penilaian Keberkesanan (Peningkatan Pengetahuan, Keyakinan Aplikasi, Manfaat Keseluruhan)\n"
+                    ."- Ulasan Peserta (Perkongsian ilmu YA/TIDAK atau ulasan penambahbaikan)\n\n"
+                    ."Tajuk Program: {$program->title}\n"
+                    ."Tempat: ".($program->venue ?: 'Politeknik Besut')."\n"
+                    ."Fokus: {$focus}\n"
+                    ."Konteks Kertas Kerja: ".mb_substr($paperwork, 0, 1500)."\n\n"
+                    ."Hasilkan sebanyak {$count} soalan dalam Bahasa Melayu mengikut format Borang SA-04. Kembalikan HANYA JSON array tanpa blok markdown:\n"
+                    .'[{"question_text": "Teks soalan", "question_type": "rating_4", "is_required": true}]'
+                    ."\nNota: Gunakan question_type 'rating_4' untuk soalan skala skor 1-4, dan 'text' untuk ulasan bertulis.";
+
+                $response = $ai->ask($prompt);
+                $cleanJson = trim(preg_replace('/^```(?:json)?|```$/m', '', $response));
+                $parsed = json_decode($cleanJson, true);
+
+                if (is_array($parsed) && count($parsed) > 0) {
+                    $valid = [];
+                    foreach ($parsed as $item) {
+                        if (! empty($item['question_text'])) {
+                            $valid[] = [
+                                'question_text' => (string) $item['question_text'],
+                                'question_type' => in_array($item['question_type'] ?? '', ['rating_4', 'rating_5', 'text'], true) ? $item['question_type'] : 'rating_4',
+                                'is_required' => ! empty($item['is_required']),
+                            ];
+                        }
+                    }
+                    if (! empty($valid)) {
+                        return array_slice($valid, 0, $count);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Fallback to tailored SA-04 questions below
+            }
+        }
+
+        // Tailored SA-04 Fallback
+        $fallback = [
+            ['question_text' => 'Objektif program '.($program->title ?: '').' tercapai dengan berkesan.', 'question_type' => 'rating_4', 'is_required' => true],
+            ['question_text' => 'Kandungan latihan dan modul yang disampaikan adalah bersesuaian.', 'question_type' => 'rating_4', 'is_required' => true],
+            ['question_text' => 'Penyampaian penceramah / fasilitator adalah menarik, jelas dan berkesan.', 'question_type' => 'rating_4', 'is_required' => true],
+            ['question_text' => 'Suasana tempat latihan '.($program->venue ? '('.$program->venue.')' : '').' adalah selesa dan kondusif.', 'question_type' => 'rating_4', 'is_required' => true],
+            ['question_text' => 'Perancangan dan pengurusan masa program berjalan dengan teratur dan lancar.', 'question_type' => 'rating_4', 'is_required' => true],
+            ['question_text' => 'Program ini berjaya meningkatkan ilmu pengetahuan dan pemahaman saya.', 'question_type' => 'rating_4', 'is_required' => true],
+            ['question_text' => 'Saya berkeyakinan untuk mengaplikasikan apa yang dipelajari dalam tugasan seharian.', 'question_type' => 'rating_4', 'is_required' => true],
+            ['question_text' => 'Secara keseluruhannya, program ini adalah berjaya dan bermanfaat.', 'question_type' => 'rating_4', 'is_required' => true],
+            ['question_text' => 'Kesediaan untuk berkongsi ilmu yang diperolehi (Sila nyatakan YA atau TIDAK berserta ulasan jika berkaitan).', 'question_type' => 'text', 'is_required' => false],
         ];
 
-        $questions[] = [
-            'question_text' => __('What suggestions or feedback do you have to improve future programs?'),
-            'question_type' => 'text',
-            'is_required' => false,
-        ];
-
-        return array_slice($questions, 0, $count);
+        return array_slice($fallback, 0, $count);
     }
 }

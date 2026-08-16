@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
 use App\Http\Controllers\Admin\FeatureController;
 use App\Http\Controllers\Admin\GuardManagementController;
 use App\Http\Controllers\Admin\LaptopController;
-use App\Http\Controllers\Admin\MaintenanceController;
+use App\Http\Controllers\Admin\MaintenanceController;j
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ProgramController;
@@ -166,6 +166,7 @@ Route::prefix('/admin/programs')->middleware('auth.session:admin')->name('admin.
     Route::get('/{program}/paperworks/{paperwork}/download', [ProgramController::class, 'download'])->name('paperworks.download');
 
     Route::get('/{program}/operations', [ProgramOperationController::class, 'operations'])->name('operations');
+    Route::get('/{program}/questionnaire', [ProgramOperationController::class, 'questionnaire'])->name('questionnaire');
     Route::post('/{program}/ai-questionnaire', [ProgramOperationController::class, 'generateAiQuestionnaire'])->name('ai-questionnaire');
     Route::post('/{program}/survey/save', [ProgramOperationController::class, 'saveSurvey'])->name('survey.save');
     Route::post('/{program}/survey/publish', [ProgramOperationController::class, 'publishSurvey'])->name('survey.publish');

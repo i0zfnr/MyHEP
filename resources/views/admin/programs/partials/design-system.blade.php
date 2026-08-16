@@ -1,3 +1,6 @@
+@php
+    $canUseAccent = $canUseAccent ?? (session('auth_user.role') === 'student' || session('auth_user.admin_role') === 'system_admin');
+@endphp
 <style>
 /* Program Management module — aligned with Document Context/Design.md. */
 .pmr {
