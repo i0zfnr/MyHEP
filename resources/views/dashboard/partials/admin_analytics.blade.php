@@ -776,6 +776,308 @@
     }
     .an-tooltip.is-visible { opacity: 1; }
 
+    /* Stack Bars */
+    .an-stack { display: grid; gap: 12px; }
+    .an-stack-row {
+        display: grid;
+        grid-template-columns: minmax(70px, auto) 1fr auto;
+        align-items: center;
+        gap: 12px;
+        color: var(--c-text-secondary, #7f7165);
+        font-size: 0.78rem;
+    }
+    body[data-theme="dark"] .an-stack-row { color: #b8a899; }
+    .an-stack-track {
+        height: 14px;
+        display: flex;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.04);
+    }
+    body[data-theme="dark"] .an-stack-track { background: rgba(255, 255, 255, 0.05); }
+    .an-stack-seg { height: 100%; transition: width 0.3s ease; }
+    .an-stack-total {
+        color: var(--c-text-primary, #171310);
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+    body[data-theme="dark"] .an-stack-total { color: #fdf8f3; }
+    .an-stack-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 14px;
+        font-size: 0.72rem;
+        color: var(--c-text-secondary, #7f7165);
+    }
+    .an-stack-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .an-stack-legend i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--legend-color, #c48e42);
+    }
+
+    /* Treemap */
+    .an-treemap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .an-tile {
+        flex: 1 1 110px;
+        min-height: 68px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: var(--tile, rgba(196, 142, 66, 0.12));
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: transform 0.2s ease;
+    }
+    .an-tile:hover { transform: translateY(-2px); }
+    .an-tile strong {
+        font-size: 1.25rem;
+        font-weight: 850;
+        line-height: 1;
+    }
+    .an-tile span {
+        margin-top: 3px;
+        font-size: 0.7rem;
+        opacity: 0.9;
+    }
+
+    /* Horizontal Bars (hbar) */
+    .an-hbar { display: grid; gap: 10px; }
+    .an-hbar-row {
+        display: grid;
+        grid-template-columns: minmax(80px, auto) 1fr auto;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.78rem;
+        color: var(--c-text-secondary, #7f7165);
+    }
+    .an-hbar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .an-hbar-track {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+    }
+    body[data-theme="dark"] .an-hbar-track { background: rgba(255, 255, 255, 0.05); }
+    .an-hbar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #f3d49b 0%, #c48e42 100%);
+    }
+    .an-hbar-value {
+        color: var(--c-text-primary, #171310);
+        font-weight: 750;
+        font-variant-numeric: tabular-nums;
+    }
+    body[data-theme="dark"] .an-hbar-value { color: #fdf8f3; }
+
+    /* Grouped Comparison */
+    .an-grouped { display: grid; gap: 10px; }
+    .an-group {
+        display: grid;
+        grid-template-columns: minmax(80px, auto) 1fr auto;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.78rem;
+        color: var(--c-text-secondary, #7f7165);
+    }
+    .an-group-pair {
+        height: 14px;
+        display: flex;
+        gap: 3px;
+        align-items: flex-end;
+    }
+    .an-group-bar {
+        width: 14px;
+        border-radius: 3px 3px 0 0;
+        background: #c48e42;
+    }
+    .an-group-bar.last { background: rgba(196, 142, 66, 0.35); }
+    .an-group-value {
+        color: var(--c-text-primary, #171310);
+        font-weight: 750;
+    }
+    body[data-theme="dark"] .an-group-value { color: #fdf8f3; }
+    .an-group-key {
+        display: flex;
+        gap: 14px;
+        margin-top: 10px;
+        font-size: 0.72rem;
+        color: var(--c-text-secondary, #7f7165);
+    }
+    .an-group-key span { display: inline-flex; align-items: center; gap: 6px; }
+    .an-group-key i {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        background: #c48e42;
+    }
+    .an-group-key i.last { background: rgba(196, 142, 66, 0.35); }
+
+    /* 12-Month Columns & Trend Grids */
+    .an-trend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+        gap: 20px;
+    }
+    .an-columns {
+        display: flex;
+        align-items: flex-end;
+        gap: 6px;
+        height: 160px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--c-border, #eadfd2);
+    }
+    body[data-theme="dark"] .an-columns { border-color: rgba(226, 209, 192, 0.14); }
+    .an-col {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+    .an-col-stage {
+        width: 100%;
+        height: 130px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+    }
+    .an-col-bar {
+        width: min(20px, 70%);
+        border-radius: 4px 4px 1px 1px;
+        background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+        transition: transform 0.2s ease;
+    }
+    .an-col:hover .an-col-bar { transform: scaleY(1.05); transform-origin: bottom; }
+    .an-col-label {
+        font-size: 0.64rem;
+        font-weight: 700;
+        color: var(--c-text-secondary, #7f7165);
+    }
+
+    /* SVG Trend Curves */
+    .an-trend-svg {
+        width: 100%;
+        height: 150px;
+        display: block;
+    }
+    .an-trend-svg .an-gridline {
+        stroke: rgba(0, 0, 0, 0.06);
+        stroke-width: 0.35;
+        stroke-dasharray: 2 2;
+    }
+    body[data-theme="dark"] .an-trend-svg .an-gridline { stroke: rgba(255, 255, 255, 0.06); }
+    .an-trend-line {
+        fill: none !important;
+        stroke: var(--c-accent, #c48e42) !important;
+        stroke-width: 0.8 !important;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        vector-effect: non-scaling-stroke;
+    }
+    .an-trend-area {
+        vector-effect: non-scaling-stroke;
+        opacity: 0.85;
+    }
+    .an-trend-dot {
+        fill: var(--c-surface, #ffffff) !important;
+        stroke: var(--c-accent, #c48e42) !important;
+        stroke-width: 0.4 !important;
+        vector-effect: non-scaling-stroke;
+        cursor: crosshair;
+    }
+    body[data-theme="dark"] .an-trend-dot { fill: #171310 !important; }
+    .an-trend-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 6px;
+        font-size: 0.68rem;
+        color: var(--c-text-secondary, #7f7165);
+    }
+
+    /* Activity Heatmap */
+    .an-heat-card .an-card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 200px;
+    }
+    .an-heat-shell {
+        max-width: 100%;
+        overflow-x: auto;
+        padding: 6px 0;
+    }
+    .an-heat {
+        width: max-content;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 36px repeat(8, 44px);
+        grid-template-rows: 20px repeat(7, 22px);
+        gap: 5px;
+        align-items: center;
+    }
+    .an-heat-dow {
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: var(--c-text-secondary, #7f7165);
+        text-align: center;
+        text-transform: uppercase;
+    }
+    .an-heat-week {
+        font-size: 0.64rem;
+        font-weight: 750;
+        color: var(--c-text-secondary, #7f7165);
+        text-align: center;
+    }
+    .an-heat-cell {
+        width: 22px;
+        height: 22px;
+        justify-self: center;
+        border-radius: 5px;
+        background: rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--c-border, #eadfd2);
+        cursor: default;
+        transition: transform 0.15s ease;
+    }
+    body[data-theme="dark"] .an-heat-cell {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(226, 209, 192, 0.10);
+    }
+    .an-heat-cell:hover { transform: scale(1.15); }
+    .an-heat-cell[data-lvl="1"] { background: rgba(196, 142, 66, 0.25); border-color: rgba(196, 142, 66, 0.35); }
+    .an-heat-cell[data-lvl="2"] { background: rgba(196, 142, 66, 0.50); border-color: rgba(196, 142, 66, 0.60); }
+    .an-heat-cell[data-lvl="3"] { background: rgba(196, 142, 66, 0.75); border-color: rgba(196, 142, 66, 0.85); }
+    .an-heat-cell[data-lvl="4"] { background: #c48e42; border-color: #9a6d2c; }
+    .an-heat-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 12px;
+        font-size: 0.72rem;
+        color: var(--c-text-secondary, #7f7165);
+    }
+    .an-heat-legend {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .an-heat-legend i {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+    }
+
     /* Unified analytics system */
     .analytics-dashboard :is(.an-card,.an-kpi,.an-featured) {
         background:var(--se-surface);
@@ -1041,14 +1343,14 @@
                 <div class="an-active-chart an-statistics-chart" data-an-chart>
                     @if ($anActivePoints !== [])
                     <svg class="an-active-svg" viewBox="0 0 100 15" preserveAspectRatio="none" role="img" aria-label="{{ __('Monthly and cumulative activity') }}: {{ implode(', ', $anActiveValues) }}">
-                        <defs><linearGradient id="anActiveGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--se-primary)" stop-opacity=".20"/><stop offset="100%" stop-color="var(--se-primary)" stop-opacity="0"/></linearGradient></defs>
+                        <defs><linearGradient id="anActiveGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--c-accent, #c48e42)" stop-opacity=".25"/><stop offset="100%" stop-color="var(--c-accent, #c48e42)" stop-opacity="0"/></linearGradient></defs>
                         <line class="an-gridline" x1="0" y1="3.75" x2="100" y2="3.75"/><line class="an-gridline" x1="0" y1="7.5" x2="100" y2="7.5"/><line class="an-gridline" x1="0" y1="11.25" x2="100" y2="11.25"/>
-                        <path class="an-active-area" d="{{ $anActiveAreaPath }}"/>
+                        <path class="an-active-area" fill="url(#anActiveGradient)" d="{{ $anActiveAreaPath }}"/>
                         <line class="an-active-guide" data-an-guide x1="0" y1="0" x2="0" y2="15"/>
-                        <path class="an-active-line-secondary" pathLength="1" d="{{ $anPointsToSmoothPath($anActiveSecondaryPoints) }}"/>
-                        <path class="an-active-line" pathLength="1" d="{{ $anPointsToSmoothPath($anActivePoints) }}"/>
+                        <path class="an-active-line-secondary" fill="none" stroke="#10b981" stroke-width="0.65" vector-effect="non-scaling-stroke" pathLength="1" d="{{ $anPointsToSmoothPath($anActiveSecondaryPoints) }}"/>
+                        <path class="an-active-line" fill="none" stroke="var(--c-accent, #c48e42)" stroke-width="0.7" vector-effect="non-scaling-stroke" pathLength="1" d="{{ $anPointsToSmoothPath($anActivePoints) }}"/>
                         @foreach ($anActivePoints as $pointIndex => $point)
-                        <circle class="an-active-node" data-an-point data-an-x="{{ $point['x'] }}" data-an-tooltip="{{ $anActiveLabels[$pointIndex] ?? ($pointIndex + 1) }}|Monthly: {{ number_format($anActiveValues[$pointIndex] ?? 0) }} · Cumulative: {{ number_format($anActiveSecondaryValues[$pointIndex] ?? 0) }}" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r=".55"/>
+                        <circle class="an-active-node" fill="var(--c-surface, #ffffff)" stroke="var(--c-accent, #c48e42)" stroke-width="0.4" vector-effect="non-scaling-stroke" data-an-point data-an-x="{{ $point['x'] }}" data-an-tooltip="{{ $anActiveLabels[$pointIndex] ?? ($pointIndex + 1) }}|Monthly: {{ number_format($anActiveValues[$pointIndex] ?? 0) }} · Cumulative: {{ number_format($anActiveSecondaryValues[$pointIndex] ?? 0) }}" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r=".55"/>
                         @endforeach
                     </svg>
                     @endif
@@ -1323,9 +1625,9 @@
                         <line class="an-gridline" x1="0" y1="6.25" x2="100" y2="6.25"/>
                         <line class="an-gridline" x1="0" y1="12.5" x2="100" y2="12.5"/>
                         <line class="an-gridline" x1="0" y1="18.75" x2="100" y2="18.75"/>
-                        <path class="an-trend-line" pathLength="1" d="{{ $anPointsToSmoothPath($linePoints) }}"/>
+                        <path class="an-trend-line" fill="none" stroke="var(--c-accent, #c48e42)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" d="{{ $anPointsToSmoothPath($linePoints) }}"/>
                         @foreach ($linePoints as $pointIndex => $point)
-                        <circle class="an-trend-dot" data-an-point data-an-tooltip="{{ $trend['six']['labels'][$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($trend['six']['values'][$pointIndex] ?? 0) }} activity" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r=".7"/>
+                        <circle class="an-trend-dot" fill="var(--c-surface, #ffffff)" stroke="var(--c-accent, #c48e42)" stroke-width="0.4" vector-effect="non-scaling-stroke" data-an-point data-an-tooltip="{{ $trend['six']['labels'][$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($trend['six']['values'][$pointIndex] ?? 0) }} activity" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="1.2"/>
                         @endforeach
                     </svg>
                     <div class="an-trend-labels">
@@ -1356,17 +1658,17 @@
                     <svg class="an-trend-svg" data-an-chart viewBox="0 0 100 25" preserveAspectRatio="none" role="img" aria-label="Cumulative {{ $trend['title'] }}: {{ implode(', ', $trend['area']) }}">
                         <defs>
                             <linearGradient id="anAreaGrad{{ $trendIndex }}" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.30"/>
-                                <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.03"/>
+                                <stop offset="0%" stop-color="var(--c-accent, #c48e42)" stop-opacity="0.30"/>
+                                <stop offset="100%" stop-color="var(--c-accent, #c48e42)" stop-opacity="0.03"/>
                             </linearGradient>
                         </defs>
                         <line class="an-gridline" x1="0" y1="6.25" x2="100" y2="6.25"/>
                         <line class="an-gridline" x1="0" y1="12.5" x2="100" y2="12.5"/>
                         <line class="an-gridline" x1="0" y1="18.75" x2="100" y2="18.75"/>
-                        <path class="an-trend-area" d="{{ $anPointsToSmoothPath($areaPoints) }} L{{ $areaPoints[count($areaPoints)-1]['x'] }},25 L{{ $areaPoints[0]['x'] }},25 Z" style="fill:url(#anAreaGrad{{ $trendIndex }})"/>
-                        <path class="an-trend-line" pathLength="1" d="{{ $anPointsToSmoothPath($areaPoints) }}"/>
+                        <path class="an-trend-area" d="{{ $anPointsToSmoothPath($areaPoints) }} L{{ $areaPoints[count($areaPoints)-1]['x'] }},25 L{{ $areaPoints[0]['x'] }},25 Z" fill="url(#anAreaGrad{{ $trendIndex }})"/>
+                        <path class="an-trend-line" fill="none" stroke="var(--c-accent, #c48e42)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" d="{{ $anPointsToSmoothPath($areaPoints) }}"/>
                         @foreach ($areaPoints as $pointIndex => $point)
-                        <circle class="an-trend-dot" data-an-point data-an-tooltip="{{ $trend['six']['labels'][$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($trend['area'][$pointIndex] ?? 0) }} cumulative" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r=".7"/>
+                        <circle class="an-trend-dot" fill="var(--c-surface, #ffffff)" stroke="var(--c-accent, #c48e42)" stroke-width="0.4" vector-effect="non-scaling-stroke" data-an-point data-an-tooltip="{{ $trend['six']['labels'][$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($trend['area'][$pointIndex] ?? 0) }} cumulative" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="1.2"/>
                         @endforeach
                     </svg>
                     <div class="an-trend-labels">
