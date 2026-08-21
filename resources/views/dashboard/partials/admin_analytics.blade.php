@@ -297,52 +297,125 @@
     /* Interactive Studio Chart Area */
     .an-studio-body { padding: 20px 24px 24px; }
     .an-chart-panel[hidden] { display: none !important; }
-    .an-studio-svg-wrap {
+
+    /* Executive Pillar Volume Chart */
+    .an-pillar-chart {
         position: relative;
-        width: 100%;
-        height: 240px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 220px;
+        padding-top: 16px;
     }
-    .an-studio-svg {
+    .an-pillar-stage {
+        position: relative;
+        height: 190px;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        padding: 0 10px 10px;
+        border-bottom: 1px solid var(--c-border, #eadfd2);
+    }
+    body[data-theme="dark"] .an-pillar-stage { border-color: rgba(226, 209, 192, 0.14); }
+    .an-pillar-gridlines {
+        position: absolute;
+        inset: 0 0 10px 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        pointer-events: none;
+    }
+    .an-pillar-gl {
         width: 100%;
+        border-top: 1px dashed rgba(0, 0, 0, 0.06);
+    }
+    body[data-theme="dark"] .an-pillar-gl { border-top-color: rgba(255, 255, 255, 0.06); }
+    .an-pillar-col {
+        position: relative;
+        z-index: 1;
+        flex: 1;
         height: 100%;
-        display: block;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        cursor: pointer;
     }
-    .an-gridline {
-        stroke: rgba(0, 0, 0, 0.06);
-        stroke-width: 0.35;
-        stroke-dasharray: 3 3;
+    .an-pillar-track {
+        width: min(36px, 80%);
+        height: 100%;
+        border-radius: 8px 8px 3px 3px;
+        background: rgba(0, 0, 0, 0.025);
+        display: flex;
+        align-items: flex-end;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.2s ease;
     }
-    body[data-theme="dark"] .an-gridline { stroke: rgba(255, 255, 255, 0.06); }
-    .an-studio-line {
-        fill: none !important;
-        stroke: #c48e42 !important;
-        stroke-width: 0.8 !important;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        vector-effect: non-scaling-stroke;
+    body[data-theme="dark"] .an-pillar-track { background: rgba(255, 255, 255, 0.035); }
+    .an-pillar-col:hover .an-pillar-track {
+        background: rgba(196, 142, 66, 0.10);
     }
-    .an-studio-area {
-        vector-effect: non-scaling-stroke;
-        opacity: 0.85;
+    .an-pillar-fill {
+        width: 100%;
+        border-radius: 8px 8px 2px 2px;
+        background: linear-gradient(180deg, #f3d49b 0%, #c48e42 100%);
+        box-shadow: 0 3px 10px rgba(196, 142, 66, 0.30);
+        transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
+        position: relative;
     }
-    .an-studio-dot {
-        fill: var(--c-surface, #ffffff) !important;
-        stroke: #c48e42 !important;
-        stroke-width: 0.45 !important;
-        vector-effect: non-scaling-stroke;
-        cursor: crosshair;
-        transition: transform 0.15s ease;
+    .an-pillar-fill.theme-blue {
+        background: linear-gradient(180deg, #93c5fd 0%, #3b82f6 100%);
+        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.30);
     }
-    body[data-theme="dark"] .an-studio-dot { fill: #171310 !important; }
-    .an-studio-dot:hover { transform: scale(1.4); transform-origin: center; }
-    .an-chart-x-labels {
+    .an-pillar-fill.is-zero {
+        height: 4px !important;
+        background: rgba(0, 0, 0, 0.10) !important;
+        box-shadow: none !important;
+        border-radius: 2px !important;
+    }
+    body[data-theme="dark"] .an-pillar-fill.is-zero { background: rgba(255, 255, 255, 0.12) !important; }
+    .an-pillar-val-badge {
+        position: absolute;
+        top: -26px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: #171310;
+        color: #fdf8f3;
+        font-size: 0.70rem;
+        font-weight: 850;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    body[data-theme="dark"] .an-pillar-val-badge {
+        background: #fdf8f3;
+        color: #17120c;
+    }
+    .an-pillar-col:hover .an-pillar-val-badge {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-2px);
+    }
+    .an-pillar-col.is-active .an-pillar-fill {
+        box-shadow: 0 0 16px rgba(196, 142, 66, 0.55);
+    }
+    .an-pillar-labels {
         display: flex;
         justify-content: space-between;
-        margin-top: 10px;
+        padding: 0 4px;
+    }
+    .an-pillar-label {
+        flex: 1;
+        text-align: center;
         font-size: 0.72rem;
         font-weight: 750;
         color: var(--c-text-secondary, #7f7165);
     }
+    body[data-theme="dark"] .an-pillar-label { color: #b8a899; }
 
     /* 2-Column Grid Layouts */
     .an-grid-2 {
@@ -893,53 +966,71 @@
 
             <div class="an-studio-body">
                 @if ($sixTotal > 0 || $twelveTotal > 0)
-                {{-- 6-Month View --}}
+                {{-- 6-Month Pillar Volume View --}}
                 <div class="an-studio-range-view active" data-studio-range-view="6">
-                    <div class="an-studio-svg-wrap">
-                        <svg class="an-studio-svg" data-an-chart viewBox="0 0 100 24" preserveAspectRatio="none" role="img" aria-label="{{ $trend['title'] }} 6-month curve">
-                            <defs>
-                                <linearGradient id="anGradSix{{ $trendIndex }}" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#c48e42" stop-opacity="0.30"/>
-                                    <stop offset="100%" stop-color="#c48e42" stop-opacity="0.02"/>
-                                </linearGradient>
-                            </defs>
-                            <line class="an-gridline" x1="0" y1="6" x2="100" y2="6"/>
-                            <line class="an-gridline" x1="0" y1="12" x2="100" y2="12"/>
-                            <line class="an-gridline" x1="0" y1="18" x2="100" y2="18"/>
-                            <path class="an-studio-area" d="{{ $anPointsToSmoothPath($sixPoints) }} L{{ $sixPoints[count($sixPoints)-1]['x'] }},24 L{{ $sixPoints[0]['x'] }},24 Z" fill="url(#anGradSix{{ $trendIndex }})"/>
-                            <path class="an-studio-line" fill="none" stroke="#c48e42" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" d="{{ $anPointsToSmoothPath($sixPoints) }}"/>
-                            @foreach ($sixPoints as $pointIndex => $point)
-                            <circle class="an-studio-dot" fill="var(--c-surface, #ffffff)" stroke="#c48e42" stroke-width="0.45" vector-effect="non-scaling-stroke" data-an-point data-an-tooltip="{{ $sixLabels[$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($sixValues[$pointIndex] ?? 0) }} {{ Str::lower($trend['kicker']) }}" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="1.3"/>
+                    <div class="an-pillar-chart">
+                        <div class="an-pillar-stage">
+                            <div class="an-pillar-gridlines">
+                                <span class="an-pillar-gl"></span>
+                                <span class="an-pillar-gl"></span>
+                                <span class="an-pillar-gl"></span>
+                                <span class="an-pillar-gl"></span>
+                            </div>
+                            @php $sixMax = max(1, ...$sixValues); @endphp
+                            @foreach ($sixValues as $idx => $val)
+                                @php
+                                    $hPercent = $val > 0 ? max(8, round(($val / $sixMax) * 100)) : 0;
+                                    $isLast = $idx === count($sixValues) - 1;
+                                @endphp
+                                <div class="an-pillar-col {{ $isLast ? 'is-active' : '' }}" data-an-point data-an-tooltip="{{ $sixLabels[$idx] ?? ($idx + 1) }}|{{ number_format($val) }} {{ Str::lower($trend['kicker']) }}">
+                                    @if ($val > 0)
+                                        <span class="an-pillar-val-badge">{{ number_format($val) }}</span>
+                                    @endif
+                                    <div class="an-pillar-track">
+                                        <div class="an-pillar-fill {{ $val === 0 ? 'is-zero' : '' }}" style="height: {{ $val > 0 ? $hPercent : 2 }}%;"></div>
+                                    </div>
+                                </div>
                             @endforeach
-                        </svg>
-                    </div>
-                    <div class="an-chart-x-labels">
-                        @foreach ($sixLabels as $label)<span>{{ $label }}</span>@endforeach
+                        </div>
+                        <div class="an-pillar-labels">
+                            @foreach ($sixLabels as $label)
+                                <span class="an-pillar-label">{{ $label }}</span>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
 
-                {{-- 12-Month View --}}
+                {{-- 12-Month Pillar Volume View --}}
                 <div class="an-studio-range-view" data-studio-range-view="12" hidden>
-                    <div class="an-studio-svg-wrap">
-                        <svg class="an-studio-svg" data-an-chart viewBox="0 0 100 24" preserveAspectRatio="none" role="img" aria-label="{{ $trend['title'] }} 12-month curve">
-                            <defs>
-                                <linearGradient id="anGradTwelve{{ $trendIndex }}" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.30"/>
-                                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.02"/>
-                                </linearGradient>
-                            </defs>
-                            <line class="an-gridline" x1="0" y1="6" x2="100" y2="6"/>
-                            <line class="an-gridline" x1="0" y1="12" x2="100" y2="12"/>
-                            <line class="an-gridline" x1="0" y1="18" x2="100" y2="18"/>
-                            <path class="an-studio-area" d="{{ $anPointsToSmoothPath($twelvePoints) }} L{{ $twelvePoints[count($twelvePoints)-1]['x'] }},24 L{{ $twelvePoints[0]['x'] }},24 Z" fill="url(#anGradTwelve{{ $trendIndex }})"/>
-                            <path class="an-studio-line" fill="none" stroke="#3b82f6" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" d="{{ $anPointsToSmoothPath($twelvePoints) }}"/>
-                            @foreach ($twelvePoints as $pointIndex => $point)
-                            <circle class="an-studio-dot" fill="var(--c-surface, #ffffff)" stroke="#3b82f6" stroke-width="0.45" vector-effect="non-scaling-stroke" data-an-point data-an-tooltip="{{ $twelveLabels[$pointIndex] ?? ($pointIndex + 1) }}|{{ number_format($twelveValues[$pointIndex] ?? 0) }} {{ Str::lower($trend['kicker']) }}" cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="1.2"/>
+                    <div class="an-pillar-chart">
+                        <div class="an-pillar-stage">
+                            <div class="an-pillar-gridlines">
+                                <span class="an-pillar-gl"></span>
+                                <span class="an-pillar-gl"></span>
+                                <span class="an-pillar-gl"></span>
+                                <span class="an-pillar-gl"></span>
+                            </div>
+                            @php $twelveMax = max(1, ...$twelveValues); @endphp
+                            @foreach ($twelveValues as $idx => $val)
+                                @php
+                                    $hPercent = $val > 0 ? max(8, round(($val / $twelveMax) * 100)) : 0;
+                                    $isLast = $idx === count($twelveValues) - 1;
+                                @endphp
+                                <div class="an-pillar-col {{ $isLast ? 'is-active' : '' }}" data-an-point data-an-tooltip="{{ $twelveLabels[$idx] ?? ($idx + 1) }}|{{ number_format($val) }} {{ Str::lower($trend['kicker']) }}">
+                                    @if ($val > 0)
+                                        <span class="an-pillar-val-badge">{{ number_format($val) }}</span>
+                                    @endif
+                                    <div class="an-pillar-track">
+                                        <div class="an-pillar-fill theme-blue {{ $val === 0 ? 'is-zero' : '' }}" style="height: {{ $val > 0 ? $hPercent : 2 }}%;"></div>
+                                    </div>
+                                </div>
                             @endforeach
-                        </svg>
-                    </div>
-                    <div class="an-chart-x-labels">
-                        @foreach ($twelveLabels as $label)<span>{{ $label }}</span>@endforeach
+                        </div>
+                        <div class="an-pillar-labels">
+                            @foreach ($twelveLabels as $label)
+                                <span class="an-pillar-label">{{ $label }}</span>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
                 @else
