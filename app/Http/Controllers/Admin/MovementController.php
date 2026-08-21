@@ -106,30 +106,30 @@ class MovementController extends Controller
         ]);
     }
 
-    public function violations(Request $request): View
-    {
-        $filters = $request->validate([
-            'q' => ['nullable', 'string', 'max:150'],
-            'date_from' => ['nullable', 'date'],
-            'date_to' => ['nullable', 'date'],
-        ]);
-        $filters['rule_status'] = 'late';
 
-        $records = $this->movementQuery($filters)
-            ->orderByDesc('student_movements.return_at')
-            ->paginate(15)
+    public function violations(): View
+    {
+        $records = $this->movementQuery(['rule_status' => 'late'])
+            ->paginate(50)
             ->withQueryString();
 
-        return view('admin.movements.violations', compact('records', 'filters'));
+        return view('admin.movements.violations', [
+            'records' => $records,
+            'stats' => $this->getStats(),
+        ]);
     }
 
     public function qr(): View
     {
         $checkpoint = DB::table('movement_checkpoints')->orderBy('id')->first();
+        $dynamicData = $checkpoint && $checkpoint->is_active
+            ? DynamicQrToken::generateForCheckpoint((int) $checkpoint->id)
+            : null;
+        $scanUrl = $dynamicData ? route('student.movements.scan', ['token' => $dynamicData['token']]) : ($checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null);
 
         return view('admin.movements.qr', [
             'checkpoint' => $checkpoint,
-            'scanUrl' => $checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null,
+            'scanUrl' => $scanUrl,
             'settings' => $this->getSettings(),
         ]);
     }
@@ -137,8 +137,9 @@ class MovementController extends Controller
     public function qrStatus()
     {
         $checkpoint = DB::table('movement_checkpoints')->orderBy('id')->first();
-        $scanUrl = $checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null;
-        $isValid = $checkpoint && $checkpoint->is_active;
+        $isValid = (bool) ($checkpoint && $checkpoint->is_active);
+        $dynamicData = $isValid ? DynamicQrToken::generateForCheckpoint((int) $checkpoint->id) : null;
+        $scanUrl = $dynamicData ? route('student.movements.scan', ['token' => $dynamicData['token']]) : ($checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null);
 
         return response()->json([
             'checkpoint' => $checkpoint ? [
@@ -147,17 +148,24 @@ class MovementController extends Controller
                 'is_active' => (bool) $checkpoint->is_active,
                 'is_valid' => $isValid,
             ] : null,
+            'token' => $dynamicData['token'] ?? null,
             'scan_url' => $scanUrl,
+            'expires_in' => $dynamicData['expires_in'] ?? 30,
+            'server_time' => time(),
         ]);
     }
 
     public function qrDisplay(): View
     {
         $checkpoint = DB::table('movement_checkpoints')->orderBy('id')->first();
+        $dynamicData = $checkpoint && $checkpoint->is_active
+            ? DynamicQrToken::generateForCheckpoint((int) $checkpoint->id)
+            : null;
+        $scanUrl = $dynamicData ? route('student.movements.scan', ['token' => $dynamicData['token']]) : ($checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null);
 
         return view('admin.movements.qr_display', [
             'checkpoint' => $checkpoint,
-            'scanUrl' => $checkpoint ? route('student.movements.scan', ['token' => $checkpoint->qr_token]) : null,
+            'scanUrl' => $scanUrl,
         ]);
     }
 

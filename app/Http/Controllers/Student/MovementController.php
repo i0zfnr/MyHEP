@@ -249,6 +249,20 @@ class MovementController extends Controller
 
     private function checkpointByToken(string $token): ?object
     {
+        // 1. Check if token is a rolling HMAC-signed DynamicQrToken
+        if (str_contains($token, '.')) {
+            $extractedId = \App\Support\DynamicQrToken::extractCheckpointId($token);
+            if ($extractedId) {
+                if (\App\Support\DynamicQrToken::verifyForCheckpoint($token, $extractedId)) {
+                    return DB::table('movement_checkpoints')->where('id', $extractedId)->first();
+                }
+
+                // Invalid signature or expired beyond 45s
+                return null;
+            }
+        }
+
+        // 2. Fallback to static checkpoint token
         return DB::table('movement_checkpoints')
             ->where('qr_token', $token)
             ->first();
@@ -256,13 +270,6 @@ class MovementController extends Controller
 
     private function issueScanPass(Request $request, object $checkpoint): void
     {
-        DB::table('movement_checkpoints')
-            ->where('id', $checkpoint->id)
-            ->update([
-                'qr_token' => Str::random(48),
-                'updated_at' => now(),
-            ]);
-
         $request->session()->put(self::SCAN_SESSION_KEY, [
             'checkpoint_id' => (int) $checkpoint->id,
             'scanned_at' => now()->toIso8601String(),
