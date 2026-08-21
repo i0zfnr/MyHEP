@@ -28,6 +28,10 @@ class SystemFeatures
             'label' => 'Liquid Design for Administrators',
             'description' => 'Use liquid glass effects for non-system administrators. Turn this off for solid, higher-contrast panels with clearer borders and reduced visual effects.',
         ],
+        'enforce_student_profile_photo' => [
+            'label' => 'Mandatory Student Profile Photo (Beta)',
+            'description' => 'Require students to upload a verified formal profile photo before accessing other portal features, with automated face alignment and client-side face detection.',
+        ],
     ];
 
     public function exists(string $key): bool
@@ -38,12 +42,16 @@ class SystemFeatures
     public function enabled(string $key): bool
     {
         if (! $this->exists($key) || ! Schema::hasTable('system_features')) {
-            return $this->exists($key);
+            return false;
         }
 
         $value = DB::table('system_features')->where('feature_key', $key)->value('enabled');
 
-        return $value === null ? true : (bool) $value;
+        if ($value === null) {
+            return $key === 'enforce_student_profile_photo' ? false : true;
+        }
+
+        return (bool) $value;
     }
 
     public function all(): array

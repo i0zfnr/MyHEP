@@ -433,6 +433,17 @@
                                     @endif
                                     @if($canManageStudents)
                                         <a class="btn manage-action" href="{{ route('admin.students.edit', $student->id) }}">{{ __('Edit') }}</a>
+                                        @if(filled($student->photo))
+                                            <form method="POST" action="{{ route('admin.students.photos.reject', $student->id) }}" style="margin:0;"
+                                                data-confirm-title="{{ __('Tolak Gambar Profil') }}"
+                                                data-confirm-message="{{ __('Adakah anda pasti mahu menolak dan memadam gambar profil pelajar ini? Pelajar akan diminta memuat naik gambar kad matrik formal baharu.') }}"
+                                                data-confirm-action="{{ __('Tolak Gambar') }}"
+                                                data-confirm-tone="danger">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-warn" type="submit" title="{{ __('Tolak gambar profil dan minta muat naik semula') }}">{{ __('Tolak Foto') }}</button>
+                                            </form>
+                                        @endif
                                         <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;"
                                             data-confirm-title="{{ __('Reset password') }}"
                                             data-confirm-message="{{ __('Reset this student password to NRIC?') }}"

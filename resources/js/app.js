@@ -1340,12 +1340,110 @@ const registerProfilePhotoCropper = () => {
         input.focus({ preventScroll: true });
     };
 
+    const statusPill = modal?.querySelector('[data-face-detection-status]');
+    const guideOverlay = modal?.querySelector('[data-face-guide-overlay]');
+
+    let lastDetectedFaces = null;
+    let evalTimeout = null;
+
+    const updateStatusPill = (status, text) => {
+        if (!statusPill) return;
+        statusPill.className = `face-detect-status is-${status}`;
+        statusPill.innerHTML = status === 'detected'
+            ? `<span>✓</span> <span>${text || 'Wajah Disahkan'}</span>`
+            : (status === 'missing'
+                ? `<span>⚠️</span> <span>${text || 'Tiada Wajah'}</span>`
+                : `<span>🔍</span> <span>${text || 'Menilai Wajah...'}</span>`);
+    };
+
+    const analyzeFacePresence = async (canvas) => {
+        if (!canvas) return { detected: true, reason: 'unsupported' };
+
+        // 1. Native Shape Detection API (Chrome / Edge / Chromium Android)
+        if ('FaceDetector' in window) {
+            try {
+                const detector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 5 });
+                const faces = await detector.detect(canvas);
+                if (faces && faces.length > 0) {
+                    return { detected: true, count: faces.length, source: 'ai' };
+                }
+                return { detected: false, count: 0, source: 'ai' };
+            } catch (err) {
+                // Fallback to pixel analysis
+            }
+        }
+
+        // 2. Client-side Skin Tone & Feature Variance Heuristic
+        try {
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) return { detected: true, reason: 'fallback' };
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const imgData = ctx.getImageData(Math.floor(w * 0.2), Math.floor(h * 0.15), Math.floor(w * 0.6), Math.floor(h * 0.6));
+            const data = imgData.data;
+
+            let skinPixels = 0;
+            let totalChecked = 0;
+            let luminanceSum = 0;
+
+            for (let i = 0; i < data.length; i += 16) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                totalChecked++;
+
+                // YCbCr conversion
+                const y = 0.299 * r + 0.587 * g + 0.114 * b;
+                const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+                const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+                luminanceSum += y;
+
+                // Human skin tone chroma bounding box
+                if (r > 60 && g > 40 && b > 20 && r > b && (r - g) >= 10 && cr >= 130 && cr <= 178 && cb >= 75 && cb <= 130) {
+                    skinPixels++;
+                }
+            }
+
+            const skinRatio = totalChecked > 0 ? (skinPixels / totalChecked) : 0;
+            // Face detected if central region has reasonable proportion of human portrait tones
+            if (skinRatio >= 0.12 && skinRatio <= 0.92) {
+                return { detected: true, count: 1, source: 'heuristic' };
+            }
+            return { detected: false, count: 0, source: 'heuristic' };
+        } catch (e) {
+            return { detected: true, reason: 'error_fallback' };
+        }
+    };
+
+    const triggerFaceCheck = () => {
+        if (!cropper) return;
+        if (evalTimeout) clearTimeout(evalTimeout);
+        updateStatusPill('checking', 'Menilai Wajah...');
+
+        evalTimeout = setTimeout(async () => {
+            if (!cropper) return;
+            const testCanvas = cropper.getCroppedCanvas({ width: 320, height: 320, imageSmoothingEnabled: false });
+            if (!testCanvas) return;
+
+            const res = await analyzeFacePresence(testCanvas);
+            lastDetectedFaces = res;
+
+            if (res.detected) {
+                updateStatusPill('detected', res.count > 1 ? `${res.count} Wajah Dikesan` : 'Wajah Disahkan');
+            } else {
+                updateStatusPill('missing', 'Wajah Kurang Jelas');
+            }
+        }, 320);
+    };
+
     const openCropper = (file) => {
         sourceUrl = URL.createObjectURL(file);
         cropImage.src = sourceUrl;
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('profile-crop-open');
+        updateStatusPill('checking', 'Menilai Wajah...');
 
         cropper = new Cropper(cropImage, {
             aspectRatio: 1,
@@ -1361,6 +1459,15 @@ const registerProfilePhotoCropper = () => {
             toggleDragModeOnDblclick: false,
             responsive: true,
             restore: false,
+            ready() {
+                triggerFaceCheck();
+            },
+            cropend() {
+                triggerFaceCheck();
+            },
+            zoom() {
+                triggerFaceCheck();
+            },
         });
     };
 
@@ -1388,11 +1495,28 @@ const registerProfilePhotoCropper = () => {
             closeCropper(true);
             return;
         }
-        if (action === 'rotate-left') cropper.rotate(-90);
-        if (action === 'rotate-right') cropper.rotate(90);
-        if (action === 'reset') cropper.reset();
+        if (action === 'rotate-left') {
+            cropper.rotate(-90);
+            triggerFaceCheck();
+        }
+        if (action === 'rotate-right') {
+            cropper.rotate(90);
+            triggerFaceCheck();
+        }
+        if (action === 'reset') {
+            cropper.reset();
+            triggerFaceCheck();
+        }
+        if (action === 'toggle-guide') {
+            guideOverlay?.classList.toggle('is-hidden');
+        }
 
         if (action === 'apply') {
+            if (lastDetectedFaces && !lastDetectedFaces.detected) {
+                const proceed = confirm('Sistem mengesan wajah anda mungkin kurang jelas atau berada di luar bulatan panduan. Adakah anda pasti mahu menggunakan gambar ini sebagai foto rasmi kad matrik?');
+                if (!proceed) return;
+            }
+
             const canvas = cropper.getCroppedCanvas({
                 width: 800,
                 height: 800,
@@ -1418,7 +1542,7 @@ const registerProfilePhotoCropper = () => {
                 }
                 if (placeholder instanceof HTMLElement) placeholder.hidden = true;
                 closeCropper(false);
-            }, 'image/jpeg', .9);
+            }, 'image/jpeg', 0.92);
         }
     });
 

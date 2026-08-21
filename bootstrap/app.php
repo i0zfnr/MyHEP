@@ -36,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
             TrackAccountSession::class,
             TranslateFrontendContent::class,
+            \App\Http\Middleware\EnsureStudentProfilePhoto::class,
             SecurityHeaders::class,
         ]);
 

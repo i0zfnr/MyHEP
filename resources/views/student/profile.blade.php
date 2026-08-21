@@ -80,6 +80,116 @@
     .profile-crop-tool { padding:0 12px; font-size:.78rem; font-weight:700; }
     .profile-crop-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .profile-crop-actions .btn { min-height:44px; text-align:center; }
+    .guideline-box {
+        margin-bottom: 16px;
+        border: 1px solid #e2d3c1;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #fffdfa 0%, #fdf9f4 100%);
+        padding: 14px 16px;
+    }
+    .guideline-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 13px;
+        color: #7b5b43;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .guideline-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+    }
+    .guideline-chip {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #5c4a3d;
+        background: #ffffff;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #ede3d6;
+    }
+    .guideline-chip.is-prohibited {
+        border-color: #fed7aa;
+        background: #fffbf7;
+        color: #9a3412;
+    }
+    .guideline-icon {
+        font-size: 14px;
+        line-height: 1;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .profile-crop-stage {
+        position: relative;
+        min-height: 320px;
+        background: #11100f;
+        overflow: hidden;
+    }
+    .face-guide-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transition: opacity .2s ease;
+    }
+    .face-guide-overlay.is-hidden { opacity: 0; }
+    .face-guide-silhouette {
+        width: 62%;
+        height: 72%;
+        border: 2px dashed rgba(255, 255, 255, 0.85);
+        border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.38);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    .face-guide-text {
+        position: absolute;
+        bottom: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #ffffff;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+    .face-detect-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .face-detect-status.is-detected {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .face-detect-status.is-checking {
+        background: rgba(212, 175, 55, 0.15);
+        color: #b99150;
+        border: 1px solid rgba(212, 175, 55, 0.35);
+    }
+    .face-detect-status.is-missing {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.35);
+    }
     @media (max-width: 600px) {
         .profile-crop-dialog { max-height:calc(100dvh - 16px); border-radius:18px; }
         .profile-crop-stage { min-height:0; height:min(48dvh, 420px); }
@@ -249,21 +359,47 @@
 @section('content')
 <div class="wrap">
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
+    @if(session('warning'))<div class="required-note" style="margin-bottom:14px;font-weight:700;">{{ session('warning') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
     <form method="POST" action="{{ route('student.profile.update') }}" enctype="multipart/form-data">
         @csrf
         <div class="card">
-            <h2>{{ __('Maklumat Akaun') }}</h2>
+            <h2>{{ __('Maklumat Akaun & Foto Kad Matrik') }}</h2>
             <div class="body">
-                <div class="required-note">{{ __('Upload a clear profile photo before using the system. You may complete the other details now or update them later.') }}</div>
+                <!-- Standard Matric Photo Guideline Card -->
+                <div class="guideline-box">
+                    <div class="guideline-header">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        <span>{{ __('Standard Gambar Profil Rasmi (Format Kad Matrik)') }}</span>
+                    </div>
+                    <div class="guideline-grid">
+                        <div class="guideline-chip">
+                            <span class="guideline-icon">✅</span>
+                            <div><strong>{{ __('Wajah Jelas:') }}</strong> {{ __('Pandang tepat ke kamera dengan pencahayaan terang dan neutral.') }}</div>
+                        </div>
+                        <div class="guideline-chip">
+                            <span class="guideline-icon">👔</span>
+                            <div><strong>{{ __('Pakaian Formal:') }}</strong> {{ __('Kemeja berkolar, blazer atau tudung kemas berdisiplin.') }}</div>
+                        </div>
+                        <div class="guideline-chip">
+                            <span class="guideline-icon">🖼️</span>
+                            <div><strong>{{ __('Latar Belakang Polos:') }}</strong> {{ __('Latar belakang kosong (biru/putih/neutral) tanpa gangguan.') }}</div>
+                        </div>
+                        <div class="guideline-chip is-prohibited">
+                            <span class="guideline-icon">🚫</span>
+                            <div><strong>{{ __('Dilarang:') }}</strong> {{ __('Avatar/anime, gambar kumpulan, cermin mata hitam, topi atau penapis (filters).') }}</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="photo-row">
                     <img class="profile-photo" data-profile-photo-preview src="{{ !empty($student->photo) ? asset('storage/' . $student->photo) : '' }}" alt="{{ __('Profile photo') }}" @if(empty($student->photo)) hidden @endif>
                     <div class="profile-photo photo-placeholder" data-profile-photo-placeholder @if(!empty($student->photo)) hidden @endif>{{ strtoupper(substr($student->full_name ?? 'P', 0, 1)) }}</div>
                     <div style="flex:1; min-width:220px;">
-                        <label for="profile_photo">{{ __('Gambar Profil') }}</label>
+                        <label for="profile_photo">{{ __('Gambar Profil (Format Pasport 3:4)') }}</label>
                         <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ empty($student->photo) ? 'required' : '' }}>
-                        <small style="display:block;margin-top:6px;color:#7a6555;">{{ __('JPG, PNG, or WEBP. Maximum 50MB for testing.') }}</small>
+                        <small style="display:block;margin-top:6px;color:#7a6555;">{{ __('JPG, PNG, atau WEBP. Sistem menyediakan alat pemotong foto dan pengesahan wajah automatik.') }}</small>
                     </div>
                 </div>
                 <div class="grid grid-2">
@@ -459,21 +595,32 @@
 <div class="profile-crop-modal" data-profile-crop-modal aria-hidden="true">
     <section class="profile-crop-dialog" role="dialog" aria-modal="true" aria-labelledby="profileCropTitle">
         <header class="profile-crop-head">
-            <h2 id="profileCropTitle">{{ __('Adjust profile photo') }}</h2>
+            <h2 id="profileCropTitle">{{ __('Penyunting Foto Profil Kad Matrik') }}</h2>
             <button type="button" class="profile-crop-close" data-profile-crop-action="cancel" aria-label="{{ __('Cancel photo crop') }}">&times;</button>
         </header>
         <div class="profile-crop-stage">
             <img data-profile-crop-image alt="{{ __('Selected profile photo') }}">
+            <div class="face-guide-overlay" data-face-guide-overlay aria-hidden="true">
+                <div class="face-guide-silhouette">
+                    <span class="face-guide-text">{{ __('Letakkan Wajah di Sini') }}</span>
+                </div>
+            </div>
         </div>
         <footer class="profile-crop-controls">
-            <div class="profile-crop-tools">
-                <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-left">{{ __('Rotate left') }}</button>
-                <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-right">{{ __('Rotate right') }}</button>
-                <button type="button" class="profile-crop-tool" data-profile-crop-action="reset">{{ __('Reset') }}</button>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div class="profile-crop-tools">
+                    <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-left" title="{{ __('Putar ke kiri') }}">&#8634; {{ __('Kiri') }}</button>
+                    <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-right" title="{{ __('Putar ke kanan') }}">&#8635; {{ __('Kanan') }}</button>
+                    <button type="button" class="profile-crop-tool" data-profile-crop-action="reset" title="{{ __('Tetapkan semula kedudukan') }}">{{ __('Reset') }}</button>
+                    <button type="button" class="profile-crop-tool" data-profile-crop-action="toggle-guide" title="{{ __('Papar/sembunyi garisan panduan wajah') }}">{{ __('Panduan') }}</button>
+                </div>
+                <div id="faceDetectionStatus" class="face-detect-status is-checking" data-face-detection-status>
+                    <span>🔍</span> <span>{{ __('Menilai Wajah...') }}</span>
+                </div>
             </div>
             <div class="profile-crop-actions">
-                <button type="button" class="btn" data-profile-crop-action="cancel">{{ __('Cancel') }}</button>
-                <button type="button" class="btn btn-primary" data-profile-crop-action="apply">{{ __('Use photo') }}</button>
+                <button type="button" class="btn" data-profile-crop-action="cancel">{{ __('Batal') }}</button>
+                <button type="button" class="btn btn-primary" data-profile-crop-action="apply">{{ __('Gunakan Foto Ini') }}</button>
             </div>
         </footer>
     </section>

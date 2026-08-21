@@ -356,6 +356,29 @@ class StudentController extends Controller
             ->with('success', __('Berjaya memadam :count gambar profil pelajar.', ['count' => $count]));
     }
 
+    public function rejectPhoto(int $id): RedirectResponse
+    {
+        if (! (session('auth_user.admin_role') === 'system_admin' || adminCan('students.manage'))) {
+            abort(403, __('Unauthorized action.'));
+        }
+
+        $student = DB::table('students')->where('id', $id)->first();
+        if (!$student) {
+            return $this->studentNotFoundRedirect();
+        }
+
+        if (filled($student->photo) && Storage::disk('public')->exists($student->photo)) {
+            Storage::disk('public')->delete($student->photo);
+        }
+
+        DB::table('students')->where('id', $id)->update(['photo' => null, 'updated_at' => now()]);
+
+        auditLog('students.reject_photo', 'students', $id, "Rejected and deleted profile photo for student #{$id} ({$student->full_name})");
+
+        return redirect()->back()
+            ->with('success', __('Gambar profil pelajar berjaya ditolak dan dipadam. Pelajar diminta memuat naik semula gambar rasmi.'));
+    }
+
     public function resetPassword(AccountSessionManager $sessions, int $id)
     {
         $student = DB::table('students')->where('id', $id)->first();
