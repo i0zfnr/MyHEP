@@ -912,11 +912,16 @@
     .adash .monitor-card,
     .adash .monitor-kpi,
     .adash .an-card,
-    .adash .an-kpi { -webkit-backdrop-filter:none!important; backdrop-filter:none!important; }
-    .adash .stats-grid,
-    .adash .two-col,
-    .adash .monitor-grid,
-    .adash .analytics-dashboard { content-visibility:auto; contain-intrinsic-size:auto 280px; }
+    .adash .an-kpi {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        contain: paint;
+        transform: translateZ(0);
+    }
+    .adash {
+        transform: translateZ(0);
+        will-change: auto;
+    }
 
     /* Unified dashboard system */
     .adash { gap:16px; --c-bg:var(--se-bg); --c-surface:var(--se-surface); --c-surface-2:var(--se-surface-soft); --c-border:var(--se-border); --c-border-strong:color-mix(in srgb,var(--se-border) 72%,var(--se-text)); --c-text-primary:var(--se-text); --c-text-secondary:var(--se-text-muted); --c-text-muted:var(--se-text-soft); }
