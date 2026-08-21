@@ -324,6 +324,38 @@ class StudentController extends Controller
             ->with('success', __('Deleted :count student records and their related data.', ['count' => $students->count()]));
     }
 
+    public function destroyAllPhotos(Request $request): RedirectResponse
+    {
+        if (! (session('auth_user.admin_role') === 'system_admin' || adminCan('students.manage'))) {
+            abort(403, __('Unauthorized action.'));
+        }
+
+        $studentsWithPhotos = DB::table('students')
+            ->whereNotNull('photo')
+            ->where('photo', '!=', '')
+            ->select('id', 'photo')
+            ->get();
+
+        $count = $studentsWithPhotos->count();
+        if ($count === 0) {
+            return redirect()->route('admin.students.index')
+                ->with('success', __('Tiada gambar profil pelajar untuk dipadam.'));
+        }
+
+        foreach ($studentsWithPhotos as $student) {
+            if (filled($student->photo) && Storage::disk('public')->exists($student->photo)) {
+                Storage::disk('public')->delete($student->photo);
+            }
+        }
+
+        DB::table('students')->update(['photo' => null]);
+
+        auditLog('students.delete_all_photos', 'students', null, "Deleted {$count} student profile photos");
+
+        return redirect()->route('admin.students.index')
+            ->with('success', __('Berjaya memadam :count gambar profil pelajar.', ['count' => $count]));
+    }
+
     public function resetPassword(AccountSessionManager $sessions, int $id)
     {
         $student = DB::table('students')->where('id', $id)->first();

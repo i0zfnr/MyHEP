@@ -347,6 +347,14 @@
                     <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">{{ __('Export CSV') }}</a>
                 @endif
                 @if($canManageStudents)
+                    <form method="POST" action="{{ route('admin.students.photos.destroy-all') }}" onsubmit="return confirm('{{ __('Adakah anda pasti mahu memadam SEMUA gambar profil pelajar? Rekod pelajar akan kekal dan mereka akan diminta memuat naik gambar kad matrik formal yang baharu.') }}');" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-warn" type="submit" style="display:inline-flex;align-items:center;gap:4px;" title="{{ __('Padam semua gambar profil pelajar untuk mewajibkan muat naik gambar kad matrik formal baharu') }}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            {{ __('Padam Semua Gambar') }}
+                        </button>
+                    </form>
                     <a class="btn" href="{{ route('admin.students.create') }}">{{ __('Tambah Pelajar') }}</a>
                 @endif
             </div>
