@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', ($isLecturer ?? false) ? __('Staff Dashboard') : __('Admin Dashboard'))
 
@@ -922,11 +922,36 @@
     .adash { gap:16px; --c-bg:var(--se-bg); --c-surface:var(--se-surface); --c-surface-2:var(--se-surface-soft); --c-border:var(--se-border); --c-border-strong:color-mix(in srgb,var(--se-border) 72%,var(--se-text)); --c-text-primary:var(--se-text); --c-text-secondary:var(--se-text-muted); --c-text-muted:var(--se-text-soft); }
     .adash :is(.dash-hero,.portal-card,.stat-card,.data-card,.monitor-card,.monitor-kpi) { border:1px solid var(--c-border); border-radius:14px; background:var(--c-surface); box-shadow:0 1px 2px rgba(25,20,16,.045); }
     .adash :is(.portal-card,.stat-card,.data-card,.monitor-card,.monitor-kpi):hover { transform:none; border-color:var(--c-border-strong); box-shadow:0 5px 16px rgba(25,20,16,.065); }
-    .dash-hero { min-height:116px; padding:22px 24px; border-color:var(--c-border)!important; background:linear-gradient(135deg,var(--c-surface),color-mix(in srgb,var(--se-primary-soft) 35%,var(--c-surface)))!important; }
-    .dash-hero::before { background:radial-gradient(320px circle at 100% 0%,color-mix(in srgb,var(--se-primary) 16%,transparent),transparent 68%)!important; }
-    .dash-hero :is(h3,p,.dash-hero-date) { color:var(--se-text)!important; }
-    .dash-hero h3 { font-family:inherit; font-size:1.55rem; font-weight:850; letter-spacing:-.035em; }
-    .dash-hero p { color:var(--se-text-muted)!important; font-weight:600; }
+    .dash-hero {
+        min-height: 116px;
+        padding: 24px 28px;
+        border-color: rgba(226, 209, 192, 0.22) !important;
+        background: linear-gradient(135deg, #2b221a 0%, #191512 100%) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18) !important;
+    }
+    .dash-hero::before { background: radial-gradient(320px circle at 100% 0%, rgba(196, 142, 66, 0.25), transparent 70%) !important; }
+    .dash-hero h3 { color: #ffffff !important; font-family: inherit; font-size: 1.65rem; font-weight: 850; letter-spacing: -0.03em; margin: 4px 0 6px 0; }
+    .dash-hero p { color: #f1e7dd !important; font-size: 0.92rem; font-weight: 500; opacity: 0.92; line-height: 1.5; }
+    .dash-hero-label {
+        background: rgba(255, 255, 255, 0.18) !important;
+        border: 1px solid rgba(255, 255, 255, 0.28) !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.08em !important;
+        padding: 4px 12px !important;
+        border-radius: 999px !important;
+    }
+    .dash-hero-date {
+        color: #fdf8f3 !important;
+        background: rgba(0, 0, 0, 0.32) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        padding: 6px 14px !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 0.8rem !important;
+    }
     .dash-hero-actions { padding:0!important; border:0!important; background:transparent!important; box-shadow:none!important; }
     .viz-mode {
         display:grid;
