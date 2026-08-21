@@ -388,6 +388,12 @@ Route::delete('/admin/bug-reports/{id}', [AdminBugReportController::class, 'dest
 Route::get('/admin/active-visitors', [ActiveVisitorController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.active-visitors.index');
+Route::delete('/admin/active-visitors', [ActiveVisitorController::class, 'clear'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.active-visitors.clear');
+Route::delete('/admin/active-visitors/{id}', [ActiveVisitorController::class, 'destroy'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.active-visitors.destroy');
 
 Route::get('/admin/students', [StudentController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:students.list'])
