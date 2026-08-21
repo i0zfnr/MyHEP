@@ -242,12 +242,17 @@
         
         @if(($programDashboard['recent'] ?? collect())->isEmpty())
             <div class="empty-state-card">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 9.75h6m-6 3h3m-6-6h1.5m6.75-9.75H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-                </svg>
-                <h4>{{ __('No programs yet') }}</h4>
-                <p>{{ __('Create your first program in Program Management to start the workflow.') }}</p>
-                <a href="{{ route('admin.programs.create') }}" class="btn-create">{{ __('Create New Program') }}</a>
+                <div class="empty-icon-circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 9.75h6m-6 3h3m-6-6h1.5m6.75-9.75H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                    </svg>
+                </div>
+                <h4>{{ __('No programs recorded yet') }}</h4>
+                <p>{{ __('Create your first program in Program Management to initiate the review and approval workflow.') }}</p>
+                <a href="{{ route('admin.programs.create') }}" class="btn-create">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    <span>{{ __('Create New Program') }}</span>
+                </a>
             </div>
         @else
             <div class="table-responsive">
@@ -952,22 +957,41 @@ body[data-theme="dark"] .branch-tag {
 
 /* Empty State Card */
 .empty-state-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 36px 20px;
+    width: 100%;
+    padding: 44px 20px;
     color: var(--c-text-secondary, #7f7165);
 }
 
-.empty-state-card svg {
-    width: 44px;
-    height: 44px;
-    margin-bottom: 10px;
-    color: var(--c-text-muted, #b8a899);
+.empty-icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(196, 142, 66, 0.10);
+    border: 1px solid rgba(196, 142, 66, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px auto;
+    color: var(--c-accent, #c48e42);
+    box-shadow: 0 4px 14px rgba(196, 142, 66, 0.12);
+}
+
+.empty-icon-circle svg {
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    color: currentColor;
 }
 
 .empty-state-card h4 {
-    margin: 0 0 4px 0;
-    font-size: 1rem;
-    font-weight: 700;
+    margin: 0 0 6px 0;
+    font-size: 1.08rem;
+    font-weight: 800;
     color: var(--c-text-primary, #171310);
 }
 
@@ -976,32 +1000,31 @@ body[data-theme="dark"] .empty-state-card h4 {
 }
 
 .empty-state-card p {
-    margin: 0 0 16px 0;
-    font-size: 0.84rem;
+    margin: 0 auto 20px auto;
+    max-width: 440px;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    color: var(--c-text-secondary, #7f7165);
 }
 
 .btn-create {
     display: inline-flex;
     align-items: center;
-    padding: 8px 16px;
-    background: var(--c-surface-2, #f5efe9);
-    border: 1px solid var(--c-border, #eadfd2);
-    color: var(--c-text-primary, #171310);
-    font-size: 0.82rem;
+    gap: 8px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #f3d49b 0%, #c48e42 100%);
+    color: #17120c !important;
+    font-size: 0.88rem;
     font-weight: 700;
-    border-radius: 10px;
+    border-radius: 12px;
     text-decoration: none;
-    transition: all 0.2s;
+    box-shadow: 0 6px 18px rgba(196, 142, 66, 0.24);
+    transition: all 0.2s ease;
 }
 
 .btn-create:hover {
-    background: var(--c-border, #eadfd2);
-}
-
-body[data-theme="dark"] .btn-create {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.12);
-    color: #fdf8f3;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(196, 142, 66, 0.35);
 }
 
 /* Responsive */
