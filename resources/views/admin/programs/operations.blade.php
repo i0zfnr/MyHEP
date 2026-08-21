@@ -134,79 +134,138 @@
 /* Participant Roster Empty State */
 .pmr-roster-empty {
     text-align: center;
-    padding: 2.5rem 1.5rem;
-    background: color-mix(in srgb, var(--pm-accent, #b99150) 4%, var(--surface, #fff));
-    border-radius: 14px;
-    border: 1px dashed color-mix(in srgb, var(--pm-accent, #b99150) 24%, var(--border, #eadac8));
+    padding: 3rem 2rem 2.5rem;
+    background: radial-gradient(ellipse at top, color-mix(in srgb, var(--pm-accent, #b99150) 9%, var(--surface, #fff)) 0%, var(--surface, #fff) 75%);
+    border-radius: 20px;
+    border: 1px solid color-mix(in srgb, var(--pm-accent, #b99150) 24%, var(--border, #eadac8));
+    box-shadow: 0 4px 20px rgba(36,26,18,0.03);
     margin-top: 0.75rem;
 }
 .pmr-roster-empty__inner {
-    max-width: 480px;
+    max-width: 640px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
+.pmr-roster-empty__icon-wrap {
+    position: relative;
+    margin-bottom: 1.25rem;
+}
 .pmr-roster-empty__icon {
     display: grid;
     place-items: center;
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--pm-accent, #b99150) 12%, var(--surface, #fff));
-    color: var(--pm-accent, #b99150);
-    margin-bottom: 1rem;
-    border: 1px solid color-mix(in srgb, var(--pm-accent, #b99150) 28%, var(--border, #eadac8));
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--pm-accent, #b99150) 20%, #fff) 0%, color-mix(in srgb, var(--pm-accent, #b99150) 8%, #fff) 100%);
+    color: var(--pm-accent-strong, #8b6a34);
+    border: 1px solid color-mix(in srgb, var(--pm-accent, #b99150) 35%, var(--border, #eadac8));
+    box-shadow: 0 8px 24px rgba(185, 145, 80, 0.18);
 }
 .pmr-roster-empty__icon svg {
-    width: 26px !important;
-    height: 26px !important;
+    width: 30px !important;
+    height: 30px !important;
     fill: none !important;
     stroke: currentColor !important;
-    stroke-width: 1.8 !important;
+    stroke-width: 1.9 !important;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 .pmr-roster-empty h3 {
-    margin: 0 0 0.35rem;
-    font-size: 1.1rem;
-    font-weight: 800;
+    margin: 0 0 0.4rem;
+    font-size: 1.25rem;
+    font-weight: 850;
+    letter-spacing: -0.02em;
     color: var(--text, #241d16);
 }
 .pmr-roster-empty p {
-    margin: 0 0 1rem;
-    font-size: 0.85rem;
+    margin: 0 0 1.5rem;
+    font-size: 0.88rem;
     color: var(--text-muted, #746b62);
-    line-height: 1.45;
+    line-height: 1.5;
+    max-width: 500px;
+}
+.pmr-roster-guidelines {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.85rem;
+    width: 100%;
+    margin-bottom: 1.75rem;
+    text-align: left;
+}
+.pmr-roster-guide {
+    padding: 0.95rem 1rem;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--pm-accent, #b99150) 4%, var(--surface, #fff));
+    border: 1px solid color-mix(in srgb, var(--pm-accent, #b99150) 16%, var(--border, #eadac8));
+}
+.pmr-roster-guide strong {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--text, #241d16);
+    margin-bottom: 0.25rem;
+}
+.pmr-roster-guide strong svg {
+    width: 15px;
+    height: 15px;
+    color: var(--pm-accent, #b99150);
+}
+.pmr-roster-guide span {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--text-muted, #746b62);
+    line-height: 1.4;
 }
 .pmr-roster-empty__toolbar {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
+    gap: 0.85rem;
     flex-wrap: wrap;
 }
 .pmr-roster-empty__status {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    min-height: 36px;
-    padding: 0.35rem 0.75rem;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--pm-accent, #b99150) 8%, var(--surface, #fff));
-    color: var(--pm-accent-strong, #8b6a34);
-    font-size: 0.72rem;
+    gap: 0.5rem;
+    min-height: 38px;
+    padding: 0.4rem 0.95rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
     font-weight: 850;
-    text-transform: uppercase;
     letter-spacing: 0.04em;
-    border: 1px solid color-mix(in srgb, var(--pm-accent, #b99150) 20%, var(--border, #eadac8));
+    text-transform: uppercase;
 }
-.pmr-roster-empty__status::before {
+.pmr-roster-empty__status.is-closed {
+    background: rgba(116, 107, 98, 0.10);
+    color: #746b62;
+    border: 1px solid rgba(116, 107, 98, 0.22);
+}
+.pmr-roster-empty__status.is-closed::before {
     content: '';
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: currentColor;
+    background: #746b62;
+}
+.pmr-roster-empty__status.is-open {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+}
+.pmr-roster-empty__status.is-open::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+@media (max-width: 700px) {
+    .pmr-roster-guidelines { grid-template-columns: 1fr; }
 }
 
 /* Report Sources Checklist */
@@ -692,16 +751,56 @@
         @if($attendances->isEmpty())
             <div class="pmr-roster-empty">
                 <div class="pmr-roster-empty__inner">
-                    <div class="pmr-roster-empty__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="4"/><path d="M17 8v6m-3-3h6"/></svg></div>
-                    <h3>{{ __('Waiting for participants') }}</h3>
-                    <p>{{ $program->attendance_status === 'open' ? __('Attendance is open. Students can scan using the PWA mobile scanner or public QR code.') : __('Attendance is currently closed. Open attendance when you are ready to receive participant check-ins.') }}</p>
-                    <div class="pmr-roster-empty__toolbar">
-                        <span class="pmr-roster-empty__status">{{ $program->attendance_status === 'open' ? __('Attendance Open') : __('Attendance Closed') }}</span>
-                        @if($program->attendance_status === 'open')
-                        <div class="pmr-actions">
-                            <a class="pmr-btn public-checkin" href="{{ $publicCheckinUrl }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="m10 14 9-9"/><path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>{{ __('Open Public Check-in') }}</a>
-                            <button class="pmr-btn" type="button" onclick="navigator.clipboard.writeText(@js($publicCheckinUrl)); this.textContent='{{ __('Copied') }}'">{{ __('Copy Check-in Link') }}</button>
+                    <div class="pmr-roster-empty__icon-wrap">
+                        <div class="pmr-roster-empty__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </div>
+                    </div>
+                    <h3>{{ __('Waiting for Participant Check-ins') }}</h3>
+                    <p>{{ $program->attendance_status === 'open' ? __('Attendance is currently open. Students can check in by scanning the dynamic event QR code on their mobile devices or through public check-in.') : __('Attendance is currently closed. Open attendance to begin receiving live student check-ins and GPS verification.') }}</p>
+                    
+                    <div class="pmr-roster-guidelines">
+                        <div class="pmr-roster-guide">
+                            <strong>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h2m2 0h2m-6 4h6"/></svg>
+                                {{ __('Dynamic QR Scan') }}
+                            </strong>
+                            <span>{{ __('Students scan the rotating dynamic QR code via the MyHEP mobile app or browser.') }}</span>
+                        </div>
+                        <div class="pmr-roster-guide">
+                            <strong>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 10-4 4-2-2"/></svg>
+                                {{ __('GPS Geofence') }}
+                            </strong>
+                            <span>{{ __('Location and distance are verified automatically against the event venue coordinates.') }}</span>
+                        </div>
+                        <div class="pmr-roster-guide">
+                            <strong>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                {{ __('Certificates & Points') }}
+                            </strong>
+                            <span>{{ __('Verified attendees automatically receive merit points and digital certificates.') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="pmr-roster-empty__toolbar">
+                        <span class="pmr-roster-empty__status {{ $program->attendance_status === 'open' ? 'is-open' : 'is-closed' }}">
+                            {{ $program->attendance_status === 'open' ? __('Live Check-in Active') : __('Attendance Closed') }}
+                        </span>
+                        @if($program->attendance_status === 'open')
+                            <div class="pmr-actions">
+                                <a class="pmr-btn public-checkin" href="{{ $publicCheckinUrl }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="m10 14 9-9"/><path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>{{ __('Open Public Check-in') }}</a>
+                                <button class="pmr-btn" type="button" onclick="navigator.clipboard.writeText(@js($publicCheckinUrl)); this.textContent='{{ __('Copied') }}'">{{ __('Copy Check-in Link') }}</button>
+                            </div>
+                        @elseif($canManageAttendance)
+                            <form method="post" action="{{ route('admin.programs.attendance.toggle', $program->id) }}" style="display:inline;">
+                                @csrf
+                                <input type="hidden" name="status" value="open">
+                                <button class="pmr-btn primary" type="submit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                                    {{ __('Open Attendance Now') }}
+                                </button>
+                            </form>
                         @endif
                     </div>
                 </div>
