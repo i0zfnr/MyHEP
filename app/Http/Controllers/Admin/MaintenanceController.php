@@ -116,7 +116,7 @@ class MaintenanceController extends Controller
 
         myhepSendPushNotification('admin', $adminId, [
             'category' => 'account',
-            'title' => 'StudentEdge test notification',
+            'title' => 'MyHEP test notification',
             'body' => 'Push notifications are connected to this System Admin account.',
             'url' => route('admin.maintenance.index'),
             'tag' => 'system-admin-push-test-'.now()->timestamp,
@@ -175,7 +175,7 @@ class MaintenanceController extends Controller
         }
         $body = filled($validated['message'] ?? null)
             ? trim((string) $validated['message'])
-            : "StudentEdge is scheduled for maintenance from {$schedule}. Please save your work before maintenance begins.";
+            : "MyHEP is scheduled for maintenance from {$schedule}. Please save your work before maintenance begins.";
 
         $studentIds = myhepPushSubscribedUserIds('student');
         $adminIds = myhepPushSubscribedUserIds('admin');

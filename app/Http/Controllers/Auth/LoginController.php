@@ -81,7 +81,7 @@ class LoginController extends Controller
 
             myhepSendPushNotification('student', (int) $student->id, [
                 'category' => 'account',
-                'title' => 'New StudentEdge login',
+                'title' => 'New MyHEP login',
                 'body' => 'A new login to your student account was detected.',
                 'url' => route('settings.show'),
                 'tag' => 'student-login-'.now()->format('YmdHi'),
@@ -127,7 +127,7 @@ class LoginController extends Controller
 
         myhepSendPushNotification('admin', (int) $admin->id, [
             'category' => 'account',
-            'title' => 'New StudentEdge login',
+            'title' => 'New MyHEP login',
             'body' => 'A new login to your admin account was detected.',
             'url' => route('settings.show'),
             'tag' => 'admin-login-'.now()->format('YmdHi'),
@@ -341,7 +341,7 @@ class LoginController extends Controller
         myhepSendPushNotification($reset->role, (int) $reset->target_id, [
             'category' => 'account',
             'title' => 'Password reset completed',
-            'body' => 'Your StudentEdge password was reset. Contact a system administrator immediately if this was not you.',
+            'body' => 'Your MyHEP password was reset. Contact a system administrator immediately if this was not you.',
             'url' => route('login'),
             'tag' => $reset->role.'-password-reset-'.$reset->target_id,
             'requireInteraction' => true,

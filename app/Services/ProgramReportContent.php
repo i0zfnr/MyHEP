@@ -74,8 +74,8 @@ class ProgramReportContent
         $endTime = $program->ends_at ? date('h:i A', strtotime($program->ends_at)) : '05:00 PM';
 
         $feedbackText = ($data['survey_responses'] ?? 0) > 0
-            ? $data['survey_responses'].' maklum balas peserta direkodkan melalui sistem StudentEdge dengan skor purata '.$data['average_rating'].' / 5.00. Majoriti peserta menyatakan program memberi manfaat yang amat tinggi.'
-            : 'Program ini mencatatkan kehadiran '.$data['attendance_total'].' peserta internal yang disahkan melalui imbasan QR kehadiran StudentEdge.';
+            ? $data['survey_responses'].' maklum balas peserta direkodkan melalui sistem MyHEP dengan skor purata '.$data['average_rating'].' / 5.00. Majoriti peserta menyatakan program memberi manfaat yang amat tinggi.'
+            : 'Program ini mencatatkan kehadiran '.$data['attendance_total'].' peserta internal yang disahkan melalui imbasan QR kehadiran MyHEP.';
 
         return [
             'kluster_kpi' => 'Kemahiran dan Inovasi',
@@ -108,7 +108,7 @@ class ProgramReportContent
             'survey_summary' => $feedbackText,
             'achievements' => [
                 'Program berjaya mencapai objektif utama dan memberi pendedahan menyeluruh kepada semua peserta.',
-                'Kehadiran seramai '.$data['attendance_total'].' orang peserta direkodkan dan disahkan secara digital dalam sistem StudentEdge.',
+                'Kehadiran seramai '.$data['attendance_total'].' orang peserta direkodkan dan disahkan secara digital dalam sistem MyHEP.',
                 'Peningkatan kefahaman dan komitmen peserta terhadap pengisian aktiviti yang dianjurkan.'
             ],
             'issues' => [

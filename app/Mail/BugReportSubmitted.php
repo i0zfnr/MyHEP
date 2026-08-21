@@ -17,7 +17,7 @@ class BugReportSubmitted extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New StudentEdge report #' . $this->report['id'] . ': ' . $this->report['subject'],
+            subject: 'New MyHEP report #' . $this->report['id'] . ': ' . $this->report['subject'],
         );
     }
 

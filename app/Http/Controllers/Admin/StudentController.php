@@ -399,7 +399,7 @@ class StudentController extends Controller
         myhepSendPushNotification('student', $id, [
             'category' => 'account',
             'title' => 'Password reset by administrator',
-            'body' => 'An administrator reset your StudentEdge password. Contact the system administrator if this was unexpected.',
+            'body' => 'An administrator reset your MyHEP password. Contact the system administrator if this was unexpected.',
             'url' => route('login'),
             'tag' => 'student-admin-password-reset-' . $id,
             'requireInteraction' => true,

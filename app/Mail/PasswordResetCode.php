@@ -23,7 +23,7 @@ class PasswordResetCode extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your StudentEdge password reset code',
+            subject: 'Your MyHEP password reset code',
         );
     }
 

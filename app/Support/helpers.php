@@ -517,10 +517,10 @@ if (!function_exists('myhepSendPushNotification')) {
             $config = myhepWebPushConfig();
             $runtime = myhepConfigureWebPushRuntime();
             $payload = json_encode([
-                'title' => (string) ($message['title'] ?? 'StudentEdge'),
+                'title' => (string) ($message['title'] ?? 'MyHEP'),
                 'body' => (string) ($message['body'] ?? ''),
                 'url' => myhepPushAbsoluteUrl($message['url'] ?? ($userType === 'admin' ? '/admin/dashboard' : '/student/dashboard')),
-                'tag' => (string) ($message['tag'] ?? 'studentedge-general'),
+                'tag' => (string) ($message['tag'] ?? 'myhep-general'),
                 'icon' => myhepPushAbsoluteUrl($message['icon'] ?? $config['icon']),
                 'badge' => myhepPushAbsoluteUrl($message['badge'] ?? $config['badge']),
                 'requireInteraction' => (bool) ($message['requireInteraction'] ?? false),
@@ -559,7 +559,7 @@ if (!function_exists('myhepSendPushNotification')) {
                             'user_id' => $userId,
                             'endpoint_hash' => $subscription->endpoint_hash ?? null,
                             'reason' => $report->getReason(),
-                            'tag' => $message['tag'] ?? 'studentedge-general',
+                            'tag' => $message['tag'] ?? 'myhep-general',
                         ]);
                     }
 

@@ -161,7 +161,7 @@ class ProfileController extends Controller
         myhepSendPushNotification('student', $studentId, [
             'category' => 'account',
             'title' => 'Password changed',
-            'body' => 'Your StudentEdge password was changed. Review your account immediately if this was not you.',
+            'body' => 'Your MyHEP password was changed. Review your account immediately if this was not you.',
             'url' => route('settings.show'),
             'tag' => 'student-password-changed-' . $studentId,
             'requireInteraction' => true,

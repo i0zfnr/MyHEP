@@ -1018,7 +1018,7 @@ class ProgramOperationController extends Controller
             ."2. Rujuk maklumat program yang dipilih oleh pengguna (tajuk, tarikh, masa, tempat, anjuran, kumpulan sasaran, objektif, latar belakang).\n"
             ."3. Teliti kertas kerja kelulusan yang dimuat naik dan rekod aktiviti program.\n"
             ."4. Analisis gambar/foto aktiviti yang disertakan untuk menggambarkan pengisian aktiviti sebenar.\n"
-            ."5. Analisis data kehadiran digital serta respons kaji selidik / maklum balas pelajar daripada sistem StudentEdge.\n"
+            ."5. Analisis data kehadiran digital serta respons kaji selidik / maklum balas pelajar daripada sistem MyHEP.\n"
             ."6. Janakan kandungan laporan lengkap dalam Bahasa Melayu rasmi bertaraf dokumen kerajaan, selaras 1-ke-1 dengan struktur templat rasmi.\n\n"
             ."FORMAT OUTPUT (Wajib JSON tulen tanpa Markdown / code fences):\n"
             ."{\n"
@@ -1118,7 +1118,7 @@ class ProgramOperationController extends Controller
         $ai = app(AiProvider::class);
         if ($ai->enabled()) {
             try {
-                $prompt = "Anda adalah AI Pembantu Politeknik Besut (StudentEdge). Hasilkan soalan kaji selidik soal selidik maklum balas program berpandukan TEMPLAT RASMI BORANG SA-04(1) POLITEKNIK BESUT:\n"
+                $prompt = "Anda adalah AI Pembantu Politeknik Besut (MyHEP). Hasilkan soalan kaji selidik soal selidik maklum balas program berpandukan TEMPLAT RASMI BORANG SA-04(1) POLITEKNIK BESUT:\n"
                     ."Struktur Borang SA-04:\n"
                     ."- Penilaian Penceramah/Fasilitator (Objektif, Kandungan, Penyampaian, Alat Bantuan)\n"
                     ."- Penilaian Pelaksanaan (Tempat/Kondusif, Perancangan Kelancaran, Masa Modul)\n"

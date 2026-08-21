@@ -57,7 +57,7 @@ class AiHelperController extends Controller
         }
         $context = $this->studentContext($studentId);
         $prompt = implode("\n\n", [
-            'You are StudentEdge Student AI Helper for a Malaysian polytechnic.',
+            'You are MyHEP Student AI Helper for a Malaysian polytechnic.',
             'Answer only about the signed-in student and general portal guidance. Provide text guidance only; never generate or offer images or other visual assets. Never infer missing records, reveal another person, or treat advice as an official decision. Be concise and use the language used in the question.',
             'Format the answer as clean, readable Markdown for a chat card. Use short headings and bullets only when they improve clarity. Write labels as **Label:** Value. Do not output raw HTML, decorative asterisks, or unnecessary report boilerplate.',
             'Signed-in student context JSON: '.json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),

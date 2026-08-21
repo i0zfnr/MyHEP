@@ -754,8 +754,8 @@ const registerPwaPromptUi = () => {
 
         showPrompt({
             kicker: 'Install App',
-            title: 'Install StudentEdge',
-            copy: 'Add StudentEdge to your home screen for faster access and a cleaner mobile app experience.',
+            title: 'Install MyHEP',
+            copy: 'Add MyHEP to your home screen for faster access and a cleaner mobile app experience.',
             dismissalKey: PWA_PROMPT_KEY,
             actions: `
                 <button type="button" class="pwa-prompt-btn primary" id="pwaInstallBtn">Install now</button>
@@ -787,8 +787,8 @@ const registerPwaPromptUi = () => {
     if (isIosSafari() && !isStandaloneMode() && !window.localStorage.getItem(PWA_PROMPT_KEY)) {
         showPrompt({
             kicker: 'Add to Home Screen',
-            title: 'Install StudentEdge on iPhone',
-            copy: 'Safari does not show the standard install popup. Use the share menu once to pin StudentEdge like an app.',
+            title: 'Install MyHEP on iPhone',
+            copy: 'Safari does not show the standard install popup. Use the share menu once to pin MyHEP like an app.',
             dismissalKey: PWA_PROMPT_KEY,
             extra: `
                 <ol class="pwa-prompt-steps">
@@ -1155,7 +1155,7 @@ const registerLiquidFilterSheets = () => {
         sheet.setAttribute('aria-labelledby', headingId);
         sheet.innerHTML = `
             <div class="se-filter-sheet-head">
-                <div><span class="se-filter-sheet-kicker">StudentEdge</span><h2 id="${headingId}"></h2></div>
+                <div><span class="se-filter-sheet-kicker">MyHEP</span><h2 id="${headingId}"></h2></div>
                 <button type="button" class="se-icon-button" data-filter-close aria-label="${config.labels?.closeFilters || 'Close filters'}">&times;</button>
             </div>
             <div class="se-filter-sheet-body"></div>

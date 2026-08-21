@@ -142,7 +142,7 @@ class AdminUserController extends Controller
             myhepSendPushNotification('admin', $id, [
                 'category' => 'account',
                 'title' => 'Password changed by administrator',
-                'body' => 'An administrator changed your StudentEdge password. Contact the system administrator if this was unexpected.',
+                'body' => 'An administrator changed your MyHEP password. Contact the system administrator if this was unexpected.',
                 'url' => route('login'),
                 'tag' => 'admin-password-changed-' . $id,
                 'requireInteraction' => true,
@@ -174,7 +174,7 @@ class AdminUserController extends Controller
         myhepSendPushNotification('admin', $id, [
             'category' => 'account',
             'title' => 'Password reset by administrator',
-            'body' => 'An administrator reset your StudentEdge password. Contact the system administrator if this was unexpected.',
+            'body' => 'An administrator reset your MyHEP password. Contact the system administrator if this was unexpected.',
             'url' => route('login'),
             'tag' => 'admin-password-reset-' . $id,
             'requireInteraction' => true,

@@ -21,7 +21,7 @@ class SystemEmailTest extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'StudentEdge Email Delivery Test',
+            subject: 'MyHEP Email Delivery Test',
         );
     }
 

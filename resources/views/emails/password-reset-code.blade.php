@@ -17,7 +17,7 @@
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                                 <tr>
                                     <td width="50" valign="middle">
-                                        <div style="width:44px;height:44px;border-radius:13px;background:#ffffff;color:#1f5559;font-size:17px;font-weight:800;line-height:44px;text-align:center;">{{ __('SE') }}</div>
+                                        <div style="width:44px;height:44px;border-radius:13px;background:#ffffff;color:#1f5559;font-size:15px;font-weight:800;line-height:44px;text-align:center;">{{ __('HEP') }}</div>
                                     </td>
                                     <td valign="middle" style="padding-left:12px;color:#ffffff;">
                                         <div style="font-size:19px;font-weight:800;letter-spacing:-.2px;">MyHEP</div>

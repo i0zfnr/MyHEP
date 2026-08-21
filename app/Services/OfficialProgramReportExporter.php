@@ -123,7 +123,7 @@ class OfficialProgramReportExporter
             'TARIKH : [17 FEBRUARI 2025]' => 'TARIKH : '.$longDate,
             'ANJURAN : [UNIT LATIHAN DAN PENDIDIKAN LANJUTAN]' => 'ANJURAN : '.mb_strtoupper($data['organizer'] ?? 'Politeknik Besut'),
             'KUMPULAN SASARAN: [PENSYARAH]' => 'KUMPULAN SASARAN: '.(($program->target_participants ?? null) ?: 'Pelajar Politeknik Besut'),
-            'BILANGAN PESERTA: [20 ORANG- senarai seperti di lampiran]' => 'BILANGAN PESERTA: '.($data['attendance_total'] ?? 0).' ORANG (senarai kehadiran direkodkan dalam StudentEdge)',
+            'BILANGAN PESERTA: [20 ORANG- senarai seperti di lampiran]' => 'BILANGAN PESERTA: '.($data['attendance_total'] ?? 0).' ORANG (senarai kehadiran direkodkan dalam MyHEP)',
             '[Sistem Pengurusan Maklumat Politeknik (SPMP) merupakan satu platform penting dalam pengurusan data akademik dan pentadbiran di politeknik. Bagi memastikan keberkesanan penggunaan sistem ini, satu kursus pemantapan akan diadakan bagi meningkatkan pemahaman serta kemahiran pengguna dalam mengendalikan sistem ini dengan lebih cekap dan berkesan.]' => $report['executive_summary'] ?? 'Program telah dilaksanakan mengikut perancangan kertas kerja.',
             'Memberikan pendedahan kepada pensyarah  yang baharu melapor diri ke PoliBesut tentang modul-modul-modul yang digunapakai dalam SPMP.' => $obj1,
             'Memantapkan kefahaman sediaada pensyarah terhadap penggunaan modul-modul dalam SPMP.' => $obj2,
