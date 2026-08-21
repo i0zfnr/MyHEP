@@ -575,8 +575,8 @@
 
     <div class="brand-panel">
         <div class="brand-panel-inner">
-            {{-- <img src="{{ asset('images/politeknik-logo.png') }}" alt="Logo StudentEdge" class="brand-logo"> --}}
-            <div class="brand-title">StudentEdge</div>
+            {{-- <img src="{{ asset('images/politeknik-logo.png') }}" alt="Logo MyHEP" class="brand-logo"> --}}
+            <div class="brand-title">MyHEP</div>
             <div class="brand-subtitle">{{ __('login.brand_subtitle') }}</div>
             <div class="brand-badge">{{ __('login.system_active') }}</div>
         </div>

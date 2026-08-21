@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\ProgramApprovalRouting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,6 +61,7 @@ class ProgramController extends Controller
         $programs->getCollection()->each(function (object $program) use ($hasOversight): void {
             $program->can_view_detail = true;
             $program->is_owned = (int) $program->created_by === (int) session('auth_user.id');
+            $program->can_manage = (session('auth_user.admin_role') === 'system_admin') || $program->is_owned;
         });
 
         $stats = [
@@ -84,7 +86,13 @@ class ProgramController extends Controller
 
     public function create(): View
     {
-        return view('admin.programs.form', ['program' => null]);
+        $authStaff = DB::table('admins')->where('id', session('auth_user.id'))->first();
+        $defaultBranch = $authStaff?->reporting_branch ?: ProgramApprovalRouting::inferBranch($authStaff?->staff_department, $authStaff?->position) ?: 'tpsa';
+
+        return view('admin.programs.form', [
+            'program' => null,
+            'defaultBranch' => $defaultBranch,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -127,8 +135,13 @@ class ProgramController extends Controller
     {
         $record = $this->program($program);
         abort_unless($this->canManage($record) && $record->status === 'active', 403);
+        $authStaff = DB::table('admins')->where('id', $record->created_by)->first();
+        $defaultBranch = $record->approval_branch ?: ($authStaff?->reporting_branch ?: ProgramApprovalRouting::inferBranch($authStaff?->staff_department, $authStaff?->position) ?: 'tpsa');
 
-        return view('admin.programs.form', ['program' => $record]);
+        return view('admin.programs.form', [
+            'program' => $record,
+            'defaultBranch' => $defaultBranch,
+        ]);
     }
 
     public function update(Request $request, int $program): RedirectResponse
@@ -150,21 +163,53 @@ class ProgramController extends Controller
 
     public function destroy(int $program): RedirectResponse
     {
-        abort_unless(session('auth_user.admin_role') === 'system_admin', 403);
         $record = $this->program($program);
-        $paths = DB::table('program_paperworks')->where('program_id', $program)
+        abort_unless($this->canManage($record), 403);
+
+        $paperworkPaths = DB::table('program_paperworks')->where('program_id', $program)
             ->where('disk', 'local')->whereNotNull('path')->pluck('path')->all();
 
+        $certPaths = Schema::hasTable('program_certificates')
+            ? DB::table('program_certificates')->where('program_id', $program)->whereNotNull('path')->pluck('path')->all()
+            : [];
+
+        $reportPaths = Schema::hasTable('program_reports')
+            ? DB::table('program_reports')->where('program_id', $program)->whereNotNull('attachment_path')->pluck('attachment_path')->all()
+            : [];
+
         DB::transaction(function () use ($program): void {
+            if (Schema::hasTable('program_certificates')) {
+                DB::table('program_certificates')->where('program_id', $program)->delete();
+            }
+            if (Schema::hasTable('program_attendances')) {
+                DB::table('program_attendances')->where('program_id', $program)->delete();
+            }
+            if (Schema::hasTable('program_surveys')) {
+                DB::table('program_surveys')->where('program_id', $program)->delete();
+            }
+            if (Schema::hasTable('program_reports')) {
+                DB::table('program_reports')->where('program_id', $program)->delete();
+            }
+            if (Schema::hasTable('program_reviewers')) {
+                DB::table('program_reviewers')->where('program_id', $program)->delete();
+            }
             DB::table('program_paperworks')->where('program_id', $program)->delete();
             DB::table('programs')->where('id', $program)->delete();
         });
-        foreach ($paths as $path) {
+
+        foreach ($paperworkPaths as $path) {
             Storage::disk('local')->delete($path);
         }
-        auditLog('programs.delete', 'programs', $program, 'System Admin permanently deleted program: '.$record->title);
+        foreach ($certPaths as $path) {
+            Storage::disk('local')->delete($path);
+        }
+        foreach ($reportPaths as $path) {
+            Storage::disk('local')->delete($path);
+        }
 
-        return redirect()->route('admin.programs.index')->with('success', __('Program and all paperwork versions were permanently deleted.'));
+        auditLog('programs.delete', 'programs', $program, 'Program record and all associated data deleted');
+
+        return redirect()->route('admin.programs.index')->with('success', __('Program and all associated data were successfully deleted.'));
     }
 
     public function download(int $program, int $paperwork): StreamedResponse
@@ -186,6 +231,7 @@ class ProgramController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:180'],
             'registration_type' => ['required', Rule::in(['approved_program', 'attendance_only_activity'])],
+            'approval_branch' => ['required', Rule::in(['tpa', 'tpsa', 'tpsp'])],
             'reference_no' => [Rule::requiredIf(fn () => $request->input('registration_type') === 'approved_program'), 'nullable', 'string', 'max:80'],
             'description' => ['nullable', 'string', 'max:10000'],
             'objectives' => ['nullable', 'string', 'max:10000'],
@@ -194,7 +240,7 @@ class ProgramController extends Controller
             'venue' => ['required', 'string', 'max:180'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'geofence_radius_m' => ['required', 'integer', 'between:20,1000'],
+            'geofence_radius_m' => ['nullable', 'integer', 'between:10,5000'],
             'target_participants' => ['required', 'string', 'max:255'],
             'estimated_participants' => ['nullable', 'integer', 'between:1,100000'],
             'participation_points' => ['required', 'integer', 'between:0,100'],

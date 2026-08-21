@@ -2,13 +2,13 @@
 <script>
     (function () {
         try {
-            var storedTheme = window.localStorage.getItem('studentedge-theme');
+            var storedTheme = window.localStorage.getItem('myhep-theme');
             var serverTheme = @json(session('theme', 'light'));
             var theme = storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : serverTheme;
-            var storedAccent = window.localStorage.getItem('studentedge-accent-theme');
+            var storedAccent = window.localStorage.getItem('myhep-accent-theme');
             var serverAccent = @json(session('accent_theme', 'gold'));
             var accent = ['gold', 'candy_blue', 'lavender', 'orchid', 'violet'].includes(serverAccent) ? serverAccent : storedAccent;
-            var storedGlass = Number(window.localStorage.getItem('studentedge-glass-transparency'));
+            var storedGlass = Number(window.localStorage.getItem('myhep-glass-transparency'));
             var serverGlass = Number(@json(session('glass_transparency', 40)));
             var glass = Number.isFinite(storedGlass) && storedGlass >= 10 && storedGlass <= 65 ? storedGlass : serverGlass;
             document.documentElement.dataset.theme = theme;

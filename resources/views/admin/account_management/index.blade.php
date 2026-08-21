@@ -115,7 +115,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="account-pagination">{{ $accounts->links('vendor.pagination.studentedge') }}</div>
+        <div class="account-pagination">{{ $accounts->links('vendor.pagination.myhep') }}</div>
         </div>
     </section>
 </div>

@@ -193,24 +193,27 @@
 <div class="wrap">
     <div class="card">
         <div class="body">
-            <div class="stats">
+            <div class="stats" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
                 <div class="stat"><div class="label">{{ __('Jumlah Pelajar') }}</div><div class="value">{{ $summary['total_students'] }}</div></div>
                 <div class="stat"><div class="label">{{ __('Borang Dihantar') }}</div><div class="value">{{ $summary['submitted'] }}</div></div>
-                <div class="stat"><div class="label">{{ __('Menerima Biasiswa') }}</div><div class="value">{{ $summary['has_scholarship'] }}</div></div>
-                <div class="stat"><div class="label">{{ __('Tidak Menerima Biasiswa') }}</div><div class="value">{{ $summary['no_scholarship'] }}</div></div>
+                <div class="stat"><div class="label">{{ __('Menerima Biasiswa') }}</div><div class="value" style="color:#0284c7;">{{ $summary['scholarship'] }}</div></div>
+                <div class="stat"><div class="label">{{ __('Bantuan Kebajikan') }}</div><div class="value" style="color:#059669;">{{ $summary['welfare'] }}</div></div>
+                <div class="stat"><div class="label">{{ __('Tiada Biasiswa/Bantuan') }}</div><div class="value" style="color:#7a6555;">{{ $summary['none'] }}</div></div>
             </div>
         </div>
     </div>
 
     <div class="card">
         <div class="head">
-            <strong>{{ __('Senarai Status Biasiswa Pelajar') }}</strong>
+            <strong>{{ __('Senarai Status Biasiswa & Bantuan Kebajikan Pelajar') }}</strong>
             <form method="GET" action="{{ route('admin.student-scholarship-status.index') }}" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama / matrik / program') }}">
-                <select name="has_scholarship">
-                    <option value="all" {{ ($filters['has_scholarship'] ?? 'all') === 'all' ? 'selected' : '' }}>{{ __('Semua') }}</option>
-                    <option value="yes" {{ ($filters['has_scholarship'] ?? '') === 'yes' ? 'selected' : '' }}>{{ __('Menerima Biasiswa') }}</option>
-                    <option value="no" {{ ($filters['has_scholarship'] ?? '') === 'no' ? 'selected' : '' }}>{{ __('Tidak Menerima Biasiswa') }}</option>
+                <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Cari nama / matrik / penaja / kebajikan') }}">
+                <select name="type">
+                    <option value="all" {{ ($filters['type'] ?? 'all') === 'all' ? 'selected' : '' }}>{{ __('Semua Status') }}</option>
+                    <option value="scholarship" {{ ($filters['type'] ?? '') === 'scholarship' ? 'selected' : '' }}>{{ __('Biasiswa / Penajaan') }}</option>
+                    <option value="welfare" {{ ($filters['type'] ?? '') === 'welfare' ? 'selected' : '' }}>{{ __('Bantuan Kebajikan') }}</option>
+                    <option value="none" {{ ($filters['type'] ?? '') === 'none' ? 'selected' : '' }}>{{ __('Tiada Biasiswa / Bantuan') }}</option>
+                    <option value="unsubmitted" {{ ($filters['type'] ?? '') === 'unsubmitted' ? 'selected' : '' }}>{{ __('Belum Hantar') }}</option>
                 </select>
                 <button class="btn" type="submit">{{ __('Tapis') }}</button>
                 <a class="btn" href="{{ route('admin.student-scholarship-status.index') }}">{{ __('Reset') }}</a>
@@ -222,16 +225,19 @@
                     <tr>
                         <th>{{ __('Pelajar') }}</th>
                         <th>{{ __('Program') }}</th>
-                        <th>{{ __('Status Biasiswa') }}</th>
-                        <th>{{ __('Penaja') }}</th>
-                        <th>{{ __('Jumlah Bulanan') }}</th>
-                        <th>{{ __('Catatan') }}</th>
-                        <th>{{ __('Surat Tawaran') }}</th>
+                        <th>{{ __('Kategori / Status') }}</th>
+                        <th>{{ __('Butiran / Penaja / Kebajikan') }}</th>
+                        <th>{{ __('Maklumat Waris / Pendapatan') }}</th>
+                        <th>{{ __('Jumlah (RM)') }}</th>
+                        <th>{{ __('Dokumen Sokongan') }}</th>
                         <th>{{ __('Tarikh Hantar') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($records as $row)
+                        @php
+                            $appType = $row->application_type ?? ($row->has_scholarship === 'yes' ? 'scholarship' : ($row->has_scholarship === 'no' ? 'none' : null));
+                        @endphp
                         <tr>
                             <td>
                                 <strong>{{ $row->full_name }}</strong><br>
@@ -239,22 +245,62 @@
                             </td>
                             <td>{{ $row->program }}</td>
                             <td>
-                                @if($row->has_scholarship === 'yes')
-                                    <span class="badge yes">{{ __('Menerima Biasiswa') }}</span>
-                                @elseif($row->has_scholarship === 'no')
-                                    <span class="badge no">{{ __('Tidak Menerima Biasiswa') }}</span>
+                                @if($appType === 'scholarship')
+                                    <span class="badge yes" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">🎓 {{ __('Biasiswa') }}</span>
+                                @elseif($appType === 'welfare')
+                                    <span class="badge yes" style="background:#d1fae5; color:#047857; border-color:#a7f3d0;">🤝 {{ __('Kebajikan') }}</span>
+                                @elseif($appType === 'none')
+                                    <span class="badge no" style="background:#f3f4f6; color:#4b5563; border-color:#e5e7eb;">❌ {{ __('Tiada') }}</span>
                                 @else
                                     <span class="badge none">{{ __('Belum Hantar') }}</span>
                                 @endif
                             </td>
-                            <td>{{ $row->sponsor_name ?: '-' }}</td>
-                            <td>{{ $row->monthly_amount !== null ? 'RM ' . number_format((float) $row->monthly_amount, 2) : '-' }}</td>
-                            <td>{{ $row->notes ?: '-' }}</td>
-                            <td>@if($row->offer_letter_id)<a class="btn" href="{{ route('admin.student-scholarship-status.documents.download', $row->offer_letter_id) }}">{{ __('Muat Turun') }}</a><br><small>{{ $row->offer_letter_name }}</small>@else - @endif</td>
-                            <td>{{ $row->submitted_at ? \Illuminate\Support\Carbon::parse($row->submitted_at)->format('Y-m-d H:i') : '-' }}</td>
+                            <td>
+                                @if($appType === 'scholarship')
+                                    <strong>{{ $row->sponsor_name ?: '-' }}</strong>
+                                    @if($row->notes)<br><small style="color:#7a6555;">{{ $row->notes }}</small>@endif
+                                @elseif($appType === 'welfare')
+                                    <strong style="color:#047857;">{{ $row->welfare_category ?: 'Bantuan Kebajikan' }}</strong>
+                                    @if($row->welfare_description)<br><small style="color:#4b5563; font-style:italic;">{{ Str::limit($row->welfare_description, 60) }}</small>@endif
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>
+                                @if($appType === 'welfare')
+                                    <div style="font-size:12px;">
+                                        <strong>Waris:</strong> {{ $row->guardian_name ?: '-' }} ({{ $row->guardian_relationship ?: 'Waris' }})<br>
+                                        <strong>Tel:</strong> {{ $row->guardian_phone ?: '-' }}<br>
+                                        <strong>Gaji:</strong> {{ $row->family_income !== null ? 'RM ' . number_format((float) $row->family_income, 2) : '-' }}
+                                        @if($row->dependents_count) ({{ $row->dependents_count }} tanggungan) @endif
+                                    </div>
+                                @else
+                                    <span style="color:#9ca3af;">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($appType === 'scholarship')
+                                    {{ $row->monthly_amount !== null ? 'RM ' . number_format((float) $row->monthly_amount, 2) . '/bln' : '-' }}
+                                @elseif($appType === 'welfare')
+                                    {{ $row->welfare_amount !== null ? 'RM ' . number_format((float) $row->welfare_amount, 2) : 'Bantuan Khas' }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>
+                                @if($row->doc_id)
+                                    <a class="btn" style="padding:4px 8px; font-size:11px;" href="{{ route('admin.student-scholarship-status.documents.download', $row->doc_id) }}">
+                                        📄 {{ __('Muat Turun') }}
+                                    </a>
+                                    <br><small style="font-size:10px; color:#7a6555;">{{ Str::limit($row->doc_name, 20) }}</small>
+                                @else
+                                    <span style="color:#9ca3af;">-</span>
+                                @endif
+                            </td>
+                            <td>{{ $row->submitted_at ? \Illuminate\Support\Carbon::parse($row->submitted_at)->format('d/m/Y H:i') : '-' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" style="text-align:center;color:#7a6555;">{{ __('Tiada data') }}</td></tr>
+                        <tr><td colspan="8" style="text-align:center;color:#7a6555;padding:24px;">{{ __('Tiada rekod dijumpai.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -35,6 +35,12 @@ class ProfileController extends Controller
             return redirect()->route('login');
         }
 
+        $rawDob = trim((string) $request->input('date_of_birth', ''));
+        if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/', $rawDob, $matches)) {
+            $normalizedDob = sprintf('%04d-%02d-%02d', (int) $matches[3], (int) $matches[2], (int) $matches[1]);
+            $request->merge(['date_of_birth' => $normalizedDob]);
+        }
+
         $validated = $request->validate([
             'profile_photo' => [blank($student->photo ?? null) ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:51200'],
             'email' => ['required', 'email', 'max:150', 'unique:students,email,' . $studentId],
@@ -56,9 +62,6 @@ class ProfileController extends Controller
             'mother_ic_no' => ['required', 'string', 'max:20'],
             'guardian_occupation' => ['required', 'string', 'max:120'],
             'family_income' => ['required', 'numeric', 'min:0'],
-            'oku_status' => ['required', 'in:yes,no'],
-            'oku_registration_no' => ['nullable', 'string', 'max:50', 'required_if:oku_status,yes'],
-            'oku_category' => ['nullable', 'string', 'max:100', 'required_if:oku_status,yes'],
             'study_address' => ['nullable', 'string'],
         ], [
             'profile_photo.uploaded' => __('The profile photo is too large. Please choose a photo below 50MB.'),
@@ -91,9 +94,6 @@ class ProfileController extends Controller
             'family_income' => array_key_exists('family_income', $validated) && $validated['family_income'] !== null && $validated['family_income'] !== ''
                 ? (float) $validated['family_income']
                 : null,
-            'oku_status' => $validated['oku_status'],
-            'oku_registration_no' => $validated['oku_status'] === 'yes' ? ($validated['oku_registration_no'] ?? null) : null,
-            'oku_category' => $validated['oku_status'] === 'yes' ? ($validated['oku_category'] ?? null) : null,
             'study_address' => $validated['study_address'] ?? null,
         ];
 

@@ -438,11 +438,23 @@ body[data-theme="dark"] .pmr-badge.rejected {
                             </td>
                             <td style="text-align: right;">
                                 @if($program->can_view_detail)
-                                    @if(($filters['scope'] ?? '') === 'review')
-                                        <a class="pmr-btn primary" href="{{ route('admin.programs.operations', $program->id) }}#programReport">{{ __('Review Report') }}</a>
-                                    @else
-                                        <a class="pmr-btn" href="{{ route('admin.programs.show', $program->id) }}">{{ __('View Detail') }}</a>
-                                    @endif
+                                    <div style="display:inline-flex; gap:6px; align-items:center; justify-content:flex-end;">
+                                        @if(($filters['scope'] ?? '') === 'review')
+                                            <a class="pmr-btn primary" href="{{ route('admin.programs.operations', $program->id) }}#programReport">{{ __('Review Report') }}</a>
+                                        @else
+                                            <a class="pmr-btn" href="{{ route('admin.programs.show', $program->id) }}">{{ __('View Detail') }}</a>
+                                        @endif
+
+                                        @if($program->can_manage ?? false)
+                                            <form method="post" action="{{ route('admin.programs.destroy', $program->id) }}" onsubmit="return confirm('{{ __('Padam program ini secara kekal?') }}')" style="display:inline-block; margin:0;">
+                                                @csrf
+                                                @method('delete')
+                                                <button class="pmr-btn" type="submit" style="color:#b91c1c; border-color:#fecaca; padding:6px 10px;" title="{{ __('Padam Program') }}">
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                     @if($program->is_owned ?? false)<div style="font-size:.72rem;color:var(--text-secondary);margin-top:.25rem;">{{ __('You manage this program') }}</div>@endif
                                 @else
                                     <span class="pmr-btn" style="opacity: 0.55; cursor: not-allowed;" title="{{ __('Access restricted by authorization policy.') }}">

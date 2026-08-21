@@ -453,7 +453,7 @@
             </table>
         </div>
         </div>
-        <div class="student-pagination" style="margin-top:14px;">{{ $students->onEachSide(1)->links('vendor.pagination.studentedge') }}</div>
+        <div class="student-pagination" style="margin-top:14px;">{{ $students->onEachSide(1)->links('vendor.pagination.myhep') }}</div>
         </div>
     </div>
 </div>

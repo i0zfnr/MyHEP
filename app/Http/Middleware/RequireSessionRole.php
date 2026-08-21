@@ -68,12 +68,12 @@ class RequireSessionRole
             return false;
         }
 
-        // Residence status, room number and current study address are intentionally optional.
+        // Residence status, room number, current study address and OKU status are intentionally optional.
         $columns = [
             'photo', 'email', 'semester', 'academic_session', 'phone', 'address',
             'religion', 'parliament', 'dun', 'race', 'date_of_birth',
             'guardian_name', 'guardian_ic_no', 'guardian_address', 'guardian_phone',
-            'mother_ic_no', 'guardian_occupation', 'family_income', 'oku_status',
+            'mother_ic_no', 'guardian_occupation', 'family_income',
         ];
 
         $select = array_values(array_filter($columns, fn (string $column) => Schema::hasColumn('students', $column)));

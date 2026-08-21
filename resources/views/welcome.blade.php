@@ -854,8 +854,8 @@
 <body data-theme="{{ session('theme', 'light') }}">
 <div class="pwa-launch" id="pwaLaunch" aria-hidden="true">
     <div class="pwa-launch-content">
-        <div class="pwa-launch-mark"><img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt=""></div>
-        <strong class="pwa-launch-title">StudentEdge</strong>
+        <div class="pwa-launch-mark"><img src="{{ asset('images/myhep-mark.png') }}?v=11" alt=""></div>
+        <strong class="pwa-launch-title">MyHEP</strong>
         <p class="pwa-launch-copy">Politeknik Besut</p>
         <span class="pwa-launch-progress" aria-hidden="true"></span>
     </div>
@@ -871,8 +871,8 @@
 
         if (!standalone || reduceMotion || !launch) return;
         try {
-            if (window.sessionStorage.getItem('studentedge-pwa-launch-seen') === '1') return;
-            window.sessionStorage.setItem('studentedge-pwa-launch-seen', '1');
+            if (window.sessionStorage.getItem('myhep-pwa-launch-seen') === '1') return;
+            window.sessionStorage.setItem('myhep-pwa-launch-seen', '1');
         } catch (_) {
             // The launch transition remains safe when storage is unavailable.
         }
@@ -934,14 +934,14 @@
                 const android = platform === 'android';
                 const canPrompt = android && deferredPrompt;
                 instructions.innerHTML = `
-                    <div class="pwa-guide-mark"><img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt=""></div>
+                    <div class="pwa-guide-mark"><img src="{{ asset('images/myhep-mark.png') }}?v=11" alt=""></div>
                     <p class="pwa-guide-kicker">${android ? 'Android install' : 'iPhone setup'}</p>
-                    <h2>${android ? 'Make StudentEdge feel like an app' : 'Add StudentEdge to your Home Screen'}</h2>
-                    <p>${android ? (canPrompt ? 'One more step opens the secure install prompt.' : 'Chrome can still add StudentEdge from its browser menu.') : 'Safari keeps this step in its Share menu.'}</p>
+                    <h2>${android ? 'Make MyHEP feel like an app' : 'Add MyHEP to your Home Screen'}</h2>
+                    <p>${android ? (canPrompt ? 'One more step opens the secure install prompt.' : 'Chrome can still add MyHEP from its browser menu.') : 'Safari keeps this step in its Share menu.'}</p>
                     <div class="pwa-guide-steps">
                         ${android
-                            ? (canPrompt ? '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Continue to open the Android install prompt.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Choose <strong>Install</strong> to add StudentEdge to your home screen.</span></div>' : '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Tap Chrome’s three-dot menu.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</span></div>')
-                            : '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Open this page in <strong>Safari</strong>.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Tap <strong>Share</strong>, then choose <strong>Add to Home Screen</strong>.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">3</span><span>Tap <strong>Add</strong> to finish.</span></div>'}
+                            ? (canPrompt ? '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Continue to open the Android install prompt.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Choose <strong>Install</strong> to add MyHEP to your home screen.</span></div>' : '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Tap Chrome’s three-dot menu.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</span></div>')
+                            : '<div class="pwa-guide-step"><span class="pwa-guide-number">1</span><span>Tap the <strong>three dots (...)</strong> or <strong>Share</strong> button at the bottom navigation bar.</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">2</span><span>Tap <strong>Share</strong> &rarr; scroll down / tap <strong>View More</strong> &rarr; select <strong>Add to Home Screen</strong> (+).</span></div><div class="pwa-guide-step"><span class="pwa-guide-number">3</span><span>Tap <strong>Add</strong> at the top right to place MyHEP on your home screen.</span></div>'}
                     </div>
                     <button type="button" class="pwa-guide-action" id="pwaGuideAction">${canPrompt ? 'Continue to install' : (android ? 'I understand' : 'I will use Safari')}</button>`;
                 dialog.showModal();
@@ -1020,10 +1020,10 @@
                 </a>
                 <div class="stat-pill" data-home-live data-live-url="{{ route('system-overview.live') }}" aria-label="{{ __('System status: online') }}">
                     <span class="dot" aria-hidden="true"></span>
-                    <span data-home-stat="system-status">{{ __('home.official_label') }} · StudentEdge · {{ __('home.live_label') }}</span>
+                    <span data-home-stat="system-status">{{ __('home.official_label') }} · MyHEP · {{ __('home.live_label') }}</span>
                 </div>
             </div>
-            <div class="pwa-options" aria-label="{{ __('Install StudentEdge') }}" hidden>
+            <div class="pwa-options" aria-label="{{ __('Install MyHEP') }}" hidden>
                 <button type="button" class="pwa-option" id="androidInstallButton" hidden>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
                     {{ __('Install on Android') }}
@@ -1060,7 +1060,7 @@
 
             <div class="badge-row">
                 <span>{{ __('home.official_label') }}</span>
-                <span class="badge">StudentEdge</span>
+                <span class="badge">MyHEP</span>
             </div>
 
         </div>
@@ -1068,7 +1068,7 @@
 
     <dialog class="pwa-install-dialog" id="pwaInstallDialog" aria-labelledby="pwaInstallTitle">
         <div class="pwa-install-dialog-inner">
-            <h2 id="pwaInstallTitle">{{ __('Install StudentEdge') }}</h2>
+            <h2 id="pwaInstallTitle">{{ __('Install MyHEP') }}</h2>
             <div id="pwaInstallInstructions"></div>
             <button type="button" class="pwa-install-dialog-close" id="pwaInstallClose">{{ __('Close') }}</button>
         </div>
@@ -1094,7 +1094,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 12h9m-9 4h5.25M6 3.75h8.25L18 7.5v12.75A2.25 2.25 0 0115.75 22.5h-9A2.25 2.25 0 014.5 20.25V6A2.25 2.25 0 016.75 3.75H6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 3.75V7.5H18"/></svg>
                     {{ __('home.cta_report') }}
                 </a>
-                <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="cta-btn secondary">
+                <a href="mailto:support@polibesut.edu.my?subject=MyHEP%20Support" class="cta-btn secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
                     {{ __('home.cta_contact') }}
                 </a>
@@ -1150,7 +1150,7 @@
             <span>{{ __('home.system_version') }}</span>
         </div>
         <div class="footer-copy">
-            &copy; {{ date('Y') }} StudentEdge. {{ __('home.copyright') }}
+            &copy; {{ date('Y') }} MyHEP. {{ __('home.copyright') }}
         </div>
     </footer>
 

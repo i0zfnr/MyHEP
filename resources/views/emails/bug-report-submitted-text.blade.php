@@ -1,4 +1,4 @@
-StudentEdge system admin alert
+MyHEP system admin alert
 
 New report #{{ $report['id'] }}: {{ $report['subject'] }}
 Category: {{ str_replace('_', ' ', $report['category']) }}

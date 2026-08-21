@@ -351,6 +351,10 @@
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"/></svg>
                 {{ __('Questionnaire Builder') }}
             </a>
+            <a class="pmr-btn" style="background: linear-gradient(135deg, #d4af37, #926b1d); color: #1c1917; font-weight: 800; border: none; box-shadow: 0 4px 14px rgba(212,175,55,0.25);" href="{{ route('admin.programs.presenter', $program->id) }}" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01"/></svg>
+                {{ __('Live Projector QR') }}
+            </a>
             <a class="pmr-btn public-checkin" href="{{ $publicCheckinUrl }}" target="_blank" rel="noopener">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="m10 14 9-9"/><path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>
                 {{ __('Open Public Check-in') }}
@@ -423,79 +427,90 @@
         </article>
     </section>
 
-    <!-- 2-Column Workspace Grid: Questionnaire Summary + QR Code -->
-    <section class="pmr-grid-2">
-        <!-- Left: Questionnaire & Participation Setup Status -->
-        <article class="pmr-card" style="display:flex;flex-direction:column;">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;">
-                <div>
-                    <span class="pmr-eyebrow">{{ __('QUESTIONNAIRE & PARTICIPATION') }}</span>
-                    <h2>{{ __('Questionnaire Setup') }}</h2>
-                </div>
-                @if(!$program->questionnaire_enabled)
-                    <span class="pmr-live-status is-closed">{{ __('Attendance Only') }}</span>
-                @elseif($survey && $survey->status === 'published')
-                    <span class="pmr-live-status">{{ __('Published & Live') }}</span>
-                @else
-                    <span class="pmr-live-status is-closed">{{ __('Draft') }}</span>
-                @endif
+    <!-- Questionnaire Control Card (Full Width) -->
+    <section class="pmr-card" style="margin-bottom: 1.25rem; display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap;">
+            <div>
+                <span class="pmr-eyebrow" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"/></svg>
+                    {{ __('KAWALAN SOAL SELIDIK / MAKLUM BALAS') }}
+                </span>
+                <h2>{{ __('Questionnaire Publishing') }}</h2>
             </div>
+            @if(!$survey || $survey->status !== 'published' || ($program->questionnaire_publish_mode ?? '') === 'closed')
+                <span class="pmr-live-status is-closed">{{ __('Draft / Ditutup') }}</span>
+            @elseif(($program->questionnaire_publish_mode ?? 'internal_system') === 'internal_system')
+                <span class="pmr-live-status" style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3); display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2 3 14h8l-1 8 11-14h-8z"/></svg>
+                    {{ __('Terus Dalam Sistem (PB)') }}
+                </span>
+            @else
+                <span class="pmr-live-status" style="background:rgba(212,175,55,0.15);color:#b99150;border:1px solid rgba(212,175,55,0.3); display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    {{ __('Mod Imbasan QR') }}
+                </span>
+            @endif
+        </div>
 
-            <p style="margin:.5rem 0 1.25rem;font-size:.88rem;color:var(--text-muted,#746b62);line-height:1.45;">
-                @if(!$program->questionnaire_enabled)
-                    {{ __('This program is configured for attendance-only check-in. Participants do not need to fill out a survey.') }}
-                @elseif($survey && $survey->status === 'published')
-                    {{ __('The questionnaire is published and active. Participants answer questions during check-in.') }}
-                @else
-                    {{ __('The questionnaire is in draft. Configure questions and publish it before opening participant check-in.') }}
-                @endif
-            </p>
+        <p style="margin: .5rem 0 1.25rem; font-size: .88rem; color: var(--text-muted,#746b62); line-height: 1.45;">
+            {{ __('Pengarah Program boleh mengawal penerbitan borang soal selidik pada bila-bila masa. Pilih sama ada mahu diterbitkan terus kepada pelajar Politeknik Besut di portal tanpa imbasan QR, atau memerlukan imbasan QR.') }}
+        </p>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
-                <div style="padding:.75rem 1rem;background:color-mix(in srgb,var(--pm-accent) 6%,var(--surface,#fff));border-radius:10px;border:1px solid var(--border,#eadac8);">
-                    <span style="font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--text-muted,#746b62);display:block;margin-bottom:2px;">{{ __('Configured Questions') }}</span>
-                    <strong style="font-size:1.15rem;color:var(--text,#241d16);">{{ count($questions) }} {{ __('Questions') }}</strong>
-                </div>
-                <div style="padding:.75rem 1rem;background:color-mix(in srgb,var(--pm-accent) 6%,var(--surface,#fff));border-radius:10px;border:1px solid var(--border,#eadac8);">
-                    <span style="font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--text-muted,#746b62);display:block;margin-bottom:2px;">{{ __('Survey Responses') }}</span>
-                    <strong style="font-size:1.15rem;color:var(--pm-accent,#b99150);">{{ number_format($surveyResponsesCount) }}</strong>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .75rem; margin-bottom: 1.25rem;">
+            <div style="padding: .75rem 1rem; background: color-mix(in srgb,var(--pm-accent) 6%,var(--surface,#fff)); border-radius: 10px; border: 1px solid var(--border,#eadac8);">
+                <span style="font-size: .72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted,#746b62); display: block; margin-bottom: 2px;">{{ __('Soalan Dikonfigurasi') }}</span>
+                <strong style="font-size: 1.15rem; color: var(--text,#241d16);">{{ count($questions) }} {{ __('Soalan') }}</strong>
+            </div>
+            <div style="padding: .75rem 1rem; background: color-mix(in srgb,var(--pm-accent) 6%,var(--surface,#fff)); border-radius: 10px; border: 1px solid var(--border,#eadac8);">
+                <span style="font-size: .72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted,#746b62); display: block; margin-bottom: 2px;">{{ __('Maklum Balas Diterima') }}</span>
+                <strong style="font-size: 1.15rem; color: var(--pm-accent,#b99150);">{{ number_format($surveyResponsesCount) }}</strong>
+            </div>
+        </div>
+
+        <!-- Publishing Mode Form -->
+        @if($canManageAttendance)
+            <div style="background: var(--bg-alt, #faf7f2); border: 1px solid var(--border); border-radius: 12px; padding: 1.15rem; margin-bottom: 1.25rem;">
+                <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.65rem;">
+                    {{ __('Pilihan Penerbitan Soal Selidik:') }}
+                </span>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+                    <form method="post" action="{{ route('admin.programs.survey.publish-mode', $program->id) }}">
+                        @csrf
+                        <input type="hidden" name="publish_mode" value="internal_system">
+                        <button type="submit" class="pmr-btn {{ ($program->questionnaire_publish_mode ?? 'internal_system') === 'internal_system' && ($survey && $survey->status === 'published') ? 'primary' : '' }}" style="width: 100%; min-height: 42px; justify-content: center; font-size: 0.84rem; gap: 0.45rem;" @disabled(count($questions) === 0)>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2 3 14h8l-1 8 11-14h-8z"/></svg>
+                            {{ __('Mod 1: Terus Dalam Sistem (PB)') }}
+                        </button>
+                    </form>
+
+                    <form method="post" action="{{ route('admin.programs.survey.publish-mode', $program->id) }}">
+                        @csrf
+                        <input type="hidden" name="publish_mode" value="qr_code">
+                        <button type="submit" class="pmr-btn {{ ($program->questionnaire_publish_mode ?? '') === 'qr_code' && ($survey && $survey->status === 'published') ? 'primary' : '' }}" style="width: 100%; min-height: 42px; justify-content: center; font-size: 0.84rem; gap: 0.45rem;" @disabled(count($questions) === 0)>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            {{ __('Mod 2: Mod Imbasan QR') }}
+                        </button>
+                    </form>
+
+                    @if($survey && $survey->status === 'published' && ($program->questionnaire_publish_mode ?? '') !== 'closed')
+                        <form method="post" action="{{ route('admin.programs.survey.close', $program->id) }}">
+                            @csrf
+                            <button type="submit" class="pmr-btn" style="width: 100%; min-height: 42px; justify-content: center; font-size: 0.84rem; color: #dc2626; gap: 0.4rem;">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                {{ __('Tutup Soal Selidik') }}
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
+        @endif
 
-            <div class="pmr-actions" style="margin-top:auto;">
-                <a class="pmr-btn primary" href="{{ route('admin.programs.questionnaire', $program->id) }}" style="width:100%;justify-content:center;min-height:42px;">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    {{ __('Open Questionnaire Builder') }}
-                </a>
-            </div>
-        </article>
-
-        <!-- Right: Public QR Code & External Guest Check-in -->
-        <article class="pmr-card">
-            <span class="pmr-eyebrow">{{ __('ATTENDANCE & PUBLIC QR CODE') }}</span>
-            <h2>{{ __('QR Check-in & Public Link') }}</h2>
-            <p>{{ __('Display or print this QR code for external guests and internal students to check in and complete the questionnaire.') }}</p>
-
-            <div class="pmr-qr-box">
-                <div class="pmr-qr-image">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data={{ urlencode($publicCheckinUrl) }}" alt="{{ __('Program Attendance QR Code') }}" style="width: 180px; height: 180px;">
-                </div>
-                <div style="margin-top: 12px; font-weight: 800; font-size: 0.95rem; color: var(--pm-accent);">
-                    {{ $program->title }}
-                </div>
-                <div style="font-size: 0.8rem; color: var(--text-secondary, #746b62); margin-top: 4px;">
-                    {{ __('Scan to Check In & Submit Feedback') }}
-                </div>
-            </div>
-
-            <div style="margin-top: 1.25rem;">
-                <label style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">{{ __('Public Check-in URL') }}</label>
-                <div style="display: flex; gap: 8px; margin-top: 4px;">
-                    <input id="publicUrlInput" value="{{ $publicCheckinUrl }}" readonly style="flex: 1; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.85rem;">
-                    <button type="button" class="pmr-btn" onclick="navigator.clipboard.writeText(document.getElementById('publicUrlInput').value); alert('{{ __('Link copied to clipboard!') }}')">{{ __('Copy Link') }}</button>
-                </div>
-            </div>
-        </article>
+        <div class="pmr-actions">
+            <a class="pmr-btn" href="{{ route('admin.programs.questionnaire', $program->id) }}" style="width: 100%; justify-content: center; min-height: 42px; font-weight: 800;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                {{ __('Buka Penyunting Soalan & Analitik (Questionnaire Builder)') }}
+            </a>
+        </div>
     </section>
 
     <!-- Post-program report and review workflow -->
@@ -595,14 +610,16 @@
                     <p>{{ __('Upload the finalized DOCX or PDF. It will be routed automatically using the Program Director organization line.') }}</p>
                     <form method="post" action="{{ route('admin.programs.report.upload-edited', $program->id) }}" enctype="multipart/form-data" style="margin-top:.8rem;">
                         @csrf
-                        <label for="finalReportFile">{{ __('Final report file') }}</label>
-                        <input id="finalReportFile" type="file" name="final_report" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required style="width:100%;padding:.7rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);">
-                        <button class="pmr-btn primary" type="submit" style="margin-top:.8rem;">{{ __('Upload Report File') }}</button>
+                        <input type="file" name="final_report" accept="application/pdf,.docx" required style="padding:.7rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);">
+                        <button class="pmr-btn primary" type="submit">{{ __('Upload Final Report') }}</button>
                     </form>
                 </div>
+            @endif
+
+            @if($canManageReport && in_array($report->status, ['draft', 'rejected'], true))
                 <form method="post" action="{{ route('admin.programs.report.submit', $program->id) }}">
                     @csrf
-                    <button class="pmr-btn primary" type="submit">{{ __('Send Report to :branch', ['branch' => $reportBranchLabel]) }}</button>
+                    <button class="pmr-btn primary" type="submit">{{ __('Submit Report for :branch Review', ['branch' => $reportBranchLabel]) }}</button>
                 </form>
             @elseif(!$canReviewReport)
                 <div class="pmr-report-lock">{{ __('Report files are locked while the report is in review or archived. The assigned reviewer controls the next workflow action.') }}</div>
@@ -622,17 +639,17 @@
         @endif
     </section>
 
-    <!-- Bottom: Certificates & Real-Time Attendee Roster -->
-    <section class="pmr-card" style="margin-bottom:1.25rem;">
-        <span class="pmr-eyebrow">{{ __('CERTIFICATES') }}</span>
-        @if($program->certificate_enabled ?? true)
-            <h2>{{ __('Choose Certificate Design') }}</h2>
-            <p>{{ __('Review the certificate design before generating private PDFs for eligible Politeknik Besut students.') }}</p>
+    <!-- Certificate Generation Section -->
+    <section class="pmr-card" style="margin-bottom: 1.25rem;">
+        <span class="pmr-eyebrow">{{ __('CERTIFICATE ISSUANCE') }}</span>
+        @if((bool) ($program->certificate_enabled ?? true))
+            <h2>{{ __('Auto-Generate Program Certificates') }}</h2>
+            <p>{{ __('Issue official participation certificates for internal students who checked in with valid attendance.') }}</p>
             <div class="pmr-certificate-layout">
-                <form class="pmr-certificate-settings" method="post" action="{{ route('admin.programs.certificates.generate',$program->id) }}">
+                <form method="post" action="{{ route('admin.programs.certificates.generate', $program->id) }}" class="pmr-mode-panel">
                     @csrf
-                    <label for="certificateTemplate">{{ __('Certificate template') }}</label>
-                    <select id="certificateTemplate" name="certificate_template" required>
+                    <label for="certTemplate">{{ __('Certificate Template') }}</label>
+                    <select id="certTemplate" name="certificate_template" style="width:100%;margin-bottom:.75rem;">
                         <option value="standard_placeholder" @selected(($program->certificate_template ?? 'standard_placeholder') === 'standard_placeholder')>{{ __('Standard certificate — temporary design') }}</option>
                     </select>
                     <p>{{ __('More official certificate templates can be added later. The selected design is saved when generation starts.') }}</p>
@@ -644,7 +661,7 @@
                 </form>
                 <div class="pmr-certificate-preview" aria-label="{{ __('Certificate design preview') }}">
                     <div class="pmr-certificate-preview__inner">
-                        <div class="pmr-certificate-preview__brand">STUDENTEDGE · POLITEKNIK BESUT</div>
+                        <div class="pmr-certificate-preview__brand">MYHEP · POLITEKNIK BESUT</div>
                         <div class="pmr-certificate-preview__title">{{ __('SIJIL PENYERTAAN') }}</div>
                         <div class="pmr-certificate-preview__meta">{{ __('Dengan ini diperakui bahawa') }}</div>
                         <div class="pmr-certificate-preview__name">{{ __('NAMA PELAJAR') }}</div>
@@ -658,16 +675,26 @@
         @endif
     </section>
 
+    <!-- Real-Time Joined Student Roster -->
     <section class="pmr-card">
-        <span class="pmr-eyebrow">{{ __('PARTICIPANT ROSTER') }}</span>
-        <h2>{{ __('Joined Student Roster & Live Attendance') }}</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <div>
+                <span class="pmr-eyebrow">{{ __('PARTICIPANT ROSTER') }}</span>
+                <h2>{{ __('Joined Student Roster & Live Attendance') }}</h2>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;">
+                <span class="pmr-badge" style="background: rgba(16,185,129,0.12); color: #059669; font-weight: 800;">
+                    {{ count($attendances) }} {{ __('Telah Mendaftar') }}
+                </span>
+            </div>
+        </div>
 
         @if($attendances->isEmpty())
             <div class="pmr-roster-empty">
                 <div class="pmr-roster-empty__inner">
                     <div class="pmr-roster-empty__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="4"/><path d="M17 8v6m-3-3h6"/></svg></div>
                     <h3>{{ __('Waiting for participants') }}</h3>
-                    <p>{{ $program->attendance_status === 'open' ? __('Attendance is open. Share the public check-in link or display the QR code so participants can record attendance.') : __('Attendance is currently closed. Open attendance when you are ready to receive participant check-ins.') }}</p>
+                    <p>{{ $program->attendance_status === 'open' ? __('Attendance is open. Students can scan using the PWA mobile scanner or public QR code.') : __('Attendance is currently closed. Open attendance when you are ready to receive participant check-ins.') }}</p>
                     <div class="pmr-roster-empty__toolbar">
                         <span class="pmr-roster-empty__status">{{ $program->attendance_status === 'open' ? __('Attendance Open') : __('Attendance Closed') }}</span>
                         @if($program->attendance_status === 'open')
@@ -684,12 +711,12 @@
                 <table class="pmr-table">
                     <thead>
                         <tr>
-                            <th>{{ __('Participant') }}</th>
-                            <th>{{ __('Identifier') }}</th>
-                            <th>{{ __('Type') }}</th>
-                            <th>{{ __('Checked In') }}</th>
-                            <th>{{ __('Survey Rating') }}</th>
-                            <th>{{ __('Attendance Validation') }}</th>
+                            <th>{{ __('Pelajar / Peserta') }}</th>
+                            <th>{{ __('No. Matrik / Pengenalan') }}</th>
+                            <th>{{ __('Kategori') }}</th>
+                            <th>{{ __('Pengesahan Lokasi') }}</th>
+                            <th>{{ __('Masa Imbas') }}</th>
+                            <th>{{ __('Soal Selidik') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -701,23 +728,23 @@
                                         <div style="font-size: 0.8rem; color: var(--text-secondary, #746b62);">{{ $row->institution_or_unit }}</div>
                                     @endif
                                 </td>
+                                <td><code>{{ $row->identifier }}</code></td>
+                                <td>
+                                    <span class="pmr-badge" style="background: {{ $row->attendee_type === 'internal' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(2, 132, 199, 0.12)' }}; color: {{ $row->attendee_type === 'internal' ? '#059669' : '#0284c7' }}; border: 1px solid {{ $row->attendee_type === 'internal' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(2, 132, 199, 0.25)' }}; font-weight: 800;">
+                                        {{ $row->attendee_type === 'internal' ? __('Pelajar PB') : __('Tetamu Luar') }}
+                                    </span>
+                                </td>
                                 <td>
                                     <strong>{{ __(str_replace('_', ' ', $row->validation_status)) }}</strong>
                                     <div style="font-size:.78rem;color:var(--text-secondary,#746b62);">
-                                        {{ $row->distance_m !== null ? number_format($row->distance_m, 1).'m '.__('from venue') : __('No distance') }}
-                                        @if($row->location_accuracy_m !== null) &middot; {{ number_format($row->location_accuracy_m, 1) }}m {{ __('accuracy') }} @endif
+                                        {{ $row->distance_m !== null ? number_format($row->distance_m, 1).'m '.__('dari lokasi') : __('Tiada jarak') }}
+                                        @if($row->location_accuracy_m !== null) &middot; {{ number_format($row->location_accuracy_m, 1) }}m {{ __('ketepatan') }} @endif
                                     </div>
-                                </td>
-                                <td><code>{{ $row->identifier }}</code></td>
-                                <td>
-                                    <span class="pmr-badge" style="background: {{ $row->attendee_type === 'internal' ? '#e7f7ee' : '#e0f2fe' }}; color: {{ $row->attendee_type === 'internal' ? '#18734a' : '#0284c7' }};">
-                                        {{ strtoupper($row->attendee_type) }}
-                                    </span>
                                 </td>
                                 <td>{{ \Illuminate\Support\Carbon::parse($row->checked_in_at)->format('d M Y, g:i A') }}</td>
                                 <td>
                                     @if($row->satisfaction_rating)
-                                        <span style="font-weight: 800; color: #704a23;">★ {{ $row->satisfaction_rating }} / 5</span>
+                                        <span style="font-weight: 800; color: #b99150;">★ {{ $row->satisfaction_rating }} / 5</span>
                                     @else
                                         <span style="color: var(--text-secondary, #746b62); font-size: 0.8rem;">-</span>
                                     @endif

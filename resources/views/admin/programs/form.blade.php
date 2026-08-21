@@ -180,8 +180,10 @@
 @endpush
 
 @section('content')
-@php($method = old('paperwork_method', $program->paperwork_method ?? 'pdf'))
-@php($registrationType = old('registration_type', $program->registration_type ?? 'approved_program'))
+@php
+    $method = old('paperwork_method', $program->paperwork_method ?? 'pdf');
+    $registrationType = old('registration_type', $program->registration_type ?? 'approved_program');
+@endphp
 
 <main class="pmr">
     <header class="pmr-hero">
@@ -238,6 +240,58 @@
                 <label for="paperwork_file">{{ __('Paperwork file') }} @if(!$program)<span>*</span>@endif</label>
                 <input id="paperwork_file" type="file" name="paperwork_file" accept=".pdf" data-new-program="{{ $program ? '0' : '1' }}">
                 <span style="font-size: 0.8rem; color: var(--text-secondary, #746b62);">{{ $program ? __('Upload a file only when replacing the approved paperwork. Maximum 20 MB.') : __('Approved PDF or DOCX, maximum 20 MB.') }}</span>
+            </div>
+        </section>
+
+        <!-- Reporting Route: Choice of TP / TPA, TPSA, or TPSP -->
+        <section class="pmr-card">
+            <span class="pmr-eyebrow" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                {{ __('LALUAN SEMAKAN LAPORAN PROGRAM') }}
+            </span>
+            <h2>{{ __('Pilihan Timbalan Pengarah Untuk Semakan Laporan') }}</h2>
+            <p>{{ __('Tentukan Timbalan Pengarah yang akan menerima draf laporan akhir program ini untuk semakan dan sokongan sebelum dimajukan ke Pengarah Politeknik.') }}</p>
+
+            @php
+                $selectedBranch = old('approval_branch', $program->approval_branch ?? ($defaultBranch ?? 'tpsa'));
+            @endphp
+
+            <div class="pmr-methods" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+                <label class="pmr-method" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <input type="radio" name="approval_branch" value="tpa" required @checked($selectedBranch === 'tpa')>
+                        <span style="font-size: 0.72rem; font-weight: 800; background: rgba(2,132,199,0.12); color: #0284c7; padding: 0.2rem 0.55rem; border-radius: 6px;">TPA</span>
+                    </div>
+                    <strong style="font-size: 0.92rem; color: var(--text); margin-top: 6px;">{{ __('TIMBALAN PENGARAH (AKADEMIK)') }}</strong>
+                    <span style="font-size: 0.84rem; font-weight: 800; color: var(--pm-accent); display: block;">SAIFUDDIN BIN SEMAIL</span>
+                    <span style="font-size: 0.78rem; color: var(--text-secondary, #746b62); display: block; margin-top: 4px; line-height: 1.4;">
+                        {{ __('Program di bawah Jabatan Akademik (JTMK, JPA, JRKV, JMSK).') }}
+                    </span>
+                </label>
+
+                <label class="pmr-method" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <input type="radio" name="approval_branch" value="tpsa" required @checked($selectedBranch === 'tpsa')>
+                        <span style="font-size: 0.72rem; font-weight: 800; background: rgba(16,185,129,0.12); color: #059669; padding: 0.2rem 0.55rem; border-radius: 6px;">TPSA</span>
+                    </div>
+                    <strong style="font-size: 0.92rem; color: var(--text); margin-top: 6px;">{{ __('TIMBALAN PENGARAH (SOKONGAN AKADEMIK)') }}</strong>
+                    <span style="font-size: 0.84rem; font-weight: 800; color: var(--pm-accent); display: block;">SITI ZUHRA BINTI ABU BAKAR</span>
+                    <span style="font-size: 0.78rem; color: var(--text-secondary, #746b62); display: block; margin-top: 4px; line-height: 1.4;">
+                        {{ __('Program pembangunan pelajar, hal ehwal pelajar (JHEP), kepimpinan, sukan, USTM & aset.') }}
+                    </span>
+                </label>
+
+                <label class="pmr-method" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <input type="radio" name="approval_branch" value="tpsp" required @checked($selectedBranch === 'tpsp')>
+                        <span style="font-size: 0.72rem; font-weight: 800; background: rgba(212,175,55,0.15); color: #b99150; padding: 0.2rem 0.55rem; border-radius: 6px;">TPGS / TPSP</span>
+                    </div>
+                    <strong style="font-size: 0.92rem; color: var(--text); margin-top: 6px;">{{ __('TIMBALAN PENGARAH (GOVERNAN & STRATEGIK)') }}</strong>
+                    <span style="font-size: 0.84rem; font-weight: 800; color: var(--pm-accent); display: block;">TS. ELISNORAZMALIZA BINTI AB HAMID</span>
+                    <span style="font-size: 0.78rem; color: var(--text-secondary, #746b62); display: block; margin-top: 4px; line-height: 1.4;">
+                        {{ __('Latihan staf, inovasi & penyelidikan, ULPL, UPLI, CISEC & pengurusan kualiti.') }}
+                    </span>
+                </label>
             </div>
         </section>
 
@@ -308,28 +362,30 @@
 
         <section class="pmr-card">
             <h2>{{ __('Attendance location settings') }}</h2>
-            <p>{{ __('Set the venue and attendance distance in metres. GPS coordinates are an optional secondary setting.') }}</p>
+            <p>{{ __('Set the venue name. Geofence radius and GPS verification are fully optional and will never block or force students to turn on their location.') }}</p>
             <div class="pmr-grid">
                 <div class="pmr-field full">
                     <label for="venue">{{ __('Venue') }} <span>*</span></label>
-                    <input id="venue" name="venue" required maxlength="180" value="{{ old('venue', $program->venue ?? '') }}">
+                    <input id="venue" name="venue" required maxlength="180" value="{{ old('venue', $program->venue ?? '') }}" placeholder="{{ __('e.g., Dewan Serbaguna / Bilik Seminar / Padang') }}">
                 </div>
-                <div class="pmr-field full">
-                    <label for="geofence_radius_m">{{ __('Geofence radius (metres)') }} <span>*</span></label>
-                    <input id="geofence_radius_m" type="number" min="20" max="1000" name="geofence_radius_m" required value="{{ old('geofence_radius_m', $program->geofence_radius_m ?? 50) }}">
-                </div>
-                <details class="pmr-optional-location" @if(old('latitude', $program->latitude ?? null) !== null || old('longitude', $program->longitude ?? null) !== null || $errors->has('latitude') || $errors->has('longitude')) open @endif>
-                    <summary>{{ __('Optional GPS coordinates') }}</summary>
+
+                <details class="pmr-optional-location" @if(old('geofence_radius_m', $program->geofence_radius_m ?? null) !== null || old('latitude', $program->latitude ?? null) !== null || old('longitude', $program->longitude ?? null) !== null || $errors->has('latitude') || $errors->has('longitude') || $errors->has('geofence_radius_m')) open @endif>
+                    <summary>{{ __('Optional GPS coordinates & Geofence radius') }}</summary>
                     <div class="pmr-optional-location-fields">
-                        <div class="pmr-field">
-                            <label for="latitude">{{ __('Venue latitude') }}</label>
-                            <input id="latitude" type="number" step="0.0000001" name="latitude" value="{{ old('latitude', $program->latitude ?? '') }}">
+                        <div class="pmr-field full">
+                            <label for="geofence_radius_m">{{ __('Geofence radius (metres) — Optional') }}</label>
+                            <input id="geofence_radius_m" type="number" min="10" max="5000" name="geofence_radius_m" value="{{ old('geofence_radius_m', $program->geofence_radius_m ?? 50) }}">
+                            <small style="color: var(--text-secondary, #746b62);">{{ __('Optional coverage radius in metres. Students can still check in without turning on GPS.') }}</small>
                         </div>
                         <div class="pmr-field">
-                            <label for="longitude">{{ __('Venue longitude') }}</label>
-                            <input id="longitude" type="number" step="0.0000001" name="longitude" value="{{ old('longitude', $program->longitude ?? '') }}">
+                            <label for="latitude">{{ __('Venue latitude (Optional)') }}</label>
+                            <input id="latitude" type="number" step="0.0000001" name="latitude" value="{{ old('latitude', $program->latitude ?? '') }}" placeholder="{{ __('e.g., 5.753123') }}">
                         </div>
-                        <p class="pmr-optional-location-note">{{ __('Leave both fields empty when registering the program. Coordinates can be added later before GPS attendance is opened.') }}</p>
+                        <div class="pmr-field">
+                            <label for="longitude">{{ __('Venue longitude (Optional)') }}</label>
+                            <input id="longitude" type="number" step="0.0000001" name="longitude" value="{{ old('longitude', $program->longitude ?? '') }}" placeholder="{{ __('e.g., 102.554123') }}">
+                        </div>
+                        <p class="pmr-optional-location-note">{{ __('Leave these fields blank if you do not need GPS geofence validation. Students and guests will be able to record attendance instantly via QR code without device location prompts.') }}</p>
                     </div>
                 </details>
             </div>

@@ -193,11 +193,14 @@ body[data-theme="dark"] .pmr-badge.rejected {
             @if($canEdit && $program->status === 'active')
                 <a class="pmr-btn" href="{{ route('admin.programs.edit', $program->id) }}">{{ __('Edit') }}</a>
             @endif
-            @if(session('auth_user.admin_role') === 'system_admin')
-                <form method="post" action="{{ route('admin.programs.destroy', $program->id) }}" onsubmit="return confirm('{{ __('Permanently delete this program and every paperwork version? This cannot be undone.') }}')">
+            @if($canEdit || session('auth_user.admin_role') === 'system_admin')
+                <form method="post" action="{{ route('admin.programs.destroy', $program->id) }}" onsubmit="return confirm('{{ __('Adakah anda pasti mahu memadam program ini secara kekal? Tindakan ini tidak boleh diundur.') }}')">
                     @csrf
                     @method('delete')
-                    <button class="pmr-btn pmr-action-danger" type="submit">{{ __('Delete Program') }}</button>
+                    <button class="pmr-btn pmr-action-danger" type="submit" style="background:#fee2e2; color:#b91c1c; border-color:#fca5a5;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        {{ __('Delete Program') }}
+                    </button>
                 </form>
             @endif
         </div>

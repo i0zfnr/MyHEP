@@ -2,12 +2,12 @@
 
 return [
     // Branding + encoding cleanup
-    'e-Biasiswa Ã‚Â· Politeknik Besut' => 'StudentEdge',
-    'E-BIASISWA Ã‚Â· POLITEKNIK BESUT' => 'StudentEdge',
-    'e-Biasiswa Â· Politeknik Besut' => 'StudentEdge',
-    'E-BIASISWA Â· POLITEKNIK BESUT' => 'StudentEdge',
-    'e-Biasiswa · Politeknik Besut' => 'StudentEdge',
-    'E-BIASISWA · POLITEKNIK BESUT' => 'StudentEdge',
+    'e-Biasiswa Ã‚Â· Politeknik Besut' => 'MyHEP',
+    'E-BIASISWA Ã‚Â· POLITEKNIK BESUT' => 'MyHEP',
+    'e-Biasiswa Â· Politeknik Besut' => 'MyHEP',
+    'E-BIASISWA Â· POLITEKNIK BESUT' => 'MyHEP',
+    'e-Biasiswa · Politeknik Besut' => 'MyHEP',
+    'E-BIASISWA · POLITEKNIK BESUT' => 'MyHEP',
     // Core navigation / layout
     'Menu Utama' => 'Main Menu',
     'Buka sidebar' => 'Open sidebar',

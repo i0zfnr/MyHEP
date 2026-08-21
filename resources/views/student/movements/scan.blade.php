@@ -211,6 +211,151 @@
     .scan-canvas {
         display: none;
     }
+
+    /* DONE KEY IN Modal */
+    .done-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(12, 9, 7, 0.88);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .done-modal-backdrop.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .done-modal-card {
+        background: linear-gradient(165deg, rgba(38, 32, 26, 0.95), rgba(20, 17, 14, 0.98));
+        border: 1px solid rgba(214, 178, 110, 0.35);
+        border-radius: 28px;
+        max-width: 420px;
+        width: 100%;
+        padding: 2rem 1.5rem 1.75rem;
+        text-align: center;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 50px rgba(212, 175, 55, 0.18);
+        transform: scale(0.9) translateY(20px);
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .done-modal-backdrop.show .done-modal-card {
+        transform: scale(1) translateY(0);
+    }
+
+    .done-badge-icon {
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981, #059669);
+        display: grid;
+        place-items: center;
+        margin: 0 auto 1.25rem;
+        box-shadow: 0 0 35px rgba(16, 185, 129, 0.45);
+        color: #fff;
+        animation: popCheck 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popCheck {
+        0% { transform: scale(0); }
+        80% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+
+    .done-title {
+        font-size: 1.75rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: #fef08a;
+        text-shadow: 0 2px 14px rgba(234, 179, 8, 0.35);
+        margin-bottom: 0.35rem;
+        text-transform: uppercase;
+    }
+
+    .done-subtitle {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #a8a29e;
+        margin-bottom: 1.25rem;
+    }
+
+    .done-student-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        padding: 1rem 1.15rem;
+        text-align: left;
+        margin-bottom: 1rem;
+    }
+
+    .done-student-name {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 0.2rem;
+    }
+
+    .done-student-meta {
+        font-size: 0.82rem;
+        color: #d6b26e;
+        font-weight: 600;
+    }
+
+    .done-points-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(234, 179, 8, 0.14);
+        border: 1px solid rgba(234, 179, 8, 0.35);
+        color: #fde047;
+        font-size: 0.82rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+
+    .done-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-done-primary {
+        background: linear-gradient(135deg, #d4af37, #926b1d);
+        color: #1c1917;
+        font-weight: 800;
+        font-size: 0.92rem;
+        padding: 0.85rem 1.25rem;
+        border-radius: 14px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 18px rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-done-secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fafaf9;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        cursor: pointer;
+    }
 </style>
 @endpush
 
@@ -236,14 +381,44 @@
 
     <div class="scan-bottom">
         <div class="scan-status" id="scanStatus" role="status" aria-live="polite">
-            {{ __('Opening camera. Point it at the guard house QR code.') }}
+            {{ __('Opening camera. Point it at the guard house or program QR code.') }}
         </div>
         <div class="scan-mode" aria-label="{{ __('Scan mode') }}">
             <span class="active">
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2"/><path d="M18 14h2"/><path d="M14 18h6"/></svg>
-                {{ __('Scan QR') }}
+                {{ __('Auto Scan QR') }}
             </span>
-            <span>{{ __('Student Movement') }}</span>
+            <span>{{ __('Movement & Program Attendance') }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- DONE KEY IN Pop-up Modal -->
+<div class="done-modal-backdrop" id="doneModal">
+    <div class="done-modal-card">
+        <div class="done-badge-icon">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+
+        <h3 class="done-title" id="doneTitle">{{ __('DONE KEY IN') }}</h3>
+        <p class="done-subtitle" id="doneProgramTitle">{{ __('Kehadiran Berjaya Direkodkan!') }}</p>
+
+        <div class="done-student-box">
+            <div class="done-student-name" id="doneStudentName">--</div>
+            <div class="done-student-meta" id="doneStudentMeta">--</div>
+        </div>
+
+        <div class="done-points-pill" id="donePointsPill">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span id="donePointsText">+10 Mata Merit Diperoleh</span>
+        </div>
+
+        <div class="done-actions">
+            <a href="#" class="btn-done-primary" id="btnDoneSurvey" style="display: none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"/></svg>
+                <span>{{ __('Jawab Soal Selidik Sekarang') }}</span>
+            </a>
+            <button type="button" class="btn-done-secondary" id="btnDoneClose">{{ __('Selesai / Imbas Lagi') }}</button>
         </div>
     </div>
 </div>
@@ -257,14 +432,25 @@
     const canvas = document.getElementById('scanCanvas');
     const statusNode = document.getElementById('scanStatus');
     const clockNode = document.getElementById('scanClock');
+    const doneModal = document.getElementById('doneModal');
+    const doneTitle = document.getElementById('doneTitle');
+    const doneProgramTitle = document.getElementById('doneProgramTitle');
+    const doneStudentName = document.getElementById('doneStudentName');
+    const doneStudentMeta = document.getElementById('doneStudentMeta');
+    const donePointsText = document.getElementById('donePointsText');
+    const btnDoneSurvey = document.getElementById('btnDoneSurvey');
+    const btnDoneClose = document.getElementById('btnDoneClose');
+
     const jsQr = window.jsQR || null;
     const canvasContext = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
     const targetUrl = new URL(@json(route('student.movements.scan')), window.location.origin);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     let stream = null;
     let detector = null;
     let scanTimer = null;
     let isScanning = false;
+    let isProcessing = false;
 
     const setStatus = (message, tone = '') => {
         if (!statusNode) return;
@@ -277,16 +463,35 @@
         clockNode.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     };
 
-    const extractToken = (rawValue) => {
+    const parseScannedValue = (rawValue) => {
         const value = String(rawValue || '').trim();
         if (!value) return null;
 
         try {
             const parsed = new URL(value, window.location.origin);
-            return parsed.searchParams.get('token');
-        } catch (error) {
-            return value.length >= 12 ? value : null;
+            const path = parsed.pathname;
+            
+            // Match /programs/{id}/qr-checkin or /student/programs/{id}
+            const programMatch = path.match(/\/(?:student\/)?programs\/(\d+)/i);
+            if (programMatch) {
+                return {
+                    type: 'program',
+                    programId: parseInt(programMatch[1], 10),
+                    token: parsed.searchParams.get('t') || parsed.searchParams.get('token') || parsed.searchParams.get('qr_token') || ''
+                };
+            }
+
+            const token = parsed.searchParams.get('token');
+            if (token) {
+                return { type: 'movement', token: token };
+            }
+        } catch (error) {}
+
+        if (value.length >= 12) {
+            return { type: 'movement', token: value };
         }
+
+        return null;
     };
 
     const stopScanner = () => {
@@ -302,21 +507,112 @@
         if (video) video.srcObject = null;
     };
 
+    const showDoneModal = (data) => {
+        doneTitle.textContent = data.message || 'DONE KEY IN';
+        doneProgramTitle.textContent = data.program?.title || @json(__('Kehadiran Berjaya Direkodkan!'));
+        doneStudentName.textContent = data.student?.full_name || '';
+        doneStudentMeta.textContent = (data.student?.matric_no || '') + ' • ' + (data.student?.program || '');
+        
+        const points = data.program?.points || 0;
+        donePointsText.textContent = points > 0 ? `+${points} {{ __('Mata Merit Diperoleh') }}` : `{{ __('Kehadiran Direkodkan') }}`;
+
+        if (data.program?.has_survey && data.program?.survey_url) {
+            btnDoneSurvey.href = data.program.survey_url;
+            btnDoneSurvey.style.display = 'flex';
+        } else {
+            btnDoneSurvey.style.display = 'none';
+        }
+
+        if (navigator.vibrate) {
+            try { navigator.vibrate([100, 50, 100]); } catch (e) {}
+        }
+
+        doneModal.classList.add('show');
+    };
+
+    const handleProgramAttendance = async (programId, token) => {
+        setStatus(@json(__('QR Program Dikesan. Merekodkan kehadiran...')), 'ok');
+        stopScanner();
+
+        let coords = { latitude: null, longitude: null, accuracy: null, capturedAt: null };
+        if (navigator.geolocation) {
+            try {
+                const pos = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    });
+                });
+                coords = {
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy,
+                    capturedAt: new Date(pos.timestamp).toISOString()
+                };
+            } catch (e) {}
+        }
+
+        try {
+            const res = await fetch(`/student/programs/${programId}/quick-scan`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    qr_token: token,
+                    latitude: coords.latitude,
+                    longitude: coords.longitude,
+                    location_accuracy_m: coords.accuracy,
+                    location_captured_at: coords.capturedAt
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showDoneModal(data);
+            } else {
+                setStatus(data.message || @json(__('Ralat semasa merekod kehadiran.')), 'danger');
+                setTimeout(() => {
+                    isProcessing = false;
+                    startScanner();
+                }, 2800);
+            }
+        } catch (err) {
+            setStatus(@json(__('Ralat rangkaian. Sila cuba lagi.')), 'danger');
+            setTimeout(() => {
+                isProcessing = false;
+                startScanner();
+            }, 2500);
+        }
+    };
+
     const handleDetectedValue = (rawValue) => {
-        const token = extractToken(rawValue);
-        if (!token) {
-            setStatus(@json(__('QR code detected, but it does not contain a valid movement token.')), 'danger');
+        if (isProcessing) return;
+        const parsed = parseScannedValue(rawValue);
+
+        if (!parsed) {
+            setStatus(@json(__('QR code detected, but it does not contain a valid token.')), 'danger');
+            return;
+        }
+
+        isProcessing = true;
+
+        if (parsed.type === 'program') {
+            handleProgramAttendance(parsed.programId, parsed.token);
             return;
         }
 
         setStatus(@json(__('QR detected. Verifying movement pass...')), 'ok');
         stopScanner();
-        targetUrl.searchParams.set('token', token);
+        targetUrl.searchParams.set('token', parsed.token);
         window.location.assign(targetUrl.toString());
     };
 
     const scanFrame = async () => {
-        if (!isScanning || !video || video.readyState < 2) return;
+        if (!isScanning || !video || video.readyState < 2 || isProcessing) return;
 
         try {
             if (detector) {
@@ -382,12 +678,19 @@
             video.setAttribute('autoplay', 'true');
             await video.play();
             isScanning = true;
-            setStatus(@json(__('Camera is ready. Point it at the guard house QR code.')), 'ok');
+            isProcessing = false;
+            setStatus(@json(__('Camera is ready. Point it at the guard house or program QR code.')), 'ok');
             scanTimer = window.setInterval(scanFrame, 350);
         } catch (error) {
             setStatus(@json(__('Camera access failed. Allow camera permission and reopen Scan QR.')), 'danger');
         }
     };
+
+    btnDoneClose?.addEventListener('click', () => {
+        doneModal.classList.remove('show');
+        isProcessing = false;
+        startScanner();
+    });
 
     updateClock();
     window.setInterval(updateClock, 1000);

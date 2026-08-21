@@ -255,7 +255,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="admin-pagination">{{ $admins->links('vendor.pagination.studentedge') }}</div>
+        <div class="admin-pagination">{{ $admins->links('vendor.pagination.myhep') }}</div>
         </div>
     </div>
 </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AiProvider;
 use App\Services\OfficialProgramReportExporter;
 use App\Services\ProgramReportContent;
+use App\Support\DynamicQrToken;
 use App\Support\ProgramApprovalRouting;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -84,9 +85,8 @@ class ProgramOperationController extends Controller
         $canManageAttendance = ($isDirector || $hasOversight) && in_array($program->status, ['active', 'approved', 'scheduled'], true);
         $attendanceSetup = [
             'venue' => filled($program->venue),
-            'questionnaire' => ! $program->questionnaire_enabled || ($survey && $survey->status === 'published'),
         ];
-        $attendanceReady = ! in_array(false, $attendanceSetup, true);
+        $attendanceReady = filled($program->venue);
         $canReviewReport = $report && match ($report->status) {
             'pending_tpsa' => (int) $report->tpsa_reviewer_id === $authId,
             'pending_director' => (int) $report->director_reviewer_id === $authId,
@@ -140,12 +140,104 @@ class ProgramOperationController extends Controller
                 ->get()
             : collect();
 
+        $totalAttendances = DB::table('program_attendances')->where('program_id', $program->id)->count();
+        $internalCount = DB::table('program_attendances')->where('program_id', $program->id)->where('attendee_type', 'internal')->count();
+        $externalCount = DB::table('program_attendances')->where('program_id', $program->id)->where('attendee_type', 'external')->count();
+
         $surveyResponsesCount = $survey
             ? DB::table('program_survey_responses')
                 ->where('program_survey_id', $survey->id)
                 ->distinct('program_attendance_id')
                 ->count('program_attendance_id')
             : 0;
+
+        $attendanceResponsesCount = DB::table('program_attendances')
+            ->where('program_id', $program->id)
+            ->whereNotNull('satisfaction_rating')
+            ->count();
+        $totalResponses = max($surveyResponsesCount, $attendanceResponsesCount);
+
+        $responseRate = $totalAttendances > 0 ? round(($totalResponses / $totalAttendances) * 100, 1) : 0;
+
+        $avgAttendanceRating = DB::table('program_attendances')
+            ->where('program_id', $program->id)
+            ->whereNotNull('satisfaction_rating')
+            ->avg('satisfaction_rating');
+
+        $questionStats = [];
+        $ratingDistribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+        $allNumericScores = [];
+
+        if ($survey && $questions->isNotEmpty()) {
+            $allResponses = DB::table('program_survey_responses')
+                ->where('program_survey_id', $survey->id)
+                ->get()
+                ->groupBy('question_id');
+
+            foreach ($questions as $q) {
+                $qResponses = $allResponses->get($q->id, collect());
+                $count = $qResponses->count();
+                $numericValues = [];
+                $breakdown = [];
+
+                if (in_array($q->question_type, ['rating_4', 'rating_5'], true)) {
+                    $maxScale = $q->question_type === 'rating_4' ? 4 : 5;
+                    for ($s = 1; $s <= $maxScale; $s++) {
+                        $breakdown[$s] = 0;
+                    }
+                    foreach ($qResponses as $r) {
+                        $val = (int) $r->answer_value;
+                        if ($val >= 1 && $val <= $maxScale) {
+                            $breakdown[$val]++;
+                            $numericValues[] = $val;
+                            $normScore = $maxScale === 4 ? round(($val / 4) * 5, 2) : $val;
+                            $allNumericScores[] = $normScore;
+                            $intBucket = min(5, max(1, (int) round($normScore)));
+                            $ratingDistribution[$intBucket]++;
+                        }
+                    }
+                    $qAvg = count($numericValues) > 0 ? round(array_sum($numericValues) / count($numericValues), 2) : null;
+                } else {
+                    $qAvg = null;
+                }
+
+                $questionStats[] = [
+                    'id' => $q->id,
+                    'text' => $q->question_text,
+                    'type' => $q->question_type,
+                    'category' => $q->category ?? 'General',
+                    'total_answers' => $count,
+                    'avg_score' => $qAvg,
+                    'breakdown' => $breakdown,
+                ];
+            }
+        }
+
+        $overallAvg = count($allNumericScores) > 0
+            ? round(array_sum($allNumericScores) / count($allNumericScores), 2)
+            : ($avgAttendanceRating ? round((float) $avgAttendanceRating, 2) : 0);
+
+        $recentComments = DB::table('program_attendances')
+            ->where('program_id', $program->id)
+            ->whereNotNull('feedback_comments')
+            ->where('feedback_comments', '!=', '')
+            ->select('full_name', 'attendee_type', 'institution_or_unit', 'satisfaction_rating', 'feedback_comments', 'checked_in_at')
+            ->orderByDesc('id')
+            ->limit(8)
+            ->get();
+
+        $analytics = [
+            'total_attendances' => $totalAttendances,
+            'internal_count' => $internalCount,
+            'external_count' => $externalCount,
+            'total_responses' => $totalResponses,
+            'response_rate' => $responseRate,
+            'overall_avg' => $overallAvg,
+            'satisfaction_percentage' => round(($overallAvg / 5) * 100, 1),
+            'rating_distribution' => $ratingDistribution,
+            'question_stats' => $questionStats,
+            'recent_comments' => $recentComments,
+        ];
 
         $publicCheckinUrl = route('public.programs.qr_checkin', $program->id);
 
@@ -155,6 +247,7 @@ class ProgramOperationController extends Controller
             'survey',
             'questions',
             'surveyResponsesCount',
+            'analytics',
             'publicCheckinUrl'
         ));
     }
@@ -162,14 +255,10 @@ class ProgramOperationController extends Controller
     public function openAttendance(int $id): RedirectResponse
     {
         $program = $this->ownedActiveProgram($id);
-        $publishedSurveyExists = DB::table('program_surveys')
-            ->where('program_id', $program->id)
-            ->where('status', 'published')
-            ->exists();
 
-        if (blank($program->venue) || ($program->questionnaire_enabled && ! $publishedSurveyExists)) {
+        if (blank($program->venue)) {
             return back()->withErrors([
-                'attendance' => __('Set the venue and, when enabled, publish a questionnaire before opening attendance.'),
+                'attendance' => __('Please set the program venue before opening attendance.'),
             ]);
         }
 
@@ -181,7 +270,7 @@ class ProgramOperationController extends Controller
         ]);
         auditLog('programs.attendance.open', 'programs', $program->id, 'Program attendance opened');
 
-        return back()->with('success', __('Attendance is now open. Participants can use the check-in form.'));
+        return back()->with('success', __('Attendance is now open. Participants can record their attendance.'));
     }
 
     public function closeAttendance(int $id): RedirectResponse
@@ -441,21 +530,52 @@ class ProgramOperationController extends Controller
     public function updateQuestionnaireSetting(Request $request, int $id): RedirectResponse
     {
         $program = $this->ownedActiveProgram($id);
-        abort_if($program->attendance_status === 'open', 403, __('Close attendance before changing the questionnaire mode.'));
-        $validated = $request->validate(['questionnaire_enabled' => ['required', 'boolean']]);
-        DB::table('programs')->where('id', $program->id)->update([
-            'questionnaire_enabled' => (bool) $validated['questionnaire_enabled'], 'updated_at' => now(),
+        $validated = $request->validate([
+            'questionnaire_publish_mode' => ['required', 'in:internal_system,qr_code,closed'],
         ]);
-        auditLog('programs.questionnaire.setting', 'programs', $program->id, $validated['questionnaire_enabled'] ? 'Questionnaire enabled' : 'Attendance-only mode enabled');
-        return back()->with('success', $validated['questionnaire_enabled']
-            ? __('Attendance and questionnaire mode enabled.')
-            : __('Attendance-only mode enabled. Students can earn points without answering questions.'));
+
+        $mode = $validated['questionnaire_publish_mode'];
+        $enabled = $mode !== 'closed';
+
+        DB::transaction(function () use ($program, $mode, $enabled): void {
+            DB::table('programs')->where('id', $program->id)->update([
+                'questionnaire_enabled' => $enabled,
+                'questionnaire_publish_mode' => $mode,
+                'updated_at' => now(),
+            ]);
+
+            if ($enabled) {
+                $survey = DB::table('program_surveys')->where('program_id', $program->id)->orderByDesc('id')->first();
+                if ($survey) {
+                    DB::table('program_surveys')->where('id', $survey->id)->update([
+                        'status' => 'published',
+                        'publish_mode' => $mode,
+                        'published_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            } else {
+                DB::table('program_surveys')->where('program_id', $program->id)->update([
+                    'status' => 'draft',
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
+        auditLog('programs.questionnaire.setting', 'programs', $program->id, 'Questionnaire mode updated to: '.$mode);
+
+        $message = match($mode) {
+            'internal_system' => __('Tetapan disimpan: Mod 1 - Terus Dalam Sistem (Pelajar PB jawab terus di portal tanpa imbas QR).'),
+            'qr_code' => __('Tetapan disimpan: Mod 2 - Mod Imbasan QR (Pelajar dan tetamu imbas QR untuk jawab).'),
+            'closed' => __('Tetapan disimpan: Soal selidik ditutup / Mod Kehadiran Sahaja.'),
+        };
+
+        return back()->with('success', $message);
     }
 
     public function saveSurvey(Request $request, int $id): RedirectResponse
     {
         $program = $this->ownedActiveProgram($id);
-        abort_unless((bool) $program->questionnaire_enabled, 403);
 
         $validated = $request->validate([
             'title' => 'required|string|max:180',
@@ -514,16 +634,168 @@ class ProgramOperationController extends Controller
         ]);
 
         return redirect()->back()
-            ->with('success', __('Questionnaire published successfully! Students can now access and answer it during check-in.'));
+            ->with('success', __('Questionnaire published successfully! Students can now access and answer it.'));
     }
 
-    public function publicCheckin(int $id): View
+    public function publishSurveyMode(Request $request, int $id): RedirectResponse
+    {
+        $program = $this->ownedActiveProgram($id);
+        $validated = $request->validate([
+            'publish_mode' => ['required', 'in:internal_system,qr_code'],
+        ]);
+
+        $survey = DB::table('program_surveys')
+            ->where('program_id', $program->id)
+            ->orderByDesc('id')
+            ->first();
+
+        if (! $survey) {
+            return redirect()->back()->withErrors(['questionnaire' => __('No survey draft found. Please create questions in Questionnaire Builder first.')]);
+        }
+
+        DB::transaction(function () use ($program, $survey, $validated): void {
+            DB::table('program_surveys')->where('id', $survey->id)->update([
+                'status' => 'published',
+                'publish_mode' => $validated['publish_mode'],
+                'published_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('programs')->where('id', $program->id)->update([
+                'questionnaire_enabled' => true,
+                'questionnaire_publish_mode' => $validated['publish_mode'],
+                'updated_at' => now(),
+            ]);
+        });
+
+        auditLog('programs.questionnaire.publish_mode', 'programs', $program->id, 'Questionnaire published in mode: '.$validated['publish_mode']);
+
+        $message = $validated['publish_mode'] === 'internal_system'
+            ? __('Questionnaire published directly in-system for Politeknik Besut students. No QR scan is required for them.')
+            : __('Questionnaire published in QR Code mode. Students can scan via PWA scanner and external guests can scan the public QR code.');
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    public function closeSurvey(int $id): RedirectResponse
+    {
+        $program = $this->ownedActiveProgram($id);
+        $survey = DB::table('program_surveys')
+            ->where('program_id', $program->id)
+            ->orderByDesc('id')
+            ->first();
+
+        if ($survey) {
+            DB::table('program_surveys')->where('id', $survey->id)->update([
+                'status' => 'draft',
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::table('programs')->where('id', $program->id)->update([
+            'questionnaire_publish_mode' => 'closed',
+            'updated_at' => now(),
+        ]);
+
+        auditLog('programs.questionnaire.close', 'programs', $program->id, 'Questionnaire closed by director');
+
+        return redirect()->back()->with('success', __('Questionnaire is now closed.'));
+    }
+
+    public function presenter(int $id): View
+    {
+        $program = DB::table('programs')->where('id', $id)->first();
+        if (! $program) {
+            abort(404, __('Program not found.'));
+        }
+
+        $authId = (int) session('auth_user.id');
+        $authRole = (string) (session('auth_user.admin_role') ?? '');
+        $hasOversight = in_array($authRole, ['system_admin', 'student_affairs_head'], true);
+        $isDirector = (int) $program->created_by === $authId;
+
+        if (! $hasOversight && ! $isDirector && ! $this->isReviewer($program, $authId)) {
+            abort(403, __('You are not authorized to access this presenter screen.'));
+        }
+
+        $survey = DB::table('program_surveys')
+            ->where('program_id', $program->id)
+            ->where('status', 'published')
+            ->orderByDesc('id')
+            ->first();
+
+        $tokenData = DynamicQrToken::generate($program->id);
+        $initialCheckinUrl = route('public.programs.qr_checkin', ['program' => $program->id, 't' => $tokenData['token']]);
+        $studentCheckinUrl = route('student.programs.show', ['program' => $program->id, 't' => $tokenData['token']]);
+
+        $attendances = DB::table('program_attendances')->where('program_id', $program->id)->get();
+        $totalJoined = $attendances->count();
+        $internalCount = $attendances->where('attendee_type', 'internal')->count();
+        $externalCount = $attendances->where('attendee_type', 'external')->count();
+
+        return view('admin.programs.presenter', compact(
+            'program',
+            'survey',
+            'tokenData',
+            'initialCheckinUrl',
+            'studentCheckinUrl',
+            'totalJoined',
+            'internalCount',
+            'externalCount'
+        ));
+    }
+
+    public function liveToken(int $id)
+    {
+        $program = DB::table('programs')->where('id', $id)->first();
+        if (! $program) {
+            return response()->json(['error' => __('Program not found.')], 404);
+        }
+
+        $authId = (int) session('auth_user.id');
+        $authRole = (string) (session('auth_user.admin_role') ?? '');
+        $hasOversight = in_array($authRole, ['system_admin', 'student_affairs_head'], true);
+        $isDirector = (int) $program->created_by === $authId;
+
+        if (! $hasOversight && ! $isDirector && ! $this->isReviewer($program, $authId)) {
+            return response()->json(['error' => __('Unauthorized.')], 403);
+        }
+
+        $tokenData = DynamicQrToken::generate($program->id);
+
+        $attendances = DB::table('program_attendances')->where('program_id', $program->id)->get();
+        $totalJoined = $attendances->count();
+        $internalCount = $attendances->where('attendee_type', 'internal')->count();
+        $externalCount = $attendances->where('attendee_type', 'external')->count();
+        $ratings = $attendances->pluck('satisfaction_rating')->filter();
+        $averageRating = $ratings->isNotEmpty() ? round($ratings->avg(), 1) : 0.0;
+
+        return response()->json([
+            'token' => $tokenData['token'],
+            'expires_in' => $tokenData['expires_in'],
+            'timestamp' => $tokenData['timestamp'],
+            'public_url' => route('public.programs.qr_checkin', ['program' => $program->id, 't' => $tokenData['token']]),
+            'student_url' => route('student.programs.show', ['program' => $program->id, 't' => $tokenData['token']]),
+            'attendance_status' => $program->attendance_status,
+            'stats' => [
+                'total' => $totalJoined,
+                'internal' => $internalCount,
+                'external' => $externalCount,
+                'target' => $program->estimated_participants ?: 0,
+                'avg_rating' => $averageRating,
+            ],
+        ]);
+    }
+
+    public function publicCheckin(Request $request, int $id): View
     {
         $program = DB::table('programs')->where('id', $id)->first();
         if (! $program) {
             abort(404, __('Program not found.'));
         }
         abort_unless($program->status === 'active' && $program->attendance_status === 'open', 404);
+
+        $token = $request->input('t') ?? $request->input('token');
 
         $survey = DB::table('program_surveys')
             ->where('program_id', $program->id)
@@ -538,7 +810,7 @@ class ProgramOperationController extends Controller
                 ->get()
             : collect();
 
-        return view('public.programs.qr_checkin', compact('program', 'survey', 'questions'));
+        return view('public.programs.qr_checkin', compact('program', 'survey', 'questions', 'token'));
     }
 
     public function storePublicCheckin(Request $request, int $id): RedirectResponse
@@ -548,9 +820,19 @@ class ProgramOperationController extends Controller
             abort(404);
         }
         abort_unless($program->status === 'active' && $program->attendance_status === 'open', 404);
+
+        if ($request->filled('qr_token')) {
+            if (! DynamicQrToken::verify($request->input('qr_token'), $program->id)) {
+                return back()->withInput()->withErrors([
+                    'qr_token' => __('The scanned QR code has expired. Please scan the current QR code displayed on the screen.'),
+                ]);
+            }
+        }
+
         $usesGeofence = $program->latitude !== null && $program->longitude !== null;
 
         $validated = $request->validate([
+            'qr_token' => 'nullable|string',
             'full_name' => 'required|string|max:180',
             'identifier' => 'required|string|max:100',
             'email' => 'nullable|email|max:180',
@@ -788,6 +1070,10 @@ class ProgramOperationController extends Controller
 
     private function reportBranch(object $program): string
     {
+        if (!empty($program->approval_branch)) {
+            return $program->approval_branch;
+        }
+
         $owner = DB::table('admins')->where('id', $program->created_by)->first();
 
         return $owner?->reporting_branch

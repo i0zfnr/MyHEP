@@ -30,6 +30,11 @@ StudentEdge provides one authenticated workspace for student-affairs operations.
 
 The browser uses server-rendered Blade views enhanced with JavaScript and CSS. Laravel controllers and route closures apply session authentication and scoped middleware. Eloquent/query-builder operations persist data in MySQL/MariaDB. Private downloads are served through authorized controller routes. Queue workers perform scalable background work. External AI, mail, and push providers are accessed server-side.
 
+## User Experience & Professional Iconography
+- **Professional Vector Iconography:** The system enforces a cohesive, high-definition SVG vector icon system across student, lecturer, and admin interfaces, maintaining crisp visual clarity on high-DPI and mobile displays.
+- **Role-Based Theming:** Light and Dark mode support with customized, institutional color tokens tailored to role hierarchies.
+- **Progressive Web App (PWA):** Mobile-first interfaces with haptic responses, offline-ready shell, and hardware-accelerated QR scanning.
+
 ## Application scale
 
 At this baseline the application registers 220 routes: 151 under `/admin`, 31 under `/student`, 7 under `/lecturer`, with remaining public and account routes. The migration history creates 38 framework and domain tables, and the automated suite contains 37 test files.

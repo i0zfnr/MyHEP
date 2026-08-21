@@ -296,6 +296,12 @@
             <p>{{ $program->reference_no ?: __('No reference number') }} &middot; {{ __('Venue:') }} <strong>{{ $program->venue ?: __('Not set') }}</strong></p>
         </div>
         <div class="pmr-actions">
+            <!-- Toggle Analytics & Visualization Button -->
+            <button type="button" class="pmr-btn" id="btnToggleAnalytics" style="background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(99,102,241,0.15)); border-color: var(--pm-accent); color: var(--text); font-weight: 850; gap: 0.6rem;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                <span id="btnToggleAnalyticsText">{{ __('Statistik & Visualisasi') }}</span>
+                <span id="analyticsStatusPill" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; background: rgba(16,185,129,0.2); color: #059669; font-weight: 900; border: 1px solid rgba(16,185,129,0.4);">ON</span>
+            </button>
             <a class="pmr-btn" href="{{ route('admin.programs.operations', $program->id) }}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
                 {{ __('Back to Operations') }}
@@ -307,142 +313,403 @@
         </div>
     </header>
 
-    <!-- 1. Participation Mode Configuration -->
+    <!-- WOW Interactive Visual Analytics & Statistics Dashboard -->
+    <section id="analyticsDashboardSection" class="pmr-card" style="border: 1px solid rgba(212,175,55,0.35); background: linear-gradient(170deg, var(--surface, #fff), color-mix(in srgb, var(--pm-accent, #b99150) 4%, var(--surface, #fff))); box-shadow: 0 12px 35px rgba(36,26,18,0.06);">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+            <div>
+                <span class="pmr-eyebrow" style="color: #6366f1; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                    {{ __('VISUALISASI & ANALISIS MAKLUM BALAS') }}
+                </span>
+                <h2 style="font-size: 1.35rem; margin: 0.2rem 0 0.1rem; color: var(--text);">{{ __('Statistik Prestasi & Kepuasan Peserta') }}</h2>
+                <p style="margin: 0; font-size: 0.84rem; color: var(--text-muted);">{{ __('Ringkasan analisis soal selidik program, pecahan responden dan skor terperinci secara masa nyata.') }}</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 0.78rem; font-weight: 750; color: var(--text-muted);">{{ __('Kadar Respons:') }}</span>
+                <strong style="font-size: 0.95rem; color: var(--pm-accent);">{{ $analytics['response_rate'] }}%</strong>
+            </div>
+        </div>
+
+        <!-- 1. Executive Metric KPI Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <!-- KPI 1: Jumlah Responden -->
+            <div style="background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 14px; padding: 1.15rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                    <span style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">{{ __('Jumlah Responden') }}</span>
+                    <span style="width: 32px; height: 32px; border-radius: 8px; background: rgba(99,102,241,0.12); color: #6366f1; display: grid; place-items: center;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </span>
+                </div>
+                <strong style="font-size: 1.8rem; font-weight: 900; color: var(--text); display: block;">{{ number_format($analytics['total_responses']) }}</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">{{ __('Daripada :total peserta hadir (:rate%)', ['total' => $analytics['total_attendances'], 'rate' => $analytics['response_rate']]) }}</span>
+            </div>
+
+            <!-- KPI 2: Indeks Kepuasan -->
+            <div style="background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 14px; padding: 1.15rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                    <span style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">{{ __('Indeks Kepuasan (CSI)') }}</span>
+                    <span style="width: 32px; height: 32px; border-radius: 8px; background: rgba(212,175,55,0.15); color: #b99150; display: grid; place-items: center;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </span>
+                </div>
+                <div style="display: flex; align-items: baseline; gap: 0.4rem;">
+                    <strong style="font-size: 1.8rem; font-weight: 900; color: var(--pm-accent);">{{ $analytics['overall_avg'] > 0 ? number_format($analytics['overall_avg'], 2) : '0.00' }}</strong>
+                    <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 700;">/ 5.0</span>
+                </div>
+                <span style="font-size: 0.8rem; color: #059669; font-weight: 750;">{{ $analytics['satisfaction_percentage'] }}% {{ __('Penarafan Positif') }}</span>
+            </div>
+
+            <!-- KPI 3: Pecahan Pelajar PB vs Tetamu Luar -->
+            <div style="background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 14px; padding: 1.15rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                    <span style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">{{ __('Pecahan Kategori') }}</span>
+                    <span style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16,185,129,0.12); color: #059669; display: grid; place-items: center;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.2rem;">
+                    <div>
+                        <strong style="font-size: 1.25rem; font-weight: 900; color: #059669;">{{ number_format($analytics['internal_count']) }}</strong>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">{{ __('Pelajar PB') }}</span>
+                    </div>
+                    <div style="width: 1px; height: 26px; background: var(--border);"></div>
+                    <div>
+                        <strong style="font-size: 1.25rem; font-weight: 900; color: #0284c7;">{{ number_format($analytics['external_count']) }}</strong>
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">{{ __('Tetamu Luar') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 4: Jumlah Soalan -->
+            <div style="background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 14px; padding: 1.15rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                    <span style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">{{ __('Item Borang Soalan') }}</span>
+                    <span style="width: 32px; height: 32px; border-radius: 8px; background: rgba(234,179,8,0.14); color: #ca8a04; display: grid; place-items: center;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </span>
+                </div>
+                <strong style="font-size: 1.8rem; font-weight: 900; color: var(--text); display: block;">{{ count($questions) }}</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">{{ __('Standard Format SA-04 Politeknik') }}</span>
+            </div>
+        </div>
+
+        <!-- 2. Dual Visual Charts Grid: Donut Pie + Rating Histogram -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+            <!-- Left Chart: Donut Breakdown (Pie Chart) -->
+            <div style="background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 16px; padding: 1.35rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+                    <div>
+                        <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10H12z"/></svg>
+                            {{ __('CARTA KOMPOSISI') }}
+                        </span>
+                        <h3 style="font-size: 1.05rem; font-weight: 850; margin: 0.1rem 0 0;">{{ __('Pecahan Komposisi Peserta') }}</h3>
+                    </div>
+                    <span style="font-size: 0.76rem; font-weight: 800; background: rgba(212,175,55,0.12); color: var(--pm-accent); padding: 0.25rem 0.65rem; border-radius: 999px;">
+                        {{ $analytics['total_attendances'] }} {{ __('Peserta') }}
+                    </span>
+                </div>
+
+                @php
+                    $totalAtt = max(1, $analytics['total_attendances']);
+                    $pbPct = round(($analytics['internal_count'] / $totalAtt) * 100);
+                    $extPct = 100 - $pbPct;
+                    // SVG Donut calculation
+                    $radius = 42;
+                    $circ = 2 * pi() * $radius; // ~263.89
+                    $pbOffset = $circ * ($pbPct / 100);
+                @endphp
+
+                <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; padding: 0.75rem 0;">
+                    <!-- SVG Pie / Donut Chart -->
+                    <div style="position: relative; width: 140px; height: 140px;">
+                        <svg width="140" height="140" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                            <!-- Background Track -->
+                            <circle cx="50" cy="50" r="{{ $radius }}" fill="transparent" stroke="#f1f5f9" stroke-width="14" />
+                            <!-- External Segment -->
+                            <circle cx="50" cy="50" r="{{ $radius }}" fill="transparent" stroke="#0284c7" stroke-width="14" stroke-dasharray="{{ $circ }}" stroke-dashoffset="0" />
+                            <!-- Internal PB Segment -->
+                            <circle cx="50" cy="50" r="{{ $radius }}" fill="transparent" stroke="#10b981" stroke-width="14" stroke-dasharray="{{ $pbOffset }} {{ $circ }}" stroke-linecap="round" />
+                        </svg>
+                        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                            <strong style="font-size: 1.35rem; font-weight: 900; color: var(--text); line-height: 1;">{{ $pbPct }}%</strong>
+                            <span style="font-size: 0.68rem; font-weight: 750; color: var(--text-muted); text-transform: uppercase;">PB Pelajar</span>
+                        </div>
+                    </div>
+
+                    <!-- Legend & Details -->
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; min-width: 150px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                <span style="width: 12px; height: 12px; border-radius: 4px; background: #10b981;"></span>
+                                <span style="font-size: 0.84rem; font-weight: 750; color: var(--text);">{{ __('Pelajar PB') }}</span>
+                            </div>
+                            <strong style="font-size: 0.88rem; color: #059669;">{{ $analytics['internal_count'] }} ({{ $pbPct }}%)</strong>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                <span style="width: 12px; height: 12px; border-radius: 4px; background: #0284c7;"></span>
+                                <span style="font-size: 0.84rem; font-weight: 750; color: var(--text);">{{ __('Tetamu Luar') }}</span>
+                            </div>
+                            <strong style="font-size: 0.88rem; color: #0284c7;">{{ $analytics['external_count'] }} ({{ $extPct }}%)</strong>
+                        </div>
+                        <div style="border-top: 1px dashed var(--border); padding-top: 0.6rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+                            <span>{{ __('Jumlah Responden') }}</span>
+                            <strong style="color: var(--text);">{{ $analytics['total_responses'] }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Chart: Score Distribution Histogram Bars (5★ to 1★) -->
+            <div style="background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 16px; padding: 1.35rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <div>
+                        <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">{{ __('TABURAN SKOR KESELURUHAN') }}</span>
+                        <h3 style="font-size: 1.05rem; font-weight: 850; margin: 0.1rem 0 0;">{{ __('Pecahan Penarafan Bintang') }}</h3>
+                    </div>
+                    <span style="font-size: 0.76rem; font-weight: 800; background: rgba(99,102,241,0.12); color: #6366f1; padding: 0.25rem 0.65rem; border-radius: 999px;">
+                        Skala 1 - 5
+                    </span>
+                </div>
+
+                @php
+                    $totalRatings = max(1, array_sum($analytics['rating_distribution']));
+                    $ratingLabels = [
+                        5 => ['label' => '5 ★ Sangat Cemerlang', 'color' => '#d4af37'],
+                        4 => ['label' => '4 ★ Cemerlang / Setuju', 'color' => '#10b981'],
+                        3 => ['label' => '3 ★ Sederhana / Baik', 'color' => '#0284c7'],
+                        2 => ['label' => '2 ★ Kurang Memuaskan', 'color' => '#f59e0b'],
+                        1 => ['label' => '1 ★ Sangat Lemah', 'color' => '#ef4444'],
+                    ];
+                @endphp
+
+                <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                    @foreach([5, 4, 3, 2, 1] as $star)
+                        @php
+                            $cnt = $analytics['rating_distribution'][$star] ?? 0;
+                            $pct = round(($cnt / $totalRatings) * 100);
+                            $cfg = $ratingLabels[$star];
+                        @endphp
+                        <div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; font-weight: 750; margin-bottom: 0.2rem;">
+                                <span style="color: var(--text);">{{ $cfg['label'] }}</span>
+                                <span style="color: var(--text-muted);"><strong>{{ $cnt }}</strong> ({{ $pct }}%)</span>
+                            </div>
+                            <div style="height: 9px; border-radius: 999px; background: #f1f5f9; overflow: hidden; width: 100%;">
+                                <div style="height: 100%; width: {{ $pct }}%; background: {{ $cfg['color'] }}; border-radius: 999px; transition: width 0.5s ease;"></div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Question Item Performance Breakdown (SA-04 Questions Histogram) -->
+        @if(!empty($analytics['question_stats']))
+            <div style="background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 16px; padding: 1.35rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">{{ __('ANALISIS PRESTASI SETIAP ITEM SOALAN') }}</span>
+                        <h3 style="font-size: 1.05rem; font-weight: 850; margin: 0.1rem 0 0;">{{ __('Skor Purata Mengikut Soalan SA-04') }}</h3>
+                    </div>
+                    <span style="font-size: 0.76rem; font-weight: 800; color: var(--text-muted);">
+                        {{ count($analytics['question_stats']) }} {{ __('Item Dinilai') }}
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
+                    @foreach($analytics['question_stats'] as $idx => $qStat)
+                        @php
+                            $maxScore = $qStat['type'] === 'rating_4' ? 4 : 5;
+                            $score = $qStat['avg_score'] ?? 0;
+                            $scorePct = $maxScore > 0 ? round(($score / $maxScore) * 100) : 0;
+                            $barColor = $scorePct >= 80 ? '#10b981' : ($scorePct >= 60 ? '#d4af37' : '#f59e0b');
+                        @endphp
+                        <div style="border: 1px solid var(--border); border-radius: 12px; padding: 1rem; background: var(--bg-alt, #faf7f2);">
+                            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                                    <span style="width: 22px; height: 22px; border-radius: 6px; background: var(--pm-accent); color: #fff; font-size: 0.72rem; font-weight: 900; display: grid; place-items: center;">{{ $idx + 1 }}</span>
+                                    <span style="font-size: 0.84rem; font-weight: 800; color: var(--text); line-height: 1.35;">{{ \Illuminate\Support\Str::limit($qStat['text'], 65) }}</span>
+                                </div>
+                                @if($score > 0)
+                                    <strong style="font-size: 0.95rem; font-weight: 900; color: {{ $barColor }}; white-space: nowrap;">
+                                        {{ number_format($score, 2) }} <span style="font-size: 0.72rem; color: var(--text-muted);">/{{ $maxScore }}</span>
+                                    </strong>
+                                @endif
+                            </div>
+
+                            @if($score > 0)
+                                <div style="height: 7px; border-radius: 999px; background: #e2e8f0; overflow: hidden; margin-bottom: 0.35rem;">
+                                    <div style="height: 100%; width: {{ $scorePct }}%; background: {{ $barColor }}; border-radius: 999px;"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                                    <span>{{ $qStat['total_answers'] }} {{ __('respons direkodkan') }}</span>
+                                    <span style="font-weight: 750; color: {{ $barColor }};">{{ $scorePct }}%</span>
+                                </div>
+                            @else
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">{{ __('Tiada respons berangka lagi') }}</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <!-- 4. Qualitative Feedback Highlights Stream -->
+        @if(!empty($analytics['recent_comments']) && $analytics['recent_comments']->isNotEmpty())
+            <div style="background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 16px; padding: 1.35rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <div>
+                        <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">{{ __('KOMEN & SUARA PESERTA') }}</span>
+                        <h3 style="font-size: 1.05rem; font-weight: 850; margin: 0.1rem 0 0;">{{ __('Maklum Balas Terkini Peserta') }}</h3>
+                    </div>
+                    <span style="font-size: 0.76rem; font-weight: 800; color: #6366f1;">{{ count($analytics['recent_comments']) }} {{ __('Komen Terkini') }}</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem;">
+                    @foreach($analytics['recent_comments'] as $comm)
+                        <div style="background: var(--bg-alt, #faf7f2); border: 1px solid var(--border); border-radius: 12px; padding: 0.95rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                                <strong style="font-size: 0.86rem; color: var(--text);">{{ $comm->full_name }}</strong>
+                                @if($comm->satisfaction_rating)
+                                    <span style="font-size: 0.78rem; font-weight: 800; color: #b99150;">★ {{ $comm->satisfaction_rating }}/5</span>
+                                @endif
+                            </div>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary, #4b5563); margin: 0 0 0.5rem; font-style: italic; line-height: 1.4;">
+                                "{{ \Illuminate\Support\Str::limit($comm->feedback_comments, 140) }}"
+                            </p>
+                            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                                <span>{{ $comm->attendee_type === 'internal' ? 'Pelajar PB' : ($comm->institution_or_unit ?: 'Tetamu Luar') }}</span>
+                                <span>{{ \Illuminate\Support\Carbon::parse($comm->checked_in_at)->diffForHumans() }}</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+    </section>
+
+    <!-- 1. Questionnaire Publishing Mode Configuration -->
     <section class="pmr-card">
-        <span class="pmr-eyebrow">{{ __('MODE SETTING') }}</span>
-        <h2>{{ __('Participation Mode') }}</h2>
-        <p class="subtitle">{{ __('Choose whether participants are required to complete a questionnaire upon checking in or record attendance only.') }}</p>
+        <span class="pmr-eyebrow" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            {{ __('KAWALAN SOAL SELIDIK & PENERBITAN') }}
+        </span>
+        <h2>{{ __('Tetapan Penerbitan Soal Selidik') }}</h2>
+        <p class="subtitle">{{ __('Tentukan cara penerbitan borang maklum balas ini: secara terus dalam portal pelajar Politeknik Besut tanpa imbasan QR, melalui imbasan QR, atau ditutup/deraf.') }}</p>
 
         <form method="post" action="{{ route('admin.programs.questionnaire-setting.update', $program->id) }}" class="pmr-mode-panel">
             @csrf @method('put')
-            <label for="participationMode" style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted, #746b62);">{{ __('Selected Mode') }}</label>
-            <select id="participationMode" name="questionnaire_enabled" data-saved-mode="{{ $program->questionnaire_enabled ? '1' : '0' }}" @disabled($program->attendance_status === 'open')>
-                <option value="1" @selected($program->questionnaire_enabled)>{{ __('Attendance + Questionnaire (Students answer questions during QR check-in)') }}</option>
-                <option value="0" @selected(!$program->questionnaire_enabled)>{{ __('Attendance Only (Fast QR check-in without questionnaire)') }}</option>
+            <label for="participationMode" style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted, #746b62);">{{ __('Mod Penerbitan') }}</label>
+            <select id="participationMode" name="questionnaire_publish_mode">
+                <option value="internal_system" @selected(($program->questionnaire_publish_mode ?? 'internal_system') === 'internal_system' && $program->questionnaire_enabled)>
+                    {{ __('Mod 1: Terus Dalam Sistem (Pelajar PB jawab terus di portal/PWA tanpa imbas QR)') }}
+                </option>
+                <option value="qr_code" @selected(($program->questionnaire_publish_mode ?? '') === 'qr_code' && $program->questionnaire_enabled)>
+                    {{ __('Mod 2: Mod Imbasan QR (PWA Pelajar & Tetamu Luar imbas kod QR)') }}
+                </option>
+                <option value="closed" @selected(!$program->questionnaire_enabled || ($program->questionnaire_publish_mode ?? '') === 'closed')>
+                    {{ __('Soal Selidik Ditutup / Deraf (Mod Kehadiran Sahaja)') }}
+                </option>
             </select>
             <div class="pmr-mode-actions">
-                <button class="pmr-btn primary" type="submit" @disabled($program->attendance_status === 'open')>{{ __('Save Mode Selection') }}</button>
-                @if($program->attendance_status === 'open')
-                    <p class="pmr-mode-status">{{ __('Close attendance in the operations page before changing this mode.') }}</p>
-                @endif
-                <p id="participationModeNotice" class="pmr-mode-status" style="display:none;color:#8a5a13;">{{ __('Save this selection to apply the chosen questionnaire mode.') }}</p>
+                <button class="pmr-btn primary" type="submit">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    {{ __('Simpan Tetapan Mod') }}
+                </button>
             </div>
         </form>
-
-        <div id="attendanceOnlyMessage" class="pmr-attendance-mode" style="margin-top: 1rem;" @if($program->questionnaire_enabled) hidden @endif>
-            <span class="pmr-attendance-mode__icon" aria-hidden="true">&#10003;</span>
-            <div>
-                <strong>{{ __('Attendance-Only Mode Active') }}</strong>
-                <p>{{ __('Students can check in directly using their student account or the public QR scanner. No questionnaire is required for this program.') }}</p>
-            </div>
-        </div>
     </section>
 
     <!-- 2. Interactive Questionnaire Builder Workspace -->
-    <div id="questionnaireBuilderContent" @if(!$program->questionnaire_enabled) hidden @endif>
+    <div id="questionnaireBuilderContent">
 
-        <!-- AI Assistant & Official Template Card -->
-        <section class="pmr-card" style="margin-bottom: 1.25rem;">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-                <div>
-                    <span class="pmr-eyebrow" style="color: #6366f1;">{{ __('TEMPLAT RASMI & PENJANA AI') }}</span>
-                    <h2>{{ __('Jana Soalan Berpandukan Templat Borang SA-04') }}</h2>
-                </div>
-                <button type="button" class="pmr-btn" id="btnLoadSa04" style="background:color-mix(in srgb,var(--pm-accent) 10%,#fff);border-color:var(--pm-accent);color:var(--pm-accent-strong);font-weight:800;">
-                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                    {{ __('Muat Templat Rasmi SA-04(1) (1-Klik)') }}
-                </button>
-            </div>
-            <p class="subtitle">{{ __('Gunakan templat rasmi Borang SA-04 Politeknik Besut (Penilaian Penceramah, Pelaksanaan, Keberkesanan & Ulasan) atau minta AI menjana soalan khusus mengikut kertas kerja program anda.') }}</p>
-
-            <div class="pmr-ai-box">
-                <div class="pmr-ai-grid">
-                    <div>
-                        <label for="aiFocus">{{ __('Pilihan Templat / Fokus AI') }}</label>
-                        <select id="aiFocus">
-                            <option value="official_sa04_1" selected>{{ __('📋 Templat Rasmi SA-04(1) — Penilaian Peserta (10 Item Skala 1-4 + Ulasan)') }}</option>
-                            <option value="official_sa04_3">{{ __('📋 Templat Rasmi SA-04(3) — Penilaian Keberkesanan Staf (7 Item Skala 0-5 + Komen)') }}</option>
-                            <option value="ai_tailored_sa04">{{ __('✨ AI: Jana Soalan Khusus Mengikut Kertas Kerja Program (Format SA-04)') }}</option>
-                            <option value="satisfaction">{{ __('✨ AI: Fokus Kepuasan & Logistik Program') }}</option>
-                            <option value="effectiveness">{{ __('✨ AI: Fokus Keberkesanan & Hasil Pembelajaran') }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="aiCount">{{ __('Bilangan Soalan') }}</label>
-                        <select id="aiCount">
-                            <option value="5">5 {{ __('Soalan') }}</option>
-                            <option value="8">8 {{ __('Soalan') }}</option>
-                            <option value="11" selected>11 {{ __('Soalan (Lengkap SA-04)') }}</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="button" class="pmr-btn primary" id="btnGenerateAi" style="width: 100%; margin-top: 14px; justify-content: center;">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
-                    {{ __('Jana / Muat Soalan Mengikut Templat Dipilih') }}
-                </button>
-            </div>
-        </section>
-
-        <!-- Question List & Form -->
+        <!-- Question Editor Form with 100% Official SA-04(1) Baseline -->
         <section class="pmr-card">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
                 <div>
-                    <span class="pmr-eyebrow">{{ __('SENARAI SOALAN') }}</span>
-                    <h2>{{ __('Susun & Kemaskini Soalan Kaji Selidik') }}</h2>
+                    <span class="pmr-eyebrow" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        {{ __('TEMPLAT RASMI SA-04(1) (P00) (24-12-24)') }}
+                    </span>
+                    <h2>{{ __('Borang Penilaian Program & Soal Selidik') }}</h2>
                 </div>
-                @if($survey && $survey->status === 'published')
-                    <span class="pmr-published-badge">{{ __('Live & Diterbitkan Kepada Peserta') }}</span>
-                @endif
+                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                    <button type="button" class="pmr-btn" id="btnLoadSa04" style="background: rgba(212,175,55,0.12); border-color: var(--pm-accent); color: var(--text); font-weight: 800; font-size: 0.82rem;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        {{ __('Muat Semula Templat Rasmi SA-04(1)') }}
+                    </button>
+                    <button type="button" class="pmr-btn" onclick="addQuestionRow()" style="font-size: 0.82rem;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        {{ __('Tambah Soalan Tambahan') }}
+                    </button>
+                </div>
             </div>
-            <p class="subtitle">{{ __('Tetapkan soalan yang akan dipaparkan kepada pelajar / peserta semasa mengimbas kod QR kehadiran.') }}</p>
+
+            <!-- Official Scoring Guide Banner -->
+            <div style="background: var(--bg-alt, #faf7f2); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1.15rem; margin-bottom: 1.25rem;">
+                <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">
+                    {{ __('Panduan Skor Borang SA-04(1):') }}
+                </span>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.82rem; font-weight: 700; color: var(--text);">
+                    <span><strong>1:</strong> Sangat Tidak Setuju</span>
+                    <span><strong>2:</strong> Tidak Setuju</span>
+                    <span><strong>3:</strong> Setuju</span>
+                    <span><strong>4:</strong> Sangat Setuju</span>
+                </div>
+            </div>
 
             <form method="post" action="{{ route('admin.programs.survey.save', $program->id) }}">
                 @csrf
-                <div style="margin-bottom: 1.25rem;">
-                    <label style="font-weight: 800; font-size: 0.85rem; display: block; margin-bottom: 4px;">{{ __('Tajuk Kaji Selidik / Borang') }}</label>
-                    <input name="title" required value="{{ old('title', $survey->title ?? __('Borang Penilaian Program [SA-04(1)] - ').$program->title) }}" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border, #eadac8); font-size: 0.95rem; box-sizing: border-box;">
-                </div>
+                <input type="hidden" name="title" value="{{ $survey->title ?? 'Borang Penilaian Program [SA-04(1)] - '.$program->title }}">
+                <input type="hidden" name="description" value="{{ $survey->description ?? 'Sila maklumkan pandangan anda terhadap program latihan yang telah diikuti ini dengan menanda pada ruangan yang sesuai berpandukan kepada skor di atas.' }}">
 
                 <div id="questionsContainer">
                     @forelse($questions as $index => $q)
                         <div class="pmr-q-item">
                             <div class="pmr-q-head">
-                                <strong class="pmr-q-title"><span class="pmr-q-number">{{ $index + 1 }}</span>{{ __('Soalan') }}</strong>
-                                <button class="pmr-remove" type="button" onclick="this.closest('.pmr-q-item').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg>{{ __('Padam') }}</button>
+                                <div class="pmr-q-title">
+                                    <span class="pmr-q-number">{{ $index + 1 }}</span>
+                                    <span>{{ __('Soalan') }} {{ $index + 1 }}</span>
+                                </div>
+                                <button type="button" class="pmr-btn" style="padding: 4px 10px; font-size: 0.76rem; min-height: 28px; color: #dc2626; border-color: rgba(220,38,38,0.25);" onclick="this.closest('.pmr-q-item').remove()">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    {{ __('Padam') }}
+                                </button>
                             </div>
-                            <label class="pmr-q-field"><span>{{ __('Teks Soalan / Kriteria Penilaian') }}</span><input name="questions[{{ $index }}][question_text]" value="{{ $q->question_text }}" required placeholder="{{ __('Masukkan teks soalan') }}"></label>
-                            <label class="pmr-q-field"><span>{{ __('Jenis Jawapan / Skala') }}</span><select name="questions[{{ $index }}][question_type]">
-                                <option value="rating_4" @selected($q->question_type === 'rating_4')>{{ __('Skala Likert 1-4 (Borang SA-04: Sangat Tidak Setuju - Sangat Setuju)') }}</option>
-                                <option value="rating_5" @selected($q->question_type === 'rating_5')>{{ __('Skala 1-5 Bintang (Sangat Rendah - Sangat Cemerlang)') }}</option>
-                                <option value="text" @selected($q->question_type === 'text')>{{ __('Jawapan Bertulis / Ulasan (Long Written Answer)') }}</option>
-                            </select></label>
+                            <label class="pmr-q-field">
+                                <span>{{ __('Teks Soalan') }}</span>
+                                <input type="text" name="questions[{{ $index }}][question_text]" value="{{ $q->question_text }}" required>
+                            </label>
+                            <label class="pmr-q-field">
+                                <span>{{ __('Jenis Jawapan / Skala') }}</span>
+                                <select name="questions[{{ $index }}][question_type]">
+                                    <option value="rating_4" @selected($q->question_type === 'rating_4')>{{ __('Skala Likert 1-4 (Borang SA-04: Sangat Tidak Setuju - Sangat Setuju)') }}</option>
+                                    <option value="rating_5" @selected($q->question_type === 'rating_5')>{{ __('Skala 1-5 Bintang (Sangat Rendah - Sangat Cemerlang)') }}</option>
+                                    <option value="text" @selected($q->question_type === 'text')>{{ __('Jawapan Bertulis / Ulasan (Long Written Answer)') }}</option>
+                                </select>
+                            </label>
                             <label class="pmr-q-required">
                                 <input type="hidden" name="questions[{{ $index }}][is_required]" value="0">
-                                <input type="checkbox" name="questions[{{ $index }}][is_required]" value="1" @checked($q->is_required) style="width:auto;margin:0;">
-                                {{ __('Soalan wajib dijawab') }}
+                                <input type="checkbox" name="questions[{{ $index }}][is_required]" value="1" @checked($q->is_required)>
+                                <span>{{ __('Soalan wajib dijawab') }}</span>
                             </label>
                         </div>
                     @empty
-                        <div class="pmr-q-item">
-                            <div class="pmr-q-head"><strong class="pmr-q-title"><span class="pmr-q-number">1</span>{{ __('Soalan') }}</strong></div>
-                            <label class="pmr-q-field"><span>{{ __('Teks Soalan / Kriteria Penilaian') }}</span><input type="text" name="questions[0][question_text]" value="Objektif latihan / program tercapai." required></label>
-                            <label class="pmr-q-field"><span>{{ __('Jenis Jawapan / Skala') }}</span><select name="questions[0][question_type]">
-                                <option value="rating_4" selected>{{ __('Skala Likert 1-4 (Borang SA-04: Sangat Tidak Setuju - Sangat Setuju)') }}</option>
-                                <option value="rating_5">{{ __('Skala 1-5 Bintang (Sangat Rendah - Sangat Cemerlang)') }}</option>
-                                <option value="text">{{ __('Jawapan Bertulis / Ulasan (Long Written Answer)') }}</option>
-                            </select></label>
-                            <label class="pmr-q-required">
-                                <input type="hidden" name="questions[0][is_required]" value="0">
-                                <input type="checkbox" name="questions[0][is_required]" value="1" checked style="width:auto;margin:0;">
-                                {{ __('Soalan wajib dijawab') }}
-                            </label>
-                        </div>
+                        <!-- Standard SA-04(1) items will be dynamically initialized via JS -->
                     @endforelse
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap;">
-                    <button type="button" class="pmr-btn" onclick="addQuestionRow()">+ {{ __('Tambah Soalan') }}</button>
-                    <button type="submit" class="pmr-btn primary">{{ __('Simpan Draf Soal Selidik') }}</button>
+                    <button type="button" class="pmr-btn" onclick="addQuestionRow()">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        {{ __('Tambah Soalan') }}
+                    </button>
+                    <button type="submit" class="pmr-btn primary">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        {{ __('Simpan Soal Selidik') }}
+                    </button>
                 </div>
             </form>
 
@@ -450,7 +717,7 @@
                 <form method="post" action="{{ route('admin.programs.survey.publish', $program->id) }}" style="margin-top: 14px; border-top: 1px solid var(--border, #eadac8); padding-top: 14px;">
                     @csrf
                     <button type="submit" class="pmr-btn primary" style="width: 100%; justify-content: center; min-height: 44px; font-size: 0.95rem;">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         {{ __('Terbitkan Soal Selidik Kepada Peserta') }}
                     </button>
                 </form>
@@ -461,20 +728,28 @@
 </main>
 
 <script>
-let questionCounter = {{ count($questions) ?: 1 }};
+let questionCounter = {{ count($questions) }};
 
+// 100% Official Borang SA-04(1) (P00) (24-12-24) Template Items
 const officialSa04Questions = [
-    { text: 'Objektif latihan / program tercapai.', type: 'rating_4', required: true },
-    { text: 'Kandungan latihan / pengisian adalah sesuai.', type: 'rating_4', required: true },
-    { text: 'Penyampaian penceramah / fasilitator yang baik dan berkesan.', type: 'rating_4', required: true },
-    { text: 'Penggunaan alat bantuan mengajar / modul dengan berkesan.', type: 'rating_4', required: true },
-    { text: 'Suasana tempat latihan / lokasi program yang sesuai dan kondusif.', type: 'rating_4', required: true },
-    { text: 'Perancangan dan pelaksanaan program telah dibuat dengan lancar.', type: 'rating_4', required: true },
-    { text: 'Masa yang diperuntukkan bagi setiap modul / slot adalah sesuai.', type: 'rating_4', required: true },
-    { text: 'Meningkatkan pengetahuan dan pemahaman peserta.', type: 'rating_4', required: true },
-    { text: 'Lebih berkeyakinan menjalankan tugas berkaitan / mengaplikasi apa yang dipelajari.', type: 'rating_4', required: true },
-    { text: 'Pada keseluruhannya latihan / program ini adalah berjaya dan bermanfaat.', type: 'rating_4', required: true },
-    { text: 'Kesediaan untuk berkongsi ilmu yang diperolehi berkaitan latihan (Sila nyatakan YA atau TIDAK berserta ulasan jika TIDAK).', type: 'text', required: false }
+    // Penilaian Penceramah
+    { text: 'Objektif latihan tercapai', type: 'rating_4', required: true },
+    { text: 'Kandungan latihan adalah sesuai', type: 'rating_4', required: true },
+    { text: 'Penyampaian yang baik dan berkesan', type: 'rating_4', required: true },
+    { text: 'Penggunaan alat bantuan mengajar dengan berkesan.', type: 'rating_4', required: true },
+
+    // Penilaian Pelaksanaan Latihan
+    { text: 'Suasana tempat latihan yang sesuai / kondusif', type: 'rating_4', required: true },
+    { text: 'Perancangan dan perlaksanaan program telah dibuat dengan lancar', type: 'rating_4', required: true },
+    { text: 'Masa yang diperuntukan bagi setiap modul adalah sesuai', type: 'rating_4', required: true },
+
+    // Penilaian Keberkesanan Latihan Terhadap Peserta
+    { text: 'Meningkatkan pengetahuan / pemahaman.', type: 'rating_4', required: true },
+    { text: 'Lebih berkeyakinan mengajar modul berkenaan / menjalankan tugas berkaitan / mengaplikasi apa yang dipelajari.', type: 'rating_4', required: true },
+    { text: 'Pada keseluruhannya latihan ini adalah berjaya dan bermanfaat.', type: 'rating_4', required: true },
+
+    // Ulasan Peserta
+    { text: 'Kesediaan untuk berkongsi ilmu yang diperolehi berkaitan latihan. YA / TIDAK, jika TIDAK sila nyatakan sebab.', type: 'text', required: false }
 ];
 
 function escapeQuestionValue(value) {
@@ -485,23 +760,36 @@ function escapeQuestionValue(value) {
 
 function addQuestionRow(text = '', type = 'rating_4', required = true) {
     const container = document.getElementById('questionsContainer');
+    if (!container) return;
     const div = document.createElement('div');
     div.className = 'pmr-q-item';
     div.innerHTML = `
         <div class="pmr-q-head">
-            <strong class="pmr-q-title"><span class="pmr-q-number">${questionCounter + 1}</span>Soalan</strong>
-            <button class="pmr-remove" type="button" onclick="this.closest('.pmr-q-item').remove()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg>Padam</button>
+            <div class="pmr-q-title">
+                <span class="pmr-q-number">${questionCounter + 1}</span>
+                <span>{{ __('Soalan') }} ${questionCounter + 1}</span>
+            </div>
+            <button type="button" class="pmr-btn" style="padding: 4px 10px; font-size: 0.76rem; min-height: 28px; color: #dc2626; border-color: rgba(220,38,38,0.25);" onclick="this.closest('.pmr-q-item').remove()">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                {{ __('Padam') }}
+            </button>
         </div>
-        <label class="pmr-q-field"><span>Teks Soalan / Kriteria Penilaian</span><input type="text" name="questions[${questionCounter}][question_text]" value="${escapeQuestionValue(text)}" required placeholder="Masukkan teks soalan"></label>
-        <label class="pmr-q-field"><span>Jenis Jawapan / Skala</span><select name="questions[${questionCounter}][question_type]">
-            <option value="rating_4" ${type === 'rating_4' ? 'selected' : ''}>Skala Likert 1-4 (Borang SA-04: Sangat Tidak Setuju - Sangat Setuju)</option>
-            <option value="rating_5" ${type === 'rating_5' ? 'selected' : ''}>Skala 1-5 Bintang (Sangat Rendah - Sangat Cemerlang)</option>
-            <option value="text" ${type === 'text' ? 'selected' : ''}>Jawapan Bertulis / Ulasan (Long Written Answer)</option>
-        </select></label>
+        <label class="pmr-q-field">
+            <span>{{ __('Teks Soalan') }}</span>
+            <input type="text" name="questions[${questionCounter}][question_text]" value="${escapeQuestionValue(text)}" required placeholder="{{ __('Masukkan teks soalan') }}">
+        </label>
+        <label class="pmr-q-field">
+            <span>{{ __('Jenis Jawapan / Skala') }}</span>
+            <select name="questions[${questionCounter}][question_type]">
+                <option value="rating_4" ${type === 'rating_4' ? 'selected' : ''}>{{ __('Skala Likert 1-4 (Borang SA-04: Sangat Tidak Setuju - Sangat Setuju)') }}</option>
+                <option value="rating_5" ${type === 'rating_5' ? 'selected' : ''}>{{ __('Skala 1-5 Bintang (Sangat Rendah - Sangat Cemerlang)') }}</option>
+                <option value="text" ${type === 'text' ? 'selected' : ''}>{{ __('Jawapan Bertulis / Ulasan (Long Written Answer)') }}</option>
+            </select>
+        </label>
         <label class="pmr-q-required">
             <input type="hidden" name="questions[${questionCounter}][is_required]" value="0">
             <input type="checkbox" name="questions[${questionCounter}][is_required]" value="1" ${required ? 'checked' : ''}>
-            Soalan wajib dijawab
+            <span>{{ __('Soalan wajib dijawab') }}</span>
         </label>
     `;
     container.appendChild(div);
@@ -510,6 +798,7 @@ function addQuestionRow(text = '', type = 'rating_4', required = true) {
 
 document.getElementById('btnLoadSa04')?.addEventListener('click', () => {
     const container = document.getElementById('questionsContainer');
+    if (!container) return;
     container.innerHTML = '';
     questionCounter = 0;
     officialSa04Questions.forEach(q => {
@@ -517,58 +806,46 @@ document.getElementById('btnLoadSa04')?.addEventListener('click', () => {
     });
 });
 
-document.getElementById('btnGenerateAi')?.addEventListener('click', async () => {
-    const focus = document.getElementById('aiFocus').value;
-    const count = document.getElementById('aiCount').value;
-    const btn = document.getElementById('btnGenerateAi');
-
-    btn.disabled = true;
-    btn.innerText = '{{ __('AI sedang menjana soalan mengikut templat...') }}';
-
-    try {
-        const response = await fetch('{{ route("admin.programs.ai-questionnaire", $program->id) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ focus: focus, question_count: count })
-        });
-
-        const data = await response.json();
-        if (data.success && Array.isArray(data.questions)) {
-            const container = document.getElementById('questionsContainer');
-            container.innerHTML = '';
-            questionCounter = 0;
-
-            data.questions.forEach(q => {
-                addQuestionRow(q.question_text, q.question_type || 'rating_4', q.is_required !== false);
-            });
-        }
-    } catch (e) {
-        alert('{{ __('Gagal menjana secara automatik. Memuatkan soalan templat standard.') }}');
-        document.getElementById('btnLoadSa04')?.click();
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg> {{ __('Jana / Muat Soalan Mengikut Templat Dipilih') }}`;
-    }
-});
-
-const participationMode = document.getElementById('participationMode');
-const questionnaireBuilderContent = document.getElementById('questionnaireBuilderContent');
-const attendanceOnlyMessage = document.getElementById('attendanceOnlyMessage');
-const participationModeNotice = document.getElementById('participationModeNotice');
-
-function syncParticipationMode() {
-    if (!participationMode) return;
-    const questionnaireSelected = participationMode.value === '1';
-    const selectionSaved = participationMode.value === participationMode.dataset.savedMode;
-    if (questionnaireBuilderContent) questionnaireBuilderContent.hidden = !questionnaireSelected || !selectionSaved;
-    if (attendanceOnlyMessage) attendanceOnlyMessage.hidden = questionnaireSelected || !selectionSaved;
-    if (participationModeNotice) participationModeNotice.style.display = selectionSaved ? 'none' : 'block';
+// Auto-populate with official SA-04 questions if container is currently empty
+if (questionCounter === 0) {
+    document.getElementById('btnLoadSa04')?.click();
 }
 
-participationMode?.addEventListener('change', syncParticipationMode);
-syncParticipationMode();
+// Analytics Dashboard ON/OFF Toggle Logic
+const btnToggleAnalytics = document.getElementById('btnToggleAnalytics');
+const analyticsSection = document.getElementById('analyticsDashboardSection');
+const analyticsStatusPill = document.getElementById('analyticsStatusPill');
+
+function setAnalyticsVisibility(show) {
+    if (!analyticsSection) return;
+    if (show) {
+        analyticsSection.style.display = 'block';
+        if (analyticsStatusPill) {
+            analyticsStatusPill.textContent = 'ON';
+            analyticsStatusPill.style.background = 'rgba(16,185,129,0.2)';
+            analyticsStatusPill.style.color = '#059669';
+            analyticsStatusPill.style.borderColor = 'rgba(16,185,129,0.4)';
+        }
+    } else {
+        analyticsSection.style.display = 'none';
+        if (analyticsStatusPill) {
+            analyticsStatusPill.textContent = 'OFF';
+            analyticsStatusPill.style.background = 'rgba(100,116,139,0.2)';
+            analyticsStatusPill.style.color = '#64748b';
+            analyticsStatusPill.style.borderColor = 'rgba(100,116,139,0.4)';
+        }
+    }
+    localStorage.setItem('show_questionnaire_analytics', show ? 'true' : 'false');
+}
+
+// Load saved preference, default to true (ON)
+const savedAnalyticsState = localStorage.getItem('show_questionnaire_analytics');
+const isAnalyticsVisible = savedAnalyticsState === null ? true : savedAnalyticsState === 'true';
+setAnalyticsVisibility(isAnalyticsVisible);
+
+btnToggleAnalytics?.addEventListener('click', () => {
+    const isCurrentlyVisible = analyticsSection.style.display !== 'none';
+    setAnalyticsVisibility(!isCurrentlyVisible);
+});
 </script>
 @endsection

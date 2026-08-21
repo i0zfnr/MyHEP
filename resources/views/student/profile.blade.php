@@ -335,8 +335,20 @@
 
                 <div class="grid grid-2" style="margin-top:12px;">
                     <div>
-                        <label for="date_of_birth">{{ __('Tarikh Lahir') }}</label>
-                        <input id="date_of_birth" type="date" name="date_of_birth" value="{{ old('date_of_birth', data_get($student, 'date_of_birth')) }}">
+                        <label for="date_of_birth">{{ __('Tarikh Lahir') }} <span style="font-size:11px; font-weight:normal; color:#7a6555;">(DD/MM/YYYY)</span></label>
+                        @php
+                            $rawDob = old('date_of_birth', data_get($student, 'date_of_birth'));
+                            $formattedDob = '';
+                            if ($rawDob) {
+                                try {
+                                    $formattedDob = \Illuminate\Support\Carbon::parse($rawDob)->format('d/m/Y');
+                                } catch (\Throwable $e) {
+                                    $formattedDob = $rawDob;
+                                }
+                            }
+                        @endphp
+                        <input id="date_of_birth" type="text" name="date_of_birth" value="{{ $formattedDob }}" placeholder="DD/MM/YYYY (Contoh: 17/07/2006)" maxlength="10" inputmode="numeric" required autocomplete="off">
+                        <small style="color:#7a6555; font-size:11px; margin-top:3px; display:block;">{{ __('Taip tarikh lahir mengikut format Hari/Bulan/Tahun (Contoh: 17/07/2006)') }}</small>
                     </div>
                     <div></div>
                 </div>
@@ -383,26 +395,6 @@
                 <div style="margin-top:12px;">
                     <label for="guardian_address">{{ __('Alamat Penjaga') }}</label>
                     <textarea id="guardian_address" name="guardian_address" rows="3" placeholder="{{ __('Alamat penjaga') }}">{{ old('guardian_address', data_get($student, 'guardian_address')) }}</textarea>
-                </div>
-
-                <div class="section-title">{{ __('Maklumat Kebajikan') }}</div>
-                <div class="grid grid-2" style="margin-top:12px;">
-                    <div>
-                        <label for="oku_status">{{ __('Status OKU') }}</label>
-                        <select id="oku_status" name="oku_status" required>
-                            <option value="">{{ __('Sila pilih') }}</option>
-                            <option value="no" @selected(old('oku_status', data_get($student, 'oku_status')) === 'no')>{{ __('Tidak') }}</option>
-                            <option value="yes" @selected(old('oku_status', data_get($student, 'oku_status')) === 'yes')>{{ __('Ya') }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="oku_registration_no">{{ __('No. Pendaftaran OKU') }}</label>
-                        <input id="oku_registration_no" type="text" name="oku_registration_no" value="{{ old('oku_registration_no', data_get($student, 'oku_registration_no')) }}">
-                    </div>
-                </div>
-                <div style="margin-top:12px;">
-                    <label for="oku_category">{{ __('Kategori OKU') }}</label>
-                    <input id="oku_category" type="text" name="oku_category" value="{{ old('oku_category', data_get($student, 'oku_category')) }}">
                 </div>
 
                 <div class="section-title">{{ __('Maklumat Tempat Tinggal Semasa Pengajian') }}</div>
@@ -486,4 +478,30 @@
         </footer>
     </section>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dobInput = document.getElementById('date_of_birth');
+    if (!dobInput) return;
+
+    dobInput.addEventListener('input', function (e) {
+        let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+        if (v.length >= 5) {
+            e.target.value = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
+        } else if (v.length >= 3) {
+            e.target.value = v.slice(0, 2) + '/' + v.slice(2);
+        } else {
+            e.target.value = v;
+        }
+    });
+
+    dobInput.addEventListener('blur', function (e) {
+        let v = e.target.value.trim();
+        // If user typed 8 digits without slashes, format it
+        if (/^\d{8}$/.test(v)) {
+            e.target.value = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
+        }
+    });
+});
+</script>
 @endsection

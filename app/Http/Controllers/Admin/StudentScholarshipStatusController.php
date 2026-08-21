@@ -16,7 +16,7 @@ class StudentScholarshipStatusController extends Controller
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:150'],
-            'has_scholarship' => ['nullable', Rule::in(['yes', 'no', 'all'])],
+            'type' => ['nullable', Rule::in(['scholarship', 'welfare', 'none', 'all', 'unsubmitted'])],
         ]);
 
         $query = DB::table('students')
@@ -30,13 +30,23 @@ class StudentScholarshipStatusController extends Controller
                 'students.full_name',
                 'students.matric_no',
                 'students.program',
+                'forms.application_type',
                 'forms.has_scholarship',
                 'forms.sponsor_name',
                 'forms.monthly_amount',
+                'forms.welfare_category',
+                'forms.welfare_description',
+                'forms.welfare_amount',
+                'forms.guardian_name',
+                'forms.guardian_phone',
+                'forms.guardian_relationship',
+                'forms.family_income',
+                'forms.dependents_count',
                 'forms.notes',
                 'forms.submitted_at',
-                'offer_docs.id as offer_letter_id',
-                'offer_docs.original_name as offer_letter_name'
+                'offer_docs.id as doc_id',
+                'offer_docs.original_name as doc_name',
+                'offer_docs.category as doc_category'
             );
 
         if (! empty($filters['q'])) {
@@ -44,13 +54,27 @@ class StudentScholarshipStatusController extends Controller
             $query->where(function ($sub) use ($q) {
                 $sub->where('students.full_name', 'like', "%{$q}%")
                     ->orWhere('students.matric_no', 'like', "%{$q}%")
-                    ->orWhere('students.program', 'like', "%{$q}%");
+                    ->orWhere('students.program', 'like', "%{$q}%")
+                    ->orWhere('forms.sponsor_name', 'like', "%{$q}%")
+                    ->orWhere('forms.welfare_category', 'like', "%{$q}%");
             });
         }
 
-        $statusFilter = $filters['has_scholarship'] ?? 'all';
-        if ($statusFilter !== 'all') {
-            $query->where('forms.has_scholarship', $statusFilter);
+        $typeFilter = $filters['type'] ?? 'all';
+        if ($typeFilter === 'scholarship') {
+            $query->where(function ($sub) {
+                $sub->where('forms.application_type', 'scholarship')
+                    ->orWhere(fn ($q) => $q->whereNull('forms.application_type')->where('forms.has_scholarship', 'yes'));
+            });
+        } elseif ($typeFilter === 'welfare') {
+            $query->where('forms.application_type', 'welfare');
+        } elseif ($typeFilter === 'none') {
+            $query->where(function ($sub) {
+                $sub->where('forms.application_type', 'none')
+                    ->orWhere(fn ($q) => $q->whereNull('forms.application_type')->where('forms.has_scholarship', 'no'));
+            });
+        } elseif ($typeFilter === 'unsubmitted') {
+            $query->whereNull('forms.submitted_at');
         }
 
         $records = $query
@@ -61,9 +85,16 @@ class StudentScholarshipStatusController extends Controller
 
         $summary = [
             'total_students' => DB::table('students')->count(),
-            'submitted' => DB::table('student_scholarship_status_forms')->count(),
-            'has_scholarship' => DB::table('student_scholarship_status_forms')->where('has_scholarship', 'yes')->count(),
-            'no_scholarship' => DB::table('student_scholarship_status_forms')->where('has_scholarship', 'no')->count(),
+            'submitted' => DB::table('student_scholarship_status_forms')->whereNotNull('submitted_at')->count(),
+            'scholarship' => DB::table('student_scholarship_status_forms')->where(function ($q) {
+                $q->where('application_type', 'scholarship')
+                  ->orWhere(fn ($sub) => $sub->whereNull('application_type')->where('has_scholarship', 'yes'));
+            })->count(),
+            'welfare' => DB::table('student_scholarship_status_forms')->where('application_type', 'welfare')->count(),
+            'none' => DB::table('student_scholarship_status_forms')->where(function ($q) {
+                $q->where('application_type', 'none')
+                  ->orWhere(fn ($sub) => $sub->whereNull('application_type')->where('has_scholarship', 'no'));
+            })->count(),
         ];
 
         return view('admin.student_scholarship_status.index', compact('records', 'filters', 'summary'));
@@ -74,12 +105,11 @@ class StudentScholarshipStatusController extends Controller
         $document = DB::table('student_documents')
             ->where('id', $id)
             ->where('source_type', 'scholarship_status')
-            ->where('category', 'scholarship')
             ->first();
         abort_unless($document && $document->disk === 'student_documents', 404);
         abort_unless(Storage::disk('student_documents')->exists($document->path), 404);
 
-        auditLog('scholarship.offer_letter_download', 'student_documents', $id, 'Scholarship offer letter downloaded');
+        auditLog('scholarship.document_download', 'student_documents', $id, 'Scholarship/welfare document downloaded');
 
         return Storage::disk('student_documents')->download($document->path, $document->original_name, [
             'Cache-Control' => 'private, no-store, max-age=0',
@@ -88,3 +118,4 @@ class StudentScholarshipStatusController extends Controller
         ]);
     }
 }
+

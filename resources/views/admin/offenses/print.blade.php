@@ -110,7 +110,7 @@
 <body>
     @php
         $logoCandidates = [
-            public_path('images/studentedge-mark.png'),
+            public_path('images/myhep-mark.png'),
             public_path('images/logohep.png'),
             public_path('images/politeknik-besut.png'),
             public_path('images/politeknik-besut-terengganu.png'),
@@ -164,7 +164,7 @@
                 @if($logoDataUri)
                     <img src="{{ $logoDataUri }}" alt="{{ __('Logo Politeknik Besut Terengganu') }}" class="logo">
                 @else
-                    <div class="logo-fallback">StudentEdge</div>
+                    <div class="logo-fallback">MyHEP</div>
                 @endif
             </div>
             <div class="header-cell header-mid">

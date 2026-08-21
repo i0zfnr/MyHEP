@@ -40,16 +40,30 @@ AI does not control the document layout. The backend template/exporter owns layo
 
 Wrap user-visible server text in `__()`, add values to both JSON catalogues, and translate stored enums at display time rather than changing stored values. Protect script/style content during automated catalogue work. Run route/localization tests and render relevant pages after changes.
 
-## Frontend behavior
+## Frontend behavior & Iconography Standards
 
-Reusable pages should use design-system tokens so each account role receives its accent color. Native nested scrolling must be preserved for dialogs, tables, file drop zones, scanners, forms, and other `[data-lenis-prevent]` regions. Respect reduced-motion preferences.
+- **Professional Icon System:**
+  - The system utilizes a unified, professional SVG icon set (Lucide/Feather-style vector iconography) across all admin, lecturer, and student portals.
+  - All icons must be rendered using inline SVGs or unified design tokens with consistent attributes:
+    - `viewBox="0 0 24 24"`
+    - `stroke="currentColor"`
+    - `stroke-width="1.8"` to `2.2` (for clear contrast in both Light & Dark modes)
+    - `stroke-linecap="round"` & `stroke-linejoin="round"`
+    - `fill="none"` (except for specific filled badges/ratings)
+    - Accessibility: Decorative icons must include `aria-hidden="true"`, and interactive icon buttons must have `aria-label`.
+  - Generic emojis are avoided in production UI controls in favor of crisp, scalable vector SVG glyphs tailored to the institutional theme.
+
+- **Design System Tokens:**
+  - Reusable pages should use design-system tokens so each account role receives its accent color (e.g. Gold/Brass for System Admin/Director, Emerald for Verified Internal Students, Sky Blue for External Guests).
+  - Native nested scrolling must be preserved for dialogs, tables, file drop zones, scanners, forms, and other `[data-lenis-prevent]` regions. Respect reduced-motion preferences.
 
 ## Adding a feature
 
 1. Define authorization and ownership rules.
 2. Add migration/model changes.
 3. Add controller/service behavior and named routes.
-4. Build Blade/UI with both locales and responsive states.
+4. Build Blade/UI with both locales, responsive states, and professional vector icons.
 5. Add feature and unit tests, including unauthorized cases.
 6. Update relevant documentation and operational requirements.
+
 

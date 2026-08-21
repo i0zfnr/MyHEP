@@ -1,6 +1,6 @@
 {
-    "name": "StudentEdge",
-    "short_name": "StudentEdge",
+    "name": "MyHEP",
+    "short_name": "MyHEP",
     "description": "Student affairs management platform for scholarship, discipline, and campus services.",
     "start_url": "/",
     "scope": "/",

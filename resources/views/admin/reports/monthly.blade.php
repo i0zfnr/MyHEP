@@ -457,7 +457,7 @@
     </section>
     @endif
 
-    <p class="report-footer-note">{{ __('Generated') }} {{ now()->format('d M Y, H:i') }} · {{ __('StudentEdge monthly operational analytics') }}</p>
+    <p class="report-footer-note">{{ __('Generated') }} {{ now()->format('d M Y, H:i') }} · {{ __('MyHEP monthly operational analytics') }}</p>
 </div>
 <div class="monthly-hover-tooltip" data-report-tooltip-surface role="status" aria-live="polite"></div>
 @endsection

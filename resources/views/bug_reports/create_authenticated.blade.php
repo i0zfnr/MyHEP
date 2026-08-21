@@ -43,7 +43,7 @@
     <header class="report-hero">
         <span class="report-kicker">{{ __('Support') }}</span>
         <h1>{{ __('bug_reports.public_heading') }}</h1>
-        <p>{{ __('Send a clear report directly to the StudentEdge system administrators. Your account details are attached automatically.') }}</p>
+        <p>{{ __('Send a clear report directly to the MyHEP system administrators. Your account details are attached automatically.') }}</p>
     </header>
 
     <div class="report-grid">

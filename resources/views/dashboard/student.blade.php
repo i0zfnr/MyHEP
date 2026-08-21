@@ -1113,7 +1113,7 @@
     {{-- â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
     <div class="hero">
         <div class="hero-text">
-            <p class="hero-eyebrow">{{ __('StudentEdge') }}</p>
+            <p class="hero-eyebrow">{{ __('MyHEP') }}</p>
             <h3 class="hero-name">{{ __('Selamat Datang,') }}<br>{{ $studentName }}</h3>
             <p class="hero-sub">{{ $studentMatric }} &nbsp;&middot;&nbsp; {{ $studentProgram }}</p>
         </div>

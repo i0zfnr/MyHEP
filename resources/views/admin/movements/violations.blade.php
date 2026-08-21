@@ -79,7 +79,7 @@
             </table>
         </div>
         <div class="ui-card-body mv-pagination-wrap">
-            {{ $records->onEachSide(1)->links('vendor.pagination.studentedge') }}
+            {{ $records->onEachSide(1)->links('vendor.pagination.myhep') }}
         </div>
     </section>
 </div>

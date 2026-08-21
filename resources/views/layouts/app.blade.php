@@ -9,7 +9,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>@yield('title', config('app.name', 'StudentEdge'))</title>
+    <title>@yield('title', config('app.name', 'MyHEP'))</title>
     @include('partials.brand_icons')
     <meta name="push-public-key" content="{{ config('services.webpush.public_key') }}">
 
@@ -2519,9 +2519,9 @@
         <div class="sb-header">
             <a href="{{ route('home') }}" class="sb-brand">
                 <div class="sb-brand-icon">
-                    <img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt="{{ __('Logo StudentEdge') }}">
+                    <img src="{{ asset('images/myhep-mark.png') }}?v=11" alt="{{ __('Logo MyHEP') }}">
                 </div>
-                <div><div class="sb-brand-name">StudentEdge</div><div class="sb-brand-sub">{{ __('Student Affairs') }}</div></div>
+                <div><div class="sb-brand-name">MyHEP</div><div class="sb-brand-sub">{{ __('Student Affairs') }}</div></div>
             </a>
             <button class="sb-close" id="sbClose" aria-label="{{ __('Tutup sidebar') }}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
@@ -2979,10 +2979,10 @@
             </button>
             <div class="topbar-brand">
                 <span class="topbar-brand-mark">
-                    <img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt="StudentEdge">
+                    <img src="{{ asset('images/myhep-mark.png') }}?v=11" alt="MyHEP">
                 </span>
                 <span class="topbar-brand-copy">
-                    <span class="topbar-title">StudentEdge</span>
+                    <span class="topbar-title">MyHEP</span>
                     <span class="topbar-subtitle">{{ __('Student Affairs') }}</span>
                 </span>
             </div>
@@ -3015,7 +3015,7 @@
                         <div class="page-header-right">
                             @include('partials.notification_button', ['notificationButtonClass' => 'se-notification-trigger--header'])
                             @if($showHeaderUserMenu && !$isStudent)
-                                <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-support">
+                                <a href="mailto:support@polibesut.edu.my?subject=MyHEP%20Support" class="header-support">
                                     {{ __('Support') }}
                                 </a>
                                 <button type="button" class="header-user" id="headerUserBtn" aria-expanded="false" aria-haspopup="menu">
@@ -3045,7 +3045,7 @@
                                     <a href="{{ route('settings.show') }}" class="header-menu-link">
                                         <span aria-hidden="true">&#9881;</span>{{ __('Settings') }}
                                     </a>
-                                    <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">
+                                    <a href="mailto:support@polibesut.edu.my?subject=MyHEP%20Support" class="header-menu-link">
                                         <span aria-hidden="true">?</span>{{ __('Support') }}
                                     </a>
                                     <div class="header-menu-sep"></div>
@@ -3083,7 +3083,7 @@
         <a href="{{ route('settings.show') }}" class="header-menu-link">
             <span aria-hidden="true">&#9881;</span>{{ __('Settings') }}
         </a>
-        <a href="mailto:support@polibesut.edu.my?subject=StudentEdge%20Support" class="header-menu-link">
+        <a href="mailto:support@polibesut.edu.my?subject=MyHEP%20Support" class="header-menu-link">
             <span aria-hidden="true">?</span>{{ __('Support') }}
         </a>
         <div class="header-menu-sep"></div>
@@ -3219,7 +3219,7 @@
     <div class="se-notification-panel" role="dialog" aria-modal="false" aria-labelledby="notificationCenterTitle">
         <div class="se-notification-head">
             <div>
-                <span class="se-notification-kicker">StudentEdge</span>
+                <span class="se-notification-kicker">MyHEP</span>
                 <h2 id="notificationCenterTitle">{{ __('Notifications') }}</h2>
             </div>
             <button type="button" class="se-icon-button" data-notification-close aria-label="{{ __('Close') }}">&times;</button>

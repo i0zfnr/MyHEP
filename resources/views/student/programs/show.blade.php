@@ -10,6 +10,7 @@
     @else
     <div style="padding:1rem;border:1px solid var(--border);border-radius:12px;margin:1rem 0;"><strong>{{ $student->full_name }}</strong><div>{{ $student->matric_no }} &middot; {{ $student->program }}</div></div>
     <form method="post" action="{{ route('student.programs.attendance.store',$program->id) }}" id="studentProgramAttendance">@csrf
+        <input type="hidden" name="qr_token" value="{{ $token ?? old('qr_token') }}">
         <input type="hidden" name="latitude" id="paLat"><input type="hidden" name="longitude" id="paLng"><input type="hidden" name="location_accuracy_m" id="paAccuracy"><input type="hidden" name="location_captured_at" id="paCaptured">
         @if(!$program->questionnaire_enabled)<div class="alert alert-success">{{ __('This program uses attendance-only mode. No questionnaire is required.') }}</div>@endif
         @foreach($questions as $question)

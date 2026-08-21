@@ -1529,7 +1529,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboard = document.querySelector('.adash');
     const modeButtons = document.querySelectorAll('[data-dashboard-mode]');
     if (dashboard && modeButtons.length) {
-        const preferenceKey = `studentedge-dashboard-viz-{{ session('auth_user.id') }}-{{ session('auth_user.admin_role') }}`;
+        const preferenceKey = `myhep-dashboard-viz-{{ session('auth_user.id') }}-{{ session('auth_user.admin_role') }}`;
         const applyMode = (mode) => {
             dashboard.setAttribute('data-dashboard-mode', mode);
             modeButtons.forEach((button) => {

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'page_title' => 'Login - StudentEdge',
+    'page_title' => 'Login - MyHEP',
     'brand_subtitle' => 'Student Affairs System',
     'system_active' => 'System Active',
     'welcome_back' => 'Welcome Back',

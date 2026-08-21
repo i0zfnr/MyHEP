@@ -352,7 +352,7 @@
     <div class="meta-line"><strong>TARIKH :</strong> {{ $longDate }}</div>
     <div class="meta-line"><strong>ANJURAN :</strong> {{ mb_strtoupper($data['organizer'] ?? 'Politeknik Besut') }}</div>
     <div class="meta-line"><strong>KUMPULAN SASARAN:</strong> {{ ($program->target_participants ?? null) ?: 'Pelajar Politeknik Besut' }}</div>
-    <div class="meta-line"><strong>BILANGAN PESERTA:</strong> {{ $data['attendance_total'] ?? 0 }} ORANG (senarai seperti di lampiran / rekod StudentEdge)</div>
+    <div class="meta-line"><strong>BILANGAN PESERTA:</strong> {{ $data['attendance_total'] ?? 0 }} ORANG (senarai seperti di lampiran / rekod MyHEP)</div>
 
     <div class="sec-head" style="margin-top: 10px;">3. JAWATANKUASA PROGRAM: <span style="font-weight: normal; font-size: 8.5pt;">(Sila isi lampiran sekiranya perlu)</span></div>
     <table class="tbl-committee">
@@ -488,7 +488,7 @@
         </table>
     @else
         <div style="font-style: italic; color: #666; font-size: 8.5pt; margin: 4px 0 8px 0;">
-            (Foto aktiviti disimpan dan direkodkan secara digital dalam sistem StudentEdge)
+            (Foto aktiviti disimpan dan direkodkan secara digital dalam sistem MyHEP)
         </div>
     @endif
 

@@ -109,6 +109,6 @@
             </table>
         </div>
     </section>
-    {{ $documents->links('vendor.pagination.studentedge') }}
+    {{ $documents->links('vendor.pagination.myhep') }}
 </div>
 @endsection

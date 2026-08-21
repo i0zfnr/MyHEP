@@ -96,6 +96,9 @@ Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
 Route::get('/student/programs', [StudentProgramActivityController::class, 'index'])->middleware('auth.session:student')->name('student.programs.index');
 Route::get('/student/programs/{program}', [StudentProgramActivityController::class, 'show'])->middleware('auth.session:student')->name('student.programs.show');
 Route::post('/student/programs/{program}/attendance', [StudentProgramActivityController::class, 'store'])->middleware(['auth.session:student', 'throttle:10,1'])->name('student.programs.attendance.store');
+Route::post('/student/programs/{program}/quick-scan', [StudentProgramActivityController::class, 'quickScanAttendance'])->middleware('auth.session:student')->name('student.programs.quick-scan');
+Route::get('/student/programs/{program}/survey', [StudentProgramActivityController::class, 'survey'])->middleware('auth.session:student')->name('student.programs.survey');
+Route::post('/student/programs/{program}/survey', [StudentProgramActivityController::class, 'storeSurvey'])->middleware(['auth.session:student', 'throttle:15,1'])->name('student.programs.survey.store');
 Route::get('/student/certificates/{certificate}/download', [StudentProgramActivityController::class, 'downloadCertificate'])->middleware('auth.session:student')->name('student.certificates.download');
 Route::get('/student/scholarship-status', [ScholarshipStatusController::class, 'edit'])
     ->middleware('auth.session:student')
@@ -170,6 +173,8 @@ Route::prefix('/admin/programs')->middleware('auth.session:admin')->name('admin.
     Route::post('/{program}/ai-questionnaire', [ProgramOperationController::class, 'generateAiQuestionnaire'])->name('ai-questionnaire');
     Route::post('/{program}/survey/save', [ProgramOperationController::class, 'saveSurvey'])->name('survey.save');
     Route::post('/{program}/survey/publish', [ProgramOperationController::class, 'publishSurvey'])->name('survey.publish');
+    Route::post('/{program}/survey/publish-mode', [ProgramOperationController::class, 'publishSurveyMode'])->name('survey.publish-mode');
+    Route::post('/{program}/survey/close', [ProgramOperationController::class, 'closeSurvey'])->name('survey.close');
     Route::put('/{program}/questionnaire-setting', [ProgramOperationController::class, 'updateQuestionnaireSetting'])->name('questionnaire-setting.update');
     Route::post('/{program}/attendance/open', [ProgramOperationController::class, 'openAttendance'])->name('attendance.open');
     Route::post('/{program}/attendance/close', [ProgramOperationController::class, 'closeAttendance'])->name('attendance.close');
@@ -178,6 +183,8 @@ Route::prefix('/admin/programs')->middleware('auth.session:admin')->name('admin.
     Route::post('/{program}/report/upload-edited', [ProgramOperationController::class, 'uploadEditedReport'])->name('report.upload-edited');
     Route::post('/{program}/report/submit', [ProgramOperationController::class, 'submitReport'])->name('report.submit');
     Route::post('/{program}/report/review', [ProgramOperationController::class, 'reviewReport'])->name('report.review');
+    Route::get('/{program}/presenter', [ProgramOperationController::class, 'presenter'])->name('presenter');
+    Route::get('/{program}/live-token', [ProgramOperationController::class, 'liveToken'])->name('live-token');
     Route::post('/{program}/certificates/generate', [ProgramCertificateController::class, 'generate'])->name('certificates.generate');
     Route::post('/{program}/certificates/generate-test', [ProgramCertificateController::class, 'generateTest'])->name('certificates.generate-test');
 });

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'studentedge-pwa-v13';
+const CACHE_VERSION = 'myhep-pwa-v13';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = '/offline.html';
@@ -49,7 +49,7 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(event.request).catch(async () => {
                 if (event.request.mode === 'navigate') {
-                    return (await caches.match(OFFLINE_URL)) || new Response('StudentEdge is currently offline.', {
+                    return (await caches.match(OFFLINE_URL)) || new Response('MyHEP is currently offline.', {
                         status: 503,
                         headers: {'Content-Type': 'text/plain; charset=utf-8'},
                     });
@@ -108,12 +108,12 @@ self.addEventListener('push', (event) => {
         payload = {};
     }
 
-    const title = payload.title || 'StudentEdge';
+    const title = payload.title || 'MyHEP';
     const options = {
         body: payload.body || 'You have a new notification.',
         icon: payload.icon || '/images/pwa/icon-192.png?v=11',
         badge: payload.badge || '/images/pwa/icon-192.png?v=11',
-        tag: payload.tag || 'studentedge-general',
+        tag: payload.tag || 'myhep-general',
         renotify: Boolean(payload.renotify),
         requireInteraction: Boolean(payload.requireInteraction),
         data: {

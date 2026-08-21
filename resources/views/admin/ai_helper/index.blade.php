@@ -1077,7 +1077,7 @@
      data-ai-provider="{{ $aiProvider }}"
      data-ai-model="{{ $aiModel }}"
      data-can-edit-ai="{{ $studentAiMode ? '0' : '1' }}"
-     data-ai-session-key="studentedge.ai.active.{{ $studentAiMode ? 'student' : ($lecturerAiMode ? 'lecturer' : 'admin') }}.{{ (int) session('auth_user.id') }}"
+     data-ai-session-key="myhep.ai.active.{{ $studentAiMode ? 'student' : ($lecturerAiMode ? 'lecturer' : 'admin') }}.{{ (int) session('auth_user.id') }}"
      data-conversations-url="{{ url($studentAiMode ? '/student/ai-helper/conversations' : ($lecturerAiMode ? '/lecturer/ai-helper/conversations' : '/admin/ai-helper/conversations')) }}">
     <section class="ai-panel">
         <div class="ai-top-actions">
@@ -1099,7 +1099,7 @@
         </div>
         <div class="ai-head">
             <div>
-                <h3>{{ __('StudentEdge AI') }}</h3>
+                <h3>{{ __('MyHEP AI') }}</h3>
                 <p class="ai-sub">{{ $studentAiMode ? __('Ask about your scholarship, offenses, payments, rules, or student portal steps.') : ($lecturerAiMode ? __('Get text guidance and summaries from records available to your lecturer category.') : __('Use templates and filters to generate actionable admin outputs quickly.')) }}</p>
             </div>
             <div class="ai-badges">
@@ -1113,7 +1113,7 @@
             <div class="ai-empty-state" id="aiEmptyState">
                 <span class="ai-empty-orb">@include('partials.ai_helper_icon')</span>
                 <h3>{{ __('What should we focus on?') }}</h3>
-                <p>{{ $studentAiMode ? __('Ask about your own scholarship, offenses, payments, rules, or StudentEdge portal steps.') : ($lecturerAiMode ? __('Research any topic, analyze attached documents, or summarize the anonymized records available to your lecturer category.') : __('Research any topic, analyze attached documents, or work with authorized StudentEdge records.')) }}</p>
+                <p>{{ $studentAiMode ? __('Ask about your own scholarship, offenses, payments, rules, or MyHEP portal steps.') : ($lecturerAiMode ? __('Research any topic, analyze attached documents, or summarize the anonymized records available to your lecturer category.') : __('Research any topic, analyze attached documents, or work with authorized MyHEP records.')) }}</p>
                 <div class="ai-empty-chips">
                     @if($studentAiMode)
                     <button type="button" class="ai-empty-chip" data-template="{{ __('What can the AI Helper help me with?') }}">{{ __('Overview') }}</button>
@@ -1140,7 +1140,7 @@
             <div class="ai-compose-attachments" id="attachmentPreview" aria-live="polite"></div>
             @endif
             <div class="ai-compose-row">
-                <textarea class="ai-input" id="aiInput" rows="1" placeholder="{{ __('Ask StudentEdge AI anything') }}"></textarea>
+                <textarea class="ai-input" id="aiInput" rows="1" placeholder="{{ __('Ask MyHEP AI anything') }}"></textarea>
                 @unless($textOnlyAiMode)
                 @endunless
                 <button type="button" class="ai-send" id="aiSendBtn" aria-label="{{ __('Send') }}" @disabled(!$aiEnabled)>↑</button>
@@ -1154,7 +1154,7 @@
     <aside class="ai-history-panel" id="aiHistoryPanel" aria-hidden="true">
         <div class="ai-history-head">
             <div class="ai-history-brand">
-                <strong>@include('partials.ai_helper_icon') <span>{{ __('StudentEdge AI') }}</span></strong>
+                <strong>@include('partials.ai_helper_icon') <span>{{ __('MyHEP AI') }}</span></strong>
                 <button type="button" class="ai-history-icon-btn" id="aiHistoryClose" aria-label="{{ __('Close') }}">×</button>
             </div>
         </div>
@@ -1181,7 +1181,7 @@
     </aside>
 
     <div class="ai-selection-tools" id="aiSelectionTools" role="toolbar" aria-label="{{ __('AI text actions') }}" aria-hidden="true">
-        <button type="button" id="aiAskSelection">{{ __('Ask StudentEdge AI') }}</button>
+        <button type="button" id="aiAskSelection">{{ __('Ask MyHEP AI') }}</button>
         <button type="button" id="aiWriteSelection">{{ __('Start writing') }}</button>
     </div>
 
@@ -1203,7 +1203,7 @@
         <button type="button" class="ai-confirm-backdrop" data-program-report-close tabindex="-1" aria-label="{{ __('Close') }}"></button>
         <div class="ai-confirm-card" data-lenis-prevent style="width:min(620px,calc(100vw - 2rem));text-align:left;">
             <h3 id="programReportDialogTitle">{{ __('Program Report Template') }}</h3>
-            <p>{{ __('Choose your program and source files. StudentEdge adds its attendance and questionnaire records automatically and saves the generated report under the selected program.') }}</p>
+            <p>{{ __('Choose your program and source files. MyHEP adds its attendance and questionnaire records automatically and saves the generated report under the selected program.') }}</p>
             <form id="programReportForm" class="program-report-form" method="post" enctype="multipart/form-data">@csrf
                 <div class="ops-field"><label for="programReportProgram">{{ __('My program') }}</label><select id="programReportProgram" required><option value="">{{ __('Choose a program') }}</option>@foreach($ownedPrograms as $ownedProgram)<option value="{{ $ownedProgram->id }}" data-action="{{ route('admin.programs.report.generate', $ownedProgram->id) }}" data-requires-paperwork="{{ ($ownedProgram->registration_type ?? 'approved_program') === 'attendance_only_activity' ? '0' : '1' }}">{{ $ownedProgram->title }}</option>@endforeach</select></div>
                 <div class="ops-field program-report-upload" id="programReportPaperworkField">
@@ -1607,7 +1607,7 @@
             while (article.firstChild) content.appendChild(article.firstChild);
             const kicker = document.createElement('div');
             kicker.className = 'ai-report-kicker';
-            kicker.textContent = @json(__('StudentEdge AI report'));
+            kicker.textContent = @json(__('MyHEP AI report'));
             article.append(kicker, content);
             if (messageText.length > 900) {
                 article.classList.add('is-collapsed');
@@ -1762,7 +1762,7 @@
         hideSelectionTools();
         window.getSelection()?.removeAllRanges();
         input.value = '';
-        input.placeholder = @json(__('Ask StudentEdge AI about the selected text'));
+        input.placeholder = @json(__('Ask MyHEP AI about the selected text'));
         input.focus();
     });
     composeContextClear?.addEventListener('click', () => {
@@ -1770,7 +1770,7 @@
         composeContext.classList.remove('is-visible');
         composeContext.hidden = true;
         composeContextText.textContent = '';
-        input.placeholder = @json(__('Ask StudentEdge AI anything'));
+        input.placeholder = @json(__('Ask MyHEP AI anything'));
         input.focus();
     });
     writeSelection?.addEventListener('click', () => {

@@ -9,7 +9,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>{{ __('bug_reports.public_title') }} - StudentEdge</title>
+    <title>{{ __('bug_reports.public_title') }} - MyHEP</title>
     @include('partials.brand_icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -317,7 +317,7 @@
             }
         }
 
-        /* StudentEdge support-page alignment */
+        /* MyHEP support-page alignment */
         .hero { grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr); align-items: start; }
         .panel,
         .info-card { border-radius: 20px; border-color: var(--border); box-shadow: 0 18px 46px rgba(61, 46, 34, .10); }
@@ -375,8 +375,8 @@
     <div class="shell">
         <div class="topbar">
             <a href="{{ route('home') }}" class="brand">
-                <img src="{{ asset('images/studentedge-mark.png') }}?v=11" alt="StudentEdge">
-                <span>StudentEdge</span>
+                <img src="{{ asset('images/myhep-mark.png') }}?v=11" alt="MyHEP">
+                <span>MyHEP</span>
             </a>
             <a href="{{ route('home') }}" class="back-link">{{ __('bug_reports.back_home') }}</a>
         </div>

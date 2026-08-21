@@ -127,6 +127,7 @@
 
     <form method="post" action="{{ route('public.programs.qr_checkin.store', $program->id) }}">
         @csrf
+        <input type="hidden" name="qr_token" value="{{ $token ?? old('qr_token') }}">
         <input type="hidden" name="latitude" id="attendanceLatitude" value="{{ old('latitude') }}">
         <input type="hidden" name="longitude" id="attendanceLongitude" value="{{ old('longitude') }}">
         <input type="hidden" name="location_accuracy_m" id="attendanceAccuracy" value="{{ old('location_accuracy_m') }}">
@@ -204,53 +205,29 @@
         </div>
         @endif
 
-        @if($program->latitude !== null && $program->longitude !== null)
-            <div id="locationStatus" class="location-status" role="status">
-                {{ __('Location permission is required. Please allow GPS access to submit attendance.') }}
-            </div>
-            <button class="btn-submit" id="attendanceSubmit" type="submit" disabled>{{ $program->questionnaire_enabled ? __('Check In & Submit Feedback') : __('Submit Attendance') }}</button>
-        @else
-            <div id="locationStatus" class="location-status ready" role="status">
-                {{ __('GPS verification is not enabled for this program. You can submit attendance now.') }}
-            </div>
-            <button class="btn-submit" id="attendanceSubmit" type="submit">{{ $program->questionnaire_enabled ? __('Check In & Submit Feedback') : __('Submit Attendance') }}</button>
-        @endif
+        <button class="btn-submit" id="attendanceSubmit" type="submit">{{ $program->questionnaire_enabled ? __('Check In & Submit Feedback') : __('Submit Attendance') }}</button>
     </form>
 </main>
 
-@if($program->latitude !== null && $program->longitude !== null)
 <script>
 (() => {
-    const status = document.getElementById('locationStatus');
-    const submit = document.getElementById('attendanceSubmit');
     const latitude = document.getElementById('attendanceLatitude');
     const longitude = document.getElementById('attendanceLongitude');
     const accuracy = document.getElementById('attendanceAccuracy');
     const capturedAt = document.getElementById('attendanceCapturedAt');
 
-    if (!navigator.geolocation) {
-        status.textContent = @json(__('This device does not support location access. Attendance cannot be submitted.'));
-        status.classList.add('error');
-        return;
+    if (navigator.geolocation && latitude && longitude) {
+        navigator.geolocation.getCurrentPosition(position => {
+            latitude.value = position.coords.latitude;
+            longitude.value = position.coords.longitude;
+            if (accuracy) accuracy.value = position.coords.accuracy;
+            if (capturedAt) capturedAt.value = new Date(position.timestamp).toISOString();
+        }, () => {
+            // Geolocation not granted or unavailable; submit works seamlessly without location
+        }, { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 });
     }
-
-    navigator.geolocation.getCurrentPosition(position => {
-        latitude.value = position.coords.latitude;
-        longitude.value = position.coords.longitude;
-        accuracy.value = position.coords.accuracy;
-        capturedAt.value = new Date(position.timestamp).toISOString();
-        status.textContent = @json(__('Location captured. You can now submit your attendance and answers.')) + ` (${Math.round(position.coords.accuracy)}m accuracy)`;
-        status.classList.add('ready');
-        submit.disabled = false;
-    }, error => {
-        status.textContent = error.code === error.PERMISSION_DENIED
-            ? @json(__('Location permission was denied. Enable location access and reload this page.'))
-            : @json(__('Your location could not be captured. Move to an open area and reload this page.'));
-        status.classList.add('error');
-    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
 })();
 </script>
-@endif
 
 </body>
 </html>
