@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', __('Active Visitors'))
+@section('header')<h2>{{ __('Active Visitors') }}</h2>@endsection
 
 @push('styles')
 <style>
