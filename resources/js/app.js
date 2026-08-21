@@ -1343,6 +1343,8 @@ const registerProfilePhotoCropper = () => {
     const statusPill = modal?.querySelector('[data-face-detection-status]');
     const guideOverlay = modal?.querySelector('[data-face-guide-overlay]');
 
+    const getLocalizedText = (key, defaultText) => modal.dataset[key] || defaultText;
+
     let lastDetectedFaces = null;
     let evalTimeout = null;
 
@@ -1350,10 +1352,10 @@ const registerProfilePhotoCropper = () => {
         if (!statusPill) return;
         statusPill.className = `face-detect-status is-${status}`;
         statusPill.innerHTML = status === 'detected'
-            ? `<span>✓</span> <span>${text || 'Wajah Disahkan'}</span>`
+            ? `<span>✓</span> <span>${text || getLocalizedText('textVerified', 'Face Verified')}</span>`
             : (status === 'missing'
-                ? `<span>⚠️</span> <span>${text || 'Tiada Wajah'}</span>`
-                : `<span>🔍</span> <span>${text || 'Menilai Wajah...'}</span>`);
+                ? `<span>⚠️</span> <span>${text || getLocalizedText('textUnclear', 'Unclear Face')}</span>`
+                : `<span>🔍</span> <span>${text || getLocalizedText('textEvaluating', 'Evaluating Face...')}</span>`);
     };
 
     const analyzeFacePresence = async (canvas) => {
@@ -1419,7 +1421,7 @@ const registerProfilePhotoCropper = () => {
     const triggerFaceCheck = () => {
         if (!cropper) return;
         if (evalTimeout) clearTimeout(evalTimeout);
-        updateStatusPill('checking', 'Menilai Wajah...');
+        updateStatusPill('checking', getLocalizedText('textEvaluating', 'Evaluating Face...'));
 
         evalTimeout = setTimeout(async () => {
             if (!cropper) return;
@@ -1430,9 +1432,9 @@ const registerProfilePhotoCropper = () => {
             lastDetectedFaces = res;
 
             if (res.detected) {
-                updateStatusPill('detected', res.count > 1 ? `${res.count} Wajah Dikesan` : 'Wajah Disahkan');
+                updateStatusPill('detected', res.count > 1 ? `${res.count} ${getLocalizedText('textVerified', 'Faces Detected')}` : getLocalizedText('textVerified', 'Face Verified'));
             } else {
-                updateStatusPill('missing', 'Wajah Kurang Jelas');
+                updateStatusPill('missing', getLocalizedText('textUnclear', 'Unclear Face'));
             }
         }, 320);
     };
@@ -1443,7 +1445,7 @@ const registerProfilePhotoCropper = () => {
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('profile-crop-open');
-        updateStatusPill('checking', 'Menilai Wajah...');
+        updateStatusPill('checking', getLocalizedText('textEvaluating', 'Evaluating Face...'));
 
         cropper = new Cropper(cropImage, {
             aspectRatio: 1,
@@ -1513,7 +1515,8 @@ const registerProfilePhotoCropper = () => {
 
         if (action === 'apply') {
             if (lastDetectedFaces && !lastDetectedFaces.detected) {
-                const proceed = confirm('Sistem mengesan wajah anda mungkin kurang jelas atau berada di luar bulatan panduan. Adakah anda pasti mahu menggunakan gambar ini sebagai foto rasmi kad matrik?');
+                const warningMsg = getLocalizedText('textConfirmWarning', 'The system detected that your face may be unclear or outside the oval guide. Are you sure you want to use this photo as your official matric photo?');
+                const proceed = confirm(warningMsg);
                 if (!proceed) return;
             }
 

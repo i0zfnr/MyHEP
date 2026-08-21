@@ -365,30 +365,30 @@
     <form method="POST" action="{{ route('student.profile.update') }}" enctype="multipart/form-data">
         @csrf
         <div class="card">
-            <h2>{{ __('Maklumat Akaun & Foto Kad Matrik') }}</h2>
+            <h2>{{ __('Account & Matric Photo Information') }}</h2>
             <div class="body">
                 <!-- Standard Matric Photo Guideline Card -->
                 <div class="guideline-box">
                     <div class="guideline-header">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        <span>{{ __('Standard Gambar Profil Rasmi (Format Kad Matrik)') }}</span>
+                        <span>{{ __('Official Profile Photo Standard (Matric Card Format)') }}</span>
                     </div>
                     <div class="guideline-grid">
                         <div class="guideline-chip">
                             <span class="guideline-icon">✅</span>
-                            <div><strong>{{ __('Wajah Jelas:') }}</strong> {{ __('Pandang tepat ke kamera dengan pencahayaan terang dan neutral.') }}</div>
+                            <div><strong>{{ __('Clear Face:') }}</strong> {{ __('Look directly into the camera with bright and neutral lighting.') }}</div>
                         </div>
                         <div class="guideline-chip">
                             <span class="guideline-icon">👔</span>
-                            <div><strong>{{ __('Pakaian Formal:') }}</strong> {{ __('Kemeja berkolar, blazer atau tudung kemas berdisiplin.') }}</div>
+                            <div><strong>{{ __('Formal Attire:') }}</strong> {{ __('Collared shirt, blazer, or neat formal hijab.') }}</div>
                         </div>
                         <div class="guideline-chip">
                             <span class="guideline-icon">🖼️</span>
-                            <div><strong>{{ __('Latar Belakang Polos:') }}</strong> {{ __('Latar belakang kosong (biru/putih/neutral) tanpa gangguan.') }}</div>
+                            <div><strong>{{ __('Plain Background:') }}</strong> {{ __('Plain background (blue/white/neutral) without distractions.') }}</div>
                         </div>
                         <div class="guideline-chip is-prohibited">
                             <span class="guideline-icon">🚫</span>
-                            <div><strong>{{ __('Dilarang:') }}</strong> {{ __('Avatar/anime, gambar kumpulan, cermin mata hitam, topi atau penapis (filters).') }}</div>
+                            <div><strong>{{ __('Prohibited:') }}</strong> {{ __('Avatars/anime, group photos, sunglasses, hats, or beauty filters.') }}</div>
                         </div>
                     </div>
                 </div>
@@ -397,9 +397,9 @@
                     <img class="profile-photo" data-profile-photo-preview src="{{ !empty($student->photo) ? asset('storage/' . $student->photo) : '' }}" alt="{{ __('Profile photo') }}" @if(empty($student->photo)) hidden @endif>
                     <div class="profile-photo photo-placeholder" data-profile-photo-placeholder @if(!empty($student->photo)) hidden @endif>{{ strtoupper(substr($student->full_name ?? 'P', 0, 1)) }}</div>
                     <div style="flex:1; min-width:220px;">
-                        <label for="profile_photo">{{ __('Gambar Profil (Format Pasport 3:4)') }}</label>
+                        <label for="profile_photo">{{ __('Profile Photo (Passport Format 3:4)') }}</label>
                         <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ empty($student->photo) ? 'required' : '' }}>
-                        <small style="display:block;margin-top:6px;color:#7a6555;">{{ __('JPG, PNG, atau WEBP. Sistem menyediakan alat pemotong foto dan pengesahan wajah automatik.') }}</small>
+                        <small style="display:block;margin-top:6px;color:#7a6555;">{{ __('JPG, PNG, or WEBP. The system provides an automatic face cropper and alignment validator.') }}</small>
                     </div>
                 </div>
                 <div class="grid grid-2">
@@ -592,35 +592,40 @@
     </form>
 </div>
 
-<div class="profile-crop-modal" data-profile-crop-modal aria-hidden="true">
+<div class="profile-crop-modal" data-profile-crop-modal
+    data-text-verified="{{ __('Face Verified') }}"
+    data-text-unclear="{{ __('Unclear Face') }}"
+    data-text-evaluating="{{ __('Evaluating Face...') }}"
+    data-text-confirm-warning="{{ __('The system detected that your face may be unclear or outside the oval guide. Are you sure you want to use this photo as your official matric photo?') }}"
+    aria-hidden="true">
     <section class="profile-crop-dialog" role="dialog" aria-modal="true" aria-labelledby="profileCropTitle">
         <header class="profile-crop-head">
-            <h2 id="profileCropTitle">{{ __('Penyunting Foto Profil Kad Matrik') }}</h2>
+            <h2 id="profileCropTitle">{{ __('Matric Card Profile Photo Editor') }}</h2>
             <button type="button" class="profile-crop-close" data-profile-crop-action="cancel" aria-label="{{ __('Cancel photo crop') }}">&times;</button>
         </header>
         <div class="profile-crop-stage">
             <img data-profile-crop-image alt="{{ __('Selected profile photo') }}">
             <div class="face-guide-overlay" data-face-guide-overlay aria-hidden="true">
                 <div class="face-guide-silhouette">
-                    <span class="face-guide-text">{{ __('Letakkan Wajah di Sini') }}</span>
+                    <span class="face-guide-text">{{ __('Place Face Here') }}</span>
                 </div>
             </div>
         </div>
         <footer class="profile-crop-controls">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
                 <div class="profile-crop-tools">
-                    <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-left" title="{{ __('Putar ke kiri') }}">&#8634; {{ __('Kiri') }}</button>
-                    <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-right" title="{{ __('Putar ke kanan') }}">&#8635; {{ __('Kanan') }}</button>
-                    <button type="button" class="profile-crop-tool" data-profile-crop-action="reset" title="{{ __('Tetapkan semula kedudukan') }}">{{ __('Reset') }}</button>
-                    <button type="button" class="profile-crop-tool" data-profile-crop-action="toggle-guide" title="{{ __('Papar/sembunyi garisan panduan wajah') }}">{{ __('Panduan') }}</button>
+                    <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-left" title="{{ __('Rotate left') }}">&#8634; {{ __('Left') }}</button>
+                    <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-right" title="{{ __('Rotate right') }}">&#8635; {{ __('Right') }}</button>
+                    <button type="button" class="profile-crop-tool" data-profile-crop-action="reset" title="{{ __('Reset position') }}">{{ __('Reset') }}</button>
+                    <button type="button" class="profile-crop-tool" data-profile-crop-action="toggle-guide" title="{{ __('Show/hide face guide overlay') }}">{{ __('Guide') }}</button>
                 </div>
                 <div id="faceDetectionStatus" class="face-detect-status is-checking" data-face-detection-status>
-                    <span>🔍</span> <span>{{ __('Menilai Wajah...') }}</span>
+                    <span>🔍</span> <span>{{ __('Evaluating Face...') }}</span>
                 </div>
             </div>
             <div class="profile-crop-actions">
-                <button type="button" class="btn" data-profile-crop-action="cancel">{{ __('Batal') }}</button>
-                <button type="button" class="btn btn-primary" data-profile-crop-action="apply">{{ __('Gunakan Foto Ini') }}</button>
+                <button type="button" class="btn" data-profile-crop-action="cancel">{{ __('Cancel') }}</button>
+                <button type="button" class="btn btn-primary" data-profile-crop-action="apply">{{ __('Use photo') }}</button>
             </div>
         </footer>
     </section>
