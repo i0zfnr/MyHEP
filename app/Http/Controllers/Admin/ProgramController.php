@@ -7,6 +7,7 @@ use App\Support\ProgramApprovalRouting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -164,7 +165,7 @@ class ProgramController extends Controller
     public function destroy(int $program): RedirectResponse
     {
         $record = $this->program($program);
-        abort_unless($this->canManage($record), 403);
+        abort_unless(session('auth_user.admin_role') === 'system_admin', 403);
 
         $paperworkPaths = DB::table('program_paperworks')->where('program_id', $program)
             ->where('disk', 'local')->whereNotNull('path')->pluck('path')->all();

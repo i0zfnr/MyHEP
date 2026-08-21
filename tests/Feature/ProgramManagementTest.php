@@ -218,7 +218,7 @@ class ProgramManagementTest extends TestCase
     private function payload(array $override = []): array
     {
         return $override + [
-            'registration_type' => 'approved_program', 'title' => 'Digital Leadership Camp', 'reference_no' => 'HEP/PROGRAM/2026/001',
+            'registration_type' => 'approved_program', 'approval_branch' => 'tpa', 'title' => 'Digital Leadership Camp', 'reference_no' => 'HEP/PROGRAM/2026/001',
             'target_participants' => 'Polytechnic students', 'paperwork_method' => 'pdf',
             'paperwork_file' => UploadedFile::fake()->create('approved-paperwork.pdf', 120, 'application/pdf'), 'geofence_radius_m' => 50,
             'participation_points' => 10,
