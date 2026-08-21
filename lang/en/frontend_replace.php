@@ -274,18 +274,9 @@ return [
     'Export CSV' => 'Export CSV',
     'Reset Password' => 'Reset Password',
     'Sah' => 'Confirm',
-    'Pilih' => 'Select',
     'Semua' => 'All',
     'Tiada data' => 'No data',
     'Kembali ke Senarai' => 'Back to List',
-
-    // Status words
-    'berjaya' => 'successful',
-    'dikemaskini' => 'updated',
-    'ditambah' => 'added',
-    'dipadam' => 'deleted',
-    'tidak dijumpai' => 'not found',
-    'tidak sah' => 'invalid',
 
     // Exact student-facing strings added after mobile/PWA updates
     'Anda mempunyai denda yang belum dibayar' => 'You have unpaid fines',

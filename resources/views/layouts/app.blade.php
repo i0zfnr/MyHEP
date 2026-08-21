@@ -2660,7 +2660,7 @@
                     </nav>
                 @endif
 
-                <div class="nav-label">{{ __('ui.sidebar_account') }}</div>
+                <div class="nav-label">{{ __('Account') }}</div>
                 <nav>
                     <a href="{{ route('student.documents.index') }}" class="nav-link {{ request()->routeIs('student.documents.*') ? 'active' : '' }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3.75h7.5L18 7.5v12.75H6.75z"/><path stroke-linecap="round" d="M9 11.25h6M9 14.25h6"/></svg>
@@ -2668,7 +2668,7 @@
                     </a>
                     <a href="{{ route('student.profile') }}" class="nav-link {{ request()->routeIs('student.profile*') ? 'active' : '' }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
-                        {{ __('Profil') }}
+                        {{ __('Profile') }}
                     </a>
                     <a href="{{ route('bug-reports.create') }}" class="nav-link {{ request()->routeIs('bug-reports.*') ? 'active' : '' }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008M4.5 19.5h15l-7.5-15-7.5 15z"/></svg>
@@ -2676,7 +2676,7 @@
                     </a>
                     <a href="{{ route('settings.show') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v2.25l1.5 1.5"/></svg>
-                        {{ __('ui.settings') }}
+                        {{ __('Settings') }}
                     </a>
                     @if($hasAdminOverride)
                         <form method="POST" action="{{ route('settings.role-mode.update') }}">
@@ -2684,17 +2684,17 @@
                             <input type="hidden" name="mode" value="admin">
                             <button type="submit" class="nav-link nav-system-controls" style="width:100%;cursor:pointer;font:inherit;">
                                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 12h2M3 12h2M12 3v2m0 14v2"/></svg>
-                                {{ __('ui.system_controls') }}
+                                {{ __('System Controls') }}
                             </button>
                         </form>
                     @endif
                 </nav>
             @elseif($isAdmin)
-                <div class="nav-label">{{ __('Papan Pemuka') }}</div>
+                <div class="nav-label">{{ __('Dashboard') }}</div>
                 <nav>
                     <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2 7-7 7 7"/></svg>
-                        {{ __('ui.dashboard') }}
+                        {{ __('Dashboard') }}
                     </a>
                     <a href="{{ route('admin.programs.index') }}" class="nav-link {{ request()->routeIs('admin.programs.*') ? 'active' : '' }}">
                         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75A2.25 2.25 0 016 4.5h4.5l1.5 1.5h6A2.25 2.25 0 0120.25 8.25v9A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25z"/><path stroke-linecap="round" d="M8.25 12h7.5m-7.5 3h4.5"/></svg>
@@ -2703,7 +2703,7 @@
                     @if(!$isGuardAdmin)
                         <a href="{{ route('admin.reports.monthly') }}" class="nav-link {{ request()->routeIs('admin.reports.monthly') ? 'active' : '' }}">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v18h16.5M7.5 15l3-3 2.25 2.25L16.5 9"/></svg>
-                            {{ __('ui.monthly_report') }}
+                            {{ __('Monthly Report') }}
                         </a>
                         @if($isLecturerAdmin && $lecturerAiHelperEnabled)
                             <a href="{{ route('lecturer.ai-helper.index') }}" class="nav-link {{ request()->routeIs('lecturer.ai-helper.*') ? 'active' : '' }}">
@@ -2962,7 +2962,7 @@
                 @csrf
                 <button type="submit" class="btn-logout">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
-                    {{ __('ui.logout') }}
+                    {{ __('Log Out') }}
                 </button>
             </form>
         </div>

@@ -492,36 +492,36 @@
             <div>
                 <span class="pmr-eyebrow" style="display: inline-flex; align-items: center; gap: 0.35rem;">
                     <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"/></svg>
-                    {{ __('KAWALAN SOAL SELIDIK / MAKLUM BALAS') }}
+                    {{ __('QUESTIONNAIRE & FEEDBACK CONTROL') }}
                 </span>
                 <h2>{{ __('Questionnaire Publishing') }}</h2>
             </div>
             @if(!$survey || $survey->status !== 'published' || ($program->questionnaire_publish_mode ?? '') === 'closed')
-                <span class="pmr-live-status is-closed">{{ __('Draft / Ditutup') }}</span>
+                <span class="pmr-live-status is-closed">{{ __('Draft / Closed') }}</span>
             @elseif(($program->questionnaire_publish_mode ?? 'internal_system') === 'internal_system')
                 <span class="pmr-live-status" style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3); display: inline-flex; align-items: center; gap: 0.35rem;">
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2 3 14h8l-1 8 11-14h-8z"/></svg>
-                    {{ __('Terus Dalam Sistem (PB)') }}
+                    {{ __('Direct in Portal (PB)') }}
                 </span>
             @else
                 <span class="pmr-live-status" style="background:rgba(212,175,55,0.15);color:#b99150;border:1px solid rgba(212,175,55,0.3); display: inline-flex; align-items: center; gap: 0.35rem;">
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    {{ __('Mod Imbasan QR') }}
+                    {{ __('QR Scan Mode') }}
                 </span>
             @endif
         </div>
 
         <p style="margin: .5rem 0 1.25rem; font-size: .88rem; color: var(--text-muted,#746b62); line-height: 1.45;">
-            {{ __('Pengarah Program boleh mengawal penerbitan borang soal selidik pada bila-bila masa. Pilih sama ada mahu diterbitkan terus kepada pelajar Politeknik Besut di portal tanpa imbasan QR, atau memerlukan imbasan QR.') }}
+            {{ __('The Program Director can manage questionnaire publication at any time. Choose whether to publish directly to Politeknik Besut students on the portal without QR scanning, or require a QR scan.') }}
         </p>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .75rem; margin-bottom: 1.25rem;">
             <div style="padding: .75rem 1rem; background: color-mix(in srgb,var(--pm-accent) 6%,var(--surface,#fff)); border-radius: 10px; border: 1px solid var(--border,#eadac8);">
-                <span style="font-size: .72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted,#746b62); display: block; margin-bottom: 2px;">{{ __('Soalan Dikonfigurasi') }}</span>
-                <strong style="font-size: 1.15rem; color: var(--text,#241d16);">{{ count($questions) }} {{ __('Soalan') }}</strong>
+                <span style="font-size: .72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted,#746b62); display: block; margin-bottom: 2px;">{{ __('Configured Questions') }}</span>
+                <strong style="font-size: 1.15rem; color: var(--text,#241d16);">{{ count($questions) }} {{ __('Questions') }}</strong>
             </div>
             <div style="padding: .75rem 1rem; background: color-mix(in srgb,var(--pm-accent) 6%,var(--surface,#fff)); border-radius: 10px; border: 1px solid var(--border,#eadac8);">
-                <span style="font-size: .72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted,#746b62); display: block; margin-bottom: 2px;">{{ __('Maklum Balas Diterima') }}</span>
+                <span style="font-size: .72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted,#746b62); display: block; margin-bottom: 2px;">{{ __('Responses Received') }}</span>
                 <strong style="font-size: 1.15rem; color: var(--pm-accent,#b99150);">{{ number_format($surveyResponsesCount) }}</strong>
             </div>
         </div>
@@ -530,7 +530,7 @@
         @if($canManageAttendance)
             <div style="background: var(--bg-alt, #faf7f2); border: 1px solid var(--border); border-radius: 12px; padding: 1.15rem; margin-bottom: 1.25rem;">
                 <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.65rem;">
-                    {{ __('Pilihan Penerbitan Soal Selidik:') }}
+                    {{ __('Questionnaire Publishing Options:') }}
                 </span>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
                     <form method="post" action="{{ route('admin.programs.survey.publish-mode', $program->id) }}">
@@ -538,7 +538,7 @@
                         <input type="hidden" name="publish_mode" value="internal_system">
                         <button type="submit" class="pmr-btn {{ ($program->questionnaire_publish_mode ?? 'internal_system') === 'internal_system' && ($survey && $survey->status === 'published') ? 'primary' : '' }}" style="width: 100%; min-height: 42px; justify-content: center; font-size: 0.84rem; gap: 0.45rem;" @disabled(count($questions) === 0)>
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2 3 14h8l-1 8 11-14h-8z"/></svg>
-                            {{ __('Mod 1: Terus Dalam Sistem (PB)') }}
+                            {{ __('Mode 1: Direct in Portal (PB)') }}
                         </button>
                     </form>
 
@@ -547,7 +547,7 @@
                         <input type="hidden" name="publish_mode" value="qr_code">
                         <button type="submit" class="pmr-btn {{ ($program->questionnaire_publish_mode ?? '') === 'qr_code' && ($survey && $survey->status === 'published') ? 'primary' : '' }}" style="width: 100%; min-height: 42px; justify-content: center; font-size: 0.84rem; gap: 0.45rem;" @disabled(count($questions) === 0)>
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                            {{ __('Mod 2: Mod Imbasan QR') }}
+                            {{ __('Mode 2: QR Scan Mode') }}
                         </button>
                     </form>
 
@@ -556,7 +556,7 @@
                             @csrf
                             <button type="submit" class="pmr-btn" style="width: 100%; min-height: 42px; justify-content: center; font-size: 0.84rem; color: #dc2626; gap: 0.4rem;">
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                                {{ __('Tutup Soal Selidik') }}
+                                {{ __('Close Questionnaire') }}
                             </button>
                         </form>
                     @endif
@@ -567,7 +567,7 @@
         <div class="pmr-actions">
             <a class="pmr-btn" href="{{ route('admin.programs.questionnaire', $program->id) }}" style="width: 100%; justify-content: center; min-height: 42px; font-weight: 800;">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                {{ __('Buka Penyunting Soalan & Analitik (Questionnaire Builder)') }}
+                {{ __('Open Questionnaire Builder & Analytics') }}
             </a>
         </div>
     </section>
