@@ -137,8 +137,8 @@
         <article class="chart-card">
             <div class="chart-header">
                 <div>
-                    <span class="chart-kicker">{{ __('Workflow Status') }}</span>
-                    <h3 class="chart-title">{{ __('Program Pipeline Distribution') }}</h3>
+                    <span class="chart-kicker">{{ __('Workflow') }}</span>
+                    <h3 class="chart-title">{{ __('Program Status Distribution') }}</h3>
                 </div>
                 <div class="chart-badge">{{ $totalPrograms }} {{ __('Total') }}</div>
             </div>
@@ -188,8 +188,8 @@
         <article class="chart-card">
             <div class="chart-header">
                 <div>
-                    <span class="chart-kicker">{{ __('Six Months Timeline') }}</span>
-                    <h3 class="chart-title">{{ __('Monthly Program Activity') }}</h3>
+                    <span class="chart-kicker">{{ __('Six Months') }}</span>
+                    <h3 class="chart-title">{{ __('Program Activity') }}</h3>
                 </div>
                 <div class="chart-legend-top">
                     <span><i class="dot-created"></i>{{ __('Created') }}</span>
