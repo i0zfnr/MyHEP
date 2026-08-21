@@ -1065,8 +1065,15 @@
                         @foreach ($heatLabels as $dayIndex => $heatLabel)
                         <span class="an-heat-dow">{{ $heatLabel }}</span>
                             @foreach (range(0, 7) as $weekIndex)
-                                @php($heatCell = $featuredHeat['cells'][$weekIndex * 7 + $dayIndex])
+                                @php
+                                    $cellIndex = $weekIndex * 7 + $dayIndex;
+                                    $heatCell = $featuredHeat['cells'][$cellIndex] ?? null;
+                                @endphp
+                                @if ($heatCell)
                                 <span class="an-heat-cell" data-an-point data-an-tooltip="{{ $heatCell['date'] }}|{{ number_format($heatCell['count']) }} records" data-lvl="{{ $heatCell['level'] }}" aria-label="{{ $heatCell['date'] }}: {{ $heatCell['count'] }}"></span>
+                                @else
+                                <span class="an-heat-cell" data-lvl="0"></span>
+                                @endif
                             @endforeach
                         @endforeach
                     </div>
