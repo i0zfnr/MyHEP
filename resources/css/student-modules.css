@@ -3934,13 +3934,13 @@ body.student-scan-mode :is(
 
     /* DONE KEY IN Modal */
     .done-modal-backdrop {
+        display: none !important;
         position: fixed;
         inset: 0;
         z-index: 1000;
         background: rgba(12, 9, 7, 0.88);
         backdrop-filter: blur(24px) saturate(180%);
         -webkit-backdrop-filter: blur(24px) saturate(180%);
-        display: flex;
         align-items: center;
         justify-content: center;
         padding: 1.25rem;
@@ -3950,6 +3950,7 @@ body.student-scan-mode :is(
     }
 
     .done-modal-backdrop.show {
+        display: flex !important;
         opacity: 1;
         pointer-events: auto;
     }
@@ -3967,19 +3968,28 @@ body.student-scan-mode :is(
         transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
+    .done-modal-card.done-modal-minimal {
+        max-width: 280px;
+        padding: 2.25rem 1.5rem 1.75rem;
+        border-radius: 26px;
+        background: linear-gradient(165deg, rgba(28, 24, 20, 0.96), rgba(14, 12, 10, 0.98));
+        border: 1.5px solid rgba(16, 185, 129, 0.3);
+        box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 50px rgba(16, 185, 129, 0.15);
+    }
+
     .done-modal-backdrop.show .done-modal-card {
         transform: scale(1) translateY(0);
     }
 
     .done-badge-icon {
-        width: 76px;
-        height: 76px;
+        width: 84px;
+        height: 84px;
         border-radius: 50%;
         background: linear-gradient(135deg, #10b981, #059669);
         display: grid;
         place-items: center;
         margin: 0 auto 1.25rem;
-        box-shadow: 0 0 35px rgba(16, 185, 129, 0.45);
+        box-shadow: 0 0 45px rgba(16, 185, 129, 0.5), 0 4px 20px rgba(0, 0, 0, 0.4);
         color: #fff;
         animation: popCheck 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -3991,12 +4001,12 @@ body.student-scan-mode :is(
     }
 
     .done-title {
-        font-size: 1.75rem;
+        font-size: 2.1rem;
         font-weight: 900;
-        letter-spacing: -0.02em;
-        color: #fef08a;
-        text-shadow: 0 2px 14px rgba(234, 179, 8, 0.35);
-        margin-bottom: 0.35rem;
+        letter-spacing: 0.04em;
+        color: #ffffff;
+        text-shadow: 0 2px 20px rgba(16, 185, 129, 0.45);
+        margin-bottom: 0;
         text-transform: uppercase;
     }
 

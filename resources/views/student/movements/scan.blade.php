@@ -42,31 +42,16 @@
     </div>
 </div>
 
-<!-- DONE KEY IN Pop-up Modal -->
-<div class="done-modal-backdrop" id="doneModal">
-    <div class="done-modal-card">
+<!-- DONE Pop-up Modal -->
+<div class="done-modal-backdrop" id="doneModal" style="display: none;" aria-hidden="true">
+    <div class="done-modal-card done-modal-minimal">
         <div class="done-badge-icon">
-            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
 
-        <h3 class="done-title" id="doneTitle">{{ __('DONE KEY IN') }}</h3>
-        <p class="done-subtitle" id="doneProgramTitle">{{ __('Kehadiran Berjaya Direkodkan!') }}</p>
+        <h3 class="done-title" id="doneTitle">{{ __('DONE') }}</h3>
 
-        <div class="done-student-box">
-            <div class="done-student-name" id="doneStudentName">--</div>
-            <div class="done-student-meta" id="doneStudentMeta">--</div>
-        </div>
-
-        <div class="done-points-pill" id="donePointsPill">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <span id="donePointsText">+10 Mata Merit Diperoleh</span>
-        </div>
-
-        <div class="done-actions">
-            <a href="#" class="btn-done-primary" id="btnDoneSurvey" style="display: none;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"/></svg>
-                <span>{{ __('Jawab Soal Selidik Sekarang') }}</span>
-            </a>
+        <div class="done-actions" style="margin-top: 1.25rem;">
             <button type="button" class="btn-done-secondary" id="btnDoneClose">{{ __('Selesai / Imbas Lagi') }}</button>
         </div>
     </div>
@@ -167,27 +152,41 @@
         if (video) video.srcObject = null;
     };
 
-    const showDoneModal = (data) => {
-        doneTitle.textContent = data.message || 'DONE KEY IN';
-        doneProgramTitle.textContent = data.program?.title || @json(__('Kehadiran Berjaya Direkodkan!'));
-        doneStudentName.textContent = data.student?.full_name || '';
-        doneStudentMeta.textContent = (data.student?.matric_no || '') + ' • ' + (data.student?.program || '');
-        
-        const points = data.program?.points || 0;
-        donePointsText.textContent = points > 0 ? `+${points} {{ __('Mata Merit Diperoleh') }}` : `{{ __('Kehadiran Direkodkan') }}`;
+    let doneAutoDismissTimer = null;
 
-        if (data.program?.has_survey && data.program?.survey_url) {
-            btnDoneSurvey.href = data.program.survey_url;
-            btnDoneSurvey.style.display = 'flex';
-        } else {
-            btnDoneSurvey.style.display = 'none';
+    const hideDoneModal = () => {
+        if (doneAutoDismissTimer) {
+            clearTimeout(doneAutoDismissTimer);
+            doneAutoDismissTimer = null;
         }
+        doneModal.classList.remove('show');
+        doneModal.setAttribute('aria-hidden', 'true');
+        setTimeout(() => {
+            if (!doneModal.classList.contains('show')) {
+                doneModal.style.display = 'none';
+            }
+        }, 300);
+        isProcessing = false;
+        startScanner();
+    };
+
+    const showDoneModal = (data) => {
+        doneTitle.textContent = 'DONE';
 
         if (navigator.vibrate) {
             try { navigator.vibrate([100, 50, 100]); } catch (e) {}
         }
 
-        doneModal.classList.add('show');
+        doneModal.style.display = 'flex';
+        doneModal.removeAttribute('aria-hidden');
+        requestAnimationFrame(() => {
+            doneModal.classList.add('show');
+        });
+
+        if (doneAutoDismissTimer) clearTimeout(doneAutoDismissTimer);
+        doneAutoDismissTimer = setTimeout(() => {
+            hideDoneModal();
+        }, 2200);
     };
 
     const handleFoodBankClaim = async () => {
@@ -206,18 +205,7 @@
 
             const data = await res.json();
             if (res.ok && data.success) {
-                doneTitle.textContent = data.message || @json(__('Makanan Berjaya Ditebus!'));
-                doneProgramTitle.textContent = '🍃 ' + (data.claim?.location || @json(__('Food Bank Siswa Politeknik Besut')));
-                doneStudentName.textContent = data.student?.full_name || '';
-                doneStudentMeta.textContent = (data.student?.matric_no || '') + ' • ' + (data.student?.program || '');
-                donePointsText.textContent = `✓ ${@json(__('Selesai Ditebus'))} (${data.claim?.claimed_at || ''})`;
-                btnDoneSurvey.style.display = 'none';
-
-                if (navigator.vibrate) {
-                    try { navigator.vibrate([100, 50, 100]); } catch (e) {}
-                }
-
-                doneModal.classList.add('show');
+                showDoneModal(data);
             } else {
                 setStatus(data.message || @json(__('Ralat semasa merekod penebusan Food Bank.')), 'danger');
                 setTimeout(() => {
@@ -395,10 +383,9 @@
         }
     };
 
-    btnDoneClose?.addEventListener('click', () => {
-        doneModal.classList.remove('show');
-        isProcessing = false;
-        startScanner();
+    btnDoneClose?.addEventListener('click', hideDoneModal);
+    doneModal?.addEventListener('click', (e) => {
+        if (e.target === doneModal) hideDoneModal();
     });
 
     updateClock();
