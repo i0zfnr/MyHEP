@@ -251,6 +251,16 @@
                                     </span>
                                     <span class="student-name-block">
                                         <span class="student-name">{{ $student->full_name }}</span>
+                                        @php($photoStatus = $student->profile_photo_status ?? (filled($student->photo ?? null) ? 'legacy' : 'missing'))
+                                        @if(filled($student->photo ?? null))
+                                            <small style="display:inline-flex;margin-top:4px;padding:3px 8px;border-radius:999px;border:1px solid var(--border);font-size:.68rem;font-weight:800;text-transform:uppercase;color:var(--text-muted);">
+                                                {{ $photoStatus === 'approved' ? __('Photo approved') : ($photoStatus === 'pending' ? __('Photo pending review') : __('Photo not approved')) }}
+                                            </small>
+                                        @else
+                                            <small style="display:inline-flex;margin-top:4px;padding:3px 8px;border-radius:999px;border:1px solid var(--border);font-size:.68rem;font-weight:800;text-transform:uppercase;color:var(--text-muted);">
+                                                {{ __('No approved photo') }}
+                                            </small>
+                                        @endif
                                     </span>
                                 </div>
                             </td>
@@ -280,6 +290,19 @@
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                             <span>{{ __('Edit') }}</span>
                                         </a>
+                                        @if(filled($student->photo) && ($student->profile_photo_status ?? null) !== 'approved')
+                                            <form method="POST" action="{{ route('admin.students.photos.approve', $student->id) }}" style="margin:0;display:inline-flex;"
+                                                data-confirm-title="{{ __('Approve Profile Photo') }}"
+                                                data-confirm-message="{{ __('Approve this as the student official matric/profile photo?') }}"
+                                                data-confirm-action="{{ __('Approve Photo') }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button class="stu-btn stu-btn-view" type="submit" title="{{ __('Approve Photo') }}">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                                                    <span>{{ __('Approve Photo') }}</span>
+                                                </button>
+                                            </form>
+                                        @endif
                                         @if(filled($student->photo))
                                             <form method="POST" action="{{ route('admin.students.photos.reject', $student->id) }}" style="margin:0;display:inline-flex;"
                                                 data-confirm-title="{{ __('Tolak Gambar Profil') }}"

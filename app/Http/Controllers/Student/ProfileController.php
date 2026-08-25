@@ -107,6 +107,15 @@ class ProfileController extends Controller
         $oldPhotoPath = $student->photo ?? null;
         if ($request->hasFile('profile_photo') && Schema::hasColumn('students', 'photo')) {
             $updateData['photo'] = $request->file('profile_photo')->store('students/profile_photos', 'public');
+            if (Schema::hasColumn('students', 'profile_photo_status')) {
+                $updateData['profile_photo_status'] = 'pending';
+            }
+            if (Schema::hasColumn('students', 'profile_photo_reviewed_at')) {
+                $updateData['profile_photo_reviewed_at'] = null;
+            }
+            if (Schema::hasColumn('students', 'profile_photo_reviewed_by')) {
+                $updateData['profile_photo_reviewed_by'] = null;
+            }
         }
 
         $updateData['updated_at'] = now();

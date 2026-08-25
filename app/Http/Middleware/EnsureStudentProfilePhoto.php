@@ -6,6 +6,7 @@ use App\Support\SystemFeatures;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureStudentProfilePhoto
@@ -54,21 +55,32 @@ class EnsureStudentProfilePhoto
             return $next($request);
         }
 
-        if (! \Illuminate\Support\Facades\Schema::hasTable('students') || ! \Illuminate\Support\Facades\Schema::hasColumn('students', 'photo')) {
+        if (! Schema::hasTable('students') || ! Schema::hasColumn('students', 'photo')) {
             return $next($request);
         }
 
-        $student = DB::table('students')->where('id', $studentId)->select('photo')->first();
-        if ($student && blank($student->photo)) {
+        $hasPhotoStatus = Schema::hasColumn('students', 'profile_photo_status');
+        $select = ['photo'];
+        if ($hasPhotoStatus) {
+            $select[] = 'profile_photo_status';
+        }
+
+        $student = DB::table('students')->where('id', $studentId)->select($select)->first();
+        $status = $hasPhotoStatus
+            ? (string) ($student->profile_photo_status ?? '')
+            : '';
+        $photoApproved = $hasPhotoStatus ? $status === 'approved' : filled($student->photo ?? null);
+
+        if ($student && (blank($student->photo) || ! $photoApproved)) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => __('Sila muat naik gambar profil kad matrik yang sah terlebih dahulu.'),
+                    'message' => __('Sila muat naik gambar profil kad matrik yang sah dan tunggu kelulusan admin terlebih dahulu.'),
                     'redirect' => route('student.profile'),
                 ], 403);
             }
 
             return redirect()->route('student.profile')
-                ->with('warning', __('Sila muat naik gambar profil rasmi standard kad matrik terlebih dahulu untuk mengakses modul sistem.'));
+                ->with('warning', __('Sila muat naik gambar profil rasmi standard kad matrik dan tunggu kelulusan admin terlebih dahulu untuk mengakses modul sistem.'));
         }
 
         return $next($request);

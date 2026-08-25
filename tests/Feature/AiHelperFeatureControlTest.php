@@ -29,6 +29,11 @@ class AiHelperFeatureControlTest extends TestCase
             $table->string('class_name')->nullable();
             $table->unsignedInteger('semester')->nullable();
             $table->string('academic_session')->nullable();
+            $table->string('photo')->nullable();
+            $table->string('profile_photo_status', 24)->nullable();
+            $table->timestamp('profile_photo_reviewed_at')->nullable();
+            $table->unsignedBigInteger('profile_photo_reviewed_by')->nullable();
+            $table->timestamps();
         });
         Schema::create('student_ai_conversations', function (Blueprint $table): void {
             $table->id();
@@ -75,8 +80,14 @@ class AiHelperFeatureControlTest extends TestCase
             ['id' => 3, 'full_name' => 'Test Lecturer', 'role' => 'lecturer'],
         ]);
         DB::table('students')->insert([
-            ['id' => 99, 'full_name' => 'Test Student', 'matric_no' => 'TEST99', 'program' => 'DIT', 'semester' => 1, 'academic_session' => '2025/2026'],
-            ['id' => 100, 'full_name' => 'Other Student', 'matric_no' => 'TEST100', 'program' => 'DIT', 'semester' => 1, 'academic_session' => '2025/2026'],
+            ['id' => 99, 'full_name' => 'Test Student', 'matric_no' => 'TEST99', 'program' => 'DIT', 'semester' => 1, 'academic_session' => '2025/2026', 'photo' => 'students/profile_photos/approved.jpg', 'profile_photo_status' => 'approved', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 100, 'full_name' => 'Other Student', 'matric_no' => 'TEST100', 'program' => 'DIT', 'semester' => 1, 'academic_session' => '2025/2026', 'photo' => null, 'profile_photo_status' => null, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        DB::table('system_features')->insert([
+            'feature_key' => 'enforce_student_profile_photo',
+            'enabled' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 
@@ -113,6 +124,36 @@ class AiHelperFeatureControlTest extends TestCase
             ->assertOk()
             ->assertSee('AI Helper (Student)')
             ->assertDontSee('id="reportAttachment"', false);
+    }
+
+    public function test_mandatory_student_profile_photo_requires_admin_approved_photo(): void
+    {
+        $this->actingAsSystemAdmin()
+            ->patch('/admin/features/enforce_student_profile_photo', ['enabled' => 1])
+            ->assertRedirect('/admin/features');
+
+        DB::table('students')->where('id', 99)->update([
+            'photo' => 'students/profile_photos/unreviewed.jpg',
+            'profile_photo_status' => 'pending',
+        ]);
+
+        $this->actingAsStudent()
+            ->get('/student/ai-helper')
+            ->assertRedirect('/student/profile');
+
+        $this->actingAsSystemAdmin()
+            ->patch('/admin/students/99/photo/approve')
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('students', [
+            'id' => 99,
+            'profile_photo_status' => 'approved',
+            'profile_photo_reviewed_by' => 1,
+        ]);
+
+        $this->actingAsStudent()
+            ->get('/student/ai-helper')
+            ->assertOk();
     }
 
     public function test_lecturer_ai_helper_has_an_independent_system_admin_control(): void

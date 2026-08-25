@@ -3017,6 +3017,10 @@ body.is-navigating .se-page-progress span {
 .header-menu-head .header-user-avatar {
     width: 36px;
     height: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    min-height: 36px;
+    max-height: 36px;
     flex: 0 0 36px;
 }
 
@@ -4394,6 +4398,11 @@ body[data-theme="dark"] .se-notification-panel {
     .app-layout .header-user-avatar {
         width: 29px;
         height: 29px;
+        min-width: 29px;
+        max-width: 29px;
+        min-height: 29px;
+        max-height: 29px;
+        flex-basis: 29px;
     }
 
     .app-layout .header-user-name {
@@ -5630,7 +5639,7 @@ body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab.active .mobile-nav-i
     }
 
     .app-layout .topbar-actions .header-user-avatar {
-        flex: 0 0 auto;
+        flex: 0 0 29px;
     }
 
     .app-layout .topbar-actions .header-user-meta {
@@ -6314,6 +6323,17 @@ body[data-theme="dark"] .app-layout .sidebar.is-open {
         background:
             radial-gradient(8rem circle at 86% -30%, color-mix(in srgb, var(--se-atmosphere-primary) 22%, transparent), transparent 68%),
             linear-gradient(145deg, color-mix(in srgb, var(--se-primary-soft) 68%, transparent), rgb(255 255 255 / calc(.03 + var(--glass-opacity) * .06))) !important;
+    }
+
+    .app-layout .mobile-bottom-nav {
+        bottom: calc(.28rem + env(safe-area-inset-bottom, 0px)) !important;
+        padding: .48rem .52rem .48rem !important;
+    }
+
+    @supports (bottom: max(0px)) {
+        .app-layout .mobile-bottom-nav {
+            bottom: max(.28rem, calc(env(safe-area-inset-bottom, 0px) - .42rem)) !important;
+        }
     }
 }
 

@@ -1159,9 +1159,35 @@ body.welcome-page .footer-copy {
 }
 
 @media (max-width: 768px) {
-    body.welcome-page .hero { padding: 4.5rem 5vw 3.5rem; }
-    body.welcome-page .brand { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
-    body.welcome-page .brand-logo { width: 140px; }
+    html.welcome-document,
+    html.welcome-document body.welcome-page {
+        height: auto !important;
+        min-height: 100svh !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: auto !important;
+    }
+    body.welcome-page .hero {
+        min-height: auto;
+        overflow: visible;
+        padding: max(4.5rem, env(safe-area-inset-top, 0px) + 3.75rem) 5vw 3.5rem;
+    }
+    body.welcome-page .brand {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+    body.welcome-page .brand-logo {
+        display: block !important;
+        flex: 0 0 48px;
+        width: 48px;
+        max-width: 48px;
+        height: 48px;
+        object-fit: contain;
+    }
     body.welcome-page .cta-group { flex-direction: column; align-items: flex-start; }
     body.welcome-page .btn-primary { width: 100%; justify-content: center; }
     body.welcome-page .pwa-options { width:100%; }
@@ -1523,6 +1549,5 @@ body.error-page .footer-org { font-size: 12.5px; font-weight: 600; color: var(--
 body.error-page .footer-contact { font-size: 11.5px; color: var(--text-sub); }
 body.error-page .footer-contact a { color: var(--gold-start); text-decoration: none; }
 body.error-page .footer-contact a:hover { text-decoration: underline; }
-
 
 

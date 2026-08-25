@@ -507,6 +507,9 @@ Route::delete('/admin/students/photos/delete-all', [StudentController::class, 'd
 Route::delete('/admin/students/{id}/photo', [StudentController::class, 'rejectPhoto'])
     ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.photos.reject');
+Route::patch('/admin/students/{id}/photo/approve', [StudentController::class, 'approvePhoto'])
+    ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
+    ->name('admin.students.photos.approve');
 Route::post('/admin/students/{id}/reset-password', [StudentController::class, 'resetPassword'])
     ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.reset-password');

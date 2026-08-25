@@ -57,12 +57,24 @@
                 </div>
 
                 <div class="photo-row">
+                    @php($photoStatus = $student->profile_photo_status ?? (filled($student->photo ?? null) ? 'legacy' : 'missing'))
                     <img class="profile-photo" data-profile-photo-preview src="{{ !empty($student->photo) ? asset('storage/' . $student->photo) : '' }}" alt="{{ __('Profile photo') }}" @if(empty($student->photo)) hidden @endif>
                     <div class="profile-photo photo-placeholder" data-profile-photo-placeholder @if(!empty($student->photo)) hidden @endif>{{ strtoupper(substr($student->full_name ?? 'P', 0, 1)) }}</div>
                     <div style="flex:1; min-width:220px;">
                         <label for="profile_photo">{{ __('Profile Photo (Passport Format 3:4)') }}</label>
                         <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ empty($student->photo) ? 'required' : '' }}>
                         <small style="display:block;margin-top:6px;color:var(--text-muted);">{{ __('JPG, PNG, or WEBP. The system provides an automatic face cropper and alignment validator.') }}</small>
+                        <small style="display:block;margin-top:8px;font-weight:800;color:{{ $photoStatus === 'approved' ? '#047857' : '#9a6700' }};">
+                            @if($photoStatus === 'approved')
+                                {{ __('Photo status: approved by admin.') }}
+                            @elseif($photoStatus === 'pending')
+                                {{ __('Photo status: pending admin review. You can update the photo again if it is not formal.') }}
+                            @elseif($photoStatus === 'rejected')
+                                {{ __('Photo status: rejected. Please upload a new formal matric photo.') }}
+                            @else
+                                {{ __('Photo status: not approved yet. Upload a formal matric photo and wait for admin approval.') }}
+                            @endif
+                        </small>
                     </div>
                 </div>
                 <div class="grid grid-2">

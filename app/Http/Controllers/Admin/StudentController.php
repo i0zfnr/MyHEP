@@ -40,12 +40,16 @@ class StudentController extends Controller
 
         $filters = $this->validateFilters($request, $canViewSensitiveStudents);
         $studentsQuery = $this->filteredStudentsQuery($filters, $canViewSensitiveStudents);
+        $photoStatusColumns = [];
+        if (Schema::hasColumn('students', 'profile_photo_status')) {
+            $photoStatusColumns[] = 'profile_photo_status';
+        }
         if ($canViewSensitiveStudents) {
             $studentsQuery
-                ->select('id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'photo', 'created_at')
+                ->select(array_merge(['id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'photo', 'created_at'], $photoStatusColumns))
                 ->selectRaw('CASE WHEN password IS NULL THEN 0 ELSE 1 END as has_custom_password');
         } else {
-            $studentsQuery->select('id', 'full_name', 'matric_no', 'program', 'photo', 'created_at');
+            $studentsQuery->select(array_merge(['id', 'full_name', 'matric_no', 'program', 'photo', 'created_at'], $photoStatusColumns));
         }
 
         $students = $studentsQuery->orderBy('full_name')->paginate(15)->withQueryString();
@@ -366,7 +370,18 @@ class StudentController extends Controller
             }
         }
 
-        DB::table('students')->update(['photo' => null]);
+        $resetData = ['photo' => null];
+        if (Schema::hasColumn('students', 'profile_photo_status')) {
+            $resetData['profile_photo_status'] = null;
+        }
+        if (Schema::hasColumn('students', 'profile_photo_reviewed_at')) {
+            $resetData['profile_photo_reviewed_at'] = null;
+        }
+        if (Schema::hasColumn('students', 'profile_photo_reviewed_by')) {
+            $resetData['profile_photo_reviewed_by'] = null;
+        }
+
+        DB::table('students')->update($resetData);
 
         auditLog('students.delete_all_photos', 'students', null, "Deleted {$count} student profile photos");
 
@@ -389,12 +404,58 @@ class StudentController extends Controller
             Storage::disk('public')->delete($student->photo);
         }
 
-        DB::table('students')->where('id', $id)->update(['photo' => null, 'updated_at' => now()]);
+        $updateData = ['photo' => null, 'updated_at' => now()];
+        if (Schema::hasColumn('students', 'profile_photo_status')) {
+            $updateData['profile_photo_status'] = 'rejected';
+        }
+        if (Schema::hasColumn('students', 'profile_photo_reviewed_at')) {
+            $updateData['profile_photo_reviewed_at'] = now();
+        }
+        if (Schema::hasColumn('students', 'profile_photo_reviewed_by')) {
+            $updateData['profile_photo_reviewed_by'] = (int) session('auth_user.id');
+        }
+
+        DB::table('students')->where('id', $id)->update($updateData);
 
         auditLog('students.reject_photo', 'students', $id, "Rejected and deleted profile photo for student #{$id} ({$student->full_name})");
 
         return redirect()->back()
             ->with('success', __('Gambar profil pelajar berjaya ditolak dan dipadam. Pelajar diminta memuat naik semula gambar rasmi.'));
+    }
+
+    public function approvePhoto(int $id): RedirectResponse
+    {
+        if (! (session('auth_user.admin_role') === 'system_admin' || adminCan('students.manage'))) {
+            abort(403, __('Unauthorized action.'));
+        }
+
+        $student = DB::table('students')->where('id', $id)->first();
+        if (!$student) {
+            return $this->studentNotFoundRedirect();
+        }
+
+        if (blank($student->photo ?? null)) {
+            return redirect()->back()
+                ->withErrors(['photo' => __('Pelajar ini belum memuat naik gambar profil.')]);
+        }
+
+        $updateData = ['updated_at' => now()];
+        if (Schema::hasColumn('students', 'profile_photo_status')) {
+            $updateData['profile_photo_status'] = 'approved';
+        }
+        if (Schema::hasColumn('students', 'profile_photo_reviewed_at')) {
+            $updateData['profile_photo_reviewed_at'] = now();
+        }
+        if (Schema::hasColumn('students', 'profile_photo_reviewed_by')) {
+            $updateData['profile_photo_reviewed_by'] = (int) session('auth_user.id');
+        }
+
+        DB::table('students')->where('id', $id)->update($updateData);
+
+        auditLog('students.approve_photo', 'students', $id, "Approved profile photo for student #{$id} ({$student->full_name})");
+
+        return redirect()->back()
+            ->with('success', __('Gambar profil pelajar telah diluluskan.'));
     }
 
     public function resetPassword(AccountSessionManager $sessions, int $id)
