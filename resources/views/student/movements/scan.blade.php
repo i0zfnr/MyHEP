@@ -86,6 +86,38 @@
     let isScanning = false;
     let isProcessing = false;
 
+    const decodeSignedTokenPayload = (token) => {
+        const value = String(token || '').trim();
+        if (!value || !value.includes('.')) return null;
+
+        const payload = value.split('.', 1)[0];
+        try {
+            const padded = payload.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (payload.length % 4)) % 4);
+            const decoded = atob(padded);
+            const json = JSON.parse(decoded);
+            return json && typeof json === 'object' ? json : null;
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const parseTokenByPayload = (token) => {
+        const payload = decodeSignedTokenPayload(token);
+        if (!payload) return null;
+
+        const programId = Number.parseInt(payload.pid, 10);
+        if (Number.isInteger(programId) && programId > 0) {
+            return { type: 'program', programId, token };
+        }
+
+        const checkpointId = Number.parseInt(payload.cid, 10);
+        if (Number.isInteger(checkpointId) && checkpointId > 0) {
+            return { type: 'movement', token };
+        }
+
+        return null;
+    };
+
     const setStatus = (message, tone = '') => {
         if (!statusNode) return;
         statusNode.textContent = message;
@@ -124,12 +156,17 @@
 
             const token = parsed.searchParams.get('token');
             if (token) {
-                return { type: 'movement', token: token };
+                return parseTokenByPayload(token) || { type: 'movement', token: token };
             }
         } catch (error) {}
 
         if (value.toLowerCase().includes('foodbank')) {
             return { type: 'foodbank' };
+        }
+
+        const parsedToken = parseTokenByPayload(value);
+        if (parsedToken) {
+            return parsedToken;
         }
 
         if (value.length >= 12) {
@@ -391,7 +428,15 @@
     updateClock();
     window.setInterval(updateClock, 1000);
     window.addEventListener('beforeunload', stopScanner);
-    startScanner();
+
+    const initialToken = new URLSearchParams(window.location.search).get('token')
+        || new URLSearchParams(window.location.search).get('t')
+        || new URLSearchParams(window.location.search).get('qr_token');
+    if (initialToken) {
+        handleDetectedValue(initialToken);
+    } else {
+        startScanner();
+    }
 })();
 </script>
 @endpush
