@@ -71,6 +71,26 @@ class DynamicQrToken
     }
 
     /**
+     * Safely extract the program ID from a signed token without assuming it is valid yet.
+     */
+    public static function extractProgramId(?string $token): ?int
+    {
+        if (blank($token) || ! str_contains($token, '.')) {
+            return null;
+        }
+
+        [$payload] = explode('.', $token, 2);
+        $decoded = base64_decode(strtr($payload, '-_', '+/'));
+        if (! $decoded) {
+            return null;
+        }
+
+        $data = json_decode($decoded, true);
+
+        return is_array($data) && isset($data['pid']) ? (int) $data['pid'] : null;
+    }
+
+    /**
      * Generate a signed time-based token for a movement checkpoint.
      */
     public static function generateForCheckpoint(int $checkpointId, int $validSeconds = self::DEFAULT_ROTATION_SECONDS): array
@@ -150,4 +170,3 @@ class DynamicQrToken
         return is_array($data) && isset($data['cid']) ? (int) $data['cid'] : null;
     }
 }
-
