@@ -17,34 +17,53 @@
 </head>
 <body data-theme="{{ session('theme', 'light') }}" class="auth-page">
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
-<div class="card">
-    <h1>{{ __('Lupa Kata Laluan') }}</h1>
-    <p>{{ __('Masukkan maklumat akaun dan email berdaftar untuk menerima kod verifikasi.') }}</p>
+<main class="auth-recovery-shell">
+<section class="auth-recovery-card">
+    <div class="auth-recovery-brand">
+        <img src="{{ asset('images/logo-politeknik-besut.png') }}" alt="Politeknik Besut">
+        <div>
+            <span>MyHEP</span>
+            <small>{{ __('Student Affairs System') }}</small>
+        </div>
+    </div>
+
+    <div class="auth-recovery-heading">
+        <p>{{ __('Account Recovery') }}</p>
+        <h1>{{ __('Lupa Kata Laluan') }}</h1>
+        <span>{{ __('Masukkan maklumat akaun dan email berdaftar untuk menerima kod verifikasi.') }}</span>
+    </div>
 
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if(session('delivery_info'))<div class="warn">{{ session('delivery_info') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
-    <form method="POST" action="{{ route('password.forgot.send') }}">
+    <form method="POST" action="{{ route('password.forgot.send') }}" class="auth-recovery-form">
         @csrf
-        <label for="role">{{ __('Peranan') }}</label>
-        <select id="role" name="role" required>
-            <option value="student" {{ old('role', 'student') === 'student' ? 'selected' : '' }}>{{ __('Pelajar') }}</option>
-            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
-        </select>
+        <div class="auth-recovery-field">
+            <label for="role">{{ __('Peranan') }}</label>
+            <select id="role" name="role" required>
+                <option value="student" {{ old('role', 'student') === 'student' ? 'selected' : '' }}>{{ __('Pelajar') }}</option>
+                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
+            </select>
+        </div>
 
-        <label for="identifier">ID Akaun (No. Matrik pelajar / No. IC admin)</label>
-        <input id="identifier" name="identifier" type="text" value="{{ old('identifier') }}" required>
+        <div class="auth-recovery-field">
+            <label for="identifier">ID Akaun (No. Matrik pelajar / No. IC admin)</label>
+            <input id="identifier" name="identifier" type="text" value="{{ old('identifier') }}" required>
+        </div>
 
-        <label for="email">{{ __('Email berdaftar') }}</label>
-        <input id="email" name="email" type="email" value="{{ old('email') }}" required>
+        <div class="auth-recovery-field">
+            <label for="email">{{ __('Email berdaftar') }}</label>
+            <input id="email" name="email" type="email" value="{{ old('email') }}" required>
+        </div>
 
-        <div class="actions">
-            <button class="btn btn-primary" type="submit">{{ __('Hantar Kod Verifikasi') }}</button>
-            <a class="btn" href="{{ route('login') }}">{{ __('Kembali Login') }}</a>
+        <div class="auth-recovery-actions">
+            <button class="btn-submit" type="submit">{{ __('Hantar Kod Verifikasi') }}</button>
+            <a class="btn-home" href="{{ route('login') }}">{{ __('Kembali Login') }}</a>
         </div>
     </form>
-</div>
+</section>
+</main>
 @include('partials.app_footer')
 </body>
 </html>

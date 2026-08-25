@@ -621,6 +621,22 @@ body.welcome-page {
     -webkit-font-smoothing: antialiased;
 }
 
+html.welcome-document,
+html.welcome-document body.welcome-page {
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+}
+
+body.welcome-page .content-sections,
+body.welcome-page .welcome-footer {
+    position: relative;
+    z-index: 1;
+}
+
 body.welcome-page[data-theme="dark"] {
     --bg:             #0f0e0d;
     --surface:        #171412;
@@ -1550,4 +1566,3 @@ body.error-page .footer-org { font-size: 12.5px; font-weight: 600; color: var(--
 body.error-page .footer-contact { font-size: 11.5px; color: var(--text-sub); }
 body.error-page .footer-contact a { color: var(--gold-start); text-decoration: none; }
 body.error-page .footer-contact a:hover { text-decoration: underline; }
-
