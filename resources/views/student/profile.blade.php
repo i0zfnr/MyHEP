@@ -8,6 +8,16 @@
 
 @section('content')
 <div class="student-profile-page">
+    @php
+        $studentPhoto = data_get($student, 'photo');
+        $studentName = data_get($student, 'full_name', 'Pelajar');
+        $studentInitial = strtoupper(substr((string) $studentName, 0, 1) ?: 'P');
+        $studentMatric = data_get($student, 'matric_no') ?: '-';
+        $studentIc = data_get($student, 'ic_no');
+        $studentProgram = data_get($student, 'program') ?: '-';
+        $photoStatus = data_get($student, 'profile_photo_status') ?? (filled($studentPhoto) ? 'legacy' : 'missing');
+    @endphp
+
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if(session('warning'))<div class="required-note" style="margin-bottom:14px;font-weight:700;">{{ session('warning') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
@@ -57,12 +67,11 @@
                 </div>
 
                 <div class="photo-row">
-                    @php($photoStatus = $student->profile_photo_status ?? (filled($student->photo ?? null) ? 'legacy' : 'missing'))
-                    <img class="profile-photo" data-profile-photo-preview src="{{ !empty($student->photo) ? asset('storage/' . $student->photo) : '' }}" alt="{{ __('Profile photo') }}" @if(empty($student->photo)) hidden @endif>
-                    <div class="profile-photo photo-placeholder" data-profile-photo-placeholder @if(!empty($student->photo)) hidden @endif>{{ strtoupper(substr($student->full_name ?? 'P', 0, 1)) }}</div>
+                    <img class="profile-photo" data-profile-photo-preview src="{{ filled($studentPhoto) ? asset('storage/' . $studentPhoto) : '' }}" alt="{{ __('Profile photo') }}" @if(blank($studentPhoto)) hidden @endif>
+                    <div class="profile-photo photo-placeholder" data-profile-photo-placeholder @if(filled($studentPhoto)) hidden @endif>{{ $studentInitial }}</div>
                     <div style="flex:1; min-width:220px;">
                         <label for="profile_photo">{{ __('Profile Photo (Passport Format 3:4)') }}</label>
-                        <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ empty($student->photo) ? 'required' : '' }}>
+                        <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ blank($studentPhoto) ? 'required' : '' }}>
                         <small style="display:block;margin-top:6px;color:var(--text-muted);">{{ __('JPG, PNG, or WEBP. The system provides an automatic face cropper and alignment validator.') }}</small>
                         <small style="display:block;margin-top:8px;font-weight:800;color:{{ $photoStatus === 'approved' ? '#047857' : '#9a6700' }};">
                             @if($photoStatus === 'approved')
@@ -80,22 +89,22 @@
                 <div class="grid grid-2">
                     <div>
                         <label>{{ __('Nama Penuh') }}</label>
-                        <input type="text" value="{{ $student->full_name }}" readonly>
+                        <input type="text" value="{{ $studentName }}" readonly>
                     </div>
                     <div>
                         <label>{{ __('No. Matrik') }}</label>
-                        <input type="text" value="{{ $student->matric_no ?: '-' }}" readonly>
+                        <input type="text" value="{{ $studentMatric }}" readonly>
                     </div>
                 </div>
 
                 <div class="grid grid-2" style="margin-top:14px;">
                     <div>
                         <label>{{ __('No. IC') }}</label>
-                        <input type="text" value="{{ maskIdentityNumber($student->ic_no) }}" readonly>
+                        <input type="text" value="{{ $studentIc ? maskIdentityNumber($studentIc) : '-' }}" readonly>
                     </div>
                     <div>
                         <label>{{ __('Program') }}</label>
-                        <input type="text" value="{{ $student->program }}" readonly>
+                        <input type="text" value="{{ $studentProgram }}" readonly>
                     </div>
                 </div>
 
@@ -121,7 +130,7 @@
                     </div>
                     <div>
                         <label for="phone">{{ __('No. Telefon') }}</label>
-                        <input id="phone" type="text" name="phone" value="{{ old('phone', $student->phone) }}" placeholder="{{ __('Contoh:') }} 0123456789">
+                        <input id="phone" type="text" name="phone" value="{{ old('phone', data_get($student, 'phone')) }}" placeholder="{{ __('Contoh:') }} 0123456789">
                     </div>
                 </div>
 
@@ -169,7 +178,7 @@
 
                 <div style="margin-top:14px;">
                     <label for="address">{{ __('Alamat Rumah') }}</label>
-                    <textarea id="address" name="address" rows="3" placeholder="{{ __('Alamat rumah') }}">{{ old('address', $student->address) }}</textarea>
+                    <textarea id="address" name="address" rows="3" placeholder="{{ __('Alamat rumah') }}">{{ old('address', data_get($student, 'address')) }}</textarea>
                 </div>
 
                 <div class="section-title">

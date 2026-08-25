@@ -1182,10 +1182,11 @@ body.welcome-page .footer-copy {
     }
     body.welcome-page .brand-logo {
         display: block !important;
-        flex: 0 0 48px;
-        width: 48px;
-        max-width: 48px;
-        height: 48px;
+        flex: 0 0 72px;
+        width: 72px;
+        max-width: 72px;
+        height: auto;
+        max-height: 52px;
         object-fit: contain;
     }
     body.welcome-page .cta-group { flex-direction: column; align-items: flex-start; }
@@ -1549,5 +1550,4 @@ body.error-page .footer-org { font-size: 12.5px; font-weight: 600; color: var(--
 body.error-page .footer-contact { font-size: 11.5px; color: var(--text-sub); }
 body.error-page .footer-contact a { color: var(--gold-start); text-decoration: none; }
 body.error-page .footer-contact a:hover { text-decoration: underline; }
-
 
