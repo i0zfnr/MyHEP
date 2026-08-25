@@ -207,10 +207,12 @@ class ProgramActivityController extends Controller
         $surveyUrl = $hasSurvey ? route('student.programs.survey', $program->id) : null;
 
         if ($existing) {
+            $existingStatus = data_get($existing, 'validation_status', 'valid');
+
             return response()->json([
                 'success' => true,
                 'already_recorded' => true,
-                'status' => $existing->validation_status,
+                'status' => $existingStatus,
                 'message' => __('DONE KEY IN'),
                 'student' => [
                     'full_name' => $student->full_name,
@@ -221,7 +223,7 @@ class ProgramActivityController extends Controller
                     'id' => $program->id,
                     'title' => $program->title,
                     'venue' => $program->venue,
-                    'points' => $existing->validation_status === 'valid' ? (int) $program->participation_points : 0,
+                    'points' => $existingStatus === 'valid' ? (int) $program->participation_points : 0,
                     'has_survey' => $hasSurvey,
                     'survey_url' => $surveyUrl,
                 ],
@@ -244,7 +246,7 @@ class ProgramActivityController extends Controller
                 ? 'invalid_outside_radius'
                 : (($accuracy !== null && (float) $accuracy > 100) ? 'needs_review_accuracy' : 'valid'));
 
-        DB::table('program_attendances')->insertGetId([
+        $attendanceData = [
             'program_id' => $program->id,
             'student_id' => $student->id,
             'attendee_type' => 'internal',
@@ -255,13 +257,22 @@ class ProgramActivityController extends Controller
             'latitude' => $lat,
             'longitude' => $lng,
             'geofence_valid' => $validationStatus === 'valid',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        foreach ([
             'validation_status' => $validationStatus,
             'distance_m' => $distance === null ? null : round($distance, 2),
             'location_accuracy_m' => $accuracy === null ? null : round((float) $accuracy, 2),
             'location_captured_at' => $capturedAt,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        ] as $column => $value) {
+            if (Schema::hasColumn('program_attendances', $column)) {
+                $attendanceData[$column] = $value;
+            }
+        }
+
+        DB::table('program_attendances')->insertGetId($attendanceData);
 
         return response()->json([
             'success' => true,
@@ -473,7 +484,7 @@ class ProgramActivityController extends Controller
         $accuracy = $usesGeofence ? (float) ($validated['location_accuracy_m'] ?? null) : null;
         $status = ! $usesGeofence ? 'valid' : ($distance > (int) $program->geofence_radius_m ? 'invalid_outside_radius' : ($accuracy > 100 ? 'needs_review_accuracy' : 'valid'));
 
-        DB::table('program_attendances')->insert([
+        $attendanceData = [
             'program_id' => $program->id,
             'student_id' => $student->id,
             'attendee_type' => 'internal',
@@ -484,13 +495,22 @@ class ProgramActivityController extends Controller
             'latitude' => $validated['latitude'] ?? null,
             'longitude' => $validated['longitude'] ?? null,
             'geofence_valid' => $status === 'valid',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        foreach ([
             'validation_status' => $status,
             'distance_m' => $distance === null ? null : round($distance, 2),
             'location_accuracy_m' => $accuracy === null ? null : round($accuracy, 2),
             'location_captured_at' => $validated['location_captured_at'] ?? null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        ] as $column => $value) {
+            if (Schema::hasColumn('program_attendances', $column)) {
+                $attendanceData[$column] = $value;
+            }
+        }
+
+        DB::table('program_attendances')->insert($attendanceData);
 
         return redirect()->route('student.programs.index')->with('success', $status === 'valid'
             ? __('Valid attendance recorded. You earned :points merit points.', ['points' => $program->participation_points])

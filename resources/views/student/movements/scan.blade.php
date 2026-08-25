@@ -37,7 +37,7 @@
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2"/><path d="M18 14h2"/><path d="M14 18h6"/></svg>
                 {{ __('Auto Scan QR') }}
             </span>
-            <span>{{ __('Movement & Program Attendance') }}</span>
+            <span>{{ __('Detects Movement, Program Attendance & Food Bank') }}</span>
         </div>
     </div>
 </div>
