@@ -6,17 +6,7 @@
     <h2 style="margin:0;font-size:1rem;font-weight:700;">{{ __('Movement Settings') }}</h2>
 @endsection
 
-@push('styles')
-<style>
-    .mv-settings { display:flex; flex-direction:column; gap:1rem; }
-    .mv-settings-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
-    .mv-settings-grid label,
-    .mv-check-grid label { display:flex; flex-direction:column; gap:.35rem; }
-    .mv-check-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.75rem; }
-    .mv-check-item { display:flex; align-items:center; gap:.55rem; border:1px solid var(--border); border-radius:12px; padding:.85rem; background:rgba(255,255,255,.55); }
-    body[data-theme="dark"] .mv-check-item { background:var(--surface); }
-</style>
-@endpush
+
 
 @section('content')
 <div class="ui-shell mv-settings">

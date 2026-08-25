@@ -309,7 +309,9 @@ if (!function_exists('systemCacheKeys')) {
         return [
             'myhep.home_stats.counts',
             'myhep.dashboard.discipline_stats',
+            'myhep.dashboard.movement_stats',
             'myhep.dashboard.scholarship_stats',
+            'myhep.dashboard.system_monitoring',
             'myhep.dashboard.recent_offenses',
             'myhep.dashboard.recent_fine_applications',
             'myhep.dashboard.recent_scholarship_records',
@@ -328,6 +330,16 @@ if (!function_exists('clearSystemCaches')) {
         $payload = systemCacheMeta();
         $payload['last_cleared_at'] = now()->toIso8601String();
         writeSystemCacheMeta($payload);
+    }
+}
+
+if (!function_exists('clearProgramCaches')) {
+    function clearProgramCaches(?int $staffId = null): void
+    {
+        if ($staffId !== null) {
+            Cache::forget("myhep.dashboard.staff_programs.{$staffId}");
+        }
+        clearSystemCaches();
     }
 }
 
@@ -647,6 +659,7 @@ if (!function_exists('myhepAdminRolesForScope')) {
             'students.lookup' => ['lecturer', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'guard', 'system_admin'],
             'backoffice' => ['scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
             'documents' => ['student_affairs_head', 'system_admin'],
+            'insurance' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
             default => ['system_admin'],
         };
     }

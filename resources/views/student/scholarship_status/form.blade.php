@@ -2,75 +2,14 @@
 
 @section('title', __('Borang Biasiswa & Bantuan Kebajikan'))
 
-@push('styles')
-<style>
-    .wrap { max-width: 920px; margin: 0 auto; }
-    .card { background:#fff; border:1px solid #ede4d9; border-radius:14px; overflow:hidden; }
-    .head { padding:14px 18px; border-bottom:1px solid #ede4d9; background:linear-gradient(180deg,#fff 0%,#fbf4ec 100%); position:relative; }
-    .head::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg,#8f6f52,#c7a98b); }
-    .body { padding:18px; }
-    .grid { display:grid; grid-template-columns:1fr; gap:12px; }
-    @media (min-width: 900px) { .grid-2 { grid-template-columns:1fr 1fr; } .grid-3 { grid-template-columns:1fr 1fr 1fr; } }
-    label { display:block; margin-bottom:6px; font-size:13px; font-weight:700; color:#5c4738; }
-    label span.req { color:#dc2626; margin-left:2px; }
-    input, select, textarea { width:100%; border:1px solid #e5d8c8; border-radius:10px; padding:10px 12px; font-size:14px; background:#fff; box-sizing:border-box; }
-    input[readonly] { background:#faf7f4; color:#7a6555; cursor:not-allowed; }
-    .actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
-    .btn { display:inline-flex; align-items:center; gap:6px; border:1px solid #cbb9a4; background:#fff; color:#685141; border-radius:10px; padding:10px 16px; text-decoration:none; font-weight:700; font-size:14px; cursor:pointer; transition:all .15s ease; }
-    .btn:hover { background:#f9f2ea; transform:translateY(-1px); border-color:#bb9c7d; }
-    .btn-primary { background:linear-gradient(135deg,#7b5b43 0%,#b69172 100%); color:#fff; border:none; }
-    .btn-primary:hover { box-shadow:0 8px 18px rgba(97,73,52,.2); background:linear-gradient(135deg,#6d4f38 0%,#a88263 100%); }
-    .hint { margin:4px 0 0; color:#7a6555; font-size:12px; line-height:1.45; }
-    .err { margin-bottom:14px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:12px; font-size:13px; }
-    
-    /* Type Selector Cards */
-    .type-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:8px; }
-    .type-card {
-        border:1.5px solid #e5d8c8; border-radius:12px; padding:14px; cursor:pointer;
-        background:#fffdfa; transition:all .2s ease; display:flex; flex-direction:column; gap:8px;
-    }
-    .type-card:hover { border-color:#c7a98b; transform:translateY(-2px); box-shadow:0 8px 18px rgba(61,46,34,.08); }
-    .type-card input[type="radio"] { width:auto; margin:0 6px 0 0; accent-color:#7b5b43; }
-    .type-card.selected { border-color:#7b5b43; background:linear-gradient(180deg,#fffdfa 0%,#fbf4ec 100%); box-shadow:0 0 0 1px #7b5b43; }
-    .type-card-title { font-weight:800; font-size:14px; color:#2d1f14; display:flex; align-items:center; gap:8px; }
-    .type-card-desc { font-size:12px; color:#7a6555; line-height:1.45; }
 
-    .type-icon-box {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    .type-icon-box.scholarship {
-        background: rgba(2, 132, 199, 0.12);
-        color: #0284c7;
-    }
-    .type-icon-box.welfare {
-        background: rgba(16, 185, 129, 0.12);
-        color: #059669;
-    }
-    .type-icon-box.none {
-        background: rgba(115, 115, 115, 0.12);
-        color: #737373;
-    }
-
-    .section-divider {
-        margin:20px 0 16px; padding-top:16px; border-top:1px dashed #e8d9cb;
-        display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; color:#685141;
-    }
-    .section-divider svg { width:18px; height:18px; color:#7b5b43; }
-</style>
-@endpush
 
 @section('header')
     <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Borang Biasiswa & Bantuan Kebajikan') }}</h2>
 @endsection
 
 @section('content')
-<div class="wrap">
+<div class="wrap scholarship-form-page">
     @if($errors->any())
         <div class="err">
             <strong>{{ __('Sila semak maklumat yang dimasukkan:') }}</strong>

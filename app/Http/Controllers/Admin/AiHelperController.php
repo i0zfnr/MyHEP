@@ -3,14 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\AiProvider;
+use App\Services\OfficialProgramPaperworkExporter;
+use App\Services\ProgramPaperworkContent;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AiHelperController extends Controller
 {
@@ -18,12 +25,65 @@ class AiHelperController extends Controller
     {
         $this->authorizeAiRoute();
         $adminId = (int) session('auth_user.id');
+        $adminRole = (string) session('auth_user.admin_role');
+
+        $initialPaperworks = collect();
+        if (Schema::hasTable('ai_generated_paperworks')) {
+            $pwQuery = DB::table('ai_generated_paperworks');
+            if (! in_array($adminRole, ['system_admin', 'student_affairs_head'], true)) {
+                $pwQuery->where('admin_id', $adminId);
+            }
+            $initialPaperworks = $pwQuery->orderByDesc('created_at')->limit(50)->get()->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'title' => $row->title,
+                    'date_text' => $row->date_text,
+                    'venue' => $row->venue,
+                    'organizer' => $row->organizer,
+                    'output_format' => $row->output_format,
+                    'docx_url' => $row->docx_path ? route($this->lecturerMode() ? 'lecturer.ai-helper.paperwork.download' : 'admin.ai-helper.paperwork.download', ['id' => $row->id, 'format' => 'docx']) : null,
+                    'pdf_url' => $row->pdf_path ? route($this->lecturerMode() ? 'lecturer.ai-helper.paperwork.download' : 'admin.ai-helper.paperwork.download', ['id' => $row->id, 'format' => 'pdf']) : null,
+                    'created_at' => Carbon::parse($row->created_at)->diffForHumans(),
+                    'created_at_date' => Carbon::parse($row->created_at)->format('d M Y, h:i A'),
+                ];
+            });
+        }
+
+        $initialReports = collect();
+        if (Schema::hasTable('program_reports') && Schema::hasTable('programs')) {
+            $repQuery = DB::table('program_reports')
+                ->join('programs', 'programs.id', '=', 'program_reports.program_id')
+                ->select('program_reports.*', 'programs.title as program_title', 'programs.venue', 'programs.starts_at');
+
+            if (! in_array($adminRole, ['system_admin', 'student_affairs_head'], true)) {
+                $repQuery->where(function ($q) use ($adminId) {
+                    $q->where('programs.created_by', $adminId)
+                      ->orWhere('program_reports.generated_by', $adminId);
+                });
+            }
+            $initialReports = $repQuery->orderByDesc('program_reports.created_at')->limit(50)->get()->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'program_id' => $row->program_id,
+                    'title' => $row->program_title,
+                    'venue' => $row->venue,
+                    'status' => $row->status,
+                    'docx_url' => $row->docx_path ? route('admin.programs.report.download', ['program' => $row->program_id, 'format' => 'docx']) : null,
+                    'pdf_url' => $row->pdf_path ? route('admin.programs.report.download', ['program' => $row->program_id, 'format' => 'pdf']) : null,
+                    'operations_url' => route('admin.programs.operations', $row->program_id),
+                    'created_at' => Carbon::parse($row->created_at)->diffForHumans(),
+                    'created_at_date' => Carbon::parse($row->created_at)->format('d M Y, h:i A'),
+                ];
+            });
+        }
 
         return view('admin.ai_helper.index', [
             'aiProvider' => $this->providerName(),
             'aiEnabled' => $this->hasApiKey(),
             'aiModel' => $this->modelName(),
             'aiConversations' => $this->conversationSummaries($adminId),
+            'initialPaperworks' => $initialPaperworks,
+            'initialReports' => $initialReports,
             'lecturerAiMode' => $this->lecturerMode(),
             'ownedPrograms' => Schema::hasTable('programs')
                 ? DB::table('programs')->where('created_by', $adminId)->orderByDesc('updated_at')->get(['id', 'title', 'starts_at', 'venue'])
@@ -653,5 +713,219 @@ class AiHelperController extends Controller
             ->pluck('text')
             ->filter()
             ->implode("\n"));
+    }
+
+    public function generatePaperwork(
+        Request $request,
+        AiProvider $ai,
+        OfficialProgramPaperworkExporter $exporter,
+        ProgramPaperworkContent $paperworkContent
+    ): RedirectResponse {
+        $this->authorizeAiRoute();
+        $adminId = (int) session('auth_user.id');
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'date_text' => ['required', 'string', 'max:150'],
+            'venue' => ['required', 'string', 'max:255'],
+            'organizer' => ['required', 'string', 'max:255'],
+            'target_group' => ['required', 'string', 'max:255'],
+            'participant_count' => ['required', 'string', 'max:100'],
+            'ajk_file' => ['nullable', 'file', 'mimes:pdf,docx,doc,txt', 'max:10240'],
+            'ajk_text' => ['nullable', 'string', 'max:5000'],
+            'itinerary' => ['nullable', 'string', 'max:5000'],
+            'financial_details' => ['nullable', 'string', 'max:5000'],
+            'program_id' => ['nullable', 'integer'],
+            'output_format' => ['required', 'in:docx,pdf,both'],
+        ]);
+
+        $ajkFilePath = null;
+        $ajkFileName = null;
+        $extractedAjk = null;
+
+        if ($request->hasFile('ajk_file')) {
+            $ajkFile = $request->file('ajk_file');
+            $ajkFileName = $ajkFile->getClientOriginalName();
+            $extractedAjk = $paperworkContent->extractTextFromAjkFile($ajkFile);
+            $ajkFilePath = $ajkFile->store('paperworks-ajk/' . $adminId, 'local');
+        }
+
+        $prompt = $paperworkContent->buildPrompt($validated, $extractedAjk);
+
+        try {
+            $attachments = $request->hasFile('ajk_file') ? [$request->file('ajk_file')] : [];
+            $aiResponse = $ai->enabled() ? trim($ai->askWithAttachments($prompt, $attachments)) : '';
+            $structured = $ai->enabled() && filled($aiResponse)
+                ? $paperworkContent->fromAiResponse($aiResponse, $validated, $extractedAjk)
+                : $paperworkContent->fallback($validated, $extractedAjk);
+        } catch (\Throwable $e) {
+            report($e);
+            $structured = $paperworkContent->fallback($validated, $extractedAjk);
+        }
+
+        $files = $exporter->export($validated, $structured, $validated['output_format'], $adminId);
+
+        $paperworkId = DB::table('ai_generated_paperworks')->insertGetId([
+            'admin_id' => $adminId,
+            'program_id' => $validated['program_id'] ?? null,
+            'title' => trim($validated['title']),
+            'date_text' => trim($validated['date_text']),
+            'venue' => trim($validated['venue']),
+            'organizer' => trim($validated['organizer']),
+            'target_group' => trim($validated['target_group']),
+            'participant_count' => trim($validated['participant_count']),
+            'ajk_file_path' => $ajkFilePath,
+            'ajk_file_name' => $ajkFileName,
+            'ajk_text' => filled($validated['ajk_text'] ?? null) ? trim($validated['ajk_text']) : null,
+            'itinerary' => filled($validated['itinerary'] ?? null) ? trim($validated['itinerary']) : null,
+            'financial_details' => filled($validated['financial_details'] ?? null) ? trim($validated['financial_details']) : null,
+            'structured_content' => json_encode($structured, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'output_format' => $validated['output_format'],
+            'docx_path' => $files['docx_path'],
+            'pdf_path' => $files['pdf_path'],
+            'ai_provider' => $ai->enabled() ? $ai->name() : 'offline_template',
+            'ai_model' => $ai->enabled() ? $ai->model() : null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        auditLog('ai_helper.paperwork.generate', 'ai_generated_paperworks', $paperworkId, 'Generated AI paperwork: ' . $validated['title']);
+
+        $downloadDocxUrl = $files['docx_path'] ? route($this->lecturerMode() ? 'lecturer.ai-helper.paperwork.download' : 'admin.ai-helper.paperwork.download', ['id' => $paperworkId, 'format' => 'docx']) : null;
+        $downloadPdfUrl = $files['pdf_path'] ? route($this->lecturerMode() ? 'lecturer.ai-helper.paperwork.download' : 'admin.ai-helper.paperwork.download', ['id' => $paperworkId, 'format' => 'pdf']) : null;
+
+        session()->flash('generated_paperwork', [
+            'id' => $paperworkId,
+            'title' => $validated['title'],
+            'docx_url' => $downloadDocxUrl,
+            'pdf_url' => $downloadPdfUrl,
+        ]);
+
+        return back()->with('success', __('Kertas kerja program berjaya dijana.'));
+    }
+
+    public function downloadPaperwork(int $id, string $format): StreamedResponse
+    {
+        $this->authorizeAiRoute();
+        $adminId = (int) session('auth_user.id');
+        $adminRole = (string) session('auth_user.admin_role');
+
+        $record = DB::table('ai_generated_paperworks')->where('id', $id)->first();
+        abort_unless($record, 404);
+
+        if ($record->admin_id !== $adminId && ! in_array($adminRole, ['system_admin', 'student_affairs_head'], true)) {
+            abort(403);
+        }
+
+        $format = strtolower($format);
+        $path = match ($format) {
+            'docx' => $record->docx_path,
+            'pdf' => $record->pdf_path,
+            default => null,
+        };
+
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        auditLog('ai_helper.paperwork.download', 'ai_generated_paperworks', $id, "Downloaded paperwork {$format}");
+
+        $ext = $format === 'pdf' ? 'pdf' : 'docx';
+        $filename = Str::slug($record->title) . '_Kertas_Kerja.' . $ext;
+
+        return Storage::disk('local')->download($path, $filename);
+    }
+
+    public function deletePaperwork(int $id): JsonResponse
+    {
+        $this->authorizeAiRoute();
+        $adminId = (int) session('auth_user.id');
+        $adminRole = (string) session('auth_user.admin_role');
+
+        $record = DB::table('ai_generated_paperworks')->where('id', $id)->first();
+        if (! $record) {
+            return response()->json(['message' => __('Record not found.')], 404);
+        }
+
+        if ($record->admin_id !== $adminId && ! in_array($adminRole, ['system_admin', 'student_affairs_head'], true)) {
+            abort(403);
+        }
+
+        if ($record->docx_path && Storage::disk('local')->exists($record->docx_path)) {
+            Storage::disk('local')->delete($record->docx_path);
+        }
+        if ($record->pdf_path && Storage::disk('local')->exists($record->pdf_path)) {
+            Storage::disk('local')->delete($record->pdf_path);
+        }
+        if ($record->ajk_file_path && Storage::disk('local')->exists($record->ajk_file_path)) {
+            Storage::disk('local')->delete($record->ajk_file_path);
+        }
+
+        DB::table('ai_generated_paperworks')->where('id', $id)->delete();
+        auditLog('ai_helper.paperwork.delete', 'ai_generated_paperworks', $id, 'Deleted generated paperwork');
+
+        return response()->json(['success' => true]);
+    }
+
+    public function paperworkHistory(): JsonResponse
+    {
+        $this->authorizeAiRoute();
+        $adminId = (int) session('auth_user.id');
+        $adminRole = (string) session('auth_user.admin_role');
+
+        $query = DB::table('ai_generated_paperworks');
+        if (! in_array($adminRole, ['system_admin', 'student_affairs_head'], true)) {
+            $query->where('admin_id', $adminId);
+        }
+
+        $items = $query->orderByDesc('created_at')->limit(50)->get()->map(function ($row) {
+            return [
+                'id' => $row->id,
+                'title' => $row->title,
+                'date_text' => $row->date_text,
+                'venue' => $row->venue,
+                'organizer' => $row->organizer,
+                'output_format' => $row->output_format,
+                'docx_url' => $row->docx_path ? route($this->lecturerMode() ? 'lecturer.ai-helper.paperwork.download' : 'admin.ai-helper.paperwork.download', ['id' => $row->id, 'format' => 'docx']) : null,
+                'pdf_url' => $row->pdf_path ? route($this->lecturerMode() ? 'lecturer.ai-helper.paperwork.download' : 'admin.ai-helper.paperwork.download', ['id' => $row->id, 'format' => 'pdf']) : null,
+                'created_at' => Carbon::parse($row->created_at)->diffForHumans(),
+                'created_at_date' => Carbon::parse($row->created_at)->format('d M Y, h:i A'),
+            ];
+        });
+
+        return response()->json(['items' => $items]);
+    }
+
+    public function reportHistory(): JsonResponse
+    {
+        $this->authorizeAiRoute();
+        $adminId = (int) session('auth_user.id');
+        $adminRole = (string) session('auth_user.admin_role');
+
+        $query = DB::table('program_reports')
+            ->join('programs', 'programs.id', '=', 'program_reports.program_id')
+            ->select('program_reports.*', 'programs.title as program_title', 'programs.venue', 'programs.starts_at');
+
+        if (! in_array($adminRole, ['system_admin', 'student_affairs_head'], true)) {
+            $query->where(function ($q) use ($adminId) {
+                $q->where('programs.created_by', $adminId)
+                  ->orWhere('program_reports.generated_by', $adminId);
+            });
+        }
+
+        $items = $query->orderByDesc('program_reports.created_at')->limit(50)->get()->map(function ($row) {
+            return [
+                'id' => $row->id,
+                'program_id' => $row->program_id,
+                'title' => $row->program_title,
+                'venue' => $row->venue,
+                'status' => $row->status,
+                'docx_url' => $row->docx_path ? route('admin.programs.report.download', ['program' => $row->program_id, 'format' => 'docx']) : null,
+                'pdf_url' => $row->pdf_path ? route('admin.programs.report.download', ['program' => $row->program_id, 'format' => 'pdf']) : null,
+                'operations_url' => route('admin.programs.operations', $row->program_id),
+                'created_at' => Carbon::parse($row->created_at)->diffForHumans(),
+                'created_at_date' => Carbon::parse($row->created_at)->format('d M Y, h:i A'),
+            ];
+        });
+
+        return response()->json(['items' => $items]);
     }
 }

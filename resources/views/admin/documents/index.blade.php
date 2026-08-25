@@ -2,23 +2,7 @@
 
 @section('title', __('Student Documents'))
 
-@push('styles')
-<style>
-    .admin-docs { max-width:1280px; margin:0 auto; display:grid; gap:18px; }
-    .admin-doc-stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-    .admin-doc-stat { padding:16px; border:1px solid var(--border); border-radius:16px; background:var(--surface); }
-    .admin-doc-stat span { color:var(--text-muted); font-size:.75rem; font-weight:800; text-transform:uppercase; }
-    .admin-doc-stat strong { display:block; margin-top:6px; color:var(--text); font-size:1.5rem; }
-    .admin-doc-filter { display:grid; grid-template-columns:2fr repeat(3,1fr) auto; gap:10px; }
-    .admin-doc-review { display:grid; gap:7px; min-width:230px; }
-    .admin-doc-review-actions { display:flex; gap:6px; }
-    .admin-doc-meta { color:var(--text-muted); font-size:.78rem; line-height:1.5; }
-    .admin-doc-table-wrap { overflow-x:auto; scrollbar-color:var(--border-strong) transparent; }
-    .admin-doc-scroll-hint { display:none; margin:0; padding:10px 14px; color:var(--text-muted); font-size:.75rem; border-bottom:1px solid var(--border); }
-    @media(max-width:850px){.admin-doc-filter{grid-template-columns:1fr 1fr}.admin-doc-stats{grid-template-columns:1fr 1fr}.admin-doc-review{min-width:190px}}
-    @media(max-width:560px){.admin-doc-filter{grid-template-columns:1fr}.admin-doc-review-actions{flex-direction:column}.admin-doc-review-actions .ui-btn{width:100%}.admin-doc-scroll-hint{display:block}.admin-doc-table-wrap .ui-table{min-width:820px}}
-</style>
-@endpush
+
 
 @section('header')<h2>{{ __('Student Documents') }}</h2>@endsection
 

@@ -83,10 +83,34 @@ class ProgramOperationController extends Controller
         $canManageReport = ($isDirector || $hasOversight) && (! $report || in_array($report->status, ['draft', 'rejected'], true));
         $canManageCertificates = $isDirector || $hasOversight;
         $canManageAttendance = ($isDirector || $hasOversight) && in_array($program->status, ['active', 'approved', 'scheduled'], true);
+        $canManageStudentPagePermissions = $hasOversight;
+        $studentPagePermissions = Schema::hasTable('program_student_page_permissions')
+            ? DB::table('program_student_page_permissions')
+                ->join('students', 'students.id', '=', 'program_student_page_permissions.student_id')
+                ->leftJoin('admins', 'admins.id', '=', 'program_student_page_permissions.granted_by')
+                ->where('program_student_page_permissions.program_id', $program->id)
+                ->select(
+                    'program_student_page_permissions.*',
+                    'students.full_name as student_name',
+                    'students.matric_no',
+                    'students.program as student_program',
+                    'admins.full_name as granted_by_name'
+                )
+                ->orderBy('students.full_name')
+                ->get()
+            : collect();
+        $studentPermissionCandidates = $canManageStudentPagePermissions
+            ? DB::table('students')
+                ->select('id', 'full_name', 'matric_no', 'program')
+                ->orderBy('full_name')
+                ->limit(750)
+                ->get()
+            : collect();
         $attendanceSetup = [
             'venue' => filled($program->venue),
+            'questionnaire' => ! $program->questionnaire_enabled || ($survey && $survey->status === 'published'),
         ];
-        $attendanceReady = filled($program->venue);
+        $attendanceReady = filled($program->venue) && $attendanceSetup['questionnaire'];
         $canReviewReport = $report && match ($report->status) {
             'pending_tpsa' => (int) $report->tpsa_reviewer_id === $authId,
             'pending_director' => (int) $report->director_reviewer_id === $authId,
@@ -114,9 +138,67 @@ class ProgramOperationController extends Controller
             'canManageCertificates',
             'canReviewReport',
             'canManageAttendance',
+            'canManageStudentPagePermissions',
+            'studentPagePermissions',
+            'studentPermissionCandidates',
             'attendanceSetup',
             'attendanceReady'
         ));
+    }
+
+    public function grantStudentPagePermission(Request $request, int $id): RedirectResponse
+    {
+        abort_unless(session('auth_user.admin_role') && in_array(session('auth_user.admin_role'), ['student_affairs_head', 'system_admin'], true), 403);
+        abort_unless(Schema::hasTable('program_student_page_permissions'), 500, __('Student page permission table is not available. Run the latest migrations first.'));
+
+        $program = DB::table('programs')->where('id', $id)->first();
+        abort_unless($program, 404);
+
+        $validated = $request->validate([
+            'student_id' => ['required', 'integer', 'exists:students,id'],
+            'access_type' => ['required', 'in:qr_presenter,questionnaire,all'],
+            'expires_at' => ['nullable', 'date', 'after:now'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        DB::table('program_student_page_permissions')->updateOrInsert(
+            [
+                'program_id' => $program->id,
+                'student_id' => (int) $validated['student_id'],
+                'access_type' => $validated['access_type'],
+            ],
+            [
+                'granted_by' => (int) session('auth_user.id'),
+                'expires_at' => filled($validated['expires_at'] ?? null) ? Carbon::parse($validated['expires_at'])->toDateTimeString() : null,
+                'note' => $validated['note'] ?? null,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
+        auditLog('programs.student_page_permission.grant', 'programs', $program->id, 'Student page access permission granted');
+
+        return redirect()->route('admin.programs.operations', $program->id)
+            ->with('success', __('Student page permission has been saved.'));
+    }
+
+    public function revokeStudentPagePermission(int $id, int $permission): RedirectResponse
+    {
+        abort_unless(session('auth_user.admin_role') && in_array(session('auth_user.admin_role'), ['student_affairs_head', 'system_admin'], true), 403);
+        abort_unless(Schema::hasTable('program_student_page_permissions'), 404);
+
+        $program = DB::table('programs')->where('id', $id)->first();
+        abort_unless($program, 404);
+
+        DB::table('program_student_page_permissions')
+            ->where('id', $permission)
+            ->where('program_id', $program->id)
+            ->delete();
+
+        auditLog('programs.student_page_permission.revoke', 'programs', $program->id, 'Student page access permission revoked');
+
+        return redirect()->route('admin.programs.operations', $program->id)
+            ->with('success', __('Student page permission has been revoked.'));
     }
 
     public function questionnaire(int $id): View
@@ -252,7 +334,7 @@ class ProgramOperationController extends Controller
         ));
     }
 
-    public function openAttendance(int $id): RedirectResponse
+    public function openAttendance(Request $request, int $id): RedirectResponse
     {
         $program = $this->ownedActiveProgram($id);
 
@@ -262,15 +344,28 @@ class ProgramOperationController extends Controller
             ]);
         }
 
-        DB::table('programs')->where('id', $program->id)->update([
+        $mode = $request->input('mode', 'qr_code');
+        if (! in_array($mode, ['qr_code', 'portal_and_qr'], true)) {
+            $mode = 'qr_code';
+        }
+
+        $updateData = [
             'attendance_status' => 'open',
             'attendance_opened_at' => now(),
             'attendance_closed_at' => null,
             'updated_at' => now(),
-        ]);
-        auditLog('programs.attendance.open', 'programs', $program->id, 'Program attendance opened');
+        ];
 
-        return back()->with('success', __('Attendance is now open. Participants can record their attendance.'));
+        if (Schema::hasColumn('programs', 'attendance_checkin_mode')) {
+            $updateData['attendance_checkin_mode'] = $mode;
+        }
+
+        DB::table('programs')->where('id', $program->id)->update($updateData);
+        auditLog('programs.attendance.open', 'programs', $program->id, 'Program attendance opened (mode: '.$mode.')');
+
+        return back()->with('success', $mode === 'qr_code'
+            ? __('Attendance opened in Mode 1: QR Scan Only (Anti-Cheating). Students must scan the dynamic QR on screen.')
+            : __('Attendance opened in Mode 2: Portal & QR. Students can check in directly on portal or via QR.'));
     }
 
     public function closeAttendance(int $id): RedirectResponse
@@ -295,10 +390,24 @@ class ProgramOperationController extends Controller
             'program_images' => ['nullable', 'array', 'max:8'],
             'program_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'paperwork_file' => ['nullable', 'file', 'mimes:pdf,docx', 'max:20480'],
+            'saved_paperwork_id' => ['nullable', 'integer'],
         ]);
         $data = $this->reportData($program);
         $requiresPaperwork = ($program->registration_type ?? 'approved_program') !== 'attendance_only_activity';
+
+        $savedPaperworkRecord = null;
+        if ($request->filled('saved_paperwork_id')) {
+            $savedPaperworkRecord = DB::table('ai_generated_paperworks')->where('id', (int) $request->input('saved_paperwork_id'))->first();
+        } elseif (Schema::hasTable('ai_generated_paperworks')) {
+            $savedPaperworkRecord = DB::table('ai_generated_paperworks')
+                ->where('program_id', $program->id)
+                ->orWhere('title', 'like', '%'.$program->title.'%')
+                ->orderByDesc('id')
+                ->first();
+        }
+
         $hasPaperwork = $request->hasFile('paperwork_file')
+            || $savedPaperworkRecord !== null
             || DB::table('program_paperworks')->where('program_id', $program->id)->exists();
         $activityImages = $request->file('program_images', []);
         $validAttendanceCount = DB::table('program_attendances')
@@ -324,7 +433,17 @@ class ProgramOperationController extends Controller
         $prompt = $this->reportPrompt($program, $data);
 
         try {
-            $attachments = array_values(array_filter([$request->file('paperwork_file'), ...$activityImages]));
+            $paperworkAttachment = $request->file('paperwork_file');
+            if (! $paperworkAttachment && $savedPaperworkRecord) {
+                $filePath = $savedPaperworkRecord->docx_path ?? $savedPaperworkRecord->pdf_path;
+                if ($filePath && Storage::disk('local')->exists($filePath)) {
+                    $absPath = Storage::disk('local')->path($filePath);
+                    $mime = str_ends_with(strtolower($filePath), '.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf';
+                    $paperworkAttachment = new \Illuminate\Http\UploadedFile($absPath, basename($absPath), $mime, null, true);
+                }
+            }
+
+            $attachments = array_values(array_filter([$paperworkAttachment, ...$activityImages]));
             $aiResponse = $ai->enabled() ? trim($ai->askWithAttachments($prompt, $attachments)) : '';
             $structuredReport = $ai->enabled()
                 ? $reportContent->fromAiResponse($aiResponse, $program, $data)

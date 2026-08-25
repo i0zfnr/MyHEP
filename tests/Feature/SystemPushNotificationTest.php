@@ -107,7 +107,7 @@ class SystemPushNotificationTest extends TestCase
 
         Mail::assertSent(function (SystemEmailTest $mail): bool {
             return $mail->hasTo('delivery@example.test')
-                && $mail->envelope()->subject === 'StudentEdge Email Delivery Test';
+                && $mail->envelope()->subject === 'MyHEP Email Delivery Test';
         });
     }
 

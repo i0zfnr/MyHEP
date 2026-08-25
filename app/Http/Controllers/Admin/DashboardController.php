@@ -46,17 +46,33 @@ class DashboardController extends Controller
         $programDashboard = $isLecturer ? $this->buildStaffProgramDashboard($lecturerId) : null;
 
         if ($hasMovementAccess) {
-            $totalStudents = DB::table('students')->count();
+            $movementStats = systemCacheRemember('myhep.dashboard.movement_stats', 45, function (): array {
+                $stats = [
+                    'total_students' => (int) DB::table('students')->count(),
+                    'outside_now' => 0,
+                    'checkouts_today' => 0,
+                    'late_returns' => 0,
+                    'overnight_records' => 0,
+                ];
 
-            if (Schema::hasTable('student_movements')) {
-                $outsideNow = DB::table('student_movements')->whereNull('return_at')->count();
-                $movementCheckoutsToday = DB::table('student_movements')->whereDate('checkout_at', now()->toDateString())->count();
-                $movementLateReturns = DB::table('student_movements')->where('rule_status', 'late')->count();
-                $movementOvernightRecords = DB::table('student_movements')
-                    ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
-                    ->where('movement_types.slug', 'overnight_stay')
-                    ->count();
-            }
+                if (Schema::hasTable('student_movements')) {
+                    $stats['outside_now'] = (int) DB::table('student_movements')->whereNull('return_at')->count();
+                    $stats['checkouts_today'] = (int) DB::table('student_movements')->whereDate('checkout_at', now()->toDateString())->count();
+                    $stats['late_returns'] = (int) DB::table('student_movements')->where('rule_status', 'late')->count();
+                    $stats['overnight_records'] = (int) DB::table('student_movements')
+                        ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
+                        ->where('movement_types.slug', 'overnight_stay')
+                        ->count();
+                }
+
+                return $stats;
+            });
+
+            $totalStudents = (int) ($movementStats['total_students'] ?? 0);
+            $outsideNow = (int) ($movementStats['outside_now'] ?? 0);
+            $movementCheckoutsToday = (int) ($movementStats['checkouts_today'] ?? 0);
+            $movementLateReturns = (int) ($movementStats['late_returns'] ?? 0);
+            $movementOvernightRecords = (int) ($movementStats['overnight_records'] ?? 0);
         }
 
         if ($hasDisciplineAccess) {
@@ -217,62 +233,92 @@ class DashboardController extends Controller
             return ['counts' => [], 'status_distribution' => [], 'trend' => [], 'recent' => collect()];
         }
 
-        $owned = DB::table('programs')->where('created_by', $staffId);
-        $reviewTasks = DB::table('programs')->where(function ($query) use ($staffId): void {
-            $query->where(function ($deputy) use ($staffId): void {
-                $deputy->where('status', 'pending_deputy')->where('deputy_reviewer_id', $staffId);
-            })->orWhere(function ($director) use ($staffId): void {
-                $director->where('status', 'pending_director')->where('director_reviewer_id', $staffId);
-            });
-        });
+        return systemCacheRemember("myhep.dashboard.staff_programs.{$staffId}", 60, function () use ($staffId): array {
+            $statusCounts = DB::table('programs')
+                ->where('created_by', $staffId)
+                ->selectRaw('status, COUNT(*) as c')
+                ->groupBy('status')
+                ->pluck('c', 'status')
+                ->all();
 
-        $statuses = ['draft', 'pending_deputy', 'pending_director', 'approved', 'in_progress', 'completed', 'rejected'];
-        $distribution = collect($statuses)->map(function (string $status) use ($owned): array {
-            return ['status' => $status, 'value' => (clone $owned)->where('status', $status)->count()];
-        })->all();
+            $reviewTasksCount = DB::table('programs')->where(function ($query) use ($staffId): void {
+                $query->where(function ($deputy) use ($staffId): void {
+                    $deputy->where('status', 'pending_deputy')->where('deputy_reviewer_id', $staffId);
+                })->orWhere(function ($director) use ($staffId): void {
+                    $director->where('status', 'pending_director')->where('director_reviewer_id', $staffId);
+                });
+            })->count();
 
-        $trend = [];
-        for ($offset = 5; $offset >= 0; $offset--) {
-            $start = now()->subMonthsNoOverflow($offset)->startOfMonth();
-            $end = $start->copy()->endOfMonth();
-            $trend[] = [
-                'label' => $start->format('M'),
-                'created' => (clone $owned)->whereBetween('created_at', [$start, $end])->count(),
-                'approved' => (clone $owned)->where('status', 'approved')->whereBetween('director_reviewed_at', [$start, $end])->count(),
+            $statuses = ['draft', 'pending_deputy', 'pending_director', 'approved', 'in_progress', 'completed', 'rejected'];
+            $distribution = collect($statuses)->map(function (string $status) use ($statusCounts): array {
+                return ['status' => $status, 'value' => (int) ($statusCounts[$status] ?? 0)];
+            })->all();
+
+            $sixMonthsAgo = now()->subMonthsNoOverflow(5)->startOfMonth();
+            $createdRows = DB::table('programs')
+                ->where('created_by', $staffId)
+                ->where('created_at', '>=', $sixMonthsAgo)
+                ->select('created_at')
+                ->get();
+
+            $approvedRows = DB::table('programs')
+                ->where('created_by', $staffId)
+                ->where('status', 'approved')
+                ->where('director_reviewed_at', '>=', $sixMonthsAgo)
+                ->select('director_reviewed_at')
+                ->get();
+
+            $trend = [];
+            for ($offset = 5; $offset >= 0; $offset--) {
+                $start = now()->subMonthsNoOverflow($offset)->startOfMonth();
+                $monthKey = $start->format('Y-m');
+
+                $createdCount = $createdRows->filter(fn ($r) => substr((string) $r->created_at, 0, 7) === $monthKey)->count();
+                $approvedCount = $approvedRows->filter(fn ($r) => substr((string) $r->director_reviewed_at, 0, 7) === $monthKey)->count();
+
+                $trend[] = [
+                    'label' => $start->format('M'),
+                    'created' => $createdCount,
+                    'approved' => $approvedCount,
+                ];
+            }
+            $trendMax = max(1, ...collect($trend)->flatMap(fn ($item) => [$item['created'], $item['approved']])->all());
+            $trend = collect($trend)->map(function (array $item) use ($trendMax): array {
+                $item['created_height'] = round(($item['created'] / $trendMax) * 100, 2);
+                $item['approved_height'] = round(($item['approved'] / $trendMax) * 100, 2);
+                return $item;
+            })->all();
+
+            $recent = DB::table('programs')
+                ->where(function ($query) use ($staffId): void {
+                    $query->where('created_by', $staffId)
+                        ->orWhere('deputy_reviewer_id', $staffId)
+                        ->orWhere('director_reviewer_id', $staffId);
+                })
+                ->select('id', 'title', 'status', 'starts_at', 'approval_branch', 'updated_at')
+                ->orderByDesc('updated_at')
+                ->limit(6)
+                ->get();
+
+            $totalOwned = array_sum($statusCounts);
+
+            return [
+                'counts' => [
+                    'total_students' => (int) DB::table('students')->count(),
+                    'total' => $totalOwned,
+                    'draft' => (int) ($statusCounts['draft'] ?? 0),
+                    'pending_deputy' => (int) ($statusCounts['pending_deputy'] ?? 0),
+                    'pending_director' => (int) ($statusCounts['pending_director'] ?? 0),
+                    'approved' => (int) ($statusCounts['approved'] ?? 0),
+                    'in_progress' => (int) ($statusCounts['in_progress'] ?? 0),
+                    'completed' => (int) ($statusCounts['completed'] ?? 0),
+                    'review_tasks' => $reviewTasksCount,
+                ],
+                'status_distribution' => $distribution,
+                'trend' => $trend,
+                'recent' => $recent,
             ];
-        }
-        $trendMax = max(1, ...collect($trend)->flatMap(fn ($item) => [$item['created'], $item['approved']])->all());
-        $trend = collect($trend)->map(function (array $item) use ($trendMax): array {
-            $item['created_height'] = round(($item['created'] / $trendMax) * 100, 2);
-            $item['approved_height'] = round(($item['approved'] / $trendMax) * 100, 2);
-            return $item;
-        })->all();
-
-        $recent = DB::table('programs')
-            ->where(function ($query) use ($staffId): void {
-                $query->where('created_by', $staffId)
-                    ->orWhere('deputy_reviewer_id', $staffId)
-                    ->orWhere('director_reviewer_id', $staffId);
-            })
-            ->select('id', 'title', 'status', 'starts_at', 'approval_branch', 'updated_at')
-            ->orderByDesc('updated_at')->limit(6)->get();
-
-        return [
-            'counts' => [
-                'total_students' => DB::table('students')->count(),
-                'total' => (clone $owned)->count(),
-                'draft' => (clone $owned)->where('status', 'draft')->count(),
-                'pending_deputy' => (clone $owned)->where('status', 'pending_deputy')->count(),
-                'pending_director' => (clone $owned)->where('status', 'pending_director')->count(),
-                'approved' => (clone $owned)->where('status', 'approved')->count(),
-                'in_progress' => (clone $owned)->where('status', 'in_progress')->count(),
-                'completed' => (clone $owned)->where('status', 'completed')->count(),
-                'review_tasks' => (clone $reviewTasks)->count(),
-            ],
-            'status_distribution' => $distribution,
-            'trend' => $trend,
-            'recent' => $recent,
-        ];
+        });
     }
 
     public function live(): JsonResponse

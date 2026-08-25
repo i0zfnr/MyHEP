@@ -18,6 +18,16 @@ class DocumentController extends Controller
     public function index(): View
     {
         $studentId = (int) session('auth_user.id');
+        $student = DB::table('students')->where('id', $studentId)->first();
+        $isSem3Or5 = in_array((string) ($student->semester ?? ''), ['3', '5'], true);
+        $insuranceDoc = $isSem3Or5
+            ? DB::table('student_documents')
+                ->where('student_id', $studentId)
+                ->where('category', 'insurance_payment')
+                ->latest('created_at')
+                ->first()
+            : null;
+
         $documents = DB::table('student_documents')
             ->leftJoin('admins', 'admins.id', '=', 'student_documents.reviewed_by')
             ->where('student_documents.student_id', $studentId)
@@ -36,6 +46,9 @@ class DocumentController extends Controller
             'documents' => $documents,
             'counts' => $counts,
             'categories' => StudentDocumentOptions::CATEGORIES,
+            'student' => $student,
+            'isSem3Or5' => $isSem3Or5,
+            'insuranceDoc' => $insuranceDoc,
         ]);
     }
 

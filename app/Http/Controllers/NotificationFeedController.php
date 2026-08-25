@@ -111,6 +111,30 @@ class NotificationFeedController extends Controller
                     'documents',
                 );
             }
+
+            if (Schema::hasTable('students')) {
+                $studentRow = DB::table('students')->where('id', $studentId)->first();
+                if ($studentRow && in_array((string) $studentRow->semester, ['3', '5'], true)) {
+                    $hasApprovedInsurance = DB::table('student_documents')
+                        ->where('student_id', $studentId)
+                        ->where('category', 'insurance_payment')
+                        ->where('status', 'approved')
+                        ->exists();
+
+                    if (! $hasApprovedInsurance) {
+                        $actionableCount += 1;
+                        $items[] = $this->item(
+                            'insurance-compulsory-alert',
+                            __('Bayaran Insurans Wajib (Sem :sem)', ['sem' => $studentRow->semester]),
+                            __('Sila muat naik resit bayaran insurans anda ke Pusat Dokumen.'),
+                            route('student.documents.index'),
+                            now(),
+                            'warning',
+                            'documents'
+                        );
+                    }
+                }
+            }
         }
 
         $items = array_merge(

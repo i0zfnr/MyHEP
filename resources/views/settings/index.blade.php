@@ -2,23 +2,7 @@
 
 @section('title', __('ui.settings_title'))
 
-@push('styles')
-<style>
-    .session-list { display:grid; gap:12px; margin-top:18px; }
-    .session-item { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px; border:1px solid var(--border); border-radius:16px; background:var(--surface-soft); }
-    .session-main { min-width:0; }
-    .session-title { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:5px; }
-    .session-title strong { color:var(--text); }
-    .session-current { padding:3px 8px; border-radius:999px; background:rgba(22,163,74,.12); color:#15803d; font-size:.72rem; font-weight:800; }
-    .session-meta { color:var(--text-muted); font-size:.82rem; line-height:1.55; overflow-wrap:anywhere; }
-    .settings-autosave { color:var(--text-muted); font-size:.78rem; font-weight:700; }
-    .settings-autosave[data-state="saving"] { color:var(--primary-dark); }
-    .settings-autosave[data-state="saved"] { color:#15803d; }
-    .settings-autosave[data-state="error"] { color:var(--danger); }
-    body[data-theme="dark"] .session-current { background:rgba(119,215,166,.14); color:#9be6bd; }
-    @media (max-width:640px) { .session-item { align-items:flex-start; flex-direction:column; } }
-</style>
-@endpush
+
 
 @section('header')
     <h2>{{ __('ui.settings_title') }}</h2>

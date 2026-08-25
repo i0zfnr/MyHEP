@@ -163,6 +163,10 @@
             transform: translateY(-1px);
         }
 
+        .presenter-menu-toggle {
+            display: none;
+        }
+
         .btn-gold {
             background: linear-gradient(135deg, var(--gold-primary), #926b1d);
             color: #1c1917;
@@ -504,6 +508,272 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
+
+        @media (max-width: 900px) {
+            body {
+                min-height: 100dvh;
+                overflow-x: hidden;
+            }
+
+            .presenter-header {
+                align-items: center;
+                flex-direction: row;
+                gap: .6rem;
+                padding: .7rem .8rem;
+                position: sticky;
+                top: 0;
+            }
+
+            .brand-badge {
+                align-items: center;
+                min-width: 0;
+                width: auto;
+            }
+
+            .brand-text {
+                min-width: 0;
+            }
+
+            .brand-logo {
+                flex: 0 0 auto;
+                height: 34px;
+                width: 34px;
+                font-size: .92rem;
+            }
+
+            .brand-text h1 {
+                font-size: .86rem;
+                line-height: 1.15;
+            }
+
+            .brand-text p {
+                font-size: .58rem;
+                line-height: 1.25;
+            }
+
+            .presenter-menu-toggle {
+                align-items: center;
+                background: var(--bg-card-glass);
+                border: 1px solid var(--border-subtle);
+                border-radius: 12px;
+                color: var(--text-main);
+                cursor: pointer;
+                display: inline-flex;
+                flex: 0 0 auto;
+                height: 36px;
+                justify-content: center;
+                margin-left: auto;
+                width: 36px;
+            }
+
+            .presenter-menu-toggle svg {
+                height: 20px;
+                width: 20px;
+            }
+
+            .header-actions {
+                background: rgba(18, 16, 14, .96);
+                border: 1px solid var(--border-glass);
+                border-radius: 16px;
+                box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+                display: none;
+                gap: .55rem;
+                grid-template-columns: 1fr;
+                padding: .65rem;
+                position: absolute;
+                right: 1rem;
+                top: calc(100% + .5rem);
+                width: min(260px, calc(100vw - 2rem));
+            }
+
+            .header-actions.is-open {
+                display: grid;
+            }
+
+            .header-actions .status-pill {
+                grid-column: 1 / -1;
+                justify-content: center;
+            }
+
+            .btn-action {
+                justify-content: center;
+                min-height: 40px;
+                padding: .55rem .7rem;
+                width: 100%;
+            }
+
+            .presenter-main {
+                align-items: stretch;
+                display: flex;
+                flex-direction: column;
+                gap: .75rem;
+                max-width: 100%;
+                min-width: 0;
+                padding: .75rem;
+            }
+
+            .program-info-card {
+                gap: .75rem;
+                min-width: 0;
+                order: 2;
+            }
+
+            .qr-stage-card {
+                border-radius: 18px;
+                min-width: 0;
+                order: 1;
+                padding: .9rem .75rem;
+                width: 100%;
+            }
+
+            .program-title {
+                font-size: clamp(1.35rem, 7vw, 1.9rem);
+                line-height: 1.08;
+                word-break: break-word;
+            }
+
+            .program-tagline {
+                font-size: .66rem;
+                max-width: 100%;
+                padding: .28rem .65rem;
+                white-space: normal;
+            }
+
+            .program-meta-grid {
+                grid-template-columns: 1fr;
+                gap: .55rem;
+            }
+
+            .meta-box {
+                border-radius: 12px;
+                padding: .72rem .78rem;
+            }
+
+            .meta-label {
+                font-size: .62rem;
+                margin-bottom: .22rem;
+            }
+
+            .meta-value {
+                font-size: .9rem;
+            }
+
+            .live-stats-strip {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: .25rem;
+                padding: .72rem .45rem;
+                border-radius: 14px;
+            }
+
+            .stat-number {
+                font-size: 1.2rem;
+                margin-bottom: .2rem;
+            }
+
+            .stat-label {
+                font-size: .54rem;
+                line-height: 1.2;
+            }
+
+            .countdown-container {
+                height: 54px;
+                margin-bottom: .55rem;
+                width: 54px;
+            }
+
+            .countdown-svg {
+                height: 54px;
+                width: 54px;
+            }
+
+            .countdown-text {
+                font-size: .85rem;
+            }
+
+            .countdown-unit {
+                font-size: .48rem;
+            }
+
+            .qr-canvas-housing {
+                border-radius: 16px;
+                margin-bottom: .7rem;
+                max-width: 100%;
+                padding: .6rem;
+            }
+
+            #qr-canvas-target canvas,
+            #qr-canvas-target svg {
+                height: min(62vw, 250px) !important;
+                width: min(62vw, 250px) !important;
+            }
+
+            .security-badge {
+                border-radius: 12px;
+                font-size: .58rem;
+                justify-content: center;
+                max-width: 100%;
+                padding: .32rem .6rem;
+                text-align: center;
+                white-space: normal;
+            }
+
+            .qr-instruction {
+                font-size: .72rem;
+                max-width: 100%;
+            }
+
+            .qr-mode-switcher {
+                flex-direction: column;
+                margin-top: .75rem;
+                width: 100%;
+            }
+
+            .mode-tab {
+                font-size: .66rem;
+                padding: .38rem .55rem;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .presenter-header {
+                padding: .65rem .7rem;
+            }
+
+            .header-actions {
+                right: .8rem;
+                top: calc(100% + .4rem);
+            }
+
+            .presenter-main {
+                padding: .6rem;
+            }
+
+            .qr-stage-card {
+                padding: .78rem .6rem;
+            }
+
+            #qr-canvas-target canvas,
+            #qr-canvas-target svg {
+                height: min(68vw, 235px) !important;
+                width: min(68vw, 235px) !important;
+            }
+
+            .live-stats-strip {
+                grid-template-columns: 1fr;
+                padding: .55rem .7rem;
+            }
+
+            .stat-item:not(:last-child) {
+                border-bottom: 1px solid var(--border-subtle);
+                border-right: 0;
+                padding-bottom: .45rem;
+            }
+
+            .stat-item:not(:first-child) {
+                padding-top: .45rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -514,12 +784,18 @@
         <div class="brand-badge">
             <div class="brand-logo">SE</div>
             <div class="brand-text">
-                <h1>{{ __('Live Attendance Presenter') }}</h1>
-                <p>e-Biasiswa &bull; Anti-Proxy Dynamic QR</p>
+                <h1>{{ request('screen') === 'questionnaire' ? __('Live Questionnaire Presenter') : __('Live Attendance Presenter') }}</h1>
+                <p>{{ request('screen') === 'questionnaire' ? __('Program Evaluation & Feedback • Anti-Proxy Dynamic QR') : __('e-Biasiswa • Anti-Proxy Dynamic QR') }}</p>
             </div>
         </div>
 
-        <div class="header-actions">
+        <button class="presenter-menu-toggle" id="btnPresenterMenu" type="button" aria-label="{{ __('Open presenter actions') }}" aria-expanded="false" aria-controls="presenterActions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16"/>
+            </svg>
+        </button>
+
+        <div class="header-actions" id="presenterActions">
             <div class="status-pill" id="statusPill">
                 <span class="status-dot"></span>
                 <span id="statusText">{{ $program->attendance_status === 'open' ? __('Attendance Live') : __('Attendance Closed') }}</span>
@@ -535,7 +811,7 @@
                 <span id="fullscreenLabel">{{ __('Fullscreen') }}</span>
             </button>
 
-            <a href="{{ route('admin.programs.operations', $program->id) }}" class="btn-action" title="{{ __('Return to Operations Workspace') }}">
+            <a href="{{ $presenterExitUrl ?? route('admin.programs.operations', $program->id) }}" class="btn-action" title="{{ __('Exit presenter screen') }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 <span>{{ __('Exit') }}</span>
             </a>
@@ -620,17 +896,17 @@
                 <span>{{ __('Dynamic Anti-Proxy Token &bull; Rotates every 30s') }}</span>
             </div>
 
-            <p class="qr-instruction">
-                {{ __('Scan with your smartphone camera to record attendance and complete the survey.') }}
+            <p class="qr-instruction" id="qrInstructionText">
+                {{ request('screen') === 'questionnaire' ? __('Scan with your smartphone camera to complete the official Program Feedback & Questionnaire.') : __('Scan with your smartphone camera to record attendance and complete the survey.') }}
             </p>
 
             <!-- Mode Switcher -->
             <div class="qr-mode-switcher">
-                <button class="mode-tab active" id="tabStudent" onclick="switchQrMode('student')">
-                    {{ __('Student Portal Mode') }}
+                <button class="mode-tab {{ request('mode') !== 'public' && request('screen') !== 'questionnaire' ? 'active' : '' }}" id="tabStudent" onclick="switchQrMode('student')">
+                    {{ __('Student Portal Mode (PB)') }}
                 </button>
-                <button class="mode-tab" id="tabPublic" onclick="switchQrMode('public')">
-                    {{ __('Public QR Mode') }}
+                <button class="mode-tab {{ request('mode') === 'public' || request('screen') === 'questionnaire' ? 'active' : '' }}" id="tabPublic" onclick="switchQrMode('public')">
+                    {{ __('Public QR Mode (External & Guests)') }}
                 </button>
             </div>
         </div>
@@ -680,8 +956,26 @@
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(qrImage, 0, 0, canvas.width, canvas.height);
                 };
-                // Fallback using direct SVG QR generator
-                qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=" + this.options.width + "x" + this.options.height + "&data=" + encoded + "&margin=1&format=svg";
+                qrImage.onerror = function() {
+                    // Fallback to internal QR generator engine if remote fails
+                    var qr = new QRCodeModel(-1, QRErrorCorrectLevel.M);
+                    qr.addData(text);
+                    qr.make();
+                    var count = qr.getModuleCount();
+                    var tileW = canvas.width / count;
+                    var tileH = canvas.height / count;
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = "#1c1917";
+                    for (var r = 0; r < count; r++) {
+                        for (var c = 0; c < count; c++) {
+                            if (qr.isDark(r, c)) {
+                                ctx.fillRect(Math.round(c * tileW), Math.round(r * tileH), Math.ceil(tileW), Math.ceil(tileH));
+                            }
+                        }
+                    }
+                };
+                qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encoded}&margin=8&format=svg`;
                 this.element.appendChild(canvas);
             };
 
@@ -690,11 +984,12 @@
 
         // State variables
         const PROGRAM_ID = {{ $program->id }};
-        const TOKEN_URL = "{{ route('admin.programs.live-token', $program->id) }}";
+        const TOKEN_URL = "{{ $presenterTokenUrl ?? route('admin.programs.live-token', $program->id) }}";
         const TOTAL_SECONDS = 30;
         const CIRCUMFERENCE = 2 * Math.PI * 36; // 226.195
 
-        let currentMode = 'student'; // 'student' or 'public'
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentMode = urlParams.get('mode') === 'public' || urlParams.get('screen') === 'questionnaire' ? 'public' : 'student';
         let currentStudentUrl = "{{ $studentCheckinUrl }}";
         let currentPublicUrl = "{{ $initialCheckinUrl }}";
         let secondsRemaining = TOTAL_SECONDS;
@@ -851,7 +1146,35 @@
         document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreen);
         document.getElementById('btnRefresh').addEventListener('click', () => fetchFreshToken(true));
 
+        const presenterMenuButton = document.getElementById('btnPresenterMenu');
+        const presenterActions = document.getElementById('presenterActions');
+        if (presenterMenuButton && presenterActions) {
+            presenterMenuButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const isOpen = presenterActions.classList.toggle('is-open');
+                presenterMenuButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!presenterActions.contains(event.target) && !presenterMenuButton.contains(event.target)) {
+                    presenterActions.classList.remove('is-open');
+                    presenterMenuButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            presenterActions.querySelectorAll('button, a').forEach((item) => {
+                item.addEventListener('click', () => {
+                    presenterActions.classList.remove('is-open');
+                    presenterMenuButton.setAttribute('aria-expanded', 'false');
+                });
+            });
+        }
+
         document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && presenterActions && presenterMenuButton) {
+                presenterActions.classList.remove('is-open');
+                presenterMenuButton.setAttribute('aria-expanded', 'false');
+            }
             if (e.key === 'f' || e.key === 'F') {
                 toggleFullscreen();
             }

@@ -2,24 +2,7 @@
 
 @section('title', __('Student Profile'))
 
-@push('styles')
-<style>
-    .profile-wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 1rem; }
-    .profile-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .profile-photo { width: 112px; height: 112px; border-radius: 14px; object-fit: cover; border: 1px solid var(--border); background: var(--surface-muted); flex: 0 0 112px; }
-    .profile-photo-empty { display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 2rem; font-weight: 800; }
-    .profile-title { display: grid; gap: .3rem; min-width: 0; }
-    .profile-title h3 { margin: 0; color: var(--text); font-size: 1.35rem; }
-    .profile-title span { color: var(--text-muted); font-weight: 700; }
-    .profile-grid { display: grid; grid-template-columns: 1fr; gap: .8rem; }
-    @media (min-width: 820px) { .profile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-    .profile-field { border: 1px solid var(--border); border-radius: 10px; padding: .8rem; background: rgba(255,255,255,.04); }
-    .profile-field span { display: block; color: var(--text-muted); font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .25rem; }
-    .profile-field b { color: var(--text); font-size: .9rem; overflow-wrap: anywhere; }
-    .profile-section-title { color: var(--text); font-weight: 800; margin-bottom: .8rem; }
-    .profile-empty { padding: 1.5rem; text-align: center; color: var(--text-muted); }
-</style>
-@endpush
+
 
 @section('header')
     <h2 style="margin:0;font-size:1rem;font-weight:700;">{{ __('Student Profile') }}</h2>

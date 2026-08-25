@@ -19,11 +19,14 @@ class AdminPermissions
         'students.export' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
         'students.manage' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
         'documents' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
+        'insurance' => ['discipline_admin', 'student_affairs_head', 'system_admin'],
+        'foodbank' => ['scholarship_admin', 'student_affairs_head', 'system_admin'],
         'lecturers.manage' => ['student_affairs_head', 'system_admin'],
         'staff.manage' => ['student_affairs_head', 'system_admin'],
         'guards.manage' => ['lecturer', 'discipline_admin', 'student_affairs_head', 'system_admin'],
         'laptops.use' => ['lecturer', 'guard', 'scholarship_admin', 'discipline_admin', 'student_affairs_head', 'system_admin'],
         'laptops.manage' => ['student_affairs_head', 'system_admin'],
+        'program_access.manage' => ['student_affairs_head', 'system_admin'],
     ];
 
     public function allowsRole(?string $role, string $ability): bool
@@ -47,7 +50,7 @@ class AdminPermissions
 
         return match ($staffCategory) {
             'discipline' => in_array($ability, ['discipline', 'movement'], true),
-            'scholarship' => $ability === 'scholarship',
+            'scholarship' => in_array($ability, ['scholarship', 'foodbank'], true),
             default => false,
         };
     }

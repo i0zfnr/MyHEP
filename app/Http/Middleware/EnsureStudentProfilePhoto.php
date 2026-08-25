@@ -54,6 +54,10 @@ class EnsureStudentProfilePhoto
             return $next($request);
         }
 
+        if (! \Illuminate\Support\Facades\Schema::hasTable('students') || ! \Illuminate\Support\Facades\Schema::hasColumn('students', 'photo')) {
+            return $next($request);
+        }
+
         $student = DB::table('students')->where('id', $studentId)->select('photo')->first();
         if ($student && blank($student->photo)) {
             if ($request->expectsJson()) {

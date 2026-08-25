@@ -52,11 +52,13 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->boolean('certificate_enabled')->default(true);
             $table->string('certificate_template')->default('standard_placeholder');
             $table->boolean('questionnaire_enabled')->default(true);
+            $table->string('questionnaire_publish_mode', 32)->default('internal_system');
             $table->decimal('estimated_budget', 12, 2)->nullable();
             $table->string('paperwork_method')->default('manual');
             $table->timestamp('paperwork_approval_confirmed_at')->nullable();
             $table->string('status')->default('draft');
             $table->string('attendance_status')->default('open');
+            $table->string('attendance_checkin_mode', 32)->default('qr_code');
             $table->timestamp('attendance_opened_at')->nullable();
             $table->timestamp('attendance_closed_at')->nullable();
             $table->unsignedBigInteger('deputy_reviewer_id')->nullable();
@@ -70,6 +72,18 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->string('matric_no')->nullable();
             $table->string('program')->nullable();
             $table->timestamps();
+        });
+
+        Schema::create('program_student_page_permissions', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('program_id');
+            $table->unsignedBigInteger('student_id');
+            $table->string('access_type', 40);
+            $table->unsignedBigInteger('granted_by')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->text('note')->nullable();
+            $table->timestamps();
+            $table->unique(['program_id', 'student_id', 'access_type'], 'program_student_page_permissions_unique');
         });
 
         Schema::create('program_paperworks', function (Blueprint $table): void {
@@ -207,7 +221,14 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Merdeka Youth Camp 2026');
-        $response->assertSee('QUESTIONNAIRE BUILDER');
+        $this->withSession([
+            'auth_user' => [
+                'id' => 1,
+                'role' => 'admin',
+                'admin_role' => 'lecturer',
+                'name' => 'Program Director',
+            ],
+        ])->get(route('admin.programs.questionnaire', $programId))->assertSee('QUESTIONNAIRE BUILDER');
     }
 
     public function test_ai_questionnaire_generation_returns_questions(): void
@@ -264,7 +285,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
                 'admin_role' => 'lecturer',
                 'name' => 'Program Director',
             ],
-        ])->post(route('admin.programs.survey.save', $programId), [
+        ])->from(route('admin.programs.operations', $programId))->post(route('admin.programs.survey.save', $programId), [
             'title' => 'Tech Workshop Feedback',
             'questions' => [
                 [
@@ -706,8 +727,9 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         ]);
 
         $studentSession = ['auth_user' => ['id' => $studentId, 'role' => 'student', 'name' => 'Siti Student', 'matric_no' => 'PB2001']];
+        $qrToken = \App\Support\DynamicQrToken::generate($programId)['token'];
         $this->withSession($studentSession)->post(route('student.programs.attendance.store', $programId), [
-            'answers' => [$questionId => 'I learned digital communication skills.'],
+            'qr_token' => $qrToken,
             'latitude' => 5.8001, 'longitude' => 102.5001, 'location_accuracy_m' => 10,
             'location_captured_at' => now()->toIso8601String(),
         ])->assertRedirect(route('student.programs.index'));
@@ -730,9 +752,9 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             'created_at' => now(), 'updated_at' => now(),
         ]);
 
-        $this->signIn(1, 'lecturer')->put(route('admin.programs.questionnaire-setting.update', $programId), ['questionnaire_enabled' => 0])->assertRedirect();
-        $this->signIn(1, 'lecturer')->post(route('admin.programs.attendance.open', $programId))->assertRedirect();
-        $this->assertDatabaseHas('programs', ['id' => $programId, 'questionnaire_enabled' => false, 'attendance_status' => 'open']);
+        $this->signIn(1, 'lecturer')->put(route('admin.programs.questionnaire-setting.update', $programId), ['questionnaire_publish_mode' => 'closed'])->assertRedirect();
+        $this->signIn(1, 'lecturer')->post(route('admin.programs.attendance.open', $programId), ['mode' => 'portal_and_qr'])->assertRedirect();
+        $this->assertDatabaseHas('programs', ['id' => $programId, 'questionnaire_enabled' => false, 'attendance_status' => 'open', 'attendance_checkin_mode' => 'portal_and_qr']);
 
         $this->withSession(['auth_user' => ['id' => $studentId, 'role' => 'student', 'name' => 'Attendance Student']])
             ->post(route('student.programs.attendance.store', $programId), [
@@ -740,6 +762,97 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
                 'location_captured_at' => now()->toIso8601String(),
             ])->assertRedirect(route('student.programs.index'));
         $this->assertDatabaseHas('program_attendances', ['program_id' => $programId, 'student_id' => $studentId, 'validation_status' => 'valid']);
+    }
+
+    public function test_kj_hep_can_grant_student_page_permission_for_program(): void
+    {
+        $studentId = DB::table('students')->insertGetId(['full_name' => 'Camera Problem Student', 'matric_no' => 'PB4001', 'program' => 'DBF', 'created_at' => now(), 'updated_at' => now()]);
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1, 'title' => 'QR Permission Program', 'paperwork_method' => 'pdf',
+            'venue' => 'Dewan Utama', 'status' => 'active', 'attendance_status' => 'open',
+            'attendance_checkin_mode' => 'qr_code', 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->signIn(4, 'student_affairs_head')
+            ->post(route('admin.programs.student-page-permissions.store', $programId), [
+                'student_id' => $studentId,
+                'access_type' => 'qr_presenter',
+                'note' => 'Responsible class representative',
+            ])
+            ->assertRedirect(route('admin.programs.operations', $programId));
+
+        $this->assertDatabaseHas('program_student_page_permissions', [
+            'program_id' => $programId,
+            'student_id' => $studentId,
+            'access_type' => 'qr_presenter',
+            'granted_by' => 4,
+        ]);
+    }
+
+    public function test_non_oversight_admin_cannot_grant_student_page_permission(): void
+    {
+        $studentId = DB::table('students')->insertGetId(['full_name' => 'Restricted Student', 'matric_no' => 'PB4002', 'program' => 'DBF', 'created_at' => now(), 'updated_at' => now()]);
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1, 'title' => 'Restricted Permission Program', 'paperwork_method' => 'pdf',
+            'venue' => 'Dewan Utama', 'status' => 'active', 'attendance_status' => 'open',
+            'attendance_checkin_mode' => 'qr_code', 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->signIn(5, 'discipline_admin')
+            ->post(route('admin.programs.student-page-permissions.store', $programId), [
+                'student_id' => $studentId,
+                'access_type' => 'qr_presenter',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('program_student_page_permissions', [
+            'program_id' => $programId,
+            'student_id' => $studentId,
+        ]);
+    }
+
+    public function test_permitted_student_can_open_dynamic_qr_presenter_but_not_bypass_attendance_token(): void
+    {
+        $studentId = DB::table('students')->insertGetId(['full_name' => 'Permitted Student', 'matric_no' => 'PB4003', 'program' => 'DBF', 'created_at' => now(), 'updated_at' => now()]);
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1, 'title' => 'QR Only Permission Program', 'paperwork_method' => 'pdf',
+            'venue' => 'Dewan Utama', 'status' => 'active', 'attendance_status' => 'open',
+            'attendance_checkin_mode' => 'qr_code', 'participation_points' => 5,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        DB::table('program_student_page_permissions')->insert([
+            'program_id' => $programId,
+            'student_id' => $studentId,
+            'access_type' => 'qr_presenter',
+            'granted_by' => 4,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $studentSession = ['auth_user' => ['id' => $studentId, 'role' => 'student', 'name' => 'Permitted Student']];
+
+        $this->withSession($studentSession)
+            ->get(route('student.programs.attendance-qr.index'))
+            ->assertOk()
+            ->assertSee('QR Only Permission Program');
+
+        $this->withSession($studentSession)
+            ->get(route('student.programs.attendance-qr.presenter', $programId))
+            ->assertOk()
+            ->assertSee('Live Projector QR');
+
+        $this->withSession($studentSession)
+            ->get(route('student.programs.attendance-qr.live-token', $programId))
+            ->assertOk()
+            ->assertJsonStructure(['token', 'student_url', 'stats']);
+
+        $this->withSession($studentSession)
+            ->post(route('student.programs.attendance.store', $programId))
+            ->assertSessionHasErrors('qr_token');
+
+        $this->assertDatabaseMissing('program_attendances', [
+            'program_id' => $programId,
+            'student_id' => $studentId,
+        ]);
     }
 
     private function signIn(int $id, string $role): static

@@ -22,10 +22,20 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $canViewSensitiveStudents = adminCan('students.sensitive');
-        $studentStats = ['total' => DB::table('students')->count()];
+        $statsRow = DB::table('students')
+            ->selectRaw('COUNT(*) as total')
+            ->when($canViewSensitiveStudents, function ($query): void {
+                $query->selectRaw('COUNT(CASE WHEN password IS NULL THEN 1 END) as default_ic')
+                    ->selectRaw('COUNT(CASE WHEN password IS NOT NULL THEN 1 END) as custom_password');
+            })
+            ->first();
+
+        $studentStats = [
+            'total' => (int) ($statsRow->total ?? 0),
+        ];
         if ($canViewSensitiveStudents) {
-            $studentStats['default_ic'] = DB::table('students')->whereNull('password')->count();
-            $studentStats['custom_password'] = DB::table('students')->whereNotNull('password')->count();
+            $studentStats['default_ic'] = (int) ($statsRow->default_ic ?? 0);
+            $studentStats['custom_password'] = (int) ($statsRow->custom_password ?? 0);
         }
 
         $filters = $this->validateFilters($request, $canViewSensitiveStudents);
@@ -165,10 +175,16 @@ class StudentController extends Controller
 
     public function importPage(): View
     {
+        $statsRow = DB::table('students')
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('COUNT(CASE WHEN password IS NULL THEN 1 END) as default_ic')
+            ->selectRaw('COUNT(CASE WHEN password IS NOT NULL THEN 1 END) as custom_password')
+            ->first();
+
         $studentStats = [
-            'total' => DB::table('students')->count(),
-            'default_ic' => DB::table('students')->whereNull('password')->count(),
-            'custom_password' => DB::table('students')->whereNotNull('password')->count(),
+            'total' => (int) ($statsRow->total ?? 0),
+            'default_ic' => (int) ($statsRow->default_ic ?? 0),
+            'custom_password' => (int) ($statsRow->custom_password ?? 0),
         ];
         $filters = [];
         $students = DB::table('students')
@@ -192,6 +208,8 @@ class StudentController extends Controller
 
     public function show(int $id): View|RedirectResponse
     {
+        abort_unless(adminCan('students.view_sensitive'), 403);
+
         $student = DB::table('students')
             ->select([
                 'id', 'full_name', 'matric_no', 'ic_no', 'email', 'phone', 'program', 'class_name', 'photo',

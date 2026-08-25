@@ -6,17 +6,7 @@
     <h2 style="margin:0;font-size:1rem;font-weight:700;">{{ __('Movement Violations') }}</h2>
 @endsection
 
-@push('styles')
-<style>
-    .mv-violation-note { color:var(--text-muted); font-size:.78rem; margin-top:.15rem; }
-    .mv-violation-empty { padding:2rem 1rem; text-align:center; color:var(--text-muted); }
-    .mv-student-card { display:flex; align-items:center; gap:.7rem; min-width:220px; }
-    .mv-avatar { width:48px; height:48px; border-radius:10px; object-fit:cover; border:1px solid rgba(226,209,192,.24); background:rgba(255,255,255,.06); flex:0 0 48px; }
-    .mv-avatar-empty { display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-weight:800; }
-    .mv-mini-btn { display:inline-flex; align-items:center; margin-top:.35rem; padding:.28rem .5rem; border-radius:8px; border:1px solid rgba(226,209,192,.18); color:var(--text); text-decoration:none; font-size:.7rem; font-weight:750; }
-    .mv-explanation { max-width:320px; color:var(--text-muted); line-height:1.45; }
-</style>
-@endpush
+
 
 @section('content')
 <div class="ui-shell">

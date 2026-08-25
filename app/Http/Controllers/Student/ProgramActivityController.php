@@ -37,6 +37,13 @@ class ProgramActivityController extends Controller
             ->orderByDesc('programs.starts_at')
             ->get();
 
+        $pagePermissions = $this->studentProgramPagePermissions($studentId);
+        $programs->each(function ($program) use ($pagePermissions): void {
+            $permissions = $pagePermissions->get((int) $program->id, collect());
+            $program->has_qr_presenter_permission = $permissions->contains(fn ($type) => in_array($type, ['qr_presenter', 'all'], true));
+            $program->has_questionnaire_page_permission = $permissions->contains(fn ($type) => in_array($type, ['questionnaire', 'all'], true));
+        });
+
         $totalPoints = $programs->where('validation_status', 'valid')->sum('participation_points');
         $programsJoined = $programs->whereNotNull('checked_in_at')->count();
 
@@ -47,9 +54,106 @@ class ProgramActivityController extends Controller
             ->where('programs.status', 'active')
             ->select('program_surveys.program_id', 'program_surveys.title as survey_title', 'programs.title as program_title', 'programs.questionnaire_publish_mode')
             ->get()
+            ->filter(function ($surveyProgram) use ($programs): bool {
+                if (($surveyProgram->questionnaire_publish_mode ?? 'internal_system') !== 'qr_code') {
+                    return true;
+                }
+
+                $program = $programs->firstWhere('id', $surveyProgram->program_id);
+
+                return (bool) ($program?->checked_in_at || $program?->has_questionnaire_page_permission);
+            })
             ->keyBy('program_id');
 
         return view('student.programs.index', compact('programs', 'totalPoints', 'programsJoined', 'activeSurveys'));
+    }
+
+    public function attendanceQrAccess(): View
+    {
+        $studentId = (int) session('auth_user.id');
+        $programs = $this->studentQrPresenterPrograms($studentId);
+
+        return view('student.programs.attendance-qr', compact('programs'));
+    }
+
+    public function attendanceQrPresenter(int $id): View
+    {
+        $studentId = (int) session('auth_user.id');
+        abort_unless($this->hasProgramPagePermission($id, $studentId, 'qr_presenter'), 404);
+
+        $program = DB::table('programs')
+            ->where('id', $id)
+            ->where('status', 'active')
+            ->where('attendance_status', 'open')
+            ->first();
+        abort_unless($program, 404);
+
+        $survey = DB::table('program_surveys')
+            ->where('program_id', $program->id)
+            ->where('status', 'published')
+            ->orderByDesc('id')
+            ->first();
+
+        $tokenData = DynamicQrToken::generate($program->id);
+        $initialCheckinUrl = route('public.programs.qr_checkin', ['program' => $program->id, 't' => $tokenData['token']]);
+        $studentCheckinUrl = route('student.programs.show', ['program' => $program->id, 't' => $tokenData['token']]);
+
+        $attendances = DB::table('program_attendances')->where('program_id', $program->id)->get();
+        $totalJoined = $attendances->count();
+        $internalCount = $attendances->where('attendee_type', 'internal')->count();
+        $externalCount = $attendances->where('attendee_type', 'external')->count();
+        $presenterTokenUrl = route('student.programs.attendance-qr.live-token', $program->id);
+        $presenterExitUrl = route('student.programs.attendance-qr.index');
+
+        return view('admin.programs.presenter', compact(
+            'program',
+            'survey',
+            'tokenData',
+            'initialCheckinUrl',
+            'studentCheckinUrl',
+            'totalJoined',
+            'internalCount',
+            'externalCount',
+            'presenterTokenUrl',
+            'presenterExitUrl'
+        ));
+    }
+
+    public function attendanceQrLiveToken(int $id)
+    {
+        $studentId = (int) session('auth_user.id');
+        if (! $this->hasProgramPagePermission($id, $studentId, 'qr_presenter')) {
+            return response()->json(['error' => __('Unauthorized.')], 403);
+        }
+
+        $program = DB::table('programs')
+            ->where('id', $id)
+            ->where('status', 'active')
+            ->where('attendance_status', 'open')
+            ->first();
+        if (! $program) {
+            return response()->json(['error' => __('Program not found or attendance closed.')], 404);
+        }
+
+        $tokenData = DynamicQrToken::generate($program->id);
+        $attendances = DB::table('program_attendances')->where('program_id', $program->id)->get();
+        $ratings = $attendances->pluck('satisfaction_rating')->filter();
+
+        return response()->json([
+            'token' => $tokenData['token'],
+            'expires_in' => $tokenData['expires_in'],
+            'timestamp' => $tokenData['timestamp'],
+            'public_url' => route('public.programs.qr_checkin', ['program' => $program->id, 't' => $tokenData['token']]),
+            'student_url' => route('student.programs.show', ['program' => $program->id, 't' => $tokenData['token']]),
+            'attendance_status' => $program->attendance_status,
+            'stats' => [
+                'total' => $attendances->count(),
+                'internal' => $attendances->where('attendee_type', 'internal')->count(),
+                'external' => $attendances->where('attendee_type', 'external')->count(),
+                'target' => $program->estimated_participants ?: 0,
+                'avg_rating' => $ratings->isNotEmpty() ? round($ratings->avg(), 1) : 0.0,
+            ],
+        ]);
     }
 
     public function downloadCertificate(int $certificate)
@@ -207,6 +311,12 @@ class ProgramActivityController extends Controller
             ->where('attendee_type', 'internal')
             ->first();
 
+        if (($program->questionnaire_publish_mode ?? 'internal_system') === 'qr_code'
+            && ! $attendance
+            && ! $this->hasProgramPagePermission($program->id, $studentId, 'questionnaire')) {
+            abort(404);
+        }
+
         $alreadySubmitted = $attendance ? DB::table('program_survey_responses')
             ->where('program_survey_id', $survey->id)
             ->where('program_attendance_id', $attendance->id)
@@ -230,6 +340,17 @@ class ProgramActivityController extends Controller
             ->latest('id')
             ->first();
         abort_unless($survey, 404);
+
+        if (($program->questionnaire_publish_mode ?? 'internal_system') === 'qr_code'
+            && ! $this->hasProgramPagePermission($program->id, $studentId, 'questionnaire')) {
+            $hasAttendance = DB::table('program_attendances')
+                ->where('program_id', $id)
+                ->where('student_id', $studentId)
+                ->where('attendee_type', 'internal')
+                ->exists();
+
+            abort_unless($hasAttendance, 404);
+        }
 
         $questions = DB::table('program_survey_questions')
             ->where('program_survey_id', $survey->id)
@@ -290,22 +411,24 @@ class ProgramActivityController extends Controller
         return redirect()->route('student.programs.index')->with('success', __('Terima kasih! Soal selidik anda telah berjaya dihantar.'));
     }
 
-    public function show(Request $request, int $id): View
+    public function show(Request $request, int $id): View|RedirectResponse
     {
         $studentId = (int) session('auth_user.id');
         $program = DB::table('programs')->where('id', $id)->where('status', 'active')->first();
         abort_unless($program, 404);
-        $survey = DB::table('program_surveys')->where('program_id', $id)->where('status', 'published')->latest('id')->first();
-        abort_unless($program->attendance_status === 'open' && (! $program->questionnaire_enabled || $survey), 404);
-        $questions = $survey && $program->questionnaire_enabled
-            ? DB::table('program_survey_questions')->where('program_survey_id', $survey->id)->orderBy('sort_order')->get()
-            : collect();
+        abort_unless($program->attendance_status === 'open', 404);
+
         $student = DB::table('students')->where('id', $studentId)->first(['id', 'full_name', 'matric_no', 'program']);
         abort_unless($student, 404);
-        $attendance = DB::table('program_attendances')->where('program_id', $id)->where('student_id', $studentId)->where('attendee_type', 'internal')->first();
-        $token = $request->input('t') ?? $request->input('token');
 
-        return view('student.programs.show', compact('program', 'survey', 'questions', 'student', 'attendance', 'token'));
+        $attendance = DB::table('program_attendances')->where('program_id', $id)->where('student_id', $studentId)->where('attendee_type', 'internal')->first();
+        $token = $request->input('t') ?? $request->input('token') ?? $request->input('qr_token');
+
+        if (($program->attendance_checkin_mode ?? 'qr_code') === 'qr_code' && blank($token) && ! $attendance) {
+            return redirect()->route('student.programs.index')->with('info', __('Program ini memerlukan imbasan Kod QR di skrin dewan untuk mendaftar kehadiran.'));
+        }
+
+        return view('student.programs.show', compact('program', 'student', 'attendance', 'token'));
     }
 
     public function store(Request $request, int $id): RedirectResponse
@@ -315,15 +438,20 @@ class ProgramActivityController extends Controller
         abort_unless($program, 404);
         $student = DB::table('students')->where('id', $studentId)->first(['id', 'full_name', 'matric_no', 'program']);
         abort_unless($student, 404);
-        $survey = DB::table('program_surveys')->where('program_id', $id)->where('status', 'published')->latest('id')->first();
-        abort_unless(! $program->questionnaire_enabled || $survey, 404);
 
         if (DB::table('program_attendances')->where('program_id', $id)->where('student_id', $studentId)->where('attendee_type', 'internal')->exists()) {
-            return back()->withErrors(['attendance' => __('You have already submitted attendance for this program.')]);
+            return redirect()->route('student.programs.index')->with('success', __('You have already submitted attendance for this program.'));
         }
 
-        if ($request->filled('qr_token')) {
-            if (! DynamicQrToken::verify($request->input('qr_token'), $program->id)) {
+        $token = $request->input('qr_token') ?? $request->input('token') ?? $request->input('t');
+        if (($program->attendance_checkin_mode ?? 'qr_code') === 'qr_code') {
+            if (blank($token) || ! DynamicQrToken::verify($token, $program->id)) {
+                return back()->withInput()->withErrors([
+                    'qr_token' => __('The scanned QR code has expired or is invalid. Please scan the current QR code displayed on the screen.'),
+                ]);
+            }
+        } elseif (filled($token)) {
+            if (! DynamicQrToken::verify($token, $program->id)) {
                 return back()->withInput()->withErrors([
                     'qr_token' => __('The scanned QR code has expired. Please scan the current QR code displayed on the screen.'),
                 ]);
@@ -333,52 +461,121 @@ class ProgramActivityController extends Controller
         $usesGeofence = $program->latitude !== null && $program->longitude !== null;
         $validated = $request->validate([
             'qr_token' => ['nullable', 'string'],
-            'answers' => ['nullable', 'array'], 'answers.*' => ['nullable', 'string', 'max:5000'],
             'latitude' => [$usesGeofence ? 'required' : 'nullable', 'numeric', 'between:-90,90'],
             'longitude' => [$usesGeofence ? 'required' : 'nullable', 'numeric', 'between:-180,180'],
             'location_accuracy_m' => [$usesGeofence ? 'required' : 'nullable', 'numeric', 'min:0', 'max:5000'],
             'location_captured_at' => [$usesGeofence ? 'required' : 'nullable', 'date', 'before_or_equal:now', 'after:'.now()->subMinutes(5)->toDateTimeString()],
         ]);
 
-        $questions = $survey && $program->questionnaire_enabled
-            ? DB::table('program_survey_questions')->where('program_survey_id', $survey->id)->orderBy('sort_order')->get()
-            : collect();
-        $answers = collect($validated['answers'] ?? [])->mapWithKeys(fn ($answer, $questionId) => [(int) $questionId => $answer]);
-        if ($answers->keys()->diff($questions->pluck('id')->map(fn ($id) => (int) $id))->isNotEmpty()) {
-            return back()->withInput()->withErrors(['answers' => __('Invalid questionnaire response.')]);
-        }
-        $missing = $questions->where('is_required', true)->first(fn ($question) => blank($answers->get((int) $question->id)));
-        if ($missing) {
-            return back()->withInput()->withErrors(['answers.'.(int) $missing->id => __('Please answer the required question: :question', ['question' => $missing->question_text])]);
-        }
-
-        $distance = $usesGeofence ? $this->distanceMeters((float) $program->latitude, (float) $program->longitude, (float) $validated['latitude'], (float) $validated['longitude']) : null;
-        $accuracy = $usesGeofence ? (float) $validated['location_accuracy_m'] : null;
+        $distance = ($usesGeofence && filled($validated['latitude'] ?? null) && filled($validated['longitude'] ?? null))
+            ? $this->distanceMeters((float) $program->latitude, (float) $program->longitude, (float) $validated['latitude'], (float) $validated['longitude'])
+            : null;
+        $accuracy = $usesGeofence ? (float) ($validated['location_accuracy_m'] ?? null) : null;
         $status = ! $usesGeofence ? 'valid' : ($distance > (int) $program->geofence_radius_m ? 'invalid_outside_radius' : ($accuracy > 100 ? 'needs_review_accuracy' : 'valid'));
 
-        DB::transaction(function () use ($program, $student, $survey, $questions, $answers, $validated, $distance, $accuracy, $status): void {
-            $attendanceId = DB::table('program_attendances')->insertGetId([
-                'program_id' => $program->id, 'student_id' => $student->id, 'attendee_type' => 'internal',
-                'full_name' => $student->full_name, 'identifier' => $student->matric_no, 'institution_or_unit' => $student->program,
-                'checked_in_at' => now(), 'latitude' => $validated['latitude'] ?? null, 'longitude' => $validated['longitude'] ?? null,
-                'geofence_valid' => $status === 'valid', 'validation_status' => $status, 'distance_m' => $distance === null ? null : round($distance, 2),
-                'location_accuracy_m' => $accuracy === null ? null : round($accuracy, 2), 'location_captured_at' => $validated['location_captured_at'] ?? null,
-                'created_at' => now(), 'updated_at' => now(),
-            ]);
-            foreach ($questions as $question) {
-                if (filled($answer = $answers->get((int) $question->id))) {
-                    DB::table('program_survey_responses')->insert([
-                        'program_survey_id' => $survey->id, 'program_attendance_id' => $attendanceId,
-                        'question_id' => $question->id, 'answer_value' => (string) $answer,
-                        'created_at' => now(), 'updated_at' => now(),
-                    ]);
-                }
-            }
-        });
+        DB::table('program_attendances')->insert([
+            'program_id' => $program->id,
+            'student_id' => $student->id,
+            'attendee_type' => 'internal',
+            'full_name' => $student->full_name,
+            'identifier' => $student->matric_no,
+            'institution_or_unit' => $student->program,
+            'checked_in_at' => now(),
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'geofence_valid' => $status === 'valid',
+            'validation_status' => $status,
+            'distance_m' => $distance === null ? null : round($distance, 2),
+            'location_accuracy_m' => $accuracy === null ? null : round($accuracy, 2),
+            'location_captured_at' => $validated['location_captured_at'] ?? null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         return redirect()->route('student.programs.index')->with('success', $status === 'valid'
-            ? __('Valid attendance recorded. You earned :points participation points.', ['points' => $program->participation_points])
-            : __('Attendance was recorded but did not qualify for participation points.'));
+            ? __('Valid attendance recorded. You earned :points merit points.', ['points' => $program->participation_points])
+            : __('Attendance was recorded but did not qualify for merit points.'));
+    }
+
+    private function studentProgramPagePermissions(int $studentId)
+    {
+        if (! Schema::hasTable('program_student_page_permissions')) {
+            return collect();
+        }
+
+        return DB::table('program_student_page_permissions')
+            ->where('student_id', $studentId)
+            ->where(function ($query): void {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->get(['program_id', 'access_type'])
+            ->groupBy('program_id')
+            ->map(fn ($permissions) => $permissions->pluck('access_type'));
+    }
+
+    public static function studentHasQrPresenterAccess(int $studentId): bool
+    {
+        if (! Schema::hasTable('program_student_page_permissions')) {
+            return false;
+        }
+
+        return DB::table('program_student_page_permissions')
+            ->join('programs', 'programs.id', '=', 'program_student_page_permissions.program_id')
+            ->where('program_student_page_permissions.student_id', $studentId)
+            ->whereIn('program_student_page_permissions.access_type', ['qr_presenter', 'all'])
+            ->where('programs.status', 'active')
+            ->where('programs.attendance_status', 'open')
+            ->where(function ($query): void {
+                $query->whereNull('program_student_page_permissions.expires_at')
+                    ->orWhere('program_student_page_permissions.expires_at', '>', now());
+            })
+            ->exists();
+    }
+
+    private function studentQrPresenterPrograms(int $studentId)
+    {
+        if (! Schema::hasTable('program_student_page_permissions')) {
+            return collect();
+        }
+
+        return DB::table('program_student_page_permissions')
+            ->join('programs', 'programs.id', '=', 'program_student_page_permissions.program_id')
+            ->where('program_student_page_permissions.student_id', $studentId)
+            ->whereIn('program_student_page_permissions.access_type', ['qr_presenter', 'all'])
+            ->where('programs.status', 'active')
+            ->where('programs.attendance_status', 'open')
+            ->where(function ($query): void {
+                $query->whereNull('program_student_page_permissions.expires_at')
+                    ->orWhere('program_student_page_permissions.expires_at', '>', now());
+            })
+            ->select(
+                'programs.id',
+                'programs.title',
+                'programs.reference_no',
+                'programs.venue',
+                'programs.starts_at',
+                'programs.ends_at',
+                'programs.attendance_status',
+                'program_student_page_permissions.expires_at'
+            )
+            ->orderByDesc('programs.starts_at')
+            ->get();
+    }
+
+    private function hasProgramPagePermission(int $programId, int $studentId, string $accessType): bool
+    {
+        if (! Schema::hasTable('program_student_page_permissions')) {
+            return false;
+        }
+
+        return DB::table('program_student_page_permissions')
+            ->where('program_id', $programId)
+            ->where('student_id', $studentId)
+            ->whereIn('access_type', [$accessType, 'all'])
+            ->where(function ($query): void {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->exists();
     }
 
     private function distanceMeters(float $lat1, float $lon1, float $lat2, float $lon2): float

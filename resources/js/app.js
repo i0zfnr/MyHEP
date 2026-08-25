@@ -1,6 +1,3 @@
-import Cropper from 'cropperjs';
-import 'cropperjs/dist/cropper.css';
-
 const initializeLiveFilters = () => {
     document.querySelectorAll('[data-live-filter-form]').forEach((form) => {
         if (!(form instanceof HTMLFormElement) || form.dataset.liveFilterReady === 'true') return;
@@ -50,7 +47,7 @@ const initializeLiveFilters = () => {
 };
 
 const registerVirtualTables = () => {
-    document.querySelectorAll('.student-table-wrap, .account-table-wrap, .laptop-table-wrap, .admin-doc-table-wrap, [data-virtual-table]').forEach((wrap) => {
+    document.querySelectorAll('.account-table-wrap, .laptop-table-wrap, .admin-doc-table-wrap, [data-virtual-table]').forEach((wrap) => {
         if (!(wrap instanceof HTMLElement) || wrap.dataset.virtualizedReady === 'true') return;
         if (wrap.hasAttribute('data-no-virtual')) return;
         const table = wrap.querySelector('table');
@@ -1439,7 +1436,17 @@ const registerProfilePhotoCropper = () => {
         }, 320);
     };
 
-    const openCropper = (file) => {
+    let CropperClass = null;
+    const getCropper = async () => {
+        if (!CropperClass) {
+            const module = await import('cropperjs');
+            await import('cropperjs/dist/cropper.css');
+            CropperClass = module.default;
+        }
+        return CropperClass;
+    };
+
+    const openCropper = async (file) => {
         sourceUrl = URL.createObjectURL(file);
         cropImage.src = sourceUrl;
         modal.classList.add('is-open');
@@ -1447,6 +1454,7 @@ const registerProfilePhotoCropper = () => {
         document.body.classList.add('profile-crop-open');
         updateStatusPill('checking', getLocalizedText('textEvaluating', 'Evaluating Face...'));
 
+        const Cropper = await getCropper();
         cropper = new Cropper(cropImage, {
             aspectRatio: 1,
             viewMode: 1,

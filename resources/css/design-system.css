@@ -225,29 +225,28 @@ html.se-theme-switching *::after {
 
 /* Navigation must remain readable regardless of the user's content-glass level. */
 @media (max-width: 1023px) {
+    .app-layout .sidebar {
+        background: var(--se-surface, #fdfbf7) !important;
+        box-shadow: 10px 0 34px rgba(44,34,26,.18) !important;
+        transform: translate3d(-100%, 0, 0);
+        transition: transform 220ms cubic-bezier(.16, 1, .3, 1) !important;
+        will-change: transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
     .app-layout .sidebar.is-open {
-        background:
-            linear-gradient(180deg,rgba(255,255,255,.38),transparent 42%),
-            color-mix(in srgb,var(--se-surface) 96%,var(--se-bg)) !important;
-        -webkit-backdrop-filter:blur(8px) saturate(108%) !important;
-        backdrop-filter:blur(8px) saturate(108%) !important;
-        box-shadow:10px 0 34px rgba(44,34,26,.2) !important;
+        transform: translate3d(0, 0, 0) !important;
     }
 
-    body[data-theme="dark"] .app-layout .sidebar.is-open {
-        background:
-            radial-gradient(22rem circle at -12% 5%,color-mix(in srgb,var(--se-primary) 16%,transparent),transparent 64%),
-            radial-gradient(19rem circle at 112% 82%,color-mix(in srgb,var(--se-atmosphere-secondary) 11%,transparent),transparent 66%),
-            linear-gradient(145deg,rgba(255,255,255,.065),transparent 46%),
-            color-mix(in srgb,var(--se-surface) 90%,#080706) !important;
-        -webkit-backdrop-filter:blur(12px) saturate(120%) !important;
-        backdrop-filter:blur(12px) saturate(120%) !important;
-        border-right-color:color-mix(in srgb,var(--se-primary) 22%,var(--se-border)) !important;
-        box-shadow:10px 0 34px rgba(0,0,0,.42),inset -1px 0 0 rgba(255,255,255,.055) !important;
+    body[data-theme="dark"] .app-layout .sidebar {
+        background: #191512 !important;
+        border-right-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 10px 0 34px rgba(0,0,0,.45) !important;
     }
 
-    .app-layout .sidebar.is-open :is(.nav-link,.nav-group-toggle,.sb-brand-name,.sb-user-name) {
-        text-shadow:none !important;
+    .app-layout .sidebar :is(.nav-link,.nav-group-toggle,.sb-brand-name,.sb-user-name) {
+        text-shadow: none !important;
     }
 }
 
@@ -509,20 +508,18 @@ body[data-theme="dark"] .app-layout .page-body {
 /* Top bar and page title */
 .app-layout .topbar,
 .app-layout .page-header {
-    background: rgba(255, 255, 255, .88) !important;
-    border-color: var(--se-border) !important;
-    box-shadow: 0 8px 24px rgba(73, 50, 29, .07) !important;
-    backdrop-filter: blur(18px) saturate(145%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+    background: var(--se-surface, #fdfbf7) !important;
+    border-color: var(--se-border, rgba(234, 223, 210, 0.8)) !important;
+    box-shadow: 0 4px 20px rgba(73, 50, 29, .06), inset 0 1px 0 rgba(255, 255, 255, .82) !important;
 }
 
 html[data-theme="dark"] .app-layout .topbar,
 html[data-theme="dark"] .app-layout .page-header,
 body[data-theme="dark"] .app-layout .topbar,
 body[data-theme="dark"] .app-layout .page-header {
-    background: rgba(14, 13, 12, .92) !important;
-    border-color: var(--se-border) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .24) !important;
+    background: var(--se-surface, #171513) !important;
+    border-color: var(--se-border, rgba(226, 209, 192, .14)) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
 }
 
 .app-layout .page-header {
@@ -2108,28 +2105,36 @@ html[data-theme="dark"] .app-layout .sb-user {
 
 /* Liquid Glass enhancement inspired by Apple's adaptive material principles. */
 .app-layout .topbar,
-.app-layout .page-header,
-.app-layout .app-footer {
-    background:
-        linear-gradient(135deg, var(--liquid-highlight), transparent 44%),
-        color-mix(in srgb, var(--se-surface) 94%, transparent) !important;
-    border-color: var(--liquid-stroke-soft) !important;
+.app-layout .page-header {
+    background: linear-gradient(135deg, rgba(255, 252, 247, var(--glass-opacity, 0.78)), rgba(250, 246, 240, calc(var(--glass-opacity, 0.78) * 0.85))) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border-color: rgba(255, 255, 255, 0.78) !important;
     box-shadow:
-        0 12px 34px rgba(73, 50, 29, .10),
-        inset 0 1px 0 var(--liquid-stroke) !important;
-    backdrop-filter: blur(28px) saturate(165%) contrast(104%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(165%) contrast(104%) !important;
+        0 8px 32px rgba(73, 50, 29, .06),
+        inset 0 1px 0 rgba(255, 255, 255, .82) !important;
+}
+.app-layout .app-footer {
+    background: transparent !important;
+    border-color: var(--se-border) !important;
+    box-shadow: none !important;
 }
 
 html[data-theme="dark"] .app-layout .topbar,
-html[data-theme="dark"] .app-layout .page-header,
-html[data-theme="dark"] .app-layout .app-footer,
-body[data-theme="dark"] .app-layout .topbar,
-body[data-theme="dark"] .app-layout .page-header,
-body[data-theme="dark"] .app-layout .app-footer {
+html[data-theme="dark"] .app-layout .page-header {
+    background: linear-gradient(135deg, rgba(28, 24, 21, var(--glass-opacity, 0.82)), rgba(18, 15, 13, calc(var(--glass-opacity, 0.82) * 0.9))) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border-color: rgba(226, 209, 192, .14) !important;
     box-shadow:
-        0 14px 38px rgba(0, 0, 0, .30),
-        inset 0 1px 0 var(--liquid-highlight) !important;
+        0 8px 32px rgba(0, 0, 0, .30),
+        inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+html[data-theme="dark"] .app-layout .app-footer,
+body[data-theme="dark"] .app-layout .app-footer {
+    background: transparent !important;
+    border-color: rgba(226, 209, 192, .12) !important;
+    box-shadow: none !important;
 }
 
 .app-layout :where(.header-support, .header-user, .header-user-menu),
@@ -3487,38 +3492,22 @@ html:not([data-theme="dark"]) body:not([data-theme="dark"]) .page-body :is(.rule
 /* Frosted shell for navigation and every transient popup surface. */
 .app-layout .sidebar {
     isolation: isolate;
-    background:
-        radial-gradient(140% 85% at -12% -4%, rgba(255, 255, 255, .88), transparent 50%),
-        radial-gradient(90% 65% at 108% 4%, var(--liquid-glow), transparent 64%),
-        linear-gradient(145deg, var(--liquid-shell-strong), var(--liquid-shell)) !important;
-    border-right-color: color-mix(in srgb, var(--liquid-rim) 72%, var(--se-primary-muted)) !important;
+    background: #fdfbf7 !important;
+    border-right-color: var(--se-border) !important;
     box-shadow:
         18px 0 60px rgba(73, 50, 29, .14),
-        inset -1px 0 0 rgba(255, 255, 255, .46),
-        inset 0 1px 0 var(--liquid-rim) !important;
-    backdrop-filter: blur(34px) saturate(185%) contrast(104%) !important;
-    -webkit-backdrop-filter: blur(34px) saturate(185%) contrast(104%) !important;
+        inset -1px 0 0 rgba(255, 255, 255, .46) !important;
 }
 
 .app-layout .sidebar::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background:
-        linear-gradient(112deg, rgba(255, 255, 255, .34), transparent 28%, transparent 72%, rgba(255, 255, 255, .12)),
-        radial-gradient(340px 220px at 20% 12%, var(--liquid-glow), transparent 72%);
+    display: none;
 }
 
 /* Let the light sidebar follow the selected glass strength instead of being
    washed out by the fixed white highlight used by the shared shell. */
 html[data-theme="light"] .app-layout .sidebar,
 body[data-theme="light"] .app-layout .sidebar {
-    background:
-        radial-gradient(140% 85% at -12% -4%, rgb(255 255 255 / calc(var(--glass-opacity) + .20)), transparent 52%),
-        radial-gradient(90% 65% at 108% 4%, var(--liquid-glow), transparent 64%),
-        linear-gradient(145deg, var(--liquid-shell-strong), var(--liquid-shell)) !important;
+    background: #fdfbf7 !important;
 }
 
 html[data-theme="light"] .app-layout .sidebar::before,
@@ -3595,9 +3584,11 @@ body[data-theme="light"] .app-layout .sidebar::before {
 }
 
 .app-layout .sb-overlay {
-    background: rgba(18, 13, 9, .28) !important;
-    backdrop-filter: blur(14px) saturate(115%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+    background: rgba(18, 13, 9, .42) !important;
+}
+
+body[data-theme="dark"] .app-layout .sb-overlay {
+    background: rgba(0, 0, 0, .58) !important;
 }
 
 :is(.confirm-modal, .se-media-modal) {
@@ -3689,14 +3680,11 @@ body[data-theme="light"] .app-layout .sidebar::before {
 
 html[data-theme="dark"] .app-layout .sidebar,
 body[data-theme="dark"] .app-layout .sidebar {
-    background:
-        radial-gradient(120% 78% at -12% -4%, rgba(255, 255, 255, .11), transparent 48%),
-        radial-gradient(90% 65% at 108% 4%, var(--liquid-glow), transparent 64%),
-        linear-gradient(145deg, var(--liquid-shell-strong), var(--liquid-shell)) !important;
+    background: #171412 !important;
+    border-right-color: rgba(226, 209, 192, .14) !important;
     box-shadow:
         18px 0 64px rgba(0, 0, 0, .46),
-        inset -1px 0 0 rgba(255, 239, 215, .08),
-        inset 0 1px 0 var(--liquid-rim) !important;
+        inset -1px 0 0 rgba(255, 239, 215, .08) !important;
 }
 
 /* System-admin consistency layer. Older modules used fixed brown or blue
@@ -4831,14 +4819,32 @@ body[data-theme="dark"] .app-layout .page-body {
 }
 
 .app-layout .topbar,
-.app-layout .page-header,
+.app-layout .page-header {
+    background: linear-gradient(135deg, rgba(255, 252, 247, var(--glass-opacity, 0.78)), rgba(250, 246, 240, calc(var(--glass-opacity, 0.78) * 0.85))) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border-color: rgba(255, 255, 255, 0.78) !important;
+    box-shadow: 0 4px 20px rgba(73, 50, 29, .06), inset 0 1px 0 rgba(255, 255, 255, .82) !important;
+}
 .app-layout .app-footer {
-    background:
-        linear-gradient(135deg, var(--liquid-highlight), transparent 44%),
-        var(--liquid-shell) !important;
-    box-shadow: var(--liquid-shadow) !important;
-    backdrop-filter: blur(28px) saturate(180%) brightness(1.08) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.08) !important;
+    background: transparent !important;
+    border-color: var(--se-border) !important;
+    box-shadow: none !important;
+}
+
+html[data-theme="dark"] .app-layout .topbar,
+html[data-theme="dark"] .app-layout .page-header {
+    background: linear-gradient(135deg, rgba(28, 24, 21, var(--glass-opacity, 0.82)), rgba(18, 15, 13, calc(var(--glass-opacity, 0.82) * 0.9))) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border-color: rgba(226, 209, 192, .14) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+html[data-theme="dark"] .app-layout .app-footer,
+body[data-theme="dark"] .app-layout .app-footer {
+    background: transparent !important;
+    border-color: rgba(226, 209, 192, .12) !important;
+    box-shadow: none !important;
 }
 
 .page-body :where(.ui-card, .card, .portal-card, .stat-card, .stat, .data-card, .monitor-card, .monitor-kpi, .settings-card, .filter-card, .form-card, .maint-card, .summary-card, .bugs-card, .bugs-stat, .mv-kpi, .mv-live-kpi, .ann-stat) {
@@ -5594,9 +5600,9 @@ body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab.active .mobile-nav-i
     .app-layout .page-header,
     .main-wrap.has-sidebar .page-header,
     .main-wrap.no-sidebar .page-header {
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 990 !important;
+        position: relative !important;
+        top: auto !important;
+        z-index: 10 !important;
     }
 
     .app-layout .topbar.is-user-menu-open {
@@ -6017,8 +6023,7 @@ body[data-theme="dark"] .glass-range::-moz-range-thumb {
 }
 
 /* Page surfaces share the same live material while retaining their own borders and shadows. */
-.page-body :is(.ui-card, .card, .portal-card, .stat-card, .data-card, .panel, .settings-panel, .monitor-card, .monitor-kpi, .bugs-card, .settings-option, .ui-stat-card),
-.page-header {
+.page-body :is(.ui-card, .card, .portal-card, .stat-card, .data-card, .panel, .settings-panel, .monitor-card, .monitor-kpi, .bugs-card, .settings-option, .ui-stat-card) {
     background: var(--liquid-surface-strong) !important;
 }
 
@@ -6039,8 +6044,7 @@ body[data-theme="dark"] .page-body :is(
     .ui-card, .card, .portal-card, .stat-card, .data-card, .panel,
     .settings-panel, .monitor-card, .monitor-kpi, .bugs-card,
     .settings-option, .ui-stat-card
-),
-body[data-theme="dark"] .page-header {
+) {
     border-color: color-mix(in srgb, var(--se-primary) 22%, var(--liquid-stroke-soft)) !important;
     background:
         radial-gradient(24rem circle at 100% -12%, color-mix(in srgb, var(--se-atmosphere-primary) 12%, transparent), transparent 64%),
@@ -6108,10 +6112,7 @@ body[data-theme="dark"] .app-layout .sb-user {
 }
 
 body[data-theme="dark"] .app-layout .sidebar {
-    background:
-        radial-gradient(30rem circle at 20% 8%, color-mix(in srgb, var(--se-atmosphere-primary) 22%, transparent), transparent 62%),
-        radial-gradient(26rem circle at 90% 72%, color-mix(in srgb, var(--se-atmosphere-secondary) 16%, transparent), transparent 66%),
-        var(--liquid-shell) !important;
+    background: #171412 !important;
 }
 
 /* Lightweight Liquid Glass settings cards: blur the shared panel once and

@@ -2,263 +2,7 @@
 
 @section('title', 'Senarai Pelajar')
 
-@push('styles')
-<style>
-    .page-body > .student-list-wrap {
-        width: 100% !important;
-        max-width: none !important;
-        margin: 0 !important;
-    }
-    .card { background:#fff; border:1px solid #ede4d9; border-radius:12px; overflow:hidden; }
-    .stats { display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:12px; }
-    @media (min-width: 900px) { .stats { grid-template-columns:repeat(3,1fr); } }
-    .stat { background:#fff; border:1px solid #ede4d9; border-radius:12px; padding:12px 14px; }
-    .stat-link { text-decoration:none; display:block; transition:transform .15s, box-shadow .15s; }
-    .stat-link:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(164,141,120,.12); }
-    .stat-label { font-size:11px; color:#7a6555; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
-    .stat-value { font-size:26px; font-weight:700; color:#2d1f14; line-height:1; }
-    .head { padding:12px 16px; border-bottom:1px solid #ede4d9; display:flex; justify-content:space-between; align-items:center; gap:10px; }
-    .filters { padding: 12px 16px; border-bottom:1px solid #ede4d9; background:#fcfaf8; }
-    .filter-grid { display:grid; grid-template-columns:1fr; gap:8px; }
-    @media (min-width: 900px) { .filter-grid { grid-template-columns: 1.4fr 1fr 1.2fr 1fr auto; } }
-    .filters input, .filters select { width:100%; border:1px solid #e5d8c8; border-radius:8px; padding:8px 10px; font-size:13px; background:#fff; }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:8px 10px; border-bottom:1px solid #f0e7dc; font-size:12px; text-align:left; vertical-align:middle; }
-    th { font-size:11px; text-transform:uppercase; color:#7a6555; letter-spacing:.05em; background:#faf7f4; }
-    .btn { display:inline-block; border:1px solid #cbb9a4; background:#fff; color:#8a7362; border-radius:8px; padding:7px 10px; text-decoration:none; font-weight:600; font-size:12px; cursor:pointer; }
-    .btn-danger { border-color:#fecaca; color:#b91c1c; background:#fef2f2; }
-    .btn-warn { border-color:#fed7aa; color:#b45309; background:#fff7ed; }
-    .pwd-badge { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:700; border:1px solid #ede4d9; }
-    .pwd-default { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .pwd-custom { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
-    .ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:10px; font-size:13px; }
-    .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:10px; font-size:13px; }
-    .actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
-    .import-panel { margin-bottom:12px; padding:14px 16px; }
-    .import-grid { display:grid; grid-template-columns:1fr; gap:10px; align-items:end; }
-    @media (min-width: 900px) { .import-grid { grid-template-columns:1.5fr auto; } }
-    .import-panel label { display:block; margin-bottom:6px; font-size:13px; font-weight:700; color:#7a6555; }
-    .import-panel input[type=file] { width:100%; border:1px solid #e5d8c8; border-radius:10px; padding:8px; background:#fffdfb; }
-    .import-hint { margin-top:8px; color:#7a6555; font-size:12px; line-height:1.55; }
-    .import-summary { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; margin-top:12px; }
-    @media (min-width: 760px) { .import-summary { grid-template-columns:repeat(4, minmax(0,1fr)); } }
-    .import-summary div { border:1px solid #eadfce; border-radius:10px; padding:10px; background:#fcfaf8; }
-    .import-summary span { display:block; font-size:11px; text-transform:uppercase; font-weight:800; color:#7a6555; }
-    .import-summary strong { display:block; margin-top:3px; font-size:18px; color:#2d1f14; }
-    .error-list { margin:10px 0 0; padding-left:18px; color:#991b1b; font-size:12px; line-height:1.5; }
-    .bulk-delete { margin-bottom:12px; border:1px solid #fecaca; border-radius:12px; background:#fff7f7; overflow:hidden; }
-    .bulk-delete summary { padding:11px 14px; color:#991b1b; font-size:13px; font-weight:800; cursor:pointer; }
-    .bulk-delete form { display:flex; gap:8px; align-items:center; padding:0 14px 14px; }
-    .bulk-delete input { flex:1; }
-    .student-name { font-weight:700; color:var(--se-text); }
-    .student-identity { display:flex; align-items:center; gap:.7rem; min-width:0; }
-    .student-avatar { position:relative; flex:0 0 auto; display:grid; width:34px; height:34px; place-items:center; overflow:hidden; border:1px solid var(--admin-line); border-radius:50%; background:linear-gradient(135deg,#f1e4d5,#c7a98b); color:#513b2a; font-size:.7rem; font-weight:900; letter-spacing:.03em; }
-    .student-avatar img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#fff; }
-    .student-name-block { min-width:0; }
-    .student-sub { display:none; margin-top:3px; color:var(--se-text-soft); font-size:11px; line-height:1.35; }
-    .matric-cell { color:var(--se-text); white-space:nowrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    .student-head-actions { display:flex; gap:8px; flex-wrap:wrap; }
-    .student-scroll-hint { display:none; margin:0; padding:8px 10px; border-bottom:1px solid var(--se-border); background:var(--se-surface-soft); color:var(--se-text-muted); font-size:.72rem; font-weight:650; }
-    .student-table-wrap { max-width:100%; overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:thin; scrollbar-color:var(--se-border-strong) transparent; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y; }
-    html[data-theme="dark"] .students-table .student-name { color:#f7f1e8 !important; }
-    html[data-theme="dark"] .students-table .student-sub { color:#cbbba9 !important; }
-    html[data-theme="dark"] .students-table .matric-cell { color:#f0e3d1 !important; }
-        /* Admin UX Identity v2 */
-    :root {
-        --admin-ink: #241a12;
-        --admin-muted: #7b6757;
-        --admin-line: #eadfce;
-        --admin-soft: #f8f2ea;
-        --admin-accent: #8f6f52;
-        --admin-accent-2: #c7a98b;
-        --admin-glow: rgba(143, 111, 82, 0.18);
-    }
-    body {
-        background:
-            radial-gradient(1200px 480px at -10% -15%, #efe3d6 0%, transparent 55%),
-            radial-gradient(900px 360px at 110% -10%, #f4eadf 0%, transparent 52%),
-            linear-gradient(180deg, #faf7f2 0%, #f6f1ea 100%);
-    }
-    .wrap {
-        width: 100%;
-        max-width: none;
-        position: relative;
-        isolation: isolate;
-    }
-    .wrap > * + * {
-        margin-top: 1rem;
-    }
-    .card,
-    .panel {
-        border: 1px solid var(--admin-line);
-        border-radius: 16px;
-        background: linear-gradient(180deg, #fff 0%, #fffdfa 100%);
-        box-shadow:
-            0 1px 2px rgba(36, 26, 18, 0.07),
-            0 10px 26px rgba(61, 46, 34, 0.06);
-        overflow: hidden;
-        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
-    }
-    .card:hover,
-    .panel:hover {
-        transform: translateY(-2px);
-        border-color: #dfccb6;
-        box-shadow:
-            0 4px 14px rgba(36, 26, 18, 0.10),
-            0 18px 34px rgba(61, 46, 34, 0.10);
-    }
-    .head,
-    .card h2 {
-        position: relative;
-        border-bottom: 1px solid var(--admin-line);
-        background:
-            linear-gradient(180deg, #fff 0%, #fbf5ee 100%);
-    }
-    .head::before,
-    .card h2::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        background: linear-gradient(180deg, var(--admin-accent) 0%, var(--admin-accent-2) 100%);
-    }
-    .head h1,
-    .card h2 {
-        color: var(--admin-ink);
-        letter-spacing: 0.01em;
-    }
-    .btn {
-        border-radius: 10px;
-        border: 1px solid #ceb79f;
-        background: linear-gradient(180deg, #ffffff 0%, #f9f3ec 100%);
-        color: #6e5745;
-        font-weight: 700;
-        transition: transform 170ms ease, box-shadow 170ms ease, background-color 170ms ease, border-color 170ms ease, color 170ms ease;
-    }
-    .btn:hover {
-        transform: translateY(-1px);
-        border-color: #bb9c7d;
-        color: #5d4737;
-        box-shadow: 0 8px 18px rgba(98, 74, 53, 0.14);
-    }
-    .btn:focus-visible {
-        outline: none;
-        box-shadow: 0 0 0 4px var(--admin-glow);
-    }
-    .btn-primary {
-        border-color: #7f6249 !important;
-        background: linear-gradient(135deg, #8f6f52 0%, #c0a183 100%) !important;
-        color: #fff !important;
-    }
-    .btn-primary:hover {
-        border-color: #6f533e !important;
-        background: linear-gradient(135deg, #7a5e46 0%, #b08f70 100%) !important;
-    }
-    input,
-    select,
-    textarea {
-        border-color: #dfceb9 !important;
-        background: #fffdfb;
-        color: var(--admin-ink);
-        transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
-    }
-    input::placeholder,
-    textarea::placeholder {
-        color: #9e8a78;
-    }
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: #b69372 !important;
-        box-shadow: 0 0 0 4px rgba(182, 147, 114, 0.19);
-        outline: none;
-        background: #fff;
-    }
-    .filters {
-        background: linear-gradient(180deg, #fffdfb 0%, #faf4ed 100%);
-        border-top: 1px solid #efe4d8;
-        border-bottom: 1px solid #efe4d8;
-    }
-    table {
-        width: 100%;
-    }
-    th {
-        background: #f9f1e8 !important;
-        color: #7b6757 !important;
-        letter-spacing: 0.06em;
-    }
-    table tbody tr {
-        transition: background-color 140ms ease;
-    }
-    table tbody tr:hover {
-        background: #fcf7f1;
-    }
-    .ok,
-    .msg-ok {
-        border-radius: 12px;
-        border-color: #b8e5c7 !important;
-    }
-    .err,
-    .error,
-    .msg-err {
-        border-radius: 12px;
-    }
-    @media (max-width: 980px) {
-        .head {
-            align-items: flex-start;
-        }
-        .head > div,
-        .head form {
-            width: 100%;
-        }
-        .head .btn {
-            width: auto;
-        }
-    }
-    @media (max-width: 760px) {
-        .wrap { width:100%; }
-        .stats { grid-template-columns:repeat(3, minmax(0,1fr)) !important; gap:6px; margin-bottom:8px; }
-        .stat { padding:8px 9px; border-radius:10px; }
-        .stat-label { font-size:9px; line-height:1.2; }
-        .stat-value { font-size:18px; }
-        .import-panel { padding:10px; margin-bottom:8px; }
-        .import-hint { display:none; }
-        .head { padding:9px 10px; }
-        .head h1 { font-size:16px !important; }
-        .head .btn { padding:7px 9px; }
-        .filters { padding:9px 10px; }
-        .filter-grid { gap:7px; }
-        .filters input, .filters select { padding:7px 9px; font-size:12px; }
-        .head { display:grid; grid-template-columns:1fr; gap:9px; }
-        .student-head-actions { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px !important; }
-        .student-head-actions .btn { width:100% !important; min-height:38px; display:flex; align-items:center; justify-content:center; text-align:center; }
-        .student-head-actions .btn:last-child:nth-child(odd) { grid-column:1 / -1; }
-        .student-scroll-hint { display:flex; align-items:center; gap:6px; }
-        .student-scroll-hint::before { content:'↔'; color:var(--se-primary-strong); font-size:.9rem; }
-        .student-table-wrap { overflow-x:auto !important; }
-        .students-table { table-layout:fixed; min-width:520px; }
-        .students-table th, .students-table td { padding:8px 9px !important; font-size:12px !important; }
-        .students-table th:nth-child(1), .students-table td:nth-child(1) { width:48%; }
-        .students-table th:nth-child(2), .students-table td:nth-child(2) { width:32%; }
-        .students-table th:nth-child(7), .students-table td:nth-child(7) { width:20%; }
-        .student-sub { display:block; }
-        .student-avatar { width:30px; height:30px; }
-        .col-ic, .col-phone, .col-password, .col-program { display:none; }
-        .matric-cell { white-space:normal; overflow-wrap:anywhere; font-size:11px !important; }
-        .actions-cell { justify-content:flex-end; }
-        .actions-cell .btn { padding:6px 8px; font-size:11px; }
-        .actions-cell form, .actions-cell .manage-action { display:none; }
-        .student-pagination { margin-top:8px !important; }
-        .student-pagination .se-pagination { padding:8px 9px; }
-        .student-pagination .se-pagination-summary { display:none; }
-        .student-pagination .se-pagination-controls { justify-content:space-between; width:100%; }
-        .student-pagination .se-pagination-pages { display:none; }
-        .student-pagination .se-page-nav { min-height:34px; padding:7px 10px; font-size:12px; }
-    }
-</style>
-@endpush
+
 
 @section('header')
     <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Pelajar') }}</h2>
@@ -274,99 +18,195 @@
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
     @if(session('auth_user.admin_role') === 'system_admin')
-        <details class="bulk-delete">
-            <summary>{{ __('Danger zone: delete every student record') }}</summary>
-            <form method="POST" action="{{ route('admin.students.destroy-all') }}" data-confirm-title="{{ __('Delete all student data') }}" data-confirm-message="This permanently deletes every student, their documents, photos, sessions, scholarship, discipline, and movement records. This cannot be undone." data-confirm-action="Delete All Students" data-confirm-tone="danger">
-                @csrf
-                @method('DELETE')
-                <input name="confirmation" required autocomplete="off" placeholder="{{ __('Type DELETE ALL STUDENTS to confirm') }}" aria-label="{{ __('Confirmation') }}">
-                <button class="btn btn-danger" type="submit">{{ __('Delete All Students') }}</button>
-            </form>
+        <details class="student-danger-zone">
+            <summary class="danger-zone-summary">
+                <div class="danger-zone-summary-left">
+                    <span class="danger-icon-badge" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </span>
+                    <div class="danger-title-group">
+                        <strong class="danger-zone-title">{{ __('Danger Zone: Padam Semua Rekod Pelajar') }}</strong>
+                        <span class="danger-zone-sub">{{ __('Tindakan kekal yang tidak boleh diundur') }}</span>
+                    </div>
+                </div>
+                <div class="danger-zone-summary-right">
+                    <span class="danger-pill-tag">{{ __('Perhatian') }}</span>
+                    <svg class="danger-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+            </summary>
+            <div class="danger-zone-content">
+                <p class="danger-warning-msg">
+                    <strong>{{ __('Amaran Kritikal:') }}</strong> {{ __('Tindakan ini akan memadam semua data pelajar, dokumen, foto, sesi, rekod biasiswa, disiplin, dan pergerakan secara kekal.') }}
+                </p>
+                <form class="danger-zone-form" method="POST" action="{{ route('admin.students.destroy-all') }}" data-confirm-title="{{ __('Delete all student data') }}" data-confirm-message="This permanently deletes every student, their documents, photos, sessions, scholarship, discipline, and movement records. This cannot be undone." data-confirm-action="Delete All Students" data-confirm-tone="danger">
+                    @csrf
+                    @method('DELETE')
+                    <div class="danger-form-row">
+                        <input class="danger-confirm-input" name="confirmation" required autocomplete="off" placeholder="{{ __('Taip DELETE ALL STUDENTS untuk sahkan') }}" aria-label="{{ __('Confirmation') }}">
+                        <button class="btn-danger-submit" type="submit">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>{{ __('Padam Semua Pelajar') }}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </details>
     @endif
 
     @if($canManageStudents)
-        <div class="card import-panel">
-            <form method="POST" action="{{ route('admin.students.import') }}" enctype="multipart/form-data">
-                @csrf
-                <div class="import-grid">
+        <div class="card student-import-card">
+            <div class="import-card-head">
+                <div class="import-head-title-wrap">
+                    <span class="import-head-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </span>
                     <div>
-                        <label for="student_file">{{ __('Import & Update Student Data') }}</label>
-                        <input id="student_file" type="file" name="student_file" accept=".csv,.txt,.xlsx" required>
-                        <div class="import-hint">
-                            {{ __('Upload an updated list of students in CSV or Excel format up to 50 MB. New students will be added, while existing matching records by IC Number or Matric Number will be updated, including Semester and Academic Session. Supported headers include Student Name, IC Number, Matric Number, Program Name, Phone, Email, Semester, and Academic Session.') }}
+                        <h3 class="import-card-title">{{ __('Import & Kemaskini Data Pelajar') }}</h3>
+                        <p class="import-card-subtitle">{{ __('Muat naik fail senarai pelajar (.CSV, .XLSX) sehingga 50 MB') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="import-card-body">
+                <form method="POST" action="{{ route('admin.students.import') }}" enctype="multipart/form-data" class="student-import-form">
+                    @csrf
+                    <div class="import-form-grid">
+                        <div class="import-file-section">
+                            <label class="import-file-dropzone" for="student_file">
+                                <span class="dropzone-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                </span>
+                                <div class="dropzone-text">
+                                    <span class="dropzone-label-primary">{{ __('Pilih atau seret fail ke sini') }}</span>
+                                    <span class="dropzone-label-sub" id="student_file_chosen">{{ __('Format disokong: .CSV, .XLSX, .TXT') }}</span>
+                                </div>
+                                <span class="dropzone-btn">{{ __('Pilih Fail') }}</span>
+                                <input id="student_file" type="file" name="student_file" accept=".csv,.txt,.xlsx" required onchange="document.getElementById('student_file_chosen').textContent = this.files[0] ? this.files[0].name : 'Format disokong: .CSV, .XLSX, .TXT';">
+                            </label>
+
+                            <div class="import-supported-tags">
+                                <span class="import-tags-label">{{ __('Lajur Disokong:') }}</span>
+                                <span class="import-tag">Nama Pelajar</span>
+                                <span class="import-tag">No IC</span>
+                                <span class="import-tag">No Matrik</span>
+                                <span class="import-tag">Program</span>
+                                <span class="import-tag">Telefon</span>
+                                <span class="import-tag">Emel</span>
+                                <span class="import-tag">Semester</span>
+                                <span class="import-tag">Sesi Akademik</span>
+                            </div>
+                        </div>
+
+                        <div class="import-action-section">
+                            <button class="btn-import-submit" type="submit">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span>{{ __('Import & Kemaskini') }}</span>
+                            </button>
                         </div>
                     </div>
-                    <button class="btn btn-primary" type="submit">{{ __('Import & Update') }}</button>
-                </div>
-            </form>
+                </form>
 
-            @if(session('import_result'))
-                @php($result = session('import_result'))
-                <div class="import-summary">
-                    <div><span>{{ __('Total rows') }}</span><strong>{{ $result['total_rows'] ?? 0 }}</strong></div>
-                    <div><span>{{ __('Created') }}</span><strong>{{ $result['students_created'] ?? 0 }}</strong></div>
-                    <div><span>{{ __('Updated') }}</span><strong>{{ $result['students_updated'] ?? 0 }}</strong></div>
-                    <div><span>{{ __('Skipped') }}</span><strong>{{ $result['skipped'] ?? 0 }}</strong></div>
-                </div>
-                @if(!empty($result['errors']))
-                    <ul class="error-list">
-                        @foreach($result['errors'] as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                @if(session('import_result'))
+                    @php($result = session('import_result'))
+                    <div class="import-summary-grid">
+                        <div class="import-summary-stat">
+                            <span class="stat-lbl">{{ __('Jumlah Baris') }}</span>
+                            <strong class="stat-val">{{ number_format($result['total_rows'] ?? 0) }}</strong>
+                        </div>
+                        <div class="import-summary-stat is-success">
+                            <span class="stat-lbl">{{ __('Pelajar Baharu') }}</span>
+                            <strong class="stat-val">{{ number_format($result['students_created'] ?? 0) }}</strong>
+                        </div>
+                        <div class="import-summary-stat is-info">
+                            <span class="stat-lbl">{{ __('Dikemaskini') }}</span>
+                            <strong class="stat-val">{{ number_format($result['students_updated'] ?? 0) }}</strong>
+                        </div>
+                        <div class="import-summary-stat is-muted">
+                            <span class="stat-lbl">{{ __('Dilangkau') }}</span>
+                            <strong class="stat-val">{{ number_format($result['skipped'] ?? 0) }}</strong>
+                        </div>
+                    </div>
+                    @if(!empty($result['errors']))
+                        <div class="import-errors-box">
+                            <h5 class="import-errors-title">{{ __('Ralat Semasa Import:') }}</h5>
+                            <ul class="error-list">
+                                @foreach($result['errors'] as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 @endif
-            @endif
+            </div>
         </div>
     @endif
 
-    <div class="stats">
-        <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page', 'password_status'), ['password_status' => ''])) }}">
+    <div class="stats student-stats-grid">
+        <a class="stat stat-link {{ empty($filters['password_status']) ? 'is-active' : '' }}" href="{{ route('admin.students.index', array_merge(request()->except('page', 'password_status'), ['password_status' => ''])) }}">
             <div class="stat-label">{{ __('Total Pelajar') }}</div>
-            <div class="stat-value">{{ $studentStats['total'] }}</div>
+            <div class="stat-value">{{ number_format($studentStats['total']) }}</div>
         </a>
         @if($canViewSensitiveStudents)
-            <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'default'])) }}">
+            <a class="stat stat-link {{ ($filters['password_status'] ?? '') === 'default' ? 'is-active' : '' }}" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'default'])) }}">
                 <div class="stat-label">{{ __('Default IC') }}</div>
-                <div class="stat-value">{{ $studentStats['default_ic'] }}</div>
+                <div class="stat-value">{{ number_format($studentStats['default_ic']) }}</div>
             </a>
-            <a class="stat stat-link" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'custom'])) }}">
+            <a class="stat stat-link {{ ($filters['password_status'] ?? '') === 'custom' ? 'is-active' : '' }}" href="{{ route('admin.students.index', array_merge(request()->except('page'), ['password_status' => 'custom'])) }}">
                 <div class="stat-label">{{ __('Custom Password') }}</div>
-                <div class="stat-value">{{ $studentStats['custom_password'] }}</div>
+                <div class="stat-value">{{ number_format($studentStats['custom_password']) }}</div>
             </a>
         @endif
     </div>
 
-    <div class="card">
-        <div class="head">
-            <h1 style="margin:0;font-size:20px;">{{ __('Senarai Pelajar') }}</h1>
+    <div class="card student-card">
+        <div class="head student-list-head">
+            <div class="student-head-title-wrap">
+                <h1 class="student-list-title">{{ __('Senarai Pelajar') }}</h1>
+                <span class="student-list-count">{{ number_format($studentStats['total']) }} {{ __('rekod') }}</span>
+            </div>
             <div class="student-head-actions">
-                <a class="btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                <a class="btn-head-action" href="{{ route('admin.dashboard') }}">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>{{ __('Dashboard') }}</span>
+                </a>
                 @if($canExportStudents)
-                    <a class="btn" href="{{ route('admin.students.export', request()->query()) }}">{{ __('Export CSV') }}</a>
+                    <a class="btn-head-action" href="{{ route('admin.students.export', request()->query()) }}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>{{ __('Export CSV') }}</span>
+                    </a>
                 @endif
                 @if($canManageStudents)
-                    <form method="POST" action="{{ route('admin.students.photos.destroy-all') }}" onsubmit="return confirm('{{ __('Are you sure you want to delete all student profile photos? Student records will remain and they will be prompted to upload fresh formal matric card photos.') }}');" style="display:inline;">
+                    <form method="POST" action="{{ route('admin.students.photos.destroy-all') }}" onsubmit="return confirm('{{ __('Are you sure you want to delete all student profile photos? Student records will remain and they will be prompted to upload fresh formal matric card photos.') }}');" style="display:inline-flex;margin:0;">
                         @csrf
                         @method('DELETE')
-                        <button class="btn btn-warn" type="submit" style="display:inline-flex;align-items:center;gap:4px;" title="{{ __('Delete all student profile photos to require uploading new formal matric card photos') }}">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                            {{ __('Delete All Photos') }}
+                        <button class="btn-head-action warn" type="submit" title="{{ __('Delete all student profile photos to require uploading new formal matric card photos') }}">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            <span>{{ __('Delete All Photos') }}</span>
                         </button>
                     </form>
-                    <a class="btn" href="{{ route('admin.students.create') }}">{{ __('Tambah Pelajar') }}</a>
+                    <a class="btn-head-action primary" href="{{ route('admin.students.create') }}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>{{ __('Tambah Pelajar') }}</span>
+                    </a>
                 @endif
             </div>
         </div>
 
-        <div class="filters" data-filter-sheet data-filter-title="{{ __('Student filters') }}">
+        <div class="filters student-filters-bar" data-filter-sheet data-filter-title="{{ __('Student filters') }}">
             <form method="GET" action="{{ route('admin.students.index') }}" data-live-filter-form data-live-filter-delay="350">
-                <div class="filter-grid">
-                    <div><input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ $canViewSensitiveStudents ? __('Cari nama / IC') : __('Cari nama') }}"></div>
-                    <div><input type="text" name="matric_no" value="{{ $filters['matric_no'] ?? '' }}" placeholder="{{ __('Cari no matrik') }}"></div>
-                    <div><input type="text" name="program" value="{{ $filters['program'] ?? '' }}" placeholder="{{ __('Cari program') }}"></div>
+                <div class="student-filter-row">
+                    <div class="filter-field filter-q">
+                        <svg class="filter-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ $canViewSensitiveStudents ? __('Cari nama / IC...') : __('Cari nama...') }}" autocomplete="off">
+                    </div>
+                    <div class="filter-field filter-matric">
+                        <input type="text" name="matric_no" value="{{ $filters['matric_no'] ?? '' }}" placeholder="{{ __('No matrik...') }}" autocomplete="off">
+                    </div>
+                    <div class="filter-field filter-program">
+                        <input type="text" name="program" value="{{ $filters['program'] ?? '' }}" placeholder="{{ __('Program...') }}" autocomplete="off">
+                    </div>
                     @if($canViewSensitiveStudents)
-                        <div>
+                        <div class="filter-field filter-pwd">
                             <select name="password_status">
                                 <option value="">{{ __('Semua status kata laluan') }}</option>
                                 <option value="default" {{ ($filters['password_status'] ?? '') === 'default' ? 'selected' : '' }}>{{ __('Default IC') }}</option>
@@ -374,51 +214,52 @@
                             </select>
                         </div>
                     @endif
-                    <span data-live-filter-status aria-live="polite" style="font-size:.75rem;color:var(--text-muted);"></span>
+                    @if(!empty(array_filter($filters ?? [])))
+                        <a class="filter-reset-btn" href="{{ route('admin.students.index') }}" title="{{ __('Reset filters') }}">&times;</a>
+                    @endif
+                    <span data-live-filter-status aria-live="polite" class="filter-live-status"></span>
                 </div>
             </form>
         </div>
 
         <div data-live-filter-results>
-        <p class="student-scroll-hint">{{ __('Swipe horizontally to view all student columns.') }}</p>
-        <div class="student-table-wrap" style="overflow-x:auto;">
+        <div class="student-table-wrap" data-no-virtual="true">
             <table class="students-table">
                 <thead>
                     <tr>
-                        <th>{{ __('Nama') }}</th>
-                        <th>{{ __('No Matrik') }}</th>
-                        @if($canViewSensitiveStudents)<th class="col-ic">IC</th>@endif
-                        <th class="col-program">{{ __('Program') }}</th>
+                        <th class="th-student">{{ __('Nama Pelajar') }}</th>
+                        <th class="th-matric">{{ __('No. Matrik') }}</th>
+                        @if($canViewSensitiveStudents)<th class="th-ic">{{ __('No. IC') }}</th>@endif
+                        <th class="th-program">{{ __('Program') }}</th>
                         @if($canViewSensitiveStudents)
-                            <th class="col-phone">{{ __('Telefon') }}</th>
-                            <th class="col-password">{{ __('Status Kata Laluan') }}</th>
+                            <th class="th-phone">{{ __('No. Telefon') }}</th>
+                            <th class="th-pwd">{{ __('Status Kata Laluan') }}</th>
                         @endif
-                        @if($hasStudentActions)<th>{{ __('Tindakan') }}</th>@endif
+                        @if($hasStudentActions)<th class="th-actions">{{ __('Tindakan') }}</th>@endif
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($students as $student)
                         <tr>
-                            <td>
+                            <td class="td-student">
                                 <div class="student-identity">
                                     <span class="student-avatar" aria-hidden="true">
                                         {{ strtoupper(substr(trim($student->full_name), 0, 2)) }}
                                         @if($student->photo ?? null)
-                                            <img src="{{ asset('storage/' . ltrim($student->photo, '/')) }}" alt="" onerror="this.remove()">
+                                            <img src="{{ asset('storage/' . ltrim($student->photo, '/')) }}" alt="" width="32" height="32" loading="lazy" decoding="async" onerror="this.remove()">
                                         @endif
                                     </span>
                                     <span class="student-name-block">
                                         <span class="student-name">{{ $student->full_name }}</span>
-                                        <span class="student-sub">{{ $student->program }}@if($canViewSensitiveStudents)<br>{{ maskIdentityNumber($student->ic_no) }}@endif</span>
                                     </span>
                                 </div>
                             </td>
-                            <td class="matric-cell">{{ $student->matric_no ?: '-' }}</td>
-                            @if($canViewSensitiveStudents)<td class="col-ic">{{ maskIdentityNumber($student->ic_no) }}</td>@endif
-                            <td class="col-program">{{ $student->program }}</td>
+                            <td class="td-matric"><span class="matric-pill">{{ $student->matric_no ?: '-' }}</span></td>
+                            @if($canViewSensitiveStudents)<td class="td-ic"><span class="ic-pill">{{ maskIdentityNumber($student->ic_no) }}</span></td>@endif
+                            <td class="td-program"><span class="prog-pill">{{ $student->program ?: '-' }}</span></td>
                             @if($canViewSensitiveStudents)
-                                <td class="col-phone">{{ $student->phone ?: '-' }}</td>
-                                <td class="col-password">
+                                <td class="td-phone">{{ $student->phone ?: '-' }}</td>
+                                <td class="td-pwd">
                                     @if((int) $student->has_custom_password === 1)
                                         <span class="pwd-badge pwd-custom">{{ __('Custom Password') }}</span>
                                     @else
@@ -426,53 +267,67 @@
                                     @endif
                                 </td>
                             @endif
-                            @if($hasStudentActions)<td>
-                                <div class="actions-cell">
+                            @if($hasStudentActions)<td class="td-actions">
+                                <div class="actions-cell student-actions-cell">
                                     @if($canViewSensitiveStudents)
-                                        <a class="btn" href="{{ route('admin.students.show', $student->id) }}">{{ __('View Profile') }}</a>
+                                        <a class="stu-btn stu-btn-view" href="{{ route('admin.students.show', $student->id) }}" title="{{ __('View Profile') }}">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            <span>{{ __('View Profile') }}</span>
+                                        </a>
                                     @endif
                                     @if($canManageStudents)
-                                        <a class="btn manage-action" href="{{ route('admin.students.edit', $student->id) }}">{{ __('Edit') }}</a>
+                                        <a class="stu-btn stu-btn-edit" href="{{ route('admin.students.edit', $student->id) }}" title="{{ __('Edit') }}">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                            <span>{{ __('Edit') }}</span>
+                                        </a>
                                         @if(filled($student->photo))
-                                            <form method="POST" action="{{ route('admin.students.photos.reject', $student->id) }}" style="margin:0;"
+                                            <form method="POST" action="{{ route('admin.students.photos.reject', $student->id) }}" style="margin:0;display:inline-flex;"
                                                 data-confirm-title="{{ __('Tolak Gambar Profil') }}"
                                                 data-confirm-message="{{ __('Adakah anda pasti mahu menolak dan memadam gambar profil pelajar ini? Pelajar akan diminta memuat naik gambar kad matrik formal baharu.') }}"
                                                 data-confirm-action="{{ __('Tolak Gambar') }}"
                                                 data-confirm-tone="danger">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-warn" type="submit" title="{{ __('Tolak gambar profil dan minta muat naik semula') }}">{{ __('Tolak Foto') }}</button>
+                                                <button class="stu-btn stu-btn-warn" type="submit" title="{{ __('Tolak Foto') }}">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                                    <span>{{ __('Tolak Foto') }}</span>
+                                                </button>
                                             </form>
                                         @endif
-                                        <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;"
+                                        <form method="POST" action="{{ route('admin.students.reset-password', $student->id) }}" style="margin:0;display:inline-flex;"
                                             data-confirm-title="{{ __('Reset password') }}"
                                             data-confirm-message="{{ __('Reset this student password to NRIC?') }}"
                                             data-confirm-action="{{ __('Reset Password') }}">
                                             @csrf
-                                            <button class="btn btn-warn" type="submit">{{ __('Reset Password') }}</button>
+                                            <button class="stu-btn stu-btn-key" type="submit" title="{{ __('Reset password to NRIC') }}">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                                <span>{{ __('Reset Password') }}</span>
+                                            </button>
                                         </form>
-                                        <form method="POST" action="{{ route('admin.students.destroy', $student->id) }}" style="margin:0;"
+                                        <form method="POST" action="{{ route('admin.students.destroy', $student->id) }}" style="margin:0;display:inline-flex;"
                                             data-confirm-title="{{ __('Delete student') }}"
                                             data-confirm-message="{{ __('Delete this student record?') }}"
                                             data-confirm-action="{{ __('Delete') }}"
                                             data-confirm-tone="danger">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-danger" type="submit">{{ __('Delete') }}</button>
+                                            <button class="stu-btn stu-btn-danger" type="submit" title="{{ __('Delete') }}">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                <span>{{ __('Delete') }}</span>
+                                            </button>
                                         </form>
                                     @endif
                                 </div>
                             </td>@endif
                         </tr>
                     @empty
-                        <tr><td colspan="{{ $canViewSensitiveStudents ? 7 : 3 }}" style="text-align:center;color:#7a6555;">{{ __('Tiada rekod pelajar.') }}</td></tr>
+                        <tr><td colspan="{{ $canViewSensitiveStudents ? 7 : 3 }}" style="text-align:center;color:#7a6555;padding:2rem 1rem;">{{ __('Tiada rekod pelajar.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         </div>
-        <div class="student-pagination" style="margin-top:14px;">{{ $students->onEachSide(1)->links('vendor.pagination.myhep') }}</div>
-        </div>
+        <div class="student-pagination" style="margin-top:14px;padding:0 1rem 1rem;">{{ $students->onEachSide(1)->links('vendor.pagination.myhep') }}</div>
     </div>
 </div>
 @endsection

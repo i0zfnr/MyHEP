@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AiHelperController as AdminAiHelperController;
 use App\Http\Controllers\Admin\ActiveVisitorController;
 use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
 use App\Http\Controllers\Admin\FeatureController;
+use App\Http\Controllers\Admin\FoodBankController as AdminFoodBankController;
 use App\Http\Controllers\Admin\GuardManagementController;
 use App\Http\Controllers\Admin\LaptopController;
 use App\Http\Controllers\Admin\MaintenanceController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\StudentDocumentController as AdminStudentDocumentController;
+use App\Http\Controllers\Admin\StudentInsuranceController;
 use App\Http\Controllers\Admin\StudentScholarshipStatusController;
 use App\Http\Controllers\Admin\StaffManagementController;
 use App\Http\Controllers\Auth\LoginController;
@@ -32,6 +34,7 @@ use App\Http\Controllers\Student\DashboardController as StudentDashboardControll
 use App\Http\Controllers\Student\ProgramActivityController as StudentProgramActivityController;
 use App\Http\Controllers\Student\AiHelperController as StudentAiHelperController;
 use App\Http\Controllers\Student\DocumentController as StudentDocumentController;
+use App\Http\Controllers\Student\FoodBankController as StudentFoodBankController;
 use App\Http\Controllers\Student\MovementController as StudentMovementController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Http\Controllers\Student\ScholarshipStatusController;
@@ -94,6 +97,9 @@ Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
     ->middleware('auth.session:student')
     ->name('student.dashboard');
 Route::get('/student/programs', [StudentProgramActivityController::class, 'index'])->middleware('auth.session:student')->name('student.programs.index');
+Route::get('/student/programs/attendance-qr', [StudentProgramActivityController::class, 'attendanceQrAccess'])->middleware('auth.session:student')->name('student.programs.attendance-qr.index');
+Route::get('/student/programs/{program}/attendance-qr', [StudentProgramActivityController::class, 'attendanceQrPresenter'])->middleware('auth.session:student')->name('student.programs.attendance-qr.presenter');
+Route::get('/student/programs/{program}/attendance-qr/live-token', [StudentProgramActivityController::class, 'attendanceQrLiveToken'])->middleware('auth.session:student')->name('student.programs.attendance-qr.live-token');
 Route::get('/student/programs/{program}', [StudentProgramActivityController::class, 'show'])->middleware('auth.session:student')->name('student.programs.show');
 Route::post('/student/programs/{program}/attendance', [StudentProgramActivityController::class, 'store'])->middleware(['auth.session:student', 'throttle:10,1'])->name('student.programs.attendance.store');
 Route::post('/student/programs/{program}/quick-scan', [StudentProgramActivityController::class, 'quickScanAttendance'])->middleware('auth.session:student')->name('student.programs.quick-scan');
@@ -152,6 +158,16 @@ Route::get('/student/documents/{id}/download', [StudentDocumentController::class
     ->middleware(['auth.session:student', 'feature.enabled:document_centre'])
     ->name('student.documents.download');
 
+Route::get('/student/foodbank', [StudentFoodBankController::class, 'index'])
+    ->middleware('auth.session:student')
+    ->name('student.foodbank.index');
+Route::get('/student/foodbank/claim', [StudentFoodBankController::class, 'claimView'])
+    ->middleware('auth.session:student')
+    ->name('student.foodbank.claim');
+Route::post('/student/foodbank/quick-scan', [StudentFoodBankController::class, 'quickScan'])
+    ->middleware('auth.session:student')
+    ->name('student.foodbank.quick_scan');
+
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
     ->name('admin.dashboard');
@@ -178,6 +194,16 @@ Route::prefix('/admin/programs')->middleware('auth.session:admin')->name('admin.
     Route::put('/{program}/questionnaire-setting', [ProgramOperationController::class, 'updateQuestionnaireSetting'])->name('questionnaire-setting.update');
     Route::post('/{program}/attendance/open', [ProgramOperationController::class, 'openAttendance'])->name('attendance.open');
     Route::post('/{program}/attendance/close', [ProgramOperationController::class, 'closeAttendance'])->name('attendance.close');
+    Route::post('/{program}/attendance/toggle', [ProgramOperationController::class, 'openAttendance'])->name('attendance.toggle');
+    Route::get('/{program}/student-page-permissions', fn (int $program) => redirect()->route('admin.programs.operations', $program))
+        ->middleware('admin.scope:program_access.manage')
+        ->name('student-page-permissions.index');
+    Route::post('/{program}/student-page-permissions', [ProgramOperationController::class, 'grantStudentPagePermission'])
+        ->middleware('admin.scope:program_access.manage')
+        ->name('student-page-permissions.store');
+    Route::delete('/{program}/student-page-permissions/{permission}', [ProgramOperationController::class, 'revokeStudentPagePermission'])
+        ->middleware('admin.scope:program_access.manage')
+        ->name('student-page-permissions.destroy');
     Route::post('/{program}/report/generate', [ProgramOperationController::class, 'generateReport'])->name('report.generate');
     Route::get('/{program}/report/download/{format}', [ProgramOperationController::class, 'downloadReport'])->name('report.download');
     Route::post('/{program}/report/upload-edited', [ProgramOperationController::class, 'uploadEditedReport'])->name('report.upload-edited');
@@ -234,6 +260,21 @@ Route::get('/admin/documents/{id}/download', [AdminStudentDocumentController::cl
 Route::patch('/admin/documents/{id}/review', [AdminStudentDocumentController::class, 'review'])
     ->middleware(['auth.session:admin', 'admin.scope:documents'])
     ->name('admin.documents.review');
+Route::get('/admin/insurance', [StudentInsuranceController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:insurance'])
+    ->name('admin.insurance.index');
+Route::get('/admin/insurance/export', [StudentInsuranceController::class, 'export'])
+    ->middleware(['auth.session:admin', 'admin.scope:insurance'])
+    ->name('admin.insurance.export');
+Route::get('/admin/insurance/receipt/{id}/download', [StudentInsuranceController::class, 'downloadReceipt'])
+    ->middleware(['auth.session:admin', 'admin.scope:insurance'])
+    ->name('admin.insurance.download-receipt');
+Route::patch('/admin/insurance/receipt/{id}/review', [StudentInsuranceController::class, 'reviewReceipt'])
+    ->middleware(['auth.session:admin', 'admin.scope:insurance'])
+    ->name('admin.insurance.review');
+Route::post('/admin/insurance/broadcast-notice', [StudentInsuranceController::class, 'broadcastNotice'])
+    ->middleware(['auth.session:admin', 'admin.scope:insurance', 'throttle:6,1'])
+    ->name('admin.insurance.broadcast-notice');
 Route::get('/admin/system-monitoring/live', [AdminDashboardController::class, 'live'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.system-monitoring.live');
@@ -246,6 +287,18 @@ Route::get('/admin/student-scholarship-status', [StudentScholarshipStatusControl
 Route::get('/admin/student-scholarship-status/documents/{id}/download', [StudentScholarshipStatusController::class, 'downloadOfferLetter'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.student-scholarship-status.documents.download');
+Route::get('/admin/foodbank', [AdminFoodBankController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:foodbank'])
+    ->name('admin.foodbank.index');
+Route::get('/admin/foodbank/export', [AdminFoodBankController::class, 'export'])
+    ->middleware(['auth.session:admin', 'admin.scope:foodbank'])
+    ->name('admin.foodbank.export');
+Route::get('/admin/foodbank/qr', [AdminFoodBankController::class, 'printQr'])
+    ->middleware(['auth.session:admin', 'admin.scope:foodbank'])
+    ->name('admin.foodbank.qr');
+Route::delete('/admin/foodbank/{id}', [AdminFoodBankController::class, 'destroy'])
+    ->middleware(['auth.session:admin', 'admin.scope:foodbank'])
+    ->name('admin.foodbank.destroy');
 Route::get('/admin/ai-helper', [AdminAiHelperController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
     ->name('admin.ai-helper.index');
@@ -267,6 +320,21 @@ Route::delete('/admin/ai-helper/conversations', [AdminAiHelperController::class,
 Route::post('/admin/ai-helper', [AdminAiHelperController::class, 'ask'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
     ->name('admin.ai-helper.ask');
+Route::post('/admin/ai-helper/paperwork/generate', [AdminAiHelperController::class, 'generatePaperwork'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.paperwork.generate');
+Route::get('/admin/ai-helper/paperwork/{id}/download/{format}', [AdminAiHelperController::class, 'downloadPaperwork'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.paperwork.download');
+Route::delete('/admin/ai-helper/paperwork/{id}', [AdminAiHelperController::class, 'deletePaperwork'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.paperwork.delete');
+Route::get('/admin/ai-helper/paperwork/history', [AdminAiHelperController::class, 'paperworkHistory'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.paperwork.history');
+Route::get('/admin/ai-helper/reports/history', [AdminAiHelperController::class, 'reportHistory'])
+    ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
+    ->name('admin.ai-helper.reports.history');
 Route::prefix('/lecturer/ai-helper')->middleware(['auth.session:admin', 'admin.scope:reports', 'feature.enabled:lecturer_ai_helper'])->name('lecturer.ai-helper.')->group(function (): void {
     Route::get('/', [AdminAiHelperController::class, 'index'])->name('index');
     Route::get('/conversations/{conversation}', [AdminAiHelperController::class, 'conversation'])->name('conversations.show');
@@ -275,6 +343,11 @@ Route::prefix('/lecturer/ai-helper')->middleware(['auth.session:admin', 'admin.s
     Route::delete('/conversations/{conversation}', [AdminAiHelperController::class, 'deleteConversation'])->name('conversations.delete');
     Route::delete('/conversations', [AdminAiHelperController::class, 'deleteAllConversations'])->name('conversations.delete-all');
     Route::post('/', [AdminAiHelperController::class, 'ask'])->middleware('throttle:20,1')->name('ask');
+    Route::post('/paperwork/generate', [AdminAiHelperController::class, 'generatePaperwork'])->name('paperwork.generate');
+    Route::get('/paperwork/{id}/download/{format}', [AdminAiHelperController::class, 'downloadPaperwork'])->name('paperwork.download');
+    Route::delete('/paperwork/{id}', [AdminAiHelperController::class, 'deletePaperwork'])->name('paperwork.delete');
+    Route::get('/paperwork/history', [AdminAiHelperController::class, 'paperworkHistory'])->name('paperwork.history');
+    Route::get('/reports/history', [AdminAiHelperController::class, 'reportHistory'])->name('reports.history');
 });
 Route::get('/admin/movements', [AdminMovementController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:movement'])
@@ -471,6 +544,19 @@ Route::put('/admin/scholarships/{id}', [ScholarshipController::class, 'update'])
 Route::delete('/admin/scholarships/{id}', [ScholarshipController::class, 'destroy'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.scholarships.destroy');
+
+Route::get('/admin/foodbank', [AdminFoodBankController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.foodbank.index');
+Route::get('/admin/foodbank/export', [AdminFoodBankController::class, 'export'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.foodbank.export');
+Route::get('/admin/foodbank/qr', [AdminFoodBankController::class, 'qr'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.foodbank.qr');
+Route::delete('/admin/foodbank/{id}', [AdminFoodBankController::class, 'destroy'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.foodbank.destroy');
 
 Route::get('/admin/scholarship-announcements', function (Request $request) {
     $filters = $request->validate([

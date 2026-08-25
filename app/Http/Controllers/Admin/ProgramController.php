@@ -114,6 +114,7 @@ class ProgramController extends Controller
 
             return $programId;
         });
+        clearProgramCaches((int) session('auth_user.id'));
         auditLog('programs.create', 'programs', $programId, $validated['registration_type'] === 'approved_program' ? 'Approved program registered' : 'Attendance-only activity created');
 
         return redirect()->route('admin.programs.operations', $programId)->with('success', $validated['registration_type'] === 'approved_program'
@@ -157,6 +158,7 @@ class ProgramController extends Controller
                 $this->createPaperworkVersion($request, $program, $version, $validated);
             }
         });
+        clearProgramCaches((int) $record->created_by);
         auditLog('programs.update', 'programs', $program, 'Program paperwork updated and versioned');
 
         return redirect()->route('admin.programs.show', $program)->with('success', __('Program information and paperwork were updated.'));
@@ -174,18 +176,33 @@ class ProgramController extends Controller
             ? DB::table('program_certificates')->where('program_id', $program)->whereNotNull('path')->pluck('path')->all()
             : [];
 
-        $reportPaths = Schema::hasTable('program_reports')
-            ? DB::table('program_reports')->where('program_id', $program)->whereNotNull('attachment_path')->pluck('attachment_path')->all()
+        $reportDocx = Schema::hasTable('program_reports') && Schema::hasColumn('program_reports', 'docx_path')
+            ? DB::table('program_reports')->where('program_id', $program)->whereNotNull('docx_path')->pluck('docx_path')->all()
             : [];
+        $reportPdf = Schema::hasTable('program_reports') && Schema::hasColumn('program_reports', 'pdf_path')
+            ? DB::table('program_reports')->where('program_id', $program)->whereNotNull('pdf_path')->pluck('pdf_path')->all()
+            : [];
+        $reportPaths = array_merge($reportDocx, $reportPdf);
 
         DB::transaction(function () use ($program): void {
             if (Schema::hasTable('program_certificates')) {
                 DB::table('program_certificates')->where('program_id', $program)->delete();
             }
             if (Schema::hasTable('program_attendances')) {
+                $attendanceIds = DB::table('program_attendances')->where('program_id', $program)->pluck('id')->all();
+                if (Schema::hasTable('program_survey_responses') && ! empty($attendanceIds)) {
+                    DB::table('program_survey_responses')->whereIn('program_attendance_id', $attendanceIds)->delete();
+                }
                 DB::table('program_attendances')->where('program_id', $program)->delete();
             }
             if (Schema::hasTable('program_surveys')) {
+                $surveyIds = DB::table('program_surveys')->where('program_id', $program)->pluck('id')->all();
+                if (Schema::hasTable('program_survey_questions') && ! empty($surveyIds)) {
+                    DB::table('program_survey_questions')->whereIn('program_survey_id', $surveyIds)->delete();
+                }
+                if (Schema::hasTable('program_survey_responses') && ! empty($surveyIds)) {
+                    DB::table('program_survey_responses')->whereIn('program_survey_id', $surveyIds)->delete();
+                }
                 DB::table('program_surveys')->where('program_id', $program)->delete();
             }
             if (Schema::hasTable('program_reports')) {
@@ -208,6 +225,7 @@ class ProgramController extends Controller
             Storage::disk('local')->delete($path);
         }
 
+        clearProgramCaches((int) $record->created_by);
         auditLog('programs.delete', 'programs', $program, 'Program record and all associated data deleted');
 
         return redirect()->route('admin.programs.index')->with('success', __('Program and all associated data were successfully deleted.'));
@@ -233,7 +251,7 @@ class ProgramController extends Controller
             'title' => ['required', 'string', 'max:180'],
             'registration_type' => ['required', Rule::in(['approved_program', 'attendance_only_activity'])],
             'approval_branch' => ['required', Rule::in(['tpa', 'tpsa', 'tpsp'])],
-            'reference_no' => [Rule::requiredIf(fn () => $request->input('registration_type') === 'approved_program'), 'nullable', 'string', 'max:80'],
+            'reference_no' => ['nullable', 'string', 'max:80'],
             'description' => ['nullable', 'string', 'max:10000'],
             'objectives' => ['nullable', 'string', 'max:10000'],
             'starts_at' => ['required', 'date'],
@@ -248,7 +266,7 @@ class ProgramController extends Controller
             'certificate_enabled' => ['sometimes', 'boolean'],
             'certificate_template' => ['sometimes', 'nullable', Rule::in(['standard_placeholder'])],
             'paperwork_method' => ['required', Rule::in(self::METHODS)],
-            'paperwork_file' => ['nullable', 'file', 'mimes:pdf,docx', 'max:20480', Rule::requiredIf(fn () => $request->isMethod('post') && $request->input('registration_type') === 'approved_program')],
+            'paperwork_file' => ['nullable', 'file', 'mimes:pdf,docx', 'max:20480'],
         ]);
 
         if ($validated['registration_type'] === 'attendance_only_activity') {

@@ -12,42 +12,10 @@
     <title>{{ __('Tetapkan Kata Laluan Baharu') }}</title>
     @include('partials.brand_icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        :root { --bg:#fdf8f3; --surface:#fff; --text:#111827; --muted:#6b7280; --border:#eadfd2; --field:#fff; --primary:#8a7362; }
-        body[data-theme="dark"] { --bg:#0f0e0d; --surface:#171412; --text:#f7efe8; --muted:#c8b8a9; --border:rgba(226,209,192,.16); --field:rgba(24,21,18,.82); --primary:#d7bfa8; color-scheme:dark; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background:var(--bg); color:var(--text); margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem; }
-        .card { width:100%; max-width:460px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
-        h1 { margin:0 0 6px; font-size:22px; }
-        p { margin:0 0 14px; color:var(--muted); font-size:14px; }
-        label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; }
-        input { width:100%; border:1px solid var(--border); border-radius:8px; padding:9px 10px; font-size:14px; margin-bottom:10px; background:var(--field); color:var(--text); }
-        .password-wrap { position:relative; margin-bottom:10px; }
-        .password-wrap input { margin-bottom:0; padding-right:46px; }
-        .password-toggle { position:absolute; top:50%; right:5px; transform:translateY(-50%)!important; width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:8px; background:transparent!important; color:var(--muted); box-shadow:none!important; transition:none!important; cursor:pointer; }
-        .password-toggle:hover,.password-toggle:active { transform:translateY(-50%)!important; background:transparent!important; box-shadow:none!important; }
-        .password-toggle:focus-visible { outline:2px solid var(--primary); outline-offset:1px; }
-        .password-toggle svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-        .password-toggle .eye-off { display:none; }
-        .password-toggle[aria-pressed="true"] .eye { display:none; }
-        .password-toggle[aria-pressed="true"] .eye-off { display:block; }
-        .actions { display:flex; gap:8px; margin-top:8px; }
-        .btn { display:inline-block; border:1px solid #cbb9a4; background:var(--surface); color:var(--primary); border-radius:8px; padding:9px 12px; text-decoration:none; font-size:13px; font-weight:600; cursor:pointer; }
-        .btn-primary { background:linear-gradient(135deg,#A48D78,#CBB9A4); color:#fff; border:none; }
-        .err { margin-bottom:10px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:9px; font-size:13px; }
-        .app-footer {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: .75rem;
-            text-align: center;
-            font-size: .76rem;
-            color: var(--muted);
-            pointer-events: none;
-        }
-    </style>
+
     @vite('resources/css/design-system.css')
 </head>
-<body data-theme="{{ session('theme', 'light') }}">
+<body data-theme="{{ session('theme', 'light') }}" class="auth-page">
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
 <div class="card">
     <h1>{{ __('Kata Laluan Baharu') }}</h1>

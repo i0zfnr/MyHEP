@@ -3,30 +3,7 @@
 @section('title', 'JHEP Laptop Management')
 @section('header')<h2 style="margin:0;font-size:1rem;font-weight:700;">{{ __('JHEP Laptop Management') }}</h2>@endsection
 
-@push('styles')
-<style>
-    .laptop-wrap{max-width:1180px;margin:0 auto;display:grid;gap:1rem}.laptop-hero{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.4rem;border-radius:20px;background:linear-gradient(135deg,#3b291d,#765237 60%,#a77950);color:#fff;box-shadow:var(--glass-shadow)}.laptop-hero h1{margin:.25rem 0;font-size:1.65rem}.laptop-hero p{margin:0;color:rgba(255,255,255,.76)}.laptop-kicker{font-size:.68rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:#f2d5b5}.laptop-scan-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.7rem 1rem;border:1px solid rgba(255,255,255,.3);border-radius:11px;background:rgba(255,255,255,.14);color:#fff;text-decoration:none;font-weight:800;white-space:nowrap}.laptop-filter,.laptop-panel{border:1px solid var(--glass-line);border-radius:18px;background:var(--glass-bg-strong);box-shadow:var(--glass-shadow);overflow:hidden}.laptop-filter{display:grid;grid-template-columns:1fr 220px auto auto;gap:.7rem;padding:1rem;align-items:end}.laptop-field{display:grid;gap:.35rem}.laptop-field label{font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}.laptop-field input,.laptop-field select{min-height:44px;width:100%;padding:.7rem .8rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit}.laptop-btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:.65rem .9rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);text-decoration:none;font-weight:800;cursor:pointer}.laptop-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem}.laptop-card{padding:1rem;border:1px solid var(--glass-line);border-radius:16px;background:var(--glass-bg-strong);box-shadow:var(--glass-shadow)}.laptop-card-head{display:flex;justify-content:space-between;gap:.5rem}.laptop-card h2{margin:0;font-size:1rem;color:var(--text)}.laptop-code{margin-top:.2rem;font-size:.68rem;color:var(--text-muted)}.laptop-status{align-self:flex-start;padding:.25rem .55rem;border-radius:999px;font-size:.65rem;font-weight:800;text-transform:capitalize}.laptop-status.available{background:#e7f4ee;color:#287352}.laptop-status.borrowed{background:#fff0d9;color:#9a5d10}body[data-theme="dark"] .laptop-status.available{background:rgba(46,160,112,.18);color:#8ee0bb}body[data-theme="dark"] .laptop-status.borrowed{background:rgba(224,153,48,.18);color:#f5c77b}.laptop-borrower{min-height:44px;margin:.8rem 0;padding:.65rem;border-radius:10px;background:color-mix(in srgb,var(--primary) 7%,var(--surface));font-size:.73rem;color:var(--text-muted)}.laptop-borrower strong{display:block;color:var(--text);margin-bottom:.15rem}.laptop-qr{display:grid;place-items:center;padding:.65rem;border-radius:12px;background:#fff}.laptop-qr img{display:block;width:100%;max-width:170px;aspect-ratio:1}.laptop-panel-head{padding:1rem;border-bottom:1px solid var(--glass-line)}.laptop-panel-head h2{margin:0;color:var(--text);font-size:1.05rem}.laptop-panel-head p{margin:.25rem 0 0;color:var(--text-muted);font-size:.75rem}.laptop-table-wrap{overflow:auto}.laptop-table{width:100%;min-width:760px;border-collapse:collapse}.laptop-table th,.laptop-table td{padding:.8rem 1rem;border-bottom:1px solid var(--glass-line);text-align:left;color:var(--text);font-size:.78rem}.laptop-table th{font-size:.65rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);background:color-mix(in srgb,var(--primary) 7%,var(--surface))}@media(max-width:900px){.laptop-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:640px){.laptop-hero{display:grid}.laptop-scan-link{width:100%}.laptop-filter{grid-template-columns:1fr 1fr}.laptop-field{grid-column:1/-1}.laptop-grid{grid-template-columns:1fr}.laptop-qr img{max-width:190px}}
-    .laptop-hero h1{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.18)}
-    .laptop-hero p{color:rgba(255,255,255,.82)!important}
-    .laptop-scan-link{
-        background:var(--surface)!important;
-        color:var(--se-primary-strong)!important;
-        border-color:color-mix(in srgb,var(--se-primary) 38%,var(--border))!important;
-        box-shadow:0 2px 5px rgba(28,36,40,.06)!important;
-        -webkit-backdrop-filter:none!important;
-        backdrop-filter:none!important;
-        filter:none!important;
-        opacity:1;
-        font-weight:750;
-        letter-spacing:-.01em;
-        text-shadow:none!important;
-        text-rendering:optimizeLegibility;
-        -webkit-font-smoothing:antialiased;
-        transform:none!important;
-    }
-    .laptop-scan-link:hover{background:var(--se-primary-soft)!important;border-color:var(--se-primary)!important;color:var(--se-primary-strong)!important;box-shadow:0 3px 8px rgba(28,36,40,.08)!important}
-</style>
-@endpush
+
 
 @section('content')
 <div class="laptop-wrap">

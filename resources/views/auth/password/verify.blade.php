@@ -12,34 +12,10 @@
     <title>{{ __('Verifikasi Kod Reset') }}</title>
     @include('partials.brand_icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        :root { --bg:#fdf8f3; --surface:#fff; --text:#111827; --muted:#6b7280; --border:#eadfd2; --field:#fff; --primary:#8a7362; }
-        body[data-theme="dark"] { --bg:#0f0e0d; --surface:#171412; --text:#f7efe8; --muted:#c8b8a9; --border:rgba(226,209,192,.16); --field:rgba(24,21,18,.82); --primary:#d7bfa8; color-scheme:dark; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background:var(--bg); color:var(--text); margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem; }
-        .card { width:100%; max-width:460px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
-        h1 { margin:0 0 6px; font-size:22px; }
-        p { margin:0 0 14px; color:var(--muted); font-size:14px; }
-        label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; }
-        input { width:100%; border:1px solid var(--border); border-radius:8px; padding:9px 10px; font-size:14px; margin-bottom:10px; background:var(--field); color:var(--text); }
-        .actions { display:flex; gap:8px; margin-top:8px; }
-        .btn { display:inline-block; border:1px solid #cbb9a4; background:var(--surface); color:var(--primary); border-radius:8px; padding:9px 12px; text-decoration:none; font-size:13px; font-weight:600; cursor:pointer; }
-        .btn-primary { background:linear-gradient(135deg,#A48D78,#CBB9A4); color:#fff; border:none; }
-        .ok { margin-bottom:10px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:8px; padding:9px; font-size:13px; }
-        .err { margin-bottom:10px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:8px; padding:9px; font-size:13px; }
-        .app-footer {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: .75rem;
-            text-align: center;
-            font-size: .76rem;
-            color: var(--muted);
-            pointer-events: none;
-        }
-    </style>
+
     @vite('resources/css/design-system.css')
 </head>
-<body data-theme="{{ session('theme', 'light') }}">
+<body data-theme="{{ session('theme', 'light') }}" class="auth-page">
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
 <div class="card">
     <h1>{{ __('Verifikasi Kod') }}</h1>

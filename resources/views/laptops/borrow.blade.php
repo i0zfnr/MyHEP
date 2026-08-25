@@ -6,9 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Borrow {{ $laptop->name }} | MyHEP</title>
     @include('partials.brand_icons')
-    <style>
-        :root{color-scheme:light}*{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;padding:1.25rem;background:radial-gradient(circle at top right,#ead6bd,transparent 42%),linear-gradient(145deg,#f8f4ee,#e9ddd0);font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#2e2119}.borrow-card{width:min(100%,440px);overflow:hidden;border:1px solid rgba(108,75,46,.16);border-radius:28px;background:rgba(255,253,249,.88);box-shadow:0 24px 70px rgba(75,48,29,.18)}.borrow-head{padding:1.5rem;background:linear-gradient(135deg,#3b291d,#765237);color:#fff}.borrow-brand{display:flex;align-items:center;gap:.65rem;font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.borrow-brand img{width:31px;height:31px;object-fit:contain}.borrow-head h1{margin:1.2rem 0 .25rem;font-size:1.45rem}.borrow-head p{margin:0;color:#f4e6d7;font-size:.88rem}.borrow-body{padding:1.5rem}.borrow-status{margin-bottom:1rem;padding:.75rem .85rem;border-radius:12px;background:#edf7ef;color:#23633b;font-size:.84rem;font-weight:700}.borrow-field{display:grid;gap:.45rem}.borrow-field label{font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#715b49}.borrow-field input{min-height:52px;width:100%;padding:.8rem .9rem;border:1px solid #cbb9a7;border-radius:13px;background:#fff;font:inherit;font-size:1rem}.borrow-help{min-height:1.35rem;margin:.5rem 0 1.15rem;font-size:.82rem;color:#7b6553}.borrow-help.error{color:#ad3030}.borrow-button{width:100%;min-height:52px;border:0;border-radius:13px;background:#6d4b2e;color:#fff;font:inherit;font-weight:800;cursor:pointer}.borrow-button:disabled{cursor:not-allowed;opacity:.48}.borrow-result{margin-top:1rem;padding:.9rem;border-radius:13px;background:#e7f5eb;color:#245e37;font-size:.88rem;font-weight:700}.borrow-result[hidden]{display:none}.borrow-note{margin:1rem 0 0;color:#826c5a;font-size:.76rem;line-height:1.5}
-    </style>
+
 </head>
 <body>
     <main class="borrow-card">

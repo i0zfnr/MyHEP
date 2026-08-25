@@ -1,1 +1,8 @@
 @import "tailwindcss";
+@import "./layout.css";
+@import "./admin-dashboard.css";
+@import "./admin-programs.css";
+@import "./admin-modules.css";
+@import "./student-modules.css";
+@import "./auth.css";
+@import "./site-shared.css";

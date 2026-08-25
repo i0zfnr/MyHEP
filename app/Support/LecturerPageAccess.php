@@ -25,6 +25,8 @@ class LecturerPageAccess
         ],
     ];
 
+    private array $loadedCache = [];
+
     public function exists(string $page): bool
     {
         return array_key_exists($page, self::PAGES);
@@ -32,14 +34,22 @@ class LecturerPageAccess
 
     public function enabled(int $adminId, string $page): bool
     {
-        if (! $this->exists($page) || ! Schema::hasTable('lecturer_page_access')) {
-            return $this->exists($page) && (bool) (self::PAGES[$page]['default'] ?? false);
+        if (! $this->exists($page)) {
+            return false;
         }
 
-        $value = DB::table('lecturer_page_access')
-            ->where('admin_id', $adminId)
-            ->where('page_key', $page)
-            ->value('enabled');
+        if (! isset($this->loadedCache[$adminId])) {
+            if (! Schema::hasTable('lecturer_page_access')) {
+                $this->loadedCache[$adminId] = [];
+            } else {
+                $this->loadedCache[$adminId] = DB::table('lecturer_page_access')
+                    ->where('admin_id', $adminId)
+                    ->pluck('enabled', 'page_key')
+                    ->all();
+            }
+        }
+
+        $value = $this->loadedCache[$adminId][$page] ?? null;
 
         return $value === null ? (bool) (self::PAGES[$page]['default'] ?? false) : (bool) $value;
     }

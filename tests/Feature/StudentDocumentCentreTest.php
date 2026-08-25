@@ -79,6 +79,10 @@ class StudentDocumentCentreTest extends TestCase
             ['id' => 1, 'full_name' => 'First Student', 'matric_no' => 'PB001', 'photo' => 'students/first.jpg'],
             ['id' => 2, 'full_name' => 'Second Student', 'matric_no' => 'PB002', 'photo' => 'students/second.jpg'],
         ]);
+        DB::table('student_scholarship_status_forms')->insert([
+            ['student_id' => 1, 'has_scholarship' => 0, 'submitted_at' => now()],
+            ['student_id' => 2, 'has_scholarship' => 0, 'submitted_at' => now()],
+        ]);
         DB::table('admins')->insert([
             ['id' => 10, 'full_name' => 'HEP Head', 'role' => 'student_affairs_head'],
             ['id' => 11, 'full_name' => 'Discipline Officer', 'role' => 'discipline_admin'],

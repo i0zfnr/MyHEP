@@ -6,34 +6,7 @@
     <h2 style="margin:0;font-size:1rem;font-weight:700;">{{ __('Students Outside Campus') }}</h2>
 @endsection
 
-@push('styles')
-<style>
-    .mv-live { display:flex; flex-direction:column; gap:1rem; }
-    .mv-live-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:.85rem; }
-    @media (min-width: 920px) { .mv-live-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); } }
-    .mv-live-kpi {
-        padding:1rem;
-        border-radius:16px;
-        border:1px solid rgba(255,255,255,.22);
-        background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(247,242,237,.82));
-        box-shadow:0 18px 34px rgba(27,20,14,.12);
-    }
-    .mv-live-kpi small { display:block; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#866f5e; margin-bottom:.35rem; }
-    .mv-live-kpi strong { font-size:2rem; line-height:1; color:#2d1f14; }
-    .mv-live-empty { padding:2rem 1rem; text-align:center; color:var(--text-muted); }
-    .mv-student-card { display:flex; align-items:center; gap:.7rem; min-width:220px; }
-    .mv-avatar { width:48px; height:48px; border-radius:10px; object-fit:cover; border:1px solid rgba(226,209,192,.24); background:rgba(255,255,255,.06); flex:0 0 48px; }
-    .mv-avatar-empty { display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-weight:800; }
-    .mv-mini-btn { display:inline-flex; align-items:center; margin-top:.35rem; padding:.28rem .5rem; border-radius:8px; border:1px solid rgba(226,209,192,.18); color:var(--text); text-decoration:none; font-size:.7rem; font-weight:750; }
-    body[data-theme="dark"] .mv-live-kpi {
-        border-color:rgba(226,209,192,.16);
-        background:linear-gradient(180deg, rgba(33,29,26,.92), rgba(18,16,14,.86));
-        box-shadow:0 20px 38px rgba(0,0,0,.32);
-    }
-    body[data-theme="dark"] .mv-live-kpi small { color:#cdb7a4; }
-    body[data-theme="dark"] .mv-live-kpi strong { color:#f7efe8; }
-</style>
-@endpush
+
 
 @section('content')
 <div class="ui-shell mv-live">

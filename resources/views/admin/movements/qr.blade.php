@@ -6,45 +6,7 @@
     <h2 style="margin:0;font-size:1rem;font-weight:700;">{{ __('Movement QR Management') }}</h2>
 @endsection
 
-@push('styles')
-<style>
-    .qr-wrap { display:grid; grid-template-columns:1fr; gap:1rem; }
-    @media (min-width: 900px) { .qr-wrap { grid-template-columns:.85fr 1.15fr; } }
-    .qr-print-sheet {
-        display:flex;
-        flex-direction:column;
-        gap:1rem;
-    }
-    .qr-box {
-        display:grid;
-        place-items:center;
-        border:1px dashed var(--border);
-        border-radius:16px;
-        padding:1rem;
-        background:#fff;
-        min-height:330px;
-        background-image:linear-gradient(135deg, rgba(164,141,120,.08), rgba(255,255,255,.96));
-    }
-    .qr-box img { width:min(280px, 100%); height:auto; }
-    .qr-url { width:100%; font-size:.78rem; word-break:break-all; border:1px solid var(--border); border-radius:10px; padding:.75rem; color:var(--text-muted); background:rgba(255,255,255,.62); }
-    .qr-meta { display:grid; grid-template-columns:1fr; gap:.8rem; margin-top:1rem; }
-    .qr-card-actions { display:flex; gap:.65rem; flex-wrap:wrap; margin-bottom:.9rem; }
-    .qr-help { color:var(--text-muted); font-size:.8rem; line-height:1.55; }
-    .qr-stamp { color:var(--text-muted); font-size:.76rem; }
-    .qr-warning {
-        border:1px solid #fed7aa;
-        background:#fff7ed;
-        color:#9a3412;
-        border-radius:12px;
-        padding:.85rem 1rem;
-        margin-bottom:1rem;
-        font-size:.84rem;
-        line-height:1.55;
-    }
-    body[data-theme="dark"] .qr-box,
-    body[data-theme="dark"] .qr-url { background:var(--surface); }
-</style>
-@endpush
+
 
 @section('content')
 @php

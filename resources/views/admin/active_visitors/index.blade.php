@@ -3,60 +3,7 @@
 @section('title', __('Active Visitors'))
 @section('header')<h2>{{ __('Active Visitors') }}</h2>@endsection
 
-@push('styles')
-<style>
-    .visitors { max-width: 1180px; margin: 0 auto; }
-    .visitors-head { display:flex; justify-content:space-between; gap:1rem; align-items:flex-end; margin-bottom:1.25rem; flex-wrap:wrap; }
-    .visitors-head h1 { margin:0; color:var(--text); font-size:clamp(1.7rem,3vw,2.35rem); }
-    .visitors-head p { margin:.4rem 0 0; color:var(--text-muted); }
-    .visitors-actions { display:flex; align-items:center; gap:.75rem; }
-    .btn-clear-logs {
-        display:inline-flex; align-items:center; gap:.5rem;
-        padding:.65rem 1.15rem; border-radius:12px;
-        background:rgba(239,68,68,0.12); color:#dc2626;
-        border:1px solid rgba(239,68,68,0.25);
-        font:inherit; font-size:.82rem; font-weight:750;
-        cursor:pointer; transition:all .2s ease;
-    }
-    .btn-clear-logs:hover {
-        background:#dc2626; color:#ffffff; border-color:#dc2626;
-        box-shadow:0 4px 12px rgba(220,38,38,0.25);
-    }
-    body[data-theme="dark"] .btn-clear-logs {
-        background:rgba(239,68,68,0.18); color:#f87171; border-color:rgba(239,68,68,0.3);
-    }
-    body[data-theme="dark"] .btn-clear-logs:hover {
-        background:#ef4444; color:#17120c;
-    }
-    .visitor-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-bottom:1rem; }
-    .visitor-stat,.visitor-card { border:1px solid var(--glass-line); background:var(--glass-bg-strong); box-shadow:var(--glass-shadow); border-radius:20px; }
-    .visitor-stat { padding:1.1rem 1.25rem; }
-    .visitor-stat span { display:block; color:var(--text-muted); font-size:.78rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
-    .visitor-stat strong { display:block; margin-top:.35rem; color:var(--text); font-size:1.8rem; }
-    .visitor-card { overflow:hidden; }
-    .visitor-tools { padding:1rem 1.25rem; border-bottom:1px solid var(--glass-line); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
-    .visitor-tools form { display:flex; flex:1; max-width:420px; }
-    .visitor-tools input { width:100%; padding:.75rem .95rem; border:1px solid var(--border); border-radius:12px; background:var(--surface); color:var(--text); font:inherit; }
-    .visitor-table { width:100%; border-collapse:collapse; }
-    .visitor-table th,.visitor-table td { padding:.9rem 1rem; text-align:left; border-bottom:1px solid var(--glass-line); vertical-align:middle; }
-    .visitor-table th { color:var(--text-muted); font-size:.73rem; letter-spacing:.06em; text-transform:uppercase; }
-    .visitor-table td { color:var(--text); }
-    .visitor-table small { display:block; margin-top:.22rem; color:var(--text-muted); overflow-wrap:anywhere; }
-    .visitor-badge { display:inline-flex; padding:.25rem .55rem; border-radius:999px; background:color-mix(in srgb,var(--primary) 14%,transparent); color:var(--primary); font-size:.75rem; font-weight:800; text-transform:capitalize; }
-    .btn-delete-row {
-        display:inline-flex; align-items:center; justify-content:center;
-        width:32px; height:32px; border-radius:8px;
-        border:1px solid transparent; background:transparent;
-        color:var(--text-muted); cursor:pointer; transition:all .15s ease;
-    }
-    .btn-delete-row:hover {
-        background:rgba(239,68,68,0.12); color:#dc2626; border-color:rgba(239,68,68,0.2);
-    }
-    .visitor-empty { padding:3rem; text-align:center; color:var(--text-muted); font-size:.95rem; }
-    .visitor-pages { padding:1rem; }
-    @media (max-width:720px) { .visitors-head { align-items:start; flex-direction:column; } .visitor-stats { grid-template-columns:1fr; } .visitor-card { overflow-x:auto; } .visitor-table { min-width:720px; } }
-</style>
-@endpush
+
 
 @section('content')
 <div class="visitors">

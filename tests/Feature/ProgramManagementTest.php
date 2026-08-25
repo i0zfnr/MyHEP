@@ -86,6 +86,8 @@ class ProgramManagementTest extends TestCase
             $table->unsignedBigInteger('program_id')->unique();
             $table->longText('content');
             $table->string('status')->default('draft');
+            $table->string('docx_path')->nullable();
+            $table->string('pdf_path')->nullable();
             $table->unsignedBigInteger('tpsa_reviewer_id')->nullable();
             $table->unsignedBigInteger('director_reviewer_id')->nullable();
             $table->unsignedBigInteger('kj_hep_reviewer_id')->nullable();
@@ -169,6 +171,26 @@ class ProgramManagementTest extends TestCase
         $this->assertDatabaseMissing('program_paperworks', ['program_id' => $programId]);
     }
 
+    public function test_staff_can_create_approved_program_without_uploading_paperwork_file(): void
+    {
+        $data = $this->payload([
+            'registration_type' => 'approved_program',
+            'reference_no' => null,
+            'paperwork_method' => 'pdf',
+            'paperwork_file' => null,
+            'title' => 'Leadership Workshop 2025',
+        ]);
+
+        $response = $this->signIn(1, 'lecturer')->post('/admin/programs', $data);
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('programs', [
+            'title' => 'Leadership Workshop 2025',
+            'registration_type' => 'approved_program',
+            'status' => 'active',
+        ]);
+    }
+
     public function test_assigned_reviewer_sees_report_in_awaiting_my_review_queue(): void
     {
         $this->signIn(1, 'lecturer')->post('/admin/programs', $this->payload());
@@ -201,13 +223,28 @@ class ProgramManagementTest extends TestCase
         $paperwork = DB::table('program_paperworks')->first();
         Storage::disk('local')->assertExists($paperwork->path);
 
+        Storage::disk('local')->put('reports/report_1.docx', 'dummy content');
+        Storage::disk('local')->put('reports/report_1.pdf', 'dummy pdf');
+        DB::table('program_reports')->insert([
+            'program_id' => 1,
+            'content' => 'Sample content',
+            'status' => 'draft',
+            'docx_path' => 'reports/report_1.docx',
+            'pdf_path' => 'reports/report_1.pdf',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $this->signIn(1, 'lecturer')->delete('/admin/programs/1')->assertForbidden();
         $this->signIn(3, 'student_affairs_head')->delete('/admin/programs/1')->assertForbidden();
         $this->signIn(6, 'system_admin')->delete('/admin/programs/1')->assertRedirect('/admin/programs');
 
         $this->assertDatabaseMissing('programs', ['id' => 1]);
         $this->assertDatabaseMissing('program_paperworks', ['program_id' => 1]);
+        $this->assertDatabaseMissing('program_reports', ['program_id' => 1]);
         Storage::disk('local')->assertMissing($paperwork->path);
+        Storage::disk('local')->assertMissing('reports/report_1.docx');
+        Storage::disk('local')->assertMissing('reports/report_1.pdf');
     }
 
     private function signIn(int $id, string $role): static

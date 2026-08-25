@@ -48,10 +48,13 @@ class ScholarshipStatusController extends Controller
             ? DB::table('student_documents')->where('source_type', 'scholarship_status')->where('source_id', $existingSubmission->id)->first()
             : null;
 
-        $type = $request->input('application_type');
-        if (blank($type)) {
-            $type = $request->input('has_scholarship') === 'yes' ? 'scholarship' : 'none';
+        if (! $request->has('application_type') && $request->has('has_scholarship')) {
+            $request->merge([
+                'application_type' => $request->input('has_scholarship') === 'yes' ? 'scholarship' : 'none',
+            ]);
         }
+
+        $type = $request->input('application_type');
 
         $validated = $request->validate([
             'application_type' => ['required', Rule::in(['scholarship', 'welfare', 'none'])],
@@ -107,6 +110,13 @@ class ScholarshipStatusController extends Controller
             'submitted_at' => now(),
             'updated_at' => now(),
         ];
+
+        if (Schema::hasTable('student_scholarship_status_forms')) {
+            $tableCols = Schema::getColumnListing('student_scholarship_status_forms');
+            if (! empty($tableCols)) {
+                $payload = array_intersect_key($payload, array_flip($tableCols));
+            }
+        }
 
         try {
             DB::transaction(function () use ($studentId, $payload, $validated, $newPath, $existingDoc, $uploadedFile) {

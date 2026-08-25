@@ -54,7 +54,7 @@ class StaffManagementController extends Controller
             ->orderByRaw('CASE WHEN staff_department IS NULL THEN 1 ELSE 0 END')
             ->orderBy('staff_department')
             ->orderBy('full_name')
-            ->paginate(100)
+            ->paginate(25)
             ->withQueryString();
 
         return view('admin.account_management.index', [

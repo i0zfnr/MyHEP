@@ -2,45 +2,7 @@
 
 @section('title', 'SCHOLARSHIP B40 TVET')
 
-@push('styles')
-<style>
-    .wrap { max-width: 1180px; margin: 0 auto; }
-    .grid { display:grid; gap:14px; grid-template-columns:1fr; }
-    @media (min-width: 980px) { .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .grid-main { grid-template-columns: .95fr 1.35fr; } }
-    .card { background:#fff; border:1px solid #eadfce; border-radius:12px; overflow:hidden; box-shadow:0 10px 26px rgba(61,46,34,.06); }
-    .head { padding:14px 16px; border-bottom:1px solid #eadfce; display:flex; justify-content:space-between; gap:10px; align-items:center; background:linear-gradient(180deg,#fff,#fbf5ee); }
-    .head h1, .head h2 { margin:0; color:#241a12; }
-    .head h1 { font-size:20px; }
-    .head h2 { font-size:16px; }
-    .body { padding:16px; }
-    .stat { padding:15px 16px; border-left:4px solid #8f6f52; }
-    .stat span { display:block; font-size:12px; color:#7b6757; text-transform:uppercase; letter-spacing:.06em; font-weight:700; }
-    .stat strong { display:block; margin-top:5px; font-size:28px; color:#241a12; }
-    .btn { display:inline-flex; align-items:center; justify-content:center; border:1px solid #ceb79f; background:linear-gradient(180deg,#fff,#f9f3ec); color:#6e5745; border-radius:10px; padding:9px 13px; text-decoration:none; font-weight:700; font-size:13px; cursor:pointer; }
-    .btn-primary { border-color:#7f6249; background:linear-gradient(135deg,#8f6f52,#c0a183); color:#fff; }
-    .btn:hover { transform:translateY(-1px); box-shadow:0 8px 18px rgba(98,74,53,.14); }
-    label { display:block; margin-bottom:6px; font-size:13px; font-weight:700; color:#7b6757; }
-    input, select { width:100%; border:1px solid #dfceb9; border-radius:10px; padding:9px 10px; background:#fffdfb; color:#241a12; font-size:13px; }
-    .hint { margin-top:8px; color:#7b6757; font-size:12px; line-height:1.55; }
-    .ok { margin-bottom:12px; background:#e7f3f3; border:1px solid #b9ddde; color:#1f5559; border-radius:10px; padding:10px 12px; font-size:13px; }
-    .err { margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:10px 12px; font-size:13px; }
-    .summary { display:grid; gap:8px; grid-template-columns:repeat(2, minmax(0, 1fr)); margin-top:12px; }
-    .summary div { border:1px solid #eadfce; border-radius:10px; padding:10px; background:#fcfaf8; }
-    .summary span { display:block; color:#7b6757; font-size:11px; text-transform:uppercase; font-weight:700; }
-    .summary strong { display:block; margin-top:3px; color:#241a12; font-size:18px; }
-    .filters { padding:12px 16px; border-bottom:1px solid #eadfce; background:#fcfaf8; }
-    .filter-grid { display:grid; gap:8px; grid-template-columns:1fr; }
-    @media (min-width: 820px) { .filter-grid { grid-template-columns:2fr 1fr auto; } }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:10px 12px; border-bottom:1px solid #f0e7dc; font-size:13px; text-align:left; vertical-align:top; }
-    th { font-size:11px; text-transform:uppercase; color:#7b6757; letter-spacing:.06em; background:#f9f1e8; }
-    .pill { display:inline-block; border-radius:99px; padding:.2rem .6rem; font-size:11px; font-weight:800; text-transform:uppercase; border:1px solid #ede4d9; }
-    .pending { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .confirmed { background:#e7f3f3; color:#28686c; border-color:#b9ddde; }
-    .rejected { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
-    .error-list { margin:10px 0 0; padding-left:18px; color:#991b1b; font-size:12px; line-height:1.5; }
-</style>
-@endpush
+
 
 @section('header')
     <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--se-text);">{{ __('SCHOLARSHIP B40 TVET') }}</h2>
@@ -151,6 +113,6 @@
         </div>
     </div>
 
-    <div style="margin-top:14px;">{{ $records->links() }}</div>
+    <div class="sch-pagination" style="margin-top:14px;">{{ $records->onEachSide(1)->links('vendor.pagination.myhep') }}</div>
 </div>
 @endsection

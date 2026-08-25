@@ -9,1062 +9,7 @@
 
 @section('title', $aiPageTitle)
 
-@push('styles')
-<style>
-    .ai-admin {
-        --ai-panel-border: rgba(214, 194, 169, .72);
-        --ai-panel-bg: linear-gradient(180deg, rgba(255, 252, 248, .95), rgba(247, 239, 229, .92));
-        --ai-panel-shadow: 0 18px 36px rgba(52, 38, 25, .14);
-        --ai-head-title: #2d1f14;
-        --ai-head-sub: #705a48;
-        --ai-badge-border: #d1b394;
-        --ai-badge-bg: rgba(201, 152, 103, .18);
-        --ai-badge-text: #7a4c1b;
-        --ai-chat-bg-start: #fbf5ee;
-        --ai-chat-bg-end: #f3e8db;
-        --ai-msg-user-bg: linear-gradient(135deg, rgba(76, 103, 132, .92), rgba(55, 76, 101, .92));
-        --ai-msg-user-border: rgba(86, 116, 149, .45);
-        --ai-msg-user-text: #f3f8ff;
-        --ai-msg-ai-bg: linear-gradient(180deg, rgba(255, 253, 250, .96), rgba(250, 242, 232, .92));
-        --ai-msg-ai-border: rgba(214, 190, 165, .7);
-        --ai-msg-ai-text: #312319;
-        --ai-msg-meta: #826c57;
-        --ai-toolbar-bg: rgba(250, 242, 233, .92);
-        --ai-btn-border: #ccb194;
-        --ai-btn-bg: rgba(201, 152, 103, .10);
-        --ai-btn-text: #5f432f;
-        --ai-compose-bg: rgba(255, 250, 244, .94);
-        --ai-input-border: #cfb497;
-        --ai-input-bg: #fffdfa;
-        --ai-input-text: #2e1e13;
-        --ai-input-placeholder: #89715d;
-        --ai-send-border: #b68b60;
-        --ai-send-bg: linear-gradient(135deg, #c99867, #e0b182);
-        --ai-send-text: #25190f;
-        --ai-hint: #7a6554;
-        --ai-card-border: rgba(215, 193, 170, .8);
-        --ai-card-bg: linear-gradient(180deg, rgba(255, 252, 247, .95), rgba(248, 241, 233, .92));
-        --ai-card-title: #7c6451;
-        --ai-task-border: rgba(206, 180, 150, .72);
-        --ai-task-bg: linear-gradient(180deg, rgba(255, 251, 246, .96), rgba(246, 235, 221, .92));
-        --ai-task-text: #4e3524;
-        --ai-label: #735d4a;
-        --ai-field-border: #cfb497;
-        --ai-field-bg: #fffdfa;
-        --ai-field-text: #2e1e13;
-        --ai-kv: #5f4635;
-        --ai-kv-strong: #2d1f14;
-        position:relative;
-        display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(320px, .9fr);
-        gap: 1.1rem;
-        width: min(100%, 1180px);
-        margin: 0 auto;
-        align-items: start;
-    }
 
-    body[data-theme="dark"] .ai-admin {
-        --ai-panel-border: rgba(126, 114, 102, .58);
-        --ai-panel-bg: linear-gradient(180deg, rgba(34, 31, 28, .94), rgba(23, 21, 19, .92));
-        --ai-panel-shadow: 0 18px 34px rgba(0, 0, 0, .38);
-        --ai-head-title: #f2e5d5;
-        --ai-head-sub: #b9a795;
-        --ai-badge-border: #8f765d;
-        --ai-badge-bg: rgba(201, 152, 103, .2);
-        --ai-badge-text: #e9c7a2;
-        --ai-chat-bg-start: rgba(43, 38, 34, .96);
-        --ai-chat-bg-end: rgba(27, 24, 21, .98);
-        --ai-msg-user-bg: linear-gradient(135deg, rgba(56, 83, 110, .96), rgba(37, 55, 74, .94));
-        --ai-msg-user-border: rgba(127, 168, 204, .45);
-        --ai-msg-user-text: #d9ebff;
-        --ai-msg-ai-bg: linear-gradient(180deg, rgba(59, 51, 44, .92), rgba(40, 35, 31, .90));
-        --ai-msg-ai-border: rgba(130, 113, 96, .52);
-        --ai-msg-ai-text: #f3e6d7;
-        --ai-msg-meta: #bda791;
-        --ai-toolbar-bg: rgba(30, 27, 24, .92);
-        --ai-btn-border: #866a4e;
-        --ai-btn-bg: rgba(201, 152, 103, .14);
-        --ai-btn-text: #f1d9bf;
-        --ai-compose-bg: rgba(30, 27, 24, .92);
-        --ai-input-border: #7f6955;
-        --ai-input-bg: rgba(22, 20, 18, .9);
-        --ai-input-text: #f3e6d7;
-        --ai-input-placeholder: #a88f78;
-        --ai-send-border: #b68b60;
-        --ai-send-bg: linear-gradient(135deg, #c99867, #e0b182);
-        --ai-send-text: #23180f;
-        --ai-hint: #9f8872;
-        --ai-card-border: rgba(123, 109, 94, .56);
-        --ai-card-bg: linear-gradient(180deg, rgba(47, 41, 36, .90), rgba(33, 29, 25, .88));
-        --ai-card-title: #c8b29a;
-        --ai-task-border: rgba(141, 119, 95, .58);
-        --ai-task-bg: linear-gradient(180deg, rgba(77, 67, 57, .72), rgba(59, 50, 42, .76));
-        --ai-task-text: #f1dbc4;
-        --ai-label: #bda58e;
-        --ai-field-border: #7f6955;
-        --ai-field-bg: rgba(22, 20, 18, .9);
-        --ai-field-text: #f3e6d7;
-        --ai-kv: #d2bcaa;
-        --ai-kv-strong: #f4e6d7;
-    }
-
-    .ai-panel {
-        border: 1px solid var(--ai-panel-border);
-        border-radius: 18px;
-        background: var(--ai-panel-bg);
-        box-shadow: var(--ai-panel-shadow);
-        overflow: hidden;
-        backdrop-filter: blur(18px) saturate(128%);
-        -webkit-backdrop-filter: blur(18px) saturate(128%);
-    }
-
-    .ai-head {
-        padding: 1.05rem 1.1rem;
-        border-bottom: 1px solid rgba(221, 209, 195, .7);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: .75rem;
-        background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, .08));
-    }
-
-    .ai-head h3 {
-        margin: 0;
-        font-size: 1.12rem;
-        color: var(--ai-head-title);
-    }
-
-    .ai-sub {
-        margin: .38rem 0 0;
-        color: var(--ai-head-sub);
-        font-size: .84rem;
-        line-height: 1.55;
-    }
-
-    .ai-badges {
-        display: flex;
-        gap: .45rem;
-    }
-
-    .ai-badge {
-        border: 1px solid var(--ai-badge-border);
-        background: var(--ai-badge-bg);
-        color: var(--ai-badge-text);
-        border-radius: 999px;
-        padding: .26rem .62rem;
-        font-size: .69rem;
-        font-weight: 800;
-        letter-spacing: .04em;
-    }
-
-    .ai-chat-log {
-        padding: 1.1rem;
-        min-height: 500px;
-        max-height: 62vh;
-        overflow: auto;
-        display: grid;
-        gap: .95rem;
-        background: linear-gradient(180deg, var(--ai-chat-bg-start), var(--ai-chat-bg-end));
-    }
-
-    .msg {
-        max-width: 88%;
-        border-radius: 16px;
-        padding: .9rem 1rem;
-        font-size: .9rem;
-        line-height: 1.65;
-        box-shadow: 0 10px 22px rgba(46, 33, 21, .08);
-    }
-
-    .msg.user {
-        margin-left: auto;
-        background: var(--ai-msg-user-bg);
-        border: 1px solid var(--ai-msg-user-border);
-        color: var(--ai-msg-user-text);
-        border-bottom-right-radius: 8px;
-    }
-
-    .msg.ai {
-        margin-right: auto;
-        background: var(--ai-msg-ai-bg);
-        border: 1px solid var(--ai-msg-ai-border);
-        color: var(--ai-msg-ai-text);
-        border-bottom-left-radius: 8px;
-    }
-
-    .msg-meta {
-        display: block;
-        margin-top: .45rem;
-        color: var(--ai-msg-meta);
-        font-size: .74rem;
-    }
-
-    .ai-toolbar {
-        display: flex;
-        gap: .55rem;
-        flex-wrap: wrap;
-        padding: .95rem 1rem;
-        border-top: 1px solid rgba(221, 209, 195, .7);
-        background: var(--ai-toolbar-bg);
-    }
-
-    .ai-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--ai-btn-border);
-        background: var(--ai-btn-bg);
-        color: var(--ai-btn-text);
-        border-radius: 10px;
-        padding: .52rem .78rem;
-        font-size: .78rem;
-        font-weight: 800;
-        text-decoration: none;
-        transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-    }
-
-    .ai-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 16px rgba(46, 33, 21, .10);
-    }
-
-    .ai-compose {
-        border-top: 1px solid rgba(221, 209, 195, .7);
-        padding: .95rem 1rem 1rem;
-        background: var(--ai-compose-bg);
-    }
-
-    .ai-compose-row {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: .55rem;
-    }
-
-    .ai-input {
-        border: 1px solid var(--ai-input-border);
-        border-radius: 12px;
-        padding: .78rem .88rem;
-        background: var(--ai-input-bg);
-        color: var(--ai-input-text);
-        font-size: .9rem;
-        font-family: inherit;
-        resize: vertical;
-        min-height: 46px;
-        max-height: 160px;
-    }
-
-    .ai-input::placeholder {
-        color: var(--ai-input-placeholder);
-    }
-
-    .ai-send {
-        border: 1px solid var(--ai-send-border);
-        background: var(--ai-send-bg);
-        color: var(--ai-send-text);
-        border-radius: 12px;
-        padding: .78rem 1.05rem;
-        font-weight: 800;
-        font-size: .86rem;
-        box-shadow: 0 10px 18px rgba(182, 139, 96, .20);
-        cursor: pointer;
-    }
-
-    .ai-send:disabled,
-    .ai-btn:disabled,
-    .task-btn:disabled {
-        cursor: not-allowed;
-        opacity: .62;
-        transform: none;
-    }
-
-    .msg.error {
-        margin-right: auto;
-        background: rgba(185, 28, 28, .10);
-        border: 1px solid rgba(185, 28, 28, .28);
-        color: #991b1b;
-    }
-
-    body[data-theme="dark"] .msg.error {
-        background: rgba(127, 29, 29, .22);
-        border-color: rgba(252, 165, 165, .34);
-        color: #fecaca;
-    }
-
-    .msg.loading {
-        opacity: .78;
-    }
-
-    .msg pre {
-        margin: .5rem 0 0;
-        white-space: pre-wrap;
-        font: inherit;
-    }
-
-    .ai-hint {
-        margin: .55rem 0 0;
-        color: var(--ai-hint);
-        font-size: .74rem;
-    }
-
-    .ops-body {
-        padding: 1rem;
-        display: grid;
-        gap: .95rem;
-    }
-
-    .ops-card {
-        border: 1px solid var(--ai-card-border);
-        background: var(--ai-card-bg);
-        border-radius: 14px;
-        padding: .9rem;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14);
-    }
-
-    .ops-title {
-        margin: 0 0 .7rem;
-        font-size: .84rem;
-        text-transform: uppercase;
-        letter-spacing: .06em;
-        color: var(--ai-card-title);
-    }
-
-    .task-list {
-        display: grid;
-        gap: .45rem;
-    }
-
-    .task-btn {
-        width: 100%;
-        text-align: left;
-        border: 1px solid var(--ai-task-border);
-        background: var(--ai-task-bg);
-        color: var(--ai-task-text);
-        border-radius: 10px;
-        padding: .72rem;
-        font-size: .82rem;
-        font-weight: 800;
-        transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-    }
-
-    .task-btn:hover {
-        transform: translateY(-1px);
-        border-color: rgba(190, 156, 122, .92);
-        box-shadow: 0 10px 16px rgba(46, 33, 21, .08);
-    }
-
-    .ops-field {
-        display: grid;
-        gap: .3rem;
-        margin-bottom: .5rem;
-    }
-
-    .ops-field label {
-        font-size: .75rem;
-        color: var(--ai-label);
-        font-weight: 700;
-    }
-
-    .ops-field input,
-    .ops-field select {
-        width: 100%;
-        border: 1px solid var(--ai-field-border);
-        border-radius: 10px;
-        padding: .65rem .72rem;
-        font-size: .82rem;
-        background: var(--ai-field-bg);
-        color: var(--ai-field-text);
-    }
-
-    .ops-field input::placeholder {
-        color: var(--ai-input-placeholder);
-    }
-
-    .ai-upload-drop { display:grid; gap:.55rem; border:1px dashed var(--ai-task-border); border-radius:12px; padding:.85rem; background:color-mix(in srgb,var(--ai-field-bg) 86%,var(--primary) 14%); cursor:pointer; transition:border-color .16s ease,transform .16s ease; }
-    .ai-upload-drop:hover { border-color:var(--primary); transform:translateY(-1px); }
-    .ai-upload-drop input { display:none !important; position:absolute !important; width:0 !important; height:0 !important; opacity:0 !important; pointer-events:none !important; }
-    .ai-upload-title { font-size:.82rem; font-weight:850; color:var(--ai-task-text); }
-    .ai-upload-note { color:var(--ai-label); font-size:.72rem; line-height:1.45; }
-    .ai-upload-preview { display:none; align-items:center; gap:.7rem; margin-top:.7rem; padding:.65rem; border:1px solid var(--ai-card-border); border-radius:11px; background:var(--ai-field-bg); }
-    .ai-upload-preview.is-visible { display:flex; }
-    .ai-upload-thumb { width:48px; height:48px; flex:0 0 48px; border-radius:9px; object-fit:cover; display:grid; place-items:center; background:color-mix(in srgb,var(--primary) 15%,var(--ai-field-bg)); color:var(--primary); font-weight:900; }
-    .ai-upload-copy { min-width:0; flex:1; }
-    .ai-upload-name { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ai-field-text); font-size:.78rem; font-weight:800; }
-    .ai-upload-size { color:var(--ai-label); font-size:.68rem; }
-    .ai-upload-remove { border:0; background:transparent; color:var(--ai-label); font-size:1.2rem; cursor:pointer; }
-
-    /* Follow the System Admin accent selected in Appearance settings. */
-    .ai-admin {
-        --ai-panel-border: color-mix(in srgb, var(--se-primary) 28%, var(--border));
-        --ai-panel-bg: linear-gradient(155deg, color-mix(in srgb, var(--surface) 94%, var(--se-primary-soft)), var(--surface));
-        --ai-panel-shadow: 0 18px 42px color-mix(in srgb, var(--se-primary-strong) 12%, transparent);
-        --ai-head-title: var(--text);
-        --ai-head-sub: var(--text-muted);
-        --ai-badge-border: var(--se-primary-muted);
-        --ai-badge-bg: var(--se-primary-soft);
-        --ai-badge-text: var(--se-primary-strong);
-        --ai-chat-bg-start: color-mix(in srgb, var(--surface) 94%, var(--se-primary-soft));
-        --ai-chat-bg-end: color-mix(in srgb, var(--bg) 96%, var(--se-primary-muted));
-        --ai-msg-user-bg: linear-gradient(135deg, var(--se-primary-button-start), var(--se-primary-button-end));
-        --ai-msg-user-border: color-mix(in srgb, var(--se-primary) 72%, var(--border));
-        --ai-msg-user-text: var(--se-primary-button-text);
-        --ai-msg-ai-bg: linear-gradient(145deg, color-mix(in srgb, var(--surface) 92%, var(--se-primary-soft)), var(--surface));
-        --ai-msg-ai-border: color-mix(in srgb, var(--se-primary) 26%, var(--border));
-        --ai-msg-ai-text: var(--text);
-        --ai-msg-meta: var(--text-muted);
-        --ai-toolbar-bg: color-mix(in srgb, var(--surface) 92%, var(--se-primary-soft));
-        --ai-btn-border: color-mix(in srgb, var(--se-primary) 45%, var(--border));
-        --ai-btn-bg: var(--se-primary-soft);
-        --ai-btn-text: var(--se-primary-strong);
-        --ai-compose-bg: color-mix(in srgb, var(--surface) 94%, var(--se-primary-soft));
-        --ai-input-border: color-mix(in srgb, var(--se-primary) 34%, var(--border));
-        --ai-input-bg: var(--surface);
-        --ai-input-text: var(--text);
-        --ai-input-placeholder: var(--text-muted);
-        --ai-send-border: var(--se-primary-strong);
-        --ai-send-bg: linear-gradient(135deg, var(--se-primary-button-start), var(--se-primary-button-end));
-        --ai-send-text: var(--se-primary-button-text);
-        --ai-hint: var(--text-muted);
-        --ai-card-border: color-mix(in srgb, var(--se-primary) 24%, var(--border));
-        --ai-card-bg: linear-gradient(145deg, color-mix(in srgb, var(--surface) 94%, var(--se-primary-soft)), var(--surface));
-        --ai-card-title: var(--se-primary-strong);
-        --ai-task-border: color-mix(in srgb, var(--se-primary) 34%, var(--border));
-        --ai-task-bg: linear-gradient(145deg, color-mix(in srgb, var(--surface) 86%, var(--se-primary-soft)), var(--surface));
-        --ai-task-text: var(--text);
-        --ai-label: var(--text-muted);
-        --ai-field-border: color-mix(in srgb, var(--se-primary) 30%, var(--border));
-        --ai-field-bg: var(--surface);
-        --ai-field-text: var(--text);
-        --ai-kv: var(--text-muted);
-        --ai-kv-strong: var(--se-primary-strong);
-    }
-    .ai-head,.ai-toolbar,.ai-compose { border-color:color-mix(in srgb,var(--se-primary) 22%,var(--border)); }
-    .ai-upload-drop { min-height:110px; place-content:center; text-align:center; border-width:1.5px; border-color:color-mix(in srgb,var(--se-primary) 50%,var(--border)); background:linear-gradient(145deg,var(--se-primary-soft),color-mix(in srgb,var(--surface) 90%,var(--se-primary-soft))); }
-    .ai-upload-drop::before { content:'↥'; width:38px; height:38px; margin:0 auto .1rem; display:grid; place-items:center; border-radius:12px; background:var(--se-primary); color:var(--se-primary-button-text); font-size:1.15rem; font-weight:900; box-shadow:0 8px 20px color-mix(in srgb,var(--se-primary) 25%,transparent); }
-    .ai-upload-title { color:var(--se-primary-strong); }
-    .ai-upload-preview { border-color:color-mix(in srgb,var(--se-primary) 36%,var(--border)); box-shadow:0 8px 20px color-mix(in srgb,var(--se-primary) 9%,transparent); }
-
-    /* Focused Gemini-style admin workspace. */
-    .ai-admin { display:block; width:min(100%,1120px); min-height:calc(100vh - 176px); }
-    .ai-admin > .ai-panel:first-child { min-height:calc(100vh - 176px); border:0; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; display:grid; grid-template-rows:auto minmax(360px,1fr) auto auto; overflow:visible; }
-    .ai-admin > .ai-panel:first-child > .ai-head { padding:.45rem .25rem; border:0; background:transparent; }
-    .ai-admin > .ai-panel:first-child .ai-sub { display:none; }
-    .ai-chat-log { min-height:430px; padding:2rem max(1rem,8%); background:radial-gradient(ellipse 52% 45% at 50% 52%,color-mix(in srgb,var(--se-primary) 18%,transparent),transparent 72%); border-radius:28px; align-content:start; }
-    .ai-empty-state { min-height:390px; display:grid; place-content:center; justify-items:center; text-align:center; gap:.7rem; color:var(--text); }
-    .ai-empty-orb { width:52px; height:52px; display:grid; place-items:center; border-radius:18px; color:var(--se-primary-button-text); background:linear-gradient(145deg,var(--se-primary-button-start),var(--se-primary-button-end)); box-shadow:0 18px 45px color-mix(in srgb,var(--se-primary) 28%,transparent); font-size:1.45rem; }
-    .ai-empty-orb svg { width:27px; height:27px; }
-    .ai-empty-state h3 { margin:.45rem 0 0; font-size:clamp(1.65rem,3vw,2.3rem); font-weight:550; letter-spacing:-.035em; }
-    .ai-empty-state p { max-width:520px; margin:0; color:var(--text-muted); line-height:1.6; }
-    .ai-empty-chips { display:flex; flex-wrap:wrap; justify-content:center; gap:.5rem; margin-top:.55rem; }
-    .ai-empty-chip { border:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); border-radius:999px; padding:.5rem .75rem; background:color-mix(in srgb,var(--surface) 86%,var(--se-primary-soft)); color:var(--text); font:inherit; font-size:.74rem; font-weight:750; cursor:pointer; }
-    .ai-toolbar { display:none; max-width:820px; width:100%; margin:0 auto; border:0; background:transparent; padding:.35rem 0 .7rem; }
-    .ai-admin.has-chat .ai-toolbar { display:flex; }
-    .ai-compose { position:sticky; bottom:12px; z-index:12; width:min(100%,820px); margin:0 auto 1rem; padding:0; border:0; background:transparent; }
-    .ai-compose-row { position:relative; display:grid; grid-template-columns:44px minmax(0,1fr) auto 44px; align-items:end; gap:.35rem; padding:.42rem; border:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); border-radius:26px; background:color-mix(in srgb,var(--surface) 94%,transparent); box-shadow:0 18px 55px rgba(0,0,0,.16),0 0 0 1px color-mix(in srgb,var(--se-primary) 6%,transparent); backdrop-filter:blur(20px) saturate(130%); }
-    .ai-input { min-height:46px; max-height:150px; padding:.75rem .4rem; border:0; background:transparent; box-shadow:none!important; resize:none; }
-    .ai-input:focus { border:0; box-shadow:none; }
-    .ai-compose-icon { width:42px; height:42px; border:0; border-radius:50%; display:grid; place-items:center; background:transparent; color:var(--text); font-size:1.4rem; cursor:pointer; }
-    .ai-compose-icon:hover,.ai-compose-icon[aria-expanded="true"] { background:var(--se-primary-soft); color:var(--se-primary-strong); }
-    .ai-format-pill { align-self:center; border:0; border-radius:999px; padding:.48rem .65rem; background:transparent; color:var(--text-muted); font-size:.72rem; font-weight:800; cursor:pointer; white-space:nowrap; }
-    .ai-format-pill:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
-    .ai-send { width:42px; height:42px; padding:0; border-radius:50%; font-size:1.05rem; }
-    .ai-hint { text-align:center; margin:.48rem 0 0; }
-    .ai-add-menu { position:absolute; z-index:24; left:10px; bottom:calc(100% + 8px); width:236px; padding:.55rem; display:none; gap:.15rem; border:1px solid color-mix(in srgb,var(--se-primary) 18%,var(--border)); border-radius:18px; background:color-mix(in srgb,var(--surface) 96%,#202124); box-shadow:0 22px 55px rgba(0,0,0,.32); backdrop-filter:blur(22px); }
-    .ai-add-menu.is-open { display:grid; }
-    .ai-add-action { display:flex; align-items:center; gap:.7rem; width:100%; min-height:42px; padding:.58rem .65rem; border:0; border-radius:10px; background:transparent; color:var(--text); font:inherit; font-size:.77rem; font-weight:700; text-align:left; cursor:pointer; }
-    .ai-add-action:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
-    .ai-add-action span { width:22px; height:22px; flex:0 0 22px; display:grid; place-items:center; border-radius:0; background:transparent; color:var(--text-muted); font-size:.9rem; }
-    .ai-add-action + .ai-add-action { border-top:1px solid color-mix(in srgb,var(--se-primary) 10%,var(--border)); }
-    .ai-tools-backdrop { position:fixed; inset:0; z-index:1070; border:0; background:rgba(0,0,0,.3); opacity:0; visibility:hidden; transition:.2s ease; }
-    .ai-tools-backdrop.is-open { opacity:1; visibility:visible; }
-    .ai-admin > aside.ai-panel { position:fixed; z-index:1071; top:18px; right:18px; bottom:18px; width:min(390px,calc(100vw - 28px)); max-height:none; overflow:auto; transform:translateX(calc(100% + 36px)); transition:transform .24s ease; border-radius:22px; }
-    .ai-admin > aside.ai-panel.is-open { transform:none; }
-    .ai-admin > aside.ai-panel .ai-head { position:sticky; top:0; z-index:2; backdrop-filter:blur(18px); }
-    body.ai-tools-open { overflow:hidden; }
-    @media(max-width:640px){.ai-chat-log{padding:1rem .25rem;min-height:380px}.ai-empty-state{min-height:350px}.ai-compose-row{grid-template-columns:42px minmax(0,1fr) 42px}.ai-format-pill{display:none}.ai-hint{font-size:.66rem}.ai-admin>.ai-panel:first-child{min-height:calc(100vh - 145px)}}
-
-    .ops-kv {
-        margin: 0;
-        display: grid;
-        gap: .35rem;
-        padding: 0;
-    }
-
-    .ops-kv li {
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
-        gap: .75rem;
-        font-size: .78rem;
-        color: var(--ai-kv);
-        padding: .3rem 0;
-        border-bottom: 1px dashed rgba(209, 187, 162, .35);
-    }
-
-    .ops-kv li:last-child {
-        border-bottom: 0;
-    }
-
-    .ops-kv strong {
-        color: var(--ai-kv-strong);
-        text-transform: uppercase;
-        font-size: .72rem;
-        letter-spacing: .04em;
-    }
-
-    .msg.ai { max-width:min(92%,760px); }
-    .msg.user { max-width:min(78%,620px); }
-    .ai-message-actions { display:flex; align-items:center; gap:.15rem; margin-top:.65rem; padding-top:.5rem; border-top:1px solid color-mix(in srgb,var(--se-primary) 16%,var(--border)); }
-    .ai-message-actions[hidden] { display:none !important; }
-    .ai-message-action { min-height:30px; display:inline-flex; align-items:center; gap:.32rem; padding:.32rem .48rem; border:0; border-radius:8px; background:transparent; color:var(--text-muted); font:inherit; font-size:.67rem; font-weight:700; cursor:pointer; }
-    .ai-message-action svg { width:14px; height:14px; }
-    .ai-message-action:hover,.ai-message-action:focus-visible { background:var(--se-primary-soft); color:var(--se-primary-strong); outline:0; }
-    .ai-message-action:disabled { opacity:.42; cursor:not-allowed; }
-    .ai-edit-actions button { min-height:32px; padding:.38rem .68rem; border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:9px; background:transparent; color:var(--se-primary-strong); font:inherit; font-size:.7rem; font-weight:750; cursor:pointer; }
-    .msg.ai.is-writing { width:min(88%,760px); max-width:min(88%,760px); padding:0 !important; overflow:hidden; border-radius:20px !important; background:color-mix(in srgb,var(--surface) 94%,var(--se-primary-soft)) !important; }
-    .ai-writing-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.68rem .8rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 18%,var(--border)); }
-    .ai-writing-label { display:inline-flex; align-items:center; gap:.42rem; min-height:34px; padding:.4rem .65rem; border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); border-radius:999px; color:var(--text); font-size:.74rem; font-weight:750; }
-    .ai-writing-label svg,.ai-writing-tools svg { width:16px; height:16px; }
-    .ai-writing-tools { display:flex; gap:.3rem; }
-    .ai-writing-tools button { width:34px; height:34px; display:grid; place-items:center; border:0; border-radius:9px; background:transparent; color:var(--text-muted); cursor:pointer; }
-    .ai-writing-tools button:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
-    .ai-writing-body { padding:.75rem .8rem .8rem; }
-    .ai-message-editor { width:100%; min-height:300px; max-height:52vh; resize:vertical; padding:.85rem; border:1px solid color-mix(in srgb,var(--se-primary) 34%,var(--border)); border-radius:12px; outline:0; background:color-mix(in srgb,var(--bg) 84%,var(--surface)); color:var(--text); font:inherit; font-size:.86rem; line-height:1.6; box-sizing:border-box; }
-    .ai-message-editor:focus { box-shadow:0 0 0 3px color-mix(in srgb,var(--se-primary) 16%,transparent); }
-    .ai-edit-prompt { display:grid; grid-template-columns:minmax(0,1fr) 34px; gap:.4rem; margin-bottom:.6rem; padding:.35rem; border:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); border-radius:12px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); }
-    .ai-edit-prompt input { min-width:0; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.76rem; }
-    .ai-edit-prompt button { width:34px; height:34px; border:0; border-radius:9px; background:var(--se-primary); color:var(--se-primary-button-text); cursor:pointer; }
-    .ai-edit-actions { display:flex; justify-content:flex-end; gap:.45rem; margin-top:.55rem; }
-    .ai-edit-actions .is-primary { background:var(--se-primary); color:var(--se-primary-button-text); }
-    .msg.ai.is-writing.is-expanded { position:fixed; z-index:14500; inset:24px; width:auto; max-width:none; margin:0; }
-    .msg.ai.is-writing.is-expanded .ai-writing-body { height:calc(100% - 60px); display:grid; grid-template-rows:auto minmax(0,1fr) auto; }
-    .msg.ai.is-writing.is-expanded .ai-message-editor { height:100%; max-height:none; resize:none; }
-    body.ai-writing-expanded #appSidebar,body.ai-writing-expanded #sbOverlay { display:none !important; }
-    body.ai-writing-expanded .main-wrap { width:100%; }
-    body.ai-writing-expanded { overflow:hidden !important; }
-    body.ai-writing-expanded .ai-chat-log { overflow:visible !important; -webkit-mask-image:none !important; mask-image:none !important; }
-    @media(max-width:640px){ .msg.ai.is-writing { width:100%; max-width:100% !important; } .msg.ai.is-writing.is-expanded { inset:8px; } }
-    .ai-selection-tools { position:fixed; z-index:15000; display:flex; overflow:hidden; border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:11px; background:#202124; box-shadow:0 10px 30px rgba(0,0,0,.32); opacity:0; visibility:hidden; pointer-events:none; transform:translateY(4px); transition:opacity .12s ease,transform .12s ease,visibility 0s linear .12s; }
-    .ai-selection-tools.is-open { opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0); transition-delay:0s; }
-    .ai-selection-tools button { min-height:38px; padding:.5rem .75rem; border:0; border-right:1px solid rgba(255,255,255,.1); background:transparent; color:#fff; font:inherit; font-size:.72rem; font-weight:750; cursor:pointer; white-space:nowrap; }
-    .ai-selection-tools button:last-child { border-right:0; }
-    .ai-selection-tools button:hover { background:color-mix(in srgb,var(--se-primary) 22%,#202124); }
-    .msg-rich { white-space:normal; overflow-wrap:anywhere; }
-    .msg-rich h3 { margin:0 0 .85rem; padding-bottom:.65rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); font-size:1.05rem; line-height:1.35; letter-spacing:.015em; color:var(--text); }
-    .msg-rich h4 { margin:1rem 0 .45rem; font-size:.94rem; line-height:1.4; color:var(--se-primary-muted); }
-    .msg-rich h4:first-child { margin-top:0; }
-    .msg-rich p { margin:.42rem 0; line-height:1.7; }
-    .msg-rich hr { height:1px; margin:.85rem 0; border:0; background:color-mix(in srgb,var(--se-primary) 25%,var(--border)); }
-    .msg-rich ul,.msg-rich ol { margin:.4rem 0 .75rem; padding-left:1.35rem; }
-    .msg-rich li { margin:.28rem 0; padding-left:.15rem; }
-    .msg-rich strong { font-weight:850; color:var(--text); }
-    .msg-rich code { padding:.1rem .32rem; border-radius:5px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.86em; }
-    .msg-rich .report-meta { display:grid; grid-template-columns:minmax(105px,auto) 1fr; gap:.3rem .7rem; margin:.25rem 0; padding:.58rem .7rem; border:1px solid color-mix(in srgb,var(--se-primary) 22%,var(--border)); border-radius:10px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); }
-    .msg-rich .report-meta-label { color:var(--text-muted); font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.035em; }
-    .msg-rich .report-meta-value { color:var(--text); font-weight:700; }
-    .msg-rich .report-table-wrap { max-width:100%; margin:.7rem 0; overflow-x:auto; border:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); border-radius:10px; }
-    .msg-rich table { width:100%; border-collapse:collapse; background:transparent !important; font-size:.78rem; }
-    .msg-rich th,.msg-rich td { padding:.55rem .65rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 18%,var(--border)); text-align:left; vertical-align:top; }
-    .msg-rich th { background:var(--se-primary-soft) !important; color:var(--se-primary-strong); font-weight:850; }
-    .msg-rich tr:last-child td { border-bottom:0; }
-    @media(max-width:640px){ .msg-rich .report-meta { grid-template-columns:1fr; gap:.08rem; } }
-    .ai-input:focus,.ops-field input:focus,.ops-field select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent); }
-
-    /* Final layout safeguards against global admin form and panel rules. */
-    .ai-admin > .ai-panel:first-child > .ai-head { display:none !important; }
-    .ai-admin > .ai-panel:first-child { position:relative; min-height:calc(100vh - 160px) !important; grid-template-rows:auto minmax(390px,1fr) auto auto !important; }
-    .ai-chat-log { min-height:420px !important; max-height:none !important; }
-    .ai-admin.has-chat .ai-chat-log.can-scroll-up:not(.can-scroll-down) {
-        -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 42px,#000 100%);
-        mask-image:linear-gradient(to bottom,transparent 0,#000 42px,#000 100%);
-    }
-    .ai-admin.has-chat .ai-chat-log.can-scroll-down:not(.can-scroll-up) {
-        -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 72px),transparent 100%);
-        mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 72px),transparent 100%);
-    }
-    .ai-admin.has-chat .ai-chat-log.can-scroll-up.can-scroll-down {
-        -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 42px,#000 calc(100% - 72px),transparent 100%);
-        mask-image:linear-gradient(to bottom,transparent 0,#000 42px,#000 calc(100% - 72px),transparent 100%);
-    }
-    @media(min-width:641px){
-        .ai-chat-log { gap:.78rem; padding-left:max(1rem,10%) !important; padding-right:max(1rem,10%) !important; }
-        .msg { padding:.72rem .82rem; font-size:.8rem; line-height:1.5; }
-        .msg.ai { max-width:min(88%,680px); }
-        .msg.user { max-width:min(72%,560px); }
-        .ai-admin .msg.user pre { padding:.58rem .84rem; font-size:.78rem; }
-        .msg-rich h3 { font-size:.92rem; }
-        .msg-rich h4 { font-size:.83rem; }
-        .msg-rich p { line-height:1.56; }
-        .msg-rich .report-meta { padding:.46rem .58rem; }
-        .msg-rich .report-meta-label { font-size:.66rem; }
-        .msg-rich table { font-size:.72rem; }
-        .ai-toolbar .ai-btn { font-size:.69rem !important; }
-        .ai-input { font-size:.8rem !important; }
-        .ai-format-pill { font-size:.7rem; }
-    }
-    .ai-compose { bottom:18px; padding:0 10px !important; }
-    .ai-compose-row { min-height:60px; grid-template-columns:46px minmax(0,1fr) auto 46px; align-items:center; padding:6px 7px; border-radius:30px; }
-    .ai-input { width:100% !important; height:46px !important; min-height:46px !important; max-height:46px !important; padding:12px 6px !important; overflow-y:auto; resize:none !important; line-height:22px; border:0 !important; border-radius:0 !important; background:transparent !important; scrollbar-width:none; -ms-overflow-style:none; }
-    .ai-input::-webkit-scrollbar { display:none; width:0; height:0; }
-    .ai-compose-icon,.ai-send { align-self:center; flex:none; }
-    .ai-compose-row .ai-send { background:linear-gradient(135deg,var(--se-primary-button-start),var(--se-primary-button-end)) !important; border-color:color-mix(in srgb,var(--se-primary-strong) 72%,var(--border)) !important; color:var(--se-primary-button-text) !important; box-shadow:0 10px 24px color-mix(in srgb,var(--se-primary) 28%,transparent) !important; }
-    .ai-compose-row .ai-send:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 14px 30px color-mix(in srgb,var(--se-primary) 38%,transparent) !important; }
-    .ai-admin--student .ai-compose-row { grid-template-columns:minmax(0,1fr) 46px !important; gap:.45rem; padding-left:18px; }
-    .ai-admin--student .ai-input { min-width:0 !important; padding-left:14px !important; padding-right:10px !important; }
-    .ai-admin.ai-admin--student .ai-compose-row textarea.ai-input,
-    .ai-admin.ai-admin--student .ai-compose-row textarea.ai-input:hover,
-    .ai-admin.ai-admin--student .ai-compose-row textarea.ai-input:focus,
-    .ai-admin.ai-admin--student .ai-compose-row textarea.ai-input:focus-visible { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; appearance:none; -webkit-appearance:none; }
-    .ai-admin--student .ai-compose-row { background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
-    body[data-theme="dark"] .ai-admin--student .ai-compose-row { background:#1f1f1f !important; }
-    .ai-admin.ai-admin--admin .ai-compose-row textarea.ai-input,
-    .ai-admin.ai-admin--admin .ai-compose-row textarea.ai-input:hover,
-    .ai-admin.ai-admin--admin .ai-compose-row textarea.ai-input:focus,
-    .ai-admin.ai-admin--admin .ai-compose-row textarea.ai-input:focus-visible { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; appearance:none; -webkit-appearance:none; }
-    .ai-admin--admin .ai-compose-row { background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
-    body[data-theme="dark"] .ai-admin--admin .ai-compose-row { background:#1f1f1f !important; }
-    .ai-admin--student .ai-send { justify-self:end; }
-    .ai-admin--admin .ai-compose-row { grid-template-columns:minmax(0,1fr) 46px !important; gap:.45rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
-    .ai-admin--lecturer .ai-compose-row { grid-template-columns:minmax(0,1fr) 46px !important; gap:.35rem; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important; border-color:color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important; }
-    .ai-admin.ai-admin--lecturer .ai-compose-row textarea.ai-input { border:none !important; outline:none !important; box-shadow:none !important; background:transparent !important; }
-    body[data-theme="dark"] .ai-admin--lecturer .ai-compose-row { background:#1f1f1f !important; }
-    .ai-compose-frame { width:min(100%,620px); margin:0 auto; overflow:visible; padding:0; border:0; border-radius:30px; background:transparent; box-shadow:none; }
-    .ai-compose-context { display:none; height:34px; align-items:center; gap:.42rem; padding:0 .68rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 16%,var(--border)); color:var(--text-muted); box-sizing:border-box; }
-    .ai-compose-context[hidden] { display:none !important; }
-    .ai-compose-context.is-visible { display:flex; }
-    .ai-compose-context svg { width:14px; height:14px; flex:0 0 14px; color:var(--se-primary-strong); }
-    .ai-compose-context blockquote { flex:1; min-width:0; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.66rem; line-height:1.2; }
-    .ai-compose-context button { width:20px; height:20px; flex:0 0 20px; display:grid; place-items:center; padding:0; border:0; border-radius:6px; background:transparent; color:var(--text-muted); cursor:pointer; }
-    .ai-compose-context button:hover { background:var(--se-primary-soft); color:var(--se-primary-strong); }
-    .ai-compose-frame .ai-compose-row { min-height:58px; padding:5px 7px 5px 10px; border:0 !important; border-radius:999px !important; background:#1f1f1f !important; box-shadow:none !important; }
-    .ai-compose-frame:has(.ai-compose-attachments.is-visible) { padding:.55rem; border:1px solid color-mix(in srgb,var(--se-primary) 20%,var(--border)); border-radius:26px; background:#202124; }
-    .ai-compose-frame:has(.ai-compose-context.is-visible) { overflow:hidden; border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); border-radius:24px; background:#202124; }
-    .ai-compose-frame:has(.ai-compose-context.is-visible) .ai-compose-row { min-height:50px; padding-top:3px; padding-bottom:3px; border-radius:0 0 24px 24px !important; }
-    .ai-compose:has(.ai-compose-context.is-visible) .ai-hint { display:none; }
-    .ai-compose-frame:has(.ai-compose-attachments.is-visible) .ai-compose-row { min-height:54px; }
-    body:not([data-theme="dark"]) .ai-compose-frame .ai-compose-row {
-        border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)) !important;
-        background:color-mix(in srgb,#fff 94%,var(--se-primary-soft)) !important;
-        box-shadow:0 12px 30px rgba(82,58,42,.1),inset 0 1px 0 rgba(255,255,255,.92) !important;
-    }
-    .ai-compose-frame .ai-compose-row:focus-within {
-        border-color:color-mix(in srgb,var(--se-primary) 62%,var(--border)) !important;
-        box-shadow:0 12px 30px color-mix(in srgb,var(--se-primary) 14%,transparent),0 0 0 3px color-mix(in srgb,var(--se-primary) 12%,transparent) !important;
-    }
-    body:not([data-theme="dark"]) .ai-compose-frame:has(.ai-compose-attachments.is-visible) {
-        border-color:color-mix(in srgb,var(--se-primary) 28%,var(--border));
-        background:color-mix(in srgb,#fff 92%,var(--se-primary-soft));
-        box-shadow:0 14px 34px rgba(82,58,42,.1);
-    }
-    body:not([data-theme="dark"]) .ai-compose-frame:has(.ai-compose-context.is-visible) { border-color:color-mix(in srgb,var(--se-primary) 28%,var(--border)); background:color-mix(in srgb,#fff 94%,var(--se-primary-soft)); box-shadow:0 14px 34px rgba(82,58,42,.1); }
-    body:not([data-theme="dark"]) .ai-compose-icon { color:var(--text); }
-    body:not([data-theme="dark"]) .ai-input { color:var(--text) !important; }
-    body:not([data-theme="dark"]) .ai-input::placeholder { color:color-mix(in srgb,var(--text-muted) 86%,transparent) !important; opacity:1; }
-    .ai-compose-attachments { display:none; flex-wrap:nowrap; gap:.5rem; max-width:100%; margin:0; padding:0 .05rem .45rem; overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:thin; }
-    .ai-compose-attachments.is-visible { display:flex; }
-    .ai-compose-attachment { position:relative; flex:0 0 104px; width:104px; height:104px; display:flex; align-items:flex-end; overflow:visible; padding:.62rem; border:1px solid color-mix(in srgb,var(--text) 7%,transparent); border-radius:17px; background:color-mix(in srgb,var(--surface) 72%,#3c4043); box-shadow:none; }
-    .ai-compose-attachment-thumb { position:absolute; inset:0; overflow:hidden; padding:.62rem; border-radius:17px; color:color-mix(in srgb,var(--text) 78%,transparent); font-size:.66rem; font-weight:850; background-position:center; background-size:cover; }
-    .ai-compose-attachment.is-image .ai-compose-attachment-thumb::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 42%,rgba(0,0,0,.68)); }
-    .ai-compose-attachment-copy { position:relative; z-index:1; min-width:0; width:100%; display:grid; gap:.1rem; }
-    .ai-compose-attachment-name { display:-webkit-box; overflow:hidden; -webkit-line-clamp:2; -webkit-box-orient:vertical; color:var(--text); font-size:.68rem; line-height:1.25; font-weight:800; overflow-wrap:anywhere; }
-    .ai-compose-attachment.is-image .ai-compose-attachment-name { color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.7); }
-    .ai-compose-attachment-meta { display:none; }
-    .ai-compose-attachment.is-image .ai-compose-attachment-meta { color:rgba(255,255,255,.82); }
-    .ai-compose-attachment-remove { position:absolute !important; z-index:3; top:6px; right:6px; width:25px !important; min-width:25px !important; max-width:25px !important; height:25px !important; min-height:25px !important; max-height:25px !important; aspect-ratio:1/1; display:grid !important; place-items:center; margin:0 !important; padding:0 !important; border:1px solid color-mix(in srgb,var(--text) 28%,transparent) !important; border-radius:999px !important; background:color-mix(in srgb,var(--surface) 88%,#202124) !important; color:var(--text) !important; font:700 15px/1 system-ui !important; cursor:pointer; box-sizing:border-box !important; }
-    .ai-compose-attachment-remove:hover { background:var(--se-primary-soft) !important; color:var(--se-primary-strong) !important; border-color:var(--se-primary) !important; }
-    .ai-compose-attachment-limit { flex:1 0 100%; color:var(--se-danger); font-size:.68rem; font-weight:750; }
-    .ai-admin .msg.user { width:auto; max-width:min(78%,620px); padding:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important; display:grid; justify-items:end; gap:.42rem; }
-    .ai-admin .msg.user pre { width:auto; max-width:100%; margin:0; padding:.72rem 1.05rem; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:999px; background:#171717; color:#f1f1f1; box-shadow:0 4px 14px color-mix(in srgb,var(--se-primary) 8%,transparent); white-space:pre-wrap; font-family:inherit; font-size:.88rem; font-weight:500; line-height:1.35; }
-    body:not([data-theme="dark"]) .ai-admin .msg.user pre {
-        border:1px solid color-mix(in srgb,var(--se-primary) 38%,var(--border));
-        background:color-mix(in srgb,var(--se-primary-soft) 68%,#fff);
-        color:var(--se-primary-strong);
-        box-shadow:0 8px 20px color-mix(in srgb,var(--se-primary) 10%,transparent);
-    }
-    .ai-sent-attachments { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.42rem; max-width:100%; }
-    .ai-sent-attachment { position:relative; width:102px; height:102px; display:flex; align-items:flex-end; overflow:hidden; padding:.62rem; border:1px solid color-mix(in srgb,var(--text) 7%,transparent); border-radius:17px; background:color-mix(in srgb,var(--surface) 72%,#3c4043); color:var(--text); box-sizing:border-box; }
-    .ai-sent-attachment-type { position:absolute; top:.62rem; left:.62rem; font-size:.66rem; font-weight:850; color:color-mix(in srgb,var(--text) 78%,transparent); }
-    .ai-sent-attachment-name { position:relative; z-index:1; display:-webkit-box; overflow:hidden; -webkit-line-clamp:2; -webkit-box-orient:vertical; font-size:.68rem; line-height:1.25; font-weight:800; overflow-wrap:anywhere; }
-    .ai-sent-attachment.is-image { background-position:center; background-size:cover; }
-    .ai-sent-attachment.is-image::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 42%,rgba(0,0,0,.7)); }
-    .ai-sent-attachment.is-image .ai-sent-attachment-type { display:none; }
-    .ai-sent-attachment.is-image .ai-sent-attachment-name { color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.75); }
-    .ai-format-pill { max-width:185px; overflow:hidden; text-overflow:ellipsis; }
-    .ai-format-pill { min-height:38px; display:inline-flex; align-items:center; gap:.42rem; padding:.48rem .75rem; border:0; border-radius:999px; background:#2b2b2b; color:#ededed; }
-    .ai-format-pill::before { display:none; }
-    .ai-format-pill:hover,.ai-format-pill[aria-expanded="true"] { border-color:transparent; background:#343434; color:#fff; }
-    body:not([data-theme="dark"]) .ai-format-pill { background:color-mix(in srgb,var(--se-primary-soft) 55%,#f5f1ed); color:var(--text); }
-    body:not([data-theme="dark"]) .ai-format-pill:hover,
-    body:not([data-theme="dark"]) .ai-format-pill[aria-expanded="true"] { background:var(--se-primary-soft); color:var(--se-primary-strong); }
-    .ai-format-menu { position:absolute; right:48px; bottom:62px; width:235px; display:none; gap:.25rem; padding:.55rem; border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:16px; background:color-mix(in srgb,var(--surface) 96%,transparent); box-shadow:0 20px 50px rgba(0,0,0,.28); backdrop-filter:blur(20px); }
-    .ai-format-menu.is-open { display:grid; }
-    .ai-format-option { display:flex; justify-content:space-between; align-items:center; gap:.5rem; width:100%; padding:.65rem .72rem; border:0; border-radius:10px; background:transparent; color:var(--text); font:inherit; font-size:.76rem; font-weight:750; text-align:left; cursor:pointer; }
-    .ai-format-option:hover,.ai-format-option.is-selected { background:var(--se-primary-soft); color:var(--se-primary-strong); }
-    .ai-format-option.is-selected::after { content:'✓'; }
-    .ai-hint { margin:.42rem 0 0; opacity:.78; }
-    .ai-tools-backdrop { z-index:11990 !important; }
-    .ai-admin > aside.ai-panel { z-index:12000 !important; top:88px !important; right:-460px !important; bottom:18px !important; width:min(420px,calc(100vw - 28px)) !important; max-height:none !important; position:fixed !important; visibility:hidden; pointer-events:none; transform:none !important; transition:right .24s ease,visibility .24s ease !important; box-shadow:-24px 0 70px rgba(0,0,0,.3); }
-    .ai-admin > aside.ai-panel { scrollbar-width:none; -ms-overflow-style:none; }
-    .ai-admin > aside.ai-panel::-webkit-scrollbar { display:none; width:0; }
-    .ai-admin > aside.ai-panel.is-open { right:18px !important; visibility:visible; pointer-events:auto; }
-    .ai-admin > aside.ai-panel .ai-head { padding:.9rem 1rem; background:color-mix(in srgb,var(--surface) 92%,var(--se-primary-soft)); }
-    .ai-admin > aside.ai-panel .ai-sub { display:block; }
-
-    /* Keep the admin tools drawer visually tied to the System Admin accent. */
-    .ai-admin--admin > aside.ai-panel {
-        border-color:color-mix(in srgb,var(--se-primary) 48%,var(--border)) !important;
-        background:
-            radial-gradient(420px circle at 100% 0%,color-mix(in srgb,var(--se-primary) 24%,transparent),transparent 68%),
-            linear-gradient(165deg,color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)),var(--surface)) !important;
-        box-shadow:-24px 0 70px rgba(0,0,0,.3),0 0 0 1px color-mix(in srgb,var(--se-primary) 12%,transparent) !important;
-    }
-    .ai-admin--admin > aside.ai-panel .ai-head {
-        border-color:color-mix(in srgb,var(--se-primary) 32%,var(--border)) !important;
-        background:linear-gradient(145deg,color-mix(in srgb,var(--surface) 74%,var(--se-primary-soft)),color-mix(in srgb,var(--surface) 94%,var(--se-primary))) !important;
-    }
-    .ai-admin--admin #aiToolsClose {
-        border-color:color-mix(in srgb,var(--se-primary) 62%,var(--border));
-        background:var(--se-primary-soft);
-        color:var(--se-primary-strong);
-    }
-    .ai-admin--admin #aiToolsClose:hover {
-        background:linear-gradient(135deg,var(--se-primary-button-start),var(--se-primary-button-end));
-        color:var(--se-primary-button-text);
-        box-shadow:0 10px 24px color-mix(in srgb,var(--se-primary) 28%,transparent);
-    }
-    .ai-admin--admin .ops-card {
-        border-color:color-mix(in srgb,var(--se-primary) 34%,var(--border)) !important;
-        background:linear-gradient(145deg,color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft)),color-mix(in srgb,var(--surface) 96%,var(--se-primary))) !important;
-        box-shadow:inset 3px 0 0 color-mix(in srgb,var(--se-primary) 78%,transparent),0 12px 28px color-mix(in srgb,var(--se-primary) 10%,transparent) !important;
-    }
-    .ai-admin--admin .ops-title { color:var(--se-primary-muted) !important; }
-    .ai-admin--admin .task-btn {
-        border-color:color-mix(in srgb,var(--se-primary) 36%,var(--border)) !important;
-        background:color-mix(in srgb,var(--surface) 78%,var(--se-primary-soft)) !important;
-    }
-    .ai-admin--admin .task-btn:hover,
-    .ai-admin--admin .task-btn:focus-visible {
-        border-color:var(--se-primary) !important;
-        background:var(--se-primary-soft) !important;
-        color:var(--se-primary-strong) !important;
-        box-shadow:0 10px 22px color-mix(in srgb,var(--se-primary) 20%,transparent) !important;
-        outline:none;
-    }
-    .ai-admin--admin .ops-field input,
-    .ai-admin--admin .ops-field select {
-        border-color:color-mix(in srgb,var(--se-primary) 30%,var(--border)) !important;
-        background:color-mix(in srgb,var(--surface) 92%,var(--se-primary-soft)) !important;
-    }
-    .ai-admin--admin .ops-field input:focus,
-    .ai-admin--admin .ops-field select:focus {
-        border-color:var(--se-primary) !important;
-        box-shadow:0 0 0 3px color-mix(in srgb,var(--se-primary) 20%,transparent) !important;
-    }
-    .ai-admin--admin .ai-upload-drop {
-        border-color:color-mix(in srgb,var(--se-primary) 62%,var(--border)) !important;
-        background:linear-gradient(145deg,var(--se-primary-soft),color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft))) !important;
-    }
-    .ai-admin--admin .ai-upload-drop:hover {
-        box-shadow:0 12px 26px color-mix(in srgb,var(--se-primary) 18%,transparent);
-    }
-    .ai-admin .msg.user {
-        padding:0 !important;
-        border:0 !important;
-        border-radius:0 !important;
-        background:transparent !important;
-        color:var(--text) !important;
-        box-shadow:none !important;
-    }
-    .ai-admin .msg.ai {
-        background:linear-gradient(145deg,color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft)),var(--surface)) !important;
-        border-color:color-mix(in srgb,var(--se-primary) 34%,var(--border)) !important;
-        color:var(--text) !important;
-        box-shadow:0 12px 28px color-mix(in srgb,var(--se-primary) 10%,transparent) !important;
-    }
-    .ai-admin .msg.ai.is-conversation { padding:.2rem 0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; }
-    .ai-admin .msg.ai.is-report { width:min(88%,720px); max-width:min(88%,720px); padding:1rem 1.05rem !important; border-radius:17px !important; }
-    .ai-report-kicker { display:flex; align-items:center; gap:.42rem; margin:0 0 .7rem; color:var(--se-primary-strong); font-size:.63rem; font-weight:800; letter-spacing:.075em; text-transform:uppercase; }
-    .ai-report-kicker::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--se-primary); box-shadow:0 0 0 4px color-mix(in srgb,var(--se-primary) 14%,transparent); }
-    .ai-report-content { position:relative; }
-    .ai-admin .msg.ai.is-report.is-collapsed .ai-report-content { max-height:420px; overflow:hidden; }
-    .ai-admin .msg.ai.is-report.is-collapsed .ai-report-content::after { content:''; position:absolute; right:0; bottom:0; left:0; height:72px; background:linear-gradient(transparent,color-mix(in srgb,var(--surface) 96%,var(--se-primary-soft))); pointer-events:none; }
-    .ai-report-toggle { margin:.55rem 0 0; padding:.4rem .62rem; border:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); border-radius:9px; background:transparent; color:var(--se-primary-strong); font:inherit; font-size:.69rem; font-weight:750; cursor:pointer; }
-    .ai-admin .msg-meta { color:var(--text-muted) !important; }
-    .ai-admin .ai-toolbar {
-        width:max-content;
-        max-width:100%;
-        margin:.35rem auto .75rem;
-        padding:.3rem !important;
-        gap:.2rem;
-        border:1px solid color-mix(in srgb,var(--se-primary) 30%,var(--border)) !important;
-        border-radius:999px;
-        background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)) !important;
-        box-shadow:0 12px 30px color-mix(in srgb,var(--se-primary) 12%,transparent);
-    }
-    .ai-admin .ai-toolbar .ai-btn {
-        min-height:36px;
-        gap:.4rem;
-        padding:.48rem .68rem;
-        border:0 !important;
-        border-radius:999px;
-        background:transparent !important;
-        color:var(--text-muted) !important;
-        box-shadow:none !important;
-    }
-    .ai-admin .ai-toolbar .ai-btn svg { width:15px; height:15px; flex:0 0 15px; }
-    .ai-admin .ai-toolbar .ai-btn:hover,
-    .ai-admin .ai-toolbar .ai-btn:focus-visible {
-        transform:none;
-        background:var(--se-primary-soft) !important;
-        color:var(--se-primary-strong) !important;
-        outline:none;
-        box-shadow:0 5px 14px color-mix(in srgb,var(--se-primary) 14%,transparent) !important;
-    }
-    .ai-top-actions { position:relative; z-index:8; justify-self:center; width:min(1180px,calc(100% - 32px)); display:flex; align-items:stretch; justify-content:center; flex-wrap:wrap; gap:.5rem; margin:14px auto 0; padding:.55rem; overflow:visible; border:1px solid color-mix(in srgb,var(--se-primary) 20%,var(--border)); border-radius:16px; background:color-mix(in srgb,var(--surface) 94%,var(--se-primary-soft)); box-shadow:0 8px 24px rgba(30,38,43,.06); }
-    .ai-history-trigger,.ai-new-chat-trigger,.ai-quick-action { position:relative; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; min-height:42px; padding:.55rem .82rem; border:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); border-radius:10px; background:var(--surface); color:var(--se-primary-strong); font:inherit; font-size:.74rem; font-weight:800; line-height:1.2; cursor:pointer; white-space:nowrap; box-shadow:0 1px 2px rgba(30,38,43,.04); }
-    .ai-history-trigger svg { width:17px; height:17px; }
-    .ai-new-chat-trigger svg { width:16px; height:16px; }
-    .ai-history-trigger:hover,.ai-new-chat-trigger:hover,.ai-quick-action:hover { background:var(--se-primary-soft); border-color:var(--se-primary); }
-    .ai-new-chat-trigger,.ai-history-trigger { min-width:108px; border-color:color-mix(in srgb,var(--se-primary) 48%,var(--border)); }
-    .ai-new-chat-trigger { background:var(--se-primary); border-color:var(--se-primary); color:#fff; box-shadow:0 5px 14px color-mix(in srgb,var(--se-primary) 24%,transparent); }
-    .ai-new-chat-trigger:hover { background:var(--se-primary-strong); border-color:var(--se-primary-strong); color:#fff; }
-    .ai-history-trigger { background:color-mix(in srgb,var(--surface) 78%,var(--se-primary-soft)); }
-    .ai-top-actions::after { content:''; align-self:stretch; width:1px; margin:2px .12rem; background:color-mix(in srgb,var(--se-primary) 20%,var(--border)); order:-1; }
-    .ai-new-chat-trigger,.ai-history-trigger { order:-2; }
-    .ai-quick-action-icon { width:20px; height:20px; flex:0 0 20px; display:grid; place-items:center; border-radius:6px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.82rem; }
-    body[data-theme="dark"] .ai-top-actions { background:color-mix(in srgb,var(--surface) 90%,var(--se-primary-soft)); box-shadow:0 10px 28px rgba(0,0,0,.2); }
-    .ai-history-backdrop { position:absolute; inset:0; z-index:11990; border:0; border-radius:inherit; background:transparent; opacity:0; visibility:hidden; transition:opacity .18s ease,visibility 0s linear .18s; }
-    .ai-history-backdrop.is-open { opacity:1; visibility:visible; }
-    .ai-history-panel { position:fixed; z-index:12000; top:88px; bottom:18px; left:-390px; width:min(360px,calc(100vw - 28px)); display:grid; grid-template-rows:auto minmax(0,1fr) auto; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:22px; overflow:hidden; background:linear-gradient(165deg,color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)),var(--surface)); box-shadow:24px 0 70px rgba(0,0,0,.3); transition:left .24s ease; }
-    .ai-history-panel.is-open { left:18px; }
-    .ai-history-head { display:flex; align-items:center; justify-content:space-between; gap:.65rem; padding:1rem; border-bottom:1px solid color-mix(in srgb,var(--se-primary) 26%,var(--border)); }
-    .ai-history-head h3 { margin:0; color:var(--text); font-size:1rem; }
-    .ai-history-actions { display:flex; gap:.4rem; }
-    .ai-history-icon-btn { width:36px; height:36px; display:grid; place-items:center; border:1px solid color-mix(in srgb,var(--se-primary) 34%,var(--border)); border-radius:11px; background:var(--se-primary-soft); color:var(--se-primary-strong); cursor:pointer; }
-    .ai-history-list { min-height:0; overflow:auto; display:grid; align-content:start; gap:.45rem; padding:.75rem; }
-    .ai-history-empty { padding:1.5rem .75rem; text-align:center; color:var(--text-muted); font-size:.8rem; line-height:1.5; }
-    .ai-history-item { position:relative; display:grid; gap:.25rem; padding:.72rem 4.8rem .72rem .78rem; border:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); border-radius:13px; background:color-mix(in srgb,var(--surface) 88%,var(--se-primary-soft)); color:var(--text); cursor:pointer; }
-    .ai-history-item:hover,.ai-history-item.is-active { border-color:var(--se-primary); background:var(--se-primary-soft); box-shadow:inset 3px 0 0 var(--se-primary); }
-    .ai-history-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.78rem; font-weight:800; }
-    .ai-history-time { color:var(--text-muted); font-size:.67rem; }
-    .ai-history-item-actions { position:absolute; top:50%; right:.45rem; transform:translateY(-50%); display:flex; gap:.2rem; }
-    .ai-history-item-actions button { width:30px; height:30px; border:0; border-radius:9px; background:transparent; color:var(--text-muted); cursor:pointer; }
-    .ai-history-item-actions button:hover { background:color-mix(in srgb,var(--se-primary) 18%,transparent); color:var(--se-primary-strong); }
-    .ai-history-foot { padding:.75rem; border-top:1px solid color-mix(in srgb,var(--se-primary) 24%,var(--border)); }
-    .ai-history-retention { margin:0 0 .6rem; color:var(--text-muted); font-size:.67rem; line-height:1.45; text-align:center; }
-    .ai-history-delete-all { width:100%; padding:.65rem; border:1px solid color-mix(in srgb,#dc2626 45%,var(--border)); border-radius:11px; background:color-mix(in srgb,#dc2626 9%,var(--surface)); color:#ef4444; font:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
-    .ai-history-panel { position:absolute; z-index:12000; top:16px; right:16px; bottom:auto; left:auto; width:min(320px,calc(100% - 32px)); height:min(720px,calc(100% - 32px)); display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(255,255,255,.1); border-radius:18px; background:#1e1e1e; box-shadow:0 18px 50px rgba(0,0,0,.24); color:#f3f3f3; opacity:0; visibility:hidden; pointer-events:none; transform:translateX(calc(100% + 32px)); transition:transform .24s ease,opacity .18s ease,visibility 0s linear .24s; }
-    .ai-history-panel.is-open { right:16px; left:auto; opacity:1; visibility:visible; pointer-events:auto; transform:translateX(0); transition-delay:0s; }
-    .ai-history-head { width:100%; display:block; padding:.78rem .75rem; border-color:rgba(255,255,255,.08); box-sizing:border-box; }
-    .ai-history-brand { width:100%; display:flex; align-items:center; justify-content:space-between; gap:.6rem; box-sizing:border-box; }
-    .ai-history-brand strong { display:flex; align-items:center; gap:.55rem; font-size:1rem; }
-    .ai-history-brand svg { width:22px; height:22px; color:var(--se-primary); }
-    .ai-history-brand .ai-history-icon-btn { width:34px; height:34px; flex:0 0 34px; border-color:rgba(255,255,255,.12); background:#292526; color:#ddd; }
-    .ai-history-brand .ai-history-icon-btn:hover { border-color:var(--se-primary); background:#343031; color:#fff; }
-    .ai-history-tabs { display:grid; grid-template-columns:1fr 1fr; padding:3px; border-radius:999px; background:#171717; }
-    .ai-history-tab { min-height:30px; border:0; border-radius:999px; background:transparent; color:#bdbdbd; font:inherit; font-size:.72rem; font-weight:750; }
-    .ai-history-tab.is-active { background:#252525; color:#fff; }
-    .ai-history-primary-actions { display:grid; gap:.08rem; padding:.42rem .48rem .3rem; border-bottom:1px solid rgba(255,255,255,.06); }
-    .ai-history-primary-action { width:100%; min-height:38px; display:flex; align-items:center; gap:.7rem; padding:.5rem .55rem; border:0; border-radius:10px; background:transparent; color:#f2f2f2; font:inherit; font-size:.77rem; font-weight:700; text-align:left; cursor:pointer; }
-    .ai-history-primary-action:hover { background:#292929; }
-    .ai-history-primary-action svg { width:18px; height:18px; flex:0 0 18px; color:#d8c4ff; }
-    .ai-history-search { display:none; margin:.1rem .55rem .45rem; }
-    .ai-history-search.is-visible { display:block; }
-    .ai-history-search input { width:100%; min-height:38px; padding:.55rem .7rem; border:1px solid rgba(255,255,255,.14); border-radius:10px; outline:0; background:#151515; color:#fff; font:inherit; font-size:.76rem; box-sizing:border-box; }
-    .ai-history-search input:focus { border-color:var(--se-primary); box-shadow:0 0 0 2px color-mix(in srgb,var(--se-primary) 20%,transparent); }
-    .ai-history-section-label { padding:.55rem .72rem .28rem; color:#999; font-size:.64rem; font-weight:750; text-transform:uppercase; letter-spacing:.045em; }
-    .ai-history-list { flex:1 1 auto; gap:.06rem; padding:.08rem .42rem .65rem; scrollbar-width:thin; }
-    .ai-history-item { min-height:32px; display:block; padding:.47rem 4rem .47rem .55rem; border:0; border-radius:9px; background:transparent; color:#f3f3f3; box-sizing:border-box; }
-    .ai-history-item:hover,.ai-history-item.is-active { border:0; background:#292929; box-shadow:none; }
-    .ai-history-title { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.7rem; line-height:1.35; font-weight:650; }
-    .ai-history-time { display:none; }
-    .ai-history-item-actions { opacity:0; transition:opacity .15s ease; }
-    .ai-history-item:hover .ai-history-item-actions,.ai-history-item:focus-within .ai-history-item-actions { opacity:1; }
-    .ai-history-item-actions button { color:#c8c8c8; }
-    .ai-history-item-actions button:hover { background:#3a3a3a; color:#fff; }
-    .ai-history-empty { color:#aaa; }
-    .ai-history-foot { padding:.58rem .72rem .7rem; border-color:rgba(255,255,255,.08); background:#1e1e1e; }
-    .ai-history-retention { margin:0 0 .48rem; color:#999; font-size:.62rem; }
-    .ai-history-delete-all { min-height:38px; padding:.5rem; font-size:.68rem; }
-    body:not([data-theme="dark"]) .ai-history-panel { background:#f7f4f0; color:#241f1b; border-color:rgba(70,50,35,.12); }
-    body:not([data-theme="dark"]) .ai-history-tabs,
-    body:not([data-theme="dark"]) .ai-history-search input { background:#ebe6e0; color:#241f1b; }
-    body:not([data-theme="dark"]) .ai-history-tab.is-active,
-    body:not([data-theme="dark"]) .ai-history-item:hover,
-    body:not([data-theme="dark"]) .ai-history-item.is-active,
-    body:not([data-theme="dark"]) .ai-history-primary-action:hover { background:#e5ded7; color:#241f1b; }
-    body:not([data-theme="dark"]) .ai-history-primary-action,
-    body:not([data-theme="dark"]) .ai-history-item { color:#241f1b; }
-    body:not([data-theme="dark"]) .ai-history-foot { background:#f7f4f0; border-color:rgba(70,50,35,.12); }
-    .ai-confirm { position:fixed; inset:0; z-index:14000; display:grid; place-items:center; padding:1rem; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .18s ease,visibility 0s linear .18s; }
-    .ai-confirm.is-open { opacity:1; visibility:visible; pointer-events:auto; transition-delay:0s; }
-    .ai-confirm-backdrop { position:absolute; inset:0; border:0; background:rgba(0,0,0,.66); backdrop-filter:blur(5px); cursor:default; }
-    .ai-confirm-card { position:relative; width:min(400px,100%); padding:1.25rem; border:1px solid color-mix(in srgb,var(--se-primary) 32%,var(--border)); border-radius:20px; background:color-mix(in srgb,var(--surface) 96%,var(--se-primary-soft)); box-shadow:0 24px 70px rgba(0,0,0,.45); color:var(--text); transform:translateY(8px) scale(.98); transition:transform .18s ease; }
-    .ai-confirm.is-open .ai-confirm-card { transform:translateY(0) scale(1); }
-    .ai-confirm-icon { width:42px; height:42px; display:grid; place-items:center; margin-bottom:.9rem; border-radius:13px; background:color-mix(in srgb,#dc2626 12%,var(--surface)); color:#ef4444; }
-    .ai-confirm-icon svg { width:20px; height:20px; }
-    .ai-confirm-card h3 { margin:0 0 .4rem; font-size:1rem; line-height:1.35; }
-    .ai-confirm-card p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.55; }
-    #programReportDialog { align-items:center; overflow:hidden; }
-    #programReportDialog .ai-confirm-card { max-height:calc(100dvh - 2rem); overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; -webkit-overflow-scrolling:touch; }
-    #programReportDialog .ai-confirm-actions { position:sticky; bottom:-1.25rem; z-index:3; margin-inline:-1.25rem; padding:.8rem 1.25rem 1.25rem; background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--surface) 98%,var(--se-primary-soft)) 24%); }
-    .program-report-form { display:grid; gap:.9rem; margin-top:1rem; }
-    .program-report-upload { display:grid; gap:.48rem; }
-    .program-report-upload-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
-    .program-report-upload-head label { margin:0; }
-    .program-report-file-input { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    .program-report-add-file { min-height:38px; display:inline-flex; align-items:center; justify-content:center; gap:.45rem; padding:.52rem .72rem; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:10px; background:color-mix(in srgb,var(--surface) 82%,var(--se-primary-soft)); color:var(--se-primary-strong); font-size:.73rem; font-weight:800; cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease; }
-    .program-report-add-file:hover,.program-report-add-file:focus-visible { border-color:var(--se-primary); background:var(--se-primary-soft); outline:none; box-shadow:0 5px 14px color-mix(in srgb,var(--se-primary) 15%,transparent); }
-    .program-report-add-file svg { width:16px; height:16px; }
-    .program-report-attachments { min-height:76px; display:flex; flex-wrap:wrap; align-items:stretch; gap:.55rem; padding:.55rem; border:1px dashed color-mix(in srgb,var(--se-primary) 30%,var(--border)); border-radius:13px; background:color-mix(in srgb,var(--surface) 92%,var(--se-primary-soft)); }
-    .program-report-attachments.is-empty { align-items:center; }
-    .program-report-attachments[data-drop-zone] { cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease; }
-    .program-report-attachments[data-drop-zone]:hover { border-color:color-mix(in srgb,var(--se-primary) 62%,var(--border)); background:color-mix(in srgb,var(--surface) 84%,var(--se-primary-soft)); }
-    .program-report-attachments.is-dragging { border-color:var(--se-primary); border-style:solid; background:var(--se-primary-soft); box-shadow:0 0 0 3px color-mix(in srgb,var(--se-primary) 15%,transparent),0 12px 24px color-mix(in srgb,var(--se-primary) 12%,transparent); transform:translateY(-1px); }
-    .program-report-attachments-empty { width:100%; margin:0; color:var(--text-muted); font-size:.72rem; text-align:center; }
-    .program-report-attachments-empty.is-error { color:#dc2626; font-weight:700; }
-    .program-report-attachment { position:relative; width:126px; min-height:94px; display:grid; grid-template-rows:42px auto; gap:.42rem; padding:.62rem 2rem .58rem .62rem; overflow:hidden; border:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border)); border-radius:13px; background:var(--surface); box-shadow:0 5px 14px rgba(30,38,43,.07); }
-    .program-report-attachment-preview { width:42px; height:42px; display:grid; place-items:center; overflow:hidden; border-radius:9px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.59rem; font-weight:850; letter-spacing:.035em; }
-    .program-report-attachment-preview img { width:100%; height:100%; object-fit:cover; }
-    .program-report-attachment-name { min-width:0; overflow:hidden; color:var(--text); font-size:.68rem; font-weight:750; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
-    .program-report-attachment-size { display:block; margin-top:.1rem; color:var(--text-muted); font-size:.6rem; font-weight:600; }
-    .program-report-attachment-remove { appearance:none !important; position:absolute; top:.48rem; right:.48rem; width:24px !important; min-width:24px !important; max-width:24px !important; height:24px !important; min-height:24px !important; max-height:24px !important; display:grid !important; place-items:center; margin:0 !important; padding:0 !important; border:1px solid color-mix(in srgb,var(--text) 14%,var(--border)) !important; border-radius:50% !important; background:color-mix(in srgb,var(--surface) 92%,var(--se-primary-soft)) !important; color:var(--text-muted) !important; line-height:1 !important; cursor:pointer; box-shadow:0 2px 7px rgba(30,38,43,.1) !important; transform:none !important; }
-    .program-report-attachment-remove:hover,.program-report-attachment-remove:focus-visible { border-color:#dc2626 !important; background:#dc2626 !important; color:#fff !important; outline:none; box-shadow:0 4px 10px color-mix(in srgb,#dc2626 24%,transparent) !important; }
-    .program-report-attachment-remove svg { display:block; width:12px !important; height:12px !important; pointer-events:none; }
-    .program-report-upload-status { min-height:1em; margin:0; color:var(--text-muted); font-size:.67rem; }
-    .program-report-upload-status.is-error { color:#dc2626; font-weight:700; }
-    @media (max-width:560px) {
-        .program-report-upload-head { align-items:flex-start; flex-direction:column; }
-        .program-report-add-file { width:100%; }
-        .program-report-attachment { width:calc(50% - .3rem); box-sizing:border-box; }
-    }
-    .program-report-progress { display:none; margin-top:1rem; padding:.9rem; border:1px solid var(--border); border-radius:14px; background:color-mix(in srgb,var(--primary) 5%,var(--surface)); }
-    .program-report-progress.is-active { display:block; }
-    .program-report-progress strong { display:block; margin-bottom:.65rem; font-size:.86rem; }
-    .program-report-progress ol { display:grid; gap:.45rem; margin:0; padding:0; list-style:none; }
-    .program-report-progress li { display:flex; align-items:center; gap:.55rem; color:var(--text-muted); font-size:.8rem; }
-    .program-report-progress li::before { content:''; width:9px; height:9px; border:2px solid var(--border); border-radius:50%; background:var(--surface); }
-    .program-report-progress li.is-active { color:var(--text); font-weight:800; }
-    .program-report-progress li.is-active::before { border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 14%,transparent); }
-    .program-report-progress li.is-done::before { border-color:#21835a; background:#21835a; }
-    .ai-confirm-actions { display:flex; justify-content:flex-end; gap:.55rem; margin-top:1.2rem; }
-    .ai-confirm-button { min-height:40px; padding:.55rem 1rem; border:1px solid color-mix(in srgb,var(--text) 16%,transparent); border-radius:12px; background:transparent; color:var(--text); font:inherit; font-size:.76rem; font-weight:750; cursor:pointer; }
-    .ai-confirm-button:hover { background:color-mix(in srgb,var(--text) 7%,transparent); }
-    .ai-confirm-button--danger { border-color:color-mix(in srgb,#dc2626 60%,transparent); background:#b4232d; color:#fff; }
-    .ai-confirm-button--danger:hover { background:#991f27; }
-    .ai-confirm-button:focus-visible { outline:2px solid var(--se-primary); outline-offset:2px; }
-    .program-report-complete-card { width:min(520px,100%); text-align:left; }
-    .program-report-complete-icon { width:52px; height:52px; display:grid; place-items:center; margin-bottom:1rem; border-radius:16px; background:color-mix(in srgb,#21835a 14%,var(--surface)); color:#21835a; box-shadow:0 8px 22px color-mix(in srgb,#21835a 18%,transparent); }
-    .program-report-complete-icon svg { width:27px; height:27px; }
-    .program-report-complete-card h3 { font-size:1.15rem; }
-    .program-report-complete-program { display:flex; align-items:center; gap:.55rem; margin-top:1rem; padding:.75rem .85rem; border:1px solid color-mix(in srgb,var(--se-primary) 22%,var(--border)); border-radius:12px; background:color-mix(in srgb,var(--surface) 90%,var(--se-primary-soft)); color:var(--text); font-size:.8rem; font-weight:800; }
-    .program-report-complete-files { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.55rem; margin-top:.8rem; }
-    .program-report-complete-files a { min-height:44px; display:flex; align-items:center; justify-content:center; gap:.45rem; padding:.65rem .8rem; border:1px solid color-mix(in srgb,var(--se-primary) 42%,var(--border)); border-radius:11px; background:color-mix(in srgb,var(--surface) 86%,var(--se-primary-soft)); color:var(--se-primary-strong); font-size:.76rem; font-weight:850; text-decoration:none; }
-    .program-report-complete-files a:hover,.program-report-complete-files a:focus-visible { border-color:var(--se-primary); background:var(--se-primary-soft); outline:none; }
-    .program-report-complete-note { margin-top:.8rem !important; padding:.72rem .8rem; border-left:3px solid var(--se-primary); border-radius:8px; background:color-mix(in srgb,var(--surface) 91%,var(--se-primary-soft)); }
-    .program-report-complete-card .ai-confirm-actions a { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; }
-    .program-report-complete-card .ai-confirm-actions .is-primary { border-color:var(--se-primary); background:var(--se-primary); color:#fff; box-shadow:0 10px 24px color-mix(in srgb,var(--se-primary) 24%,transparent); }
-    @media(max-width:520px){ .program-report-complete-files { grid-template-columns:1fr; } }
-    body.admin-ai-helper-page { overflow:hidden !important; }
-    body.admin-ai-helper-page .main-scroll-viewport { overflow:hidden !important; }
-    body.admin-ai-helper-page .main-scroll-inner { height:100%; min-height:0; overflow:hidden; }
-    body.admin-ai-helper-page .page-header { flex:0 0 auto; }
-    body.admin-ai-helper-page .page-body { flex:1 1 auto; height:auto !important; min-height:0; overflow:hidden !important; padding-bottom:0 !important; box-sizing:border-box; }
-    body.admin-ai-helper-page .app-footer { display:none !important; }
-    body.admin-ai-helper-page .ai-admin,body.admin-ai-helper-page .ai-admin>.ai-panel:first-child { min-height:0 !important; height:100% !important; }
-    @media(max-width:640px){
-        .ai-history-backdrop { background:rgba(0,0,0,.16); }
-        body.admin-ai-helper-page .page-body { padding:.4rem .55rem .7rem !important; }
-        .ai-admin > .ai-panel:first-child { min-height:0 !important; height:100% !important; grid-template-rows:auto minmax(0,1fr) auto auto !important; }
-        .ai-chat-log { min-height:0 !important; height:auto !important; overflow-y:auto !important; padding:.7rem .2rem .55rem !important; overscroll-behavior:contain; }
-        .ai-empty-state { min-height:0 !important; padding:2rem .45rem 1rem; align-content:start; }
-        .ai-empty-state h3 { font-size:clamp(1.55rem,7vw,2rem); line-height:1.12; }
-        .ai-empty-state p { max-width:330px; font-size:.9rem; line-height:1.55; }
-        .ai-empty-chips { width:100%; gap:.42rem; }
-        .ai-empty-chip { flex:0 1 auto; min-height:42px; padding:.58rem .78rem; font-size:.7rem; }
-        .ai-compose { position:relative !important; bottom:auto !important; width:100% !important; margin:0 auto !important; padding:0 !important; }
-        .ai-compose-frame { width:100%; border-radius:24px; }
-        .ai-compose-frame .ai-compose-row { min-height:54px; padding:4px 6px 4px 8px; }
-        .ai-input { height:42px !important; min-height:42px !important; max-height:42px !important; font-size:.82rem !important; }
-        .ai-compose-icon,.ai-send { width:40px !important; height:40px !important; }
-        .ai-admin--admin .ai-compose-row { grid-template-columns:minmax(0,1fr) 42px !important; }
-        .ai-admin--lecturer .ai-compose-row { grid-template-columns:minmax(0,1fr) 42px !important; }
-        .ai-format-pill { display:none !important; }
-        .ai-admin--student .ai-compose-row { grid-template-columns:minmax(0,1fr) 44px !important; padding-left:10px; }
-        .ai-admin--student .ai-input { padding-left:12px !important; }
-        .ai-hint { display:none; }
-        .ai-admin .ai-toolbar { display:none !important; }
-        .ai-admin .ai-toolbar .ai-btn { width:38px; height:38px; min-height:38px; padding:0; justify-content:center; }
-        .ai-admin .ai-toolbar .ai-btn span { display:none; }
-        .ai-message-action span { display:none; }
-        .ai-message-action { width:32px; height:32px; padding:0; justify-content:center; }
-        .msg.ai,.msg.user { max-width:92% !important; }
-        .ai-admin .msg.ai.is-report { width:96%; max-width:96% !important; padding:.8rem !important; }
-        .ai-top-actions { width:calc(100% - 16px); justify-content:flex-start; flex-wrap:nowrap; gap:.35rem; margin:8px 8px 0; padding:.4rem; overflow-x:auto; scrollbar-width:none; }
-        .ai-top-actions::-webkit-scrollbar { display:none; }
-        .ai-history-trigger,.ai-new-chat-trigger { width:auto; min-width:max-content; padding:.48rem .7rem; }
-        .ai-history-trigger span,.ai-new-chat-trigger span { display:inline; }
-        .ai-top-actions::after { flex:0 0 1px; }
-        .ai-quick-action { min-height:40px; padding:.48rem .62rem; }
-        .ai-history-panel { top:8px; right:8px; bottom:8px; left:auto; width:calc(100% - 16px); height:auto; border-radius:18px; }
-        .ai-history-panel.is-open { right:8px; left:auto; transform:translateX(0); }
-        .ai-admin > aside.ai-panel { top:72px !important; right:-105vw !important; bottom:8px !important; width:calc(100vw - 16px) !important; }
-        .ai-admin > aside.ai-panel.is-open { right:8px !important; }
-    }
-    @media (max-width:767px) and (display-mode:standalone),
-           (max-width:767px) and (display-mode:fullscreen),
-           (max-width:767px) and (display-mode:minimal-ui),
-           (max-width:767px) and (display-mode:window-controls-overlay) {
-        body.admin-ai-helper-page .page-body { padding-bottom:calc(4.7rem + env(safe-area-inset-bottom,0px)) !important; }
-        body.admin-ai-helper-page .ai-compose {
-            position:fixed !important;
-            z-index:1080 !important;
-            left:max(.55rem,env(safe-area-inset-left,0px));
-            right:max(.55rem,env(safe-area-inset-right,0px));
-            bottom:calc(.8rem + env(safe-area-inset-bottom,0px)) !important;
-            width:auto !important;
-        }
-        body.student-bottom-nav-eligible.admin-ai-helper-page .page-body { padding-bottom:calc(10.8rem + env(safe-area-inset-bottom,0px)) !important; }
-        body.student-bottom-nav-eligible.admin-ai-helper-page .ai-compose { bottom:calc(6.65rem + env(safe-area-inset-bottom,0px)) !important; }
-        body.student-bottom-nav-eligible.admin-ai-helper-page .ai-chat-log { padding-bottom:4.5rem !important; }
-    }
-    @media(max-width:767px){
-        body.student-mobile-shell.admin-ai-helper-page .page-header { display:none !important; }
-        body.student-mobile-shell.admin-ai-helper-page .page-body {
-            padding:.35rem .55rem calc(6.3rem + env(safe-area-inset-bottom,0px)) !important;
-        }
-        body.student-mobile-shell.admin-ai-helper-page .ai-admin > .ai-panel:first-child {
-            grid-template-rows:auto minmax(0,1fr) auto !important;
-        }
-        body.student-mobile-shell.admin-ai-helper-page .ai-top-actions {
-            width:100%;
-            min-height:42px;
-            margin:0;
-            padding:.15rem 0 .35rem;
-            justify-content:flex-end;
-        }
-        body.student-mobile-shell.admin-ai-helper-page .ai-chat-log {
-            padding:.55rem .2rem .7rem !important;
-            scrollbar-width:none;
-        }
-        body.student-mobile-shell.admin-ai-helper-page .ai-chat-log::-webkit-scrollbar { display:none; }
-        body.student-mobile-shell.admin-ai-helper-page .ai-empty-state {
-            min-height:100% !important;
-            padding:1.25rem .6rem;
-            align-content:center;
-        }
-        body.student-mobile-shell.admin-ai-helper-page .ai-empty-state h3 { font-size:1.45rem; }
-        body.student-mobile-shell.admin-ai-helper-page .ai-empty-state p { font-size:.82rem; line-height:1.45; }
-        body.student-mobile-shell.admin-ai-helper-page .ai-compose-frame {
-            border-radius:16px;
-            box-shadow:0 6px 18px rgba(45,31,20,.1);
-        }
-        body.student-mobile-shell.admin-ai-helper-page .ai-compose-frame .ai-compose-row { min-height:48px; }
-        body.student-mobile-shell.admin-ai-helper-page .ai-input { height:38px !important; min-height:38px !important; max-height:92px !important; }
-        body.student-mobile-shell.admin-ai-helper-page .ai-send { width:36px !important; height:36px !important; }
-    }
-
-</style>
-@endpush
 
 @section('header')
     <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--text);">{{ $aiPageTitle }}</h2>
@@ -1088,13 +33,26 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>{{ __('History') }}</span>
             </button>
             @if($canUploadAiFiles)
-            <button type="button" class="ai-quick-action" id="aiUploadShortcut" aria-label="{{ __('Upload PDF or image') }}"><span class="ai-quick-action-icon">↥</span><span class="ai-quick-label">{{ __('Upload PDF or image') }}</span></button>
-            @if(!$studentAiMode)<button type="button" class="ai-quick-action" id="programReportTemplateShortcut"><span class="ai-quick-action-icon">▤</span><span class="ai-quick-label">{{ __('Program Report Template') }}</span></button>@endif
-            @unless($lecturerAiMode)
-            <button type="button" class="ai-quick-action" id="aiReportToolsShortcut"><span class="ai-quick-action-icon">☷</span><span class="ai-quick-label">{{ __('Report tools and filters') }}</span></button>
-            <button type="button" class="ai-quick-action" data-template="{{ __('Generate Monthly Report') }}"><span class="ai-quick-action-icon">▤</span><span class="ai-quick-label">{{ __('Generate monthly report') }}</span></button>
-            <button type="button" class="ai-quick-action" data-template="{{ __('Review Pending Fine Applications') }}"><span class="ai-quick-action-icon">!</span><span class="ai-quick-label">{{ __('Review pending fines') }}</span></button>
-            @endunless
+            <button type="button" class="ai-quick-action" id="aiUploadShortcut" aria-label="{{ __('Upload PDF or image') }}">
+                <span class="ai-quick-action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </span>
+                <span class="ai-quick-label">{{ __('Upload PDF or image') }}</span>
+            </button>
+            @if(!$studentAiMode)
+            <button type="button" class="ai-quick-action" id="paperworkTemplateShortcut">
+                <span class="ai-quick-action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </span>
+                <span class="ai-quick-label">{{ __('Paperwork Template') }}</span>
+            </button>
+            <button type="button" class="ai-quick-action" id="programReportTemplateShortcut">
+                <span class="ai-quick-action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="18" x2="9" y2="15"/><line x1="15" y1="18" x2="15" y2="9"/></svg>
+                </span>
+                <span class="ai-quick-label">{{ __('Program Report Template') }}</span>
+            </button>
+            @endif
             @endif
         </div>
         <div class="ai-head">
@@ -1154,29 +112,123 @@
     <aside class="ai-history-panel" id="aiHistoryPanel" aria-hidden="true">
         <div class="ai-history-head">
             <div class="ai-history-brand">
-                <strong>@include('partials.ai_helper_icon') <span>{{ __('MyHEP AI') }}</span></strong>
+                <strong>@include('partials.ai_helper_icon') <span>{{ __('AI History') }}</span></strong>
                 <button type="button" class="ai-history-icon-btn" id="aiHistoryClose" aria-label="{{ __('Close') }}">×</button>
             </div>
         </div>
-        <div class="ai-history-primary-actions">
-            <button type="button" class="ai-history-primary-action" id="aiHistorySearchButton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4" stroke-linecap="round"/></svg><span>{{ __('Search chats') }}</span></button>
+
+        <div class="ai-history-tabs">
+            <button type="button" class="ai-history-tab is-active" data-history-tab="chats">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline-block;vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>{{ __('Chats') }} ({{ count($aiConversations ?? []) }})
+            </button>
+            <button type="button" class="ai-history-tab" data-history-tab="paperwork">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline-block;vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>{{ __('Paperwork') }} ({{ count($initialPaperworks ?? []) }})
+            </button>
+            <button type="button" class="ai-history-tab" data-history-tab="reports">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline-block;vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="18" x2="9" y2="15"/><line x1="15" y1="18" x2="15" y2="9"/></svg>{{ __('Reports') }} ({{ count($initialReports ?? []) }})
+            </button>
         </div>
-        <label class="ai-history-search" id="aiHistorySearch"><input id="aiHistorySearchInput" type="search" placeholder="{{ __('Search conversations') }}" autocomplete="off"></label>
-        <div class="ai-history-section-label">{{ __('Recents') }}</div>
-        <div class="ai-history-list" id="aiHistoryList">
-            @forelse($aiConversations ?? [] as $conversation)
-            <div class="ai-history-item" data-conversation-id="{{ $conversation['id'] }}" data-title="{{ $conversation['title'] }}">
-                <span class="ai-history-title">{{ $conversation['title'] }}</span>
-                <span class="ai-history-time">{{ $conversation['last_message_at'] ?? $conversation['updated_at'] }}</span>
-                <span class="ai-history-item-actions"><button type="button" data-history-rename aria-label="{{ __('Rename') }}">✎</button><button type="button" data-history-delete aria-label="{{ __('Delete') }}">×</button></span>
+
+        <!-- Chats View -->
+        <div id="aiHistoryChatsView" style="display:flex;flex-direction:column;flex:1 1 auto;overflow:hidden;">
+            <div class="ai-history-primary-actions">
+                <button type="button" class="ai-history-primary-action" id="aiHistorySearchButton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4" stroke-linecap="round"/></svg><span>{{ __('Search chats') }}</span></button>
             </div>
-            @empty
-            <p class="ai-history-empty">{{ __('Your AI conversations will appear here after you send a message.') }}</p>
-            @endforelse
+            <label class="ai-history-search" id="aiHistorySearch"><input id="aiHistorySearchInput" type="search" placeholder="{{ __('Search conversations') }}" autocomplete="off"></label>
+            <div class="ai-history-section-label">{{ __('Recents') }}</div>
+            <div class="ai-history-list" id="aiHistoryList">
+                @forelse($aiConversations ?? [] as $conversation)
+                <div class="ai-history-item" data-conversation-id="{{ $conversation['id'] }}" data-title="{{ $conversation['title'] }}">
+                    <span class="ai-history-title">{{ $conversation['title'] }}</span>
+                    <span class="ai-history-time">{{ $conversation['last_message_at'] ?? $conversation['updated_at'] }}</span>
+                    <span class="ai-history-item-actions"><button type="button" data-history-rename aria-label="{{ __('Rename') }}">✎</button><button type="button" data-history-delete aria-label="{{ __('Delete') }}">×</button></span>
+                </div>
+                @empty
+                <p class="ai-history-empty">{{ __('Your AI conversations will appear here after you send a message.') }}</p>
+                @endforelse
+            </div>
+            <div class="ai-history-foot">
+                <p class="ai-history-retention">{{ __('Inactive conversations are automatically deleted after :days days.', ['days' => config('ai.conversation_retention_days', 30)]) }}</p>
+                <button type="button" class="ai-history-delete-all" id="aiDeleteAllHistory">{{ __('Delete all AI history') }}</button>
+            </div>
         </div>
-        <div class="ai-history-foot">
-            <p class="ai-history-retention">{{ __('Inactive conversations are automatically deleted after :days days.', ['days' => config('ai.conversation_retention_days', 30)]) }}</p>
-            <button type="button" class="ai-history-delete-all" id="aiDeleteAllHistory">{{ __('Delete all AI history') }}</button>
+
+        <!-- Paperwork History View -->
+        <div id="aiHistoryPaperworkView" style="display:none;flex-direction:column;flex:1 1 auto;overflow:hidden;">
+            <div class="ai-history-section-label" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>{{ __('Paperwork History') }} ({{ count($initialPaperworks ?? []) }})</span>
+                <button type="button" id="refreshPaperworkHistory" style="background:transparent;border:none;color:var(--se-primary);font-size:0.72rem;cursor:pointer;font-weight:750;display:inline-flex;align-items:center;gap:3px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    {{ __('Refresh') }}
+                </button>
+            </div>
+            <div class="ai-history-list" id="aiPaperworkHistoryList" style="flex:1;overflow-y:auto;padding:8px;gap:8px;">
+                @forelse($initialPaperworks ?? [] as $pw)
+                <div class="ai-history-item" style="padding:0.75rem 0.85rem;border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:0.6rem;background:rgba(255,255,255,0.03);display:block;">
+                    <div style="font-weight:750;font-size:0.82rem;line-height:1.35;margin-bottom:4px;color:var(--text, #fff);">${pw['title']}</div>
+                    <div style="font-size:0.68rem;color:var(--text-muted, #aaa);margin-bottom:8px;">{{ $pw['date_text'] }} · {{ $pw['venue'] }} · <span title="{{ $pw['created_at_date'] }}">{{ $pw['created_at'] }}</span></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                        @if($pw['docx_url'])<a href="{{ $pw['docx_url'] }}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:var(--se-primary);color:#fff;font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> DOCX</a>@endif
+                        @if($pw['pdf_url'])<a href="{{ $pw['pdf_url'] }}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.12);color:var(--text, #fff);font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12h4"/><path d="M10 16h4"/></svg> PDF</a>@endif
+                        <button type="button" data-delete-paperwork="{{ $pw['id'] }}" style="margin-left:auto;border:none;background:transparent;color:#ef4444;font-size:0.85rem;cursor:pointer;padding:2px 6px;display:flex;align-items:center;" title="{{ __('Delete') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                    </div>
+                </div>
+                @empty
+                <p class="ai-history-empty">{{ __('No paperwork history found.') }}</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Program Reports History View -->
+        <div id="aiHistoryReportsView" style="display:none;flex-direction:column;flex:1 1 auto;overflow:hidden;">
+            <div class="ai-history-section-label" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>{{ __('Program Reports History') }} ({{ count($initialReports ?? []) }})</span>
+                <button type="button" id="refreshReportsHistory" style="background:transparent;border:none;color:var(--se-primary);font-size:0.72rem;cursor:pointer;font-weight:750;display:inline-flex;align-items:center;gap:3px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    {{ __('Refresh') }}
+                </button>
+            </div>
+            <div class="ai-history-list" id="aiPaperworkHistoryList" style="flex:1;overflow-y:auto;padding:8px;gap:8px;">
+                @forelse($initialPaperworks ?? [] as $pw)
+                <div class="ai-history-item" style="padding:0.75rem 0.85rem;border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:0.6rem;background:rgba(255,255,255,0.03);display:block;">
+                    <div style="font-weight:750;font-size:0.82rem;line-height:1.35;margin-bottom:4px;color:var(--text, #fff);">{{ $pw['title'] }}</div>
+                    <div style="font-size:0.68rem;color:var(--text-muted, #aaa);margin-bottom:8px;">{{ $pw['date_text'] }} · {{ $pw['venue'] }} · <span title="{{ $pw['created_at_date'] }}">{{ $pw['created_at'] }}</span></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                        @if($pw['docx_url'])<a href="{{ $pw['docx_url'] }}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:var(--se-primary);color:#fff;font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> DOCX</a>@endif
+                        @if($pw['pdf_url'])<a href="{{ $pw['pdf_url'] }}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.12);color:var(--text, #fff);font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12h4"/><path d="M10 16h4"/></svg> PDF</a>@endif
+                        <button type="button" data-delete-paperwork="{{ $pw['id'] }}" style="margin-left:auto;border:none;background:transparent;color:#ef4444;font-size:0.85rem;cursor:pointer;padding:2px 6px;display:flex;align-items:center;" title="{{ __('Padam') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                    </div>
+                </div>
+                @empty
+                <p class="ai-history-empty">{{ __('Tiada sejarah kertas kerja dijumpai.') }}</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Program Reports History View -->
+        <div id="aiHistoryReportsView" style="display:none;flex-direction:column;flex:1 1 auto;overflow:hidden;">
+            <div class="ai-history-section-label" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>{{ __('Sejarah Laporan Program') }} ({{ count($initialReports ?? []) }})</span>
+                <button type="button" id="refreshReportsHistory" style="background:transparent;border:none;color:var(--se-primary);font-size:0.72rem;cursor:pointer;font-weight:750;display:inline-flex;align-items:center;gap:3px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    {{ __('Muat Semula') }}
+                </button>
+            </div>
+            <div class="ai-history-list" id="aiReportsHistoryList" style="flex:1;overflow-y:auto;padding:8px;gap:8px;">
+                @forelse($initialReports ?? [] as $rep)
+                <div class="ai-history-item" style="padding:0.75rem 0.85rem;border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:0.6rem;background:rgba(255,255,255,0.03);display:block;">
+                    <div style="font-weight:750;font-size:0.82rem;line-height:1.35;margin-bottom:4px;color:var(--text, #fff);">{{ $rep['title'] }}</div>
+                    <div style="font-size:0.68rem;color:var(--text-muted, #aaa);margin-bottom:8px;">{{ $rep['venue'] }} · <span style="text-transform:uppercase;font-weight:700;color:var(--se-primary);">{{ $rep['status'] ?? 'draft' }}</span> · <span title="{{ $rep['created_at_date'] }}">{{ $rep['created_at'] }}</span></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                        @if($rep['docx_url'])<a href="{{ $rep['docx_url'] }}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:var(--se-primary);color:#fff;font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> DOCX</a>@endif
+                        @if($rep['pdf_url'])<a href="{{ $rep['pdf_url'] }}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.12);color:var(--text, #fff);font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12h4"/><path d="M10 16h4"/></svg> PDF</a>@endif
+                        @if($rep['operations_url'])<a href="{{ $rep['operations_url'] }}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.08);color:var(--text, #fff);font-size:0.7rem;font-weight:600;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> {{ __('Operasi') }}</a>@endif
+                    </div>
+                </div>
+                @empty
+                <p class="ai-history-empty">{{ __('Tiada sejarah laporan program dijumpai.') }}</p>
+                @endforelse
+            </div>
         </div>
     </aside>
 
@@ -1199,36 +251,304 @@
     </div>
 
     @if(!$studentAiMode)
+    <!-- Paperwork Generator Modal -->
+    <div class="ai-confirm" id="paperworkDialog" role="dialog" aria-modal="true" aria-labelledby="paperworkDialogTitle" aria-hidden="true">
+        <button type="button" class="ai-confirm-backdrop" data-paperwork-close tabindex="-1" aria-label="{{ __('Close') }}"></button>
+        <div class="ai-confirm-card" data-lenis-prevent style="text-align:left;">
+            <div class="ai-modal-header">
+                <div class="ai-modal-title-box">
+                    <div class="ai-modal-icon-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <div class="ai-modal-title-copy">
+                        <h3 id="paperworkDialogTitle">{{ __('AI Program Paperwork Generator') }}</h3>
+                        <p>{{ __('Fill in the program details below. AI will generate a complete official Politeknik Besut paperwork (Standard 2025 format).') }}</p>
+                    </div>
+                </div>
+                <button type="button" class="ai-modal-close-btn" data-paperwork-close aria-label="{{ __('Close') }}">✕</button>
+            </div>
+
+            <form id="paperworkForm" class="ai-modal-form" method="POST" action="{{ route($lecturerAiMode ? 'lecturer.ai-helper.paperwork.generate' : 'admin.ai-helper.paperwork.generate') }}" enctype="multipart/form-data">
+                @csrf
+
+                <div class="ai-modal-body">
+                    @if(count($ownedPrograms ?? []) > 0)
+                    <div class="ai-form-card">
+                        <div class="ops-field">
+                            <label for="paperworkPresetProgram">
+                                <span>{{ __('Choose from My Programs (Optional - Auto-fill)') }}</span>
+                            </label>
+                            <select id="paperworkPresetProgram" class="ai-modal-select">
+                                <option value="">{{ __('-- New Program / Manual Entry --') }}</option>
+                                @foreach($ownedPrograms as $op)
+                                    <option value="{{ $op->id }}" data-title="{{ $op->title }}" data-venue="{{ $op->venue }}" data-date="{{ $op->starts_at ? date('d.m.Y', strtotime($op->starts_at)) : '' }}">
+                                        {{ $op->title }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" name="program_id" id="paperworkProgramId" value="">
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="ai-form-card">
+                        <div class="ai-form-card-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <span>{{ __('Program Details') }}</span>
+                        </div>
+                        <div class="ai-form-grid">
+                            <div class="ops-field ai-form-col-full">
+                                <label for="paperworkTitle">
+                                    <span>{{ __('1. Program Title *') }}</span>
+                                </label>
+                                <input id="paperworkTitle" name="title" type="text" required placeholder="{{ __('e.g. Student Leadership & Empowerment Workshop 2025') }}" class="ai-modal-input">
+                            </div>
+
+                            <div class="ops-field">
+                                <label for="paperworkDate">
+                                    <span>{{ __('2. Program Date *') }}</span>
+                                </label>
+                                <input id="paperworkDate" name="date_text" type="text" required placeholder="{{ __('e.g. 15 March 2025 (Saturday)') }}" class="ai-modal-input">
+                            </div>
+
+                            <div class="ops-field">
+                                <label for="paperworkVenue">
+                                    <span>{{ __('3. Program Venue *') }}</span>
+                                </label>
+                                <input id="paperworkVenue" name="venue" type="text" required placeholder="{{ __('e.g. Main Lecture Hall, Politeknik Besut') }}" class="ai-modal-input">
+                            </div>
+
+                            <div class="ops-field">
+                                <label for="paperworkOrganizer">
+                                    <span>{{ __('4. Organizer / Department *') }}</span>
+                                </label>
+                                <input id="paperworkOrganizer" name="organizer" type="text" required placeholder="{{ __('e.g. Student Affairs Department / JTMK') }}" class="ai-modal-input">
+                            </div>
+
+                            <div class="ops-field">
+                                <label for="paperworkTargetGroup">
+                                    <span>{{ __('5. Target Group *') }}</span>
+                                </label>
+                                <input id="paperworkTargetGroup" name="target_group" type="text" required placeholder="{{ __('e.g. Semester 1 - 5 Students') }}" class="ai-modal-input">
+                            </div>
+
+                            <div class="ops-field ai-form-col-full">
+                                <label for="paperworkParticipants">
+                                    <span>{{ __('6. Number of Participants *') }}</span>
+                                </label>
+                                <input id="paperworkParticipants" name="participant_count" type="text" required placeholder="{{ __('e.g. 50 participants') }}" class="ai-modal-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AJK Program -->
+                    <div class="ai-form-card">
+                        <div class="ops-field program-report-upload">
+                            <div class="program-report-upload-head">
+                                <label for="paperworkAjkFile">
+                                    <span>{{ __('7. Upload Committee List (PDF / Word) or Type Manually') }}</span>
+                                </label>
+                                <label class="program-report-add-file" for="paperworkAjkFile">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    <span>{{ __('Choose Committee File') }}</span>
+                                </label>
+                            </div>
+                            <input class="program-report-file-input" id="paperworkAjkFile" name="ajk_file" type="file" accept=".pdf,.docx,.doc,.txt">
+                            <div id="paperworkAjkFileName" style="font-size:0.75rem;color:var(--se-primary);font-weight:750;display:none;margin-top:4px;"></div>
+                            <textarea name="ajk_text" id="paperworkAjkText" rows="3" placeholder="{{ __("Type committee list (Optional if file attached):\nProgram Director: ..., Secretary: ..., Advisor: ..., Committee Members: ...") }}" class="ai-modal-textarea" style="margin-top:6px;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Aturcara Program -->
+                    <div class="ai-form-card">
+                        <div class="ops-field">
+                            <label for="paperworkItinerary">
+                                <span>{{ __('8. Program Schedule / Itinerary') }}</span>
+                            </label>
+                            <textarea id="paperworkItinerary" name="itinerary" rows="4" placeholder="{{ __("Tentative program schedule:\n08:00 AM - Participant Registration\n08:30 AM - Briefing & Ice Breaking\n10:30 AM - Morning Refreshments\n11:00 AM - Hands-on Workshop\n01:00 PM - Lunch & Prayer Break\n02:30 PM - Project Presentation & Closing Ceremony") }}" class="ai-modal-textarea"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Perincian Kewangan -->
+                    <div class="ai-form-card">
+                        <div class="ops-field">
+                            <label for="paperworkFinancial">
+                                <span>{{ __('9. Budget & Financial Estimation') }}</span>
+                            </label>
+                            <textarea id="paperworkFinancial" name="financial_details" rows="4" placeholder="{{ __("Estimated budget details:\n1. Participant Meals: RM10.00 x 50 pax = RM500.00 (OS29000)\n2. Speaker Token of Appreciation: RM150.00 x 1 = RM150.00 (OS29000)\nTotal Estimated: RM650.00 (Source: Government / OS29000)") }}" class="ai-modal-textarea"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Output Format -->
+                    <div class="ai-form-card">
+                        <div class="ops-field">
+                            <label for="paperworkOutput">
+                                <span>{{ __('10. Document Format') }}</span>
+                            </label>
+                            <select id="paperworkOutput" name="output_format" required class="ai-modal-select">
+                                <option value="both">{{ __('DOCX and PDF (Recommended)') }}</option>
+                                <option value="docx">{{ __('DOCX (Editable)') }}</option>
+                                <option value="pdf">{{ __('PDF (Print Ready)') }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="program-report-progress" id="paperworkProgress" role="status" aria-live="polite">
+                        <strong>{{ __('Generating Official Paperwork...') }}</strong>
+                        <ol>
+                            <li data-paperwork-progress-step>{{ __('Reading Polibesut 2025 standard paperwork template') }}</li>
+                            <li data-paperwork-progress-step>{{ __('Analyzing program details & committee list') }}</li>
+                            <li data-paperwork-progress-step>{{ __('Structuring objectives, impact & budget allocation') }}</li>
+                            <li data-paperwork-progress-step>{{ __('Generating DOCX & PDF output files') }}</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="ai-modal-footer">
+                    <button type="button" class="ai-modal-btn" data-paperwork-close>{{ __('Cancel') }}</button>
+                    <button id="paperworkSubmit" type="submit" class="ai-modal-btn ai-modal-btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        <span>{{ __('Generate Paperwork') }}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Paperwork Complete Dialog -->
+    @if(session('generated_paperwork'))
+    @php
+        $gp = session('generated_paperwork');
+    @endphp
+    <div class="ai-confirm is-open" id="paperworkCompleteDialog" role="dialog" aria-modal="true" aria-labelledby="paperworkCompleteTitle" aria-hidden="false">
+        <button type="button" class="ai-confirm-backdrop" data-paperwork-complete-close tabindex="-1" aria-label="{{ __('Close') }}"></button>
+        <div class="ai-confirm-card program-report-complete-card" data-lenis-prevent>
+            <div class="program-report-complete-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4.2 4.2L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <h3 id="paperworkCompleteTitle">{{ __('Paperwork Generated Successfully!') }}</h3>
+            <p>{{ __('Official Politeknik Besut Paperwork (Standard 2025 Format) has been successfully generated.') }}</p>
+            <div class="program-report-complete-program"><span>{{ __('Program') }}</span><span aria-hidden="true">&middot;</span><strong>{{ $gp['title'] }}</strong></div>
+            <div class="program-report-complete-files">
+                @if($gp['docx_url'])<a href="{{ $gp['docx_url'] }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>{{ __('Download Editable DOCX') }}</a>@endif
+                @if($gp['pdf_url'])<a href="{{ $gp['pdf_url'] }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12h4"/><path d="M10 16h4"/></svg>{{ __('Download PDF') }}</a>@endif
+            </div>
+            <p class="program-report-complete-note">{{ __('Please review the details before printing or submitting for official approval.') }}</p>
+            <div class="ai-confirm-actions">
+                <button type="button" class="ai-confirm-button is-primary" data-paperwork-complete-close>{{ __('Close') }}</button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Program Report Modal -->
     <div class="ai-confirm" id="programReportDialog" role="dialog" aria-modal="true" aria-labelledby="programReportDialogTitle" aria-hidden="true">
         <button type="button" class="ai-confirm-backdrop" data-program-report-close tabindex="-1" aria-label="{{ __('Close') }}"></button>
-        <div class="ai-confirm-card" data-lenis-prevent style="width:min(620px,calc(100vw - 2rem));text-align:left;">
-            <h3 id="programReportDialogTitle">{{ __('Program Report Template') }}</h3>
-            <p>{{ __('Choose your program and source files. MyHEP adds its attendance and questionnaire records automatically and saves the generated report under the selected program.') }}</p>
-            <form id="programReportForm" class="program-report-form" method="post" enctype="multipart/form-data">@csrf
-                <div class="ops-field"><label for="programReportProgram">{{ __('My program') }}</label><select id="programReportProgram" required><option value="">{{ __('Choose a program') }}</option>@foreach($ownedPrograms as $ownedProgram)<option value="{{ $ownedProgram->id }}" data-action="{{ route('admin.programs.report.generate', $ownedProgram->id) }}" data-requires-paperwork="{{ ($ownedProgram->registration_type ?? 'approved_program') === 'attendance_only_activity' ? '0' : '1' }}">{{ $ownedProgram->title }}</option>@endforeach</select></div>
-                <div class="ops-field program-report-upload" id="programReportPaperworkField">
-                    <div class="program-report-upload-head"><label for="programReportPaperwork">{{ __('Approved paperwork') }}</label><label class="program-report-add-file" for="programReportPaperwork"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ __('Add paperwork') }}</label></div>
-                    <input class="program-report-file-input" id="programReportPaperwork" name="paperwork_file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-                    <div class="program-report-attachments is-empty" id="programReportPaperworkPreview" data-drop-zone="paperwork" role="button" tabindex="0" aria-label="{{ __('Add or drop approved paperwork') }}" aria-live="polite"></div>
-                    <small>{{ __('Required for approved programs. Attendance-only activities do not require paperwork.') }}</small>
+        <div class="ai-confirm-card" data-lenis-prevent style="text-align:left;">
+            <div class="ai-modal-header">
+                <div class="ai-modal-title-box">
+                    <div class="ai-modal-icon-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="18" x2="9" y2="15"/><line x1="15" y1="18" x2="15" y2="9"/></svg>
+                    </div>
+                    <div class="ai-modal-title-copy">
+                        <h3 id="programReportDialogTitle">{{ __('AI Program Report Generator') }}</h3>
+                        <p>{{ __('Select a program and documents. MyHEP automatically incorporates attendance records and feedback surveys, and saves the official report.') }}</p>
+                    </div>
                 </div>
-                <div class="ops-field program-report-upload">
-                    <div class="program-report-upload-head"><label for="programReportImages">{{ __('Images after the program') }}</label><label class="program-report-add-file" for="programReportImages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-linecap="round"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>{{ __('Add images') }}</label></div>
-                    <input class="program-report-file-input" id="programReportImages" name="program_images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
-                    <div class="program-report-attachments is-empty" id="programReportImagesPreview" data-drop-zone="images" role="button" tabindex="0" aria-label="{{ __('Add or drop activity images') }}" aria-live="polite"></div>
-                    <small class="program-report-upload-status" id="programReportImagesStatus">{{ __('Add up to 8 activity images. You can choose more images again without replacing the current selection.') }}</small>
+                <button type="button" class="ai-modal-close-btn" data-program-report-close aria-label="{{ __('Close') }}">✕</button>
+            </div>
+
+            <form id="programReportForm" class="ai-modal-form" method="post" enctype="multipart/form-data">
+                @csrf
+                <div class="ai-modal-body">
+                    <div class="ai-form-card">
+                        <div class="ops-field">
+                            <label for="programReportProgram">
+                                <span>{{ __('My Program') }}</span>
+                            </label>
+                            <select id="programReportProgram" required class="ai-modal-select">
+                                <option value="">{{ __('-- Select Program --') }}</option>
+                                @foreach($ownedPrograms as $ownedProgram)
+                                    <option value="{{ $ownedProgram->id }}" data-action="{{ route('admin.programs.report.generate', $ownedProgram->id) }}" data-requires-paperwork="{{ ($ownedProgram->registration_type ?? 'approved_program') === 'attendance_only_activity' ? '0' : '1' }}">{{ $ownedProgram->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="ai-form-card program-report-upload" id="programReportPaperworkField">
+                        @if(count($initialPaperworks ?? []) > 0)
+                        <div style="margin-bottom:8px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--surface) 90%,var(--se-primary-soft));border:1px solid color-mix(in srgb,var(--se-primary) 28%,var(--border));">
+                            <label for="programReportSavedPaperwork" style="font-size:0.78rem;font-weight:750;color:var(--text);display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--se-primary);" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                <span>{{ __('Select from AI-Generated Paperwork (No re-upload needed)') }}</span>
+                            </label>
+                            <select id="programReportSavedPaperwork" name="saved_paperwork_id" class="ai-modal-select" style="padding:8px 34px 8px 12px;font-size:0.82rem;">
+                                <option value="">{{ __('-- Select Paperwork from History (Optional) --') }}</option>
+                                @foreach($initialPaperworks as $pw)
+                                    <option value="{{ $pw['id'] }}">{{ $pw['title'] }} ({{ $pw['created_at_date'] }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @endif
+
+                        <div class="program-report-upload-head">
+                            <label for="programReportPaperwork">
+                                <span>{{ __('Or Upload Approved Paperwork (PDF / Word)') }}</span>
+                            </label>
+                            <label class="program-report-add-file" for="programReportPaperwork">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <span>{{ __('Choose File') }}</span>
+                            </label>
+                        </div>
+                        <input class="program-report-file-input" id="programReportPaperwork" name="paperwork_file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                        <div class="program-report-attachments is-empty" id="programReportPaperworkPreview" data-drop-zone="paperwork" role="button" tabindex="0" aria-label="{{ __('Add or drop approved paperwork') }}" aria-live="polite"></div>
+                        <small style="font-size:0.72rem;color:var(--text-muted);display:block;margin-top:2px;">{{ __('Required for approved programs. Attendance-only activities do not require paperwork.') }}</small>
+                    </div>
+
+                    <div class="ai-form-card program-report-upload">
+                        <div class="program-report-upload-head">
+                            <label for="programReportImages">
+                                <span>{{ __('Program / Activity Photos') }}</span>
+                            </label>
+                            <label class="program-report-add-file" for="programReportImages">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-linecap="round"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+                                <span>{{ __('Add Photos') }}</span>
+                            </label>
+                        </div>
+                        <input class="program-report-file-input" id="programReportImages" name="program_images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
+                        <div class="program-report-attachments is-empty" id="programReportImagesPreview" data-drop-zone="images" role="button" tabindex="0" aria-label="{{ __('Add or drop activity images') }}" aria-live="polite"></div>
+                        <small class="program-report-upload-status" id="programReportImagesStatus" style="font-size:0.72rem;color:var(--text-muted);display:block;margin-top:2px;">{{ __('Add up to 8 activity photos. You can choose more images again without replacing the current selection.') }}</small>
+                    </div>
+
+                    <div class="ai-form-card">
+                        <div class="ops-field">
+                            <label for="programReportOutput">
+                                <span>{{ __('Document Format') }}</span>
+                            </label>
+                            <select id="programReportOutput" name="output_format" required class="ai-modal-select">
+                                <option value="both">{{ __('DOCX and PDF (Recommended)') }}</option>
+                                <option value="docx">DOCX</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="program-report-progress" id="programReportProgress" role="status" aria-live="polite">
+                        <strong>{{ __('Generating Official Program Report...') }}</strong>
+                        <ol>
+                            <li data-report-progress-step>{{ __('Uploading source documents and photos') }}</li>
+                            <li data-report-progress-step>{{ __('Analyzing program records & attendance metrics') }}</li>
+                            <li data-report-progress-step>{{ __('Structuring report template & formatting') }}</li>
+                            <li data-report-progress-step>{{ __('Finalizing and saving report files') }}</li>
+                        </ol>
+                    </div>
                 </div>
-                <div class="ops-field"><label for="programReportOutput">{{ __('Create report as') }}</label><select id="programReportOutput" name="output_format" required><option value="docx">DOCX</option><option value="pdf">PDF</option><option value="both">{{ __('DOCX and PDF') }}</option></select></div>
-                <div class="program-report-progress" id="programReportProgress" role="status" aria-live="polite">
-                    <strong>{{ __('Generating your official report') }}</strong>
-                    <ol>
-                        <li data-report-progress-step>{{ __('Uploading source files') }}</li>
-                        <li data-report-progress-step>{{ __('Analysing program records') }}</li>
-                        <li data-report-progress-step>{{ __('Creating the official report') }}</li>
-                        <li data-report-progress-step>{{ __('Saving report files') }}</li>
-                    </ol>
+
+                <div class="ai-modal-footer">
+                    <button type="button" class="ai-modal-btn" data-program-report-close>{{ __('Cancel') }}</button>
+                    <button id="programReportSubmit" type="submit" class="ai-modal-btn ai-modal-btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        <span>{{ __('Generate Program Report') }}</span>
+                    </button>
                 </div>
-                <div class="ai-confirm-actions"><button type="button" class="ai-confirm-button" data-program-report-close>{{ __('Cancel') }}</button><button id="programReportSubmit" type="submit" class="ai-confirm-button">{{ __('Generate Program Report') }}</button></div>
             </form>
         </div>
     </div>
@@ -1258,84 +578,6 @@
         </div>
     </div>
     @endif
-
-    @unless($textOnlyAiMode)
-    <button type="button" class="ai-tools-backdrop" id="aiToolsBackdrop" aria-label="{{ __('Close report tools') }}"></button>
-    <aside class="ai-panel" id="aiToolsPanel" aria-hidden="true">
-        <div class="ai-head">
-            <div>
-                <h3>{{ __('Quick Actions & Filters') }}</h3>
-                <p class="ai-sub">{{ __('Pre-structured prompts for common admin workflows.') }}</p>
-            </div>
-            <button type="button" class="ai-btn" id="aiToolsClose">{{ __('Close') }}</button>
-        </div>
-
-        <div class="ops-body">
-            <section class="ops-card">
-                <h4 class="ops-title">{{ __('Task Templates') }}</h4>
-                <div class="task-list">
-                    <button type="button" class="task-btn" data-template="{{ __('Generate Monthly Report') }}">{{ __('Generate Monthly Report') }}</button>
-                    <button type="button" class="task-btn" data-template="{{ __('Review Pending Fine Applications') }}">{{ __('Review Pending Fine Applications') }}</button>
-                    <button type="button" class="task-btn" data-template="{{ __('Find Student by Matric No') }}">{{ __('Find Student by Matric No') }}</button>
-                    <button type="button" class="task-btn" data-template="{{ __('Summarize Scholarship Status') }}">{{ __('Summarize Scholarship Status') }}</button>
-                </div>
-            </section>
-
-            <section class="ops-card">
-                <h4 class="ops-title">{{ __('Task Filters') }}</h4>
-                <div class="ops-field">
-                    <label for="reportMonth">{{ __('Report Month') }}</label>
-                    <input id="reportMonth" type="month">
-                </div>
-                <div class="ops-field">
-                    <label for="statusFilter">{{ __('Status Filter') }}</label>
-                    <select id="statusFilter">
-                        <option value="all">{{ __('All') }}</option>
-                        <option value="pending">{{ __('Pending') }}</option>
-                        <option value="approved">{{ __('Approved') }}</option>
-                        <option value="rejected">{{ __('Rejected') }}</option>
-                        <option value="unpaid">{{ __('Unpaid') }}</option>
-                        <option value="applied">{{ __('Applied') }}</option>
-                        <option value="paid">{{ __('Paid') }}</option>
-                    </select>
-                </div>
-                <div class="ops-field">
-                    <label for="matricFilter">{{ __('Matric Number') }}</label>
-                    <input id="matricFilter" type="text" placeholder="{{ __('23DIB23F1001') }}">
-                </div>
-                <div class="ops-field">
-                    <label for="outputFormat">{{ __('Report Format') }}</label>
-                    <select id="outputFormat">
-                        <option value="auto">{{ __('Follow my request automatically') }}</option>
-                        <option value="formal_report">{{ __('Formal report') }}</option>
-                        <option value="executive_summary">{{ __('Executive summary') }}</option>
-                        <option value="table">{{ __('Table format') }}</option>
-                        <option value="csv">CSV</option>
-                        <option value="json">JSON</option>
-                    </select>
-                </div>
-            </section>
-
-            <section class="ops-card">
-                <h4 class="ops-title">{{ __('Report Source') }}</h4>
-                <label class="ai-upload-drop" for="reportAttachment">
-                    <span class="ai-upload-title">＋ {{ __('Attach a document or image') }}</span>
-                    <span class="ai-upload-note">{{ __('Up to 10 PDF, CSV, XLSX, JPG, PNG or WebP files · Maximum 10 MB each. Gemini will inspect every attachment.') }}</span>
-                </label>
-            </section>
-
-            <section class="ops-card">
-                <h4 class="ops-title">{{ __('Data Sources') }}</h4>
-                <ul class="ops-kv">
-                    <li><span>students</span><strong>table</strong></li>
-                    <li><span>scholarships</span><strong>table</strong></li>
-                    <li><span>offenses</span><strong>table</strong></li>
-                    <li><span>fine_payment_applications</span><strong>table</strong></li>
-                </ul>
-            </section>
-        </div>
-    </aside>
-    @endunless
 </div>
 @endsection
 
@@ -1360,15 +602,23 @@
     const chatLog = document.getElementById('aiChatLog');
     const input = document.getElementById('aiInput');
     const sendBtn = document.getElementById('aiSendBtn');
-    const reportMonth = document.getElementById('reportMonth');
-    const statusFilter = document.getElementById('statusFilter');
-    const matricFilter = document.getElementById('matricFilter');
-    const outputFormat = document.getElementById('outputFormat');
     const attachmentInput = document.getElementById('reportAttachment');
     const attachmentPreview = document.getElementById('attachmentPreview');
     let selectedAttachments = [];
     let attachmentObjectUrls = [];
     const uploadShortcut = document.getElementById('aiUploadShortcut');
+    const paperworkShortcut = document.getElementById('paperworkTemplateShortcut');
+    const paperworkDialog = document.getElementById('paperworkDialog');
+    const paperworkForm = document.getElementById('paperworkForm');
+    const paperworkPresetProgram = document.getElementById('paperworkPresetProgram');
+    const paperworkProgramId = document.getElementById('paperworkProgramId');
+    const paperworkTitle = document.getElementById('paperworkTitle');
+    const paperworkDate = document.getElementById('paperworkDate');
+    const paperworkVenue = document.getElementById('paperworkVenue');
+    const paperworkAjkFile = document.getElementById('paperworkAjkFile');
+    const paperworkAjkFileName = document.getElementById('paperworkAjkFileName');
+    const paperworkProgress = document.getElementById('paperworkProgress');
+    const paperworkSubmit = document.getElementById('paperworkSubmit');
     const programReportShortcut = document.getElementById('programReportTemplateShortcut');
     const programReportDialog = document.getElementById('programReportDialog');
     const programReportProgram = document.getElementById('programReportProgram');
@@ -1383,11 +633,6 @@
     const programReportSubmit = document.getElementById('programReportSubmit');
     let programReportSelectedImages = [];
     let programReportImageUrls = [];
-    const reportToolsShortcut = document.getElementById('aiReportToolsShortcut');
-    const formatBtn = document.getElementById('aiFormatBtn');
-    const toolsPanel = document.getElementById('aiToolsPanel');
-    const toolsBackdrop = document.getElementById('aiToolsBackdrop');
-    const toolsClose = document.getElementById('aiToolsClose');
     const historyTrigger = document.getElementById('aiHistoryTrigger');
     const historyPanel = document.getElementById('aiHistoryPanel');
     const historyBackdrop = document.getElementById('aiHistoryBackdrop');
@@ -1885,29 +1130,9 @@
         setHistoryOpen(false);
     });
 
-    const setToolsOpen = (open) => {
-        toolsPanel?.classList.toggle('is-open', open);
-        toolsBackdrop?.classList.toggle('is-open', open);
-        toolsPanel?.setAttribute('aria-hidden', open ? 'false' : 'true');
-        document.body.classList.toggle('ai-tools-open', open);
-        if (open) reportMonth?.focus();
-    };
     uploadShortcut?.addEventListener('click', () => { if (attachmentInput) attachmentInput.value = ''; attachmentInput?.click(); });
-    reportToolsShortcut?.addEventListener('click', () => setToolsOpen(true));
-    formatBtn?.addEventListener('click', () => setToolsOpen(true));
-    toolsClose?.addEventListener('click', () => setToolsOpen(false));
-    toolsBackdrop?.addEventListener('click', () => setToolsOpen(false));
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') setToolsOpen(false); });
-    outputFormat?.addEventListener('change', () => {
-        if (formatBtn) formatBtn.textContent = `${outputFormat.options[outputFormat.selectedIndex]?.text || @json(__('Auto format'))}⌄`;
-    });
 
-    const filters = () => ({
-        report_month: reportMonth?.value || '',
-        status: statusFilter?.value || 'all',
-        matric_no: matricFilter?.value || '',
-        output_format: outputFormat?.value || 'auto',
-    });
+    const filters = () => ({});
 
     const setAttachmentFiles = files => {
         if (!attachmentInput || typeof DataTransfer === 'undefined') return;
@@ -2146,12 +1371,15 @@
         programReportDialog?.classList.toggle('is-open', open);
         programReportDialog?.setAttribute('aria-hidden', open ? 'false' : 'true');
     };
+    const programReportSavedPaperwork = document.getElementById('programReportSavedPaperwork');
     const syncProgramReportRequirements = () => {
         const requiresPaperwork = programReportProgram?.selectedOptions?.[0]?.dataset.requiresPaperwork === '1';
-        if (programReportPaperwork) programReportPaperwork.required = requiresPaperwork;
+        const hasSavedPaperwork = Boolean(programReportSavedPaperwork?.value);
+        if (programReportPaperwork) programReportPaperwork.required = requiresPaperwork && !hasSavedPaperwork;
         if (programReportPaperworkField) programReportPaperworkField.hidden = !requiresPaperwork && Boolean(programReportProgram?.value);
     };
     programReportProgram?.addEventListener('change', syncProgramReportRequirements);
+    programReportSavedPaperwork?.addEventListener('change', syncProgramReportRequirements);
     programReportShortcut?.addEventListener('click', () => setProgramReportOpen(true));
     document.querySelectorAll('[data-program-report-close]').forEach(button => button.addEventListener('click', () => setProgramReportOpen(false)));
     const programReportCompleteDialog = document.getElementById('programReportCompleteDialog');
@@ -2184,6 +1412,169 @@
             setProgramReportOpen(true);
         }
     }
+
+    // --- Paperwork Generator Handlers ---
+    const setPaperworkOpen = open => {
+        paperworkDialog?.classList.toggle('is-open', open);
+        paperworkDialog?.setAttribute('aria-hidden', open ? 'false' : 'true');
+    };
+    paperworkShortcut?.addEventListener('click', () => setPaperworkOpen(true));
+    document.querySelectorAll('[data-paperwork-close]').forEach(button => button.addEventListener('click', () => setPaperworkOpen(false)));
+    document.querySelectorAll('[data-paperwork-complete-close]').forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('paperworkCompleteDialog')?.classList.remove('is-open');
+            document.getElementById('paperworkCompleteDialog')?.setAttribute('aria-hidden', 'true');
+        });
+    });
+
+    paperworkPresetProgram?.addEventListener('change', () => {
+        const opt = paperworkPresetProgram.selectedOptions[0];
+        if (!opt || !opt.value) {
+            if (paperworkProgramId) paperworkProgramId.value = '';
+            return;
+        }
+        if (paperworkProgramId) paperworkProgramId.value = opt.value;
+        if (paperworkTitle && opt.dataset.title) paperworkTitle.value = opt.dataset.title;
+        if (paperworkVenue && opt.dataset.venue) paperworkVenue.value = opt.dataset.venue;
+        if (paperworkDate && opt.dataset.date) paperworkDate.value = opt.dataset.date;
+    });
+
+    paperworkAjkFile?.addEventListener('change', () => {
+        const file = paperworkAjkFile.files?.[0];
+        if (paperworkAjkFileName) {
+            if (file) {
+                paperworkAjkFileName.style.display = 'block';
+                paperworkAjkFileName.textContent = `✓ ${file.name} (${programReportFileSize(file.size)})`;
+            } else {
+                paperworkAjkFileName.style.display = 'none';
+                paperworkAjkFileName.textContent = '';
+            }
+        }
+    });
+
+    paperworkForm?.addEventListener('submit', () => {
+        if (paperworkSubmit) {
+            paperworkSubmit.disabled = true;
+            paperworkSubmit.textContent = @json(__('Generating Paperwork...'));
+        }
+        paperworkProgress?.classList.add('is-active');
+        const progressSteps = Array.from(paperworkProgress?.querySelectorAll('[data-paperwork-progress-step]') || []);
+        progressSteps.forEach(step => step.classList.remove('is-active', 'is-done'));
+        progressSteps[0]?.classList.add('is-active');
+        [1000, 2500, 4500].forEach((delay, index) => window.setTimeout(() => {
+            progressSteps[index]?.classList.remove('is-active');
+            progressSteps[index]?.classList.add('is-done');
+            progressSteps[index + 1]?.classList.add('is-active');
+        }, delay));
+    });
+
+    // --- History Tabs & Loaders ---
+    const historyTabs = document.querySelectorAll('.ai-history-tab');
+    const historyChatsView = document.getElementById('aiHistoryChatsView');
+    const historyPaperworkView = document.getElementById('aiHistoryPaperworkView');
+    const historyReportsView = document.getElementById('aiHistoryReportsView');
+    const paperworkHistoryUrl = @json(route($lecturerAiMode ? 'lecturer.ai-helper.paperwork.history' : 'admin.ai-helper.paperwork.history'));
+    const reportsHistoryUrl = @json(route($lecturerAiMode ? 'lecturer.ai-helper.reports.history' : 'admin.ai-helper.reports.history'));
+
+    const loadPaperworkHistory = async () => {
+        const list = document.getElementById('aiPaperworkHistoryList');
+        if (!list) return;
+        list.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-muted);font-size:0.78rem;">' + @json(__('Loading records...')) + '</div>';
+        try {
+            const res = await fetch(paperworkHistoryUrl, {headers:{'Accept':'application/json'},credentials:'same-origin'});
+            const data = await res.json();
+            const items = data.items || [];
+            if (!items.length) {
+                list.innerHTML = '<p class="ai-history-empty">' + @json(__('No paperwork history found.')) + '</p>';
+                return;
+            }
+            list.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'ai-history-item';
+                card.style.cssText = 'padding:0.75rem 0.85rem;border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:0.6rem;background:rgba(255,255,255,0.03);display:block;';
+                card.innerHTML = `
+                    <div style="font-weight:750;font-size:0.82rem;line-height:1.35;margin-bottom:4px;color:var(--text);">${item.title}</div>
+                    <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:8px;">${item.date_text || ''} · ${item.venue || ''} · <span title="${item.created_at_date}">${item.created_at}</span></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                        ${item.docx_url ? `<a href="${item.docx_url}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:var(--se-primary);color:#fff;font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> DOCX</a>` : ''}
+                        ${item.pdf_url ? `<a href="${item.pdf_url}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.12);color:var(--text);font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12h4"/><path d="M10 16h4"/></svg> PDF</a>` : ''}
+                        <button type="button" data-delete-paperwork="${item.id}" style="margin-left:auto;border:none;background:transparent;color:#ef4444;font-size:0.85rem;cursor:pointer;padding:2px 6px;display:flex;align-items:center;" title="${@json(__('Delete'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        } catch (e) {
+            list.innerHTML = '<p class="ai-history-empty" style="color:#ef4444;">' + @json(__('Failed to load records.')) + '</p>';
+        }
+    };
+
+    document.getElementById('aiPaperworkHistoryList')?.addEventListener('click', async (event) => {
+        const delBtn = event.target.closest('[data-delete-paperwork]');
+        if (!delBtn) return;
+        const id = delBtn.dataset.deletePaperwork;
+        if (!confirm(@json(__('Are you sure you want to delete this paperwork?')))) return;
+        try {
+            const deleteUrl = `${root.dataset.conversationsUrl.replace('/conversations', '')}/paperwork/${id}`;
+            const res = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {'Accept':'application/json','X-CSRF-TOKEN':csrfToken},
+                credentials: 'same-origin'
+            });
+            if (res.ok) {
+                delBtn.closest('.ai-history-item')?.remove();
+            }
+        } catch (_) {}
+    });
+
+    const loadReportsHistory = async () => {
+        const list = document.getElementById('aiReportsHistoryList');
+        if (!list) return;
+        list.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-muted);font-size:0.78rem;">' + @json(__('Loading records...')) + '</div>';
+        try {
+            const res = await fetch(reportsHistoryUrl, {headers:{'Accept':'application/json'},credentials:'same-origin'});
+            const data = await res.json();
+            const items = data.items || [];
+            if (!items.length) {
+                list.innerHTML = '<p class="ai-history-empty">' + @json(__('No program report history found.')) + '</p>';
+                return;
+            }
+            list.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'ai-history-item';
+                card.style.cssText = 'padding:0.75rem 0.85rem;border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:0.6rem;background:rgba(255,255,255,0.03);display:block;';
+                card.innerHTML = `
+                    <div style="font-weight:750;font-size:0.82rem;line-height:1.35;margin-bottom:4px;color:var(--text);">${item.title}</div>
+                    <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:8px;">${item.venue || ''} · <span style="text-transform:uppercase;font-weight:700;color:var(--se-primary);">${item.status || 'draft'}</span> · <span title="${item.created_at_date}">${item.created_at}</span></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                        ${item.docx_url ? `<a href="${item.docx_url}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:var(--se-primary);color:#fff;font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> DOCX</a>` : ''}
+                        ${item.pdf_url ? `<a href="${item.pdf_url}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.12);color:var(--text);font-size:0.7rem;font-weight:750;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12h4"/><path d="M10 16h4"/></svg> PDF</a>` : ''}
+                        ${item.operations_url ? `<a href="${item.operations_url}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.08);color:var(--text);font-size:0.7rem;font-weight:600;text-decoration:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> ${@json(__('Operations'))}</a>` : ''}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        } catch (e) {
+            list.innerHTML = '<p class="ai-history-empty" style="color:#ef4444;">' + @json(__('Failed to load records.')) + '</p>';
+        }
+    };
+
+    const switchHistoryTab = (tabName) => {
+        historyTabs.forEach(t => t.classList.toggle('is-active', t.dataset.historyTab === tabName));
+        if (historyChatsView) historyChatsView.style.display = tabName === 'chats' ? 'flex' : 'none';
+        if (historyPaperworkView) historyPaperworkView.style.display = tabName === 'paperwork' ? 'flex' : 'none';
+        if (historyReportsView) historyReportsView.style.display = tabName === 'reports' ? 'flex' : 'none';
+        if (tabName === 'paperwork') loadPaperworkHistory();
+        if (tabName === 'reports') loadReportsHistory();
+    };
+
+    historyTabs.forEach(tab => {
+        tab.addEventListener('click', () => switchHistoryTab(tab.dataset.historyTab));
+    });
+
+    document.getElementById('refreshPaperworkHistory')?.addEventListener('click', loadPaperworkHistory);
+    document.getElementById('refreshReportsHistory')?.addEventListener('click', loadReportsHistory);
 
     const setBusy = (busy) => {
         requestInFlight = busy;
@@ -2277,7 +1668,6 @@
         const button = event.target.closest('[data-template]');
         if (!button || !root.contains(button)) return;
         const template = button.dataset.template;
-        setToolsOpen(false);
         input.value = template;
         send(template, template);
     });

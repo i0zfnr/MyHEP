@@ -75,8 +75,8 @@ class AiHelperFeatureControlTest extends TestCase
             ['id' => 3, 'full_name' => 'Test Lecturer', 'role' => 'lecturer'],
         ]);
         DB::table('students')->insert([
-            ['id' => 99, 'full_name' => 'Test Student', 'matric_no' => 'TEST99', 'program' => 'DIT'],
-            ['id' => 100, 'full_name' => 'Other Student', 'matric_no' => 'TEST100', 'program' => 'DIT'],
+            ['id' => 99, 'full_name' => 'Test Student', 'matric_no' => 'TEST99', 'program' => 'DIT', 'semester' => 1, 'academic_session' => '2025/2026'],
+            ['id' => 100, 'full_name' => 'Other Student', 'matric_no' => 'TEST100', 'program' => 'DIT', 'semester' => 1, 'academic_session' => '2025/2026'],
         ]);
     }
 

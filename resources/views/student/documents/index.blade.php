@@ -2,35 +2,7 @@
 
 @section('title', __('Document Centre'))
 
-@push('styles')
-<style>
-    .docs-shell { width:min(100%,1280px); margin:0 auto; display:grid; gap:16px; }
-    .docs-stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-    .docs-stat { position:relative; overflow:hidden; min-height:92px; padding:15px 16px; border:1px solid var(--border); border-radius:15px; background:var(--surface); box-shadow:0 10px 28px rgba(20,15,10,.05); }
-    .docs-stat::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--primary); opacity:.7; }
-    .docs-stat span { display:block; color:var(--text-muted); font-size:.75rem; font-weight:800; text-transform:uppercase; }
-    .docs-stat strong { display:block; margin-top:6px; color:var(--text); font-size:1.5rem; }
-    .docs-note { color:var(--text-muted); font-size:.74rem; }
-    .docs-panel { overflow:hidden; border-radius:17px; }
-    .docs-panel-head { display:flex; align-items:center; justify-content:space-between; gap:16px; }
-    .docs-panel-title { display:grid; gap:3px; }
-    .docs-panel-title span { color:var(--text-muted); font-size:.72rem; }
-    .docs-security { padding:6px 9px; border:1px solid var(--border); border-radius:999px; color:var(--text-muted); font-size:.68rem; font-weight:750; }
-    .docs-upload-grid { display:grid; grid-template-columns:1.3fr 1fr .7fr; gap:14px; }
-    .docs-field { display:grid; gap:6px; }
-    .docs-field label { color:var(--text); font-size:.78rem; font-weight:750; }
-    .docs-field small { color:var(--text-muted); font-size:.7rem; line-height:1.45; }
-    .docs-file { grid-column:1 / -1; }
-    .docs-file-input { width:100%; padding:5px; border:1px dashed var(--border); border-radius:12px; background:var(--surface-soft); color:var(--text-muted); font:inherit; font-size:.76rem; }
-    .docs-file-input::file-selector-button { min-height:36px; margin-right:10px; padding:0 14px; border:0; border-radius:9px; background:color-mix(in srgb,var(--primary) 14%,var(--surface)); color:var(--text); font:inherit; font-size:.73rem; font-weight:800; cursor:pointer; }
-    .docs-submit-row { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .docs-routing { max-width:680px; color:var(--text-muted); font-size:.69rem; line-height:1.45; }
-    .docs-table-wrap { overflow-x:auto; }
-    .docs-empty { padding:28px 16px !important; text-align:center; color:var(--text-muted); }
-    @media(max-width:900px){ .docs-stats{grid-template-columns:1fr 1fr}.docs-upload-grid{grid-template-columns:1fr 1fr}.docs-upload-grid .docs-field:nth-child(3){grid-column:1/-1} }
-    @media(max-width:700px){ .docs-shell{gap:12px}.docs-upload-grid{grid-template-columns:1fr}.docs-upload-grid .docs-field:nth-child(3),.docs-file,.docs-submit-row{grid-column:auto}.docs-submit-row{align-items:stretch;flex-direction:column}.docs-submit-row .ui-btn{width:100%;justify-content:center}.docs-security{display:none}.docs-table thead{display:none}.docs-table,.docs-table tbody,.docs-table tr,.docs-table td{display:block;width:100%}.docs-table tr{padding:13px 14px;border-bottom:1px solid var(--border)}.docs-table td{display:grid;grid-template-columns:88px minmax(0,1fr);gap:10px;padding:6px 0;border:0}.docs-table td::before{content:attr(data-label);color:var(--text-muted);font-size:.66rem;font-weight:800;text-transform:uppercase}.docs-table td:first-child{display:block}.docs-table td:first-child::before,.docs-table .docs-empty::before{display:none} }
-</style>
-@endpush
+
 
 @section('header')
     <h2>{{ __('Document Centre') }}</h2>
@@ -39,7 +11,50 @@
 @section('content')
 <div class="docs-shell">
     @if(session('success'))<div class="se-feedback se-feedback--success">{{ session('success') }}</div>@endif
-    @if($errors->any())<div class="se-feedback se-feedback--error">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+    @if(isset($errors) && $errors->any())<div class="se-feedback se-feedback--error">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+
+    @if(!empty($isSem3Or5))
+        <section class="ui-card" style="padding:16px 20px;border-radius:16px;border:1px solid @if(!$insuranceDoc || $insuranceDoc->status === 'rejected') #fca5a5;background:#fff5f5; @elseif($insuranceDoc->status === 'pending') #fef08a;background:#fffbeb; @else #bbf7d0;background:#f0fdf4; @endif">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:@if(!$insuranceDoc || $insuranceDoc->status === 'rejected') #fee2e2;color:#b91c1c; @elseif($insuranceDoc->status === 'pending') #fef9c3;color:#854d0e; @else #dcfce7;color:#166534; @endif flex-shrink:0;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                    </div>
+                    <div>
+                        <strong style="font-size:0.95rem;color:@if(!$insuranceDoc || $insuranceDoc->status === 'rejected') #991b1b; @elseif($insuranceDoc->status === 'pending') #854d0e; @else #166534; @endif">
+                            {{ __('Tindakan Wajib: Bayaran Insurans Pelajar (Semester :sem)', ['sem' => $student->semester ?? '3/5']) }}
+                        </strong>
+                        <p style="margin:2px 0 0;font-size:0.82rem;color:@if(!$insuranceDoc || $insuranceDoc->status === 'rejected') #7f1d1d; @elseif($insuranceDoc->status === 'pending') #713f12; @else #14532d; @endif">
+                            @if(!$insuranceDoc)
+                                {{ __('Semua pelajar Semester 3 & 5 diwajibkan memuat naik resit bayaran insurans bagi sesi akademik ini.') }}
+                            @elseif($insuranceDoc->status === 'pending')
+                                {{ __('Resit bayaran insurans anda (:name) sedang disemak oleh pihak pengurusan HEP / Disiplin.', ['name' => $insuranceDoc->original_name]) }}
+                            @elseif($insuranceDoc->status === 'rejected')
+                                {{ __('Resit bayaran insurans anda telah ditolak. Sebab: :reason. Sila muat naik semula resit yang sah.', ['reason' => $insuranceDoc->review_note ?: __('Sila pastikan maklumat resit lengkap dan jelas.')]) }}
+                            @else
+                                {{ __('Resit bayaran insurans anda telah disahkan dan diluluskan. Terima kasih.') }}
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    @if(!$insuranceDoc || $insuranceDoc->status === 'rejected')
+                        <button type="button" class="ui-btn primary" onclick="document.getElementById('document-category').value='insurance_payment';document.getElementById('document-title').value='{{ __('Resit Bayaran Insurans Semester :sem', ['sem' => $student->semester ?? '']) }}';document.getElementById('document-file').focus();">
+                            {{ __('Muat Naik Resit Insurans') }}
+                        </button>
+                    @elseif($insuranceDoc->status === 'pending')
+                        <span class="ui-badge" style="background:#fef9c3;color:#854d0e;border:1px solid #fef08a;font-weight:800;padding:6px 12px;border-radius:999px;">
+                            ⏳ {{ __('Menunggu Semakan') }}
+                        </span>
+                    @else
+                        <span class="ui-badge" style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;font-weight:800;padding:6px 12px;border-radius:999px;">
+                            ✓ {{ __('Disahkan') }}
+                        </span>
+                    @endif
+                </div>
+            </div>
+        </section>
+    @endif
 
     <div class="docs-stats">
         <div class="docs-stat"><span>{{ __('Total') }}</span><strong>{{ (int) ($counts->total ?? 0) }}</strong></div>
