@@ -6703,3 +6703,52 @@ body[data-theme="dark"] .app-layout .sidebar {
         radial-gradient(30rem circle at 20% 8%, color-mix(in srgb,var(--se-atmosphere-primary) 14%,transparent),transparent 62%),
         linear-gradient(180deg,color-mix(in srgb,var(--se-surface) 96%,#000),color-mix(in srgb,var(--se-bg) 97%,var(--se-primary-muted)))!important;
 }
+
+/* Final mobile PWA bottom navigation position.
+   This intentionally lives at EOF because bottom-nav rules exist in layout.css,
+   design-system.css, and older late glass overrides. */
+@media (max-width: 767px) {
+    body.student-bottom-nav-eligible .app-layout .mobile-bottom-nav,
+    body.has-student-bottom-nav .app-layout .mobile-bottom-nav {
+        left: 50% !important;
+        right: auto !important;
+        width: min(calc(100vw - .95rem), 398px) !important;
+        min-height: 60px !important;
+        bottom: max(4px, calc(env(safe-area-inset-bottom, 0px) - 30px)) !important;
+        padding: .34rem .42rem .32rem !important;
+        border-radius: 26px !important;
+        transform: translateX(-50%) translateZ(0) !important;
+    }
+
+    body.student-bottom-nav-eligible .mobile-bottom-nav :is(a, button),
+    body.has-student-bottom-nav .mobile-bottom-nav :is(a, button) {
+        min-height: 50px !important;
+        gap: .18rem !important;
+        border-radius: 19px !important;
+        font-size: .58rem !important;
+        line-height: 1.05 !important;
+    }
+
+    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-nav-icon,
+    body.has-student-bottom-nav .mobile-bottom-nav .mobile-nav-icon {
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab,
+    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab:not(.active),
+    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab.active,
+    body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab,
+    body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab:not(.active),
+    body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab.active {
+        min-height: 64px !important;
+        margin: -.82rem -.04rem -.06rem !important;
+        border-radius: 21px !important;
+    }
+
+    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon,
+    body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon {
+        width: 30px !important;
+        height: 30px !important;
+    }
+}

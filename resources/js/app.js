@@ -557,8 +557,8 @@ const createPromptShell = () => {
                 border-radius: 20px;
             }
             body.has-student-bottom-nav .pwa-prompt {
-                bottom: calc(6.65rem + env(safe-area-inset-bottom, 0px));
-                max-height: min(36vh, 260px);
+                bottom: calc(4.85rem + max(4px, calc(env(safe-area-inset-bottom, 0px) - 30px)));
+                max-height: min(38vh, 270px);
             }
             .pwa-prompt-body {
                 min-width: 0;
