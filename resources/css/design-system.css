@@ -6706,33 +6706,42 @@ body[data-theme="dark"] .app-layout .sidebar {
 
 /* Final mobile PWA bottom navigation position.
    This intentionally lives at EOF because bottom-nav rules exist in layout.css,
-   design-system.css, and older late glass overrides. */
+   design-system.css, and older late glass overrides. Keep all dependent mobile
+   overlays on the same variables so the nav and prompts cannot overlap. */
 @media (max-width: 767px) {
+    body.student-bottom-nav-eligible,
+    body.has-student-bottom-nav {
+        --student-bottom-nav-bottom: max(2px, calc(env(safe-area-inset-bottom, 0px) - 30px));
+        --student-bottom-nav-height: 64px;
+        --student-bottom-nav-total: calc(var(--student-bottom-nav-height) + var(--student-bottom-nav-bottom));
+        --student-bottom-nav-overlay-gap: 14px;
+    }
+
     body.student-bottom-nav-eligible .app-layout .mobile-bottom-nav,
     body.has-student-bottom-nav .app-layout .mobile-bottom-nav {
         left: 50% !important;
         right: auto !important;
-        width: min(calc(100vw - .95rem), 398px) !important;
-        min-height: 60px !important;
-        bottom: 0 !important;
-        padding: .34rem .42rem .32rem !important;
-        border-radius: 26px !important;
-        transform: translateX(-50%) translateY(22px) translateZ(0) !important;
+        width: min(calc(100vw - 1rem), 392px) !important;
+        min-height: var(--student-bottom-nav-height) !important;
+        bottom: var(--student-bottom-nav-bottom) !important;
+        padding: .34rem .42rem !important;
+        border-radius: clamp(22px, 7vw, 28px) !important;
+        transform: translateX(-50%) translateZ(0) !important;
     }
 
     body.student-bottom-nav-eligible .mobile-bottom-nav :is(a, button),
     body.has-student-bottom-nav .mobile-bottom-nav :is(a, button) {
-        min-height: 50px !important;
-        gap: .18rem !important;
-        border-radius: 19px !important;
-        font-size: .58rem !important;
+        min-height: 49px !important;
+        gap: .17rem !important;
+        border-radius: 18px !important;
+        font-size: clamp(.55rem, 2.15vw, .61rem) !important;
         line-height: 1.05 !important;
     }
 
     body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-nav-icon,
     body.has-student-bottom-nav .mobile-bottom-nav .mobile-nav-icon {
-        width: 26px !important;
-        height: 26px !important;
+        width: clamp(24px, 7vw, 27px) !important;
+        height: clamp(24px, 7vw, 27px) !important;
     }
 
     body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab,
@@ -6741,21 +6750,26 @@ body[data-theme="dark"] .app-layout .sidebar {
     body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab,
     body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab:not(.active),
     body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab.active {
-        min-height: 64px !important;
-        margin: -.82rem -.04rem -.06rem !important;
+        min-height: 63px !important;
+        margin: -.78rem -.04rem -.04rem !important;
         border-radius: 21px !important;
     }
 
     body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon,
     body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon {
-        width: 30px !important;
-        height: 30px !important;
+        width: clamp(29px, 8vw, 32px) !important;
+        height: clamp(29px, 8vw, 32px) !important;
     }
 
     @supports (-webkit-touch-callout: none) {
+        body.student-bottom-nav-eligible,
+        body.has-student-bottom-nav {
+            --student-bottom-nav-bottom: max(2px, calc(env(safe-area-inset-bottom, 0px) - 32px));
+        }
+
         body.student-bottom-nav-eligible .app-layout .mobile-bottom-nav,
         body.has-student-bottom-nav .app-layout .mobile-bottom-nav {
-            transform: translateX(-50%) translateY(26px) translateZ(0) !important;
+            transform: translateX(-50%) translateZ(0) !important;
         }
     }
 }
