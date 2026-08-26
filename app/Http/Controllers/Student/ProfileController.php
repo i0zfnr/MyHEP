@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Support\AccountSessionManager;
+use App\Support\SystemFeatures;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function show(): View|RedirectResponse
+    public function show(SystemFeatures $features): View|RedirectResponse
     {
         $student = DB::table('students')
             ->where('id', session('auth_user.id'))
@@ -24,7 +25,9 @@ class ProfileController extends Controller
             return redirect()->route('login');
         }
 
-        return view('student.profile', compact('student'));
+        $enforceStudentProfilePhoto = $features->enabled('enforce_student_profile_photo');
+
+        return view('student.profile', compact('student', 'enforceStudentProfilePhoto'));
     }
 
     public function update(Request $request): RedirectResponse

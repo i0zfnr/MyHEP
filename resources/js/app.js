@@ -556,6 +556,7 @@ const createPromptShell = () => {
                 overflow-y: auto;
                 border-radius: 20px;
             }
+            body.student-bottom-nav-eligible .pwa-prompt,
             body.has-student-bottom-nav .pwa-prompt {
                 bottom: calc(var(--student-bottom-nav-total, 5rem) + var(--student-bottom-nav-overlay-gap, 14px));
                 max-height: min(34vh, 250px);
@@ -577,12 +578,14 @@ const createPromptShell = () => {
                 font-size: .78rem;
                 line-height: 1.45;
             }
+            body.student-bottom-nav-eligible .pwa-prompt-copy,
             body.has-student-bottom-nav .pwa-prompt-copy {
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
             }
+            body.student-bottom-nav-eligible .pwa-prompt-actions,
             body.has-student-bottom-nav .pwa-prompt-actions {
                 display: grid;
                 grid-template-columns: minmax(0, 1fr) auto;
@@ -594,23 +597,28 @@ const createPromptShell = () => {
                 border-radius: 12px;
                 font-size: .8rem;
             }
+            body.student-bottom-nav-eligible .pwa-prompt-btn,
             body.has-student-bottom-nav .pwa-prompt-btn {
                 flex: initial;
                 min-height: 40px;
                 text-align: center;
             }
+            body.student-bottom-nav-eligible .pwa-prompt-btn.link,
             body.has-student-bottom-nav .pwa-prompt-btn.link {
                 flex: initial;
                 padding-inline: 8px;
                 white-space: nowrap;
             }
             @media (max-width: 360px) {
+                body.student-bottom-nav-eligible .pwa-prompt,
                 body.has-student-bottom-nav .pwa-prompt {
                     bottom: calc(var(--student-bottom-nav-total, 5rem) + 10px);
                 }
+                body.student-bottom-nav-eligible .pwa-prompt-actions,
                 body.has-student-bottom-nav .pwa-prompt-actions {
                     grid-template-columns: 1fr;
                 }
+                body.student-bottom-nav-eligible .pwa-prompt-btn.link,
                 body.has-student-bottom-nav .pwa-prompt-btn.link {
                     padding-block: 4px;
                 }

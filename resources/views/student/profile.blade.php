@@ -16,6 +16,7 @@
         $studentIc = data_get($student, 'ic_no');
         $studentProgram = data_get($student, 'program') ?: '-';
         $photoStatus = data_get($student, 'profile_photo_status') ?? (filled($studentPhoto) ? 'legacy' : 'missing');
+        $enforceStudentProfilePhoto = (bool) ($enforceStudentProfilePhoto ?? false);
     @endphp
 
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
@@ -32,39 +33,41 @@
                 <h2>{{ __('Account & Matric Photo Information') }}</h2>
             </div>
             <div class="body">
-                <!-- Standard Matric Photo Guideline Card -->
-                <div class="guideline-box">
-                    <div class="guideline-header">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        <span>{{ __('Official Profile Photo Standard (Matric Card Format)') }}</span>
+                @if($enforceStudentProfilePhoto)
+                    <!-- Standard Matric Photo Guideline Card -->
+                    <div class="guideline-box">
+                        <div class="guideline-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            <span>{{ __('Official Profile Photo Standard (Matric Card Format)') }}</span>
+                        </div>
+                        <div class="guideline-grid">
+                            <div class="guideline-chip">
+                                <span class="guideline-icon-badge is-face">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>
+                                </span>
+                                <div><strong>{{ __('Clear Face:') }}</strong> {{ __('Look directly into the camera with bright and neutral lighting.') }}</div>
+                            </div>
+                            <div class="guideline-chip">
+                                <span class="guideline-icon-badge is-formal">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 3h12l-2 5-4 2-4-2-2-5z"/><path d="M12 10l1.8 10-1.8 2-1.8-2L12 10z" fill="currentColor"/></svg>
+                                </span>
+                                <div><strong>{{ __('Formal Attire:') }}</strong> {{ __('Collared shirt, blazer, or neat formal hijab.') }}</div>
+                            </div>
+                            <div class="guideline-chip">
+                                <span class="guideline-icon-badge is-bg">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                </span>
+                                <div><strong>{{ __('Plain Background:') }}</strong> {{ __('Plain background (blue/white/neutral) without distractions.') }}</div>
+                            </div>
+                            <div class="guideline-chip is-prohibited">
+                                <span class="guideline-icon-badge is-prohibited">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                </span>
+                                <div><strong>{{ __('Prohibited:') }}</strong> {{ __('Avatars/anime, group photos, sunglasses, hats, or beauty filters.') }}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="guideline-grid">
-                        <div class="guideline-chip">
-                            <span class="guideline-icon-badge is-face">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>
-                            </span>
-                            <div><strong>{{ __('Clear Face:') }}</strong> {{ __('Look directly into the camera with bright and neutral lighting.') }}</div>
-                        </div>
-                        <div class="guideline-chip">
-                            <span class="guideline-icon-badge is-formal">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 3h12l-2 5-4 2-4-2-2-5z"/><path d="M12 10l1.8 10-1.8 2-1.8-2L12 10z" fill="currentColor"/></svg>
-                            </span>
-                            <div><strong>{{ __('Formal Attire:') }}</strong> {{ __('Collared shirt, blazer, or neat formal hijab.') }}</div>
-                        </div>
-                        <div class="guideline-chip">
-                            <span class="guideline-icon-badge is-bg">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                            </span>
-                            <div><strong>{{ __('Plain Background:') }}</strong> {{ __('Plain background (blue/white/neutral) without distractions.') }}</div>
-                        </div>
-                        <div class="guideline-chip is-prohibited">
-                            <span class="guideline-icon-badge is-prohibited">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                            </span>
-                            <div><strong>{{ __('Prohibited:') }}</strong> {{ __('Avatars/anime, group photos, sunglasses, hats, or beauty filters.') }}</div>
-                        </div>
-                    </div>
-                </div>
+                @endif
 
                 <div class="photo-row">
                     <img class="profile-photo" data-profile-photo-preview src="{{ filled($studentPhoto) ? asset('storage/' . $studentPhoto) : '' }}" alt="{{ __('Profile photo') }}" @if(blank($studentPhoto)) hidden @endif>
@@ -73,17 +76,19 @@
                         <label for="profile_photo">{{ __('Profile Photo (Passport Format 3:4)') }}</label>
                         <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ blank($studentPhoto) ? 'required' : '' }}>
                         <small style="display:block;margin-top:6px;color:var(--text-muted);">{{ __('JPG, PNG, or WEBP. The system provides an automatic face cropper and alignment validator.') }}</small>
-                        <small style="display:block;margin-top:8px;font-weight:800;color:{{ $photoStatus === 'approved' ? '#047857' : '#9a6700' }};">
-                            @if($photoStatus === 'approved')
-                                {{ __('Photo status: approved by admin.') }}
-                            @elseif($photoStatus === 'pending')
-                                {{ __('Photo status: pending admin review. You can update the photo again if it is not formal.') }}
-                            @elseif($photoStatus === 'rejected')
-                                {{ __('Photo status: rejected. Please upload a new formal matric photo.') }}
-                            @else
-                                {{ __('Photo status: not approved yet. Upload a formal matric photo and wait for admin approval.') }}
-                            @endif
-                        </small>
+                        @if($enforceStudentProfilePhoto)
+                            <small style="display:block;margin-top:8px;font-weight:800;color:{{ $photoStatus === 'approved' ? '#047857' : '#9a6700' }};">
+                                @if($photoStatus === 'approved')
+                                    {{ __('Photo status: approved by admin.') }}
+                                @elseif($photoStatus === 'pending')
+                                    {{ __('Photo status: pending admin review. You can update the photo again if it is not formal.') }}
+                                @elseif($photoStatus === 'rejected')
+                                    {{ __('Photo status: rejected. Please upload a new formal matric photo.') }}
+                                @else
+                                    {{ __('Photo status: not approved yet. Upload a formal matric photo and wait for admin approval.') }}
+                                @endif
+                            </small>
+                        @endif
                     </div>
                 </div>
                 <div class="grid grid-2">
