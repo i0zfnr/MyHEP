@@ -2590,6 +2590,37 @@
             inset 0 1px 0 rgb(255 255 255 / .72);
     }
 
+    .student-survey-page :is(.student-survey-option, .student-survey-rating-option) {
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        transition:
+            transform .14s ease,
+            border-color .14s ease,
+            background-color .14s ease,
+            box-shadow .14s ease;
+    }
+
+    .student-survey-page :is(.student-survey-option, .student-survey-rating-option):active {
+        transform: scale(.985);
+    }
+
+    .student-survey-page :is(.student-survey-option, .student-survey-rating-option):has(input[type="radio"]:checked) {
+        border-color: color-mix(in srgb, var(--se-primary) 58%, var(--se-border)) !important;
+        background:
+            radial-gradient(9rem circle at 100% -24%, color-mix(in srgb, var(--se-primary-soft) 58%, transparent), transparent 66%),
+            color-mix(in srgb, var(--se-primary-soft) 54%, var(--se-surface, #fff)) !important;
+        box-shadow:
+            0 8px 18px color-mix(in srgb, var(--se-primary) 13%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / .72) !important;
+        color: var(--se-primary-strong, #8b6a34) !important;
+    }
+
+    .student-survey-page :is(.student-survey-option, .student-survey-rating-option):has(input[type="radio"]:focus-visible) {
+        outline: 3px solid color-mix(in srgb, var(--se-primary) 28%, transparent);
+        outline-offset: 2px;
+    }
+
     .student-survey-page .student-survey-rating-option input[type="radio"] {
         display: block !important;
         margin: 0 auto .28rem !important;
