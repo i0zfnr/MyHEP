@@ -845,9 +845,9 @@ const registerPushPromptUi = () => {
             const permission = await Notification.requestPermission();
 
             if (permission === 'granted') {
-                await syncPushSubscription();
                 clearPromptDismissal(PUSH_PROMPT_KEY);
                 hidePrompt(false);
+                syncPushSubscription().catch(() => {});
                 return;
             }
         } catch (error) {
