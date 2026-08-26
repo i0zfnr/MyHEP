@@ -49,7 +49,7 @@ class ProgramActivityController extends Controller
         $totalPoints = $programs->where('validation_status', 'valid')->sum('participation_points');
         $programsJoined = $programs->whereNotNull('checked_in_at')->count();
 
-        // Check active in-system surveys for PB students
+        // Check active in-system surveys for PB students, including completed ones so students can update their answers.
         $activeSurveys = DB::table('program_surveys')
             ->join('programs', 'programs.id', '=', 'program_surveys.program_id')
             ->leftJoin('program_attendances', function ($join) use ($studentId): void {
@@ -63,10 +63,25 @@ class ProgramActivityController extends Controller
             })
             ->where('program_surveys.status', 'published')
             ->where('programs.status', 'active')
-            ->whereNull('program_survey_responses.id')
-            ->select('program_surveys.program_id', 'program_surveys.title as survey_title', 'programs.title as program_title', 'programs.questionnaire_publish_mode')
-            ->distinct()
+            ->select(
+                'program_surveys.program_id',
+                'program_surveys.title as survey_title',
+                'programs.title as program_title',
+                'programs.questionnaire_publish_mode',
+                DB::raw('COUNT(program_survey_responses.id) as response_count')
+            )
+            ->groupBy(
+                'program_surveys.program_id',
+                'program_surveys.title',
+                'programs.title',
+                'programs.questionnaire_publish_mode'
+            )
             ->get()
+            ->map(function ($surveyProgram) {
+                $surveyProgram->already_submitted = (int) ($surveyProgram->response_count ?? 0) > 0;
+
+                return $surveyProgram;
+            })
             ->filter(function ($surveyProgram) use ($programs): bool {
                 if (($surveyProgram->questionnaire_publish_mode ?? 'internal_system') !== 'qr_code') {
                     return true;
@@ -376,7 +391,14 @@ class ProgramActivityController extends Controller
             ->where('program_attendance_id', $attendance->id)
             ->exists() : false;
 
-        return view('student.programs.survey', compact('program', 'survey', 'questions', 'student', 'attendance', 'alreadySubmitted'));
+        $existingAnswers = $attendance ? DB::table('program_survey_responses')
+            ->where('program_survey_id', $survey->id)
+            ->where('program_attendance_id', $attendance->id)
+            ->pluck('answer_value', 'question_id')
+            ->mapWithKeys(fn ($answer, $questionId) => [(int) $questionId => (string) $answer])
+            ->all() : [];
+
+        return view('student.programs.survey', compact('program', 'survey', 'questions', 'student', 'attendance', 'alreadySubmitted', 'existingAnswers'));
     }
 
     public function storeSurvey(Request $request, int $id): RedirectResponse

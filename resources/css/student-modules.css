@@ -66,6 +66,24 @@
 .alert-success { background: var(--success-bg); border-color: #b9ddde; }
 .alert-success .alert-icon { background: #d7eded; color: var(--success); }
 .alert-success strong, .alert-success p { color: var(--success); }
+body[data-theme="dark"] .alert-success {
+    background:
+        radial-gradient(18rem circle at 100% -30%, rgba(119, 215, 166, .14), transparent 68%),
+        rgba(24, 115, 74, .20);
+    border-color: rgba(119, 215, 166, .34);
+    color: #c9f7dd;
+    box-shadow:
+        0 16px 34px rgba(0, 0, 0, .28),
+        inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+body[data-theme="dark"] .alert-success .alert-icon {
+    background: rgba(119, 215, 166, .16);
+    color: #c9f7dd;
+}
+body[data-theme="dark"] .alert-success strong,
+body[data-theme="dark"] .alert-success p {
+    color: #c9f7dd;
+}
 .alert-danger {
     background: linear-gradient(135deg, rgba(95, 35, 28, .18) 0%, rgba(192, 57, 43, .10) 100%);
     border-color: rgba(247, 198, 191, .28);
@@ -2573,7 +2591,7 @@
         border: 1.5px solid color-mix(in srgb, var(--se-text-muted, #76695e) 62%, var(--se-border));
         border-radius: 999px;
         background:
-            radial-gradient(circle, var(--se-primary-strong, #8b6a34) 0 38%, transparent 41%),
+            linear-gradient(135deg, transparent 0 100%),
             var(--se-surface, #fff);
         background-size: 0 0, auto;
         background-position: center;
@@ -2583,11 +2601,16 @@
     }
 
     .student-survey-page :is(.student-survey-option, .student-survey-rating-option) input[type="radio"]:checked {
-        border-color: var(--se-primary-strong, #8b6a34);
-        background-size: 8px 8px, auto;
+        border-color: #2563eb;
+        background:
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.1 7.2 5.8 9.9 11 4.4' fill='none' stroke='white' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+            linear-gradient(135deg, #3b82f6, #1d4ed8);
+        background-size: 11px 11px, auto;
+        background-position: center;
+        background-repeat: no-repeat;
         box-shadow:
-            0 0 0 3px color-mix(in srgb, var(--se-primary) 18%, transparent),
-            inset 0 1px 0 rgb(255 255 255 / .72);
+            0 0 0 3px rgb(37 99 235 / .18),
+            inset 0 1px 0 rgb(255 255 255 / .36);
     }
 
     .student-survey-page :is(.student-survey-option, .student-survey-rating-option) {
@@ -2638,10 +2661,10 @@
         }
 
         .student-survey-page :is(.student-survey-option, .student-survey-rating-option) input[type="radio"]:checked {
-            background-size: 7px 7px, auto;
+            background-size: 9px 9px, auto;
             box-shadow:
-                0 0 0 2px color-mix(in srgb, var(--se-primary) 16%, transparent),
-                inset 0 1px 0 rgb(255 255 255 / .72);
+                0 0 0 2px rgb(37 99 235 / .16),
+                inset 0 1px 0 rgb(255 255 255 / .36);
         }
 
         .student-survey-page .student-survey-options {
@@ -3052,9 +3075,16 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        padding: 1.15rem 1.4rem;
-        background: var(--surface-soft, #fbf7f2);
-        border-bottom: 1px solid var(--border);
+        position: relative;
+        margin: 0.85rem 0.85rem 0;
+        padding: 0.9rem 1rem;
+        background:
+            radial-gradient(14rem circle at 0% -45%, rgba(183, 146, 107, 0.12), transparent 68%),
+            color-mix(in srgb, var(--surface-soft, #fbf7f2) 88%, var(--surface, #fff));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66);
+        overflow: hidden;
     }
     .student-profile-page .profile-head-icon {
         width: 32px;
@@ -3067,6 +3097,8 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        position: relative;
+        z-index: 1;
     }
     .student-profile-page .profile-head-icon svg {
         width: 16px;
@@ -3080,9 +3112,18 @@
         border: 0;
         padding: 0;
         background: transparent;
+        line-height: 1.2;
+        position: relative;
+        z-index: 1;
+    }
+    .student-profile-page .profile-card-head h2::before,
+    .student-profile-page .profile-card-head h2::after {
+        content: none !important;
+        display: none !important;
     }
     .student-profile-page .body {
         padding: clamp(1.2rem, 3vw, 1.8rem);
+        padding-top: 1rem;
     }
     .student-profile-page .grid {
         display: grid;
@@ -3178,6 +3219,66 @@
         font-size: 28px;
         background: rgba(183, 146, 107, 0.12);
         border: 2px solid rgba(183, 146, 107, 0.25);
+    }
+    body[data-theme="dark"] .student-profile-page .profile-card {
+        background:
+            radial-gradient(24rem circle at 100% -28%, rgba(231, 211, 168, .08), transparent 66%),
+            rgba(23, 21, 19, .86) !important;
+        border-color: rgba(231, 211, 168, .18) !important;
+        box-shadow:
+            0 18px 40px rgba(0, 0, 0, .34),
+            inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+    }
+    body[data-theme="dark"] .student-profile-page .profile-card-head {
+        background:
+            radial-gradient(14rem circle at -8% -38%, rgba(231, 211, 168, .13), transparent 70%),
+            linear-gradient(135deg, rgba(255, 255, 255, .055), rgba(231, 211, 168, .035)),
+            rgba(12, 11, 10, .72) !important;
+        border-color: rgba(231, 211, 168, .18) !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .07),
+            0 10px 22px rgba(0, 0, 0, .18) !important;
+    }
+    body[data-theme="dark"] .student-profile-page .profile-card-head h2 {
+        color: #fff7ed !important;
+    }
+    body[data-theme="dark"] .student-profile-page .profile-head-icon {
+        background: rgba(231, 211, 168, .10) !important;
+        border-color: rgba(231, 211, 168, .20) !important;
+        color: #e7d3a8 !important;
+    }
+    body[data-theme="dark"] .student-profile-page .photo-row {
+        background:
+            radial-gradient(18rem circle at 100% -35%, rgba(231, 211, 168, .08), transparent 68%),
+            rgba(15, 14, 13, .76) !important;
+        border-color: rgba(231, 211, 168, .18) !important;
+    }
+    body[data-theme="dark"] .student-profile-page .profile-photo,
+    body[data-theme="dark"] .student-profile-page .photo-placeholder {
+        background: rgba(255, 255, 255, .055) !important;
+        border-color: rgba(231, 211, 168, .24) !important;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, .36) !important;
+    }
+    body[data-theme="dark"] .student-profile-page :is(input, textarea, select) {
+        background: rgba(10, 9, 8, .68) !important;
+        border-color: rgba(231, 211, 168, .20) !important;
+        color: #fff7ed !important;
+    }
+    body[data-theme="dark"] .student-profile-page :is(input, textarea, select)::placeholder {
+        color: rgba(255, 247, 237, .45) !important;
+    }
+    body[data-theme="dark"] .student-profile-page input[readonly] {
+        background: rgba(255, 255, 255, .045) !important;
+        color: rgba(255, 247, 237, .70) !important;
+    }
+    body[data-theme="dark"] .student-profile-page input[type="file"] {
+        background: rgba(10, 9, 8, .68) !important;
+        color: #f7ead8 !important;
+    }
+    body[data-theme="dark"] .student-profile-page input[type="file"]::file-selector-button {
+        background: rgba(231, 211, 168, .18) !important;
+        border-color: rgba(231, 211, 168, .24) !important;
+        color: #f6e7c8 !important;
     }
     .student-profile-page .profile-actions-bar {
         display: flex;

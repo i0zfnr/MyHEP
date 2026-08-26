@@ -86,7 +86,7 @@
                                     @endphp
                                     @foreach($options as $val => $lbl)
                                         <label class="student-survey-option" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 0.84rem; font-weight: 600; background: var(--bg-alt, #faf7f2);">
-                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $val }}" @required($question->is_required) {{ old('answers.'.$question->id) == $val ? 'checked' : '' }}>
+                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $val }}" @required($question->is_required) {{ old('answers.'.$question->id, $existingAnswers[(int) $question->id] ?? null) == $val ? 'checked' : '' }}>
                                             <span>{{ $lbl }}</span>
                                         </label>
                                     @endforeach
@@ -95,13 +95,13 @@
                                 <div class="student-survey-rating" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                     @for($i = 1; $i <= 5; $i++)
                                         <label class="student-survey-rating-option" style="flex: 1; min-width: 60px; text-align: center; padding: 0.75rem 0.5rem; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; background: var(--bg-alt, #faf7f2);">
-                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $i }}" @required($question->is_required) {{ old('answers.'.$question->id) == $i ? 'checked' : '' }} style="display: block; margin: 0 auto 0.35rem;">
+                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $i }}" @required($question->is_required) {{ old('answers.'.$question->id, $existingAnswers[(int) $question->id] ?? null) == $i ? 'checked' : '' }} style="display: block; margin: 0 auto 0.35rem;">
                                             <span>{{ $i }} ★</span>
                                         </label>
                                     @endfor
                                 </div>
                             @else
-                                <textarea name="answers[{{ $question->id }}]" rows="3" @required($question->is_required) style="width: 100%; box-sizing: border-box; padding: 0.85rem; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.88rem;" placeholder="{{ __('Sila nyatakan ulasan / pandangan anda...') }}">{{ old('answers.'.$question->id) }}</textarea>
+                                <textarea name="answers[{{ $question->id }}]" rows="3" @required($question->is_required) style="width: 100%; box-sizing: border-box; padding: 0.85rem; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.88rem;" placeholder="{{ __('Sila nyatakan ulasan / pandangan anda...') }}">{{ old('answers.'.$question->id, $existingAnswers[(int) $question->id] ?? '') }}</textarea>
                             @endif
                         </div>
                     @endforeach

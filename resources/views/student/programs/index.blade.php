@@ -18,7 +18,7 @@
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 </div>
                 <div class="sp-survey-text">
-                    <span class="sp-survey-kicker">{{ __('Action required') }}</span>
+                    <span class="sp-survey-kicker">{{ $activeSurveys->contains(fn ($surveyProgram) => !($surveyProgram->already_submitted ?? false)) ? __('Action required') : __('Questionnaire available') }}</span>
                     <strong>{{ __('Active Program Questionnaire') }}</strong>
                     <span>{{ __('Please complete the feedback for the Besut Polytechnic program you participated in.') }}</span>
                 </div>
@@ -27,7 +27,7 @@
                 @foreach($activeSurveys as $surveyProgram)
                     <a href="{{ route('student.programs.survey', $surveyProgram->program_id) }}" class="sp-survey-btn">
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"/></svg>
-                        <span>{{ __('Answer questionnaire') }}</span>
+                        <span>{{ ($surveyProgram->already_submitted ?? false) ? __('Update questionnaire') : __('Answer questionnaire') }}</span>
                         <small>{{ \Illuminate\Support\Str::limit($surveyProgram->program_title, 28) }}</small>
                     </a>
                 @endforeach
@@ -68,6 +68,7 @@
         @forelse($programs as $program)
             @php
                 $hasActiveSurvey = isset($activeSurveys[$program->id]);
+                $surveyCompleted = $hasActiveSurvey && ($activeSurveys[$program->id]->already_submitted ?? false);
             @endphp
             <article class="sp-item">
                 <div class="sp-item-main">
@@ -76,7 +77,7 @@
                         @if($hasActiveSurvey)
                             <span class="sp-badge" style="background:rgba(212,175,55,0.14); color:#b45309; border:1px solid rgba(212,175,55,0.3); font-size:0.72rem; padding:0.2rem 0.55rem;">
                                 <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
-                                {{ __('Soal Selidik Dibuka') }}
+                                {{ $surveyCompleted ? __('Soal Selidik Selesai') : __('Soal Selidik Dibuka') }}
                             </span>
                         @endif
                     </div>
@@ -94,7 +95,7 @@
                     @if($hasActiveSurvey)
                         <a class="sp-btn sp-btn-survey" href="{{ route('student.programs.survey', $program->id) }}">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                            <span>{{ __('Soal Selidik') }}</span>
+                            <span>{{ $surveyCompleted ? __('Kemaskini Soal Selidik') : __('Soal Selidik') }}</span>
                         </a>
                     @endif
 
