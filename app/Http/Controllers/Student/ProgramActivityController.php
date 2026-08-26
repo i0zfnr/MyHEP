@@ -7,6 +7,7 @@ use App\Support\DynamicQrToken;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -166,133 +167,163 @@ class ProgramActivityController extends Controller
 
     public function quickScanAttendance(Request $request, int $id)
     {
-        $studentId = (int) session('auth_user.id');
-        $student = DB::table('students')->where('id', $studentId)->first(['id', 'full_name', 'matric_no', 'program']);
-        if (! $student) {
-            return response()->json(['success' => false, 'message' => __('Student profile not found.')], 403);
-        }
-
-        $program = DB::table('programs')->where('id', $id)->where('status', 'active')->first();
-        if (! $program) {
-            return response()->json(['success' => false, 'message' => __('Program not found or inactive.')], 404);
-        }
-
-        if ($program->attendance_status !== 'open') {
-            return response()->json(['success' => false, 'message' => __('Attendance is currently closed for this program.')], 422);
-        }
-
-        $token = $request->input('qr_token') ?? $request->input('token') ?? $request->input('t');
-        if (filled($token)) {
-            if (! DynamicQrToken::verify($token, $program->id)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('The scanned QR code has expired. Please scan the current QR code on the screen.'),
-                ], 422);
+        try {
+            $studentId = (int) session('auth_user.id');
+            $studentColumns = ['id', 'full_name', 'matric_no'];
+            if (Schema::hasColumn('students', 'program')) {
+                $studentColumns[] = 'program';
             }
-        }
 
-        $existing = DB::table('program_attendances')
-            ->where('program_id', $program->id)
-            ->where('student_id', $student->id)
-            ->where('attendee_type', 'internal')
-            ->first();
+            $student = DB::table('students')->where('id', $studentId)->first($studentColumns);
+            if (! $student) {
+                return response()->json(['success' => false, 'message' => __('Student profile not found.')], 403);
+            }
 
-        $survey = DB::table('program_surveys')
-            ->where('program_id', $program->id)
-            ->where('status', 'published')
-            ->orderByDesc('id')
-            ->first();
+            $program = DB::table('programs')->where('id', $id)->where('status', 'active')->first();
+            if (! $program) {
+                return response()->json(['success' => false, 'message' => __('Program not found or inactive.')], 404);
+            }
 
-        $hasSurvey = (bool) $survey;
-        $surveyUrl = $hasSurvey ? route('student.programs.survey', $program->id) : null;
+            if (($program->attendance_status ?? 'closed') !== 'open') {
+                return response()->json(['success' => false, 'message' => __('Attendance is currently closed for this program.')], 422);
+            }
 
-        if ($existing) {
-            $existingStatus = data_get($existing, 'validation_status', 'valid');
+            $token = $request->input('qr_token') ?? $request->input('token') ?? $request->input('t');
+            if (filled($token)) {
+                if (! DynamicQrToken::verify($token, $program->id)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('The scanned QR code has expired. Please scan the current QR code on the screen.'),
+                    ], 422);
+                }
+            }
+
+            $attendanceQuery = DB::table('program_attendances')
+                ->where('program_id', $program->id)
+                ->where('student_id', $student->id);
+
+            if (Schema::hasColumn('program_attendances', 'attendee_type')) {
+                $attendanceQuery->where('attendee_type', 'internal');
+            }
+
+            $existing = $attendanceQuery->first();
+
+            $survey = DB::table('program_surveys')
+                ->where('program_id', $program->id)
+                ->where('status', 'published')
+                ->orderByDesc('id')
+                ->first();
+
+            $hasSurvey = (bool) $survey;
+            $surveyUrl = $hasSurvey ? route('student.programs.survey', $program->id) : null;
+
+            if ($existing) {
+                $existingStatus = data_get($existing, 'validation_status', 'valid');
+
+                return response()->json([
+                    'success' => true,
+                    'already_recorded' => true,
+                    'status' => $existingStatus,
+                    'message' => __('DONE KEY IN'),
+                    'student' => [
+                        'full_name' => $student->full_name,
+                        'matric_no' => $student->matric_no,
+                        'program' => data_get($student, 'program', '-'),
+                    ],
+                    'program' => [
+                        'id' => $program->id,
+                        'title' => data_get($program, 'title', __('Program')),
+                        'venue' => data_get($program, 'venue', '-'),
+                        'points' => $existingStatus === 'valid' ? (int) data_get($program, 'participation_points', 0) : 0,
+                        'has_survey' => $hasSurvey,
+                        'survey_url' => $surveyUrl,
+                    ],
+                ]);
+            }
+
+            $programLatitude = data_get($program, 'latitude');
+            $programLongitude = data_get($program, 'longitude');
+            $usesGeofence = $programLatitude !== null && $programLongitude !== null;
+            $lat = $request->input('latitude');
+            $lng = $request->input('longitude');
+            $accuracy = $request->input('location_accuracy_m');
+            $capturedAt = $request->input('location_captured_at');
+
+            $distance = ($usesGeofence && filled($lat) && filled($lng))
+                ? $this->distanceMeters((float) $programLatitude, (float) $programLongitude, (float) $lat, (float) $lng)
+                : null;
+
+            $validationStatus = ! $usesGeofence
+                ? 'valid'
+                : (($distance !== null && $distance > (int) data_get($program, 'geofence_radius_m', 50))
+                    ? 'invalid_outside_radius'
+                    : (($accuracy !== null && (float) $accuracy > 100) ? 'needs_review_accuracy' : 'valid'));
+
+            $attendanceData = [
+                'program_id' => $program->id,
+                'student_id' => $student->id,
+                'attendee_type' => 'internal',
+                'full_name' => $student->full_name,
+                'identifier' => $student->matric_no,
+                'institution_or_unit' => data_get($student, 'program'),
+                'checked_in_at' => now(),
+                'latitude' => $lat,
+                'longitude' => $lng,
+                'geofence_valid' => $validationStatus === 'valid',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            foreach ([
+                'validation_status' => $validationStatus,
+                'distance_m' => $distance === null ? null : round($distance, 2),
+                'location_accuracy_m' => $accuracy === null ? null : round((float) $accuracy, 2),
+                'location_captured_at' => $capturedAt,
+            ] as $column => $value) {
+                if (Schema::hasColumn('program_attendances', $column)) {
+                    $attendanceData[$column] = $value;
+                }
+            }
+
+            $attendanceData = array_filter(
+                $attendanceData,
+                fn ($value, string $column): bool => Schema::hasColumn('program_attendances', $column),
+                ARRAY_FILTER_USE_BOTH
+            );
+
+            DB::table('program_attendances')->insertGetId($attendanceData);
 
             return response()->json([
                 'success' => true,
-                'already_recorded' => true,
-                'status' => $existingStatus,
+                'already_recorded' => false,
+                'status' => $validationStatus,
                 'message' => __('DONE KEY IN'),
                 'student' => [
                     'full_name' => $student->full_name,
                     'matric_no' => $student->matric_no,
-                    'program' => $student->program,
+                    'program' => data_get($student, 'program', '-'),
                 ],
                 'program' => [
                     'id' => $program->id,
-                    'title' => $program->title,
-                    'venue' => $program->venue,
-                    'points' => $existingStatus === 'valid' ? (int) $program->participation_points : 0,
+                    'title' => data_get($program, 'title', __('Program')),
+                    'venue' => data_get($program, 'venue', '-'),
+                    'points' => $validationStatus === 'valid' ? (int) data_get($program, 'participation_points', 0) : 0,
                     'has_survey' => $hasSurvey,
                     'survey_url' => $surveyUrl,
                 ],
             ]);
+        } catch (\Throwable $exception) {
+            Log::error('Program quick scan attendance failed', [
+                'program_id' => $id,
+                'student_id' => session('auth_user.id'),
+                'message' => $exception->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('Attendance could not be recorded. Please ask the admin to check the server log.'),
+            ], 500);
         }
-
-        $usesGeofence = $program->latitude !== null && $program->longitude !== null;
-        $lat = $request->input('latitude');
-        $lng = $request->input('longitude');
-        $accuracy = $request->input('location_accuracy_m');
-        $capturedAt = $request->input('location_captured_at');
-
-        $distance = ($usesGeofence && filled($lat) && filled($lng))
-            ? $this->distanceMeters((float) $program->latitude, (float) $program->longitude, (float) $lat, (float) $lng)
-            : null;
-
-        $validationStatus = ! $usesGeofence
-            ? 'valid'
-            : (($distance !== null && $distance > (int) $program->geofence_radius_m)
-                ? 'invalid_outside_radius'
-                : (($accuracy !== null && (float) $accuracy > 100) ? 'needs_review_accuracy' : 'valid'));
-
-        $attendanceData = [
-            'program_id' => $program->id,
-            'student_id' => $student->id,
-            'attendee_type' => 'internal',
-            'full_name' => $student->full_name,
-            'identifier' => $student->matric_no,
-            'institution_or_unit' => $student->program,
-            'checked_in_at' => now(),
-            'latitude' => $lat,
-            'longitude' => $lng,
-            'geofence_valid' => $validationStatus === 'valid',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-
-        foreach ([
-            'validation_status' => $validationStatus,
-            'distance_m' => $distance === null ? null : round($distance, 2),
-            'location_accuracy_m' => $accuracy === null ? null : round((float) $accuracy, 2),
-            'location_captured_at' => $capturedAt,
-        ] as $column => $value) {
-            if (Schema::hasColumn('program_attendances', $column)) {
-                $attendanceData[$column] = $value;
-            }
-        }
-
-        DB::table('program_attendances')->insertGetId($attendanceData);
-
-        return response()->json([
-            'success' => true,
-            'already_recorded' => false,
-            'status' => $validationStatus,
-            'message' => __('DONE KEY IN'),
-            'student' => [
-                'full_name' => $student->full_name,
-                'matric_no' => $student->matric_no,
-                'program' => $student->program,
-            ],
-            'program' => [
-                'id' => $program->id,
-                'title' => $program->title,
-                'venue' => $program->venue,
-                'points' => $validationStatus === 'valid' ? (int) $program->participation_points : 0,
-                'has_survey' => $hasSurvey,
-                'survey_url' => $surveyUrl,
-            ],
-        ]);
     }
 
     public function survey(int $id): View

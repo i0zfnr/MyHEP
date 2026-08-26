@@ -299,7 +299,19 @@
                 })
             });
 
-            const data = await res.json();
+            const text = await res.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (error) {
+                data = {
+                    success: false,
+                    message: res.status >= 500
+                        ? @json(__('Server error while recording attendance. Please ask admin to check the Laravel log.'))
+                        : @json(__('Unable to read the server response. Please try again.')),
+                };
+            }
+
             if (res.ok && data.success) {
                 showDoneModal(data);
             } else {
