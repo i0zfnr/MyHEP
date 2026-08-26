@@ -5126,7 +5126,7 @@ html[data-theme] body > .shell :where(.btn, .back-link),
 
 /* Liquid Glass material is reserved for navigation and overlay layers. */
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-    .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) {
+    .app-layout :is(.topbar, .mobile-more-sheet, .header-user) {
         position: relative;
         isolation: isolate;
         overflow: hidden;
@@ -5142,7 +5142,7 @@ html[data-theme] body > .shell :where(.btn, .back-link),
         -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.06) !important;
     }
 
-    .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user)::before {
+    .app-layout :is(.topbar, .mobile-more-sheet, .header-user)::before {
         content: '';
         position: absolute;
         inset: 0;
@@ -5151,12 +5151,12 @@ html[data-theme] body > .shell :where(.btn, .back-link),
         background: linear-gradient(125deg, rgba(255,255,255,.42), transparent 28%, rgba(255,255,255,.1) 62%, transparent 82%);
     }
 
-    .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) > * {
+    .app-layout :is(.topbar, .mobile-more-sheet, .header-user) > * {
         position: relative;
         z-index: 1;
     }
 
-    body[data-theme="dark"] .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) {
+    body[data-theme="dark"] .app-layout :is(.topbar, .mobile-more-sheet, .header-user) {
         border-color: rgba(246, 231, 200, .2) !important;
         background:
             linear-gradient(118deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.035) 34%, transparent 68%),
@@ -5169,206 +5169,9 @@ html[data-theme] body > .shell :where(.btn, .back-link),
         -webkit-backdrop-filter: blur(32px) saturate(185%) brightness(1.04) !important;
     }
 
-    body[data-theme="dark"] .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user)::before {
+    body[data-theme="dark"] .app-layout :is(.topbar, .mobile-more-sheet, .header-user)::before {
         background: linear-gradient(125deg, rgba(255,255,255,.15), transparent 30%, rgba(231,211,168,.08) 62%, transparent 82%);
     }
-
-    .app-layout .mobile-bottom-nav {
-        border-color: rgba(255, 255, 255, .28) !important;
-        background:
-            linear-gradient(118deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.055) 36%, transparent 72%),
-            rgba(34, 30, 25, .70) !important;
-        box-shadow:
-            0 18px 42px rgba(0,0,0,.28),
-            inset 0 1px 0 rgba(255,255,255,.18),
-            inset 0 -1px 0 rgba(0,0,0,.18) !important;
-        backdrop-filter: blur(32px) saturate(185%) brightness(1.04) !important;
-        -webkit-backdrop-filter: blur(32px) saturate(185%) brightness(1.04) !important;
-    }
-
-    .app-layout .mobile-bottom-nav::before {
-        background: linear-gradient(125deg, rgba(255,255,255,.17), transparent 30%, rgba(231,211,168,.08) 62%, transparent 82%);
-    }
-
-    body[data-theme="dark"] .app-layout .mobile-bottom-nav {
-        border-color: rgba(246, 231, 200, .28) !important;
-        background:
-            radial-gradient(180px circle at 14% 18%, rgba(255,255,255,.13), transparent 58%),
-            linear-gradient(118deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.055) 36%, rgba(231,211,168,.05) 68%),
-            rgba(24, 21, 18, .48) !important;
-        box-shadow:
-            0 20px 48px rgba(0,0,0,.38),
-            0 1px 0 rgba(255,255,255,.08),
-            inset 0 1px 0 rgba(255,255,255,.22),
-            inset 0 -1px 0 rgba(0,0,0,.18) !important;
-    }
-
-    body[data-theme="dark"] .app-layout .mobile-bottom-nav::before {
-        background:
-            linear-gradient(125deg, rgba(255,255,255,.20), transparent 28%, rgba(231,211,168,.10) 62%, transparent 82%);
-    }
-}
-
-/* The QR action is a restrained glass primary action, not a glowing badge. */
-.mobile-bottom-nav .mobile-scan-tab:not(.active) {
-    border-color: rgba(139, 102, 72, .34);
-    color: #fffaf3;
-    background:
-        linear-gradient(145deg, rgba(255,255,255,.30), rgba(183,146,107,.32) 38%, rgba(78, 55, 38, .70)),
-        rgba(122, 91, 66, .78);
-    box-shadow:
-        0 12px 24px rgba(73, 50, 29, .24),
-        inset 0 1px 0 rgba(255,255,255,.36),
-        inset 0 -1px 0 rgba(45, 29, 18, .22);
-}
-
-.mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile-nav-icon {
-    border-color: rgba(255,255,255,.24);
-    background: rgba(255,255,255,.13);
-    color: #fffaf3;
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.24),
-        inset 0 -1px 0 rgba(45, 29, 18, .18);
-}
-
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) {
-    border-color: rgba(255, 245, 229, .24);
-    color: #fff7ef;
-    background:
-        linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.035) 48%, rgba(0,0,0,.12)),
-        rgba(58, 50, 42, .58);
-    box-shadow:
-        0 10px 22px rgba(0, 0, 0, .30),
-        inset 0 1px 0 rgba(255,255,255,.16),
-        inset 0 -1px 0 rgba(0,0,0,.20);
-}
-
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active) .mobile-nav-icon {
-    border-color: rgba(255, 245, 229, .18);
-    background: rgba(255,255,255,.08);
-    color: #fff7ef;
-}
-
-/* Student and staff PWA navigation follows the shared Liquid Glass slider. */
-.app-layout .mobile-bottom-nav {
-    border-color: color-mix(in srgb, var(--liquid-rim) 62%, transparent) !important;
-    background:
-        radial-gradient(190px circle at 16% 8%, rgb(255 255 255 / calc(var(--glass-opacity) + .34)), transparent 64%),
-        radial-gradient(170px circle at 82% 100%, color-mix(in srgb, var(--se-primary) 18%, transparent), transparent 68%),
-        linear-gradient(118deg, rgb(255 255 255 / calc(var(--glass-opacity) + .24)), rgb(255 252 247 / calc(var(--glass-opacity) + .08)) 46%, rgb(245 238 231 / calc(var(--glass-opacity) + .15))),
-        rgb(255 252 247 / calc(var(--glass-opacity) + .10)) !important;
-    box-shadow:
-        0 18px 42px rgba(65, 47, 33, .18),
-        inset 0 1px 0 rgb(255 255 255 / calc(var(--glass-opacity) + .46)),
-        inset 0 -1px 0 rgba(117, 85, 57, .10) !important;
-    backdrop-filter: blur(34px) saturate(180%) brightness(1.10) !important;
-    -webkit-backdrop-filter: blur(34px) saturate(180%) brightness(1.10) !important;
-}
-
-.app-layout .mobile-bottom-nav::before {
-    background: linear-gradient(125deg, rgb(255 255 255 / calc(var(--glass-opacity) * .46)), transparent 30%, rgb(255 255 255 / calc(var(--glass-opacity) * .15)) 64%, transparent 84%) !important;
-}
-
-.mobile-bottom-nav :is(a, button) {
-    color: var(--se-primary-strong);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .74);
-}
-
-.mobile-bottom-nav .mobile-nav-icon {
-    border-color: rgb(255 255 255 / calc(var(--glass-opacity) + .12)) !important;
-    background:
-        linear-gradient(145deg, rgb(255 255 255 / calc(var(--glass-opacity) + .06)), rgb(245 233 221 / calc(var(--glass-opacity) * .70))) !important;
-    color: var(--se-primary-strong) !important;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(var(--glass-opacity) + .20)) !important;
-}
-
-.mobile-bottom-nav :is(a, button).active:not(.mobile-scan-tab) {
-    border-color: rgb(255 255 255 / calc(var(--glass-opacity) + .16)) !important;
-    background:
-        linear-gradient(145deg, rgb(255 255 255 / calc(var(--glass-opacity) + .24)), rgb(245 233 221 / calc(var(--glass-opacity) + .14))) !important;
-    box-shadow:
-        0 10px 24px rgba(32, 23, 17, .16),
-        inset 0 1px 0 rgb(255 255 255 / calc(var(--glass-opacity) + .30)) !important;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .42);
-}
-
-.mobile-bottom-nav .mobile-scan-tab,
-.mobile-bottom-nav .mobile-scan-tab:not(.active),
-.mobile-bottom-nav .mobile-scan-tab.active {
-    border-color: rgb(255 245 229 / calc(var(--glass-opacity) + .10)) !important;
-    background:
-        radial-gradient(120px circle at 22% 8%, rgb(255 255 255 / calc(var(--glass-opacity) * .52)), transparent 62%),
-        linear-gradient(145deg, rgb(255 255 255 / calc(var(--glass-opacity) * .42)), rgb(183 146 107 / calc(var(--glass-opacity) * .54)) 42%, rgb(69 44 27 / calc(var(--glass-opacity) + .18))),
-        rgb(111 76 49 / calc(var(--glass-opacity) + .14)) !important;
-    box-shadow:
-        0 13px 28px rgba(45, 29, 18, .24),
-        0 0 0 1px rgb(255 255 255 / calc(var(--glass-opacity) * .14)),
-        inset 0 1px 0 rgb(255 255 255 / calc(var(--glass-opacity) * .66)),
-        inset 0 -1px 0 rgba(0,0,0,.16) !important;
-    backdrop-filter: blur(28px) saturate(185%) brightness(1.05) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.05) !important;
-    color: #fffaf3 !important;
-    text-shadow: 0 1px 2px rgba(45, 29, 18, .42);
-}
-
-.mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon,
-.mobile-bottom-nav .mobile-scan-tab.active .mobile-nav-icon {
-    border-color: rgb(255 255 255 / calc(var(--glass-opacity) + .08)) !important;
-    background: rgb(255 255 255 / calc(var(--glass-opacity) * .42)) !important;
-    color: #fffaf3 !important;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(var(--glass-opacity) * .62)) !important;
-}
-
-body[data-theme="dark"] .app-layout .mobile-bottom-nav {
-    background:
-        radial-gradient(180px circle at 14% 12%, rgb(255 255 255 / calc(var(--glass-opacity) * .24)), transparent 62%),
-        linear-gradient(118deg, rgb(255 255 255 / calc(var(--glass-opacity) * .26)), transparent 40%, rgb(231 211 168 / calc(var(--glass-opacity) * .10)) 72%),
-        rgb(28 24 21 / calc(.30 + var(--glass-opacity) * .42)) !important;
-    border-color: rgb(246 231 200 / calc(.16 + var(--glass-opacity) * .12)) !important;
-    box-shadow:
-        0 18px 42px rgba(0,0,0,.32),
-        inset 0 1px 0 rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .12)),
-        inset 0 -1px 0 rgba(0,0,0,.18) !important;
-}
-
-body[data-theme="dark"] .mobile-bottom-nav .mobile-nav-icon {
-    border-color: rgb(231 211 168 / calc(.12 + var(--glass-opacity) * .10)) !important;
-    background:
-        linear-gradient(145deg, rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .10)), rgb(215 191 168 / calc(.05 + var(--glass-opacity) * .08))) !important;
-    color: var(--se-primary-strong) !important;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .10)) !important;
-}
-
-body[data-theme="dark"] .mobile-bottom-nav :is(a, button).active:not(.mobile-scan-tab) {
-    color: #fff7ef !important;
-    border-color: rgb(231 211 168 / calc(.12 + var(--glass-opacity) * .10)) !important;
-    background:
-        linear-gradient(145deg, rgb(255 255 255 / calc(.07 + var(--glass-opacity) * .10)), rgb(215 191 168 / calc(.08 + var(--glass-opacity) * .14))) !important;
-    box-shadow:
-        0 9px 20px rgba(0,0,0,.20),
-        inset 0 1px 0 rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .10)) !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .42);
-}
-
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab,
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab:not(.active),
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab.active {
-    border-color: rgb(255 245 229 / calc(.14 + var(--glass-opacity) * .12)) !important;
-    background:
-        radial-gradient(120px circle at 22% 8%, rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .10)), transparent 62%),
-        linear-gradient(145deg, rgb(255 255 255 / calc(.07 + var(--glass-opacity) * .10)), rgb(183 146 107 / calc(.10 + var(--glass-opacity) * .14)) 44%, rgb(58 50 42 / calc(.22 + var(--glass-opacity) * .36))),
-        rgb(58 50 42 / calc(.22 + var(--glass-opacity) * .36)) !important;
-    box-shadow:
-        0 12px 25px rgba(0,0,0,.28),
-        inset 0 1px 0 rgb(255 255 255 / calc(.10 + var(--glass-opacity) * .12)),
-        inset 0 -1px 0 rgba(0,0,0,.18) !important;
-}
-
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon,
-body[data-theme="dark"] .mobile-bottom-nav .mobile-scan-tab.active .mobile-nav-icon {
-    border-color: rgb(255 245 229 / calc(.12 + var(--glass-opacity) * .08)) !important;
-    background: rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .08)) !important;
-    color: #fff7ef !important;
 }
 
 /* Content cards are lightweight surfaces; reserve deep material motion for overlays. */
@@ -6720,76 +6523,6 @@ body[data-theme="dark"] .app-layout .sidebar {
 
     body.student-bottom-nav-eligible .page-body,
     body.has-student-bottom-nav .page-body {
-        padding-bottom: calc(var(--student-bottom-nav-total) + 1rem) !important;
-    }
-
-    body.student-bottom-nav-eligible .app-layout .mobile-bottom-nav,
-    body.has-student-bottom-nav .app-layout .mobile-bottom-nav {
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        max-width: none !important;
-        min-height: var(--student-bottom-nav-height) !important;
-        bottom: 0 !important;
-        padding:
-            .36rem max(.68rem, env(safe-area-inset-right, 0px))
-            calc(.38rem + var(--student-bottom-nav-safe))
-            max(.68rem, env(safe-area-inset-left, 0px)) !important;
-        border-right: 0 !important;
-        border-bottom: 0 !important;
-        border-left: 0 !important;
-        border-radius: 24px 24px 0 0 !important;
-        transform: translateZ(0) !important;
-    }
-
-    body.student-bottom-nav-eligible .mobile-bottom-nav :is(a, button),
-    body.has-student-bottom-nav .mobile-bottom-nav :is(a, button) {
-        min-height: 48px !important;
-        gap: .17rem !important;
-        border-radius: 17px !important;
-        font-size: clamp(.55rem, 2.15vw, .61rem) !important;
-        line-height: 1.05 !important;
-    }
-
-    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-nav-icon,
-    body.has-student-bottom-nav .mobile-bottom-nav .mobile-nav-icon {
-        width: clamp(24px, 7vw, 27px) !important;
-        height: clamp(24px, 7vw, 27px) !important;
-    }
-
-    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab,
-    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab:not(.active),
-    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab.active,
-    body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab,
-    body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab:not(.active),
-    body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab.active {
-        min-height: 60px !important;
-        margin: -.58rem -.02rem -.02rem !important;
-        border-radius: 21px !important;
-    }
-
-    body.student-bottom-nav-eligible .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon,
-    body.has-student-bottom-nav .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon {
-        width: clamp(29px, 8vw, 32px) !important;
-        height: clamp(29px, 8vw, 32px) !important;
-    }
-
-    body.student-bottom-nav-eligible .mobile-more-sheet,
-    body.has-student-bottom-nav .mobile-more-sheet {
-        bottom: calc(var(--student-bottom-nav-total) + 12px) !important;
-        left: max(.75rem, env(safe-area-inset-left, 0px)) !important;
-        right: max(.75rem, env(safe-area-inset-right, 0px)) !important;
-    }
-
-    @supports (-webkit-touch-callout: none) {
-        body.student-bottom-nav-eligible,
-        body.has-student-bottom-nav {
-            --student-bottom-nav-height: 60px;
-        }
-
-        body.student-bottom-nav-eligible .app-layout .mobile-bottom-nav,
-        body.has-student-bottom-nav .app-layout .mobile-bottom-nav {
-            transform: translateZ(0) !important;
-        }
+        padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 16px)) !important;
     }
 }
