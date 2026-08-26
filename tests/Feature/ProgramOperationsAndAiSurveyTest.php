@@ -742,6 +742,56 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             ->assertOk()->assertSee('20')->assertSee('Digital Skills Program');
     }
 
+    public function test_student_quick_scan_attendance_accepts_browser_iso_location_timestamp(): void
+    {
+        $studentId = DB::table('students')->insertGetId([
+            'full_name' => 'Quick Scan Student',
+            'matric_no' => 'PB9001',
+            'program' => 'DIT',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1,
+            'title' => 'Quick Scan Program',
+            'paperwork_method' => 'pdf',
+            'status' => 'active',
+            'attendance_status' => 'open',
+            'venue' => 'Dewan',
+            'latitude' => 5.8,
+            'longitude' => 102.5,
+            'geofence_radius_m' => 50,
+            'participation_points' => 10,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $qrToken = \App\Support\DynamicQrToken::generate($programId)['token'];
+
+        $this->withSession(['auth_user' => ['id' => $studentId, 'role' => 'student', 'name' => 'Quick Scan Student']])
+            ->postJson(route('student.programs.quick-scan', $programId), [
+                'qr_token' => $qrToken,
+                'latitude' => 5.8001,
+                'longitude' => 102.5001,
+                'location_accuracy_m' => 15.58,
+                'location_captured_at' => '2026-08-26T00:09:47.081Z',
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'already_recorded' => false,
+            ]);
+
+        $this->assertDatabaseHas('program_attendances', [
+            'program_id' => $programId,
+            'student_id' => $studentId,
+            'identifier' => 'PB9001',
+            'validation_status' => 'valid',
+            'location_captured_at' => '2026-08-26 00:09:47',
+        ]);
+    }
+
     public function test_program_owner_can_use_attendance_only_mode_and_students_still_earn_points(): void
     {
         $studentId = DB::table('students')->insertGetId(['full_name' => 'Attendance Student', 'matric_no' => 'PB3001', 'program' => 'DIT', 'created_at' => now(), 'updated_at' => now()]);

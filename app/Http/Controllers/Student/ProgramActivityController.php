@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Support\DynamicQrToken;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -247,7 +248,7 @@ class ProgramActivityController extends Controller
             $lat = $request->input('latitude');
             $lng = $request->input('longitude');
             $accuracy = $request->input('location_accuracy_m');
-            $capturedAt = $request->input('location_captured_at');
+            $capturedAt = $this->databaseTimestamp($request->input('location_captured_at'));
 
             $distance = ($usesGeofence && filled($lat) && filled($lng))
                 ? $this->distanceMeters((float) $programLatitude, (float) $programLongitude, (float) $lat, (float) $lng)
@@ -534,7 +535,7 @@ class ProgramActivityController extends Controller
             'validation_status' => $status,
             'distance_m' => $distance === null ? null : round($distance, 2),
             'location_accuracy_m' => $accuracy === null ? null : round($accuracy, 2),
-            'location_captured_at' => $validated['location_captured_at'] ?? null,
+            'location_captured_at' => $this->databaseTimestamp($validated['location_captured_at'] ?? null),
         ] as $column => $value) {
             if (Schema::hasColumn('program_attendances', $column)) {
                 $attendanceData[$column] = $value;
@@ -634,5 +635,18 @@ class ProgramActivityController extends Controller
         $earthRadius = 6371000; $dLat = deg2rad($lat2 - $lat1); $dLon = deg2rad($lon2 - $lon1);
         $a = sin($dLat / 2) ** 2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) ** 2;
         return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
+    }
+
+    private function databaseTimestamp(?string $value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($value)->toDateTimeString();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }
