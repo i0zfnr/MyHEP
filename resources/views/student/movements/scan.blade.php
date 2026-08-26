@@ -77,7 +77,8 @@
 
     const jsQr = window.jsQR || null;
     const canvasContext = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
-    const targetUrl = new URL(@json(route('student.movements.scan')), window.location.origin);
+    const movementUrl = new URL(@json(route('student.movements.index')), window.location.origin);
+    const foodBankUrl = new URL(@json(route('student.foodbank.index')), window.location.origin);
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     let stream = null;
@@ -342,7 +343,9 @@
         isProcessing = true;
 
         if (parsed.type === 'foodbank') {
-            handleFoodBankClaim();
+            setStatus(@json(__('Food Bank QR detected. Opening Food Bank page...')), 'ok');
+            stopScanner();
+            window.location.assign(foodBankUrl.toString());
             return;
         }
 
@@ -353,8 +356,8 @@
 
         setStatus(@json(__('QR detected. Verifying movement pass...')), 'ok');
         stopScanner();
-        targetUrl.searchParams.set('token', parsed.token);
-        window.location.assign(targetUrl.toString());
+        movementUrl.searchParams.set('token', parsed.token);
+        window.location.assign(movementUrl.toString());
     };
 
     const scanFrame = async () => {

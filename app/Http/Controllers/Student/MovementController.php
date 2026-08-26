@@ -80,10 +80,7 @@ class MovementController extends Controller
         if ($token !== '') {
             $programId = DynamicQrToken::extractProgramId($token);
             if ($programId !== null && DynamicQrToken::verify($token, $programId)) {
-                return redirect()->route('student.programs.show', [
-                    'program' => $programId,
-                    't' => $token,
-                ]);
+                return view('student.movements.scan');
             }
 
             $checkpoint = $this->checkpointByToken($token);

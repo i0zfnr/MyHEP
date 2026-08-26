@@ -2988,5 +2988,10 @@
     "Control participant check-in for this program. Choose Mode 1 (QR Scan Only) to prevent proxy check-in by requiring the dynamic screen QR code, or Mode 2 (Portal & QR) for open check-in.": "Kawal imbasan kehadiran peserta program ini. Pilih Mod 1 (Imbas QR Sahaja) bagi menghalang kehadiran proksi/menipu dengan mewajibkan imbasan kod QR dinamik di skrin, atau Mod 2 (Portal & QR) untuk pendaftaran terbuka.",
     "Attendance opened in Mode 1: QR Scan Only (Anti-Cheating). Students must scan the dynamic QR on screen.": "Kehadiran dibuka dalam Mod 1: Imbas QR Sahaja (Anti-Penipuan). Pelajar wajib mengimbas kod QR dinamik di skrin.",
     "Attendance opened in Mode 2: Portal & QR. Students can check in directly on portal or via QR.": "Kehadiran dibuka dalam Mod 2: Portal & QR. Pelajar boleh mendaftar kehadiran terus di portal atau melalui QR.",
-    "Program ini memerlukan imbasan Kod QR di skrin dewan untuk mendaftar kehadiran.": "Program ini memerlukan imbasan Kod QR di skrin dewan untuk mendaftar kehadiran."
+    "Program ini memerlukan imbasan Kod QR di skrin dewan untuk mendaftar kehadiran.": "Program ini memerlukan imbasan Kod QR di skrin dewan untuk mendaftar kehadiran.",
+    "Detects Movement, Program Attendance & Food Bank": "Mengesan Pergerakan, Kehadiran Program & Food Bank",
+    "Server error while recording attendance. Please ask admin to check the Laravel log.": "Ralat pelayan semasa merekod kehadiran. Sila minta admin semak log Laravel.",
+    "Unable to read the server response. Please try again.": "Tidak dapat membaca respons pelayan. Sila cuba lagi.",
+    "Attendance could not be recorded. Please ask the admin to check the server log.": "Kehadiran tidak dapat direkodkan. Sila minta admin semak log pelayan.",
+    "Food Bank QR detected. Opening Food Bank page...": "QR Food Bank dikesan. Membuka halaman Food Bank..."
 }

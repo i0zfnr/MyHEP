@@ -1646,7 +1646,7 @@
     "QR Check-in & Public Link": "QR Check-in & Public Link",
     "QR Code": "QR Code",
     "QR Controls": "QR Controls",
-    "QR Program Dikesan. Merekodkan kehadiran...": "QR Program Dikesan. Merekodkan kehadiran...",
+    "QR Program Dikesan. Merekodkan kehadiran...": "Program QR detected. Recording attendance...",
     "QR Requirement": "QR Requirement",
     "QR Scan Mode": "QR Scan Mode",
     "QR Token refreshed!": "QR Token refreshed!",
@@ -1685,7 +1685,7 @@
     "Race Distribution": "Race Distribution",
     "Ralat rangkaian. Sila cuba lagi.": "Ralat rangkaian. Sila cuba lagi.",
     "Ralat rangkaian. Sila cuba semula.": "Network error. Please try again.",
-    "Ralat semasa merekod kehadiran.": "Ralat semasa merekod kehadiran.",
+    "Ralat semasa merekod kehadiran.": "Error while recording attendance.",
     "Rank": "Rank",
     "Ranks Politeknik Besut students using valid internal program attendance and points configured by each Program Director.": "Ranks Politeknik Besut students using valid internal program attendance and points configured by each Program Director.",
     "Rating 1-5 Stars": "Rating 1-5 Stars",
@@ -2832,5 +2832,10 @@
     "Control participant check-in for this program. Choose Mode 1 (QR Scan Only) to prevent proxy check-in by requiring the dynamic screen QR code, or Mode 2 (Portal & QR) for open check-in.": "Control participant check-in for this program. Choose Mode 1 (QR Scan Only) to prevent proxy check-in by requiring the dynamic screen QR code, or Mode 2 (Portal & QR) for open check-in.",
     "Attendance opened in Mode 1: QR Scan Only (Anti-Cheating). Students must scan the dynamic QR on screen.": "Attendance opened in Mode 1: QR Scan Only (Anti-Cheating). Students must scan the dynamic QR on screen.",
     "Attendance opened in Mode 2: Portal & QR. Students can check in directly on portal or via QR.": "Attendance opened in Mode 2: Portal & QR. Students can check in directly on portal or via QR.",
-    "Program ini memerlukan imbasan Kod QR di skrin dewan untuk mendaftar kehadiran.": "This program requires scanning the QR Code on the presenter screen to register attendance."
+    "Program ini memerlukan imbasan Kod QR di skrin dewan untuk mendaftar kehadiran.": "This program requires scanning the QR Code on the presenter screen to register attendance.",
+    "Detects Movement, Program Attendance & Food Bank": "Detects Movement, Program Attendance & Food Bank",
+    "Server error while recording attendance. Please ask admin to check the Laravel log.": "Server error while recording attendance. Please ask admin to check the Laravel log.",
+    "Unable to read the server response. Please try again.": "Unable to read the server response. Please try again.",
+    "Attendance could not be recorded. Please ask the admin to check the server log.": "Attendance could not be recorded. Please ask the admin to check the server log.",
+    "Food Bank QR detected. Opening Food Bank page...": "Food Bank QR detected. Opening Food Bank page..."
 }
