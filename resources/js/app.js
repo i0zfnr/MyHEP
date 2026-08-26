@@ -1365,6 +1365,7 @@ const registerProfilePhotoCropper = () => {
 
     const statusPill = modal?.querySelector('[data-face-detection-status]');
     const guideOverlay = modal?.querySelector('[data-face-guide-overlay]');
+    const profileStandardEnabled = modal.dataset.profileStandardEnabled === 'true';
 
     const getLocalizedText = (key, defaultText) => modal.dataset[key] || defaultText;
 
@@ -1442,7 +1443,7 @@ const registerProfilePhotoCropper = () => {
     };
 
     const triggerFaceCheck = () => {
-        if (!cropper) return;
+        if (!profileStandardEnabled || !cropper) return;
         if (evalTimeout) clearTimeout(evalTimeout);
         updateStatusPill('checking', getLocalizedText('textEvaluating', 'Evaluating Face...'));
 
@@ -1478,7 +1479,9 @@ const registerProfilePhotoCropper = () => {
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('profile-crop-open');
-        updateStatusPill('checking', getLocalizedText('textEvaluating', 'Evaluating Face...'));
+        if (profileStandardEnabled) {
+            updateStatusPill('checking', getLocalizedText('textEvaluating', 'Evaluating Face...'));
+        }
 
         const Cropper = await getCropper();
         cropper = new Cropper(cropImage, {
@@ -1544,11 +1547,12 @@ const registerProfilePhotoCropper = () => {
             triggerFaceCheck();
         }
         if (action === 'toggle-guide') {
+            if (!profileStandardEnabled) return;
             guideOverlay?.classList.toggle('is-hidden');
         }
 
         if (action === 'apply') {
-            if (lastDetectedFaces && !lastDetectedFaces.detected) {
+            if (profileStandardEnabled && lastDetectedFaces && !lastDetectedFaces.detected) {
                 const warningMsg = getLocalizedText('textConfirmWarning', 'The system detected that your face may be unclear or outside the oval guide. Are you sure you want to use this photo as your official matric photo?');
                 const proceed = confirm(warningMsg);
                 if (!proceed) return;

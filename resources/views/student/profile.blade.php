@@ -75,7 +75,12 @@
                     <div style="flex:1; min-width:220px;">
                         <label for="profile_photo">{{ __('Profile Photo (Passport Format 3:4)') }}</label>
                         <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ blank($studentPhoto) ? 'required' : '' }}>
-                        <small style="display:block;margin-top:6px;color:var(--text-muted);">{{ __('JPG, PNG, or WEBP. The system provides an automatic face cropper and alignment validator.') }}</small>
+                        <small style="display:block;margin-top:6px;color:var(--text-muted);">
+                            {{ $enforceStudentProfilePhoto
+                                ? __('JPG, PNG, or WEBP. The system provides an automatic face cropper and alignment validator.')
+                                : __('JPG, PNG, or WEBP image file.')
+                            }}
+                        </small>
                         @if($enforceStudentProfilePhoto)
                             <small style="display:block;margin-top:8px;font-weight:800;color:{{ $photoStatus === 'approved' ? '#047857' : '#9a6700' }};">
                                 @if($photoStatus === 'approved')
@@ -288,6 +293,7 @@
 </div>
 
 <div class="profile-crop-modal" data-profile-crop-modal
+    data-profile-standard-enabled="{{ $enforceStudentProfilePhoto ? 'true' : 'false' }}"
     data-text-verified="{{ __('Face Verified') }}"
     data-text-unclear="{{ __('Unclear Face') }}"
     data-text-evaluating="{{ __('Evaluating Face...') }}"
@@ -300,11 +306,13 @@
         </header>
         <div class="profile-crop-stage">
             <img data-profile-crop-image alt="{{ __('Selected profile photo') }}">
-            <div class="face-guide-overlay" data-face-guide-overlay aria-hidden="true">
-                <div class="face-guide-silhouette">
-                    <span class="face-guide-text">{{ __('Place Face Here') }}</span>
+            @if($enforceStudentProfilePhoto)
+                <div class="face-guide-overlay" data-face-guide-overlay aria-hidden="true">
+                    <div class="face-guide-silhouette">
+                        <span class="face-guide-text">{{ __('Place Face Here') }}</span>
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
         <footer class="profile-crop-controls">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -312,11 +320,15 @@
                     <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-left" title="{{ __('Rotate left') }}">&#8634; {{ __('Left') }}</button>
                     <button type="button" class="profile-crop-tool" data-profile-crop-action="rotate-right" title="{{ __('Rotate right') }}">&#8635; {{ __('Right') }}</button>
                     <button type="button" class="profile-crop-tool" data-profile-crop-action="reset" title="{{ __('Reset position') }}">{{ __('Reset') }}</button>
-                    <button type="button" class="profile-crop-tool" data-profile-crop-action="toggle-guide" title="{{ __('Show/hide face guide overlay') }}">{{ __('Guide') }}</button>
+                    @if($enforceStudentProfilePhoto)
+                        <button type="button" class="profile-crop-tool" data-profile-crop-action="toggle-guide" title="{{ __('Show/hide face guide overlay') }}">{{ __('Guide') }}</button>
+                    @endif
                 </div>
-                <div id="faceDetectionStatus" class="face-detect-status is-checking" data-face-detection-status>
-                    <span>🔍</span> <span>{{ __('Evaluating Face...') }}</span>
-                </div>
+                @if($enforceStudentProfilePhoto)
+                    <div id="faceDetectionStatus" class="face-detect-status is-checking" data-face-detection-status>
+                        <span>🔍</span> <span>{{ __('Evaluating Face...') }}</span>
+                    </div>
+                @endif
             </div>
             <div class="profile-crop-actions">
                 <button type="button" class="btn" data-profile-crop-action="cancel">{{ __('Cancel') }}</button>
