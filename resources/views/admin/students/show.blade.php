@@ -19,9 +19,9 @@
                     <div class="profile-photo profile-photo-empty">{{ strtoupper(substr($student->full_name ?? 'S', 0, 1)) }}</div>
                 @endif
                 <div class="profile-title">
-                    <h3>{{ $student->full_name }}</h3>
-                    <span>{{ $student->matric_no }} | {{ $student->class_name ?: $student->program }}</span>
-                    <span>{{ ($student->residence_status ?? 'inside_campus') === 'live_out' ? __('Live Out / Outside Campus') : __('Inside Campus') }}: {{ $student->room_number ?: '-' }}</span>
+                    <h3>{{ data_get($student, 'full_name') }}</h3>
+                    <span>{{ data_get($student, 'matric_no') }} | {{ data_get($student, 'class_name') ?: data_get($student, 'program') }}</span>
+                    <span>{{ (data_get($student, 'residence_status') ?? 'inside_campus') === 'live_out' ? __('Live Out / Outside Campus') : __('Inside Campus') }}: {{ data_get($student, 'room_number') ?: '-' }}</span>
                 </div>
                 <div class="ui-actions" style="margin-left:auto;">
                     <a class="ui-btn" href="{{ route('admin.movements.index') }}">{{ __('Movement Records') }}</a>
@@ -35,16 +35,16 @@
         <div class="ui-card-body">
             <div class="profile-section-title">{{ __('Student Details') }}</div>
             <div class="profile-grid">
-                <div class="profile-field"><span>{{ __('IC No.') }}</span><b>{{ maskIdentityNumber($student->ic_no) }}</b></div>
-                <div class="profile-field"><span>{{ __('Email') }}</span><b>{{ $student->email ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Phone') }}</span><b>{{ $student->phone ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Semester') }}</span><b>{{ $student->semester ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Academic Session') }}</span><b>{{ $student->academic_session ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Date of Birth') }}</span><b>{{ $student->date_of_birth ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Religion') }}</span><b>{{ $student->religion ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Race') }}</span><b>{{ $student->race ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Home Address') }}</span><b>{{ $student->address ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Study Address') }}</span><b>{{ $student->study_address ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('IC No.') }}</span><b>{{ maskIdentityNumber(data_get($student, 'ic_no')) }}</b></div>
+                <div class="profile-field"><span>{{ __('Email') }}</span><b>{{ data_get($student, 'email') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Phone') }}</span><b>{{ data_get($student, 'phone') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Semester') }}</span><b>{{ data_get($student, 'semester') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Academic Session') }}</span><b>{{ data_get($student, 'academic_session') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Date of Birth') }}</span><b>{{ data_get($student, 'date_of_birth') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Religion') }}</span><b>{{ data_get($student, 'religion') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Race') }}</span><b>{{ data_get($student, 'race') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Home Address') }}</span><b>{{ data_get($student, 'address') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Study Address') }}</span><b>{{ data_get($student, 'study_address') ?: '-' }}</b></div>
             </div>
         </div>
     </section>
@@ -53,15 +53,15 @@
         <div class="ui-card-body">
             <div class="profile-section-title">{{ __('Guardian Details') }}</div>
             <div class="profile-grid">
-                <div class="profile-field"><span>{{ __('Guardian Name') }}</span><b>{{ $student->guardian_name ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Guardian IC') }}</span><b>{{ maskIdentityNumber($student->guardian_ic_no) }}</b></div>
-                <div class="profile-field"><span>{{ __('Guardian Phone') }}</span><b>{{ $student->guardian_phone ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Mother IC') }}</span><b>{{ maskIdentityNumber($student->mother_ic_no) }}</b></div>
-                <div class="profile-field"><span>{{ __('Family Income') }}</span><b>{{ $student->family_income !== null ? 'RM ' . number_format((float) $student->family_income, 2) : '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('OKU Status') }}</span><b>{{ $student->oku_status === 'yes' ? __('Yes') : ($student->oku_status === 'no' ? __('No') : '-') }}</b></div>
-                <div class="profile-field"><span>{{ __('OKU Registration No.') }}</span><b>{{ $student->oku_registration_no ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('OKU Category') }}</span><b>{{ $student->oku_category ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Guardian Address') }}</span><b>{{ $student->guardian_address ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Guardian Name') }}</span><b>{{ data_get($student, 'guardian_name') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Guardian IC') }}</span><b>{{ maskIdentityNumber(data_get($student, 'guardian_ic_no')) }}</b></div>
+                <div class="profile-field"><span>{{ __('Guardian Phone') }}</span><b>{{ data_get($student, 'guardian_phone') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Mother IC') }}</span><b>{{ maskIdentityNumber(data_get($student, 'mother_ic_no')) }}</b></div>
+                <div class="profile-field"><span>{{ __('Family Income') }}</span><b>{{ data_get($student, 'family_income') !== null ? 'RM ' . number_format((float) data_get($student, 'family_income'), 2) : '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('OKU Status') }}</span><b>{{ data_get($student, 'oku_status') === 'yes' ? __('Yes') : (data_get($student, 'oku_status') === 'no' ? __('No') : '-') }}</b></div>
+                <div class="profile-field"><span>{{ __('OKU Registration No.') }}</span><b>{{ data_get($student, 'oku_registration_no') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('OKU Category') }}</span><b>{{ data_get($student, 'oku_category') ?: '-' }}</b></div>
+                <div class="profile-field"><span>{{ __('Guardian Address') }}</span><b>{{ data_get($student, 'guardian_address') ?: '-' }}</b></div>
             </div>
         </div>
     </section>

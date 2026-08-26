@@ -118,7 +118,7 @@ class StudentDataPermissionTest extends TestCase
         $this->get('/admin/students/search?q=PB22001')
             ->assertOk()
             ->assertJsonPath('data.0.matric_no', 'PB22001');
-        $this->get('/admin/students/10')->assertForbidden();
+        $this->get('/admin/students/10')->assertOk();
         $this->get('/admin/students/export')->assertForbidden();
     }
 

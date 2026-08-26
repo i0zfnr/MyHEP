@@ -212,30 +212,26 @@ class StudentController extends Controller
 
     public function show(int $id): View|RedirectResponse
     {
-        abort_unless(adminCan('students.view_sensitive'), 403);
+        abort_unless(adminCan('students.sensitive'), 403);
 
         $student = DB::table('students')
-            ->select([
-                'id', 'full_name', 'matric_no', 'ic_no', 'email', 'phone', 'program', 'class_name', 'photo',
-                'semester', 'academic_session', 'date_of_birth', 'religion', 'race', 'parliament', 'dun',
-                'address', 'study_address', 'residence_status', 'room_number', 'guardian_name',
-                'guardian_ic_no', 'guardian_phone', 'mother_ic_no', 'guardian_occupation',
-                'family_income', 'guardian_address', 'oku_status', 'oku_registration_no', 'oku_category',
-            ])
             ->where('id', $id)
             ->first();
         if (!$student) {
             return $this->studentNotFoundRedirect();
         }
 
-        $latestMovements = DB::table('student_movements')
-            ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
-            ->join('movement_checkpoints', 'movement_checkpoints.id', '=', 'student_movements.checkpoint_id')
-            ->where('student_movements.student_id', $id)
-            ->select('student_movements.*', 'movement_types.name as movement_type_name', 'movement_checkpoints.name as checkpoint_name')
-            ->orderByDesc('student_movements.checkout_at')
-            ->limit(8)
-            ->get();
+        $latestMovements = collect();
+        if (Schema::hasTable('student_movements') && Schema::hasTable('movement_types') && Schema::hasTable('movement_checkpoints')) {
+            $latestMovements = DB::table('student_movements')
+                ->join('movement_types', 'movement_types.id', '=', 'student_movements.movement_type_id')
+                ->join('movement_checkpoints', 'movement_checkpoints.id', '=', 'student_movements.checkpoint_id')
+                ->where('student_movements.student_id', $id)
+                ->select('student_movements.*', 'movement_types.name as movement_type_name', 'movement_checkpoints.name as checkpoint_name')
+                ->orderByDesc('student_movements.checkout_at')
+                ->limit(8)
+                ->get();
+        }
 
         return view('admin.students.show', compact('student', 'latestMovements'));
     }
