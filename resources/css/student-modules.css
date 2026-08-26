@@ -2801,6 +2801,108 @@ body[data-theme="dark"] .alert-success p {
         font-weight: 800;
     }
 
+    body[data-theme="dark"] .sp-survey-banner {
+        background:
+            radial-gradient(22rem circle at 100% -34%, rgba(231, 211, 168, .16), transparent 68%),
+            radial-gradient(18rem circle at 0% 120%, rgba(185, 145, 80, .12), transparent 72%),
+            rgba(23, 21, 18, .82) !important;
+        border-color: rgba(231, 211, 168, .22) !important;
+        box-shadow:
+            0 18px 42px rgba(0, 0, 0, .34),
+            inset 0 1px 0 rgba(255, 255, 255, .07) !important;
+    }
+    body[data-theme="dark"] .sp-survey-banner::before {
+        background: linear-gradient(115deg, rgba(255, 255, 255, .08), transparent 46%);
+    }
+    body[data-theme="dark"] .sp-survey-icon {
+        background:
+            radial-gradient(circle at 30% 18%, rgba(255, 255, 255, .22), transparent 42%),
+            linear-gradient(145deg, #d8b868, #8b6329) !important;
+        color: #fff7dd !important;
+    }
+    body[data-theme="dark"] .sp-survey-kicker {
+        background: rgba(231, 211, 168, .15) !important;
+        color: #f5dfad !important;
+    }
+    body[data-theme="dark"] .sp-survey-text strong {
+        color: #fff7ed !important;
+    }
+    body[data-theme="dark"] .sp-survey-text span:last-child {
+        color: rgba(255, 247, 237, .72) !important;
+    }
+    body[data-theme="dark"] .sp-survey-btn {
+        background:
+            linear-gradient(145deg, rgba(231, 211, 168, .22), rgba(185, 145, 80, .18)),
+            rgba(16, 14, 12, .86) !important;
+        border-color: rgba(231, 211, 168, .26) !important;
+        color: #fff3cf !important;
+    }
+    body[data-theme="dark"] .sp-survey-btn small {
+        color: rgba(255, 247, 237, .62) !important;
+    }
+
+    body[data-theme="dark"] .student-survey-page .card {
+        background:
+            radial-gradient(28rem circle at 100% -22%, rgba(231, 211, 168, .08), transparent 68%),
+            rgba(22, 20, 17, .86) !important;
+        border-color: rgba(231, 211, 168, .18) !important;
+        box-shadow:
+            0 18px 40px rgba(0, 0, 0, .36),
+            inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+    }
+    body[data-theme="dark"] .student-survey-page .card > div:first-child {
+        border-bottom-color: rgba(231, 211, 168, .16) !important;
+    }
+    body[data-theme="dark"] .student-survey-page .card > div:first-child > div:first-child {
+        background: rgba(231, 211, 168, .13) !important;
+        color: #f5dfad !important;
+    }
+    body[data-theme="dark"] .student-survey-page h1,
+    body[data-theme="dark"] .student-survey-page label {
+        color: #fff7ed !important;
+    }
+    body[data-theme="dark"] .student-survey-page p,
+    body[data-theme="dark"] .student-survey-page span {
+        color: rgba(255, 247, 237, .72);
+    }
+    body[data-theme="dark"] .student-survey-page .card > div:first-child > div:last-child span {
+        background: rgba(255, 255, 255, .055) !important;
+        border-color: rgba(231, 211, 168, .16) !important;
+        color: rgba(255, 247, 237, .80) !important;
+    }
+    body[data-theme="dark"] .student-survey-page form > div > div {
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, .035), rgba(231, 211, 168, .025)),
+            rgba(13, 12, 10, .62) !important;
+        border-color: rgba(231, 211, 168, .16) !important;
+    }
+    body[data-theme="dark"] .student-survey-page :is(.student-survey-option, .student-survey-rating-option) {
+        background: rgba(255, 255, 255, .045) !important;
+        border-color: rgba(231, 211, 168, .18) !important;
+        color: rgba(255, 247, 237, .82) !important;
+    }
+    body[data-theme="dark"] .student-survey-page :is(.student-survey-option, .student-survey-rating-option) span {
+        color: rgba(255, 247, 237, .82) !important;
+    }
+    body[data-theme="dark"] .student-survey-page :is(.student-survey-option, .student-survey-rating-option):has(input[type="radio"]:checked) {
+        background:
+            radial-gradient(9rem circle at 100% -24%, rgba(231, 211, 168, .13), transparent 66%),
+            rgba(185, 145, 80, .14) !important;
+        border-color: rgba(231, 211, 168, .42) !important;
+        color: #fff3cf !important;
+    }
+    body[data-theme="dark"] .student-survey-page :is(.student-survey-option, .student-survey-rating-option):has(input[type="radio"]:checked) span {
+        color: #fff3cf !important;
+    }
+    body[data-theme="dark"] .student-survey-page textarea {
+        background: rgba(10, 9, 8, .68) !important;
+        border-color: rgba(231, 211, 168, .20) !important;
+        color: #fff7ed !important;
+    }
+    body[data-theme="dark"] .student-survey-page textarea::placeholder {
+        color: rgba(255, 247, 237, .46) !important;
+    }
+
     @media (max-width: 767px) {
         .sp-survey-banner {
             align-items: stretch;
