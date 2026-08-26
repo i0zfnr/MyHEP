@@ -143,7 +143,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-3" style="margin-top:12px;">
+                    <div class="grid grid-2" style="margin-top:12px;">
                         <div>
                             <label for="guardian_relationship">{{ __('Hubungan Waris') }} <span class="req">*</span></label>
                             <select id="guardian_relationship" name="guardian_relationship">
@@ -161,10 +161,6 @@
                         <div>
                             <label for="guardian_phone">{{ __('No. Telefon Penjaga') }} <span class="req">*</span></label>
                             <input id="guardian_phone" type="text" name="guardian_phone" value="{{ old('guardian_phone', $submission->guardian_phone ?? ($student->guardian_phone ?? '')) }}" placeholder="{{ __('Contoh: 0123456789') }}">
-                        </div>
-                        <div>
-                            <label for="guardian_occupation">{{ __('Pekerjaan Penjaga') }} <span class="req">*</span></label>
-                            <input id="guardian_occupation" type="text" name="guardian_occupation" value="{{ old('guardian_occupation', $submission->guardian_occupation ?? ($student->guardian_occupation ?? '')) }}" placeholder="{{ __('Contoh: Buruh / Petani / Bekerja Sendiri') }}">
                         </div>
                     </div>
 
@@ -267,7 +263,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const guardianName = document.getElementById('guardian_name');
     const guardianIc = document.getElementById('guardian_ic_no');
     const guardianPhone = document.getElementById('guardian_phone');
-    const guardianOcc = document.getElementById('guardian_occupation');
     const famIncome = document.getElementById('family_income');
     const welfareDesc = document.getElementById('welfare_description');
     const welfareFileInput = document.getElementById('welfare_proof');
@@ -297,7 +292,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (guardianName) guardianName.required = isWel;
         if (guardianIc) guardianIc.required = isWel;
         if (guardianPhone) guardianPhone.required = isWel;
-        if (guardianOcc) guardianOcc.required = isWel;
         if (famIncome) famIncome.required = isWel;
         if (welfareDesc) welfareDesc.required = isWel;
         if (welfareFileInput) welfareFileInput.required = isWel && !hasExistingDoc;

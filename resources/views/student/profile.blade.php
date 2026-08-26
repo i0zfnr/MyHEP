@@ -152,17 +152,6 @@
 
                 <div class="grid grid-2" style="margin-top:14px;">
                     <div>
-                        <label for="parliament">{{ __('Parlimen') }}</label>
-                        <input id="parliament" type="text" name="parliament" value="{{ old('parliament', data_get($student, 'parliament')) }}">
-                    </div>
-                    <div>
-                        <label for="dun">{{ __('DUN') }}</label>
-                        <input id="dun" type="text" name="dun" value="{{ old('dun', data_get($student, 'dun')) }}">
-                    </div>
-                </div>
-
-                <div class="grid grid-2" style="margin-top:14px;">
-                    <div>
                         <label for="date_of_birth">{{ __('Tarikh Lahir') }} <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(DD/MM/YYYY)</span></label>
                         @php
                             $rawDob = old('date_of_birth', data_get($student, 'date_of_birth'));
@@ -212,15 +201,9 @@
                     </div>
                 </div>
 
-                <div class="grid grid-2" style="margin-top:14px;">
-                    <div>
-                        <label for="guardian_occupation">{{ __('Pekerjaan Penjaga') }}</label>
-                        <input id="guardian_occupation" type="text" name="guardian_occupation" value="{{ old('guardian_occupation', data_get($student, 'guardian_occupation')) }}">
-                    </div>
-                    <div>
-                        <label for="family_income">{{ __('Pendapatan Keluarga (RM)') }}</label>
-                        <input id="family_income" type="number" name="family_income" value="{{ old('family_income', data_get($student, 'family_income')) }}" min="0" step="0.01" placeholder="0.00">
-                    </div>
+                <div style="margin-top:14px;">
+                    <label for="family_income">{{ __('Pendapatan Keluarga (RM)') }}</label>
+                    <input id="family_income" type="number" name="family_income" value="{{ old('family_income', data_get($student, 'family_income')) }}" min="0" step="0.01" placeholder="0.00">
                 </div>
 
                 <div style="margin-top:14px;">

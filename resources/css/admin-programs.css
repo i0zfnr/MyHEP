@@ -760,26 +760,96 @@ body[data-theme="dark"] .pmr-badge.rejected {
 
 .pmr-methods {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.85rem;
     margin-top: 1rem;
 }
 .pmr-method {
-    border: 1px solid color-mix(in srgb, var(--pm-accent) 22%, var(--border, #eadac8));
+    position: relative;
+    border: 1.5px solid color-mix(in srgb, var(--pm-accent, #b99150) 22%, var(--border, #eadac8));
     border-radius: 14px;
-    padding: 1.1rem;
+    padding: 1.15rem 1.25rem;
     cursor: pointer;
     background: var(--surface, #fff);
     color: var(--text, #241d16);
-    transition: all 0.15s ease;
+    transition: all 0.18s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    box-sizing: border-box;
 }
-.pmr-method:hover { border-color: var(--pm-accent); }
+.pmr-method:hover {
+    border-color: var(--pm-accent, #b99150);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(36,26,18,0.06);
+}
 .pmr-method:has(input:checked) {
-    border-color: var(--pm-accent);
-    background: color-mix(in srgb, var(--pm-accent) 9%, var(--surface, #fff));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--pm-accent) 25%, transparent);
+    border-color: var(--pm-accent, #b99150) !important;
+    background: color-mix(in srgb, var(--pm-accent, #b99150) 9%, var(--surface, #fff)) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--pm-accent, #b99150) 28%, transparent), 0 6px 16px rgba(36,26,18,0.06) !important;
 }
-.pmr-method strong { display: block; margin: 8px 0 4px; font-weight: 800; font-size: 0.95rem; color: var(--text, #241d16); }
+.pmr-method input[type="radio"],
+.pmr-methods input[type="radio"],
+.pmr input[type="radio"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    border: 2px solid var(--border, #cbb9a7) !important;
+    border-radius: 50% !important;
+    background: var(--surface, #fff) !important;
+    cursor: pointer !important;
+    display: inline-grid !important;
+    place-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.06) !important;
+    vertical-align: middle;
+}
+.pmr-method input[type="radio"]::before,
+.pmr-methods input[type="radio"]::before,
+.pmr input[type="radio"]::before {
+    content: "" !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    transform: scale(0) !important;
+    transition: 0.16s transform cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    background: var(--pm-accent, #b99150) !important;
+}
+.pmr-method:hover input[type="radio"],
+.pmr-methods label:hover input[type="radio"] {
+    border-color: var(--pm-accent, #b99150) !important;
+}
+.pmr-method input[type="radio"]:checked,
+.pmr-methods input[type="radio"]:checked,
+.pmr input[type="radio"]:checked {
+    border-color: var(--pm-accent, #b99150) !important;
+    background: var(--surface, #fff) !important;
+}
+.pmr-method input[type="radio"]:checked::before,
+.pmr-methods input[type="radio"]:checked::before,
+.pmr input[type="radio"]:checked::before {
+    transform: scale(1) !important;
+}
+.pmr-method strong {
+    display: block;
+    margin: 4px 0 2px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--text, #241d16);
+}
+.pmr-method span {
+    font-size: 0.82rem;
+    color: var(--text-secondary, #746b62);
+    line-height: 1.45;
+}
 
 .pmr-grid {
     display: grid;
@@ -792,7 +862,7 @@ body[data-theme="dark"] .pmr-badge.rejected {
 .pmr-field label { font-weight: 800; font-size: 0.85rem; color: var(--text, #241d16); }
 .pmr-field label span { color: var(--se-danger, #b42318); }
 
-.pmr-field input, .pmr-field textarea, .pmr-field select {
+.pmr-field input:not([type="checkbox"]):not([type="radio"]), .pmr-field textarea, .pmr-field select {
     min-height: 44px;
     border: 1px solid var(--border, #eadac8);
     border-radius: 12px;
@@ -1571,23 +1641,72 @@ body[data-theme="dark"] .pmr-badge.rejected {
 }
 .pmr-q-field input, .pmr-q-field select {
     width: 100%;
-    padding: 9px 12px;
-    border: 1px solid var(--border, #eadac8);
-    border-radius: 8px;
+    padding: 10px 13px;
+    border: 1.5px solid var(--border, #eadac8);
+    border-radius: 10px;
     font-size: 0.9rem;
-    background: #fff;
+    background: var(--surface, #fff);
     color: var(--text, #241d16);
     box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.pmr-q-field input:focus, .pmr-q-field select:focus {
+    outline: none;
+    border-color: var(--pm-accent, #b99150);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pm-accent, #b99150) 18%, transparent);
 }
 .pmr-q-required {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    font-weight: 700;
+    gap: 0.65rem;
+    font-size: 0.84rem;
+    font-weight: 750;
     color: var(--text, #241d16);
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: 6px;
+    user-select: none;
+}
+.pmr-q-required input[type="checkbox"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    border: 1.5px solid var(--border, #cbb9a7) !important;
+    border-radius: 5px !important;
+    background: var(--surface, #fff) !important;
+    cursor: pointer !important;
+    display: inline-grid !important;
+    place-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    transition: all 0.15s ease !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+    vertical-align: middle;
+}
+.pmr-q-required input[type="checkbox"]::before {
+    content: "" !important;
+    width: 9px !important;
+    height: 5px !important;
+    border-left: 2px solid #fff !important;
+    border-bottom: 2px solid #fff !important;
+    transform: rotate(-45deg) translate(1px, -1px) scale(0) !important;
+    transition: 0.14s transform ease-in-out !important;
+}
+.pmr-q-required:hover input[type="checkbox"] {
+    border-color: var(--pm-accent, #b99150) !important;
+}
+.pmr-q-required input[type="checkbox"]:checked {
+    background: var(--pm-accent, #b99150) !important;
+    border-color: var(--pm-accent, #b99150) !important;
+    box-shadow: 0 2px 6px color-mix(in srgb, var(--pm-accent, #b99150) 35%, transparent) !important;
+}
+.pmr-q-required input[type="checkbox"]:checked::before {
+    transform: rotate(-45deg) translate(1px, -1px) scale(1) !important;
 }
 .pmr-remove {
     display: inline-flex;

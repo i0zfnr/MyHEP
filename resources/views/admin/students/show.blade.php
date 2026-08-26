@@ -43,7 +43,6 @@
                 <div class="profile-field"><span>{{ __('Date of Birth') }}</span><b>{{ $student->date_of_birth ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Religion') }}</span><b>{{ $student->religion ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Race') }}</span><b>{{ $student->race ?: '-' }}</b></div>
-                <div class="profile-field"><span>{{ __('Parliament / DUN') }}</span><b>{{ trim(($student->parliament ?: '-') . ' / ' . ($student->dun ?: '-')) }}</b></div>
                 <div class="profile-field"><span>{{ __('Home Address') }}</span><b>{{ $student->address ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Study Address') }}</span><b>{{ $student->study_address ?: '-' }}</b></div>
             </div>
@@ -58,7 +57,6 @@
                 <div class="profile-field"><span>{{ __('Guardian IC') }}</span><b>{{ maskIdentityNumber($student->guardian_ic_no) }}</b></div>
                 <div class="profile-field"><span>{{ __('Guardian Phone') }}</span><b>{{ $student->guardian_phone ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Mother IC') }}</span><b>{{ maskIdentityNumber($student->mother_ic_no) }}</b></div>
-                <div class="profile-field"><span>{{ __('Occupation') }}</span><b>{{ $student->guardian_occupation ?: '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('Family Income') }}</span><b>{{ $student->family_income !== null ? 'RM ' . number_format((float) $student->family_income, 2) : '-' }}</b></div>
                 <div class="profile-field"><span>{{ __('OKU Status') }}</span><b>{{ $student->oku_status === 'yes' ? __('Yes') : ($student->oku_status === 'no' ? __('No') : '-') }}</b></div>
                 <div class="profile-field"><span>{{ __('OKU Registration No.') }}</span><b>{{ $student->oku_registration_no ?: '-' }}</b></div>

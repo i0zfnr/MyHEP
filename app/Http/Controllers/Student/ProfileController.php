@@ -54,8 +54,6 @@ class ProfileController extends Controller
             'residence_status' => ['nullable', 'in:inside_campus,live_out'],
             'room_number' => ['nullable', 'string', 'max:30'],
             'religion' => ['required', 'string', 'max:50'],
-            'parliament' => ['required', 'string', 'max:120'],
-            'dun' => ['required', 'string', 'max:120'],
             'race' => ['required', 'string', 'max:80'],
             'date_of_birth' => ['required', 'date'],
             'guardian_name' => ['required', 'string', 'max:150'],
@@ -63,7 +61,6 @@ class ProfileController extends Controller
             'guardian_address' => ['required', 'string'],
             'guardian_phone' => ['required', 'string', 'max:20'],
             'mother_ic_no' => ['required', 'string', 'max:20'],
-            'guardian_occupation' => ['required', 'string', 'max:120'],
             'family_income' => ['required', 'numeric', 'min:0'],
             'study_address' => ['nullable', 'string'],
         ], [
@@ -84,8 +81,6 @@ class ProfileController extends Controller
                 ? ($validated['room_number'] ?? null)
                 : null,
             'religion' => $validated['religion'] ?? null,
-            'parliament' => $validated['parliament'] ?? null,
-            'dun' => $validated['dun'] ?? null,
             'race' => $validated['race'] ?? null,
             'date_of_birth' => $validated['date_of_birth'] ?? null,
             'guardian_name' => $validated['guardian_name'] ?? null,
@@ -93,7 +88,6 @@ class ProfileController extends Controller
             'guardian_address' => $validated['guardian_address'] ?? null,
             'guardian_phone' => $validated['guardian_phone'] ?? null,
             'mother_ic_no' => $validated['mother_ic_no'] ?? null,
-            'guardian_occupation' => $validated['guardian_occupation'] ?? null,
             'family_income' => array_key_exists('family_income', $validated) && $validated['family_income'] !== null && $validated['family_income'] !== ''
                 ? (float) $validated['family_income']
                 : null,

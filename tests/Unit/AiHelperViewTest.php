@@ -34,7 +34,7 @@ class AiHelperViewTest extends TestCase
         $this->assertStringNotContainsString('id="aiAddMenu"', $view);
         $this->assertStringNotContainsString('id="aiAddBtn"', $view);
         $this->assertStringContainsString('class="ai-quick-action" id="aiUploadShortcut"', $view);
-        $this->assertStringContainsString('id="aiToolsPanel" aria-hidden="true"', $view);
+        $this->assertStringContainsString('id="aiHistoryPanel"', $view);
         $this->assertStringContainsString('id="aiUploadShortcut"', $view);
     }
 

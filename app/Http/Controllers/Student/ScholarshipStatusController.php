@@ -69,7 +69,6 @@ class ScholarshipStatusController extends Controller
             'guardian_ic_no' => ['nullable', 'string', 'max:30', Rule::requiredIf(fn () => $type === 'welfare')],
             'guardian_relationship' => ['nullable', 'string', 'max:60', Rule::requiredIf(fn () => $type === 'welfare')],
             'guardian_phone' => ['nullable', 'string', 'max:30', Rule::requiredIf(fn () => $type === 'welfare')],
-            'guardian_occupation' => ['nullable', 'string', 'max:150', Rule::requiredIf(fn () => $type === 'welfare')],
             'family_income' => ['nullable', 'numeric', 'min:0', Rule::requiredIf(fn () => $type === 'welfare')],
             'dependents_count' => ['nullable', 'integer', 'min:0', 'max:30'],
             'welfare_category' => ['nullable', 'string', 'max:100', Rule::requiredIf(fn () => $type === 'welfare')],
@@ -102,7 +101,6 @@ class ScholarshipStatusController extends Controller
             'guardian_ic_no' => $validated['application_type'] === 'welfare' ? trim((string) ($validated['guardian_ic_no'] ?? '')) : null,
             'guardian_relationship' => $validated['application_type'] === 'welfare' ? trim((string) ($validated['guardian_relationship'] ?? '')) : null,
             'guardian_phone' => $validated['application_type'] === 'welfare' ? trim((string) ($validated['guardian_phone'] ?? '')) : null,
-            'guardian_occupation' => $validated['application_type'] === 'welfare' ? trim((string) ($validated['guardian_occupation'] ?? '')) : null,
             'family_income' => $validated['application_type'] === 'welfare' ? $validated['family_income'] : null,
             'dependents_count' => $validated['application_type'] === 'welfare' ? ($validated['dependents_count'] ?? null) : null,
             
@@ -143,7 +141,6 @@ class ScholarshipStatusController extends Controller
                     if (filled($validated['guardian_name'] ?? null)) $studentProfileSync['guardian_name'] = trim($validated['guardian_name']);
                     if (filled($validated['guardian_ic_no'] ?? null)) $studentProfileSync['guardian_ic_no'] = trim($validated['guardian_ic_no']);
                     if (filled($validated['guardian_phone'] ?? null)) $studentProfileSync['guardian_phone'] = trim($validated['guardian_phone']);
-                    if (filled($validated['guardian_occupation'] ?? null)) $studentProfileSync['guardian_occupation'] = trim($validated['guardian_occupation']);
                     if (array_key_exists('family_income', $validated) && $validated['family_income'] !== null) $studentProfileSync['family_income'] = (float) $validated['family_income'];
                     if (!empty($studentProfileSync)) {
                         DB::table('students')->where('id', $studentId)->update($studentProfileSync);
