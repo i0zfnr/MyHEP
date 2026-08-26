@@ -32,6 +32,10 @@ class SystemFeatures
             'label' => 'Mandatory Student Profile Photo (Beta)',
             'description' => 'Require students to upload a verified formal profile photo before accessing other portal features, with automated face alignment and client-side face detection.',
         ],
+        'student_browser_bottom_nav' => [
+            'label' => 'Student Bottom Navigation in Browser',
+            'description' => 'Show the student mobile bottom navigation in normal mobile browsers. Installed PWA mode always keeps the bottom navigation available.',
+        ],
     ];
 
     public function exists(string $key): bool

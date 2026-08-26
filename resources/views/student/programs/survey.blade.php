@@ -7,7 +7,7 @@
 @endsection
 
 @section('content')
-<main style="max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem;">
+<main class="student-survey-page" style="max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem;">
     @if(session('success'))
         <div class="alert alert-success" style="border-radius: 14px; margin-bottom: 1.25rem;">
             {{ session('success') }}
@@ -75,7 +75,7 @@
                             </label>
 
                             @if($question->question_type === 'rating_4')
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem;">
+                                <div class="student-survey-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem;">
                                     @php
                                         $options = [
                                             '4' => '4 - Sangat Setuju',
@@ -85,16 +85,16 @@
                                         ];
                                     @endphp
                                     @foreach($options as $val => $lbl)
-                                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 0.84rem; font-weight: 600; background: var(--bg-alt, #faf7f2);">
+                                        <label class="student-survey-option" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 0.84rem; font-weight: 600; background: var(--bg-alt, #faf7f2);">
                                             <input type="radio" name="answers[{{ $question->id }}]" value="{{ $val }}" @required($question->is_required) {{ old('answers.'.$question->id) == $val ? 'checked' : '' }}>
                                             <span>{{ $lbl }}</span>
                                         </label>
                                     @endforeach
                                 </div>
                             @elseif($question->question_type === 'rating_5')
-                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <div class="student-survey-rating" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                     @for($i = 1; $i <= 5; $i++)
-                                        <label style="flex: 1; min-width: 60px; text-align: center; padding: 0.75rem 0.5rem; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; background: var(--bg-alt, #faf7f2);">
+                                        <label class="student-survey-rating-option" style="flex: 1; min-width: 60px; text-align: center; padding: 0.75rem 0.5rem; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; background: var(--bg-alt, #faf7f2);">
                                             <input type="radio" name="answers[{{ $question->id }}]" value="{{ $i }}" @required($question->is_required) {{ old('answers.'.$question->id) == $i ? 'checked' : '' }} style="display: block; margin: 0 auto 0.35rem;">
                                             <span>{{ $i }} ★</span>
                                         </label>

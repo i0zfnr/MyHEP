@@ -52,9 +52,20 @@ class ProgramActivityController extends Controller
         // Check active in-system surveys for PB students
         $activeSurveys = DB::table('program_surveys')
             ->join('programs', 'programs.id', '=', 'program_surveys.program_id')
+            ->leftJoin('program_attendances', function ($join) use ($studentId): void {
+                $join->on('program_attendances.program_id', '=', 'programs.id')
+                    ->where('program_attendances.student_id', '=', $studentId)
+                    ->where('program_attendances.attendee_type', '=', 'internal');
+            })
+            ->leftJoin('program_survey_responses', function ($join): void {
+                $join->on('program_survey_responses.program_survey_id', '=', 'program_surveys.id')
+                    ->on('program_survey_responses.program_attendance_id', '=', 'program_attendances.id');
+            })
             ->where('program_surveys.status', 'published')
             ->where('programs.status', 'active')
+            ->whereNull('program_survey_responses.id')
             ->select('program_surveys.program_id', 'program_surveys.title as survey_title', 'programs.title as program_title', 'programs.questionnaire_publish_mode')
+            ->distinct()
             ->get()
             ->filter(function ($surveyProgram) use ($programs): bool {
                 if (($surveyProgram->questionnaire_publish_mode ?? 'internal_system') !== 'qr_code') {

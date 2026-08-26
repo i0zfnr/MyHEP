@@ -17,16 +17,18 @@
                 <div class="sp-survey-icon">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 </div>
-                <div>
-                    <strong style="font-size: 1.05rem; display: block; color: var(--text);">{{ __('Soal Selidik Program Aktif') }}</strong>
-                    <span style="font-size: 0.84rem; color: var(--text-muted);">{{ __('Sila lengkapkan maklum balas program Politeknik Besut yang anda sertai.') }}</span>
+                <div class="sp-survey-text">
+                    <span class="sp-survey-kicker">{{ __('Action required') }}</span>
+                    <strong>{{ __('Active Program Questionnaire') }}</strong>
+                    <span>{{ __('Please complete the feedback for the Besut Polytechnic program you participated in.') }}</span>
                 </div>
             </div>
-            <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+            <div class="sp-survey-actions">
                 @foreach($activeSurveys as $surveyProgram)
                     <a href="{{ route('student.programs.survey', $surveyProgram->program_id) }}" class="sp-survey-btn">
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"/></svg>
-                        <span>{{ __('Jawab: :title', ['title' => \Illuminate\Support\Str::limit($surveyProgram->program_title, 24)]) }}</span>
+                        <span>{{ __('Answer questionnaire') }}</span>
+                        <small>{{ \Illuminate\Support\Str::limit($surveyProgram->program_title, 28) }}</small>
                     </a>
                 @endforeach
             </div>

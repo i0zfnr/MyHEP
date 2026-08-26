@@ -2555,38 +2555,241 @@
     }
 
 .sp-wrap { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .student-survey-page :is(.student-survey-option, .student-survey-rating-option) input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        box-sizing: border-box !important;
+        flex: 0 0 16px !important;
+        width: 16px !important;
+        min-width: 16px !important;
+        max-width: 16px !important;
+        height: 16px !important;
+        min-height: 16px !important;
+        max-height: 16px !important;
+        aspect-ratio: 1 / 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 1.5px solid color-mix(in srgb, var(--se-text-muted, #76695e) 62%, var(--se-border));
+        border-radius: 999px;
+        background:
+            radial-gradient(circle, var(--se-primary-strong, #8b6a34) 0 38%, transparent 41%),
+            var(--se-surface, #fff);
+        background-size: 0 0, auto;
+        background-position: center;
+        background-repeat: no-repeat;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / .7);
+        transition: border-color .16s ease, background-size .16s ease, box-shadow .16s ease;
+    }
+
+    .student-survey-page :is(.student-survey-option, .student-survey-rating-option) input[type="radio"]:checked {
+        border-color: var(--se-primary-strong, #8b6a34);
+        background-size: 8px 8px, auto;
+        box-shadow:
+            0 0 0 3px color-mix(in srgb, var(--se-primary) 18%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / .72);
+    }
+
+    .student-survey-page .student-survey-rating-option input[type="radio"] {
+        display: block !important;
+        margin: 0 auto .28rem !important;
+    }
+
+    @media (max-width: 767px) {
+        .student-survey-page :is(.student-survey-option, .student-survey-rating-option) input[type="radio"] {
+            flex-basis: 14px !important;
+            width: 14px !important;
+            min-width: 14px !important;
+            max-width: 14px !important;
+            height: 14px !important;
+            min-height: 14px !important;
+            max-height: 14px !important;
+        }
+
+        .student-survey-page :is(.student-survey-option, .student-survey-rating-option) input[type="radio"]:checked {
+            background-size: 7px 7px, auto;
+            box-shadow:
+                0 0 0 2px color-mix(in srgb, var(--se-primary) 16%, transparent),
+                inset 0 1px 0 rgb(255 255 255 / .72);
+        }
+
+        .student-survey-page .student-survey-options {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: .55rem !important;
+        }
+
+        .student-survey-page .student-survey-option {
+            gap: .45rem !important;
+            padding: .62rem .68rem !important;
+            font-size: .78rem !important;
+            line-height: 1.18 !important;
+        }
+    }
     
     /* Top Banner / Active Survey Alert */
     .sp-survey-banner {
-        background: linear-gradient(135deg, rgba(212,175,55,0.14) 0%, rgba(180,83,9,0.08) 100%);
-        border: 1px solid rgba(212,175,55,0.35);
-        border-radius: 20px;
-        padding: 1.25rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(24rem circle at 100% -40%, rgba(255, 255, 255, .62), transparent 66%),
+            radial-gradient(18rem circle at 0% 120%, rgba(200, 169, 106, .20), transparent 70%),
+            linear-gradient(135deg, rgba(255, 252, 247, .88), rgba(246, 231, 200, .46));
+        border: 1px solid color-mix(in srgb, var(--se-primary) 28%, var(--se-border));
+        border-radius: 24px;
+        padding: clamp(1rem, 2.8vw, 1.35rem);
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 1rem;
-        box-shadow: 0 4px 20px rgba(212,175,55,0.08);
+        box-shadow:
+            0 18px 42px rgba(73, 50, 29, .12),
+            inset 0 1px 0 rgba(255, 255, 255, .72);
+        backdrop-filter: blur(22px) saturate(150%);
+        -webkit-backdrop-filter: blur(22px) saturate(150%);
     }
-    .sp-survey-copy { display: flex; align-items: center; gap: 1rem; }
+    .sp-survey-banner::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(115deg, rgba(255,255,255,.42), transparent 42%);
+    }
+    .sp-survey-copy {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: .85rem;
+        min-width: 0;
+        flex: 1 1 260px;
+    }
     .sp-survey-icon {
-        width: 48px; height: 48px; border-radius: 14px;
-        background: #d4af37; color: #1c1917;
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background:
+            radial-gradient(circle at 30% 18%, rgba(255,255,255,.34), transparent 40%),
+            linear-gradient(145deg, var(--se-primary), var(--se-primary-strong));
+        color: #fffaf0;
         display: grid; place-items: center; flex-shrink: 0;
-        box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+        box-shadow:
+            0 12px 24px rgba(139, 106, 52, .24),
+            inset 0 1px 0 rgba(255,255,255,.36);
+    }
+    .sp-survey-text {
+        display: grid;
+        gap: .22rem;
+        min-width: 0;
+    }
+    .sp-survey-kicker {
+        width: max-content;
+        max-width: 100%;
+        padding: .22rem .52rem;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--se-primary-soft) 72%, #fff);
+        color: var(--se-primary-strong);
+        font-size: .62rem;
+        font-weight: 900;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+    .sp-survey-text strong {
+        color: var(--text);
+        font-size: clamp(1rem, 3.8vw, 1.18rem);
+        line-height: 1.15;
+    }
+    .sp-survey-text span:last-child {
+        color: var(--text-muted);
+        font-size: .86rem;
+        line-height: 1.55;
+    }
+    .sp-survey-actions {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: .6rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
     }
     .sp-survey-btn {
-        display: inline-flex; align-items: center; gap: 0.45rem;
-        padding: 0.6rem 1.1rem; border-radius: 12px;
-        background: #d4af37; color: #171310;
-        font-size: 0.85rem; font-weight: 850;
-        text-decoration: none; transition: all 0.2s ease;
-        box-shadow: 0 4px 12px rgba(212,175,55,0.25);
+        min-height: 46px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        column-gap: .55rem;
+        padding: .68rem .9rem;
+        border: 1px solid color-mix(in srgb, var(--se-primary) 30%, rgba(255,255,255,.72));
+        border-radius: 15px;
+        background: linear-gradient(145deg, var(--se-primary), var(--se-primary-strong));
+        color: var(--se-primary-button-text);
+        font-size: .84rem;
+        font-weight: 900;
+        line-height: 1.08;
+        text-decoration: none;
+        transition: transform .18s ease, box-shadow .18s ease;
+        box-shadow:
+            0 10px 22px rgba(139, 106, 52, .22),
+            inset 0 1px 0 rgba(255,255,255,.35);
     }
     .sp-survey-btn:hover {
-        background: #c29d2b; transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(212,175,55,0.35);
+        transform: translateY(-1px);
+        box-shadow:
+            0 14px 28px rgba(139, 106, 52, .28),
+            inset 0 1px 0 rgba(255,255,255,.42);
+    }
+    .sp-survey-btn small {
+        grid-column: 2;
+        display: block;
+        margin-top: .16rem;
+        color: color-mix(in srgb, var(--se-primary-button-text) 76%, transparent);
+        font-size: .64rem;
+        font-weight: 800;
+    }
+
+    @media (max-width: 767px) {
+        .sp-survey-banner {
+            align-items: stretch;
+            gap: .85rem;
+            border-radius: 20px;
+            padding: .95rem;
+        }
+
+        .sp-survey-copy {
+            align-items: flex-start;
+            gap: .72rem;
+        }
+
+        .sp-survey-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+        }
+
+        .sp-survey-icon svg {
+            width: 21px;
+            height: 21px;
+        }
+
+        .sp-survey-text strong {
+            font-size: 1rem;
+        }
+
+        .sp-survey-text span:last-child {
+            font-size: .8rem;
+            line-height: 1.45;
+        }
+
+        .sp-survey-actions,
+        .sp-survey-btn {
+            width: 100%;
+        }
+
+        .sp-survey-btn {
+            min-height: 44px;
+            padding: .62rem .78rem;
+            border-radius: 14px;
+        }
     }
 
     /* KPI Highlights */

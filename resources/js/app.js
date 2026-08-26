@@ -425,7 +425,10 @@ const syncPwaDisplayMode = () => {
     body.classList.toggle('pwa-standalone', standalone);
     body.classList.toggle(
         'has-student-bottom-nav',
-        standalone && body.classList.contains('student-bottom-nav-eligible'),
+        standalone && (
+            body.classList.contains('student-bottom-nav-pwa-eligible')
+            || body.classList.contains('student-bottom-nav-eligible')
+        ),
     );
 };
 

@@ -140,9 +140,10 @@
     $showSidebar = $isAdmin || $isStudent;
     $showDesktopSidebar = $isAdmin || ($isStudent && !$studentOnDashboard);
     $showHeaderUserMenu = (bool) $authUser && ($isStudent || $adminOnDashboard);
+    $systemFeatures = app(\App\Support\SystemFeatures::class);
     $showStudentBottomNav = $isStudent;
     $showStaffBottomNav = $isLecturerAdmin;
-    $systemFeatures = app(\App\Support\SystemFeatures::class);
+    $studentBrowserBottomNavEnabled = $systemFeatures->enabled('student_browser_bottom_nav');
     $studentAiHelperEnabled = $systemFeatures->enabled('student_ai_helper');
     $lecturerAiHelperEnabled = $systemFeatures->enabled('lecturer_ai_helper');
     $adminAiHelperEnabled = $adminScope === 'system_admin' || $systemFeatures->enabled('admin_ai_helper');
@@ -157,7 +158,8 @@
         ($isStudent ? 'student-mobile-shell' : '') . ' ' .
         ($isStudent && request()->routeIs('student.scholarships.index') ? 'student-liquid-aid' : '') . ' ' .
         ($isStudent && request()->routeIs('student.offenses.index') ? 'student-liquid-fines' : '') . ' ' .
-        (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-eligible' : '') . ' ' .
+        (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-pwa-eligible' : '') . ' ' .
+        ((($showStudentBottomNav && $studentBrowserBottomNavEnabled) || $showStaffBottomNav) ? 'student-bottom-nav-eligible' : '') . ' ' .
         (request()->routeIs('student.movements.scan', 'admin.laptops.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar ' : '') .
         ($isAdmin && $adminScope === 'system_admin' ? 'system-admin-shell ' : '') .
