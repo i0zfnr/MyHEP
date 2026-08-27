@@ -7,6 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\GenerateProgramCertificate;
 use Tests\TestCase;
@@ -51,6 +52,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->unsignedSmallInteger('participation_points')->default(0);
             $table->boolean('certificate_enabled')->default(true);
             $table->string('certificate_template')->default('standard_placeholder');
+            $table->unsignedBigInteger('certificate_template_id')->nullable();
             $table->boolean('questionnaire_enabled')->default(true);
             $table->string('questionnaire_publish_mode', 32)->default('internal_system');
             $table->decimal('estimated_budget', 12, 2)->nullable();
@@ -70,6 +72,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->id();
             $table->string('full_name');
             $table->string('matric_no')->nullable();
+            $table->string('ic_no')->nullable();
             $table->string('program')->nullable();
             $table->timestamps();
         });
@@ -182,7 +185,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         Schema::create('program_certificates', function (Blueprint $table): void {
             $table->id(); $table->unsignedBigInteger('program_id'); $table->unsignedBigInteger('program_attendance_id');
             $table->unsignedBigInteger('student_id'); $table->string('matric_no'); $table->string('student_name');
-            $table->string('serial_no')->unique(); $table->string('template_key')->default('standard_placeholder'); $table->string('status')->default('pending'); $table->string('disk')->default('local');
+            $table->string('serial_no')->unique(); $table->string('template_key')->default('standard_placeholder'); $table->unsignedBigInteger('certificate_template_id')->nullable(); $table->string('status')->default('pending'); $table->string('disk')->default('local');
             $table->string('path')->nullable(); $table->text('failure_reason')->nullable(); $table->unsignedBigInteger('generated_by');
             $table->timestamp('generated_at')->nullable(); $table->timestamps(); $table->unique(['program_id','student_id']);
         });
@@ -194,6 +197,51 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             ['id' => 4, 'username' => 'kjhep', 'email' => 'kjhep@polibesut.edu.my', 'password' => bcrypt('password'), 'role' => 'student_affairs_head', 'full_name' => 'KJ HEP', 'staff_department' => null, 'reporting_branch' => null, 'position' => 'KJ HEP', 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
             ['id' => 5, 'username' => 'discipline', 'email' => 'discipline@polibesut.edu.my', 'password' => bcrypt('password'), 'role' => 'discipline_admin', 'full_name' => 'Discipline Admin', 'staff_department' => null, 'reporting_branch' => null, 'position' => 'Warden', 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
         ]);
+    }
+
+    public function test_admin_can_use_ai_to_detect_only_name_and_ic_template_fields(): void
+    {
+        config([
+            'services.gemini.key' => 'test-gemini-key',
+            'services.gemini.model' => 'gemini-test',
+            'services.gemini.url' => 'https://generativelanguage.googleapis.com/v1beta',
+            'services.openai.key' => null,
+        ]);
+
+        Http::fake(function ($request) {
+            $this->assertSame('test-gemini-key', $request->header('x-goog-api-key')[0] ?? null);
+            $this->assertStringNotContainsString('?key=', $request->url());
+
+            return Http::response([
+                'candidates' => [[
+                    'content' => ['parts' => [[
+                        'text' => '{"student_name":{"x_mm":73.5,"y_mm":75.3,"width_mm":150,"font_size":14},"ic_no":{"x_mm":73.5,"y_mm":87.1,"width_mm":150,"font_size":10}}',
+                    ]]],
+                ]],
+            ]);
+        });
+
+        $pdf = new UploadedFile(
+            resource_path('certificates/batik-run.pdf'),
+            'blank-certificate.pdf',
+            'application/pdf',
+            null,
+            true
+        );
+
+        $this->signIn(1, 'lecturer')
+            ->withHeader('Accept', 'application/json')
+            ->post(route('admin.program-certificate-templates.analyze'), [
+                'template_pdf' => $pdf,
+                'source_page' => 1,
+            ])
+            ->assertOk()
+            ->assertJsonPath('fields.student_name.x_mm', 73.5)
+            ->assertJsonPath('fields.ic_no.y_mm', 87.1)
+            ->assertJsonMissingPath('fields.program_title')
+            ->assertJsonMissingPath('fields.serial_no');
+
+        Http::assertSentCount(1);
     }
 
     public function test_program_director_can_open_operations_workspace(): void
@@ -657,16 +705,14 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             ->assertSee('15');
     }
 
-    public function test_program_director_bulk_queues_certificates_by_student_matric_number(): void
+    public function test_program_director_bulk_generates_certificates_by_student_matric_number(): void
     {
-        Queue::fake();
         $studentId = DB::table('students')->insertGetId(['full_name'=>'Certificate Student','matric_no'=>'PB22001','program'=>'DIT','created_at'=>now(),'updated_at'=>now()]);
         $programId = DB::table('programs')->insertGetId(['created_by'=>1,'title'=>'Certificate Program','paperwork_method'=>'none','questionnaire_enabled'=>false,'status'=>'completed','created_at'=>now(),'updated_at'=>now()]);
         $attendanceId = DB::table('program_attendances')->insertGetId(['program_id'=>$programId,'student_id'=>$studentId,'attendee_type'=>'internal','full_name'=>'Certificate Student','identifier'=>'PB22001','checked_in_at'=>now(),'geofence_valid'=>true,'validation_status'=>'valid','created_at'=>now(),'updated_at'=>now()]);
 
         $this->signIn(1,'lecturer')->post(route('admin.programs.certificates.generate',$programId))->assertRedirect()->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('program_certificates',['program_id'=>$programId,'program_attendance_id'=>$attendanceId,'student_id'=>$studentId,'matric_no'=>'PB22001','status'=>'pending']);
-        Queue::assertPushed(GenerateProgramCertificate::class,1);
+        $this->assertDatabaseHas('program_certificates',['program_id'=>$programId,'program_attendance_id'=>$attendanceId,'student_id'=>$studentId,'matric_no'=>'PB22001','status'=>'ready']);
     }
 
     public function test_program_director_can_generate_one_test_certificate_immediately(): void

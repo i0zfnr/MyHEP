@@ -625,65 +625,52 @@
     <section class="pmr-card" style="margin-bottom: 1.25rem;">
         <span class="pmr-eyebrow">{{ __('CERTIFICATE ISSUANCE') }}</span>
         @if((bool) ($program->certificate_enabled ?? true))
-            <h2>{{ __('Auto-Generate Program Certificates') }}</h2>
-            <p>{{ __('Issue official participation certificates for internal students who checked in with valid attendance.') }}</p>
-            <div class="pmr-certificate-layout">
-                <form method="post" action="{{ route('admin.programs.certificates.generate', $program->id) }}" class="pmr-mode-panel">
-                    @csrf
-                    <label for="certTemplate">{{ __('Built-in Certificate Template') }}</label>
-                    <select id="certTemplate" name="certificate_template" style="width:100%;margin-bottom:.75rem;">
-                        <option value="standard_placeholder" @selected(($program->certificate_template ?? 'standard_placeholder') === 'standard_placeholder')>{{ __('Standard certificate — temporary design') }}</option>
-                        <option value="batik_run_participation" @selected(($program->certificate_template ?? 'standard_placeholder') === 'batik_run_participation')>{{ __('Batik Run — Sijil Penyertaan (Page 1)') }}</option>
-                    </select>
-                    <label for="uploadedCertTemplate">{{ __('Uploaded PDF Template') }}</label>
+            <h2>{{ __('Generate Program Certificates') }}</h2>
+            <p>{{ __('Choose the prepared design and generate certificates for all eligible students.') }}</p>
+            @php
+                $activeTemplateId = (int) ($program->certificate_template_id ?: ($certificateTemplates->first()->id ?? 0));
+            @endphp
+            <form method="post" action="{{ route('admin.programs.certificates.generate', $program->id) }}" class="pmr-mode-panel pmr-certificate-generator">
+                @csrf
+                <input type="hidden" name="certificate_template" value="standard_placeholder">
+                @if($certificateTemplates->isNotEmpty())
+                    <label for="uploadedCertTemplate">{{ __('Certificate design') }}</label>
                     <select id="uploadedCertTemplate" name="certificate_template_id" style="width:100%;margin-bottom:.75rem;">
-                        <option value="">{{ __('Use built-in template above') }}</option>
                         @foreach($certificateTemplates as $template)
-                            <option
-                                value="{{ $template->id }}"
-                                data-preview-url="{{ route('admin.program-certificate-templates.preview', $template->id) }}"
-                                @selected((int) ($program->certificate_template_id ?? 0) === (int) $template->id)
-                            >
-                                {{ $template->name }} · {{ __('Page :page/:total', ['page' => $template->source_page, 'total' => $template->page_count]) }}
-                            </option>
+                            <option value="{{ $template->id }}" @selected($activeTemplateId === (int) $template->id)>{{ $template->name }}</option>
                         @endforeach
                     </select>
-                    <p>{{ __('Uploaded PDF templates keep the original design and overlay the mapped student fields. Built-in Batik Run currently generates the participation certificate page only.') }}</p>
+                @else
+                    <div class="pmr-certificate-empty">
+                        <strong>{{ __('No certificate design yet') }}</strong>
+                        <span>{{ __('Upload one PDF and AI will prepare it for you.') }}</span>
+                    </div>
+                @endif
+
+                <div class="pmr-actions pmr-certificate-main-actions">
+                    @if($canManageCertificates && $certificateTemplates->isNotEmpty())
+                        <button class="pmr-btn primary" type="submit">{{ __('Generate Certificates') }}</button>
+                        <button class="pmr-btn" type="submit" formaction="{{ route('admin.programs.certificates.generate-test',$program->id) }}">{{ __('Test First') }}</button>
+                    @endif
+                    <a class="pmr-btn" href="{{ route('admin.program-certificate-templates.index', ['program_id' => $program->id]) }}">{{ $certificateTemplates->isEmpty() ? __('Create Design') : __('New Design') }}</a>
+                </div>
+
+                <details class="pmr-certificate-more">
+                    <summary>{{ __('More options') }}</summary>
                     <div class="pmr-actions">
-                        @if($canManageCertificates)<button class="pmr-btn" type="submit" formaction="{{ route('admin.programs.certificates.generate-test',$program->id) }}">{{ __('Generate Test Certificate') }}</button>@endif
-                        @if($canManageCertificates)<button class="pmr-btn primary" type="submit">{{ __('Generate All Eligible Certificates') }}</button>@endif
-                        <a class="pmr-btn" href="{{ route('admin.program-certificate-templates.index') }}">{{ __('Manage Templates') }}</a>
-                        <a class="pmr-btn" href="{{ route('admin.program-certificates.index',['program_id'=>$program->id]) }}">{{ __('Search Certificate Records') }}</a>
+                        <a class="pmr-btn" href="{{ route('admin.program-certificates.index',['program_id'=>$program->id]) }}">{{ __('Certificate Records') }}</a>
                         @if($canManageCertificates)
                             <button class="pmr-btn danger" type="submit" form="deleteProgramCertificatesForm" onclick="return confirm('{{ __('Delete all generated certificates for this program? This cannot be undone.') }}')">{{ __('Delete Generated Certificates') }}</button>
                         @endif
                     </div>
+                </details>
+            </form>
+            @if($canManageCertificates)
+                <form id="deleteProgramCertificatesForm" method="post" action="{{ route('admin.programs.certificates.destroy-all', $program->id) }}" style="display:none;">
+                    @csrf
+                    @method('DELETE')
                 </form>
-                @if($canManageCertificates)
-                    <form id="deleteProgramCertificatesForm" method="post" action="{{ route('admin.programs.certificates.destroy-all', $program->id) }}" style="display:none;">
-                        @csrf
-                        @method('DELETE')
-                    </form>
-                @endif
-                <div class="pmr-certificate-preview" aria-label="{{ __('Certificate design preview') }}">
-                    @php
-                        $selectedTemplate = $certificateTemplates->firstWhere('id', (int) ($program->certificate_template_id ?? 0));
-                    @endphp
-                    <iframe
-                        id="uploadedCertificatePreview"
-                        src="{{ $selectedTemplate ? route('admin.program-certificate-templates.preview', $selectedTemplate->id) : '' }}"
-                        title="{{ __('Uploaded certificate template preview') }}"
-                        style="{{ $selectedTemplate ? '' : 'display:none;' }}"
-                    ></iframe>
-                    <div id="builtInCertificatePreview" class="pmr-certificate-preview__inner" style="{{ $selectedTemplate ? 'display:none;' : '' }}">
-                        <div class="pmr-certificate-preview__brand">MYHEP · POLITEKNIK BESUT</div>
-                        <div class="pmr-certificate-preview__title">{{ __('SIJIL PENYERTAAN') }}</div>
-                        <div class="pmr-certificate-preview__meta">{{ __('Dengan ini diperakui bahawa') }}</div>
-                        <div class="pmr-certificate-preview__name">{{ __('NAMA PELAJAR') }}</div>
-                        <div class="pmr-certificate-preview__meta">{{ __('Preview only') }} · {{ $program->title }}</div>
-                    </div>
-                </div>
-            </div>
+            @endif
         @else
             <h2>{{ __('Points-only program') }}</h2>
             <div class="pmr-points-only"><strong>{{ __('Certificates are not provided for this program.') }}</strong><p>{{ __('Students with valid attendance will still receive the participation points configured by the Program Director.') }}</p></div>
@@ -863,31 +850,6 @@
 @endphp
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const uploadedTemplateSelect = document.getElementById('uploadedCertTemplate');
-    const uploadedPreview = document.getElementById('uploadedCertificatePreview');
-    const builtInPreview = document.getElementById('builtInCertificatePreview');
-
-    if (uploadedTemplateSelect && uploadedPreview && builtInPreview) {
-        const updateCertificatePreview = function () {
-            const selected = uploadedTemplateSelect.options[uploadedTemplateSelect.selectedIndex];
-            const previewUrl = selected ? selected.dataset.previewUrl : '';
-
-            if (previewUrl) {
-                uploadedPreview.src = previewUrl;
-                uploadedPreview.style.display = '';
-                builtInPreview.style.display = 'none';
-                return;
-            }
-
-            uploadedPreview.removeAttribute('src');
-            uploadedPreview.style.display = 'none';
-            builtInPreview.style.display = '';
-        };
-
-        uploadedTemplateSelect.addEventListener('change', updateCertificatePreview);
-        updateCertificatePreview();
-    }
-
     const students = @json($studentAutocompleteOptions);
 
     document.querySelectorAll('[data-student-autocomplete]').forEach(function (root) {

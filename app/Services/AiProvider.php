@@ -55,8 +55,10 @@ class AiProvider
             if (! $attachment instanceof UploadedFile) continue;
             $parts[] = ['inlineData' => ['mimeType' => (string) $attachment->getMimeType(), 'data' => base64_encode((string) file_get_contents($attachment->getRealPath()))]];
         }
-        $response = Http::acceptJson()->timeout(90)
-            ->post($url.'?key='.urlencode((string) config('services.gemini.key')), [
+        $response = Http::acceptJson()
+            ->withHeaders(['x-goog-api-key' => (string) config('services.gemini.key')])
+            ->timeout(90)
+            ->post($url, [
                 'systemInstruction' => ['parts' => [['text' => 'You are a careful student support assistant.']]],
                 'contents' => [['role' => 'user', 'parts' => $parts]],
             ])->throw()->json();

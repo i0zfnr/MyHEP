@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const pdfCanvas = document.getElementById('certPdfCanvas');
     const empty = document.querySelector('.cert-empty-preview');
     const status = document.getElementById('certPreviewStatus');
+    const analyzeButton = document.getElementById('analyzeCertificateTemplate');
+    const saveButton = document.getElementById('saveCertificateTemplate');
+    const aiStatus = document.getElementById('certAiStatus');
     const fields = Array.from(document.querySelectorAll('.cert-drag-field'));
     const pills = Array.from(document.querySelectorAll('[data-focus-field]'));
 
@@ -29,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const prefix = field.dataset.prefix;
         const x = Number(getInput(prefix, 'x')?.value || 0);
         const y = Number(getInput(prefix, 'y')?.value || 0);
-        field.style.left = `${(x / pageSize.w) * 100}%`;
+        const width = Number(getInput(prefix, 'w')?.value || 100);
+        field.style.left = `${((x + (width / 2)) / pageSize.w) * 100}%`;
         field.style.top = `${(y / pageSize.h) * 100}%`;
     };
 
@@ -83,11 +87,71 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('change', async () => {
         const file = input.files?.[0];
         if (!file) return;
+        const nameInput = document.querySelector('input[name="name"]');
+        if (nameInput && !nameInput.value.trim()) {
+            nameInput.value = file.name.replace(/\.pdf$/i, '').replace(/[-_]+/g, ' ').trim();
+        }
         currentPdfBytes = await file.arrayBuffer();
         await renderPdfPreview();
+        canvas.classList.add('has-pdf');
+        analyzeButton?.click();
     });
 
     pageInput?.addEventListener('change', renderPdfPreview);
+
+    analyzeButton?.addEventListener('click', async () => {
+        const file = input.files?.[0];
+        if (!file) {
+            aiStatus.textContent = 'Choose a blank certificate PDF first.';
+            aiStatus.className = 'cert-ai-status error';
+            return;
+        }
+
+        analyzeButton.disabled = true;
+        aiStatus.textContent = 'AI is reading the blank template...';
+        aiStatus.className = 'cert-ai-status';
+
+        try {
+            const formData = new FormData();
+            formData.append('template_pdf', file);
+            formData.append('source_page', pageInput?.value || '1');
+            const response = await fetch(analyzeButton.dataset.analyzeUrl, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                },
+                body: formData,
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'AI detection failed.');
+
+            pageSize.w = Number(result.page?.width_mm || pageSize.w);
+            pageSize.h = Number(result.page?.height_mm || pageSize.h);
+            Object.entries({ student_name: 'name', ic_no: 'ic' }).forEach(([key, prefix]) => {
+                const detected = result.fields?.[key];
+                if (!detected) return;
+                getInput(prefix, 'x').value = detected.x_mm;
+                getInput(prefix, 'y').value = detected.y_mm;
+                getInput(prefix, 'w').value = detected.width_mm;
+                getInput(prefix, 'font').value = detected.font_size;
+            });
+            fields.forEach(placeFieldFromInputs);
+            setActive('student_name');
+            canvas.classList.add('is-detected');
+            analyzeButton.textContent = 'Run AI Detection Again';
+            aiStatus.textContent = result.message;
+            aiStatus.className = 'cert-ai-status success';
+            if (saveButton) saveButton.disabled = false;
+        } catch (error) {
+            aiStatus.textContent = error.message || 'AI detection failed. Position the fields manually.';
+            aiStatus.className = 'cert-ai-status error';
+            if (saveButton) saveButton.disabled = false;
+        } finally {
+            analyzeButton.disabled = false;
+            analyzeButton.hidden = false;
+        }
+    });
 
     pills.forEach((pill) => {
         pill.addEventListener('click', () => setActive(pill.dataset.focusField));
@@ -99,14 +163,23 @@ document.addEventListener('DOMContentLoaded', () => {
             field.setPointerCapture(event.pointerId);
             setActive(field.dataset.certField);
             field.style.cursor = 'grabbing';
+            const initialRect = field.getBoundingClientRect();
+            const grabOffsetX = event.clientX - (initialRect.left + (initialRect.width / 2));
+            const grabOffsetY = event.clientY - initialRect.top;
 
             const move = (moveEvent) => {
                 const rect = canvas.getBoundingClientRect();
-                const x = Math.max(0, Math.min(rect.width, moveEvent.clientX - rect.left));
-                const y = Math.max(0, Math.min(rect.height, moveEvent.clientY - rect.top));
-                const xMm = +((x / rect.width) * pageSize.w).toFixed(1);
+                const outputWidthMm = Number(getInput(field.dataset.prefix, 'w')?.value || 100);
+                const outputWidthPx = (outputWidthMm / pageSize.w) * rect.width;
+                const halfOutputWidth = outputWidthPx / 2;
+                const centerX = Math.max(
+                    halfOutputWidth,
+                    Math.min(rect.width - halfOutputWidth, moveEvent.clientX - rect.left - grabOffsetX)
+                );
+                const y = Math.max(0, Math.min(rect.height, moveEvent.clientY - rect.top - grabOffsetY));
+                const xMm = +((((centerX - halfOutputWidth) / rect.width) * pageSize.w).toFixed(1));
                 const yMm = +((y / rect.height) * pageSize.h).toFixed(1);
-                field.style.left = `${(x / rect.width) * 100}%`;
+                field.style.left = `${(centerX / rect.width) * 100}%`;
                 field.style.top = `${(y / rect.height) * 100}%`;
                 getInput(field.dataset.prefix, 'x').value = xMm;
                 getInput(field.dataset.prefix, 'y').value = yMm;
@@ -122,6 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
             field.addEventListener('pointermove', move);
             field.addEventListener('pointerup', up);
             field.addEventListener('pointercancel', up);
+        });
+    });
+
+    document.querySelectorAll('[data-field-input$="_w"]').forEach((control) => {
+        control.addEventListener('input', () => {
+            const prefix = control.dataset.fieldInput.replace(/_w$/, '');
+            const field = fields.find((item) => item.dataset.prefix === prefix);
+            if (field) placeFieldFromInputs(field);
         });
     });
 });

@@ -1373,6 +1373,41 @@ body[data-theme="dark"] .pmr-badge.rejected {
 }
 
 /* Certificate Layout & Preview */
+.pmr-certificate-generator {
+    max-width: 720px;
+    margin-top: 0.75rem;
+}
+.pmr-certificate-main-actions {
+    margin-top: 0.25rem;
+}
+.pmr-certificate-empty {
+    display: grid;
+    gap: 0.2rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px dashed var(--border, #eadac8);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--pm-accent, #b99150) 6%, transparent);
+}
+.pmr-certificate-empty span {
+    color: var(--text-muted, #746b62);
+    font-size: 0.9rem;
+}
+.pmr-certificate-more {
+    margin-top: 0.85rem;
+    border-top: 1px solid var(--border, #eadac8);
+    padding-top: 0.7rem;
+}
+.pmr-certificate-more summary {
+    width: max-content;
+    cursor: pointer;
+    color: var(--text-muted, #746b62);
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+.pmr-certificate-more[open] .pmr-actions {
+    margin-top: 0.75rem;
+}
 .pmr-certificate-layout {
     display: grid;
     grid-template-columns: 1.2fr 1fr;

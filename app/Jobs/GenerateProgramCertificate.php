@@ -102,9 +102,10 @@ class GenerateProgramCertificate implements ShouldQueue
             $pdf->SetXY(73.5, 82.0);
             $pdf->Cell(150, 4.5, 'NO. KAD PENGENALAN', 0, 1, 'C');
 
-            $pdf->SetFont('Arial', '', $this->fitFontSize($pdf, $certificate->matric_no, 150, 10, 8));
+            $icNo = $this->studentIcNo($certificate);
+            $pdf->SetFont('Arial', '', $this->fitFontSize($pdf, $icNo, 150, 10, 8));
             $pdf->SetXY(73.5, 87.1);
-            $pdf->Cell(150, 5.2, $this->pdfText($certificate->matric_no), 0, 1, 'C');
+            $pdf->Cell(150, 5.2, $this->pdfText($icNo), 0, 1, 'C');
 
             return $pdf->Output('S');
         } finally {
@@ -199,12 +200,17 @@ class GenerateProgramCertificate implements ShouldQueue
     {
         return match ($fieldKey) {
             'student_name' => (string) $certificate->student_name,
-            'matric_no' => (string) $certificate->matric_no,
+            'ic_no' => $this->studentIcNo($certificate),
             'program_title' => (string) $program->title,
             'program_date' => $program->starts_at ? date('d M Y', strtotime($program->starts_at)) : '',
             'serial_no' => (string) $certificate->serial_no,
             default => '',
         };
+    }
+
+    private function studentIcNo(object $certificate): string
+    {
+        return (string) (DB::table('students')->where('id', $certificate->student_id)->value('ic_no') ?? '');
     }
 
     private function hexToRgb(string $hex): array

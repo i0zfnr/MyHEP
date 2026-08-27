@@ -562,8 +562,9 @@ class AiHelperController extends Controller
         }
 
         $response = Http::acceptJson()
+            ->withHeaders(['x-goog-api-key' => (string) config('services.gemini.key')])
             ->timeout(45)
-            ->post($url . '?key=' . urlencode((string) config('services.gemini.key')), [
+            ->post($url, [
                 'systemInstruction' => [
                     'parts' => [
                         ['text' => 'You are a careful admin operations assistant.'],
