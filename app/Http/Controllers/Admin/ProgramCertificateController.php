@@ -601,9 +601,20 @@ PROMPT;
                 ? strtolower($cover['color'])
                 : '#f4ebd6';
 
-            if ($x < 0 || $y < 0 || $width < 20 || $x + $width > $pageWidth + 1 || $y > $pageHeight
-                || $coverX < 0 || $coverY < 0 || $coverWidth < 1 || $coverHeight < 1
-                || $coverX + $coverWidth > $pageWidth + 1 || $coverY + $coverHeight > $pageHeight + 1) {
+            if ($x < 0 || $x >= $pageWidth || $y < 0 || $y > $pageHeight
+                || $coverX < 0 || $coverX >= $pageWidth || $coverY < 0 || $coverY >= $pageHeight
+                || $width < 20 || $coverWidth < 1 || $coverHeight < 1) {
+                throw new \UnexpectedValueException("{$key} is outside the certificate page.");
+            }
+
+            // Gemini can correctly locate a placeholder while slightly oversizing its
+            // suggested rectangle. Keep the detected origin and fit the right/bottom
+            // edges to the real PDF page instead of discarding the entire analysis.
+            $width = round(min($width, $pageWidth - $x), 1);
+            $coverWidth = round(min($coverWidth, $pageWidth - $coverX), 1);
+            $coverHeight = round(min($coverHeight, $pageHeight - $coverY), 1);
+
+            if ($width < 20 || $coverWidth < 1 || $coverHeight < 1) {
                 throw new \UnexpectedValueException("{$key} is outside the certificate page.");
             }
 

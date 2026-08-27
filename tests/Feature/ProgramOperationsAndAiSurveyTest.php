@@ -245,6 +245,51 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_ai_template_detection_fits_oversized_rectangles_inside_the_pdf_page(): void
+    {
+        config([
+            'services.gemini.key' => 'test-gemini-key',
+            'services.gemini.model' => 'gemini-test',
+            'services.gemini.url' => 'https://generativelanguage.googleapis.com/v1beta',
+            'services.openai.key' => null,
+        ]);
+
+        Http::fake(Http::response([
+            'candidates' => [[
+                'content' => ['parts' => [[
+                    'text' => '{"student_name":{"x_mm":73.5,"y_mm":75.3,"width_mm":260,"font_size":14,"cover":{"x_mm":72,"y_mm":74,"width_mm":260,"height_mm":10,"color":"#f4ebd6"}},"ic_no":{"x_mm":73.5,"y_mm":87.1,"width_mm":260,"font_size":10,"cover":{"x_mm":72,"y_mm":86,"width_mm":260,"height_mm":8,"color":"#f4ebd6"}}}',
+                ]]],
+            ]],
+        ]));
+
+        $pdf = new UploadedFile(
+            resource_path('certificates/batik-run.pdf'),
+            'blank-certificate.pdf',
+            'application/pdf',
+            null,
+            true
+        );
+
+        $response = $this->signIn(1, 'lecturer')
+            ->withHeader('Accept', 'application/json')
+            ->post(route('admin.program-certificate-templates.analyze'), [
+                'template_pdf' => $pdf,
+                'source_page' => 1,
+            ]);
+
+        $response->assertOk();
+        $pageWidth = (float) $response->json('page.width_mm');
+        $this->assertLessThanOrEqual(
+            $pageWidth,
+            (float) $response->json('fields.student_name.x_mm') + (float) $response->json('fields.student_name.width_mm')
+        );
+        $this->assertEqualsWithDelta(
+            $pageWidth,
+            (float) $response->json('fields.student_name.cover.x_mm') + (float) $response->json('fields.student_name.cover.width_mm'),
+            0.1
+        );
+    }
+
     public function test_program_director_can_open_operations_workspace(): void
     {
         $programId = DB::table('programs')->insertGetId([
