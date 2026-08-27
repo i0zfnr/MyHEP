@@ -290,6 +290,46 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         );
     }
 
+    public function test_ai_template_detection_converts_normalized_coordinates_to_millimetres(): void
+    {
+        config([
+            'services.gemini.key' => 'test-gemini-key',
+            'services.gemini.model' => 'gemini-test',
+            'services.gemini.url' => 'https://generativelanguage.googleapis.com/v1beta',
+            'services.openai.key' => null,
+        ]);
+
+        Http::fake(Http::response([
+            'candidates' => [[
+                'content' => ['parts' => [[
+                    'text' => '{"student_name":{"x_mm":350,"y_mm":350,"width_mm":300,"font_size":14,"cover":{"x_mm":340,"y_mm":330,"width_mm":320,"height_mm":80,"color":"#f4ebd6"}},"ic_no":{"x_mm":400,"y_mm":440,"width_mm":200,"font_size":10,"cover":{"x_mm":390,"y_mm":420,"width_mm":220,"height_mm":70,"color":"#f4ebd6"}}}',
+                ]]],
+            ]],
+        ]));
+
+        $pdf = new UploadedFile(
+            resource_path('certificates/batik-run.pdf'),
+            'blank-certificate.pdf',
+            'application/pdf',
+            null,
+            true
+        );
+
+        $response = $this->signIn(1, 'lecturer')
+            ->withHeader('Accept', 'application/json')
+            ->post(route('admin.program-certificate-templates.analyze'), [
+                'template_pdf' => $pdf,
+                'source_page' => 1,
+            ]);
+
+        $response->assertOk();
+        $pageWidth = (float) $response->json('page.width_mm');
+        $pageHeight = (float) $response->json('page.height_mm');
+        $this->assertEqualsWithDelta($pageWidth * 0.35, (float) $response->json('fields.student_name.x_mm'), 0.1);
+        $this->assertEqualsWithDelta($pageHeight * 0.35, (float) $response->json('fields.student_name.y_mm'), 0.1);
+        $this->assertEqualsWithDelta($pageWidth * 0.22, (float) $response->json('fields.ic_no.cover.width_mm'), 0.1);
+    }
+
     public function test_program_director_can_open_operations_workspace(): void
     {
         $programId = DB::table('programs')->insertGetId([

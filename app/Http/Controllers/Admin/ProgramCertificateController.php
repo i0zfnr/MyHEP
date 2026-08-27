@@ -563,6 +563,7 @@ PROMPT;
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         $pageWidth = (float) $templateInfo['width'];
         $pageHeight = (float) $templateInfo['height'];
+        $decoded = $this->normalizeCertificateCoordinates($decoded, $pageWidth, $pageHeight);
         $result = [];
 
         foreach (['student_name' => 14, 'ic_no' => 10] as $key => $defaultFont) {
@@ -634,5 +635,48 @@ PROMPT;
         }
 
         return $result;
+    }
+
+    private function normalizeCertificateCoordinates(array $decoded, float $pageWidth, float $pageHeight): array
+    {
+        $boxes = [];
+        foreach (['student_name', 'ic_no'] as $key) {
+            if (! is_array($decoded[$key] ?? null) || ! is_array($decoded[$key]['cover'] ?? null)) {
+                return $decoded;
+            }
+
+            $boxes[] = $decoded[$key];
+            $boxes[] = $decoded[$key]['cover'];
+        }
+
+        $usesNormalizedGrid = false;
+        foreach ($boxes as $box) {
+            foreach (['x_mm', 'y_mm', 'width_mm', 'height_mm'] as $coordinate) {
+                if (isset($box[$coordinate]) && (! is_numeric($box[$coordinate]) || (float) $box[$coordinate] < 0 || (float) $box[$coordinate] > 1000)) {
+                    return $decoded;
+                }
+            }
+
+            $usesNormalizedGrid = $usesNormalizedGrid
+                || (isset($box['x_mm']) && (float) $box['x_mm'] >= $pageWidth)
+                || (isset($box['y_mm']) && (float) $box['y_mm'] > $pageHeight);
+        }
+
+        if (! $usesNormalizedGrid) {
+            return $decoded;
+        }
+
+        foreach (['student_name', 'ic_no'] as $key) {
+            foreach (['x_mm', 'width_mm'] as $coordinate) {
+                $decoded[$key][$coordinate] = (float) $decoded[$key][$coordinate] * $pageWidth / 1000;
+                $decoded[$key]['cover'][$coordinate] = (float) $decoded[$key]['cover'][$coordinate] * $pageWidth / 1000;
+            }
+
+            $decoded[$key]['y_mm'] = (float) $decoded[$key]['y_mm'] * $pageHeight / 1000;
+            $decoded[$key]['cover']['y_mm'] = (float) $decoded[$key]['cover']['y_mm'] * $pageHeight / 1000;
+            $decoded[$key]['cover']['height_mm'] = (float) $decoded[$key]['cover']['height_mm'] * $pageHeight / 1000;
+        }
+
+        return $decoded;
     }
 }
