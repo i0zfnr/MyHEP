@@ -215,7 +215,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             return Http::response([
                 'candidates' => [[
                     'content' => ['parts' => [[
-                        'text' => '{"student_name":{"x_mm":73.5,"y_mm":75.3,"width_mm":150,"font_size":14},"ic_no":{"x_mm":73.5,"y_mm":87.1,"width_mm":150,"font_size":10}}',
+                        'text' => '{"student_name":{"x_mm":73.5,"y_mm":75.3,"width_mm":150,"font_size":14,"cover":{"x_mm":72,"y_mm":74,"width_mm":153,"height_mm":10,"color":"#f4ebd6"}},"ic_no":{"x_mm":73.5,"y_mm":87.1,"width_mm":150,"font_size":10,"cover":{"x_mm":72,"y_mm":86,"width_mm":153,"height_mm":8,"color":"#f4ebd6"}}}',
                     ]]],
                 ]],
             ]);
@@ -238,6 +238,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             ->assertOk()
             ->assertJsonPath('fields.student_name.x_mm', 73.5)
             ->assertJsonPath('fields.ic_no.y_mm', 87.1)
+            ->assertJsonPath('fields.student_name.cover.width_mm', 153)
             ->assertJsonMissingPath('fields.program_title')
             ->assertJsonMissingPath('fields.serial_no');
 

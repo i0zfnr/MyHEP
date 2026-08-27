@@ -46,7 +46,14 @@ class AiProvider
         return $this->askGemini($prompt, $attachments);
     }
 
-    private function askGemini(string $prompt, array $attachments = []): string
+    public function askJsonWithAttachments(string $prompt, array $attachments): string
+    {
+        if ($this->name() !== 'gemini' || $attachments === []) return $this->ask($prompt);
+
+        return $this->askGemini($prompt, $attachments, true);
+    }
+
+    private function askGemini(string $prompt, array $attachments = [], bool $jsonResponse = false): string
     {
         $url = rtrim((string) config('services.gemini.url'), '/')
             .'/models/'.$this->model().':generateContent';
@@ -58,10 +65,11 @@ class AiProvider
         $response = Http::acceptJson()
             ->withHeaders(['x-goog-api-key' => (string) config('services.gemini.key')])
             ->timeout(90)
-            ->post($url, [
+            ->post($url, array_filter([
                 'systemInstruction' => ['parts' => [['text' => 'You are a careful student support assistant.']]],
                 'contents' => [['role' => 'user', 'parts' => $parts]],
-            ])->throw()->json();
+                'generationConfig' => $jsonResponse ? ['responseMimeType' => 'application/json', 'temperature' => 0] : null,
+            ]))->throw()->json();
 
         return trim(collect(data_get($response, 'candidates.0.content.parts', []))
             ->pluck('text')->filter()->implode("\n"));

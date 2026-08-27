@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveButton = document.getElementById('saveCertificateTemplate');
     const aiStatus = document.getElementById('certAiStatus');
     const fields = Array.from(document.querySelectorAll('.cert-drag-field'));
+    const covers = Array.from(document.querySelectorAll('[data-cover-for]'));
     const pills = Array.from(document.querySelectorAll('[data-focus-field]'));
 
     if (!input || !canvas || !(pdfCanvas instanceof HTMLCanvasElement)) return;
@@ -35,6 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const width = Number(getInput(prefix, 'w')?.value || 100);
         field.style.left = `${((x + (width / 2)) / pageSize.w) * 100}%`;
         field.style.top = `${(y / pageSize.h) * 100}%`;
+    };
+
+    const placeCoverFromInputs = (cover) => {
+        const prefix = cover.dataset.coverFor;
+        const x = Number(getInput(prefix, 'cover_x')?.value || 0);
+        const y = Number(getInput(prefix, 'cover_y')?.value || 0);
+        const width = Number(getInput(prefix, 'cover_w')?.value || 1);
+        const height = Number(getInput(prefix, 'cover_h')?.value || 1);
+        cover.style.left = `${(x / pageSize.w) * 100}%`;
+        cover.style.top = `${(y / pageSize.h) * 100}%`;
+        cover.style.width = `${(width / pageSize.w) * 100}%`;
+        cover.style.height = `${(height / pageSize.h) * 100}%`;
+        cover.style.background = getInput(prefix, 'cover_color')?.value || '#f4ebd6';
     };
 
     const setActive = (fieldKey) => {
@@ -68,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.dataset.pageWidthMm = String(pageSize.w);
             canvas.dataset.pageHeightMm = String(pageSize.h);
             fields.forEach(placeFieldFromInputs);
+            covers.forEach(placeCoverFromInputs);
 
             renderTask = page.render({ canvasContext: context, viewport: scaled });
             await renderTask.promise;
@@ -108,6 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         analyzeButton.disabled = true;
+        if (saveButton) saveButton.disabled = true;
+        const aiCleanedInput = document.querySelector('[data-ai-cleaned]');
+        if (aiCleanedInput) aiCleanedInput.value = '0';
         aiStatus.textContent = 'AI is reading the blank template...';
         aiStatus.className = 'cert-ai-status';
 
@@ -135,18 +153,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 getInput(prefix, 'y').value = detected.y_mm;
                 getInput(prefix, 'w').value = detected.width_mm;
                 getInput(prefix, 'font').value = detected.font_size;
+                getInput(prefix, 'cover_x').value = detected.cover.x_mm;
+                getInput(prefix, 'cover_y').value = detected.cover.y_mm;
+                getInput(prefix, 'cover_w').value = detected.cover.width_mm;
+                getInput(prefix, 'cover_h').value = detected.cover.height_mm;
+                getInput(prefix, 'cover_color').value = detected.cover.color;
             });
             fields.forEach(placeFieldFromInputs);
+            covers.forEach(placeCoverFromInputs);
             setActive('student_name');
             canvas.classList.add('is-detected');
             analyzeButton.textContent = 'Run AI Detection Again';
             aiStatus.textContent = result.message;
             aiStatus.className = 'cert-ai-status success';
+            if (aiCleanedInput) aiCleanedInput.value = '1';
             if (saveButton) saveButton.disabled = false;
         } catch (error) {
             aiStatus.textContent = error.message || 'AI detection failed. Position the fields manually.';
             aiStatus.className = 'cert-ai-status error';
-            if (saveButton) saveButton.disabled = false;
+            canvas.classList.remove('is-detected');
         } finally {
             analyzeButton.disabled = false;
             analyzeButton.hidden = false;

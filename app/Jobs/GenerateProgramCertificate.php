@@ -156,7 +156,7 @@ class GenerateProgramCertificate implements ShouldQueue
             $pdf->useTemplate($page, 0, 0, $width, $height);
 
             foreach ($fields as $field) {
-                if ((string) $field->field_key === 'background_cover') {
+                if (str_starts_with((string) $field->field_key, 'background_cover')) {
                     $this->drawCover($pdf, $field);
                     continue;
                 }
