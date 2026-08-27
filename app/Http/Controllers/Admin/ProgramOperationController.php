@@ -52,9 +52,35 @@ class ProgramOperationController extends Controller
                 ->get()
             : collect();
 
-        $attendances = DB::table('program_attendances')
-            ->where('program_id', $program->id)
-            ->orderByDesc('checked_in_at')
+        $attendanceQuery = DB::table('program_attendances')
+            ->where('program_attendances.program_id', $program->id);
+
+        if (Schema::hasTable('program_certificates')) {
+            $attendanceQuery->leftJoin('program_certificates', function ($join): void {
+                $join->on('program_certificates.program_id', '=', 'program_attendances.program_id')
+                    ->on('program_certificates.student_id', '=', 'program_attendances.student_id');
+            });
+        }
+
+        $certificateSelect = Schema::hasTable('program_certificates')
+            ? [
+                'program_certificates.id as certificate_id',
+                'program_certificates.status as certificate_status',
+                'program_certificates.path as certificate_path',
+                'program_certificates.failure_reason as certificate_failure_reason',
+                'program_certificates.generated_at as certificate_generated_at',
+            ]
+            : [
+                DB::raw('NULL as certificate_id'),
+                DB::raw('NULL as certificate_status'),
+                DB::raw('NULL as certificate_path'),
+                DB::raw('NULL as certificate_failure_reason'),
+                DB::raw('NULL as certificate_generated_at'),
+            ];
+
+        $attendances = $attendanceQuery
+            ->select('program_attendances.*', ...$certificateSelect)
+            ->orderByDesc('program_attendances.checked_in_at')
             ->get();
 
         $totalJoined = $attendances->count();
@@ -82,6 +108,12 @@ class ProgramOperationController extends Controller
         ]))->get()->keyBy('id') : collect();
         $canManageReport = ($isDirector || $hasOversight) && (! $report || in_array($report->status, ['draft', 'rejected'], true));
         $canManageCertificates = $isDirector || $hasOversight;
+        $certificateTemplates = Schema::hasTable('certificate_templates')
+            ? DB::table('certificate_templates')
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'page_count', 'source_page'])
+            : collect();
         $canManageAttendance = ($isDirector || $hasOversight) && in_array($program->status, ['active', 'approved', 'scheduled'], true);
         $canManageStudentPagePermissions = $hasOversight;
         $studentPagePermissions = Schema::hasTable('program_student_page_permissions')
@@ -136,6 +168,7 @@ class ProgramOperationController extends Controller
             'reportReviewers',
             'canManageReport',
             'canManageCertificates',
+            'certificateTemplates',
             'canReviewReport',
             'canManageAttendance',
             'canManageStudentPagePermissions',

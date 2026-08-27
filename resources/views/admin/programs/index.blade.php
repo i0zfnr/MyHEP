@@ -23,6 +23,7 @@
         </div>
         <div class="pmr-actions">
             <a class="pmr-btn" href="{{ route('admin.program-certificates.index') }}">{{ __('Certificates') }}</a>
+            <a class="pmr-btn" href="{{ route('admin.program-certificate-templates.index') }}">{{ __('Certificate Templates') }}</a>
             <a class="pmr-btn primary" href="{{ route('admin.programs.create') }}">+ {{ __('New Program') }}</a>
         </div>
     </header>

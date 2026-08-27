@@ -264,7 +264,8 @@ class ProgramController extends Controller
             'estimated_participants' => ['nullable', 'integer', 'between:1,100000'],
             'participation_points' => ['required', 'integer', 'between:0,100'],
             'certificate_enabled' => ['sometimes', 'boolean'],
-            'certificate_template' => ['sometimes', 'nullable', Rule::in(['standard_placeholder'])],
+            'certificate_template' => ['sometimes', 'nullable', Rule::in(['standard_placeholder', 'batik_run_participation', 'uploaded_pdf'])],
+            'certificate_template_id' => ['sometimes', 'nullable', 'integer', Rule::exists('certificate_templates', 'id')->where('is_active', true)],
             'paperwork_method' => ['required', Rule::in(self::METHODS)],
             'paperwork_file' => ['nullable', 'file', 'mimes:pdf,docx', 'max:20480'],
         ]);

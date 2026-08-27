@@ -630,19 +630,52 @@
             <div class="pmr-certificate-layout">
                 <form method="post" action="{{ route('admin.programs.certificates.generate', $program->id) }}" class="pmr-mode-panel">
                     @csrf
-                    <label for="certTemplate">{{ __('Certificate Template') }}</label>
+                    <label for="certTemplate">{{ __('Built-in Certificate Template') }}</label>
                     <select id="certTemplate" name="certificate_template" style="width:100%;margin-bottom:.75rem;">
                         <option value="standard_placeholder" @selected(($program->certificate_template ?? 'standard_placeholder') === 'standard_placeholder')>{{ __('Standard certificate — temporary design') }}</option>
+                        <option value="batik_run_participation" @selected(($program->certificate_template ?? 'standard_placeholder') === 'batik_run_participation')>{{ __('Batik Run — Sijil Penyertaan (Page 1)') }}</option>
                     </select>
-                    <p>{{ __('More official certificate templates can be added later. The selected design is saved when generation starts.') }}</p>
+                    <label for="uploadedCertTemplate">{{ __('Uploaded PDF Template') }}</label>
+                    <select id="uploadedCertTemplate" name="certificate_template_id" style="width:100%;margin-bottom:.75rem;">
+                        <option value="">{{ __('Use built-in template above') }}</option>
+                        @foreach($certificateTemplates as $template)
+                            <option
+                                value="{{ $template->id }}"
+                                data-preview-url="{{ route('admin.program-certificate-templates.preview', $template->id) }}"
+                                @selected((int) ($program->certificate_template_id ?? 0) === (int) $template->id)
+                            >
+                                {{ $template->name }} · {{ __('Page :page/:total', ['page' => $template->source_page, 'total' => $template->page_count]) }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p>{{ __('Uploaded PDF templates keep the original design and overlay the mapped student fields. Built-in Batik Run currently generates the participation certificate page only.') }}</p>
                     <div class="pmr-actions">
                         @if($canManageCertificates)<button class="pmr-btn" type="submit" formaction="{{ route('admin.programs.certificates.generate-test',$program->id) }}">{{ __('Generate Test Certificate') }}</button>@endif
                         @if($canManageCertificates)<button class="pmr-btn primary" type="submit">{{ __('Generate All Eligible Certificates') }}</button>@endif
+                        <a class="pmr-btn" href="{{ route('admin.program-certificate-templates.index') }}">{{ __('Manage Templates') }}</a>
                         <a class="pmr-btn" href="{{ route('admin.program-certificates.index',['program_id'=>$program->id]) }}">{{ __('Search Certificate Records') }}</a>
+                        @if($canManageCertificates)
+                            <button class="pmr-btn danger" type="submit" form="deleteProgramCertificatesForm" onclick="return confirm('{{ __('Delete all generated certificates for this program? This cannot be undone.') }}')">{{ __('Delete Generated Certificates') }}</button>
+                        @endif
                     </div>
                 </form>
+                @if($canManageCertificates)
+                    <form id="deleteProgramCertificatesForm" method="post" action="{{ route('admin.programs.certificates.destroy-all', $program->id) }}" style="display:none;">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                @endif
                 <div class="pmr-certificate-preview" aria-label="{{ __('Certificate design preview') }}">
-                    <div class="pmr-certificate-preview__inner">
+                    @php
+                        $selectedTemplate = $certificateTemplates->firstWhere('id', (int) ($program->certificate_template_id ?? 0));
+                    @endphp
+                    <iframe
+                        id="uploadedCertificatePreview"
+                        src="{{ $selectedTemplate ? route('admin.program-certificate-templates.preview', $selectedTemplate->id) : '' }}"
+                        title="{{ __('Uploaded certificate template preview') }}"
+                        style="{{ $selectedTemplate ? '' : 'display:none;' }}"
+                    ></iframe>
+                    <div id="builtInCertificatePreview" class="pmr-certificate-preview__inner" style="{{ $selectedTemplate ? 'display:none;' : '' }}">
                         <div class="pmr-certificate-preview__brand">MYHEP · POLITEKNIK BESUT</div>
                         <div class="pmr-certificate-preview__title">{{ __('SIJIL PENYERTAAN') }}</div>
                         <div class="pmr-certificate-preview__meta">{{ __('Dengan ini diperakui bahawa') }}</div>
@@ -735,6 +768,8 @@
                             <th>{{ __('Matric No. / Identifier') }}</th>
                             <th>{{ __('Category') }}</th>
                             <th>{{ __('Location Verification') }}</th>
+                            <th>{{ __('Certificate Status') }}</th>
+                            <th>{{ __('Certificate') }}</th>
                             <th>{{ __('Scan Time') }}</th>
                             <th>{{ __('Questionnaire') }}</th>
                         </tr>
@@ -760,6 +795,38 @@
                                         {{ $row->distance_m !== null ? number_format($row->distance_m, 1).'m '.__('from venue') : __('No distance recorded') }}
                                         @if($row->location_accuracy_m !== null) &middot; {{ number_format($row->location_accuracy_m, 1) }}m {{ __('accuracy') }} @endif
                                     </div>
+                                </td>
+                                <td>
+                                    @if($row->attendee_type !== 'internal')
+                                        <span class="pmr-badge certificate muted">{{ __('Not applicable') }}</span>
+                                    @elseif($row->certificate_status === 'ready')
+                                        <span class="pmr-badge certificate ready">{{ __('Certificate Ready') }}</span>
+                                        @if($row->certificate_generated_at)
+                                            <div class="pmr-cert-meta">{{ \Illuminate\Support\Carbon::parse($row->certificate_generated_at)->format('d M Y, g:i A') }}</div>
+                                        @endif
+                                    @elseif(in_array($row->certificate_status, ['pending', 'generating'], true))
+                                        <span class="pmr-badge certificate pending">{{ __(ucfirst($row->certificate_status)) }}</span>
+                                    @elseif($row->certificate_status === 'failed')
+                                        <span class="pmr-badge certificate failed">{{ __('Failed') }}</span>
+                                        @if($row->certificate_failure_reason)
+                                            <div class="pmr-cert-meta failed" title="{{ $row->certificate_failure_reason }}">{{ \Illuminate\Support\Str::limit($row->certificate_failure_reason, 72) }}</div>
+                                        @endif
+                                    @else
+                                        <span class="pmr-badge certificate missing">{{ __('No Certificate Yet') }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($row->certificate_status === 'ready' && $row->certificate_id)
+                                        <a class="pmr-mini-action" href="{{ route('admin.program-certificates.download', $row->certificate_id) }}" target="_blank" rel="noopener">
+                                            {{ __('View Certificate') }}
+                                        </a>
+                                    @elseif($row->certificate_status === 'failed')
+                                        <span class="pmr-cert-meta">{{ __('Regenerate required') }}</span>
+                                    @elseif(in_array($row->certificate_status, ['pending', 'generating'], true))
+                                        <span class="pmr-cert-meta">{{ __('Processing') }}</span>
+                                    @else
+                                        <span class="pmr-cert-meta">—</span>
+                                    @endif
                                 </td>
                                 <td>{{ \Illuminate\Support\Carbon::parse($row->checked_in_at)->format('d M Y, g:i A') }}</td>
                                 <td>
@@ -796,6 +863,31 @@
 @endphp
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const uploadedTemplateSelect = document.getElementById('uploadedCertTemplate');
+    const uploadedPreview = document.getElementById('uploadedCertificatePreview');
+    const builtInPreview = document.getElementById('builtInCertificatePreview');
+
+    if (uploadedTemplateSelect && uploadedPreview && builtInPreview) {
+        const updateCertificatePreview = function () {
+            const selected = uploadedTemplateSelect.options[uploadedTemplateSelect.selectedIndex];
+            const previewUrl = selected ? selected.dataset.previewUrl : '';
+
+            if (previewUrl) {
+                uploadedPreview.src = previewUrl;
+                uploadedPreview.style.display = '';
+                builtInPreview.style.display = 'none';
+                return;
+            }
+
+            uploadedPreview.removeAttribute('src');
+            uploadedPreview.style.display = 'none';
+            builtInPreview.style.display = '';
+        };
+
+        uploadedTemplateSelect.addEventListener('change', updateCertificatePreview);
+        updateCertificatePreview();
+    }
+
     const students = @json($studentAutocompleteOptions);
 
     document.querySelectorAll('[data-student-autocomplete]').forEach(function (root) {

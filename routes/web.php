@@ -213,9 +213,13 @@ Route::prefix('/admin/programs')->middleware('auth.session:admin')->name('admin.
     Route::get('/{program}/live-token', [ProgramOperationController::class, 'liveToken'])->name('live-token');
     Route::post('/{program}/certificates/generate', [ProgramCertificateController::class, 'generate'])->name('certificates.generate');
     Route::post('/{program}/certificates/generate-test', [ProgramCertificateController::class, 'generateTest'])->name('certificates.generate-test');
+    Route::delete('/{program}/certificates', [ProgramCertificateController::class, 'destroyForProgram'])->name('certificates.destroy-all');
 });
 Route::get('/admin/program-certificates', [ProgramCertificateController::class, 'index'])->middleware('auth.session:admin')->name('admin.program-certificates.index');
 Route::get('/admin/program-certificates/{certificate}/download', [ProgramCertificateController::class, 'download'])->middleware('auth.session:admin')->name('admin.program-certificates.download');
+Route::get('/admin/program-certificate-templates', [ProgramCertificateController::class, 'templates'])->middleware('auth.session:admin')->name('admin.program-certificate-templates.index');
+Route::post('/admin/program-certificate-templates', [ProgramCertificateController::class, 'storeTemplate'])->middleware('auth.session:admin')->name('admin.program-certificate-templates.store');
+Route::get('/admin/program-certificate-templates/{template}/preview', [ProgramCertificateController::class, 'previewTemplate'])->middleware('auth.session:admin')->name('admin.program-certificate-templates.preview');
 
 Route::get('/programs/{program}/qr-checkin', [ProgramOperationController::class, 'publicCheckin'])->name('public.programs.qr_checkin');
 Route::post('/programs/{program}/qr-checkin', [ProgramOperationController::class, 'storePublicCheckin'])->name('public.programs.qr_checkin.store');
