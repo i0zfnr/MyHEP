@@ -447,15 +447,33 @@ class ProgramCertificateController extends Controller
             return back()->withErrors(['certificates' => __('The test certificate could not be generated. Please check the application log and try again.')]);
         }
 
-        return redirect()->route('admin.program-certificates.index', ['program_id' => $program, 'q' => $student->matric_no])
+        return redirect()->route('admin.program-certificates.preview', $certificateId)
             ->with('success', __('Test certificate generated successfully and is ready to download.'));
+    }
+
+    public function preview(int $certificate)
+    {
+        $item = $this->readyCertificate($certificate);
+
+        return response()->file(Storage::disk($item->disk)->path($item->path), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.addslashes($item->matric_no.' - Certificate.pdf').'"',
+        ]);
     }
 
     public function download(int $certificate)
     {
-        $item = DB::table('program_certificates')->where('id',$certificate)->first();
-        abort_unless($item && $item->status === 'ready' && $item->path && Storage::disk($item->disk)->exists($item->path),404);
+        $item = $this->readyCertificate($certificate);
+
         return Storage::disk($item->disk)->download($item->path,$item->matric_no.' - Certificate.pdf');
+    }
+
+    private function readyCertificate(int $certificate): object
+    {
+        $item = DB::table('program_certificates')->where('id', $certificate)->first();
+        abort_unless($item && $item->status === 'ready' && $item->path && Storage::disk($item->disk)->exists($item->path), 404);
+
+        return $item;
     }
 
     private function selectedTemplate(array $validated): array

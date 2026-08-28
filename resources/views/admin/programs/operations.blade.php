@@ -650,7 +650,7 @@
                 <div class="pmr-actions pmr-certificate-main-actions">
                     @if($canManageCertificates && $certificateTemplates->isNotEmpty())
                         <button class="pmr-btn primary" type="submit">{{ __('Generate Certificates') }}</button>
-                        <button class="pmr-btn" type="submit" formaction="{{ route('admin.programs.certificates.generate-test',$program->id) }}">{{ __('Test First') }}</button>
+                        <button class="pmr-btn" type="submit" formaction="{{ route('admin.programs.certificates.generate-test',$program->id) }}">{{ __('Test & Preview') }}</button>
                     @endif
                     <a class="pmr-btn" href="{{ route('admin.program-certificate-templates.index', ['program_id' => $program->id]) }}">{{ $certificateTemplates->isEmpty() ? __('Create Design') : __('New Design') }}</a>
                 </div>
