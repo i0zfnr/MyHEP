@@ -15,7 +15,7 @@
         <div>
             <p>{{ __('Certificate Studio') }}</p>
             <h1>{{ __('Create a certificate template') }}</h1>
-            <span>{{ __('Upload the blank PDF and let AI prepare the Name and IC placement.') }}</span>
+            <span>{{ __('Upload a certificate containing Name and IC placeholders or sample recipient details. AI will map only those two areas for replacement.') }}</span>
         </div>
         <a class="btn" href="{{ $programId ? route('admin.programs.operations', $programId) : route('admin.programs.index') }}">{{ $programId ? __('Back to Program Operations') : __('Back to Program Management') }}</a>
     </section>
@@ -125,7 +125,7 @@
             <div id="certCanvas" class="cert-canvas" data-page-width-mm="297" data-page-height-mm="210">
                 <div class="cert-empty-preview">
                     <strong>{{ __('PDF preview will appear here') }}</strong>
-                    <span>{{ __('Choose a PDF, then click Prepare Template with AI.') }}</span>
+                    <span>{{ __('Choose a PDF containing existing Name and IC areas, then let AI detect them.') }}</span>
                 </div>
                 <canvas id="certPdfCanvas" hidden></canvas>
                 <span class="cert-clean-cover" data-cover-for="name" aria-hidden="true"></span>

@@ -211,6 +211,11 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         Http::fake(function ($request) {
             $this->assertSame('test-gemini-key', $request->header('x-goog-api-key')[0] ?? null);
             $this->assertStringNotContainsString('?key=', $request->url());
+            $prompt = (string) data_get($request->data(), 'contents.0.parts.0.text');
+            $this->assertStringContainsString('sample person\'s full name', $prompt);
+            $this->assertStringContainsString('sample Malaysian IC/NRIC value', $prompt);
+            $this->assertStringContainsString('signature or issuer block is permanent', $prompt);
+            $this->assertStringContainsString('Do not redesign, rewrite, move, or remove permanent content', $prompt);
 
             return Http::response([
                 'candidates' => [[

@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     analyzeButton?.addEventListener('click', async () => {
         const file = input.files?.[0];
         if (!file) {
-            aiStatus.textContent = 'Choose a blank certificate PDF first.';
+            aiStatus.textContent = 'Choose a certificate PDF containing Name and IC placeholders or sample details first.';
             aiStatus.className = 'cert-ai-status error';
             return;
         }
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (saveButton) saveButton.disabled = true;
         const aiCleanedInput = document.querySelector('[data-ai-cleaned]');
         if (aiCleanedInput) aiCleanedInput.value = '0';
-        aiStatus.textContent = 'AI is reading the blank template...';
+        aiStatus.textContent = 'AI is locating the existing Name and IC areas...';
         aiStatus.className = 'cert-ai-status';
 
         try {
