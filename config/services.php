@@ -59,6 +59,7 @@ return [
         'key' => env('GEMINI_API_KEY'),
         'url' => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         'model' => env('GEMINI_MODEL', 'gemini-3.7-flash'),
+        'ca_bundle' => env('GEMINI_CA_BUNDLE'),
     ],
 
     'certificate_cleaner' => [

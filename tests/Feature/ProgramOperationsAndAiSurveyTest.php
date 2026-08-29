@@ -266,6 +266,46 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_certificate_ai_retries_temporary_gemini_overload(): void
+    {
+        config([
+            'services.gemini.key' => 'test-gemini-key',
+            'services.gemini.model' => 'gemini-test',
+            'services.openai.key' => null,
+        ]);
+
+        Http::fakeSequence()
+            ->push(['error' => ['code' => 503, 'message' => 'Model overloaded']], 503)
+            ->push(['error' => ['code' => 503, 'message' => 'Model overloaded']], 503)
+            ->push([
+                'candidates' => [[
+                    'content' => ['parts' => [[
+                        'text' => '{"student_name":{"x_mm":73.5,"y_mm":75.3,"width_mm":150,"font_size":14,"cover":{"x_mm":72,"y_mm":74,"width_mm":153,"height_mm":10,"color":"#f4ebd6"}},"ic_no":{"x_mm":73.5,"y_mm":87.1,"width_mm":150,"font_size":10,"cover":{"x_mm":72,"y_mm":86,"width_mm":153,"height_mm":8,"color":"#f4ebd6"}}}',
+                    ]]],
+                ]],
+            ], 200);
+
+        $pdf = new UploadedFile(
+            resource_path('certificates/batik-run.pdf'),
+            'blank-certificate.pdf',
+            'application/pdf',
+            null,
+            true
+        );
+
+        $this->signIn(1, 'lecturer')
+            ->withHeader('Accept', 'application/json')
+            ->post(route('admin.program-certificate-templates.analyze'), [
+                'template_pdf' => $pdf,
+                'source_page' => 1,
+            ])
+            ->assertOk()
+            ->assertJsonPath('fields.student_name.x_mm', 73.5)
+            ->assertJsonPath('fields.ic_no.y_mm', 87.1);
+
+        Http::assertSentCount(3);
+    }
+
     public function test_admin_upload_saves_original_and_cleaned_certificate_master(): void
     {
         Storage::fake('local');

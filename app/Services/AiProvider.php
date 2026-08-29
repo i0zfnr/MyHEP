@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 
@@ -62,10 +63,27 @@ class AiProvider
             if (! $attachment instanceof UploadedFile) continue;
             $parts[] = ['inlineData' => ['mimeType' => (string) $attachment->getMimeType(), 'data' => base64_encode((string) file_get_contents($attachment->getRealPath()))]];
         }
-        $response = Http::acceptJson()
+        $request = Http::acceptJson()
             ->withHeaders(['x-goog-api-key' => (string) config('services.gemini.key')])
             ->timeout(90)
-            ->post($url, array_filter([
+            ->retry([1000, 2000], function (\Throwable $exception): bool {
+                if (! $exception instanceof RequestException || ! $exception->response) {
+                    return false;
+                }
+
+                return in_array($exception->response->status(), [429, 500, 502, 503, 504], true);
+            });
+
+        $caBundle = config('services.gemini.ca_bundle');
+        if (is_string($caBundle) && $caBundle !== '') {
+            if (! is_file($caBundle)) {
+                throw new \RuntimeException("The configured Gemini CA bundle does not exist: {$caBundle}");
+            }
+
+            $request = $request->withOptions(['verify' => $caBundle]);
+        }
+
+        $response = $request->post($url, array_filter([
                 'systemInstruction' => ['parts' => [['text' => 'You are a careful student support assistant.']]],
                 'contents' => [['role' => 'user', 'parts' => $parts]],
                 'generationConfig' => $jsonResponse ? ['responseMimeType' => 'application/json', 'temperature' => 0] : null,

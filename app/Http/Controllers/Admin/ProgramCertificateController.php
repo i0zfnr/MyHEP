@@ -308,6 +308,21 @@ class ProgramCertificateController extends Controller
                 'page' => ['width_mm' => $templateInfo['width'], 'height_mm' => $templateInfo['height']],
                 'fields' => $this->parseCertificateAnalysis($response, $templateInfo),
             ]);
+        } catch (\Illuminate\Http\Client\ConnectionException $exception) {
+            report($exception);
+
+            return response()->json([
+                'message' => __('AI connection failed because the server could not establish a secure connection to Gemini. Check the configured CA certificate bundle, then try again.'),
+            ], 503);
+        } catch (\Illuminate\Http\Client\RequestException $exception) {
+            report($exception);
+
+            $status = $exception->response?->status();
+            $message = in_array($status, [429, 500, 502, 503, 504], true)
+                ? __('Gemini is temporarily busy. Please wait a moment and select Prepare Template with AI again, or position both fields manually.')
+                : __('Gemini rejected the template analysis request. Check the API configuration, then try again or position both fields manually.');
+
+            return response()->json(['message' => $message], 503);
         } catch (\Throwable $exception) {
             report($exception);
 
