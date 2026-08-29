@@ -107,7 +107,7 @@ class ProgramCertificateController extends Controller
             $slug.'-'.$storedAt.'-original.pdf',
             'local'
         );
-        $cleanedPath = 'certificate-templates/'.$slug.'-'.$storedAt.'-cleaned.pdf';
+        $cleanedPath = null;
 
         try {
             $templateInfo = $this->inspectUploadedTemplate(Storage::disk('local')->path($path), (int) $validated['source_page']);
@@ -125,35 +125,39 @@ class ProgramCertificateController extends Controller
         $pageHeight = (float) $templateInfo['height'];
         $this->validateFieldBounds($validated, $pageWidth, $pageHeight);
 
-        try {
-            $cleaner->clean(
-                Storage::disk('local')->path($path),
-                Storage::disk('local')->path($cleanedPath),
-                (int) $validated['source_page'],
-                [
-                    [
-                        'x_mm' => (float) $validated['name_cover_x_mm'],
-                        'y_mm' => (float) $validated['name_cover_y_mm'],
-                        'width_mm' => (float) $validated['name_cover_width_mm'],
-                        'height_mm' => (float) $validated['name_cover_height_mm'],
-                        'color' => (string) $validated['name_cover_color'],
-                    ],
-                    [
-                        'x_mm' => (float) $validated['ic_cover_x_mm'],
-                        'y_mm' => (float) $validated['ic_cover_y_mm'],
-                        'width_mm' => (float) $validated['ic_cover_width_mm'],
-                        'height_mm' => (float) $validated['ic_cover_height_mm'],
-                        'color' => (string) $validated['ic_cover_color'],
-                    ],
-                ]
-            );
-        } catch (\Throwable $exception) {
-            Storage::disk('local')->delete([$path, $cleanedPath]);
-            report($exception);
+        if ((bool) $validated['ai_cleaned']) {
+            $cleanedPath = 'certificate-templates/'.$slug.'-'.$storedAt.'-cleaned.pdf';
 
-            return back()->withInput()->withErrors([
-                'template_pdf' => __('The Name and IC placeholders could not be removed cleanly. Review both detected areas and try again.'),
-            ]);
+            try {
+                $cleaner->clean(
+                    Storage::disk('local')->path($path),
+                    Storage::disk('local')->path($cleanedPath),
+                    (int) $validated['source_page'],
+                    [
+                        [
+                            'x_mm' => (float) $validated['name_cover_x_mm'],
+                            'y_mm' => (float) $validated['name_cover_y_mm'],
+                            'width_mm' => (float) $validated['name_cover_width_mm'],
+                            'height_mm' => (float) $validated['name_cover_height_mm'],
+                            'color' => (string) $validated['name_cover_color'],
+                        ],
+                        [
+                            'x_mm' => (float) $validated['ic_cover_x_mm'],
+                            'y_mm' => (float) $validated['ic_cover_y_mm'],
+                            'width_mm' => (float) $validated['ic_cover_width_mm'],
+                            'height_mm' => (float) $validated['ic_cover_height_mm'],
+                            'color' => (string) $validated['ic_cover_color'],
+                        ],
+                    ]
+                );
+            } catch (\Throwable $exception) {
+                Storage::disk('local')->delete(array_filter([$path, $cleanedPath]));
+                report($exception);
+
+                return back()->withInput()->withErrors([
+                    'template_pdf' => __('The Name and IC placeholders could not be removed cleanly. Review both detected areas and try again.'),
+                ]);
+            }
         }
 
         $templateId = DB::transaction(function () use ($validated, $file, $path, $cleanedPath, $slug, $templateInfo): int {
@@ -692,7 +696,7 @@ PROMPT;
         $decoded = $this->normalizeCertificateCoordinates($decoded, $pageWidth, $pageHeight);
         $result = [];
 
-        foreach (['student_name' => 14, 'ic_no' => 10] as $key => $defaultFont) {
+        foreach (['student_name' => 18, 'ic_no' => 14] as $key => $defaultFont) {
             $field = $decoded[$key] ?? null;
             if (! is_array($field)) {
                 throw new \UnexpectedValueException("Missing {$key} field.");
@@ -749,7 +753,7 @@ PROMPT;
                 'x_mm' => $x,
                 'y_mm' => $y,
                 'width_mm' => $width,
-                'font_size' => max(8, min(72, $font)),
+                'font_size' => max($key === 'student_name' ? 16 : 12, min(72, $font)),
                 'cover' => [
                     'x_mm' => $coverX,
                     'y_mm' => $coverY,

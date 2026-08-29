@@ -332,6 +332,37 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->assertDatabaseHas('certificate_template_fields', ['certificate_template_id' => $template->id, 'field_key' => 'ic_no']);
     }
 
+    public function test_blank_template_manual_placement_preserves_the_original_pdf(): void
+    {
+        Storage::fake('local');
+        $cleaner = Mockery::mock(CertificateTemplateCleaner::class);
+        $cleaner->shouldNotReceive('clean');
+        app()->instance(CertificateTemplateCleaner::class, $cleaner);
+
+        $pdf = new UploadedFile(resource_path('certificates/batik-run.pdf'), 'blank-certificate.pdf', 'application/pdf', null, true);
+        $response = $this->signIn(1, 'lecturer')->post(route('admin.program-certificate-templates.store'), [
+            'name' => 'Blank Placement Template', 'template_pdf' => $pdf, 'source_page' => 1, 'ai_cleaned' => 0,
+            'name_x_mm' => 73.5, 'name_y_mm' => 75.3, 'name_width_mm' => 150, 'name_font_size' => 18,
+            'ic_x_mm' => 73.5, 'ic_y_mm' => 87.1, 'ic_width_mm' => 150, 'ic_font_size' => 14,
+            'name_cover_x_mm' => 73.5, 'name_cover_y_mm' => 75.3, 'name_cover_width_mm' => 150, 'name_cover_height_mm' => 10, 'name_cover_color' => '#f4ebd6',
+            'ic_cover_x_mm' => 73.5, 'ic_cover_y_mm' => 87.1, 'ic_cover_width_mm' => 150, 'ic_cover_height_mm' => 8, 'ic_cover_color' => '#f4ebd6',
+        ]);
+
+        $response->assertRedirect(route('admin.program-certificate-templates.index'));
+        $template = DB::table('certificate_templates')->where('slug', 'blank-placement-template')->first();
+        $this->assertNotNull($template);
+        $this->assertNull($template->cleaned_file_path);
+        Storage::disk('local')->assertExists($template->file_path);
+        $this->assertDatabaseMissing('certificate_template_fields', [
+            'certificate_template_id' => $template->id,
+            'field_key' => 'background_cover_name',
+        ]);
+        $this->assertDatabaseMissing('certificate_template_fields', [
+            'certificate_template_id' => $template->id,
+            'field_key' => 'background_cover_ic',
+        ]);
+    }
+
     public function test_template_owner_can_rename_and_delete_an_unused_template_with_private_files(): void
     {
         Storage::fake('local');

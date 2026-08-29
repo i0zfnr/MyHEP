@@ -29,6 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getInput = (prefix, suffix) => document.querySelector(`[data-field-input="${prefix}_${suffix}"]`);
 
+    const usePlacementOnly = () => {
+        const aiCleanedInput = document.querySelector('[data-ai-cleaned]');
+        if (aiCleanedInput) aiCleanedInput.value = '0';
+        canvas.classList.remove('is-detected');
+        aiStatus.textContent = 'Manual placement selected. The original PDF will be preserved without removing or covering any text.';
+        aiStatus.className = 'cert-ai-status success';
+        if (saveButton) saveButton.disabled = false;
+    };
+
     const placeFieldFromInputs = (field) => {
         const prefix = field.dataset.prefix;
         const x = Number(getInput(prefix, 'x')?.value || 0);
@@ -198,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fields.forEach((field) => {
         field.addEventListener('pointerdown', (event) => {
             event.preventDefault();
+            usePlacementOnly();
             field.setPointerCapture(event.pointerId);
             setActive(field.dataset.certField);
             field.style.cursor = 'grabbing';

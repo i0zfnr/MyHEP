@@ -58,8 +58,8 @@
 
             @php
                 $fieldDefaults = [
-                    'name' => ['label' => __('Student Name'), 'prefix' => 'name', 'x' => '74', 'y' => '76', 'w' => '150', 'font' => '14'],
-                    'ic' => ['label' => __('IC Number'), 'prefix' => 'ic', 'x' => '74', 'y' => '88', 'w' => '150', 'font' => '10'],
+                    'name' => ['label' => __('Student Name'), 'prefix' => 'name', 'x' => '74', 'y' => '76', 'w' => '150', 'font' => '18'],
+                    'ic' => ['label' => __('IC Number'), 'prefix' => 'ic', 'x' => '74', 'y' => '88', 'w' => '150', 'font' => '14'],
                 ];
             @endphp
 

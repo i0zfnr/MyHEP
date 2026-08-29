@@ -199,7 +199,7 @@ class GenerateProgramCertificate implements ShouldQueue
                     $value,
                     (float) $field->width_mm,
                     (int) $field->font_size,
-                    8
+                    (string) $field->field_key === 'student_name' ? 11 : 10
                 );
                 $pdf->SetFont('Arial', $style, $fontSize);
                 $recipientCover = match ((string) $field->field_key) {
@@ -263,7 +263,9 @@ class GenerateProgramCertificate implements ShouldQueue
         foreach (['name' => 'student_name', 'ic' => 'ic_no'] as $suffix => $recipientKey) {
             $cover = $recipientFields->get('background_cover_'.$suffix);
             $recipient = $recipientFields->get($recipientKey);
-            if (! $recipient) {
+            // Templates saved in placement-only mode deliberately have no
+            // removal covers. Their original artwork must remain untouched.
+            if (! $recipient || ! $cover) {
                 return null;
             }
 
