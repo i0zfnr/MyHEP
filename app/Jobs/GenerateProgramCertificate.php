@@ -194,12 +194,13 @@ class GenerateProgramCertificate implements ShouldQueue
 
                 $style = (string) $field->font_weight === 'bold' ? 'B' : '';
                 $pdf->SetTextColor(...$this->hexToRgb($field->text_color ?: '#1f1a16'));
+                $fontRange = $this->recipientFontRange((string) $field->field_key, (int) $field->font_size);
                 $fontSize = $this->fitFontSize(
                     $pdf,
                     $value,
                     (float) $field->width_mm,
-                    (int) $field->font_size,
-                    (string) $field->field_key === 'student_name' ? 11 : 10
+                    $fontRange['start'],
+                    $fontRange['minimum']
                 );
                 $pdf->SetFont('Arial', $style, $fontSize);
                 $recipientCover = match ((string) $field->field_key) {
@@ -362,6 +363,15 @@ class GenerateProgramCertificate implements ShouldQueue
         } while ($fontSize >= $minimum);
 
         return $minimum;
+    }
+
+    private function recipientFontRange(string $fieldKey, int $configuredSize): array
+    {
+        return match ($fieldKey) {
+            'student_name' => ['start' => max(18, $configuredSize), 'minimum' => 12],
+            'ic_no' => ['start' => max(14, $configuredSize), 'minimum' => 11],
+            default => ['start' => max(10, $configuredSize), 'minimum' => 8],
+        };
     }
 
     private function pdfText(?string $text): string

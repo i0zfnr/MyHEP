@@ -512,6 +512,10 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->assertSame(90.0, $safetyBox['width']);
         $this->assertSame(8.0, $safetyBox['height']);
         $this->assertEqualsWithDelta(97.5, $safetyBox['x'], 0.1);
+
+        $fontMethod = new \ReflectionMethod(GenerateProgramCertificate::class, 'recipientFontRange');
+        $this->assertSame(['start' => 18, 'minimum' => 12], $fontMethod->invoke($job, 'student_name', 8));
+        $this->assertSame(['start' => 14, 'minimum' => 11], $fontMethod->invoke($job, 'ic_no', 8));
     }
 
     public function test_program_director_can_open_operations_workspace(): void
