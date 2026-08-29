@@ -136,12 +136,14 @@ class ProgramCertificateController extends Controller
                         'y_mm' => (float) $validated['name_cover_y_mm'],
                         'width_mm' => (float) $validated['name_cover_width_mm'],
                         'height_mm' => (float) $validated['name_cover_height_mm'],
+                        'color' => (string) $validated['name_cover_color'],
                     ],
                     [
                         'x_mm' => (float) $validated['ic_cover_x_mm'],
                         'y_mm' => (float) $validated['ic_cover_y_mm'],
                         'width_mm' => (float) $validated['ic_cover_width_mm'],
                         'height_mm' => (float) $validated['ic_cover_height_mm'],
+                        'color' => (string) $validated['ic_cover_color'],
                     ],
                 ]
             );

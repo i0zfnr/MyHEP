@@ -247,6 +247,7 @@ class GenerateProgramCertificate implements ShouldQueue
                     'y_mm' => (float) $cover->y_mm,
                     'width_mm' => (float) $cover->width_mm,
                     'height_mm' => (float) $cover->height_mm,
+                    'color' => (string) ($cover->cover_color ?: '#f4ebd6'),
                 ];
                 continue;
             }
@@ -257,6 +258,7 @@ class GenerateProgramCertificate implements ShouldQueue
                 'y_mm' => max(0, (float) $recipient->y_mm - $coverHeight),
                 'width_mm' => (float) $recipient->width_mm,
                 'height_mm' => (float) $recipient->height_mm + $coverHeight,
+                'color' => (string) ($cover->cover_color ?? '#f4ebd6'),
             ];
         }
 

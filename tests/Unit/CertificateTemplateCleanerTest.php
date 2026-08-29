@@ -18,8 +18,8 @@ class CertificateTemplateCleanerTest extends TestCase
                 $output,
                 1,
                 [
-                    ['x_mm' => 143, 'y_mm' => 69.5, 'width_mm' => 28, 'height_mm' => 11.5],
-                    ['x_mm' => 113, 'y_mm' => 78.2, 'width_mm' => 88, 'height_mm' => 11.7],
+                    ['x_mm' => 143, 'y_mm' => 69.5, 'width_mm' => 28, 'height_mm' => 11.5, 'color' => '#f4ebd6'],
+                    ['x_mm' => 113, 'y_mm' => 78.2, 'width_mm' => 88, 'height_mm' => 11.7, 'color' => '#f4ebd6'],
                 ]
             );
 
@@ -28,6 +28,10 @@ class CertificateTemplateCleanerTest extends TestCase
 
             $pdf = new Fpdi();
             $this->assertSame(1, $pdf->setSourceFile($output));
+            $page = $pdf->importPage(1);
+            $size = $pdf->getTemplateSize($page);
+            $this->assertEqualsWithDelta(297, (float) $size['width'], 0.2);
+            $this->assertEqualsWithDelta(210, (float) $size['height'], 0.2);
         } finally {
             if (is_file($output)) {
                 unlink($output);

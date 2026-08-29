@@ -15,10 +15,9 @@
 2. Create `.env` from the example without copying development secrets.
 3. Configure `APP_ENV=production`, `APP_DEBUG=false`, canonical URL, database, session, queue, cache, mail, push, and AI settings.
 4. Generate the application key, migrate with `--force`, link storage, and build frontend assets.
-5. Install Python 3 plus `pymupdf`, `opencv-python-headless`, and `numpy`. Set `CERTIFICATE_CLEANER_PYTHON` if the production Python executable is not available as `python`.
-6. Run persistent queue workers under a process supervisor and configure the Laravel scheduler. Bulk certificate generation depends on the worker; **Test & Preview** remains synchronous for immediate review.
-7. Cache configuration/routes/views only after environment validation.
-8. Verify trusted hosts, HTTPS, writable storage/cache paths, private-file authorization, and security headers.
+5. Run persistent queue workers under a process supervisor and configure the Laravel scheduler. Bulk certificate generation depends on the worker; **Test & Preview** remains synchronous for immediate review.
+6. Cache configuration/routes/views only after environment validation.
+7. Verify trusted hosts, HTTPS, writable storage/cache paths, private-file authorization, and security headers.
 
 ## Typical commands
 
