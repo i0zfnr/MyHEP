@@ -156,6 +156,7 @@ class GenerateProgramCertificate implements ShouldQueue
 
         try {
             $pdf = new Fpdi('L', 'mm', 'A4');
+            $this->registerCertificateFonts($pdf);
             $pageCount = $pdf->setSourceFile($templatePath);
             $sourcePage = max(1, min((int) ($template->source_page ?: 1), $pageCount));
             $page = $pdf->importPage($sourcePage);
@@ -192,7 +193,12 @@ class GenerateProgramCertificate implements ShouldQueue
                     continue;
                 }
 
-                $style = (string) $field->font_weight === 'bold' ? 'B' : '';
+                $style = in_array((string) $field->field_key, ['student_name', 'ic_no'], true)
+                    ? 'B'
+                    : ((string) $field->font_weight === 'bold' ? 'B' : '');
+                $fontFamily = in_array((string) $field->field_key, ['student_name', 'ic_no'], true)
+                    ? 'Poppins'
+                    : 'Arial';
                 $pdf->SetTextColor(...$this->hexToRgb($field->text_color ?: '#1f1a16'));
                 $fontRange = $this->recipientFontRange((string) $field->field_key, (int) $field->font_size);
                 $fontSize = $this->fitFontSize(
@@ -200,9 +206,11 @@ class GenerateProgramCertificate implements ShouldQueue
                     $value,
                     (float) $field->width_mm,
                     $fontRange['start'],
-                    $fontRange['minimum']
+                    $fontRange['minimum'],
+                    $fontFamily,
+                    $style
                 );
-                $pdf->SetFont('Arial', $style, $fontSize);
+                $pdf->SetFont($fontFamily, $style, $fontSize);
                 $recipientCover = match ((string) $field->field_key) {
                     'student_name' => $recipientFields->get('background_cover_name'),
                     'ic_no' => $recipientFields->get('background_cover_ic'),
@@ -351,11 +359,19 @@ class GenerateProgramCertificate implements ShouldQueue
         ];
     }
 
-    private function fitFontSize(Fpdi $pdf, string $text, float $maxWidth, int $start, int $minimum): int
+    private function fitFontSize(
+        Fpdi $pdf,
+        string $text,
+        float $maxWidth,
+        int $start,
+        int $minimum,
+        string $fontFamily = 'Arial',
+        string $fontStyle = 'B'
+    ): int
     {
-        $fontSize = $start;
+        $fontSize = max($start, $minimum);
         do {
-            $pdf->SetFont('Arial', 'B', $fontSize);
+            $pdf->SetFont($fontFamily, $fontStyle, $fontSize);
             if ($pdf->GetStringWidth($this->pdfText($text)) <= $maxWidth || $fontSize <= $minimum) {
                 return $fontSize;
             }
@@ -365,11 +381,24 @@ class GenerateProgramCertificate implements ShouldQueue
         return $minimum;
     }
 
+    private function registerCertificateFonts(Fpdi $pdf): void
+    {
+        $fontDirectory = resource_path('fonts/certificate');
+        $fontDefinition = $fontDirectory.DIRECTORY_SEPARATOR.'Poppins-Bold.php';
+        $fontData = $fontDirectory.DIRECTORY_SEPARATOR.'Poppins-Bold.z';
+
+        if (! is_file($fontDefinition) || ! is_file($fontData)) {
+            throw new \RuntimeException('Poppins certificate font assets are missing.');
+        }
+
+        $pdf->AddFont('Poppins', 'B', 'Poppins-Bold.php', $fontDirectory);
+    }
+
     private function recipientFontRange(string $fieldKey, int $configuredSize): array
     {
         return match ($fieldKey) {
             'student_name' => ['start' => max(18, $configuredSize), 'minimum' => 12],
-            'ic_no' => ['start' => max(14, $configuredSize), 'minimum' => 11],
+            'ic_no' => ['start' => max(16, $configuredSize), 'minimum' => 12],
             default => ['start' => max(10, $configuredSize), 'minimum' => 8],
         };
     }

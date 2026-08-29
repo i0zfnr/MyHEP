@@ -515,7 +515,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
 
         $fontMethod = new \ReflectionMethod(GenerateProgramCertificate::class, 'recipientFontRange');
         $this->assertSame(['start' => 18, 'minimum' => 12], $fontMethod->invoke($job, 'student_name', 8));
-        $this->assertSame(['start' => 14, 'minimum' => 11], $fontMethod->invoke($job, 'ic_no', 8));
+        $this->assertSame(['start' => 16, 'minimum' => 12], $fontMethod->invoke($job, 'ic_no', 8));
     }
 
     public function test_program_director_can_open_operations_workspace(): void
