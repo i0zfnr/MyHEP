@@ -276,7 +276,6 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
 
         Http::fakeSequence()
             ->push(['error' => ['code' => 503, 'message' => 'Model overloaded']], 503)
-            ->push(['error' => ['code' => 503, 'message' => 'Model overloaded']], 503)
             ->push([
                 'candidates' => [[
                     'content' => ['parts' => [[
@@ -303,7 +302,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             ->assertJsonPath('fields.student_name.x_mm', 73.5)
             ->assertJsonPath('fields.ic_no.y_mm', 87.1);
 
-        Http::assertSentCount(3);
+        Http::assertSentCount(2);
     }
 
     public function test_admin_upload_saves_original_and_cleaned_certificate_master(): void

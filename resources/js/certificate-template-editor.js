@@ -141,8 +141,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: formData,
             });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'AI detection failed.');
+            const responseBody = await response.text();
+            let result = {};
+            try {
+                result = responseBody ? JSON.parse(responseBody) : {};
+            } catch {
+                result = {};
+            }
+
+            if (!response.ok) {
+                const temporaryFailure = [429, 500, 502, 503, 504].includes(response.status);
+                const fallbackMessage = temporaryFailure
+                    ? 'Gemini or the hosting server is temporarily busy. Please wait a moment and try again, or position both fields manually.'
+                    : `AI detection failed (HTTP ${response.status}). Please try again or position both fields manually.`;
+                throw new Error(result.message || fallbackMessage);
+            }
 
             pageSize.w = Number(result.page?.width_mm || pageSize.w);
             pageSize.h = Number(result.page?.height_mm || pageSize.h);

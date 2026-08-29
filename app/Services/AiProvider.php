@@ -66,7 +66,7 @@ class AiProvider
         $request = Http::acceptJson()
             ->withHeaders(['x-goog-api-key' => (string) config('services.gemini.key')])
             ->timeout(90)
-            ->retry([1000, 2000], function (\Throwable $exception): bool {
+            ->retry([1500], function (\Throwable $exception): bool {
                 if (! $exception instanceof RequestException || ! $exception->response) {
                     return false;
                 }
