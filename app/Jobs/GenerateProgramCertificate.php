@@ -168,10 +168,6 @@ class GenerateProgramCertificate implements ShouldQueue
 
             foreach ($fields as $field) {
                 if (str_starts_with((string) $field->field_key, 'background_cover')) {
-                    if ($usesCleanedMaster) {
-                        continue;
-                    }
-
                     $recipientKey = match ((string) $field->field_key) {
                         'background_cover_name' => 'student_name',
                         'background_cover_ic' => 'ic_no',
@@ -179,8 +175,8 @@ class GenerateProgramCertificate implements ShouldQueue
                     };
                     $recipientField = $recipientKey ? $recipientFields->get($recipientKey) : null;
 
-                    if ($recipientField && ! $this->coverOverlapsRecipientField($field, $recipientField)) {
-                        $this->drawRecipientFallbackCover($pdf, $field, $recipientField);
+                    if ($recipientField && $recipientKey) {
+                        $this->drawRecipientSafetyCover($pdf, $field, $recipientKey, $width);
                     } else {
                         $this->drawCover($pdf, $field);
                     }
@@ -206,7 +202,15 @@ class GenerateProgramCertificate implements ShouldQueue
                     8
                 );
                 $pdf->SetFont('Arial', $style, $fontSize);
-                $pdf->SetXY((float) $field->x_mm, (float) $field->y_mm);
+                $recipientCover = match ((string) $field->field_key) {
+                    'student_name' => $recipientFields->get('background_cover_name'),
+                    'ic_no' => $recipientFields->get('background_cover_ic'),
+                    default => null,
+                };
+                $fieldY = $recipientCover
+                    ? max(0, (float) $recipientCover->y_mm + (((float) $recipientCover->height_mm - (float) $field->height_mm) / 2))
+                    : (float) $field->y_mm;
+                $pdf->SetXY((float) $field->x_mm, $fieldY);
                 $pdf->Cell(
                     (float) $field->width_mm,
                     (float) $field->height_mm,
@@ -227,6 +231,28 @@ class GenerateProgramCertificate implements ShouldQueue
     {
         $pdf->SetFillColor(...$this->hexToRgb($field->cover_color ?: '#f4ebd6'));
         $pdf->Rect((float) $field->x_mm, (float) $field->y_mm, (float) $field->width_mm, (float) $field->height_mm, 'F');
+    }
+
+    private function drawRecipientSafetyCover(Fpdi $pdf, object $cover, string $recipientKey, float $pageWidth): void
+    {
+        $box = $this->recipientSafetyCoverBox($cover, $recipientKey, $pageWidth);
+        $pdf->SetFillColor(...$this->hexToRgb($cover->cover_color ?: '#f4ebd6'));
+        $pdf->Rect($box['x'], $box['y'], $box['width'], $box['height'], 'F');
+    }
+
+    private function recipientSafetyCoverBox(object $cover, string $recipientKey, float $pageWidth): array
+    {
+        $minimumWidth = $recipientKey === 'ic_no' ? 90.0 : 55.0;
+        $width = min($pageWidth, max((float) $cover->width_mm, $minimumWidth));
+        $center = (float) $cover->x_mm + ((float) $cover->width_mm / 2);
+        $x = max(0, min($pageWidth - $width, $center - ($width / 2)));
+
+        return [
+            'x' => $x,
+            'y' => max(0, (float) $cover->y_mm),
+            'width' => $width,
+            'height' => max(8.0, (float) $cover->height_mm),
+        ];
     }
 
     private function createCleanedMasterForLegacyTemplate(object $template, $fields, string $disk): ?string
@@ -289,19 +315,6 @@ class GenerateProgramCertificate implements ShouldQueue
         ) - max((float) $cover->y_mm, (float) $recipient->y_mm);
 
         return $horizontalOverlap > 0 && $verticalOverlap > 0;
-    }
-
-    private function drawRecipientFallbackCover(Fpdi $pdf, object $cover, object $recipient): void
-    {
-        $paddingY = 1.0;
-        $pdf->SetFillColor(...$this->hexToRgb($cover->cover_color ?: '#f4ebd6'));
-        $pdf->Rect(
-            (float) $recipient->x_mm,
-            max(0, (float) $recipient->y_mm - $paddingY),
-            (float) $recipient->width_mm,
-            max((float) $recipient->height_mm + ($paddingY * 2), (float) $cover->height_mm),
-            'F'
-        );
     }
 
     private function certificateFieldValue(string $fieldKey, object $certificate, object $program): string

@@ -474,6 +474,13 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
 
         $this->assertTrue($method->invoke($job, $correctCover, $recipient));
         $this->assertFalse($method->invoke($job, $displacedCover, $recipient));
+
+        $safetyMethod = new \ReflectionMethod(GenerateProgramCertificate::class, 'recipientSafetyCoverBox');
+        $narrowIcCover = (object) ['x_mm' => 130, 'y_mm' => 78, 'width_mm' => 25, 'height_mm' => 7];
+        $safetyBox = $safetyMethod->invoke($job, $narrowIcCover, 'ic_no', 297.0);
+        $this->assertSame(90.0, $safetyBox['width']);
+        $this->assertSame(8.0, $safetyBox['height']);
+        $this->assertEqualsWithDelta(97.5, $safetyBox['x'], 0.1);
     }
 
     public function test_program_director_can_open_operations_workspace(): void
