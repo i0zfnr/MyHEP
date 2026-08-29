@@ -5,6 +5,7 @@ StudentEdge is a Laravel 13 student-affairs platform for Politeknik Besut. It co
 ## Current baseline
 
 - PHP 8.3+, Laravel 13, MySQL/MariaDB
+- Python 3 with PyMuPDF and OpenCV for one-time certificate-template cleaning
 - Vite 8 and Tailwind CSS 4
 - PHPWord for editable DOCX reports and Dompdf for PDF output
 - Queue-backed bulk certificate generation and email/push integrations
@@ -21,6 +22,7 @@ php artisan migrate
 npm install
 npm run build
 php artisan storage:link
+python -m pip install pymupdf opencv-python-headless numpy
 ```
 
 For development, run `composer run dev`. A queue worker must be running for queued work such as bulk certificate generation.

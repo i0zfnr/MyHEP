@@ -61,6 +61,11 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-3.7-flash'),
     ],
 
+    'certificate_cleaner' => [
+        'python' => env('CERTIFICATE_CLEANER_PYTHON', 'python'),
+        'dpi' => (int) env('CERTIFICATE_CLEANER_DPI', 300),
+    ],
+
     'openai' => [
         'key' => env('OPENAI_API_KEY'),
         'url' => env('OPENAI_API_URL', 'https://api.openai.com/v1/responses'),

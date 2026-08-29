@@ -222,6 +222,8 @@ Route::get('/admin/program-certificate-templates', [ProgramCertificateController
 Route::post('/admin/program-certificate-templates/analyze', [ProgramCertificateController::class, 'analyzeTemplate'])->middleware(['auth.session:admin', 'throttle:5,1'])->name('admin.program-certificate-templates.analyze');
 Route::post('/admin/program-certificate-templates', [ProgramCertificateController::class, 'storeTemplate'])->middleware('auth.session:admin')->name('admin.program-certificate-templates.store');
 Route::get('/admin/program-certificate-templates/{template}/preview', [ProgramCertificateController::class, 'previewTemplate'])->middleware('auth.session:admin')->name('admin.program-certificate-templates.preview');
+Route::patch('/admin/program-certificate-templates/{template}', [ProgramCertificateController::class, 'renameTemplate'])->middleware('auth.session:admin')->name('admin.program-certificate-templates.rename');
+Route::delete('/admin/program-certificate-templates/{template}', [ProgramCertificateController::class, 'destroyTemplate'])->middleware('auth.session:admin')->name('admin.program-certificate-templates.destroy');
 
 Route::get('/programs/{program}/qr-checkin', [ProgramOperationController::class, 'publicCheckin'])->name('public.programs.qr_checkin');
 Route::post('/programs/{program}/qr-checkin', [ProgramOperationController::class, 'storePublicCheckin'])->name('public.programs.qr_checkin.store');

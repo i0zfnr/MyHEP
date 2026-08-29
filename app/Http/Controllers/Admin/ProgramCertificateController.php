@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Jobs\GenerateProgramCertificate;
 use App\Services\AiProvider;
+use App\Services\CertificateTemplateCleaner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,7 +59,7 @@ class ProgramCertificateController extends Controller
         return view('admin.programs.certificate_templates', compact('templates', 'programId'));
     }
 
-    public function storeTemplate(Request $request): RedirectResponse
+    public function storeTemplate(Request $request, CertificateTemplateCleaner $cleaner): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
@@ -100,11 +101,13 @@ class ProgramCertificateController extends Controller
             $slug = $slugBase.'-'.$suffix++;
         }
 
+        $storedAt = now()->format('YmdHis');
         $path = $file->storeAs(
             'certificate-templates',
-            $slug.'-'.now()->format('YmdHis').'.pdf',
+            $slug.'-'.$storedAt.'-original.pdf',
             'local'
         );
+        $cleanedPath = 'certificate-templates/'.$slug.'-'.$storedAt.'-cleaned.pdf';
 
         try {
             $templateInfo = $this->inspectUploadedTemplate(Storage::disk('local')->path($path), (int) $validated['source_page']);
@@ -122,12 +125,42 @@ class ProgramCertificateController extends Controller
         $pageHeight = (float) $templateInfo['height'];
         $this->validateFieldBounds($validated, $pageWidth, $pageHeight);
 
-        $templateId = DB::transaction(function () use ($validated, $file, $path, $slug, $templateInfo): int {
+        try {
+            $cleaner->clean(
+                Storage::disk('local')->path($path),
+                Storage::disk('local')->path($cleanedPath),
+                (int) $validated['source_page'],
+                [
+                    [
+                        'x_mm' => (float) $validated['name_cover_x_mm'],
+                        'y_mm' => (float) $validated['name_cover_y_mm'],
+                        'width_mm' => (float) $validated['name_cover_width_mm'],
+                        'height_mm' => (float) $validated['name_cover_height_mm'],
+                    ],
+                    [
+                        'x_mm' => (float) $validated['ic_cover_x_mm'],
+                        'y_mm' => (float) $validated['ic_cover_y_mm'],
+                        'width_mm' => (float) $validated['ic_cover_width_mm'],
+                        'height_mm' => (float) $validated['ic_cover_height_mm'],
+                    ],
+                ]
+            );
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete([$path, $cleanedPath]);
+            report($exception);
+
+            return back()->withInput()->withErrors([
+                'template_pdf' => __('The Name and IC placeholders could not be removed cleanly. Review both detected areas and try again.'),
+            ]);
+        }
+
+        $templateId = DB::transaction(function () use ($validated, $file, $path, $cleanedPath, $slug, $templateInfo): int {
             $templateId = DB::table('certificate_templates')->insertGetId([
                 'name' => $validated['name'],
                 'slug' => $slug,
                 'disk' => 'local',
                 'file_path' => $path,
+                'cleaned_file_path' => $cleanedPath,
                 'original_filename' => $file->getClientOriginalName(),
                 'page_count' => $templateInfo['page_count'],
                 'source_page' => (int) $validated['source_page'],
@@ -288,12 +321,73 @@ class ProgramCertificateController extends Controller
     {
         $item = DB::table('certificate_templates')->where('id', $template)->where('is_active', true)->first();
         abort_unless($item, 404);
-        abort_unless(Storage::disk($item->disk ?: 'local')->exists($item->file_path), 404);
+        $disk = $item->disk ?: 'local';
+        $cleanedPath = $item->cleaned_file_path ?? null;
+        $previewPath = ! empty($cleanedPath) && Storage::disk($disk)->exists($cleanedPath)
+            ? $cleanedPath
+            : $item->file_path;
+        abort_unless(Storage::disk($disk)->exists($previewPath), 404);
 
-        return response()->file(Storage::disk($item->disk ?: 'local')->path($item->file_path), [
+        return response()->file(Storage::disk($disk)->path($previewPath), [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="'.addslashes($item->original_filename ?: 'certificate-template.pdf').'"',
+            'Content-Disposition' => 'inline; filename="'.addslashes('Cleaned - '.($item->original_filename ?: 'certificate-template.pdf')).'"',
         ]);
+    }
+
+    public function renameTemplate(Request $request, int $template): RedirectResponse
+    {
+        $item = DB::table('certificate_templates')->where('id', $template)->first();
+        abort_unless($item, 404);
+        $this->authorizeTemplateManagement($item);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+        ]);
+
+        DB::table('certificate_templates')->where('id', $template)->update([
+            'name' => trim($validated['name']),
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('success', __('Certificate template renamed successfully.'));
+    }
+
+    public function destroyTemplate(int $template): RedirectResponse
+    {
+        $item = DB::table('certificate_templates')->where('id', $template)->first();
+        abort_unless($item, 404);
+        $this->authorizeTemplateManagement($item);
+
+        $isInUse = DB::table('programs')->where('certificate_template_id', $template)->exists()
+            || DB::table('program_certificates')->where('certificate_template_id', $template)->exists();
+        if ($isInUse) {
+            return back()->withErrors([
+                'template' => __('This template cannot be deleted because it is assigned to a program or certificate record.'),
+            ]);
+        }
+
+        DB::transaction(function () use ($template): void {
+            DB::table('certificate_template_fields')->where('certificate_template_id', $template)->delete();
+            DB::table('certificate_templates')->where('id', $template)->delete();
+        });
+
+        Storage::disk($item->disk ?: 'local')->delete(array_values(array_filter([
+            $item->file_path,
+            $item->cleaned_file_path ?? null,
+        ])));
+
+        return back()->with('success', __('Certificate template deleted successfully.'));
+    }
+
+    private function authorizeTemplateManagement(object $template): void
+    {
+        $authId = (int) session('auth_user.id');
+        $role = (string) session('auth_user.admin_role');
+        abort_unless(
+            (int) ($template->created_by ?? 0) === $authId
+                || in_array($role, ['system_admin', 'student_affairs_head'], true),
+            403
+        );
     }
 
     public function generate(Request $request, int $program): RedirectResponse
@@ -341,24 +435,15 @@ class ProgramCertificateController extends Controller
                 $queued[]=$id;
             }
         });
-        $generated = 0;
-        $failed = 0;
         foreach ($queued as $id) {
-            try {
-                (new GenerateProgramCertificate($id))->handle();
-                $generated++;
-            } catch (\Throwable $exception) {
-                (new GenerateProgramCertificate($id))->failed($exception);
-                report($exception);
-                $failed++;
-            }
+            GenerateProgramCertificate::dispatch($id);
         }
 
-        if ($failed > 0) {
-            return back()->withErrors(['certificates' => __(':generated certificates generated. :failed certificates failed. Please check the failed records.', ['generated' => $generated, 'failed' => $failed])]);
-        }
-
-        return back()->with('success', trans_choice(':count certificate generated and ready for students.|:count certificates generated and ready for students.', $generated, ['count' => $generated]));
+        return back()->with('success', trans_choice(
+            ':count certificate queued for generation.|:count certificates queued for generation.',
+            count($queued),
+            ['count' => count($queued)]
+        ));
     }
 
     public function destroyForProgram(int $program): RedirectResponse

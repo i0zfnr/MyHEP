@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Services\CertificateTemplateCleaner;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Bus\Queueable;
@@ -140,7 +141,17 @@ class GenerateProgramCertificate implements ShouldQueue
             throw new \RuntimeException('Uploaded certificate template has no mapped fields.');
         }
 
-        $templatePath = Storage::disk($disk)->path($template->file_path);
+        $recipientFields = $fields->keyBy('field_key');
+
+        $cleanedPath = $template->cleaned_file_path ?? null;
+        if (empty($cleanedPath) || ! Storage::disk($disk)->exists($cleanedPath)) {
+            $cleanedPath = $this->createCleanedMasterForLegacyTemplate($template, $fields, $disk);
+        }
+        $usesCleanedMaster = ! empty($cleanedPath)
+            && Storage::disk($disk)->exists($cleanedPath);
+        $templatePath = Storage::disk($disk)->path(
+            $usesCleanedMaster ? $cleanedPath : $template->file_path
+        );
         $previousReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
 
         try {
@@ -157,11 +168,26 @@ class GenerateProgramCertificate implements ShouldQueue
 
             foreach ($fields as $field) {
                 if (str_starts_with((string) $field->field_key, 'background_cover')) {
-                    $this->drawCover($pdf, $field);
+                    if ($usesCleanedMaster) {
+                        continue;
+                    }
+
+                    $recipientKey = match ((string) $field->field_key) {
+                        'background_cover_name' => 'student_name',
+                        'background_cover_ic' => 'ic_no',
+                        default => null,
+                    };
+                    $recipientField = $recipientKey ? $recipientFields->get($recipientKey) : null;
+
+                    if ($recipientField && ! $this->coverOverlapsRecipientField($field, $recipientField)) {
+                        $this->drawRecipientFallbackCover($pdf, $field, $recipientField);
+                    } else {
+                        $this->drawCover($pdf, $field);
+                    }
                     continue;
                 }
 
-                if ((bool) $field->cover_background) {
+                if (! $usesCleanedMaster && (bool) $field->cover_background) {
                     $this->drawCover($pdf, $field);
                 }
 
@@ -172,7 +198,14 @@ class GenerateProgramCertificate implements ShouldQueue
 
                 $style = (string) $field->font_weight === 'bold' ? 'B' : '';
                 $pdf->SetTextColor(...$this->hexToRgb($field->text_color ?: '#1f1a16'));
-                $pdf->SetFont('Arial', $style, (int) $field->font_size);
+                $fontSize = $this->fitFontSize(
+                    $pdf,
+                    $value,
+                    (float) $field->width_mm,
+                    (int) $field->font_size,
+                    8
+                );
+                $pdf->SetFont('Arial', $style, $fontSize);
                 $pdf->SetXY((float) $field->x_mm, (float) $field->y_mm);
                 $pdf->Cell(
                     (float) $field->width_mm,
@@ -194,6 +227,79 @@ class GenerateProgramCertificate implements ShouldQueue
     {
         $pdf->SetFillColor(...$this->hexToRgb($field->cover_color ?: '#f4ebd6'));
         $pdf->Rect((float) $field->x_mm, (float) $field->y_mm, (float) $field->width_mm, (float) $field->height_mm, 'F');
+    }
+
+    private function createCleanedMasterForLegacyTemplate(object $template, $fields, string $disk): ?string
+    {
+        $recipientFields = $fields->keyBy('field_key');
+        $regions = [];
+
+        foreach (['name' => 'student_name', 'ic' => 'ic_no'] as $suffix => $recipientKey) {
+            $cover = $recipientFields->get('background_cover_'.$suffix);
+            $recipient = $recipientFields->get($recipientKey);
+            if (! $recipient) {
+                return null;
+            }
+
+            if ($cover && $this->coverOverlapsRecipientField($cover, $recipient)) {
+                $regions[] = [
+                    'x_mm' => (float) $cover->x_mm,
+                    'y_mm' => (float) $cover->y_mm,
+                    'width_mm' => (float) $cover->width_mm,
+                    'height_mm' => (float) $cover->height_mm,
+                ];
+                continue;
+            }
+
+            $coverHeight = max(8.0, (float) ($cover->height_mm ?? $recipient->height_mm));
+            $regions[] = [
+                'x_mm' => (float) $recipient->x_mm,
+                'y_mm' => max(0, (float) $recipient->y_mm - $coverHeight),
+                'width_mm' => (float) $recipient->width_mm,
+                'height_mm' => (float) $recipient->height_mm + $coverHeight,
+            ];
+        }
+
+        $cleanedPath = 'certificate-templates/'.((string) $template->slug).'-cleaned.pdf';
+        app(CertificateTemplateCleaner::class)->clean(
+            Storage::disk($disk)->path($template->file_path),
+            Storage::disk($disk)->path($cleanedPath),
+            (int) ($template->source_page ?: 1),
+            $regions
+        );
+        DB::table('certificate_templates')->where('id', $template->id)->update([
+            'cleaned_file_path' => $cleanedPath,
+            'updated_at' => now(),
+        ]);
+
+        return $cleanedPath;
+    }
+
+    private function coverOverlapsRecipientField(object $cover, object $recipient): bool
+    {
+        $horizontalOverlap = min(
+            (float) $cover->x_mm + (float) $cover->width_mm,
+            (float) $recipient->x_mm + (float) $recipient->width_mm
+        ) - max((float) $cover->x_mm, (float) $recipient->x_mm);
+        $verticalOverlap = min(
+            (float) $cover->y_mm + (float) $cover->height_mm,
+            (float) $recipient->y_mm + (float) $recipient->height_mm
+        ) - max((float) $cover->y_mm, (float) $recipient->y_mm);
+
+        return $horizontalOverlap > 0 && $verticalOverlap > 0;
+    }
+
+    private function drawRecipientFallbackCover(Fpdi $pdf, object $cover, object $recipient): void
+    {
+        $paddingY = 1.0;
+        $pdf->SetFillColor(...$this->hexToRgb($cover->cover_color ?: '#f4ebd6'));
+        $pdf->Rect(
+            (float) $recipient->x_mm,
+            max(0, (float) $recipient->y_mm - $paddingY),
+            (float) $recipient->width_mm,
+            max((float) $recipient->height_mm + ($paddingY * 2), (float) $cover->height_mm),
+            'F'
+        );
     }
 
     private function certificateFieldValue(string $fieldKey, object $certificate, object $program): string

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\GenerateProgramCertificate;
+use App\Services\CertificateTemplateCleaner;
+use Mockery;
 use Tests\TestCase;
 
 class ProgramOperationsAndAiSurveyTest extends TestCase
@@ -189,6 +191,20 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->string('path')->nullable(); $table->text('failure_reason')->nullable(); $table->unsignedBigInteger('generated_by');
             $table->timestamp('generated_at')->nullable(); $table->timestamps(); $table->unique(['program_id','student_id']);
         });
+        Schema::create('certificate_templates', function (Blueprint $table): void {
+            $table->id(); $table->string('name'); $table->string('slug')->unique(); $table->string('disk')->default('local');
+            $table->string('file_path'); $table->string('cleaned_file_path')->nullable(); $table->string('original_filename');
+            $table->unsignedInteger('page_count')->default(1); $table->unsignedInteger('source_page')->default(1);
+            $table->decimal('page_width_mm', 8, 2)->default(297); $table->decimal('page_height_mm', 8, 2)->default(210);
+            $table->boolean('is_active')->default(true); $table->unsignedBigInteger('created_by')->nullable(); $table->timestamps();
+        });
+        Schema::create('certificate_template_fields', function (Blueprint $table): void {
+            $table->id(); $table->unsignedBigInteger('certificate_template_id'); $table->string('field_key'); $table->string('label');
+            $table->unsignedInteger('page_number')->default(1); $table->decimal('x_mm', 8, 2); $table->decimal('y_mm', 8, 2);
+            $table->decimal('width_mm', 8, 2); $table->decimal('height_mm', 8, 2); $table->unsignedInteger('font_size');
+            $table->string('font_weight'); $table->string('text_color'); $table->string('alignment');
+            $table->boolean('cover_background')->default(false); $table->string('cover_color')->nullable(); $table->timestamps();
+        });
 
         DB::table('admins')->insert([
             ['id' => 1, 'username' => 'staff_director', 'email' => 'director@polibesut.edu.my', 'password' => bcrypt('password'), 'role' => 'lecturer', 'full_name' => 'Program Director', 'staff_department' => null, 'reporting_branch' => null, 'position' => 'Lecturer', 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
@@ -248,6 +264,80 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             ->assertJsonMissingPath('fields.serial_no');
 
         Http::assertSentCount(1);
+    }
+
+    public function test_admin_upload_saves_original_and_cleaned_certificate_master(): void
+    {
+        Storage::fake('local');
+        $cleaner = Mockery::mock(CertificateTemplateCleaner::class);
+        $cleaner->shouldReceive('clean')->once()->andReturnUsing(function (string $input, string $output): void {
+            copy($input, $output);
+        });
+        app()->instance(CertificateTemplateCleaner::class, $cleaner);
+
+        $pdf = new UploadedFile(resource_path('certificates/batik-run.pdf'), 'batik-run.pdf', 'application/pdf', null, true);
+        $response = $this->signIn(1, 'lecturer')->post(route('admin.program-certificate-templates.store'), [
+            'name' => 'Batik Run Clean Master', 'template_pdf' => $pdf, 'source_page' => 1, 'ai_cleaned' => 1,
+            'name_x_mm' => 73.5, 'name_y_mm' => 75.3, 'name_width_mm' => 150, 'name_font_size' => 14,
+            'ic_x_mm' => 73.5, 'ic_y_mm' => 87.1, 'ic_width_mm' => 150, 'ic_font_size' => 10,
+            'name_cover_x_mm' => 143, 'name_cover_y_mm' => 69.5, 'name_cover_width_mm' => 28, 'name_cover_height_mm' => 11.5, 'name_cover_color' => '#f4ebd6',
+            'ic_cover_x_mm' => 113, 'ic_cover_y_mm' => 78.2, 'ic_cover_width_mm' => 88, 'ic_cover_height_mm' => 11.7, 'ic_cover_color' => '#f4ebd6',
+        ]);
+
+        $response->assertRedirect(route('admin.program-certificate-templates.index'));
+        $template = DB::table('certificate_templates')->where('slug', 'batik-run-clean-master')->first();
+        $this->assertNotNull($template);
+        Storage::disk('local')->assertExists($template->file_path);
+        Storage::disk('local')->assertExists($template->cleaned_file_path);
+        $this->assertDatabaseHas('certificate_template_fields', ['certificate_template_id' => $template->id, 'field_key' => 'student_name']);
+        $this->assertDatabaseHas('certificate_template_fields', ['certificate_template_id' => $template->id, 'field_key' => 'ic_no']);
+    }
+
+    public function test_template_owner_can_rename_and_delete_an_unused_template_with_private_files(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('certificate-templates/original.pdf', '%PDF-original');
+        Storage::disk('local')->put('certificate-templates/cleaned.pdf', '%PDF-cleaned');
+        $templateId = DB::table('certificate_templates')->insertGetId([
+            'name' => 'Old Template Name', 'slug' => 'old-template-name', 'disk' => 'local',
+            'file_path' => 'certificate-templates/original.pdf', 'cleaned_file_path' => 'certificate-templates/cleaned.pdf',
+            'original_filename' => 'original.pdf', 'page_count' => 1, 'source_page' => 1,
+            'page_width_mm' => 297, 'page_height_mm' => 210, 'is_active' => true, 'created_by' => 1,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->signIn(1, 'lecturer')->patch(route('admin.program-certificate-templates.rename', $templateId), [
+            'name' => 'Official Batik Certificate',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('certificate_templates', ['id' => $templateId, 'name' => 'Official Batik Certificate']);
+
+        $this->signIn(1, 'lecturer')->delete(route('admin.program-certificate-templates.destroy', $templateId))
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseMissing('certificate_templates', ['id' => $templateId]);
+        Storage::disk('local')->assertMissing('certificate-templates/original.pdf');
+        Storage::disk('local')->assertMissing('certificate-templates/cleaned.pdf');
+    }
+
+    public function test_template_delete_is_blocked_when_in_use_and_non_owner_cannot_rename(): void
+    {
+        $templateId = DB::table('certificate_templates')->insertGetId([
+            'name' => 'Assigned Template', 'slug' => 'assigned-template', 'disk' => 'local',
+            'file_path' => 'certificate-templates/assigned.pdf', 'cleaned_file_path' => null,
+            'original_filename' => 'assigned.pdf', 'page_count' => 1, 'source_page' => 1,
+            'page_width_mm' => 297, 'page_height_mm' => 210, 'is_active' => true, 'created_by' => 1,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        DB::table('programs')->insert([
+            'created_by' => 1, 'title' => 'Assigned Program', 'paperwork_method' => 'none',
+            'certificate_template_id' => $templateId, 'status' => 'active', 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->signIn(2, 'lecturer')->patch(route('admin.program-certificate-templates.rename', $templateId), [
+            'name' => 'Unauthorized Rename',
+        ])->assertForbidden();
+        $this->signIn(1, 'lecturer')->delete(route('admin.program-certificate-templates.destroy', $templateId))
+            ->assertRedirect()->assertSessionHasErrors('template');
+        $this->assertDatabaseHas('certificate_templates', ['id' => $templateId, 'name' => 'Assigned Template']);
     }
 
     public function test_ai_template_detection_fits_oversized_rectangles_inside_the_pdf_page(): void
@@ -333,6 +423,18 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->assertEqualsWithDelta($pageWidth * 0.35, (float) $response->json('fields.student_name.x_mm'), 0.1);
         $this->assertEqualsWithDelta($pageHeight * 0.35, (float) $response->json('fields.student_name.y_mm'), 0.1);
         $this->assertEqualsWithDelta($pageWidth * 0.22, (float) $response->json('fields.ic_no.cover.width_mm'), 0.1);
+    }
+
+    public function test_certificate_renderer_rejects_a_placeholder_cover_displaced_from_its_recipient_field(): void
+    {
+        $method = new \ReflectionMethod(GenerateProgramCertificate::class, 'coverOverlapsRecipientField');
+        $job = new GenerateProgramCertificate(1);
+        $recipient = (object) ['x_mm' => 73.5, 'y_mm' => 75.3, 'width_mm' => 150, 'height_mm' => 9];
+        $correctCover = (object) ['x_mm' => 72, 'y_mm' => 74, 'width_mm' => 153, 'height_mm' => 10];
+        $displacedCover = (object) ['x_mm' => 20, 'y_mm' => 74, 'width_mm' => 30, 'height_mm' => 10];
+
+        $this->assertTrue($method->invoke($job, $correctCover, $recipient));
+        $this->assertFalse($method->invoke($job, $displacedCover, $recipient));
     }
 
     public function test_program_director_can_open_operations_workspace(): void
@@ -798,12 +900,15 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
 
     public function test_program_director_bulk_generates_certificates_by_student_matric_number(): void
     {
+        Queue::fake();
         $studentId = DB::table('students')->insertGetId(['full_name'=>'Certificate Student','matric_no'=>'PB22001','program'=>'DIT','created_at'=>now(),'updated_at'=>now()]);
         $programId = DB::table('programs')->insertGetId(['created_by'=>1,'title'=>'Certificate Program','paperwork_method'=>'none','questionnaire_enabled'=>false,'status'=>'completed','created_at'=>now(),'updated_at'=>now()]);
         $attendanceId = DB::table('program_attendances')->insertGetId(['program_id'=>$programId,'student_id'=>$studentId,'attendee_type'=>'internal','full_name'=>'Certificate Student','identifier'=>'PB22001','checked_in_at'=>now(),'geofence_valid'=>true,'validation_status'=>'valid','created_at'=>now(),'updated_at'=>now()]);
 
         $this->signIn(1,'lecturer')->post(route('admin.programs.certificates.generate',$programId))->assertRedirect()->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('program_certificates',['program_id'=>$programId,'program_attendance_id'=>$attendanceId,'student_id'=>$studentId,'matric_no'=>'PB22001','status'=>'ready']);
+        $certificateId = DB::table('program_certificates')->where('program_id', $programId)->where('student_id', $studentId)->value('id');
+        $this->assertDatabaseHas('program_certificates',['program_id'=>$programId,'program_attendance_id'=>$attendanceId,'student_id'=>$studentId,'matric_no'=>'PB22001','status'=>'pending']);
+        Queue::assertPushed(GenerateProgramCertificate::class, fn (GenerateProgramCertificate $job): bool => $job->certificateId === $certificateId);
     }
 
     public function test_program_director_can_generate_one_test_certificate_immediately(): void
