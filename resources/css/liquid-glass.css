@@ -941,6 +941,9 @@ body.role-student.pwa-standalone .app-footer {
 /* System Admin: same material language, denser professional control center. */
 body.role-system-admin:not(.admin-liquid-disabled) .page-header--system-liquid {
     margin: .75rem clamp(.75rem, 2vw, 1.4rem) 0;
+    width: auto !important;
+    min-width: 0;
+    box-sizing: border-box;
     border: 1px solid var(--liquid-border) !important;
     border-radius: var(--liquid-radius-lg) !important;
     background:
