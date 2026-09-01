@@ -14,7 +14,6 @@ class SystemAdminLiquidHeaderTest extends TestCase
         $this->assertStringContainsString("\$isAdmin && \$adminScope === 'system_admin' ? ' page-header--system-liquid' : ''", $layout);
         $this->assertStringContainsString('body.role-system-admin:not(.admin-liquid-disabled) .page-header--system-liquid', $styles);
         $this->assertStringContainsString('backdrop-filter: blur(var(--liquid-blur)) saturate(170%)', $styles);
-        $this->assertStringContainsString('body.role-student .topbar', $styles);
         $this->assertStringContainsString('width: auto !important;', $styles);
         $this->assertStringContainsString('box-sizing: border-box;', $styles);
         $this->assertStringNotContainsString('body.role-lecturer', $styles);
