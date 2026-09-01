@@ -1,5 +1,6 @@
-/* MyHEP Liquid Glass is intentionally restricted to the Student mobile
- * navigation. Student pages otherwise use the published design-system UI. */
+/* MyHEP Liquid Glass is restricted to Student transient mobile surfaces:
+ * navigation, sheets, and the opened drawer. Page content stays in the
+ * published design-system UI. */
 
 body:is(.role-student, .role-qr-staff) {
     --safe-top: env(safe-area-inset-top, 0px);
@@ -203,8 +204,8 @@ body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
         border-radius: 22px;
         background:
             linear-gradient(180deg, rgb(255 255 255 / var(--student-nav-active-reflection-alpha)), rgb(255 255 255 / .08) 42%, transparent 100%),
-            rgb(255 253 249 / var(--student-nav-active-alpha));
-        box-shadow: 0 3px 8px rgba(77, 59, 39, .08), inset 0 1px 0 rgba(255,255,255,.62);
+            color-mix(in srgb, var(--se-primary) 18%, rgb(255 253 249 / var(--student-nav-active-alpha)));
+        box-shadow: 0 4px 10px color-mix(in srgb, var(--se-primary) 16%, transparent), inset 0 1px 0 rgba(255,255,255,.62);
         backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
         -webkit-backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
         pointer-events: none;
@@ -256,8 +257,8 @@ body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
         border-radius: 50% !important;
         background:
             linear-gradient(180deg, rgb(255 255 255 / .34), transparent 48%),
-            color-mix(in srgb, var(--se-primary) 28%, rgb(255 253 249 / var(--student-nav-active-alpha))) !important;
-        box-shadow: 0 8px 18px color-mix(in srgb, var(--se-primary) 24%, transparent), inset 0 1px 0 rgb(255 255 255 / .60), inset 0 -1px 0 rgb(72 54 35 / .10) !important;
+            color-mix(in srgb, var(--se-primary) 38%, rgb(255 253 249 / var(--student-nav-active-alpha))) !important;
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--se-primary) 30%, transparent), inset 0 1px 0 rgb(255 255 255 / .60), inset 0 -1px 0 rgb(72 54 35 / .10) !important;
         color: var(--student-nav-text) !important;
         text-shadow: none !important;
         transform: translateY(-.16rem) !important;
@@ -272,9 +273,9 @@ body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
     body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab:is(.active, :active) {
         background:
             linear-gradient(180deg, rgb(255 255 255 / .46), transparent 48%),
-            color-mix(in srgb, var(--se-primary) 58%, rgb(255 253 249 / var(--student-nav-active-alpha))) !important;
-        border-color: color-mix(in srgb, var(--se-primary) 54%, rgb(255 255 255 / .62)) !important;
-        box-shadow: 0 10px 22px color-mix(in srgb, var(--se-primary) 38%, transparent), inset 0 1px 0 rgb(255 255 255 / .70), inset 0 -1px 0 rgb(72 54 35 / .10) !important;
+            color-mix(in srgb, var(--se-primary) 68%, rgb(255 253 249 / var(--student-nav-active-alpha))) !important;
+        border-color: color-mix(in srgb, var(--se-primary) 62%, rgb(255 255 255 / .62)) !important;
+        box-shadow: 0 10px 22px color-mix(in srgb, var(--se-primary) 44%, transparent), inset 0 1px 0 rgb(255 255 255 / .70), inset 0 -1px 0 rgb(72 54 35 / .10) !important;
         color: var(--se-primary-button-text) !important;
     }
 
@@ -285,17 +286,17 @@ body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
     body:is(.role-student, .role-qr-staff)[data-theme="dark"]:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab {
         background:
             linear-gradient(180deg, rgb(255 255 255 / .15), transparent 48%),
-            color-mix(in srgb, var(--se-primary) 30%, rgb(57 54 50 / var(--student-nav-active-alpha))) !important;
-        border-color: color-mix(in srgb, var(--se-primary) 34%, rgb(255 255 255 / .16)) !important;
-        box-shadow: 0 8px 19px color-mix(in srgb, var(--se-primary) 22%, transparent), inset 0 1px 0 rgb(255 255 255 / .16), inset 0 -1px 0 rgb(0 0 0 / .20) !important;
+            color-mix(in srgb, var(--se-primary) 40%, rgb(57 54 50 / var(--student-nav-active-alpha))) !important;
+        border-color: color-mix(in srgb, var(--se-primary) 42%, rgb(255 255 255 / .16)) !important;
+        box-shadow: 0 8px 19px color-mix(in srgb, var(--se-primary) 28%, transparent), inset 0 1px 0 rgb(255 255 255 / .16), inset 0 -1px 0 rgb(0 0 0 / .20) !important;
     }
 
     body:is(.role-student, .role-qr-staff)[data-theme="dark"]:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab:is(.active, :active) {
         background:
             linear-gradient(180deg, rgb(255 255 255 / .22), transparent 48%),
-            color-mix(in srgb, var(--se-primary) 62%, rgb(57 54 50 / var(--student-nav-active-alpha))) !important;
-        border-color: color-mix(in srgb, var(--se-primary) 58%, rgb(255 255 255 / .22)) !important;
-        box-shadow: 0 10px 23px color-mix(in srgb, var(--se-primary) 40%, transparent), inset 0 1px 0 rgb(255 255 255 / .22), inset 0 -1px 0 rgb(0 0 0 / .20) !important;
+            color-mix(in srgb, var(--se-primary) 70%, rgb(57 54 50 / var(--student-nav-active-alpha))) !important;
+        border-color: color-mix(in srgb, var(--se-primary) 66%, rgb(255 255 255 / .22)) !important;
+        box-shadow: 0 10px 23px color-mix(in srgb, var(--se-primary) 46%, transparent), inset 0 1px 0 rgb(255 255 255 / .22), inset 0 -1px 0 rgb(0 0 0 / .20) !important;
     }
 
     body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab > span {
@@ -366,8 +367,8 @@ body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
     body.role-student[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student #mobileMoreToggle[aria-expanded="true"]::before {
         background:
             linear-gradient(180deg, rgb(255 255 255 / .13), rgb(255 255 255 / .04) 42%, transparent 100%),
-            rgb(65 62 58 / var(--student-nav-active-alpha));
-        box-shadow: 0 3px 9px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
+            color-mix(in srgb, var(--se-primary) 22%, rgb(65 62 58 / var(--student-nav-active-alpha)));
+        box-shadow: 0 4px 11px color-mix(in srgb, var(--se-primary) 20%, transparent), inset 0 1px 0 rgba(255,255,255,.16);
     }
 
     /* The shared sheet transition uses a vertical transform. Explicit insets
@@ -448,6 +449,56 @@ body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
             linear-gradient(125deg, rgb(255 255 255 / .10), transparent 34%, rgb(255 255 255 / .025) 72%),
             rgba(29, 28, 27, .95) !important;
         box-shadow: 0 18px 46px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.11) !important;
+    }
+}
+
+/* The Student drawer is a single, bounded Liquid Glass sheet. It inherits the
+   shared --glass-opacity setting, so the appearance control affects it and
+   every other glass surface without making navigation text compete with the
+   dashboard behind it. */
+@media (max-width: 1023px) {
+    body.role-student .app-layout .sidebar.is-open {
+        border-right-color: color-mix(in srgb, var(--se-primary) 26%, var(--liquid-stroke-soft)) !important;
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / calc(.10 + var(--glass-opacity) * .18)), transparent 48%),
+            radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 64%),
+            radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 12%, transparent), transparent 70%),
+            var(--liquid-shell-strong) !important;
+        box-shadow:
+            18px 0 42px rgb(35 24 16 / .20),
+            inset -1px 0 0 rgb(255 255 255 / calc(.18 + var(--glass-opacity) * .28)),
+            inset 0 1px 0 rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .20)) !important;
+        backdrop-filter: blur(18px) saturate(135%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(135%) !important;
+    }
+
+    body.role-student .app-layout .sidebar.is-open .sb-user {
+        border-color: color-mix(in srgb, var(--se-primary) 34%, var(--liquid-stroke-soft)) !important;
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .18)), transparent 52%),
+            color-mix(in srgb, var(--liquid-surface-strong) 88%, var(--se-primary-soft)) !important;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(.20 + var(--glass-opacity) * .22)) !important;
+    }
+
+    body.role-student[data-theme="dark"] .app-layout .sidebar.is-open {
+        border-right-color: color-mix(in srgb, var(--se-primary) 28%, var(--liquid-stroke-soft)) !important;
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / calc(.035 + var(--glass-opacity) * .08)), transparent 48%),
+            radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 16%, transparent), transparent 64%),
+            radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 10%, transparent), transparent 70%),
+            var(--liquid-shell-strong) !important;
+        box-shadow:
+            18px 0 46px rgb(0 0 0 / .46),
+            inset -1px 0 0 rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .12)),
+            inset 0 1px 0 rgb(255 255 255 / calc(.05 + var(--glass-opacity) * .10)) !important;
+    }
+
+    body.role-student[data-theme="dark"] .app-layout .sidebar.is-open .sb-user {
+        border-color: color-mix(in srgb, var(--se-primary) 30%, var(--liquid-stroke-soft)) !important;
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / calc(.045 + var(--glass-opacity) * .09)), transparent 52%),
+            color-mix(in srgb, var(--liquid-surface-strong) 88%, var(--se-primary-soft)) !important;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .11)) !important;
     }
 }
 

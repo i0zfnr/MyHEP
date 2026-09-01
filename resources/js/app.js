@@ -111,7 +111,7 @@ const ACCENT_THEME_KEY = 'studentedge-accent-theme';
 const GLASS_TRANSPARENCY_KEY = 'studentedge-glass-transparency';
 
 const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
-const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet'].includes(theme) ? theme : 'gold';
+const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet', 'pink', 'red'].includes(theme) ? theme : 'gold';
 const normalizeGlassTransparency = (value) => Math.min(100, Math.max(0, Number.isFinite(Number(value)) ? Number(value) : 40));
 const updateGlassControls = (value) => {
     const transparency = normalizeGlassTransparency(value);
@@ -132,7 +132,10 @@ const applyGlassTransparency = (value, persist = true) => {
     const root = document.documentElement;
 
     // Transparency controls a bounded physical material, never raw element opacity.
+    // Shared Liquid Glass surfaces consume this token; navigation keeps its
+    // dedicated values for its compact mobile contrast requirements.
     root.style.setProperty('--glass-user-transparency', ratio.toFixed(2));
+    root.style.setProperty('--glass-opacity', (0.86 - (ratio * 0.34)).toFixed(2));
     root.style.setProperty('--student-nav-material-alpha', (0.86 - (ratio * 0.34)).toFixed(2));
     root.style.setProperty('--student-nav-active-alpha', (0.80 - (ratio * 0.18)).toFixed(2));
     root.style.setProperty('--student-nav-reflection-alpha', (0.34 - (ratio * 0.16)).toFixed(2));

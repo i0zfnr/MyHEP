@@ -15,7 +15,7 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString("'resources/css/design-system.css', 'resources/css/liquid-glass.css'", $layout);
     }
 
-    public function test_student_liquid_css_is_limited_to_navigation_and_safe_area_behaviour(): void
+    public function test_student_liquid_css_is_limited_to_transient_navigation_and_drawer_surfaces(): void
     {
         $styles = file_get_contents(__DIR__.'/../../resources/css/liquid-glass.css');
 
@@ -32,7 +32,7 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('transform: translate3d(0, 0, 0) scale(1) !important;', $styles);
         $this->assertStringContainsString('stroke: currentColor !important;', $styles);
         $this->assertStringNotContainsString('body.role-student .sdash', $styles);
-        $this->assertStringNotContainsString('body.role-student .sidebar', $styles);
+        $this->assertStringContainsString('body.role-student .app-layout .sidebar.is-open', $styles);
         $this->assertStringNotContainsString('body.role-student .topbar', $styles);
         $this->assertStringNotContainsString('body.role-student :is(.liquid-glass-surface, .liquid-glass-card)', $styles);
         $this->assertStringContainsString('+ 2rem)', $styles);
@@ -64,8 +64,8 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('background-image: none !important;', $styles);
         $this->assertStringContainsString('box-shadow: none !important;', $styles);
         $this->assertStringContainsString('border: 0;', $styles);
-        $this->assertStringContainsString('box-shadow: 0 3px 8px', $styles);
-        $this->assertStringContainsString('box-shadow: 0 3px 9px', $styles);
+        $this->assertStringContainsString('color-mix(in srgb, var(--se-primary) 18%', $styles);
+        $this->assertStringContainsString('color-mix(in srgb, var(--se-primary) 22%', $styles);
         $this->assertStringContainsString('width: 64px !important;', $styles);
         $this->assertStringContainsString('height: 64px !important;', $styles);
         $this->assertStringContainsString('border-radius: 50% !important;', $styles);
@@ -108,14 +108,14 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('padding-bottom: .8rem;', $studentModules);
     }
 
-    public function test_transparency_control_only_updates_student_navigation_material_tokens(): void
+    public function test_transparency_control_updates_shared_and_student_navigation_material_tokens(): void
     {
         $script = file_get_contents(__DIR__.'/../../resources/js/app.js');
         $bootstrap = file_get_contents(__DIR__.'/../../resources/views/partials/theme_bootstrap.blade.php');
 
         $this->assertStringContainsString("root.style.setProperty('--student-nav-material-alpha'", $script);
-        $this->assertStringNotContainsString("root.style.setProperty('--glass-opacity'", $script);
+        $this->assertStringContainsString("root.style.setProperty('--glass-opacity'", $script);
         $this->assertStringContainsString("document.documentElement.style.setProperty('--student-nav-active-alpha'", $bootstrap);
-        $this->assertStringNotContainsString("document.documentElement.style.setProperty('--glass-opacity'", $bootstrap);
+        $this->assertStringContainsString("document.documentElement.style.setProperty('--glass-opacity'", $bootstrap);
     }
 }

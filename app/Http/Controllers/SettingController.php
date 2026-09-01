@@ -58,7 +58,7 @@ class SettingController extends Controller
         $validated = $request->validate([
             'locale' => ['required', 'in:en,ms'],
             'theme' => ['required', 'in:light,dark'],
-            'accent_theme' => ['nullable', 'in:gold,candy_blue,lavender,orchid,violet'],
+            'accent_theme' => ['nullable', 'in:gold,candy_blue,lavender,orchid,violet,pink,red'],
             'glass_transparency' => ['nullable', 'integer', 'min:0', 'max:100'],
         ]);
 

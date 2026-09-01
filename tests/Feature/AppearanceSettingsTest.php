@@ -70,11 +70,25 @@ class AppearanceSettingsTest extends TestCase
         ])->postJson('/settings', [
             'locale' => 'en',
             'theme' => 'light',
-            'accent_theme' => 'candy_blue',
+            'accent_theme' => 'pink',
             'glass_transparency' => 40,
         ])->assertOk()
-            ->assertJson(['accent_theme' => 'candy_blue'])
-            ->assertSessionHas('accent_theme', 'candy_blue');
+            ->assertJson(['accent_theme' => 'pink'])
+            ->assertSessionHas('accent_theme', 'pink');
+    }
+
+    public function test_student_can_save_the_red_accent_theme(): void
+    {
+        $this->withSession([
+            'auth_user' => ['id' => 10, 'role' => 'student', 'name' => 'Student'],
+        ])->postJson('/settings', [
+            'locale' => 'en',
+            'theme' => 'dark',
+            'accent_theme' => 'red',
+            'glass_transparency' => 40,
+        ])->assertOk()
+            ->assertJson(['accent_theme' => 'red'])
+            ->assertSessionHas('accent_theme', 'red');
     }
 
     public function test_liquid_glass_transparency_is_limited_to_safe_readable_values(): void

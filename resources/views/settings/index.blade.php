@@ -142,7 +142,7 @@
                     </h3>
                     <p class="settings-section-copy">{{ __('Choose a curated color mood for MyHEP. Status and safety colors stay unchanged.') }}</p>
                     <div class="settings-options settings-options--accent">
-                        @foreach(['gold' => ['MyHEP Gold', 'accent-preview--gold'], 'candy_blue' => ['Candy Blue', 'accent-preview--candy-blue'], 'lavender' => ['Lavender', 'accent-preview--lavender'], 'orchid' => ['Orchid', 'accent-preview--orchid'], 'violet' => ['Violet', 'accent-preview--violet']] as $value => [$label, $previewClass])
+                        @foreach(['gold' => ['MyHEP Gold', 'accent-preview--gold'], 'candy_blue' => ['Candy Blue', 'accent-preview--candy-blue'], 'lavender' => ['Lavender', 'accent-preview--lavender'], 'orchid' => ['Orchid', 'accent-preview--orchid'], 'violet' => ['Violet', 'accent-preview--violet'], 'pink' => ['Pink', 'accent-preview--pink'], 'red' => ['Red', 'accent-preview--red']] as $value => [$label, $previewClass])
                             <label class="settings-option settings-option--accent">
                                 <input type="radio" name="accent_theme" value="{{ $value }}" @checked($currentAccentTheme === $value)>
                                 <span class="accent-preview {{ $previewClass }}" aria-hidden="true"><span></span><span></span><span></span></span>

@@ -1785,6 +1785,38 @@ body[data-accent-theme="violet"] {
     --se-atmosphere-secondary: #493240;
 }
 
+html[data-accent-theme="pink"],
+body[data-accent-theme="pink"] {
+    --se-primary: #ee5b9c;
+    --se-primary-strong: #aa2867;
+    --se-primary-soft: #ffe7f1;
+    --se-primary-muted: #f4a2c5;
+    --se-primary-button-start: #bd2f72;
+    --se-primary-button-end: #ed5d9e;
+    --se-accent: #ee5b9c;
+    --se-accent-strong: #aa2867;
+    --se-accent-soft: #ffe7f1;
+    --se-accent-ink: #4d1230;
+    --se-atmosphere-primary: #ff6fae;
+    --se-atmosphere-secondary: #a93576;
+}
+
+html[data-accent-theme="red"],
+body[data-accent-theme="red"] {
+    --se-primary: #e55462;
+    --se-primary-strong: #a92d3d;
+    --se-primary-soft: #ffeaed;
+    --se-primary-muted: #efa4ad;
+    --se-primary-button-start: #b73042;
+    --se-primary-button-end: #e55765;
+    --se-accent: #e55462;
+    --se-accent-strong: #a92d3d;
+    --se-accent-soft: #ffeaed;
+    --se-accent-ink: #4c121b;
+    --se-atmosphere-primary: #ff6673;
+    --se-atmosphere-secondary: #b83245;
+}
+
 /* Dark surfaces need luminous accents and translucent soft fills. */
 :is(html, body)[data-theme="dark"][data-accent-theme="candy_blue"] {
     --se-primary: #79bddb;
@@ -1850,6 +1882,38 @@ body[data-accent-theme="violet"] {
     --liquid-glow: rgba(155, 131, 212, .18);
 }
 
+:is(html, body)[data-theme="dark"][data-accent-theme="pink"] {
+    --se-primary: #ff73b4;
+    --se-primary-strong: #ffc0db;
+    --se-primary-soft: rgba(189, 47, 114, .30);
+    --se-primary-muted: #d54e8f;
+    --se-primary-button-start: #c83878;
+    --se-primary-button-end: #f169aa;
+    --se-accent: #ff73b4;
+    --se-accent-strong: #ffc0db;
+    --se-accent-soft: rgba(189, 47, 114, .30);
+    --se-accent-ink: #4d1230;
+    --se-ring: 0 0 0 4px rgba(255, 115, 180, .24);
+    --liquid-stroke-soft: rgba(255, 115, 180, .30);
+    --liquid-glow: rgba(255, 115, 180, .18);
+}
+
+:is(html, body)[data-theme="dark"][data-accent-theme="red"] {
+    --se-primary: #ff7782;
+    --se-primary-strong: #ffc2c8;
+    --se-primary-soft: rgba(183, 48, 66, .30);
+    --se-primary-muted: #d24b5b;
+    --se-primary-button-start: #c33b4c;
+    --se-primary-button-end: #ef6571;
+    --se-accent: #ff7782;
+    --se-accent-strong: #ffc2c8;
+    --se-accent-soft: rgba(183, 48, 66, .30);
+    --se-accent-ink: #4c121b;
+    --se-ring: 0 0 0 4px rgba(255, 119, 130, .24);
+    --liquid-stroke-soft: rgba(255, 119, 130, .30);
+    --liquid-glow: rgba(255, 119, 130, .18);
+}
+
 .settings-section--beta { position: relative; }
 .settings-beta-label { display:inline-flex; align-items:center; min-height:20px; margin:0 0 .65rem; padding:0 .5rem; border:1px solid var(--se-primary-muted); border-radius:999px; background:var(--se-primary-soft); color:var(--se-primary-strong); font-size:.64rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
 .settings-options--accent { grid-template-columns:repeat(3, minmax(0, 1fr)); }
@@ -1863,6 +1927,8 @@ body[data-accent-theme="violet"] {
 .accent-preview--lavender { background:#efe9f8; }.accent-preview--lavender span:nth-child(1) { background:#b993d6; }.accent-preview--lavender span:nth-child(2) { background:#8ca6db; }.accent-preview--lavender span:nth-child(3) { background:#a58bca; }
 .accent-preview--orchid { background:#fae8f0; }.accent-preview--orchid span:nth-child(1) { background:#b24592; }.accent-preview--orchid span:nth-child(2) { background:#f15f79; }.accent-preview--orchid span:nth-child(3) { background:#ca8ca9; }
 .accent-preview--violet { background:#ece8f8; }.accent-preview--violet span:nth-child(1) { background:#493240; }.accent-preview--violet span:nth-child(2) { background:#ff0099; }.accent-preview--violet span:nth-child(3) { background:#8068ba; }
+.accent-preview--pink { background:#ffe7f1; }.accent-preview--pink span:nth-child(1) { background:#aa2867; }.accent-preview--pink span:nth-child(2) { background:#ff6fae; }.accent-preview--pink span:nth-child(3) { background:#ee5b9c; }
+.accent-preview--red { background:#ffeaed; }.accent-preview--red span:nth-child(1) { background:#a92d3d; }.accent-preview--red span:nth-child(2) { background:#ff6673; }.accent-preview--red span:nth-child(3) { background:#e55462; }
 
 @media (max-width: 767px) {
     .settings-options--accent { grid-template-columns:repeat(2, minmax(0, 1fr)); }
