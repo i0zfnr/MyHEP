@@ -21,8 +21,12 @@ class LiquidGlassRoleIsolationTest extends TestCase
 
         $this->assertStringContainsString('--safe-top: env(safe-area-inset-top, 0px);', $styles);
         $this->assertStringContainsString('--safe-bottom: env(safe-area-inset-bottom, 0px);', $styles);
+        $this->assertStringContainsString('--student-nav-bottom-offset: max(', $styles);
+        $this->assertStringContainsString('bottom: var(--student-nav-bottom-offset) !important;', $styles);
+        $this->assertStringContainsString('body:is(.role-student, .role-qr-staff)', $styles);
+        $this->assertStringContainsString('body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff', $styles);
         $this->assertStringContainsString('body.role-student .mobile-bottom-nav.mobile-bottom-nav--student', $styles);
-        $this->assertStringContainsString('body.role-student.pwa-standalone .app-footer', $styles);
+        $this->assertStringContainsString('body:is(.role-student, .role-qr-staff) .app-footer', $styles);
         $this->assertStringContainsString('body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-more-sheet', $styles);
         $this->assertStringContainsString('left: max(.65rem, var(--safe-left)) !important;', $styles);
         $this->assertStringContainsString('transform: translate3d(0, 0, 0) scale(1) !important;', $styles);
@@ -62,10 +66,31 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('border: 0;', $styles);
         $this->assertStringContainsString('box-shadow: 0 3px 8px', $styles);
         $this->assertStringContainsString('box-shadow: 0 3px 9px', $styles);
+        $this->assertStringContainsString('width: 64px !important;', $styles);
+        $this->assertStringContainsString('height: 64px !important;', $styles);
+        $this->assertStringContainsString('border-radius: 50% !important;', $styles);
+        $this->assertStringContainsString('margin: -1.42rem auto -.1rem !important;', $styles);
+        $this->assertStringContainsString('content: none !important;', $styles);
+        $this->assertStringContainsString('.mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab', $styles);
+        $this->assertStringContainsString('.mobile-scan-tab .mobile-nav-icon', $styles);
+        $this->assertStringContainsString('position: static !important;', $styles);
+        $this->assertStringNotContainsString('.app-layout .mobile-bottom-nav .mobile-scan-tab', $styles);
         $this->assertStringContainsString('--student-nav-accent: var(--se-primary-strong);', $styles);
         $this->assertStringContainsString('--student-nav-accent: var(--se-primary);', $styles);
         $this->assertStringContainsString('body[data-theme="dark"].has-student-bottom-nav:not(.role-student)', $legacyStyles);
+        $this->assertStringContainsString('body.student-bottom-nav-eligible:not(.role-student) .app-layout .mobile-bottom-nav', $legacyStyles);
         $this->assertStringNotContainsString('body[data-theme="dark"].has-student-bottom-nav .mobile-bottom-nav :is(a, button).active:not(.mobile-scan-tab)', $legacyStyles);
+    }
+
+    public function test_qr_capable_staff_navigation_is_role_scoped_and_uses_authorized_destinations(): void
+    {
+        $layout = file_get_contents(__DIR__.'/../../resources/views/layouts/app.blade.php');
+
+        $this->assertStringContainsString("\$showStaffBottomNav = \$isAdmin && \$adminScope !== 'system_admin' && \$canUseLaptops;", $layout);
+        $this->assertStringContainsString("(\$showStaffBottomNav ? 'role-qr-staff '", $layout);
+        $this->assertStringContainsString("'guard' => [route('admin.movements.index')", $layout);
+        $this->assertStringContainsString("'student_affairs_head' => [route('admin.students.index')", $layout);
+        $this->assertStringContainsString('mobile-bottom-nav--staff', $layout);
     }
 
     public function test_student_dashboard_accent_refinement_is_role_scoped_and_keeps_status_surfaces_neutral(): void

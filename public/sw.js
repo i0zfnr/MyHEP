@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'myhep-pwa-v13';
+const CACHE_VERSION = 'myhep-pwa-v14';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = '/offline.html';

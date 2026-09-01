@@ -1658,7 +1658,7 @@ if ('serviceWorker' in navigator) {
             return;
         }
 
-        navigator.serviceWorker.register('/sw.js?v=13').catch(() => {
+        navigator.serviceWorker.register('/sw.js?v=14').catch(() => {
             // Keep the app usable even if PWA registration fails.
         });
     });

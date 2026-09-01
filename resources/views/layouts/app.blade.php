@@ -142,7 +142,9 @@
     $showHeaderUserMenu = (bool) $authUser && ($isStudent || $adminOnDashboard);
     $systemFeatures = app(\App\Support\SystemFeatures::class);
     $showStudentBottomNav = $isStudent;
-    $showStaffBottomNav = $isLecturerAdmin;
+    // Keep the shared mobile navigation limited to operational roles that can
+    // actually use the laptop QR scanner. System Admin retains its desktop UI.
+    $showStaffBottomNav = $isAdmin && $adminScope !== 'system_admin' && $canUseLaptops;
     $studentBrowserBottomNavEnabled = $systemFeatures->enabled('student_browser_bottom_nav');
     $studentAiHelperEnabled = $systemFeatures->enabled('student_ai_helper');
     $lecturerAiHelperEnabled = $systemFeatures->enabled('lecturer_ai_helper');
@@ -156,6 +158,7 @@
         || request()->routeIs('settings.*');
     $bodyClasses = trim(
         ($isStudent ? 'role-student student-mobile-shell' : '') . ' ' .
+        ($showStaffBottomNav ? 'role-qr-staff ' : '') .
         ($isStudent && request()->routeIs('student.scholarships.index') ? 'student-liquid-aid' : '') . ' ' .
         ($isStudent && request()->routeIs('student.offenses.index') ? 'student-liquid-fines' : '') . ' ' .
         (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-pwa-eligible' : '') . ' ' .
@@ -868,15 +871,16 @@
 @if($showStaffBottomNav)
     @php
         $staffCategory = $authUser['staff_category'] ?? null;
-        $staffWorkRoute = match ($staffCategory) {
-            'scholarship' => route('admin.scholarships.index'),
-            'discipline' => route('admin.offenses.index'),
-            default => route('admin.dashboard'),
-        };
-        $staffWorkActive = match ($staffCategory) {
-            'scholarship' => request()->routeIs('admin.scholarships.*'),
-            'discipline' => request()->routeIs('admin.offenses.*'),
-            default => false,
+        [$staffWorkRoute, $staffWorkLabel, $staffWorkActive] = match ($adminScope) {
+            'guard' => [route('admin.movements.index'), __('Movements'), request()->routeIs('admin.movements.*')],
+            'scholarship_admin' => [route('admin.scholarships.index'), __('Scholarships'), request()->routeIs('admin.scholarships.*')],
+            'discipline_admin' => [route('admin.offenses.index'), __('Discipline'), request()->routeIs('admin.offenses.*')],
+            'student_affairs_head' => [route('admin.students.index'), __('Students'), request()->routeIs('admin.students.*')],
+            default => match ($staffCategory) {
+                'scholarship' => [route('admin.scholarships.index'), __('Scholarships'), request()->routeIs('admin.scholarships.*')],
+                'discipline' => [route('admin.offenses.index'), __('Discipline'), request()->routeIs('admin.offenses.*')],
+                default => [route('admin.dashboard'), __('Work'), false],
+            },
         };
     @endphp
     <nav class="mobile-bottom-nav mobile-bottom-nav--staff" aria-label="{{ __('Staff mobile navigation') }}">
@@ -884,7 +888,7 @@
             <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span>{{ __('Home') }}</span>
         </a>
         <a href="{{ $staffWorkRoute }}" class="{{ $staffWorkActive ? 'active' : '' }}">
-            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>{{ __('Work') }}</span>
+            <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>{{ $staffWorkLabel }}</span>
         </a>
         <a href="{{ route('admin.laptops.scan') }}" class="mobile-scan-tab {{ request()->routeIs('admin.laptops.scan*') ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M14 14h2M18 14h2M14 18h6"/></svg></span><span>{{ __('Scan QR') }}</span>

@@ -6613,8 +6613,8 @@ body[data-theme="dark"] .app-layout .sidebar {
         padding-bottom: calc(var(--student-bottom-nav-total) + 1.4rem) !important;
     }
 
-    body.student-bottom-nav-eligible .app-layout .mobile-bottom-nav,
-    body.has-student-bottom-nav .app-layout .mobile-bottom-nav {
+    body.student-bottom-nav-eligible:not(.role-student) .app-layout .mobile-bottom-nav,
+    body.has-student-bottom-nav:not(.role-student) .app-layout .mobile-bottom-nav {
         left: 50% !important;
         right: auto !important;
         width: min(calc(100vw - 1.25rem), 420px) !important;
@@ -6637,8 +6637,8 @@ body[data-theme="dark"] .app-layout .sidebar {
         --student-bottom-nav-height: 64px;
     }
 
-    body.student-bottom-nav-eligible .app-layout .mobile-bottom-nav,
-    body.has-student-bottom-nav .app-layout .mobile-bottom-nav {
+    body.student-bottom-nav-eligible:not(.role-student) .app-layout .mobile-bottom-nav,
+    body.has-student-bottom-nav:not(.role-student) .app-layout .mobile-bottom-nav {
         bottom: max(-18px, calc(env(safe-area-inset-bottom, 0px) - 28px)) !important;
         transform: translateX(-50%) translateY(16px) translateZ(0) !important;
     }

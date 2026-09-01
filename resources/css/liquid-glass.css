@@ -1,7 +1,7 @@
 /* MyHEP Liquid Glass is intentionally restricted to the Student mobile
  * navigation. Student pages otherwise use the published design-system UI. */
 
-body.role-student {
+body:is(.role-student, .role-qr-staff) {
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -22,9 +22,12 @@ body.role-student {
     --student-nav-inner: rgba(255, 255, 255, .72);
     --student-liquid-nav-height: 64px;
     --student-liquid-nav-gap: 8px;
+    /* Keep the floating bar clear of the home indicator without lifting it by
+     * the full inset. On an iPhone inset of 34px this resolves to 14px. */
+    --student-nav-bottom-offset: max(var(--student-liquid-nav-gap), calc(var(--safe-bottom) - 1.25rem));
 }
 
-body.role-student[data-theme="dark"] {
+body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
     --student-nav-text: #fffaf5;
     --student-nav-muted: #bdb2a8;
     --student-nav-border: rgba(255, 255, 255, .12);
@@ -34,14 +37,14 @@ body.role-student[data-theme="dark"] {
 }
 
 @media (max-width: 767px) {
-    body.role-student .page-body {
-        padding-bottom: calc(var(--student-liquid-nav-height) + var(--safe-bottom) + 2rem) !important;
+    body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .page-body {
+        padding-bottom: calc(var(--student-liquid-nav-height) + var(--student-nav-bottom-offset) + 2rem) !important;
     }
 
     body.role-student .mobile-bottom-nav.mobile-bottom-nav--student {
         left: 50% !important;
         right: auto !important;
-        bottom: max(var(--student-liquid-nav-gap), var(--safe-bottom)) !important;
+        bottom: var(--student-nav-bottom-offset) !important;
         width: min(calc(100vw - max(1rem, calc(var(--safe-left) + var(--safe-right)))), 420px) !important;
         min-height: var(--student-liquid-nav-height) !important;
         padding: .3rem .34rem !important;
@@ -55,6 +58,108 @@ body.role-student[data-theme="dark"] {
         box-shadow: 0 10px 24px rgba(39, 34, 30, .11), 0 2px 5px rgba(39, 34, 30, .04), inset 0 1px 0 var(--student-nav-inner), inset 0 -1px 0 var(--student-nav-edge) !important;
         backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) !important;
         -webkit-backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) !important;
+    }
+
+    body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff {
+        left: 50% !important;
+        right: auto !important;
+        bottom: var(--student-nav-bottom-offset) !important;
+        width: min(calc(100vw - max(1rem, calc(var(--safe-left) + var(--safe-right)))), 420px) !important;
+        min-height: var(--student-liquid-nav-height) !important;
+        padding: .3rem .34rem !important;
+        gap: .08rem !important;
+        transform: translateX(-50%) translateZ(0) !important;
+        border: 1px solid color-mix(in srgb, var(--student-nav-border) 34%, transparent) !important;
+        border-radius: 999px !important;
+        background:
+            linear-gradient(112deg, rgb(255 255 255 / var(--student-nav-reflection-alpha)), transparent 32%, rgb(255 255 255 / .05) 74%),
+            rgb(252 250 247 / var(--student-nav-material-alpha)) !important;
+        box-shadow: 0 10px 24px rgba(39, 34, 30, .11), 0 2px 5px rgba(39, 34, 30, .04), inset 0 1px 0 var(--student-nav-inner), inset 0 -1px 0 var(--student-nav-edge) !important;
+        backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) !important;
+        -webkit-backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) !important;
+    }
+
+    body.role-qr-staff[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--staff {
+        border-color: color-mix(in srgb, var(--student-nav-border) 58%, transparent) !important;
+        background:
+            linear-gradient(112deg, rgb(255 255 255 / .08), transparent 30%, rgb(215 167 97 / .025) 76%),
+            rgb(24 23 22 / var(--student-nav-material-alpha)) !important;
+        box-shadow: 0 11px 26px rgba(0, 0, 0, .30), inset 0 1px 0 var(--student-nav-inner), inset 0 -1px 0 var(--student-nav-edge) !important;
+    }
+
+    body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff :is(a, button) {
+        isolation: isolate;
+        min-width: 0;
+        min-height: 48px !important;
+        padding: .2rem .1rem !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        color: var(--student-nav-muted) !important;
+        touch-action: manipulation;
+        transition: transform 180ms cubic-bezier(.2, .8, .2, 1), background 220ms cubic-bezier(.2, .8, .2, 1), color 180ms ease, box-shadow 220ms cubic-bezier(.2, .8, .2, 1) !important;
+    }
+
+    body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff :is(a, button).active {
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: var(--student-nav-accent) !important;
+    }
+
+    body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff :is(a, button).active::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 0;
+        width: min(62px, calc(100% - 2px));
+        height: 52px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgb(255 255 255 / var(--student-nav-active-reflection-alpha)), rgb(255 255 255 / .08) 42%, transparent 100%), rgb(255 253 249 / var(--student-nav-active-alpha));
+        box-shadow: 0 3px 8px rgba(77, 59, 39, .08), inset 0 1px 0 rgba(255,255,255,.62);
+        backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
+        -webkit-backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+    }
+
+    body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff :is(a, button).active > span {
+        position: relative;
+        z-index: 1;
+    }
+
+    body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff :is(a, button) .mobile-nav-icon {
+        position: static !important;
+        width: 22px !important;
+        height: 22px !important;
+        transform: none !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff :is(a, button) .mobile-nav-icon svg {
+        width: 19px !important;
+        height: 19px !important;
+        stroke-width: 2 !important;
+        color: currentColor !important;
+    }
+
+    body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff :is(a, button) > span:not(.mobile-nav-icon) {
+        display: block !important;
+        margin: 0 !important;
+        color: currentColor !important;
+        font-size: clamp(.56rem, 2vw, .64rem) !important;
+        font-weight: 650 !important;
+        line-height: 1.1 !important;
+        text-shadow: none !important;
+        white-space: nowrap !important;
+    }
+
+    body.role-qr-staff[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--staff :is(a, button).active::before {
+        background: linear-gradient(180deg, rgb(255 255 255 / .13), rgb(255 255 255 / .04) 42%, transparent 100%), rgb(65 62 58 / var(--student-nav-active-alpha));
+        box-shadow: 0 3px 9px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
     }
 
     body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button) {
@@ -74,8 +179,8 @@ body.role-student[data-theme="dark"] {
 
     /* The link is a positioning and touch layer only; ::before is the single
      * visible selected capsule in both browser and standalone Student modes. */
-    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .app-layout .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).active,
-    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .app-layout .mobile-bottom-nav.mobile-bottom-nav--student #mobileMoreToggle[aria-expanded="true"] {
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).active,
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav.mobile-bottom-nav--student #mobileMoreToggle[aria-expanded="true"] {
         border: 0 !important;
         border-color: transparent !important;
         background-color: transparent !important;
@@ -132,6 +237,92 @@ body.role-student[data-theme="dark"] {
 
     body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab.active {
         color: var(--student-nav-accent) !important;
+    }
+
+    /* The scanner remains visibly central even away from its own route. Its
+       accent comes entirely from the selected system theme, never a colour
+       hardcoded for a single student or staff role. */
+    body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab {
+        position: relative !important;
+        align-self: center;
+        z-index: 2;
+        width: 64px !important;
+        height: 64px !important;
+        min-height: 64px !important;
+        max-height: 64px !important;
+        margin: -1.42rem auto -.1rem !important;
+        padding: .28rem .1rem .22rem !important;
+        border: 1px solid color-mix(in srgb, var(--se-primary) 30%, rgb(255 255 255 / .40)) !important;
+        border-radius: 50% !important;
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / .34), transparent 48%),
+            color-mix(in srgb, var(--se-primary) 28%, rgb(255 253 249 / var(--student-nav-active-alpha))) !important;
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--se-primary) 24%, transparent), inset 0 1px 0 rgb(255 255 255 / .60), inset 0 -1px 0 rgb(72 54 35 / .10) !important;
+        color: var(--student-nav-text) !important;
+        text-shadow: none !important;
+        transform: translateY(-.16rem) !important;
+        isolation: isolate;
+    }
+
+    body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab:is(.active, :active) {
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / .46), transparent 48%),
+            color-mix(in srgb, var(--se-primary) 58%, rgb(255 253 249 / var(--student-nav-active-alpha))) !important;
+        border-color: color-mix(in srgb, var(--se-primary) 54%, rgb(255 255 255 / .62)) !important;
+        box-shadow: 0 10px 22px color-mix(in srgb, var(--se-primary) 38%, transparent), inset 0 1px 0 rgb(255 255 255 / .70), inset 0 -1px 0 rgb(72 54 35 / .10) !important;
+        color: var(--se-primary-button-text) !important;
+    }
+
+    body:is(.role-student, .role-qr-staff)[data-theme="dark"]:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab {
+        color: #fffaf5 !important;
+    }
+
+    body:is(.role-student, .role-qr-staff)[data-theme="dark"]:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab {
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / .15), transparent 48%),
+            color-mix(in srgb, var(--se-primary) 30%, rgb(57 54 50 / var(--student-nav-active-alpha))) !important;
+        border-color: color-mix(in srgb, var(--se-primary) 34%, rgb(255 255 255 / .16)) !important;
+        box-shadow: 0 8px 19px color-mix(in srgb, var(--se-primary) 22%, transparent), inset 0 1px 0 rgb(255 255 255 / .16), inset 0 -1px 0 rgb(0 0 0 / .20) !important;
+    }
+
+    body:is(.role-student, .role-qr-staff)[data-theme="dark"]:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab:is(.active, :active) {
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / .22), transparent 48%),
+            color-mix(in srgb, var(--se-primary) 62%, rgb(57 54 50 / var(--student-nav-active-alpha))) !important;
+        border-color: color-mix(in srgb, var(--se-primary) 58%, rgb(255 255 255 / .22)) !important;
+        box-shadow: 0 10px 23px color-mix(in srgb, var(--se-primary) 40%, transparent), inset 0 1px 0 rgb(255 255 255 / .22), inset 0 -1px 0 rgb(0 0 0 / .20) !important;
+    }
+
+    body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab > span {
+        position: relative !important;
+        z-index: 1;
+    }
+
+    /* The legacy scanner icon is absolutely positioned for the old tab.
+       Keep it inside the new raised bubble instead. */
+    body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab .mobile-nav-icon {
+        position: static !important;
+        display: grid !important;
+        place-items: center !important;
+        width: 22px !important;
+        height: 22px !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff) .mobile-scan-tab .mobile-nav-icon svg {
+        width: 20px !important;
+        height: 20px !important;
+        color: currentColor !important;
+        stroke-width: 2.15 !important;
     }
 
     body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button) .mobile-nav-icon {
@@ -192,7 +383,7 @@ body.role-student[data-theme="dark"] {
         right: max(.65rem, var(--safe-right)) !important;
         width: auto !important;
         max-height: min(68dvh, 520px);
-        bottom: calc(var(--student-liquid-nav-height) + max(var(--student-liquid-nav-gap), var(--safe-bottom)) + .65rem) !important;
+        bottom: calc(var(--student-liquid-nav-height) + var(--student-nav-bottom-offset) + .65rem) !important;
         box-sizing: border-box;
         padding: .65rem !important;
         overflow-y: auto;
@@ -260,14 +451,14 @@ body.role-student[data-theme="dark"] {
     }
 }
 
-/* An installed Student PWA is an application shell, not a web page. */
-body.role-student.pwa-standalone .app-footer {
-    display: none !important;
-}
-
 @media (max-width: 767px) {
-    body.role-student.student-bottom-nav-eligible:not(.pwa-standalone) .app-footer {
-        margin-bottom: calc(var(--student-liquid-nav-height) + var(--safe-bottom) + 1rem);
+    /* Authenticated QR-capable mobile shells end at their floating navigation.
+       Public/welcome and every desktop footer retain the normal website footer. */
+    body:is(.role-student, .role-qr-staff) .app-footer {
+        display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
     }
 }
 
