@@ -973,6 +973,13 @@ body[data-theme="dark"] .alert-success p {
             gap: .9rem;
         }
 
+        /* The fixed PWA navigation already reserves its own clearance on
+           .page-body. Avoid adding a second bottom reserve on the dashboard,
+           which otherwise creates a short, empty scroll range. */
+        body.role-student.student-dashboard-mobile-sidebar:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .sdash {
+            padding-bottom: .8rem;
+        }
+
         .alert {
             gap: .65rem;
             padding: .8rem;

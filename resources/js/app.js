@@ -134,7 +134,7 @@ const applyGlassTransparency = (value, persist = true) => {
     // Transparency controls a bounded physical material, never raw element opacity.
     root.style.setProperty('--glass-user-transparency', ratio.toFixed(2));
     root.style.setProperty('--student-nav-material-alpha', (0.86 - (ratio * 0.34)).toFixed(2));
-    root.style.setProperty('--student-nav-active-alpha', (0.90 - (ratio * 0.22)).toFixed(2));
+    root.style.setProperty('--student-nav-active-alpha', (0.80 - (ratio * 0.18)).toFixed(2));
     root.style.setProperty('--student-nav-reflection-alpha', (0.34 - (ratio * 0.16)).toFixed(2));
     root.style.setProperty('--student-nav-active-reflection-alpha', (0.46 - (ratio * 0.24)).toFixed(2));
     root.style.setProperty('--student-nav-blur', `${18 + (ratio * 8)}px`);

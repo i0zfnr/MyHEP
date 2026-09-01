@@ -7,7 +7,7 @@ body.role-student {
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
     --student-nav-material-alpha: .72;
-    --student-nav-active-alpha: .81;
+    --student-nav-active-alpha: .74;
     --student-nav-reflection-alpha: .26;
     --student-nav-active-reflection-alpha: .34;
     --student-nav-blur: 22px;
@@ -15,7 +15,8 @@ body.role-student {
     --student-nav-saturation: 142%;
     --student-nav-text: #241d17;
     --student-nav-muted: #70645a;
-    --student-nav-accent: #946326;
+    /* The selected accent is expressive; the glass material stays neutral. */
+    --student-nav-accent: var(--se-primary-strong);
     --student-nav-border: rgba(255, 255, 255, .58);
     --student-nav-edge: rgba(116, 103, 91, .10);
     --student-nav-inner: rgba(255, 255, 255, .72);
@@ -26,10 +27,10 @@ body.role-student {
 body.role-student[data-theme="dark"] {
     --student-nav-text: #fffaf5;
     --student-nav-muted: #bdb2a8;
-    --student-nav-accent: #d4a761;
     --student-nav-border: rgba(255, 255, 255, .12);
     --student-nav-edge: rgba(0, 0, 0, .24);
     --student-nav-inner: rgba(255, 255, 255, .095);
+    --student-nav-accent: var(--se-primary);
 }
 
 @media (max-width: 767px) {
@@ -46,12 +47,12 @@ body.role-student[data-theme="dark"] {
         padding: .3rem .34rem !important;
         gap: .08rem !important;
         transform: translateX(-50%) translateZ(0) !important;
-        border: 1px solid color-mix(in srgb, var(--student-nav-border) 58%, transparent) !important;
+        border: 1px solid color-mix(in srgb, var(--student-nav-border) 34%, transparent) !important;
         border-radius: 999px !important;
         background:
             linear-gradient(112deg, rgb(255 255 255 / var(--student-nav-reflection-alpha)), transparent 32%, rgb(255 255 255 / .05) 74%),
             rgb(252 250 247 / var(--student-nav-material-alpha)) !important;
-        box-shadow: 0 13px 30px rgba(39, 34, 30, .14), 0 2px 6px rgba(39, 34, 30, .05), inset 0 1px 0 var(--student-nav-inner), inset 0 -1px 0 var(--student-nav-edge) !important;
+        box-shadow: 0 10px 24px rgba(39, 34, 30, .11), 0 2px 5px rgba(39, 34, 30, .04), inset 0 1px 0 var(--student-nav-inner), inset 0 -1px 0 var(--student-nav-edge) !important;
         backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) !important;
         -webkit-backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) !important;
     }
@@ -98,7 +99,7 @@ body.role-student[data-theme="dark"] {
         background:
             linear-gradient(180deg, rgb(255 255 255 / var(--student-nav-active-reflection-alpha)), rgb(255 255 255 / .08) 42%, transparent 100%),
             rgb(255 253 249 / var(--student-nav-active-alpha));
-        box-shadow: 0 4px 11px rgba(77, 59, 39, .10), inset 0 1px 0 rgba(255,255,255,.66);
+        box-shadow: 0 3px 8px rgba(77, 59, 39, .08), inset 0 1px 0 rgba(255,255,255,.62);
         backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
         -webkit-backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
         pointer-events: none;
@@ -163,11 +164,11 @@ body.role-student[data-theme="dark"] {
     }
 
     body.role-student[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student {
-        border-color: color-mix(in srgb, var(--student-nav-border) 88%, transparent) !important;
+        border-color: color-mix(in srgb, var(--student-nav-border) 58%, transparent) !important;
         background:
             linear-gradient(112deg, rgb(255 255 255 / .08), transparent 30%, rgb(215 167 97 / .025) 76%),
             rgb(24 23 22 / var(--student-nav-material-alpha)) !important;
-        box-shadow: 0 14px 32px rgba(0, 0, 0, .36), inset 0 1px 0 var(--student-nav-inner), inset 0 -1px 0 var(--student-nav-edge) !important;
+        box-shadow: 0 11px 26px rgba(0, 0, 0, .30), inset 0 1px 0 var(--student-nav-inner), inset 0 -1px 0 var(--student-nav-edge) !important;
     }
 
     body.role-student[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).active::before,
@@ -175,7 +176,87 @@ body.role-student[data-theme="dark"] {
         background:
             linear-gradient(180deg, rgb(255 255 255 / .13), rgb(255 255 255 / .04) 42%, transparent 100%),
             rgb(65 62 58 / var(--student-nav-active-alpha));
-        box-shadow: 0 5px 12px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18);
+        box-shadow: 0 3px 9px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
+    }
+
+    /* The shared sheet transition uses a vertical transform. Explicit insets
+       keep this Student PWA sheet centred without losing half its width. */
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-more-backdrop {
+        background: rgba(12, 10, 8, .38) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+    }
+
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-more-sheet {
+        left: max(.65rem, var(--safe-left)) !important;
+        right: max(.65rem, var(--safe-right)) !important;
+        width: auto !important;
+        max-height: min(68dvh, 520px);
+        bottom: calc(var(--student-liquid-nav-height) + max(var(--student-liquid-nav-gap), var(--safe-bottom)) + .65rem) !important;
+        box-sizing: border-box;
+        padding: .65rem !important;
+        overflow-y: auto;
+        border: 1px solid color-mix(in srgb, var(--student-nav-border) 42%, transparent) !important;
+        border-radius: 24px !important;
+        background:
+            linear-gradient(125deg, rgb(255 255 255 / .34), transparent 32%, rgb(255 255 255 / .06) 72%),
+            rgba(250, 248, 245, .96) !important;
+        box-shadow: 0 18px 46px rgba(30, 24, 20, .24), inset 0 1px 0 rgba(255,255,255,.76) !important;
+        backdrop-filter: blur(24px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+        transform: translate3d(0, 18px, 0) scale(.98) !important;
+        transform-origin: bottom center;
+    }
+
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-more-sheet.is-open {
+        transform: translate3d(0, 0, 0) scale(1) !important;
+    }
+
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-more-sheet-head {
+        padding: .25rem .45rem .45rem;
+        color: var(--student-nav-text);
+        font-weight: 750;
+    }
+
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-more-sheet-head small {
+        color: var(--student-nav-muted);
+    }
+
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) :is(.mobile-more-link, .mobile-more-control) {
+        min-height: 48px;
+        border: 0 !important;
+        border-radius: 14px !important;
+        background: transparent !important;
+        color: var(--student-nav-text) !important;
+    }
+
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) :is(.mobile-more-link, .mobile-more-control):hover,
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) :is(.mobile-more-link, .mobile-more-control):focus-visible {
+        background: color-mix(in srgb, var(--se-primary-soft) 52%, transparent) !important;
+        color: var(--student-nav-accent) !important;
+    }
+
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) :is(.mobile-more-link, .mobile-more-control) > span {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--se-primary-soft) 78%, transparent) !important;
+        color: var(--student-nav-accent) !important;
+    }
+
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) :is(.mobile-more-link, .mobile-more-control) > span svg,
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) :is(.mobile-more-link, .mobile-more-control) > span svg :is(path, circle, line, polyline, polygon, rect) {
+        fill: none !important;
+        stroke: currentColor !important;
+        stroke-width: 2 !important;
+    }
+
+    body.role-student[data-theme="dark"]:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-more-sheet {
+        border-color: color-mix(in srgb, var(--student-nav-border) 72%, transparent) !important;
+        background:
+            linear-gradient(125deg, rgb(255 255 255 / .10), transparent 34%, rgb(255 255 255 / .025) 72%),
+            rgba(29, 28, 27, .95) !important;
+        box-shadow: 0 18px 46px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.11) !important;
     }
 }
 

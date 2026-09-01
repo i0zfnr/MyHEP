@@ -6418,6 +6418,64 @@ body[data-theme="dark"] .app-layout .sidebar.is-open {
     body[data-theme="dark"].student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card:nth-child(6) .stat-icon { color:#9fb7e8 !important; }
 }
 
+/* Student dashboard refinement: selected accents are expressive at key
+   interaction points, while informational surfaces stay neutral and calm. */
+body.role-student .sdash .hero {
+    border-color: color-mix(in srgb, var(--se-primary) 52%, rgba(255,255,255,.28)) !important;
+    box-shadow: 0 18px 38px color-mix(in srgb, var(--se-primary-strong) 20%, transparent), inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+
+body.role-student .sdash .hero-text {
+    min-width: 0;
+}
+
+body.role-student .sdash .hero-name {
+    max-inline-size: 24ch;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+}
+
+body.role-student .sdash .section-label {
+    color: var(--se-primary-strong) !important;
+}
+
+body.role-student .sdash :is(.stat-card, .portal-card) {
+    border-color: color-mix(in srgb, var(--se-primary) 14%, var(--se-border)) !important;
+    box-shadow: var(--se-shadow-sm), 0 12px 28px color-mix(in srgb, var(--se-primary) 7%, transparent) !important;
+}
+
+body.role-student .sdash :is(.stat-icon.sand, .stat-icon.gold, .portal-card-icon.gold, .portal-card-icon.sand) {
+    border-color: color-mix(in srgb, var(--se-primary) 52%, var(--se-border)) !important;
+    background: color-mix(in srgb, var(--se-primary-soft) 88%, transparent) !important;
+    color: var(--se-primary-strong) !important;
+}
+
+body.role-student .sdash .portal-card-cta {
+    color: var(--se-primary-strong) !important;
+    font-weight: 750;
+}
+
+@media (max-width: 767px) {
+    body.role-student .sdash .hero-name {
+        max-inline-size: 19ch;
+        line-height: 1.08;
+    }
+
+    body.role-student .sdash .section-label {
+        margin-top: .35rem;
+    }
+
+    body.role-student.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card {
+        border-color: color-mix(in srgb, var(--se-primary) 16%, var(--se-border)) !important;
+        box-shadow: 0 10px 22px color-mix(in srgb, var(--se-primary-strong) 8%, transparent), inset 0 1px 0 rgba(255,255,255,.9) !important;
+    }
+
+    body[data-theme="dark"].role-student.student-dashboard-mobile-sidebar .page-body .student-stats-section .stat-card {
+        border-color: color-mix(in srgb, var(--se-primary) 20%, var(--se-border)) !important;
+        box-shadow: 0 14px 30px rgba(0,0,0,.32), 0 8px 20px color-mix(in srgb, var(--se-primary) 9%, transparent), inset 0 1px 0 rgba(255,255,255,.055) !important;
+    }
+}
+
 /* Keep accessibility mode authoritative after all theme and accent variants. */
 body.admin-liquid-disabled {
     --glass-opacity: 1;

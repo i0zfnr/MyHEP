@@ -23,10 +23,15 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('--safe-bottom: env(safe-area-inset-bottom, 0px);', $styles);
         $this->assertStringContainsString('body.role-student .mobile-bottom-nav.mobile-bottom-nav--student', $styles);
         $this->assertStringContainsString('body.role-student.pwa-standalone .app-footer', $styles);
+        $this->assertStringContainsString('body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-more-sheet', $styles);
+        $this->assertStringContainsString('left: max(.65rem, var(--safe-left)) !important;', $styles);
+        $this->assertStringContainsString('transform: translate3d(0, 0, 0) scale(1) !important;', $styles);
+        $this->assertStringContainsString('stroke: currentColor !important;', $styles);
         $this->assertStringNotContainsString('body.role-student .sdash', $styles);
         $this->assertStringNotContainsString('body.role-student .sidebar', $styles);
         $this->assertStringNotContainsString('body.role-student .topbar', $styles);
         $this->assertStringNotContainsString('body.role-student :is(.liquid-glass-surface, .liquid-glass-card)', $styles);
+        $this->assertStringContainsString('+ 2rem)', $styles);
     }
 
     public function test_student_dashboard_restores_the_published_markup(): void
@@ -54,8 +59,28 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('background-color: transparent !important;', $styles);
         $this->assertStringContainsString('background-image: none !important;', $styles);
         $this->assertStringContainsString('box-shadow: none !important;', $styles);
+        $this->assertStringContainsString('border: 0;', $styles);
+        $this->assertStringContainsString('box-shadow: 0 3px 8px', $styles);
+        $this->assertStringContainsString('box-shadow: 0 3px 9px', $styles);
+        $this->assertStringContainsString('--student-nav-accent: var(--se-primary-strong);', $styles);
+        $this->assertStringContainsString('--student-nav-accent: var(--se-primary);', $styles);
         $this->assertStringContainsString('body[data-theme="dark"].has-student-bottom-nav:not(.role-student)', $legacyStyles);
         $this->assertStringNotContainsString('body[data-theme="dark"].has-student-bottom-nav .mobile-bottom-nav :is(a, button).active:not(.mobile-scan-tab)', $legacyStyles);
+    }
+
+    public function test_student_dashboard_accent_refinement_is_role_scoped_and_keeps_status_surfaces_neutral(): void
+    {
+        $styles = file_get_contents(__DIR__.'/../../resources/css/design-system.css');
+
+        $this->assertStringContainsString('body.role-student .sdash .hero', $styles);
+        $this->assertStringContainsString('body.role-student .sdash .hero-name', $styles);
+        $this->assertStringContainsString('body.role-student .sdash :is(.stat-card, .portal-card)', $styles);
+        $this->assertStringContainsString('body.role-student .sdash :is(.stat-icon.sand, .stat-icon.gold, .portal-card-icon.gold, .portal-card-icon.sand)', $styles);
+        $this->assertStringNotContainsString('body.role-lecturer .sdash .hero', $styles);
+
+        $studentModules = file_get_contents(__DIR__.'/../../resources/css/student-modules.css');
+        $this->assertStringContainsString('body.role-student.student-dashboard-mobile-sidebar:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .sdash', $studentModules);
+        $this->assertStringContainsString('padding-bottom: .8rem;', $studentModules);
     }
 
     public function test_transparency_control_only_updates_student_navigation_material_tokens(): void

@@ -18,7 +18,7 @@
             document.documentElement.style.colorScheme = theme;
             document.documentElement.style.setProperty('--glass-user-transparency', glassRatio.toFixed(2));
             document.documentElement.style.setProperty('--student-nav-material-alpha', (0.86 - (glassRatio * 0.34)).toFixed(2));
-            document.documentElement.style.setProperty('--student-nav-active-alpha', (0.90 - (glassRatio * 0.22)).toFixed(2));
+            document.documentElement.style.setProperty('--student-nav-active-alpha', (0.80 - (glassRatio * 0.18)).toFixed(2));
             document.documentElement.style.setProperty('--student-nav-reflection-alpha', (0.34 - (glassRatio * 0.16)).toFixed(2));
             document.documentElement.style.setProperty('--student-nav-active-reflection-alpha', (0.46 - (glassRatio * 0.24)).toFixed(2));
             document.documentElement.style.setProperty('--student-nav-blur', (18 + (glassRatio * 8)) + 'px');
@@ -29,7 +29,7 @@
             document.documentElement.dataset.theme = @json(session('theme', 'light'));
             document.documentElement.dataset.accentTheme = @json(session('accent_theme', 'gold'));
             document.documentElement.style.setProperty('--student-nav-material-alpha', '.72');
-            document.documentElement.style.setProperty('--student-nav-active-alpha', '.81');
+            document.documentElement.style.setProperty('--student-nav-active-alpha', '.74');
             document.documentElement.style.setProperty('--student-nav-reflection-alpha', '.26');
             document.documentElement.style.setProperty('--student-nav-active-reflection-alpha', '.34');
             document.documentElement.style.setProperty('--student-nav-blur', '22px');
