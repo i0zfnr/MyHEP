@@ -58,7 +58,7 @@
         window.studentEdgeUi = {!! json_encode($studentEdgeUiConfig, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!};
     </script>
 
-        @vite(['resources/css/app.css', 'resources/css/design-system.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/css/design-system.css', 'resources/css/liquid-glass.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 @php
@@ -155,14 +155,14 @@
         || request()->routeIs('student.discipline-announcements.*')
         || request()->routeIs('settings.*');
     $bodyClasses = trim(
-        ($isStudent ? 'student-mobile-shell' : '') . ' ' .
+        ($isStudent ? 'role-student student-mobile-shell' : '') . ' ' .
         ($isStudent && request()->routeIs('student.scholarships.index') ? 'student-liquid-aid' : '') . ' ' .
         ($isStudent && request()->routeIs('student.offenses.index') ? 'student-liquid-fines' : '') . ' ' .
         (($showStudentBottomNav || $showStaffBottomNav) ? 'student-bottom-nav-pwa-eligible' : '') . ' ' .
         ((($showStudentBottomNav && $studentBrowserBottomNavEnabled) || $showStaffBottomNav) ? 'student-bottom-nav-eligible' : '') . ' ' .
         (request()->routeIs('student.movements.scan', 'admin.laptops.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar ' : '') .
-        ($isAdmin && $adminScope === 'system_admin' ? 'system-admin-shell ' : '') .
+        ($isAdmin && $adminScope === 'system_admin' ? 'role-system-admin system-admin-shell ' : '') .
         (! $adminLiquidDesignEnabled ? 'admin-liquid-disabled ' : '') .
         ($adminOnDashboard ? 'admin-dashboard-page ' : '') .
         (request()->routeIs('admin.ai-helper.*', 'student.ai-helper.*', 'lecturer.ai-helper.*') ? 'admin-ai-helper-page ' : '')
@@ -223,7 +223,10 @@
                         {{ __('AI Helper') }}
                     </a>
                     @else
-                    <span class="nav-link" style="opacity:.55;cursor:not-allowed" aria-disabled="true">{{ __('AI Helper') }} · {{ __('Unavailable') }}</span>
+                    <span class="nav-link" style="opacity:.55;cursor:not-allowed" aria-disabled="true">
+                        @include('partials.ai_helper_icon', ['class' => 'nav-icon'])
+                        {{ __('AI Helper') }} · {{ __('Unavailable') }}
+                    </span>
                     @endif
                 </nav>
 
@@ -783,7 +786,11 @@
 
 @if($showStudentBottomNav)
     <button type="button" class="mobile-more-backdrop" id="mobileMoreBackdrop" aria-label="{{ __('Close menu') }}" aria-hidden="true" tabindex="-1"></button>
-    <div class="mobile-more-sheet" id="mobileMoreSheet" aria-hidden="true">
+    <div class="mobile-more-sheet" id="mobileMoreSheet" role="dialog" aria-modal="true" aria-label="{{ __('More student services') }}" aria-hidden="true" tabindex="-1">
+        <div class="mobile-more-sheet-head">
+            <span>{{ __('More') }}</span>
+            <small>{{ __('Student services') }}</small>
+        </div>
         <a href="{{ route('student.movements.index') }}" class="mobile-more-link">
             <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 0 0-14 0c0 6.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
             {{ __('Campus Movement') }}
@@ -1027,6 +1034,7 @@ document.addEventListener('click', function (event) {
     }
 
     function closeMobileMore() {
+        var wasOpen = mobileMoreSheet && mobileMoreSheet.classList.contains('is-open');
         if (mobileMoreSheet) {
             mobileMoreSheet.classList.remove('is-open');
             mobileMoreSheet.setAttribute('aria-hidden', 'true');
@@ -1038,6 +1046,9 @@ document.addEventListener('click', function (event) {
         if (mobileMoreToggle) mobileMoreToggle.setAttribute('aria-expanded', 'false');
         if (!document.querySelector('.se-notification-center.is-open, .se-media-modal.is-open, .se-filter-sheet.is-open')) {
             document.body.style.overflow = '';
+        }
+        if (wasOpen && mobileMoreToggle && document.contains(mobileMoreToggle)) {
+            mobileMoreToggle.focus({ preventScroll: true });
         }
     }
 
@@ -1051,6 +1062,20 @@ document.addEventListener('click', function (event) {
             mobileMoreBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
         }
         if (window.innerWidth <= 767) document.body.style.overflow = open ? 'hidden' : '';
+        if (open) {
+            window.setTimeout(function () {
+                var firstAction = mobileMoreSheet.querySelector('a, button');
+                if (firstAction) firstAction.focus();
+            }, 180);
+        }
+    }
+
+    function focusSidebarPanel() {
+        window.setTimeout(function () {
+            if (!sidebar || !sidebar.classList.contains('is-open')) return;
+            var firstControl = closeBtn || sidebar.querySelector('button:not([disabled]), a[href], summary, [tabindex]:not([tabindex="-1"])');
+            if (firstControl) firstControl.focus({ preventScroll: true });
+        }, 180);
     }
 
     function openSidebar() {
@@ -1066,6 +1091,7 @@ document.addEventListener('click', function (event) {
             if (overlay) overlay.classList.add('is-visible');
             if (hamBox) hamBox.classList.add('is-open-ham');
             if (toggle) toggle.setAttribute('aria-expanded', 'true');
+            focusSidebarPanel();
             return;
         }
         sidebar.classList.add('is-open');
@@ -1075,10 +1101,12 @@ document.addEventListener('click', function (event) {
         if (hamBox) hamBox.classList.add('is-open-ham');
         if (toggle) toggle.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden';
+        focusSidebarPanel();
     }
 
     function closeSidebar() {
         if (!sidebar) return;
+        var wasOpen = sidebar.classList.contains('is-open');
         if (window.innerWidth >= 1024) {
             if (!document.body.classList.contains('student-dashboard-mobile-sidebar')) {
                 sidebar.setAttribute('aria-hidden', document.body.classList.contains('student-mobile-shell') ? 'true' : 'false');
@@ -1090,6 +1118,7 @@ document.addEventListener('click', function (event) {
             if (overlay) overlay.classList.remove('is-visible');
             if (hamBox) hamBox.classList.remove('is-open-ham');
             if (toggle) toggle.setAttribute('aria-expanded', 'false');
+            if (wasOpen && toggle) toggle.focus({ preventScroll: true });
             return;
         }
         sidebar.classList.remove('is-open');
@@ -1099,6 +1128,7 @@ document.addEventListener('click', function (event) {
         if (hamBox) hamBox.classList.remove('is-open-ham');
         if (toggle) toggle.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
+        if (wasOpen && toggle) toggle.focus({ preventScroll: true });
     }
 
     if (sidebar && toggle) {
@@ -1109,6 +1139,21 @@ document.addEventListener('click', function (event) {
     if (sidebar && closeBtn) closeBtn.addEventListener('click', closeSidebar);
     if (sidebar && overlay) overlay.addEventListener('click', closeSidebar);
     document.addEventListener('keydown', function (e) {
+        if (e.key === 'Tab' && sidebar && sidebar.classList.contains('is-open')) {
+            var focusable = Array.from(sidebar.querySelectorAll('button:not([disabled]), a[href], summary, [tabindex]:not([tabindex="-1"])'))
+                .filter(function (element) { return element.offsetParent !== null; });
+            if (focusable.length) {
+                var first = focusable[0];
+                var last = focusable[focusable.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        }
         if (e.key === 'Escape') {
             if (sidebar) closeSidebar();
             closeHeaderUserMenu();

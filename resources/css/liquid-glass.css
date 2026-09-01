@@ -1,0 +1,1030 @@
+/* MyHEP Liquid Glass
+ * Scope is intentionally limited to Student and System Admin role roots.
+ * Transient navigation layers receive blur; scrolling content cards do not.
+ */
+body.role-student,
+body.role-system-admin {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --liquid-blur: 22px;
+    --liquid-radius-sm: 14px;
+    --liquid-radius-md: 20px;
+    --liquid-radius-lg: 28px;
+    --liquid-motion-fast: 180ms;
+    --liquid-motion: 240ms;
+    --liquid-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+body.role-student {
+    --student-nav-material-alpha: .72;
+    --student-nav-active-alpha: .81;
+    --student-nav-reflection-alpha: .26;
+    --student-nav-active-reflection-alpha: .34;
+    --student-nav-blur: 22px;
+    --student-nav-active-blur: 12px;
+    --student-nav-saturation: 142%;
+    --liquid-text: #241d17;
+    --liquid-muted: #70645a;
+    --liquid-accent: #946326;
+    --liquid-accent-bright: #c99a55;
+    --liquid-accent-soft: rgba(174, 125, 61, .12);
+    --student-interaction: #6754a6;
+    --student-interaction-soft: rgba(103, 84, 166, .12);
+    --student-interaction-edge: rgba(103, 84, 166, .22);
+    --student-sheet-surface: rgba(249, 248, 246, .93);
+    --liquid-neutral-glow: rgba(235, 230, 224, .58);
+    --liquid-surface: rgba(250, 249, 247, .72);
+    --liquid-surface-strong: rgba(252, 251, 249, .88);
+    --liquid-border: rgba(255, 255, 255, .58);
+    --liquid-edge: rgba(116, 103, 91, .10);
+    --liquid-inner: rgba(255, 255, 255, .72);
+    --liquid-shadow: 0 14px 34px rgba(50, 43, 37, .09), inset 0 1px 0 var(--liquid-inner), inset 0 -1px 0 var(--liquid-edge);
+    color: var(--liquid-text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif !important;
+    background:
+        radial-gradient(58rem circle at 8% -14%, rgba(255, 255, 255, .94), transparent 62%),
+        radial-gradient(44rem circle at 104% 24%, rgba(203, 161, 99, .09), transparent 66%),
+        linear-gradient(180deg, #f5f3f0 0%, #eeeae5 100%) !important;
+}
+
+body.role-student[data-theme="dark"] {
+    --liquid-text: #fffaf5;
+    --liquid-muted: #bdb2a8;
+    --liquid-accent: #d4a761;
+    --liquid-accent-bright: #e1bd7d;
+    --liquid-accent-soft: rgba(203, 157, 87, .14);
+    --student-interaction: #c6baff;
+    --student-interaction-soft: rgba(198, 186, 255, .14);
+    --student-interaction-edge: rgba(198, 186, 255, .24);
+    --student-sheet-surface: rgba(29, 28, 27, .93);
+    --liquid-neutral-glow: rgba(255, 255, 255, .055);
+    --liquid-surface: rgba(28, 27, 26, .72);
+    --liquid-surface-strong: rgba(30, 29, 28, .88);
+    --liquid-border: rgba(255, 255, 255, .12);
+    --liquid-edge: rgba(0, 0, 0, .24);
+    --liquid-inner: rgba(255, 255, 255, .095);
+    --liquid-shadow: 0 16px 38px rgba(0, 0, 0, .30), inset 0 1px 0 var(--liquid-inner), inset 0 -1px 0 var(--liquid-edge);
+    background:
+        radial-gradient(50rem circle at 5% -8%, rgba(255, 255, 255, .055), transparent 64%),
+        radial-gradient(42rem circle at 105% 30%, rgba(185, 135, 72, .075), transparent 68%),
+        linear-gradient(180deg, #121110 0%, #0e0d0c 100%) !important;
+}
+
+/* Preserve the established System Admin palette; this refinement only changes
+ * Student material values. */
+body.role-system-admin {
+    --liquid-text: var(--se-text);
+    --liquid-muted: var(--se-text-muted);
+    --liquid-accent: var(--se-primary-strong);
+    --liquid-accent-bright: var(--se-primary);
+    --liquid-accent-soft: color-mix(in srgb, var(--se-primary-soft) 76%, transparent);
+    --liquid-border: var(--liquid-stroke);
+    --liquid-edge: color-mix(in srgb, var(--se-border) 62%, transparent);
+    --liquid-inner: var(--liquid-highlight);
+}
+
+body.role-student :is(.liquid-glass-surface, .liquid-glass-card),
+body.role-system-admin :is(.liquid-glass-surface, .liquid-glass-card) {
+    position: relative;
+    isolation: isolate;
+    border: 1px solid var(--liquid-border) !important;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.28), transparent 42%),
+        var(--liquid-surface) !important;
+    box-shadow: var(--liquid-shadow) !important;
+}
+
+body.role-student .liquid-glass-surface::before,
+body.role-system-admin .liquid-glass-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(118deg, rgba(255,255,255,.28), transparent 27%, rgba(255,255,255,.065) 62%, transparent 82%);
+}
+
+body.role-student .main-wrap,
+body.role-system-admin .main-wrap,
+body.role-student .main-scroll-viewport,
+body.role-system-admin .main-scroll-viewport {
+    background: transparent !important;
+}
+
+/* The shared design system paints .page-body, but Student deliberately limits
+ * that element to the readable dashboard width. Keep the environment on the
+ * full application shell so a centred content column cannot form side seams. */
+body.role-student .app-layout,
+body.role-student .main-wrap,
+body.role-student .main-scroll-viewport,
+body.role-student .main-scroll-inner {
+    background: transparent !important;
+}
+
+body.role-student .app-layout .page-body {
+    background: transparent !important;
+}
+
+/* Student app shell */
+body.role-student .topbar {
+    top: 0;
+    min-height: calc(58px + var(--safe-top));
+    padding: calc(.55rem + var(--safe-top)) max(.8rem, var(--safe-right)) .55rem max(.8rem, var(--safe-left));
+    margin: .5rem max(.55rem, var(--safe-right)) 0 max(.55rem, var(--safe-left));
+    width: auto;
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid var(--liquid-border) !important;
+    border-radius: 22px !important;
+    background:
+        linear-gradient(120deg, rgba(255,255,255,.22), transparent 38%),
+        color-mix(in srgb, var(--liquid-surface-strong) 84%, transparent) !important;
+    box-shadow: 0 10px 28px rgba(45, 39, 34, .09), inset 0 1px 0 var(--liquid-inner), inset 0 -1px 0 var(--liquid-edge) !important;
+    backdrop-filter: blur(var(--liquid-blur)) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(145%) !important;
+}
+
+body.role-student .topbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, rgba(255,255,255,.26), transparent 24%, rgba(255,255,255,.055) 68%, transparent 84%);
+}
+
+body.role-student .topbar > * {
+    position: relative;
+    z-index: 1;
+}
+
+body.role-student .topbar :is(.btn-ham, .se-notification-trigger--topbar, .header-user) {
+    border-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.role-student .topbar :is(.btn-ham, .se-notification-trigger--topbar):hover,
+body.role-student .topbar :is(.btn-ham, .se-notification-trigger--topbar):focus-visible {
+    background: rgba(120, 108, 97, .08) !important;
+}
+
+body.role-student .page-body {
+    width: min(100%, 1180px);
+    margin-inline: auto;
+}
+
+body.role-student .sdash {
+    gap: clamp(1rem, 2.4vw, 1.6rem);
+}
+
+body.role-student .sdash .hero.liquid-glass-hero {
+    overflow: hidden;
+    border-radius: var(--liquid-radius-lg) !important;
+    color: var(--liquid-text) !important;
+    padding: clamp(1.2rem, 2.5vw, 2rem) !important;
+    min-height: 0 !important;
+    background:
+        radial-gradient(30rem circle at 100% 0%, rgba(194, 148, 84, .08), transparent 64%),
+        linear-gradient(140deg, rgba(255,255,255,.22), transparent 44%),
+        var(--liquid-surface) !important;
+    box-shadow: 0 12px 30px rgba(50, 43, 37, .08), inset 0 1px 0 var(--liquid-inner), inset 0 -1px 0 var(--liquid-edge) !important;
+}
+
+body.role-student .sdash .hero.liquid-glass-hero::before {
+    z-index: 0;
+    opacity: 1 !important;
+    background:
+        linear-gradient(118deg, rgba(255,255,255,.30), transparent 26%, rgba(255,255,255,.06) 64%, transparent 84%),
+        radial-gradient(26rem circle at 100% 0%, rgba(194, 148, 84, .08), transparent 68%) !important;
+}
+
+body.role-student .sdash .hero-name {
+    max-width: 22ch;
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-family: inherit !important;
+    font-size: clamp(1.7rem, 4.5vw, 3.15rem) !important;
+    font-weight: 760 !important;
+    letter-spacing: -.045em;
+    line-height: 1.02;
+    text-wrap: balance;
+    color: var(--liquid-text) !important;
+    text-shadow: none !important;
+}
+
+body.role-student .sdash .hero-name > span {
+    display: block;
+    margin-bottom: .28rem;
+    color: var(--liquid-muted);
+    font-size: .45em;
+    font-weight: 650;
+    letter-spacing: .01em;
+}
+
+body.role-student .sdash .hero-sub,
+body.role-student .sdash .hero-meta-label,
+body.role-student .sdash .section-label {
+    color: var(--liquid-muted) !important;
+}
+
+body.role-student .sdash .hero-eyebrow {
+    color: var(--liquid-accent) !important;
+}
+
+body.role-student .sdash .hero-badge {
+    min-width: 88px;
+    padding: .58rem .76rem;
+    border: 1px solid color-mix(in srgb, var(--liquid-border) 58%, transparent) !important;
+    background: color-mix(in srgb, var(--liquid-surface-strong) 58%, transparent) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--liquid-inner) 72%, transparent) !important;
+    color: var(--liquid-text) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.role-student .sdash .hero-badge-label {
+    color: var(--liquid-muted) !important;
+}
+
+body.role-student .sdash :is(.hero-badge-value, .hero-meta-value) {
+    color: var(--liquid-text) !important;
+    text-shadow: none !important;
+}
+
+body.role-student .sdash .hero-right {
+    align-items: center;
+    gap: clamp(.7rem, 1.4vw, 1rem);
+}
+
+body.role-student .sdash .hero-meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .3rem 0 !important;
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+body.role-student .sdash .hero-meta-item {
+    flex: 1 1 8.5rem;
+    min-width: 0;
+    min-height: 0;
+    padding: .1rem .85rem;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+body.role-student .sdash .hero-meta-item + .hero-meta-item {
+    border-left: 1px solid color-mix(in srgb, var(--liquid-edge) 72%, transparent) !important;
+}
+
+body.role-student .sdash .hero-meta-value {
+    overflow-wrap: anywhere;
+}
+
+body.role-student .sdash .liquid-glass-card {
+    border-radius: var(--liquid-radius-md) !important;
+    border-color: color-mix(in srgb, var(--liquid-border) 74%, transparent) !important;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.22), transparent 42%),
+        var(--liquid-surface) !important;
+    box-shadow: var(--liquid-shadow) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: transform var(--liquid-motion) var(--liquid-ease), box-shadow var(--liquid-motion) var(--liquid-ease), border-color var(--liquid-motion-fast) ease !important;
+}
+
+body.role-student .sdash .liquid-glass-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255,255,255,.20), transparent 38%) !important;
+}
+
+body.role-student .sdash .portal-card::after {
+    height: 2px;
+    background: linear-gradient(90deg, var(--liquid-accent), var(--liquid-accent-bright)) !important;
+    opacity: .72;
+}
+
+body.role-student .sdash .stat-card {
+    min-height: 128px;
+    padding: 1rem !important;
+}
+
+body.role-student .sdash .portal-card {
+    min-height: 178px;
+}
+
+body.role-student .sidebar {
+    color: var(--liquid-text);
+}
+
+body.role-student .app-layout .sidebar {
+    border-color: color-mix(in srgb, var(--liquid-border) 72%, transparent) !important;
+    background:
+        linear-gradient(135deg, rgba(255,255,255,.22), transparent 36%, rgba(255,255,255,.05) 76%),
+        var(--student-sheet-surface) !important;
+    box-shadow: 12px 0 34px rgba(46, 40, 35, .15), inset 0 1px 0 var(--liquid-inner), inset -1px 0 0 var(--liquid-edge) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.role-student .app-layout .sidebar::before {
+    background: linear-gradient(112deg, rgba(255,255,255,.30), transparent 28%, transparent 72%, rgba(255,255,255,.06)) !important;
+}
+
+body.role-student .app-layout .sidebar::after {
+    display: none !important;
+}
+
+body.role-student .sidebar :is(.sb-header, .sb-footer, .sb-user, .nav-link, .se-theme-toggle, .btn-logout) {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+body.role-student .sidebar :is(.sb-header, .sb-user) {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.role-student .sidebar .nav-label {
+    color: var(--liquid-muted) !important;
+}
+
+body.role-student .sidebar .nav-link {
+    color: color-mix(in srgb, var(--liquid-text) 78%, var(--liquid-muted)) !important;
+}
+
+body.role-student .sidebar .nav-icon {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    color: color-mix(in srgb, var(--liquid-accent) 68%, var(--liquid-muted)) !important;
+}
+
+body.role-student .sidebar :is(.nav-link:hover, .nav-link:focus-visible, .nav-group:hover > .nav-group-toggle, .nav-group[open] > .nav-group-toggle) {
+    border-color: transparent !important;
+    background: color-mix(in srgb, var(--liquid-text) 7%, transparent) !important;
+    color: var(--liquid-text) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+body.role-student .sidebar :is(.nav-link.active, .nav-group.active > .nav-group-toggle) {
+    margin-inline: .16rem;
+    border: 1px solid var(--student-interaction-edge) !important;
+    border-radius: 16px;
+    background:
+        radial-gradient(9rem circle at 12% 0%, rgba(255,255,255,.26), transparent 62%),
+        var(--student-interaction-soft) !important;
+    color: var(--student-interaction) !important;
+    box-shadow: 0 7px 16px rgba(72, 54, 125, .08), inset 0 1px 0 color-mix(in srgb, var(--liquid-inner) 76%, transparent) !important;
+    transform: translateX(2px) !important;
+}
+
+body.role-student .sidebar :is(.nav-link.active, .nav-group.active > .nav-group-toggle) .nav-icon {
+    color: var(--student-interaction) !important;
+}
+
+body.role-student .sidebar :is(.nav-link.active, .nav-group.active > .nav-group-toggle)::before {
+    display: none !important;
+}
+
+body.role-student .sidebar .nav-submenu {
+    border-left-color: color-mix(in srgb, var(--liquid-edge) 54%, transparent) !important;
+}
+
+body.role-student .sidebar :is(.sb-user-name, .sb-brand-name) {
+    color: var(--liquid-text) !important;
+}
+
+body.role-student .sidebar :is(.sb-user-role, .sb-brand-sub) {
+    color: var(--liquid-muted) !important;
+}
+
+body.role-student .sidebar .sb-role-badge.student {
+    border-color: transparent !important;
+    background: var(--liquid-accent-soft) !important;
+    color: var(--liquid-accent) !important;
+}
+
+body.role-student .sidebar .sb-user {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .55rem;
+    margin: .5rem .65rem .2rem;
+    padding: .6rem .65rem;
+    border-radius: 16px;
+}
+
+body.role-student .sidebar .sb-user-row {
+    min-width: 0;
+}
+
+body.role-student .sidebar .sb-role-badge.student {
+    margin: 0;
+    padding: .16rem .48rem;
+}
+
+body.role-student .sidebar .sb-footer {
+    margin: .2rem .55rem .55rem;
+    padding: .35rem;
+    border: 1px solid color-mix(in srgb, var(--liquid-border) 58%, transparent) !important;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--liquid-surface-strong) 44%, transparent) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--liquid-inner) 62%, transparent) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.role-student .sidebar .sb-footer form {
+    margin-top: .25rem;
+    padding-top: .25rem;
+    border-top: 1px solid color-mix(in srgb, var(--liquid-edge) 58%, transparent);
+}
+
+body.role-student .sidebar :is(.se-theme-toggle, .btn-logout) {
+    justify-content: flex-start !important;
+    min-height: 44px;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transform: none !important;
+}
+
+body.role-student .sidebar .se-theme-toggle {
+    color: var(--liquid-text) !important;
+}
+
+body.role-student .sidebar :is(.se-theme-toggle:hover, .se-theme-toggle:focus-visible) {
+    background: color-mix(in srgb, var(--liquid-text) 7%, transparent) !important;
+    color: var(--student-interaction) !important;
+}
+
+body.role-student .sidebar .btn-logout {
+    color: #a8413a !important;
+}
+
+body.role-student[data-theme="dark"] .sidebar .btn-logout {
+    color: #f2aaa3 !important;
+}
+
+body.role-student .sidebar :is(.btn-logout:hover, .btn-logout:focus-visible) {
+    background: rgba(176, 55, 47, .08) !important;
+}
+
+/* The Student dashboard keeps its drawer behavior at desktop widths. Give
+ * that transient panel the same inset sheet geometry as compact screens. */
+body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar {
+    position: fixed !important;
+    top: max(.5rem, var(--safe-top)) !important;
+    right: auto !important;
+    bottom: max(.5rem, var(--safe-bottom)) !important;
+    left: max(.5rem, var(--safe-left)) !important;
+    width: min(calc(100vw - max(1rem, calc(var(--safe-left) + var(--safe-right)))), 340px) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    border: 1px solid color-mix(in srgb, var(--liquid-border) 82%, transparent) !important;
+    border-radius: 28px !important;
+    transform: translate3d(calc(-100% - 1.25rem), 0, 0) !important;
+    box-shadow: 16px 0 46px rgba(39, 34, 30, .18), inset 0 1px 0 var(--liquid-inner), inset 0 -1px 0 var(--liquid-edge) !important;
+    backdrop-filter: blur(18px) saturate(142%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(142%) !important;
+    contain: paint;
+}
+
+body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar.is-open {
+    transform: translate3d(0, 0, 0) !important;
+}
+
+body.role-student.student-dashboard-mobile-sidebar .sidebar .sb-close {
+    display: flex !important;
+}
+
+@media (max-width: 1023px) {
+    body.role-student .app-layout .sidebar {
+        top: max(.5rem, var(--safe-top)) !important;
+        right: auto !important;
+        bottom: max(.5rem, var(--safe-bottom)) !important;
+        left: max(.5rem, var(--safe-left)) !important;
+        width: min(calc(100vw - max(1rem, calc(var(--safe-left) + var(--safe-right)))), 340px) !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding-top: 0 !important;
+        border: 1px solid color-mix(in srgb, var(--liquid-border) 82%, transparent) !important;
+        border-radius: 28px !important;
+        transform: translate3d(calc(-100% - 1.25rem), 0, 0) !important;
+        box-shadow: 16px 0 46px rgba(39, 34, 30, .18), inset 0 1px 0 var(--liquid-inner), inset 0 -1px 0 var(--liquid-edge) !important;
+        backdrop-filter: blur(18px) saturate(142%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(142%) !important;
+        contain: paint;
+    }
+
+    body.role-student .app-layout .sidebar.is-open {
+        transform: translate3d(0, 0, 0) !important;
+    }
+
+    body.role-student .sidebar .sb-header {
+        height: 58px;
+        padding: .45rem .7rem .35rem .8rem;
+        border-bottom: 1px solid color-mix(in srgb, var(--liquid-edge) 48%, transparent) !important;
+    }
+
+    body.role-student .sidebar .sb-brand-icon {
+        width: 32px;
+        height: 32px;
+        border-color: color-mix(in srgb, var(--liquid-border) 68%, transparent) !important;
+        background: color-mix(in srgb, var(--liquid-surface-strong) 58%, transparent) !important;
+        box-shadow: inset 0 1px 0 var(--liquid-inner) !important;
+    }
+
+    body.role-student .sidebar .sb-close {
+        width: 44px;
+        height: 44px;
+        border-radius: 15px;
+    }
+
+    body.role-student .sidebar .sb-close:hover,
+    body.role-student .sidebar .sb-close:focus-visible {
+        background: color-mix(in srgb, var(--liquid-text) 7%, transparent) !important;
+        color: var(--liquid-text) !important;
+    }
+
+    body.role-student .sidebar .sb-user {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: .55rem;
+        margin: .45rem .65rem .2rem;
+        padding: .55rem .65rem;
+        border-radius: 16px;
+    }
+
+    body.role-student .sidebar .sb-user-row {
+        min-width: 0;
+        gap: .55rem;
+    }
+
+    body.role-student .sidebar .sb-avatar {
+        width: 34px;
+        min-width: 34px;
+        max-width: 34px;
+        height: 34px;
+        min-height: 34px;
+        max-height: 34px;
+        flex-basis: 34px;
+    }
+
+    body.role-student .sidebar .sb-role-badge.student {
+        margin: 0;
+        padding: .16rem .48rem;
+        font-size: .58rem;
+    }
+
+    body.role-student .sidebar .sb-scroll {
+        padding: .35rem .55rem .65rem;
+    }
+
+    body.role-student .sidebar .nav-label {
+        margin-top: .75rem;
+        padding: .2rem .65rem .35rem;
+        font-size: .61rem;
+        letter-spacing: .095em;
+    }
+
+    body.role-student .sidebar .nav-link {
+        min-height: 44px;
+        margin: 1px 0;
+        padding: .6rem .7rem;
+        border-radius: 14px;
+        gap: .7rem;
+    }
+
+    body.role-student .sidebar .nav-submenu {
+        margin: .12rem 0 .4rem .55rem;
+        padding-left: .3rem;
+    }
+
+    body.role-student .sidebar .nav-submenu .nav-link {
+        margin-left: 0;
+    }
+
+    body.role-student .sidebar .sb-footer {
+        margin: .2rem .55rem .55rem;
+        padding: .35rem;
+        border-radius: 18px;
+    }
+
+    body.role-student .app-layout .sb-overlay {
+        background: rgba(28, 25, 23, .28) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+    }
+
+    body.role-student[data-theme="dark"] .app-layout .sb-overlay {
+        background: rgba(0, 0, 0, .48) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    body.role-student.student-dashboard-mobile-sidebar .app-layout .topbar {
+        min-height: calc(58px + var(--safe-top)) !important;
+        height: auto !important;
+        padding: calc(.45rem + var(--safe-top)) max(.8rem, var(--safe-right)) .45rem max(.8rem, var(--safe-left)) !important;
+        border-bottom-color: var(--liquid-edge) !important;
+    }
+}
+
+/* Mobile action sheet and bottom system control */
+@media (max-width: 767px) {
+    body.role-student {
+        --student-liquid-nav-height: 64px;
+        --student-liquid-nav-gap: 8px;
+    }
+
+    body.role-student .page-body {
+        padding-bottom: calc(var(--student-liquid-nav-height) + var(--safe-bottom) + 2rem) !important;
+    }
+
+    body.role-student .mobile-bottom-nav {
+        left: 50% !important;
+        right: auto !important;
+        bottom: max(var(--student-liquid-nav-gap), var(--safe-bottom)) !important;
+        width: min(calc(100vw - max(1rem, calc(var(--safe-left) + var(--safe-right)))), 420px) !important;
+        min-height: var(--student-liquid-nav-height) !important;
+        padding: .3rem .34rem !important;
+        gap: .08rem !important;
+        transform: translateX(-50%) translateZ(0) !important;
+        border: 1px solid color-mix(in srgb, var(--liquid-border) 58%, transparent) !important;
+        border-radius: 999px !important;
+        background:
+            linear-gradient(112deg, rgb(255 255 255 / var(--student-nav-reflection-alpha)), transparent 32%, rgb(255 255 255 / .05) 74%),
+            rgb(252 250 247 / var(--student-nav-material-alpha)) !important;
+        box-shadow: 0 13px 30px rgba(39, 34, 30, .14), 0 2px 6px rgba(39, 34, 30, .05), inset 0 1px 0 var(--liquid-inner), inset 0 -1px 0 var(--liquid-edge) !important;
+        backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) !important;
+        -webkit-backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) !important;
+    }
+
+    body.role-student .mobile-bottom-nav :is(a, button) {
+        isolation: isolate;
+        min-width: 0;
+        min-height: 48px !important;
+        padding: .2rem .1rem !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        touch-action: manipulation;
+        transition: transform var(--liquid-motion-fast) var(--liquid-ease), background var(--liquid-motion) var(--liquid-ease), color var(--liquid-motion-fast) ease, box-shadow var(--liquid-motion) var(--liquid-ease) !important;
+    }
+
+    body.role-student .mobile-bottom-nav :is(a, button):active {
+        transform: scale(.96) !important;
+    }
+
+    body.role-student .mobile-bottom-nav :is(a, button).active,
+    body.role-student .mobile-bottom-nav #mobileMoreToggle[aria-expanded="true"] {
+        background: transparent !important;
+        color: var(--liquid-accent) !important;
+        box-shadow: none !important;
+    }
+
+    /* This higher-specificity reset prevents legacy active tab rules from
+     * painting a second button below the sole visible ::before bubble. */
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).active,
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student #mobileMoreToggle[aria-expanded="true"] {
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    /* Student mobile navigation: this outranks the legacy dark selectors for
+     * both browser and standalone modes. The tab remains only the positioning
+     * layer; its ::before owns the one visible active material. */
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .app-layout .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).active,
+    body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .app-layout .mobile-bottom-nav.mobile-bottom-nav--student #mobileMoreToggle[aria-expanded="true"] {
+        border: 0 !important;
+        border-color: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        color: var(--liquid-accent) !important;
+    }
+
+    body.role-student .mobile-bottom-nav :is(a, button).active::before,
+    body.role-student .mobile-bottom-nav #mobileMoreToggle[aria-expanded="true"]::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 0;
+        width: min(62px, calc(100% - 2px));
+        height: 52px;
+        border: 0;
+        border-radius: 22px;
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / var(--student-nav-active-reflection-alpha)), rgb(255 255 255 / .08) 42%, transparent 100%),
+            rgb(255 253 249 / var(--student-nav-active-alpha));
+        box-shadow: 0 4px 11px rgba(77, 59, 39, .10), inset 0 1px 0 rgba(255,255,255,.66);
+        backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
+        -webkit-backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
+        pointer-events: none;
+        transform: translate(-50%, -50%) scale(.96);
+        transition: transform var(--liquid-motion) var(--liquid-ease), opacity var(--liquid-motion-fast) ease, background var(--liquid-motion) ease, box-shadow var(--liquid-motion) ease;
+    }
+
+    body.role-student .mobile-bottom-nav :is(a, button).active::before,
+    body.role-student .mobile-bottom-nav #mobileMoreToggle[aria-expanded="true"]::before {
+        transform: translate(-50%, -50%) scale(1);
+        animation: student-nav-bubble-in var(--liquid-motion) var(--liquid-ease) both;
+    }
+
+    @keyframes student-nav-bubble-in {
+        from { opacity: .6; transform: translate(-50%, -50%) scale(.96); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    body.role-student .mobile-bottom-nav :is(a, button).active > span,
+    body.role-student .mobile-bottom-nav #mobileMoreToggle[aria-expanded="true"] > span {
+        position: relative;
+        z-index: 1;
+    }
+
+    body.role-student .mobile-bottom-nav .mobile-scan-tab,
+    body.role-student .mobile-bottom-nav .mobile-scan-tab:not(.active),
+    body.role-student .mobile-bottom-nav .mobile-scan-tab.active {
+        min-height: 48px !important;
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        background: transparent !important;
+        color: var(--liquid-muted) !important;
+        box-shadow: none !important;
+    }
+
+    body.role-student .mobile-bottom-nav .mobile-scan-tab .mobile-nav-icon {
+        color: inherit !important;
+    }
+
+    body.role-student .mobile-bottom-nav .mobile-scan-tab.active {
+        background: transparent !important;
+        color: var(--liquid-accent) !important;
+        box-shadow: none !important;
+    }
+
+    body.role-student .mobile-bottom-nav .mobile-scan-tab:active {
+        transform: scale(.96) !important;
+    }
+
+    /* Override the legacy raised Scan treatment. Every Student destination is
+     * now one equal tab inside the shared capsule, with a consistent icon and
+     * label rhythm. */
+    body.role-student .mobile-bottom-nav--student :is(a, button) .mobile-nav-icon {
+        position: static !important;
+        width: 22px !important;
+        height: 22px !important;
+        transform: none !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    body.role-student .mobile-bottom-nav--student :is(a, button) .mobile-nav-icon svg {
+        width: 19px !important;
+        height: 19px !important;
+        stroke-width: 2 !important;
+        color: currentColor !important;
+    }
+
+    body.role-student .mobile-bottom-nav--student :is(a, button) > span:not(.mobile-nav-icon) {
+        display: block !important;
+        margin: 0 !important;
+        color: currentColor !important;
+        font-size: clamp(.56rem, 2vw, .64rem) !important;
+        font-weight: 650 !important;
+        line-height: 1.1 !important;
+        text-shadow: none !important;
+        white-space: nowrap !important;
+    }
+
+    body.role-student[data-theme="dark"] .mobile-bottom-nav--student .mobile-scan-tab,
+    body.role-student[data-theme="dark"] .mobile-bottom-nav--student .mobile-scan-tab:not(.active) {
+        color: var(--liquid-muted) !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    body.role-student[data-theme="dark"] .mobile-bottom-nav--student {
+        border-color: color-mix(in srgb, var(--liquid-border) 88%, transparent) !important;
+        background:
+            linear-gradient(112deg, rgb(255 255 255 / .08), transparent 30%, rgb(215 167 97 / .025) 76%),
+            rgb(24 23 22 / var(--student-nav-material-alpha)) !important;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, .36), inset 0 1px 0 rgba(255,255,255,.13), inset 0 -1px 0 rgba(0,0,0,.18) !important;
+    }
+
+    body.role-student[data-theme="dark"] .mobile-bottom-nav--student :is(a, button).active::before,
+    body.role-student[data-theme="dark"] .mobile-bottom-nav--student #mobileMoreToggle[aria-expanded="true"]::before {
+        border: 0;
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / .13), rgb(255 255 255 / .04) 42%, transparent 100%),
+            rgb(65 62 58 / var(--student-nav-active-alpha));
+        box-shadow: 0 5px 12px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18);
+    }
+
+    body.role-student .mobile-more-backdrop {
+        background: rgba(22, 20, 18, .28) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+    }
+
+    body.role-student .mobile-more-sheet {
+        left: max(.7rem, var(--safe-left)) !important;
+        right: max(.7rem, var(--safe-right)) !important;
+        bottom: calc(var(--student-liquid-nav-height) + max(var(--student-liquid-nav-gap), var(--safe-bottom)) + .65rem) !important;
+        max-height: min(70dvh, 520px);
+        padding: .65rem !important;
+        overflow-y: auto;
+        border: 1px solid color-mix(in srgb, var(--liquid-border) 82%, transparent) !important;
+        border-radius: 28px !important;
+        background:
+            linear-gradient(135deg, rgba(255,255,255,.25), transparent 40%),
+            color-mix(in srgb, var(--liquid-surface-strong) 88%, transparent) !important;
+        box-shadow: 0 22px 58px rgba(38, 33, 29, .24), inset 0 1px 0 var(--liquid-inner), inset 0 -1px 0 var(--liquid-edge) !important;
+        backdrop-filter: blur(24px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+    }
+
+    body.role-student .mobile-more-sheet-head {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .4rem .55rem .65rem;
+        color: var(--liquid-text);
+        font-weight: 760;
+    }
+
+    body.role-student .mobile-more-sheet-head small {
+        color: var(--liquid-muted);
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+    body.role-student .mobile-more-link,
+    body.role-student .mobile-more-control {
+        min-height: 52px;
+        border: 1px solid transparent !important;
+        border-radius: 16px !important;
+        background: transparent !important;
+        color: var(--liquid-text) !important;
+    }
+
+    body.role-student .mobile-more-link:hover,
+    body.role-student .mobile-more-link:focus-visible,
+    body.role-student .mobile-more-control:hover,
+    body.role-student .mobile-more-control:focus-visible {
+        background: rgba(120, 108, 97, .08) !important;
+        color: var(--liquid-accent) !important;
+    }
+
+    body.role-student .mobile-more-link > span,
+    body.role-student .mobile-more-control > span {
+        background: var(--liquid-accent-soft) !important;
+        color: var(--liquid-accent) !important;
+    }
+
+    body.role-student .sdash .hero {
+        padding: 1.2rem !important;
+    }
+
+    body.role-student .sdash .hero-name {
+        max-width: 100%;
+        font-size: clamp(1.55rem, 8vw, 2.25rem) !important;
+    }
+
+    body.role-student .sdash .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .7rem !important;
+    }
+
+    body.role-student .sdash .stat-card {
+        min-width: 0;
+        min-height: 116px;
+    }
+}
+
+/* A Student standalone install is an application shell, not a web page. The
+ * normal footer remains available for desktop, browser mode, and public views. */
+body.role-student.pwa-standalone .app-footer {
+    display: none !important;
+}
+
+@media (max-width: 767px) {
+    body.role-student.student-bottom-nav-eligible:not(.pwa-standalone) .app-footer {
+        margin-bottom: calc(var(--student-liquid-nav-height) + var(--safe-bottom) + 1rem);
+    }
+}
+
+/* System Admin: same material language, denser professional control center. */
+body.role-system-admin:not(.admin-liquid-disabled) .page-header--system-liquid {
+    margin: .75rem clamp(.75rem, 2vw, 1.4rem) 0;
+    border: 1px solid var(--liquid-border) !important;
+    border-radius: var(--liquid-radius-lg) !important;
+    background:
+        linear-gradient(125deg, rgba(255,255,255,.38), transparent 35%),
+        color-mix(in srgb, var(--liquid-surface-strong) 84%, transparent) !important;
+    box-shadow: var(--liquid-shadow) !important;
+    backdrop-filter: blur(var(--liquid-blur)) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(170%) !important;
+}
+
+body.role-system-admin:not(.admin-liquid-disabled) .page-body {
+    padding: clamp(1rem, 2vw, 1.5rem) !important;
+}
+
+body.role-system-admin:not(.admin-liquid-disabled) .page-body :is(.ui-card, .card, .panel, .monitor-card, .monitor-kpi, .data-card, .settings-card, .account-card) {
+    border-radius: var(--liquid-radius-md) !important;
+    border-color: color-mix(in srgb, var(--liquid-border) 76%, var(--se-border)) !important;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,.24), transparent 44%),
+        color-mix(in srgb, var(--liquid-surface) 90%, var(--se-surface)) !important;
+    box-shadow: 0 12px 30px rgba(55, 38, 22, .08), inset 0 1px 0 var(--liquid-inner) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.role-system-admin:not(.admin-liquid-disabled) .sidebar .nav-link.active {
+    border-color: color-mix(in srgb, var(--se-primary) 26%, transparent) !important;
+    background: color-mix(in srgb, var(--se-primary-soft) 68%, transparent) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 8px 18px color-mix(in srgb, var(--se-primary) 10%, transparent) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body.role-student .sdash .liquid-glass-card:hover,
+    body.role-system-admin:not(.admin-liquid-disabled) .page-body :is(.ui-card, .card, .panel, .monitor-card, .monitor-kpi, .data-card, .settings-card, .account-card):hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 18px 40px rgba(55, 38, 22, .12), inset 0 1px 0 var(--liquid-inner) !important;
+    }
+}
+
+:where(body.role-student, body.role-system-admin) :where(a, button, input, select, textarea):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--se-primary) 64%, white) !important;
+    outline-offset: 3px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where(body.role-student, body.role-system-admin) *,
+    :where(body.role-student, body.role-system-admin) *::before,
+    :where(body.role-student, body.role-system-admin) *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    body.role-student :is(.topbar, .sidebar, .mobile-bottom-nav, .mobile-more-sheet, .liquid-glass-surface, .liquid-glass-card) {
+        border-color: color-mix(in srgb, var(--liquid-text) 24%, transparent) !important;
+        background: #fbfaf8 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    body.role-student[data-theme="dark"] :is(.topbar, .sidebar, .mobile-bottom-nav, .mobile-more-sheet, .liquid-glass-surface, .liquid-glass-card) {
+        background: #1e1d1c !important;
+    }
+
+    body.role-student :is(.mobile-more-backdrop, .sb-overlay) {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    body.role-system-admin:not(.admin-liquid-disabled) .page-header--system-liquid {
+        background: var(--se-surface) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+@media (forced-colors: active) {
+    :where(body.role-student, body.role-system-admin) :where(.liquid-glass-surface, .liquid-glass-card, .mobile-bottom-nav, .mobile-more-sheet, .page-header, .topbar, .sidebar) {
+        border: 1px solid CanvasText !important;
+        background: Canvas !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+    }
+}

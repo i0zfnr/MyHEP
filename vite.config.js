@@ -23,7 +23,7 @@ export default defineConfig({
     },
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/css/design-system.css', 'resources/js/app.js', 'resources/js/certificate-template-editor.js'],
+            input: ['resources/css/app.css', 'resources/css/design-system.css', 'resources/css/liquid-glass.css', 'resources/js/app.js', 'resources/js/certificate-template-editor.js'],
             refresh: true,
         }),
         tailwindcss(),

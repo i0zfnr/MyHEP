@@ -169,7 +169,7 @@
                             <span>{{ __('ui.glass_preview') }}</span>
                             <strong data-glass-output>{{ $currentGlassTransparency }}%</strong>
                         </div>
-                        <div class="glass-slider" style="--glass-range-progress: {{ (($currentGlassTransparency - 10) / 70) * 100 }}%;">
+                        <div class="glass-slider" style="--glass-range-progress: {{ $currentGlassTransparency }}%;">
                             <span class="glass-slider-icon" title="{{ __('ui.glass_more_solid') }}" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3.5" y="5" width="14" height="11" rx="3"/><rect x="7" y="8" width="13.5" height="10.5" rx="3"/></svg>
                             </span>
@@ -178,8 +178,8 @@
                                 class="glass-range"
                                 type="range"
                                 name="glass_transparency"
-                                min="10"
-                                max="80"
+                                min="0"
+                                max="100"
                                 step="1"
                                 value="{{ $currentGlassTransparency }}"
                                 aria-label="{{ __('ui.glass_transparency') }}"

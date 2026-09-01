@@ -112,7 +112,7 @@ const GLASS_TRANSPARENCY_KEY = 'studentedge-glass-transparency';
 
 const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
 const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet'].includes(theme) ? theme : 'gold';
-const normalizeGlassTransparency = (value) => Math.min(80, Math.max(10, Number(value) || 40));
+const normalizeGlassTransparency = (value) => Math.min(100, Math.max(0, Number.isFinite(Number(value)) ? Number(value) : 40));
 const updateGlassControls = (value) => {
     const transparency = normalizeGlassTransparency(value);
 
@@ -120,7 +120,7 @@ const updateGlassControls = (value) => {
         output.textContent = `${transparency}%`;
     });
     document.querySelectorAll('.glass-slider').forEach((slider) => {
-        slider.style.setProperty('--glass-range-progress', `${((transparency - 10) / 70) * 100}%`);
+        slider.style.setProperty('--glass-range-progress', `${transparency}%`);
     });
 
     return transparency;
@@ -128,9 +128,21 @@ const updateGlassControls = (value) => {
 
 const applyGlassTransparency = (value, persist = true) => {
     const transparency = updateGlassControls(value);
-    document.documentElement.style.setProperty('--glass-opacity', ((100 - transparency) / 100).toFixed(2));
-    document.documentElement.dataset.glassTransparency = String(transparency);
-    document.documentElement.dataset.glassHigh = transparency >= 70 ? 'true' : 'false';
+    const ratio = transparency / 100;
+    const root = document.documentElement;
+
+    // Transparency controls a bounded physical material, never raw element opacity.
+    root.style.setProperty('--glass-user-transparency', ratio.toFixed(2));
+    root.style.setProperty('--glass-opacity', (0.86 - (ratio * 0.34)).toFixed(2));
+    root.style.setProperty('--student-nav-material-alpha', (0.86 - (ratio * 0.34)).toFixed(2));
+    root.style.setProperty('--student-nav-active-alpha', (0.90 - (ratio * 0.22)).toFixed(2));
+    root.style.setProperty('--student-nav-reflection-alpha', (0.34 - (ratio * 0.16)).toFixed(2));
+    root.style.setProperty('--student-nav-active-reflection-alpha', (0.46 - (ratio * 0.24)).toFixed(2));
+    root.style.setProperty('--student-nav-blur', `${18 + (ratio * 8)}px`);
+    root.style.setProperty('--student-nav-active-blur', `${10 + (ratio * 4)}px`);
+    root.style.setProperty('--student-nav-saturation', `${132 + (ratio * 16)}%`);
+    root.dataset.glassTransparency = String(transparency);
+    root.dataset.glassHigh = transparency >= 70 ? 'true' : 'false';
 
     if (document.body) {
         document.body.dataset.glassTransparency = String(transparency);
@@ -303,7 +315,6 @@ const registerThemeUi = () => {
             input.addEventListener('change', savePreferences);
         });
         const glassInput = settingsForm.querySelector('input[name="glass_transparency"]');
-        const useLightweightGlassPreview = window.matchMedia('(pointer: coarse), (max-width: 767px)').matches;
         let glassPreviewFrame = null;
 
         glassInput?.addEventListener('input', () => {
@@ -312,11 +323,7 @@ const registerThemeUi = () => {
             }
 
             glassPreviewFrame = window.requestAnimationFrame(() => {
-                if (useLightweightGlassPreview) {
-                    updateGlassControls(glassInput.value);
-                } else {
-                    applyGlassTransparency(glassInput.value, false);
-                }
+                applyGlassTransparency(glassInput.value, false);
                 glassPreviewFrame = null;
             });
         });

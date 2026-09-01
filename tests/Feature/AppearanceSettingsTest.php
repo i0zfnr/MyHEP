@@ -84,7 +84,7 @@ class AppearanceSettingsTest extends TestCase
         ])->from('/settings')->post('/settings', [
             'locale' => 'en',
             'theme' => 'light',
-            'glass_transparency' => 5,
+            'glass_transparency' => -1,
         ])->assertRedirect('/settings')
             ->assertSessionHasErrors('glass_transparency');
 
@@ -93,9 +93,27 @@ class AppearanceSettingsTest extends TestCase
         ])->from('/settings')->post('/settings', [
             'locale' => 'en',
             'theme' => 'light',
-            'glass_transparency' => 81,
+            'glass_transparency' => 101,
         ])->assertRedirect('/settings')
             ->assertSessionHasErrors('glass_transparency');
+
+        $this->withSession([
+            'auth_user' => ['id' => 10, 'role' => 'student', 'name' => 'Student'],
+        ])->post('/settings', [
+            'locale' => 'en',
+            'theme' => 'light',
+            'glass_transparency' => 0,
+        ])->assertRedirect('/settings')
+            ->assertSessionHas('glass_transparency', 0);
+
+        $this->withSession([
+            'auth_user' => ['id' => 10, 'role' => 'student', 'name' => 'Student'],
+        ])->post('/settings', [
+            'locale' => 'en',
+            'theme' => 'light',
+            'glass_transparency' => 100,
+        ])->assertRedirect('/settings')
+            ->assertSessionHas('glass_transparency', 100);
     }
 
     public function test_system_admin_can_save_liquid_glass_transparency(): void
