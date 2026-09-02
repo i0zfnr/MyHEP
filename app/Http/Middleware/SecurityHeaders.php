@@ -18,7 +18,7 @@ class SecurityHeaders
             "connect-src 'self' https://cloudflareinsights.com",
             "font-src 'self' https://fonts.gstatic.com data:",
             "form-action 'self'",
-            "frame-ancestors 'none'",
+            "frame-ancestors 'self' https://portfolio.ryz.my.id http://localhost:* http://127.0.0.1:*",
             "frame-src 'self' https://maps.google.com https://www.google.com",
             "img-src 'self' data: blob: https:",
             "object-src 'none'",
@@ -28,7 +28,7 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(self), geolocation=(self), microphone=()');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
-        $response->headers->set('X-Frame-Options', 'DENY');
+        $response->headers->remove('X-Frame-Options');
 
         if ($request->isSecure() && app()->environment('production')) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
