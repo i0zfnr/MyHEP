@@ -33,6 +33,8 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('stroke: currentColor !important;', $styles);
         $this->assertStringNotContainsString('body.role-student .sdash', $styles);
         $this->assertStringContainsString('body.role-student .app-layout .sidebar.is-open', $styles);
+        $this->assertStringContainsString('backdrop-filter: blur(30px) saturate(145%) !important;', $styles);
+        $this->assertStringContainsString('rgb(17 15 13 / max(.78, var(--glass-opacity))) !important;', $styles);
         $this->assertStringNotContainsString('body.role-student .topbar', $styles);
         $this->assertStringNotContainsString('body.role-student :is(.liquid-glass-surface, .liquid-glass-card)', $styles);
         $this->assertStringContainsString('+ 2rem)', $styles);
@@ -115,6 +117,8 @@ class LiquidGlassRoleIsolationTest extends TestCase
 
         $this->assertStringContainsString("root.style.setProperty('--student-nav-material-alpha'", $script);
         $this->assertStringContainsString("root.style.setProperty('--glass-opacity'", $script);
+        $this->assertStringContainsString('?? document.documentElement.dataset.glassTransparency', $script);
+        $this->assertStringContainsString('selectedGlassTransparency !== undefined', $script);
         $this->assertStringContainsString("document.documentElement.style.setProperty('--student-nav-active-alpha'", $bootstrap);
         $this->assertStringContainsString("document.documentElement.style.setProperty('--glass-opacity'", $bootstrap);
     }

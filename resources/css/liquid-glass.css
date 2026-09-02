@@ -463,13 +463,13 @@ body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
             linear-gradient(145deg, rgb(255 255 255 / calc(.10 + var(--glass-opacity) * .18)), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 12%, transparent), transparent 70%),
-            var(--liquid-shell-strong) !important;
+            rgb(255 252 247 / max(.76, var(--glass-opacity))) !important;
         box-shadow:
             18px 0 42px rgb(35 24 16 / .20),
             inset -1px 0 0 rgb(255 255 255 / calc(.18 + var(--glass-opacity) * .28)),
             inset 0 1px 0 rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .20)) !important;
-        backdrop-filter: blur(18px) saturate(135%) !important;
-        -webkit-backdrop-filter: blur(18px) saturate(135%) !important;
+        backdrop-filter: blur(30px) saturate(145%) !important;
+        -webkit-backdrop-filter: blur(30px) saturate(145%) !important;
     }
 
     body.role-student .app-layout .sidebar.is-open .sb-user {
@@ -486,7 +486,7 @@ body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
             linear-gradient(145deg, rgb(255 255 255 / calc(.035 + var(--glass-opacity) * .08)), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 16%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 10%, transparent), transparent 70%),
-            var(--liquid-shell-strong) !important;
+            rgb(17 15 13 / max(.78, var(--glass-opacity))) !important;
         box-shadow:
             18px 0 46px rgb(0 0 0 / .46),
             inset -1px 0 0 rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .12)),

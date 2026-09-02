@@ -250,8 +250,8 @@ const registerThemeUi = () => {
         || 'gold';
     applyAccentTheme(initialAccentTheme, false);
     const initialGlassTransparency = window.localStorage.getItem(GLASS_TRANSPARENCY_KEY)
-        || document.documentElement.dataset.glassTransparency
-        || '40';
+        ?? document.documentElement.dataset.glassTransparency
+        ?? '40';
     applyGlassTransparency(initialGlassTransparency, false);
     const settingsForm = document.querySelector('[data-settings-form]');
 
@@ -349,7 +349,7 @@ const registerThemeUi = () => {
                 applyAccentTheme(selectedAccentTheme);
             }
             const selectedGlassTransparency = settingsForm.querySelector('input[name="glass_transparency"]')?.value;
-            if (selectedGlassTransparency) {
+            if (selectedGlassTransparency !== undefined) {
                 applyGlassTransparency(selectedGlassTransparency);
             }
         });
