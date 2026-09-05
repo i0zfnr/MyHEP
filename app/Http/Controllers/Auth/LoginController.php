@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -66,6 +67,15 @@ class LoginController extends Controller
 
                 return redirect()->route('login')->withErrors([
                     'username' => __('login.error_invalid_student'),
+                ])->withInput();
+            }
+
+            if (Schema::hasColumn('students', 'is_blacklisted') && (bool) ($student->is_blacklisted ?? false)) {
+                RateLimiter::hit($throttleKey, 900);
+                auditLog('auth.login_blocked', 'student', $student->id, 'Blacklisted student attempted login');
+
+                return redirect()->route('login')->withErrors([
+                    'username' => __('This student account has been blocked. Please contact the system administrator.'),
                 ])->withInput();
             }
 

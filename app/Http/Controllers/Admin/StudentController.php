@@ -44,6 +44,12 @@ class StudentController extends Controller
         if (Schema::hasColumn('students', 'profile_photo_status')) {
             $photoStatusColumns[] = 'profile_photo_status';
         }
+        if (Schema::hasColumn('students', 'profile_completion_bypass')) {
+            $photoStatusColumns[] = 'profile_completion_bypass';
+        }
+        if (Schema::hasColumn('students', 'is_blacklisted')) {
+            $photoStatusColumns[] = 'is_blacklisted';
+        }
         if ($canViewSensitiveStudents) {
             $studentsQuery
                 ->select(array_merge(['id', 'full_name', 'matric_no', 'ic_no', 'program', 'phone', 'photo', 'created_at'], $photoStatusColumns))
@@ -452,6 +458,82 @@ class StudentController extends Controller
 
         return redirect()->back()
             ->with('success', __('Gambar profil pelajar telah diluluskan.'));
+    }
+
+    public function toggleProfileCompletionBypass(int $id): RedirectResponse
+    {
+        if (session('auth_user.admin_role') !== 'system_admin') {
+            abort(403, __('Unauthorized action.'));
+        }
+
+        if (! Schema::hasColumn('students', 'profile_completion_bypass')) {
+            abort(409, __('Student profile access override is not available until migrations have run.'));
+        }
+
+        $student = DB::table('students')->select('id', 'full_name', 'profile_completion_bypass')->where('id', $id)->first();
+        if (! $student) {
+            return $this->studentNotFoundRedirect();
+        }
+
+        $enabled = ! (bool) $student->profile_completion_bypass;
+        DB::table('students')->where('id', $id)->update([
+            'profile_completion_bypass' => $enabled,
+            'updated_at' => now(),
+        ]);
+
+        auditLog(
+            'students.profile_completion_bypass',
+            'students',
+            $id,
+            ($enabled ? 'Enabled' : 'Disabled')." profile completion bypass for {$student->full_name}"
+        );
+
+        return redirect()->back()->with(
+            'success',
+            $enabled
+                ? __('Student can now access the system without completing profile information.')
+                : __('Student must complete profile information before accessing the system.')
+        );
+    }
+
+    public function toggleBlacklist(AccountSessionManager $sessions, int $id): RedirectResponse
+    {
+        if (session('auth_user.admin_role') !== 'system_admin') {
+            abort(403, __('Unauthorized action.'));
+        }
+
+        if (! Schema::hasColumn('students', 'is_blacklisted')) {
+            abort(409, __('Student blacklist is not available until migrations have run.'));
+        }
+
+        $student = DB::table('students')->select('id', 'full_name', 'is_blacklisted')->where('id', $id)->first();
+        if (! $student) {
+            return $this->studentNotFoundRedirect();
+        }
+
+        $blacklisted = ! (bool) $student->is_blacklisted;
+        DB::table('students')->where('id', $id)->update([
+            'is_blacklisted' => $blacklisted,
+            'updated_at' => now(),
+        ]);
+
+        if ($blacklisted) {
+            $sessions->revokeAccount('student', $id);
+        }
+
+        auditLog(
+            'students.blacklist',
+            'students',
+            $id,
+            ($blacklisted ? 'Blacklisted' : 'Removed blacklist for')." {$student->full_name}"
+        );
+
+        return redirect()->back()->with(
+            'success',
+            $blacklisted
+                ? __('Student has been blacklisted and signed out from active sessions.')
+                : __('Student blacklist has been removed.')
+        );
     }
 
     public function resetPassword(AccountSessionManager $sessions, int $id)

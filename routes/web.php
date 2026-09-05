@@ -521,6 +521,12 @@ Route::patch('/admin/students/{id}/photo/approve', [StudentController::class, 'a
 Route::post('/admin/students/{id}/reset-password', [StudentController::class, 'resetPassword'])
     ->middleware(['auth.session:admin', 'admin.scope:students.manage'])
     ->name('admin.students.reset-password');
+Route::patch('/admin/students/{id}/profile-completion-bypass', [StudentController::class, 'toggleProfileCompletionBypass'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.students.profile-completion-bypass');
+Route::patch('/admin/students/{id}/blacklist', [StudentController::class, 'toggleBlacklist'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.students.blacklist');
 
 Route::get('/admin/scholarships', [ScholarshipController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])

@@ -20,7 +20,11 @@ class RequireSessionRole
 
         $account = $role === 'admin'
             ? DB::table('admins')->select('id', 'role', 'full_name')->where('id', $authUser['id'] ?? 0)->first()
-            : DB::table('students')->select('id', 'full_name')->where('id', $authUser['id'] ?? 0)->first();
+            : DB::table('students')->select(array_filter([
+                'id',
+                'full_name',
+                Schema::hasColumn('students', 'is_blacklisted') ? 'is_blacklisted' : null,
+            ]))->where('id', $authUser['id'] ?? 0)->first();
 
         $isStaffOverride = $role === 'admin' && (bool) ($authUser['staff_override'] ?? false);
         if (!$account || ($role === 'admin' && !$isStaffOverride && ($account->role ?? null) !== ($authUser['admin_role'] ?? null))) {
@@ -46,6 +50,15 @@ class RequireSessionRole
         if ($role === 'student') {
             $studentId = (int) ($authUser['id'] ?? 0);
 
+            if ((bool) ($account->is_blacklisted ?? false)) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('login')->withErrors([
+                    'username' => __('This student account has been blocked. Please contact the system administrator.'),
+                ]);
+            }
+
             if ($this->studentProfileIncomplete($studentId) && !$this->isAllowedProfileRoute($request)) {
                 return redirect()->route('student.profile')
                     ->withErrors(['profile' => __('Please complete all required profile and guardian information before using the system.')]);
@@ -65,6 +78,10 @@ class RequireSessionRole
     private function studentProfileIncomplete(int $studentId): bool
     {
         if ($studentId <= 0 || !Schema::hasTable('students')) {
+            return false;
+        }
+
+        if ($this->studentCompletionBypassEnabled($studentId)) {
             return false;
         }
 
@@ -105,10 +122,23 @@ class RequireSessionRole
             return true;
         }
 
+        if ($this->studentCompletionBypassEnabled($studentId)) {
+            return true;
+        }
+
         return DB::table('student_scholarship_status_forms')
             ->where('student_id', $studentId)
             ->whereNotNull('submitted_at')
             ->exists();
+    }
+
+    private function studentCompletionBypassEnabled(int $studentId): bool
+    {
+        return $studentId > 0
+            && Schema::hasColumn('students', 'profile_completion_bypass')
+            && (bool) DB::table('students')
+                ->where('id', $studentId)
+                ->value('profile_completion_bypass');
     }
 
     private function isAllowedProfileRoute(Request $request): bool

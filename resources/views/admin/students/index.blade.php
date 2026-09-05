@@ -13,6 +13,7 @@
     @php($canViewSensitiveStudents = adminCan('students.sensitive'))
     @php($canExportStudents = adminCan('students.export'))
     @php($canManageStudents = adminCan('students.manage'))
+    @php($canManageCompletionBypass = session('auth_user.admin_role') === 'system_admin')
     @php($hasStudentActions = $canViewSensitiveStudents || $canManageStudents)
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
@@ -337,6 +338,27 @@
                                             <button class="stu-btn stu-btn-danger" type="submit" title="{{ __('Delete') }}">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                                 <span>{{ __('Delete') }}</span>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if($canManageCompletionBypass)
+                                        <form method="POST" action="{{ route('admin.students.profile-completion-bypass', $student->id) }}" style="margin:0;display:inline-flex;"
+                                            data-confirm-title="{{ (bool) ($student->profile_completion_bypass ?? false) ? __('Require Profile Completion') : __('Allow Incomplete Profile Access') }}"
+                                            data-confirm-message="{{ (bool) ($student->profile_completion_bypass ?? false) ? __('This student will again be required to complete profile and scholarship status information before using the system.') : __('This student can use the system without completing profile and scholarship status information.') }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button class="stu-btn {{ (bool) ($student->profile_completion_bypass ?? false) ? 'stu-btn-warn' : 'stu-btn-view' }}" type="submit" title="{{ __('Toggle profile completion requirement') }}">
+                                                <span>{{ (bool) ($student->profile_completion_bypass ?? false) ? __('Require Profile') : __('Allow Incomplete Access') }}</span>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.students.blacklist', $student->id) }}" style="margin:0;display:inline-flex;"
+                                            data-confirm-title="{{ (bool) ($student->is_blacklisted ?? false) ? __('Remove Student Blacklist') : __('Blacklist Student') }}"
+                                            data-confirm-message="{{ (bool) ($student->is_blacklisted ?? false) ? __('This student can sign in and use the system again.') : __('This immediately blocks the student from signing in and revokes active sessions. Their records will remain.') }}"
+                                            data-confirm-tone="{{ (bool) ($student->is_blacklisted ?? false) ? 'default' : 'danger' }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button class="stu-btn {{ (bool) ($student->is_blacklisted ?? false) ? 'stu-btn-view' : 'stu-btn-danger' }}" type="submit" title="{{ __('Toggle student blacklist') }}">
+                                                <span>{{ (bool) ($student->is_blacklisted ?? false) ? __('Unblacklist') : __('Blacklist') }}</span>
                                             </button>
                                         </form>
                                     @endif
