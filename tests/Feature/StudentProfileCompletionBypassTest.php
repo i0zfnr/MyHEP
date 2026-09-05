@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\RequireSessionRole;
+use App\Http\Controllers\Student\ProfileController;
 use Closure;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
@@ -37,6 +40,7 @@ class StudentProfileCompletionBypassTest extends TestCase
             $table->decimal('family_income', 12, 2)->nullable();
             $table->boolean('profile_completion_bypass')->default(false);
             $table->boolean('is_blacklisted')->default(false);
+            $table->timestamp('updated_at')->nullable();
         });
 
         Schema::create('student_scholarship_status_forms', function (Blueprint $table): void {
@@ -66,6 +70,35 @@ class StudentProfileCompletionBypassTest extends TestCase
         ]);
 
         $this->assertSame(302, $this->studentRequest(3)->getStatusCode());
+    }
+
+    public function test_profile_bypass_allows_a_photo_only_profile_update(): void
+    {
+        Storage::fake('public');
+
+        DB::table('students')->insert([
+            'id' => 4,
+            'full_name' => 'Optional Profile Student',
+            'profile_completion_bypass' => true,
+        ]);
+
+        $session = app('session')->driver();
+        $session->put('auth_user', [
+            'id' => 4,
+            'role' => 'student',
+            'name' => 'Optional Profile Student',
+        ]);
+
+        $request = Request::create('/student/profile', 'POST', [], [], [
+            'profile_photo' => UploadedFile::fake()->image('profile.png'),
+        ]);
+        $request->setLaravelSession($session);
+
+        $response = app(ProfileController::class)->update($request);
+
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame(true, (bool) DB::table('students')->where('id', 4)->value('profile_completion_bypass'));
+        $this->assertNotEmpty(DB::table('students')->where('id', 4)->value('photo'));
     }
 
     private function studentRequest(int $studentId): Response

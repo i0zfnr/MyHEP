@@ -17,6 +17,7 @@
         $studentProgram = data_get($student, 'program') ?: '-';
         $photoStatus = data_get($student, 'profile_photo_status') ?? (filled($studentPhoto) ? 'legacy' : 'missing');
         $enforceStudentProfilePhoto = (bool) ($enforceStudentProfilePhoto ?? false);
+        $profileCompletionBypass = (bool) data_get($student, 'profile_completion_bypass', false);
     @endphp
 
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
@@ -74,7 +75,7 @@
                     <div class="profile-photo photo-placeholder" data-profile-photo-placeholder @if(filled($studentPhoto)) hidden @endif>{{ $studentInitial }}</div>
                     <div style="flex:1; min-width:220px;">
                         <label for="profile_photo">{{ __('Profile Photo (Passport Format 3:4)') }}</label>
-                        <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ blank($studentPhoto) ? 'required' : '' }}>
+                        <input id="profile_photo" type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" data-profile-photo-input data-invalid-type="{{ __('Choose a JPG, PNG, or WEBP image.') }}" {{ blank($studentPhoto) && ! $profileCompletionBypass ? 'required' : '' }}>
                         <small style="display:block;margin-top:6px;color:var(--text-muted);">
                             {{ $enforceStudentProfilePhoto
                                 ? __('JPG, PNG, or WEBP. The system provides an automatic face cropper and alignment validator.')
@@ -169,7 +170,7 @@
                                 }
                             }
                         @endphp
-                        <input id="date_of_birth" type="text" name="date_of_birth" value="{{ $formattedDob }}" placeholder="DD/MM/YYYY (Contoh: 17/07/2006)" maxlength="10" inputmode="numeric" required autocomplete="off">
+                        <input id="date_of_birth" type="text" name="date_of_birth" value="{{ $formattedDob }}" placeholder="DD/MM/YYYY (Contoh: 17/07/2006)" maxlength="10" inputmode="numeric" {{ ! $profileCompletionBypass ? 'required' : '' }} autocomplete="off">
                         <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">{{ __('Taip tarikh lahir mengikut format Hari/Bulan/Tahun (Contoh: 17/07/2006)') }}</small>
                     </div>
                     <div></div>

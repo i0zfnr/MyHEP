@@ -25,9 +25,6 @@ class ProfileController extends Controller
             return redirect()->route('login');
         }
 
-        $completionBypassEnabled = (bool) ($student->profile_completion_bypass ?? false);
-        $requiredProfileField = $completionBypassEnabled ? 'nullable' : 'required';
-
         $enforceStudentProfilePhoto = $features->enabled('enforce_student_profile_photo');
 
         return view('student.profile', compact('student', 'enforceStudentProfilePhoto'));
@@ -40,6 +37,12 @@ class ProfileController extends Controller
         if (!$student) {
             return redirect()->route('login');
         }
+
+        // An administrator can allow this student to use the system while
+        // completing profile information at their own pace. Keep this check in
+        // the write action as well as the access middleware.
+        $completionBypassEnabled = (bool) ($student->profile_completion_bypass ?? false);
+        $requiredProfileField = $completionBypassEnabled ? 'nullable' : 'required';
 
         $rawDob = trim((string) $request->input('date_of_birth', ''));
         if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/', $rawDob, $matches)) {
