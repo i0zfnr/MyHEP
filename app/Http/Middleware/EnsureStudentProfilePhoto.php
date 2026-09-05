@@ -64,8 +64,14 @@ class EnsureStudentProfilePhoto
         if ($hasPhotoStatus) {
             $select[] = 'profile_photo_status';
         }
+        if (Schema::hasColumn('students', 'profile_completion_bypass')) {
+            $select[] = 'profile_completion_bypass';
+        }
 
         $student = DB::table('students')->where('id', $studentId)->select($select)->first();
+        if ((bool) ($student->profile_completion_bypass ?? false)) {
+            return $next($request);
+        }
         $status = $hasPhotoStatus
             ? (string) ($student->profile_photo_status ?? '')
             : '';

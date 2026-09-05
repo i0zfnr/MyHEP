@@ -25,6 +25,9 @@ class ProfileController extends Controller
             return redirect()->route('login');
         }
 
+        $completionBypassEnabled = (bool) ($student->profile_completion_bypass ?? false);
+        $requiredProfileField = $completionBypassEnabled ? 'nullable' : 'required';
+
         $enforceStudentProfilePhoto = $features->enabled('enforce_student_profile_photo');
 
         return view('student.profile', compact('student', 'enforceStudentProfilePhoto'));
@@ -45,23 +48,23 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validate([
-            'profile_photo' => [blank($student->photo ?? null) ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:51200'],
-            'email' => ['required', 'email', 'max:150', 'unique:students,email,' . $studentId],
-            'semester' => ['required', 'string', 'max:20'],
-            'academic_session' => ['required', 'string', 'max:30'],
-            'phone' => ['required', 'string', 'max:20'],
-            'address' => ['required', 'string'],
+            'profile_photo' => [blank($student->photo ?? null) && ! $completionBypassEnabled ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:51200'],
+            'email' => [$requiredProfileField, 'email', 'max:150', 'unique:students,email,' . $studentId],
+            'semester' => [$requiredProfileField, 'string', 'max:20'],
+            'academic_session' => [$requiredProfileField, 'string', 'max:30'],
+            'phone' => [$requiredProfileField, 'string', 'max:20'],
+            'address' => [$requiredProfileField, 'string'],
             'residence_status' => ['nullable', 'in:inside_campus,live_out'],
             'room_number' => ['nullable', 'string', 'max:30'],
-            'religion' => ['required', 'string', 'max:50'],
-            'race' => ['required', 'string', 'max:80'],
-            'date_of_birth' => ['required', 'date'],
-            'guardian_name' => ['required', 'string', 'max:150'],
-            'guardian_ic_no' => ['required', 'string', 'max:20'],
-            'guardian_address' => ['required', 'string'],
-            'guardian_phone' => ['required', 'string', 'max:20'],
-            'mother_ic_no' => ['required', 'string', 'max:20'],
-            'family_income' => ['required', 'numeric', 'min:0'],
+            'religion' => [$requiredProfileField, 'string', 'max:50'],
+            'race' => [$requiredProfileField, 'string', 'max:80'],
+            'date_of_birth' => [$requiredProfileField, 'date'],
+            'guardian_name' => [$requiredProfileField, 'string', 'max:150'],
+            'guardian_ic_no' => [$requiredProfileField, 'string', 'max:20'],
+            'guardian_address' => [$requiredProfileField, 'string'],
+            'guardian_phone' => [$requiredProfileField, 'string', 'max:20'],
+            'mother_ic_no' => [$requiredProfileField, 'string', 'max:20'],
+            'family_income' => [$requiredProfileField, 'numeric', 'min:0'],
             'study_address' => ['nullable', 'string'],
         ], [
             'profile_photo.uploaded' => __('The profile photo is too large. Please choose a photo below 50MB.'),
