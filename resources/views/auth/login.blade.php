@@ -11,11 +11,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{{ __('login.page_title') }}</title>
     @include('partials.brand_icons')
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/design-system.css', 'resources/css/auth.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    @vite('resources/css/design-system.css')
 </head>
 <body data-theme="{{ session('theme', 'light') }}" class="auth-page">
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])
