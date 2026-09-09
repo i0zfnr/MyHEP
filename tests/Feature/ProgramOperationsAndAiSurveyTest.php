@@ -956,6 +956,39 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->assertDatabaseMissing('program_reports', ['program_id' => $programId]);
     }
 
+    public function test_report_docx_download_sanitizes_slashes_from_program_title(): void
+    {
+        Storage::fake('local');
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1,
+            'registration_type' => 'attendance_only_activity',
+            'title' => 'Majlis AJK / Unit \\ HEP',
+            'paperwork_method' => 'none',
+            'questionnaire_enabled' => false,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $docxPath = 'program-reports/'.$programId.'/report.docx';
+        Storage::disk('local')->put($docxPath, 'dummy docx');
+        DB::table('program_reports')->insert([
+            'program_id' => $programId,
+            'content' => 'Laporan',
+            'status' => 'draft',
+            'generated_by' => 1,
+            'generated_at' => now(),
+            'output_format' => 'docx',
+            'docx_path' => $docxPath,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->signIn(1, 'lecturer')
+            ->get(route('admin.programs.report.download', [$programId, 'docx']))
+            ->assertOk()
+            ->assertDownload('Laporan Program - Majlis AJK Unit HEP.docx');
+    }
+
     public function test_discipline_admin_can_rank_students_by_valid_program_participation_points(): void
     {
         $studentId = DB::table('students')->insertGetId([

@@ -1198,6 +1198,18 @@ body[data-theme="dark"] .pmr-badge.rejected {
 }
 .pmr-table th { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted, #746b62); font-weight: 800; background: color-mix(in srgb, var(--pm-accent) 5%, var(--surface, #fff)); }
 
+.pmr-roster-table-wrap {
+    overflow-x: auto;
+}
+
+.pmr-roster-pagination {
+    padding-top: 1rem;
+}
+
+.pmr-roster-pagination .se-pagination {
+    box-shadow: none;
+}
+
 /* Constrain all icons inside PMR */
 .pmr svg { max-width: 100%; }
 

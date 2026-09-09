@@ -678,7 +678,7 @@
     </section>
 
     <!-- Real-Time Joined Student Roster -->
-    <section class="pmr-card">
+    <section class="pmr-card" id="participantRoster">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
             <div>
                 <span class="pmr-eyebrow">{{ __('PARTICIPANT ROSTER') }}</span>
@@ -686,12 +686,12 @@
             </div>
             <div style="display:flex;align-items:center;gap:0.6rem;">
                 <span class="pmr-badge" style="background: rgba(16,185,129,0.12); color: #059669; font-weight: 800;">
-                    {{ count($attendances) }} {{ __('Telah Mendaftar') }}
+                    {{ number_format($totalJoined) }} {{ __('Telah Mendaftar') }}
                 </span>
             </div>
         </div>
 
-        @if($attendances->isEmpty())
+        @if($attendances->count() === 0)
             <div class="pmr-roster-empty">
                 <div class="pmr-roster-empty__inner">
                     <div class="pmr-roster-empty__icon-wrap">
@@ -747,7 +747,7 @@
                 </div>
             </div>
         @else
-            <div style="overflow-x: auto;">
+            <div class="pmr-table-wrap pmr-roster-table-wrap">
                 <table class="pmr-table">
                     <thead>
                         <tr>
@@ -827,6 +827,9 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+            <div class="pmr-roster-pagination">
+                {{ $attendances->onEachSide(1)->links('vendor.pagination.myhep') }}
             </div>
         @endif
     </section>

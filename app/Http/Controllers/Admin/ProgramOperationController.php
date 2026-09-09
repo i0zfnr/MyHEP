@@ -78,19 +78,29 @@ class ProgramOperationController extends Controller
                 DB::raw('NULL as certificate_generated_at'),
             ];
 
+        $attendanceStats = DB::table('program_attendances')
+            ->where('program_attendances.program_id', $program->id)
+            ->selectRaw('
+                COUNT(*) as total_joined,
+                SUM(CASE WHEN program_attendances.attendee_type = ? THEN 1 ELSE 0 END) as internal_count,
+                SUM(CASE WHEN program_attendances.attendee_type = ? THEN 1 ELSE 0 END) as external_count,
+                AVG(program_attendances.satisfaction_rating) as average_rating
+            ', ['internal', 'external'])
+            ->first();
+
         $attendances = $attendanceQuery
             ->select('program_attendances.*', ...$certificateSelect)
             ->orderByDesc('program_attendances.checked_in_at')
-            ->get();
+            ->paginate(25, ['*'], 'roster_page')
+            ->withQueryString()
+            ->fragment('participantRoster');
 
-        $totalJoined = $attendances->count();
-        $internalCount = $attendances->where('attendee_type', 'internal')->count();
-        $externalCount = $attendances->where('attendee_type', 'external')->count();
+        $totalJoined = (int) ($attendanceStats->total_joined ?? 0);
+        $internalCount = (int) ($attendanceStats->internal_count ?? 0);
+        $externalCount = (int) ($attendanceStats->external_count ?? 0);
         $estimated = max(1, (int) ($program->estimated_participants ?: 50));
         $attendanceRate = round(($totalJoined / $estimated) * 100, 1);
-
-        $ratings = $attendances->pluck('satisfaction_rating')->filter();
-        $averageRating = $ratings->isNotEmpty() ? round($ratings->avg(), 1) : 0.0;
+        $averageRating = $attendanceStats->average_rating !== null ? round((float) $attendanceStats->average_rating, 1) : 0.0;
 
         $surveyResponsesCount = $survey
             ? DB::table('program_survey_responses')
@@ -557,7 +567,13 @@ class ProgramOperationController extends Controller
         $column = $format.'_path';
         abort_unless($report && $report->{$column} && Storage::disk('local')->exists($report->{$column}), 404);
 
-        return Storage::disk('local')->download($report->{$column}, 'Laporan Program - '.$program->title.'.'.$format);
+        $safeTitle = trim((string) preg_replace('/\s+/', ' ', (string) preg_replace('/[\/\\\\]+/', ' ', (string) $program->title)));
+        if ($safeTitle === '') {
+            $safeTitle = 'Program '.$program->id;
+        }
+        $filename = 'Laporan Program - '.$safeTitle.'.'.$format;
+
+        return Storage::disk('local')->download($report->{$column}, $filename);
     }
 
     public function uploadEditedReport(Request $request, int $id): RedirectResponse
