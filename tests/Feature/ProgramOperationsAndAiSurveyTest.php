@@ -76,6 +76,11 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->string('matric_no')->nullable();
             $table->string('ic_no')->nullable();
             $table->string('program')->nullable();
+            $table->string('race', 80)->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->text('address')->nullable();
+            $table->text('study_address')->nullable();
+            $table->string('oku_status', 10)->nullable();
             $table->timestamps();
         });
 
@@ -954,6 +959,68 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             ->assertSessionHasErrors(['paperwork_file', 'program_images', 'attendance', 'questionnaire']);
 
         $this->assertDatabaseMissing('program_reports', ['program_id' => $programId]);
+    }
+
+    public function test_generated_report_fills_student_demographic_section_from_joined_students(): void
+    {
+        config(['services.gemini.key' => null, 'services.openai.key' => null, 'services.deepseek.key' => null]);
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1,
+            'registration_type' => 'attendance_only_activity',
+            'title' => 'Demographic Report Program',
+            'paperwork_method' => 'none',
+            'questionnaire_enabled' => false,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $students = [
+            ['id' => 101, 'full_name' => 'Ali Melayu', 'matric_no' => 'PB101', 'ic_no' => '060101010013', 'program' => 'DIT', 'race' => 'Melayu', 'date_of_birth' => now()->subYears(20)->toDateString(), 'study_address' => 'Bandar Jertih', 'oku_status' => 'no'],
+            ['id' => 102, 'full_name' => 'Mei Cina', 'matric_no' => 'PB102', 'ic_no' => '080101010024', 'program' => 'DIT', 'race' => 'Cina', 'date_of_birth' => now()->subYears(18)->toDateString(), 'study_address' => 'Luar Bandar Besut', 'oku_status' => 'yes'],
+            ['id' => 103, 'full_name' => 'Ravi India', 'matric_no' => 'PB103', 'ic_no' => '960101010035', 'program' => 'DIT', 'race' => 'India', 'date_of_birth' => now()->subYears(30)->toDateString(), 'study_address' => null, 'oku_status' => 'no'],
+        ];
+        DB::table('students')->insert(array_map(fn (array $student): array => $student + ['created_at' => now(), 'updated_at' => now()], $students));
+        foreach ($students as $student) {
+            DB::table('program_attendances')->insert([
+                'program_id' => $programId,
+                'student_id' => $student['id'],
+                'attendee_type' => 'internal',
+                'full_name' => $student['full_name'],
+                'identifier' => $student['matric_no'],
+                'checked_in_at' => now(),
+                'geofence_valid' => true,
+                'validation_status' => 'valid',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->signIn(1, 'lecturer')->post(route('admin.programs.report.generate', $programId), [
+            'program_images' => [UploadedFile::fake()->createWithContent(
+                'activity.png',
+                base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+            )],
+            'output_format' => 'docx',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $docxPath = DB::table('program_reports')->where('program_id', $programId)->value('docx_path');
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open(Storage::disk('local')->path($docxPath)) === true);
+        $documentXml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        $this->assertIsString($documentXml);
+        $plainText = preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($documentXml)));
+        $this->assertStringContainsString('8.1 MELAYU: 1', $plainText);
+        $this->assertStringContainsString('8.2 CINA: 1', $plainText);
+        $this->assertStringContainsString('8.3 INDIA: 1', $plainText);
+        $this->assertStringContainsString('8.6 OKU: 1', $plainText);
+        $this->assertStringContainsString('LELAKI: 2', $plainText);
+        $this->assertStringContainsString('PEREMPUAN: 1', $plainText);
+        $this->assertStringContainsString('JUMLAH KESELURUHAN PELAJAR: 3', $plainText);
+        $this->assertStringContainsString('BANDAR: 1', $plainText);
+        $this->assertStringContainsString('LUAR BANDAR: 1', $plainText);
     }
 
     public function test_report_docx_download_sanitizes_slashes_from_program_title(): void

@@ -1152,6 +1152,7 @@ class ProgramOperationController extends Controller
     private function reportData(object $program): array
     {
         $attendances = DB::table('program_attendances')->where('program_id', $program->id)->get();
+        $studentDemographics = $this->studentDemographics($program);
         $owner = DB::table('admins')->where('id', $program->created_by)->first();
         $survey = DB::table('program_surveys')->where('program_id', $program->id)->where('status', 'published')->latest('id')->first();
         $responseCount = $survey ? DB::table('program_survey_responses')->where('program_survey_id', $survey->id)
@@ -1170,12 +1171,154 @@ class ProgramOperationController extends Controller
             'external_total' => $attendances->where('attendee_type', 'external')->count(),
             'survey_responses' => $responseCount,
             'average_rating' => $ratings->isNotEmpty() ? round((float) $ratings->avg(), 2) : 0,
+            'student_demographics' => $studentDemographics,
             'comments' => $attendances->pluck('feedback_comments')->filter()->take(30)->values()->all(),
             'questionnaire_answers' => $answers,
             'prepared_by' => $owner?->full_name ?: 'Tidak direkodkan',
             'prepared_by_position' => $owner?->position ?: 'Pengarah Program',
             'organizer' => $owner?->staff_department ?: 'Tidak direkodkan',
         ];
+    }
+
+    private function studentDemographics(object $program): array
+    {
+        if (! Schema::hasTable('students')) {
+            return $this->emptyStudentDemographics();
+        }
+
+        $select = [
+            'students.id',
+            'students.ic_no',
+            'students.race',
+            'students.date_of_birth',
+            'students.address',
+            'students.study_address',
+            'students.oku_status',
+        ];
+        $availableSelect = array_values(array_filter(
+            $select,
+            fn (string $column): bool => ! str_contains($column, '.') || Schema::hasColumn('students', substr($column, strlen('students.')))
+        ));
+
+        $students = DB::table('program_attendances')
+            ->join('students', 'students.id', '=', 'program_attendances.student_id')
+            ->where('program_attendances.program_id', $program->id)
+            ->where('program_attendances.attendee_type', 'internal')
+            ->where('program_attendances.validation_status', 'valid')
+            ->whereNotNull('program_attendances.student_id')
+            ->select($availableSelect)
+            ->distinct()
+            ->get();
+
+        $summary = $this->emptyStudentDemographics();
+        $summary['is_student_related'] = $students->isNotEmpty();
+
+        foreach ($students as $student) {
+            $summary['total']++;
+            $raceKey = $this->raceBucket((string) ($student->race ?? ''));
+            if ($raceKey !== null) {
+                $summary[$raceKey]++;
+            }
+
+            if (strtolower(trim((string) ($student->oku_status ?? ''))) === 'yes') {
+                $summary['oku']++;
+            }
+
+            $gender = $this->genderFromIc((string) ($student->ic_no ?? ''));
+            if ($gender !== null) {
+                $summary[$gender]++;
+            }
+
+            $locality = $this->localityBucket((string) (($student->study_address ?? '') ?: ($student->address ?? '')));
+            if ($locality !== null) {
+                $summary[$locality]++;
+            }
+
+            $age = $this->studentAge($student);
+            if ($age !== null) {
+                if ($age >= 15 && $age <= 18) {
+                    $summary['age_15_18']++;
+                } elseif ($age >= 19 && $age <= 24) {
+                    $summary['age_19_24']++;
+                } elseif ($age >= 25 && $age <= 30) {
+                    $summary['age_25_30']++;
+                }
+            }
+        }
+
+        return $summary;
+    }
+
+    private function emptyStudentDemographics(): array
+    {
+        return [
+            'is_student_related' => false,
+            'melayu' => 0,
+            'cina' => 0,
+            'india' => 0,
+            'bumiputera_sabah_sarawak' => 0,
+            'orang_asli' => 0,
+            'oku' => 0,
+            'lelaki' => 0,
+            'perempuan' => 0,
+            'total' => 0,
+            'bandar' => 0,
+            'luar_bandar' => 0,
+            'age_15_18' => 0,
+            'age_19_24' => 0,
+            'age_25_30' => 0,
+        ];
+    }
+
+    private function raceBucket(string $race): ?string
+    {
+        $race = strtolower(trim($race));
+        if ($race === '') return null;
+        if (str_contains($race, 'melayu')) return 'melayu';
+        if (str_contains($race, 'cina') || str_contains($race, 'chinese')) return 'cina';
+        if (str_contains($race, 'india') || str_contains($race, 'indian')) return 'india';
+        if (str_contains($race, 'orang asli') || str_contains($race, 'asli')) return 'orang_asli';
+        if (str_contains($race, 'sabah') || str_contains($race, 'sarawak') || str_contains($race, 'bumiputera')) return 'bumiputera_sabah_sarawak';
+
+        return null;
+    }
+
+    private function genderFromIc(string $icNo): ?string
+    {
+        $digits = preg_replace('/\D+/', '', $icNo) ?? '';
+        if ($digits === '') return null;
+
+        return ((int) substr($digits, -1)) % 2 === 1 ? 'lelaki' : 'perempuan';
+    }
+
+    private function localityBucket(string $address): ?string
+    {
+        $address = strtolower($address);
+        if (str_contains($address, 'luar bandar')) return 'luar_bandar';
+        if (str_contains($address, 'bandar')) return 'bandar';
+
+        return null;
+    }
+
+    private function studentAge(object $student): ?int
+    {
+        if (! empty($student->date_of_birth)) {
+            return Carbon::parse($student->date_of_birth)->age;
+        }
+
+        $digits = preg_replace('/\D+/', '', (string) ($student->ic_no ?? '')) ?? '';
+        if (strlen($digits) < 6) return null;
+        $yy = (int) substr($digits, 0, 2);
+        $month = (int) substr($digits, 2, 2);
+        $day = (int) substr($digits, 4, 2);
+        if (! checkdate($month, $day, 2000)) return null;
+
+        $currentYear = (int) now()->format('Y');
+        $century = $yy > ((int) now()->format('y')) ? 1900 : 2000;
+        $year = $century + $yy;
+        if ($year > $currentYear) return null;
+
+        return Carbon::create($year, $month, $day)->age;
     }
 
     private function reportPrompt(object $program, array $data): string

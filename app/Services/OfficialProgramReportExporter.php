@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class OfficialProgramReportExporter
 {
@@ -108,6 +107,7 @@ class OfficialProgramReportExporter
 
         $jawatankuasa = $report['jawatankuasa'] ?? [];
         $penceramah = $report['penceramah'] ?? [];
+        $studentDemographics = $data['student_demographics'] ?? [];
 
         // 2. Perform exact string replacements for all placeholders
         $replacements = [
@@ -149,6 +149,8 @@ class OfficialProgramReportExporter
             $escapedReplace = htmlspecialchars((string) $replace, ENT_XML1 | ENT_COMPAT, 'UTF-8');
             $xml = str_replace($search, $escapedReplace, $xml);
         }
+
+        $xml = $this->fillStudentDemographicSection($xml, $studentDemographics);
 
         // 3. Mark KPI Cluster in Header Table
         $kpiKey = strtolower($report['kluster_kpi'] ?? 'kemahiran dan inovasi');
@@ -255,6 +257,63 @@ class OfficialProgramReportExporter
         $dompdf->render();
 
         file_put_contents($destination, $dompdf->output());
+    }
+
+    private function fillStudentDemographicSection(string $xml, array $demographics): string
+    {
+        $related = (bool) ($demographics['is_student_related'] ?? false);
+        $sectionValues = [
+            '8.1 MELAYU:' => $demographics['melayu'] ?? 0,
+            '8.2 CINA:' => $demographics['cina'] ?? 0,
+            '8.3 INDIA:' => $demographics['india'] ?? 0,
+            '8.4 BUMIPUTRA SABAH/SARAWAK:' => $demographics['bumiputera_sabah_sarawak'] ?? 0,
+            '8.5 ORANG ASLI:' => $demographics['orang_asli'] ?? 0,
+            '8.6 OKU:' => $demographics['oku'] ?? 0,
+            'LELAKI:' => $demographics['lelaki'] ?? 0,
+            'PEREMPUAN:' => $demographics['perempuan'] ?? 0,
+            'JUMLAH KESELURUHAN PELAJAR:' => $demographics['total'] ?? 0,
+            'BANDAR:' => $demographics['bandar'] ?? 0,
+            'LUAR BANDAR:' => $demographics['luar_bandar'] ?? 0,
+            'BELIA AWAL (15-18 TAHUN) :' => $demographics['age_15_18'] ?? 0,
+            'BELIA PERTENGAHAN (19-24 TAHUN):' => $demographics['age_19_24'] ?? 0,
+            'BELIA AKHIR (25-30 TAHUN):' => $demographics['age_25_30'] ?? 0,
+        ];
+
+        $xml = $this->appendValueAfterText($xml, 'Berkaitan', $related ? 'X' : '', 1);
+        $xml = $this->appendValueAfterText($xml, 'Tidak Berkaitan', $related ? '' : 'X', 1);
+
+        foreach ($sectionValues as $label => $value) {
+            $xml = $this->appendValueAfterText($xml, $label, (string) (int) $value);
+        }
+
+        return $xml;
+    }
+
+    private function appendValueAfterText(string $xml, string $label, string $value, int $limit = 0): string
+    {
+        $escapedValue = htmlspecialchars((string) $value, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+        $normalizedLabel = preg_replace('/\s+/', ' ', trim($label));
+        $replacements = 0;
+
+        return preg_replace_callback(
+            '/(<w:t(?:\s+[^>]*)?>)(.*?)(<\/w:t>)/su',
+            function (array $matches) use ($normalizedLabel, $escapedValue, $limit, &$replacements): string {
+                if ($limit > 0 && $replacements >= $limit) {
+                    return $matches[0];
+                }
+
+                $text = html_entity_decode($matches[2], ENT_QUOTES | ENT_XML1, 'UTF-8');
+                $normalizedText = preg_replace('/\s+/', ' ', trim($text));
+                if ($normalizedText !== $normalizedLabel) {
+                    return $matches[0];
+                }
+
+                $replacements++;
+
+                return $matches[1].$matches[2].($escapedValue === '' ? '' : ' '.$escapedValue).$matches[3];
+            },
+            $xml
+        ) ?? $xml;
     }
 
     private function createPhotoSheet(array $imagePaths): ?string

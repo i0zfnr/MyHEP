@@ -247,6 +247,7 @@
         $longDate = ($program->starts_at ?? null)
             ? strtoupper(\Carbon\Carbon::parse($program->starts_at)->locale('ms')->translatedFormat('d F Y'))
             : 'TIDAK DIREKODKAN';
+        $studentDemographics = $data['student_demographics'] ?? [];
     @endphp
 
     <!-- ================= PAGE 1: COVER PAGE ================= -->
@@ -448,17 +449,17 @@
         </tbody>
     </table>
 
-    <div class="sec-head">8. BILANGAN PELAJAR : <span style="font-weight: normal;">{{ $data['attendance_total'] ?? 0 }} Orang Direkodkan</span></div>
+    <div class="sec-head">8. BILANGAN PELAJAR : <span style="font-weight: normal;">{{ ($studentDemographics['is_student_related'] ?? false) ? 'Berkaitan' : 'Tidak Berkaitan' }}</span></div>
     <div style="font-size: 9pt; line-height: 1.4; margin-bottom: 6px;">
-        <strong>8.1 MELAYU:</strong> {{ $data['attendance_total'] ?? 0 }} &nbsp;&nbsp;|&nbsp;&nbsp; 
-        <strong>8.2 CINA:</strong> 0 &nbsp;&nbsp;|&nbsp;&nbsp; 
-        <strong>8.3 INDIA:</strong> 0 &nbsp;&nbsp;|&nbsp;&nbsp; 
-        <strong>8.4 BUMIPUTRA SABAH/SARAWAK:</strong> 0<br>
-        <strong>8.5 ORANG ASLI:</strong> 0 &nbsp;&nbsp;|&nbsp;&nbsp; 
-        <strong>8.6 OKU:</strong> 0 &nbsp;&nbsp;|&nbsp;&nbsp; 
-        <strong>8.7 JANTINA:</strong> LELAKI: {{ $data['male_total'] ?? 0 }} &nbsp;|&nbsp; PEREMPUAN: {{ $data['female_total'] ?? 0 }}<br>
-        <strong>8.8 PECAHAN LOKALITI:</strong> BANDAR: {{ round(($data['attendance_total'] ?? 0) * 0.4) }} &nbsp;|&nbsp; LUAR BANDAR: {{ round(($data['attendance_total'] ?? 0) * 0.6) }}<br>
-        <strong>8.9 PECAHAN UMUR:</strong> BELIA AWAL (15-18 TAHUN): 0 &nbsp;|&nbsp; BELIA PERTENGAHAN (19-24 TAHUN): {{ $data['attendance_total'] ?? 0 }} &nbsp;|&nbsp; BELIA AKHIR: 0
+        <strong>8.1 MELAYU:</strong> {{ $studentDemographics['melayu'] ?? 0 }} &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>8.2 CINA:</strong> {{ $studentDemographics['cina'] ?? 0 }} &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>8.3 INDIA:</strong> {{ $studentDemographics['india'] ?? 0 }} &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>8.4 BUMIPUTRA SABAH/SARAWAK:</strong> {{ $studentDemographics['bumiputera_sabah_sarawak'] ?? 0 }}<br>
+        <strong>8.5 ORANG ASLI:</strong> {{ $studentDemographics['orang_asli'] ?? 0 }} &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>8.6 OKU:</strong> {{ $studentDemographics['oku'] ?? 0 }} &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong>8.7 JANTINA:</strong> LELAKI: {{ $studentDemographics['lelaki'] ?? 0 }} &nbsp;|&nbsp; PEREMPUAN: {{ $studentDemographics['perempuan'] ?? 0 }} &nbsp;|&nbsp; JUMLAH: {{ $studentDemographics['total'] ?? 0 }}<br>
+        <strong>8.8 PECAHAN LOKALITI:</strong> BANDAR: {{ $studentDemographics['bandar'] ?? 0 }} &nbsp;|&nbsp; LUAR BANDAR: {{ $studentDemographics['luar_bandar'] ?? 0 }}<br>
+        <strong>8.9 PECAHAN UMUR:</strong> BELIA AWAL (15-18 TAHUN): {{ $studentDemographics['age_15_18'] ?? 0 }} &nbsp;|&nbsp; BELIA PERTENGAHAN (19-24 TAHUN): {{ $studentDemographics['age_19_24'] ?? 0 }} &nbsp;|&nbsp; BELIA AKHIR: {{ $studentDemographics['age_25_30'] ?? 0 }}
     </div>
 
     <div class="sec-head">9. BILANGAN PENGLIBATAN/PENYERTAAN KOMUNITI/BELIA (Jika ada): <span style="font-weight: normal;">Tiada</span></div>
