@@ -936,9 +936,9 @@ body[data-theme="dark"] .alert-success p {
         }
 
         body.student-dashboard-mobile-sidebar .app-layout .topbar {
-            min-height: 58px !important;
-            height: 58px !important;
-            padding: 0 .8rem !important;
+            min-height: calc(58px + var(--app-safe-top, env(safe-area-inset-top, 0px))) !important;
+            height: calc(58px + var(--app-safe-top, env(safe-area-inset-top, 0px))) !important;
+            padding: var(--app-safe-top, env(safe-area-inset-top, 0px)) max(.8rem, env(safe-area-inset-right, 0px)) 0 max(.8rem, env(safe-area-inset-left, 0px)) !important;
             border-bottom-color: rgba(215, 191, 168, .14) !important;
         }
 
@@ -978,6 +978,10 @@ body[data-theme="dark"] .alert-success p {
            which otherwise creates a short, empty scroll range. */
         body.role-student.student-dashboard-mobile-sidebar:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .sdash {
             padding-bottom: .8rem;
+        }
+
+        body.role-student.student-dashboard-mobile-sidebar.pwa-standalone .sdash {
+            padding-top: 1rem;
         }
 
         .alert {

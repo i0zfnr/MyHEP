@@ -108,6 +108,8 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $studentModules = file_get_contents(__DIR__.'/../../resources/css/student-modules.css');
         $this->assertStringContainsString('body.role-student.student-dashboard-mobile-sidebar:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .sdash', $studentModules);
         $this->assertStringContainsString('padding-bottom: .8rem;', $studentModules);
+        $this->assertStringContainsString('height: calc(58px + var(--app-safe-top, env(safe-area-inset-top, 0px))) !important;', $studentModules);
+        $this->assertStringContainsString('body.role-student.student-dashboard-mobile-sidebar.pwa-standalone .sdash', $studentModules);
     }
 
     public function test_transparency_control_updates_shared_and_student_navigation_material_tokens(): void
