@@ -289,57 +289,9 @@ class ProgramOperationController extends Controller
             ->whereNotNull('satisfaction_rating')
             ->avg('satisfaction_rating');
 
-        $questionStats = [];
-        $ratingDistribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
-        $allNumericScores = [];
-
-        if ($survey && $questions->isNotEmpty()) {
-            $allResponses = DB::table('program_survey_responses')
-                ->where('program_survey_id', $survey->id)
-                ->get()
-                ->groupBy('question_id');
-
-            foreach ($questions as $q) {
-                $qResponses = $allResponses->get($q->id, collect());
-                $count = $qResponses->count();
-                $numericValues = [];
-                $breakdown = [];
-
-                if (in_array($q->question_type, ['rating_4', 'rating_5'], true)) {
-                    $maxScale = $q->question_type === 'rating_4' ? 4 : 5;
-                    for ($s = 1; $s <= $maxScale; $s++) {
-                        $breakdown[$s] = 0;
-                    }
-                    foreach ($qResponses as $r) {
-                        $val = (int) $r->answer_value;
-                        if ($val >= 1 && $val <= $maxScale) {
-                            $breakdown[$val]++;
-                            $numericValues[] = $val;
-                            $normScore = $maxScale === 4 ? round(($val / 4) * 5, 2) : $val;
-                            $allNumericScores[] = $normScore;
-                            $intBucket = min(5, max(1, (int) round($normScore)));
-                            $ratingDistribution[$intBucket]++;
-                        }
-                    }
-                    $qAvg = count($numericValues) > 0 ? round(array_sum($numericValues) / count($numericValues), 2) : null;
-                } else {
-                    $qAvg = null;
-                }
-
-                $questionStats[] = [
-                    'id' => $q->id,
-                    'text' => $q->question_text,
-                    'type' => $q->question_type,
-                    'category' => $q->category ?? 'General',
-                    'total_answers' => $count,
-                    'avg_score' => $qAvg,
-                    'breakdown' => $breakdown,
-                ];
-            }
-        }
-
-        $overallAvg = count($allNumericScores) > 0
-            ? round(array_sum($allNumericScores) / count($allNumericScores), 2)
+        $analytics = $this->questionnaireAnalytics($program, $survey, $questions);
+        $overallAvg = $analytics['overall_avg'] > 0
+            ? $analytics['overall_avg']
             : ($avgAttendanceRating ? round((float) $avgAttendanceRating, 2) : 0);
 
         $recentComments = DB::table('program_attendances')
@@ -351,7 +303,7 @@ class ProgramOperationController extends Controller
             ->limit(8)
             ->get();
 
-        $analytics = [
+        $analytics = array_replace($analytics, [
             'total_attendances' => $totalAttendances,
             'internal_count' => $internalCount,
             'external_count' => $externalCount,
@@ -359,10 +311,8 @@ class ProgramOperationController extends Controller
             'response_rate' => $responseRate,
             'overall_avg' => $overallAvg,
             'satisfaction_percentage' => round(($overallAvg / 5) * 100, 1),
-            'rating_distribution' => $ratingDistribution,
-            'question_stats' => $questionStats,
             'recent_comments' => $recentComments,
-        ];
+        ]);
 
         $publicCheckinUrl = route('public.programs.qr_checkin', $program->id);
 
@@ -1155,6 +1105,13 @@ class ProgramOperationController extends Controller
         $studentDemographics = $this->studentDemographics($program);
         $owner = DB::table('admins')->where('id', $program->created_by)->first();
         $survey = DB::table('program_surveys')->where('program_id', $program->id)->where('status', 'published')->latest('id')->first();
+        $questions = $survey
+            ? DB::table('program_survey_questions')
+                ->where('program_survey_id', $survey->id)
+                ->orderBy('sort_order')
+                ->get()
+            : collect();
+        $questionnaireAnalytics = $this->questionnaireAnalytics($program, $survey, $questions);
         $responseCount = $survey ? DB::table('program_survey_responses')->where('program_survey_id', $survey->id)
             ->distinct('program_attendance_id')->count('program_attendance_id') : 0;
         $ratings = $attendances->pluck('satisfaction_rating')->filter();
@@ -1170,13 +1127,104 @@ class ProgramOperationController extends Controller
             'internal_total' => $attendances->where('attendee_type', 'internal')->count(),
             'external_total' => $attendances->where('attendee_type', 'external')->count(),
             'survey_responses' => $responseCount,
-            'average_rating' => $ratings->isNotEmpty() ? round((float) $ratings->avg(), 2) : 0,
+            'average_rating' => $questionnaireAnalytics['overall_avg'] > 0
+                ? $questionnaireAnalytics['overall_avg']
+                : ($ratings->isNotEmpty() ? round((float) $ratings->avg(), 2) : 0),
             'student_demographics' => $studentDemographics,
             'comments' => $attendances->pluck('feedback_comments')->filter()->take(30)->values()->all(),
             'questionnaire_answers' => $answers,
+            'questionnaire_analytics' => $questionnaireAnalytics,
             'prepared_by' => $owner?->full_name ?: 'Tidak direkodkan',
             'prepared_by_position' => $owner?->position ?: 'Pengarah Program',
             'organizer' => $owner?->staff_department ?: 'Tidak direkodkan',
+        ];
+    }
+
+    private function questionnaireAnalytics(object $program, ?object $survey, $questions): array
+    {
+        $totalAttendances = DB::table('program_attendances')->where('program_id', $program->id)->count();
+        $internalCount = DB::table('program_attendances')->where('program_id', $program->id)->where('attendee_type', 'internal')->count();
+        $externalCount = DB::table('program_attendances')->where('program_id', $program->id)->where('attendee_type', 'external')->count();
+        $surveyResponsesCount = $survey
+            ? DB::table('program_survey_responses')
+                ->where('program_survey_id', $survey->id)
+                ->distinct('program_attendance_id')
+                ->count('program_attendance_id')
+            : 0;
+        $attendanceResponsesCount = DB::table('program_attendances')
+            ->where('program_id', $program->id)
+            ->whereNotNull('satisfaction_rating')
+            ->count();
+        $totalResponses = max($surveyResponsesCount, $attendanceResponsesCount);
+        $responseRate = $totalAttendances > 0 ? round(($totalResponses / $totalAttendances) * 100, 1) : 0;
+        $avgAttendanceRating = DB::table('program_attendances')
+            ->where('program_id', $program->id)
+            ->whereNotNull('satisfaction_rating')
+            ->avg('satisfaction_rating');
+
+        $questionStats = [];
+        $ratingDistribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+        $allNumericScores = [];
+
+        if ($survey && $questions->isNotEmpty()) {
+            $allResponses = DB::table('program_survey_responses')
+                ->where('program_survey_id', $survey->id)
+                ->get()
+                ->groupBy('question_id');
+
+            foreach ($questions as $q) {
+                $qResponses = $allResponses->get($q->id, collect());
+                $count = $qResponses->count();
+                $numericValues = [];
+                $breakdown = [];
+
+                if (in_array($q->question_type, ['rating_4', 'rating_5'], true)) {
+                    $maxScale = $q->question_type === 'rating_4' ? 4 : 5;
+                    for ($s = 1; $s <= $maxScale; $s++) {
+                        $breakdown[$s] = 0;
+                    }
+                    foreach ($qResponses as $r) {
+                        $val = (int) $r->answer_value;
+                        if ($val >= 1 && $val <= $maxScale) {
+                            $breakdown[$val]++;
+                            $numericValues[] = $val;
+                            $normScore = $maxScale === 4 ? round(($val / 4) * 5, 2) : $val;
+                            $allNumericScores[] = $normScore;
+                            $intBucket = min(5, max(1, (int) round($normScore)));
+                            $ratingDistribution[$intBucket]++;
+                        }
+                    }
+                    $qAvg = count($numericValues) > 0 ? round(array_sum($numericValues) / count($numericValues), 2) : null;
+                } else {
+                    $qAvg = null;
+                }
+
+                $questionStats[] = [
+                    'id' => $q->id,
+                    'text' => $q->question_text,
+                    'type' => $q->question_type,
+                    'category' => $q->category ?? 'General',
+                    'total_answers' => $count,
+                    'avg_score' => $qAvg,
+                    'breakdown' => $breakdown,
+                ];
+            }
+        }
+
+        $overallAvg = count($allNumericScores) > 0
+            ? round(array_sum($allNumericScores) / count($allNumericScores), 2)
+            : ($avgAttendanceRating ? round((float) $avgAttendanceRating, 2) : 0);
+
+        return [
+            'total_attendances' => $totalAttendances,
+            'internal_count' => $internalCount,
+            'external_count' => $externalCount,
+            'total_responses' => $totalResponses,
+            'response_rate' => $responseRate,
+            'overall_avg' => $overallAvg,
+            'satisfaction_percentage' => round(($overallAvg / 5) * 100, 1),
+            'rating_distribution' => $ratingDistribution,
+            'question_stats' => $questionStats,
         ];
     }
 

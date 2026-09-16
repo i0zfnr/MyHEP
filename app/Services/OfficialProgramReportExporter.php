@@ -139,7 +139,7 @@ class OfficialProgramReportExporter
             'Jawatan                 : Pegawai Pendidikan Pengajian Tinggi' => 'Jawatan                 : '.($penceramah['jawatan'] ?? 'Pegawai Pendidikan'),
             'Gred                   : DH52' => 'Gred                   : '.($penceramah['gred'] ?? '—'),
             'Jabatan / Institusi   : Politeknik Besut Terengganu' => 'Jabatan / Institusi   : '.($penceramah['institusi'] ?? 'Politeknik Besut Terengganu'),
-            'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM:' => 'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM: '.($report['survey_summary'] ?? 'Tiada maklum balas direkodkan.'),
+            'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM:' => 'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM:',
             'Peningkatan kefahaman tentang fungsi modul dalam SPMP.' => $impactLines[0],
             'Peningkatan kecekapan dan produktiviti dalam pengurusan data akademik.' => $impactLines[1],
             'Pemantapan sistem pengurusan akademik dan pelajar melalui penggunaan SPMP yang lebih berkesan.' => $impactLines[2],
@@ -151,6 +151,7 @@ class OfficialProgramReportExporter
         }
 
         $xml = $this->fillStudentDemographicSection($xml, $studentDemographics);
+        $xml = $this->insertSurveySectionAfterHeading($xml, $data, $report);
 
         // 3. Mark KPI Cluster in Header Table
         $kpiKey = strtolower($report['kluster_kpi'] ?? 'kemahiran dan inovasi');
@@ -287,6 +288,204 @@ class OfficialProgramReportExporter
         }
 
         return $xml;
+    }
+
+    private function insertSurveySectionAfterHeading(string $xml, array $data, array $report): string
+    {
+        $surveyXml = $this->buildSurveySectionXml($data, $report);
+        if ($surveyXml === '') {
+            return $xml;
+        }
+
+        return $this->insertXmlAfterParagraphContaining($xml, 'HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM:', $surveyXml);
+    }
+
+    private function buildSurveySectionXml(array $data, array $report): string
+    {
+        $analytics = $data['questionnaire_analytics'] ?? [];
+        $questionStats = array_values(array_filter(
+            $analytics['question_stats'] ?? [],
+            fn ($item): bool => ($item['type'] ?? null) === 'rating_4'
+        ));
+
+        $summary = trim((string) ($report['survey_summary'] ?? ''));
+        if ($questionStats === []) {
+            return $summary !== '' ? $this->wordParagraph($summary) : '';
+        }
+
+        $questionStats = array_slice($questionStats, 0, 10);
+        $surveyResponses = (int) ($data['survey_responses'] ?? $analytics['total_responses'] ?? 0);
+        $intro = 'Soal selidik telah diedarkan secara atas talian. Hasil maklum balas daripada '
+            .$surveyResponses.' responden sistem MyHEP adalah seperti jadual berikut.';
+
+        $totals = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
+        $currentCategory = null;
+        $rows = [
+            $this->wordTableRow([
+                ['text' => 'Bil', 'width' => 420, 'bold' => true, 'center' => true],
+                ['text' => '1', 'width' => 260, 'bold' => true, 'center' => true],
+                ['text' => 'Sangat tidak setuju', 'width' => 1020, 'bold' => true, 'center' => true],
+                ['text' => '2', 'width' => 260, 'bold' => true, 'center' => true],
+                ['text' => 'Tidak setuju', 'width' => 1020, 'bold' => true, 'center' => true],
+                ['text' => '3', 'width' => 260, 'bold' => true, 'center' => true],
+                ['text' => 'Setuju', 'width' => 1020, 'bold' => true, 'center' => true],
+                ['text' => '4', 'width' => 260, 'bold' => true, 'center' => true],
+                ['text' => 'Sangat Setuju', 'width' => 1020, 'bold' => true, 'center' => true],
+                ['text' => 'BIL. RESPON', 'width' => 1680, 'bold' => true, 'center' => true, 'gridSpan' => 4],
+            ]),
+            $this->wordTableRow([
+                ['text' => '', 'width' => 5540, 'gridSpan' => 9],
+                ['text' => '1', 'width' => 420, 'center' => true],
+                ['text' => '2', 'width' => 420, 'center' => true],
+                ['text' => '3', 'width' => 420, 'center' => true],
+                ['text' => '4', 'width' => 420, 'center' => true],
+            ]),
+        ];
+
+        foreach ($questionStats as $index => $item) {
+            $breakdown = $item['breakdown'] ?? [];
+            $category = $this->surveyCategoryForQuestion((string) ($item['text'] ?? ''), $index);
+            if ($category !== $currentCategory) {
+                $currentCategory = $category;
+                $rows[] = $this->wordTableRow([
+                    ['text' => '', 'width' => 420],
+                    ['text' => $category, 'width' => 6800, 'bold' => true, 'italic' => true, 'gridSpan' => 12],
+                ], 'D9D9D9');
+            }
+
+            for ($score = 1; $score <= 4; $score++) {
+                $totals[$score] += (int) ($breakdown[$score] ?? 0);
+            }
+
+            $rows[] = $this->wordTableRow([
+                ['text' => (string) ($index + 1).'.', 'width' => 420, 'center' => true],
+                ['text' => (string) ($item['text'] ?? 'Soalan'), 'width' => 5120, 'gridSpan' => 8],
+                ['text' => (string) ((int) ($breakdown[1] ?? 0)), 'width' => 420, 'center' => true],
+                ['text' => (string) ((int) ($breakdown[2] ?? 0)), 'width' => 420, 'center' => true],
+                ['text' => (string) ((int) ($breakdown[3] ?? 0)), 'width' => 420, 'center' => true],
+                ['text' => (string) ((int) ($breakdown[4] ?? 0)), 'width' => 420, 'center' => true],
+            ]);
+        }
+
+        $grandTotal = max(1, array_sum($totals));
+        $rows[] = $this->wordTableRow([
+            ['text' => '', 'width' => 420],
+            ['text' => 'Jumlah', 'width' => 5120, 'bold' => true, 'right' => true, 'gridSpan' => 8],
+            ['text' => (string) $totals[1], 'width' => 420, 'center' => true],
+            ['text' => (string) $totals[2], 'width' => 420, 'center' => true],
+            ['text' => (string) $totals[3], 'width' => 420, 'center' => true],
+            ['text' => (string) $totals[4], 'width' => 420, 'center' => true],
+        ]);
+        $rows[] = $this->wordTableRow([
+            ['text' => '', 'width' => 420],
+            ['text' => 'Peratus (%)', 'width' => 5120, 'bold' => true, 'right' => true, 'gridSpan' => 8],
+            ['text' => number_format(($totals[1] / $grandTotal) * 100, 1), 'width' => 420, 'center' => true],
+            ['text' => number_format(($totals[2] / $grandTotal) * 100, 1), 'width' => 420, 'center' => true],
+            ['text' => number_format(($totals[3] / $grandTotal) * 100, 1), 'width' => 420, 'center' => true],
+            ['text' => number_format(($totals[4] / $grandTotal) * 100, 1), 'width' => 420, 'center' => true],
+        ]);
+
+        $table = '<w:tbl>'
+            .'<w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders><w:top w:val="single" w:sz="6" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="6" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="6" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="6" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="6" w:space="0" w:color="000000"/><w:insideV w:val="single" w:sz="6" w:space="0" w:color="000000"/></w:tblBorders><w:tblCellMar><w:top w:w="70" w:type="dxa"/><w:left w:w="70" w:type="dxa"/><w:bottom w:w="70" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tblCellMar></w:tblPr>'
+            .implode('', $rows)
+            .'</w:tbl>';
+
+        return $this->wordParagraph($intro).$table.($summary !== '' ? $this->wordParagraph('Ulasan Urusetia: '.$summary) : '');
+    }
+
+    private function surveyCategoryForQuestion(string $question, int $index): string
+    {
+        $text = mb_strtolower($question);
+        $effectivenessKeywords = [
+            'meningkatkan',
+            'pengetahuan',
+            'pemahaman',
+            'berkeyakinan',
+            'keyakinan',
+            'mengaplikasi',
+            'berjaya',
+            'bermanfaat',
+            'increased',
+            'knowledge',
+            'understanding',
+            'confident',
+            'successful',
+            'beneficial',
+        ];
+
+        foreach ($effectivenessKeywords as $keyword) {
+            if (str_contains($text, $keyword)) {
+                return 'Penilaian Keberkesanan Program Terhadap Peserta';
+            }
+        }
+
+        return 'Penilaian Pelaksanaan Program';
+    }
+
+    private function insertXmlAfterParagraphContaining(string $xml, string $needle, string $insertXml): string
+    {
+        $normalizedNeedle = preg_replace('/\s+/', ' ', trim($needle));
+        $inserted = false;
+
+        return preg_replace_callback(
+            '/<w:p\b[^>]*>.*?<\/w:p>/su',
+            function (array $matches) use ($normalizedNeedle, $insertXml, &$inserted): string {
+                if ($inserted) {
+                    return $matches[0];
+                }
+
+                $text = html_entity_decode(strip_tags($matches[0]), ENT_QUOTES | ENT_XML1, 'UTF-8');
+                $normalizedText = preg_replace('/\s+/', ' ', trim($text));
+                if (! str_contains($normalizedText, $normalizedNeedle)) {
+                    return $matches[0];
+                }
+
+                $inserted = true;
+
+                return $matches[0].$insertXml;
+            },
+            $xml
+        ) ?? $xml;
+    }
+
+    private function wordParagraph(string $text): string
+    {
+        return '<w:p><w:pPr><w:spacing w:before="100" w:after="100"/><w:jc w:val="both"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:cs="Arial" w:eastAsia="Arial" w:hAnsi="Arial"/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t xml:space="preserve">'
+            .htmlspecialchars($text, ENT_XML1 | ENT_COMPAT, 'UTF-8')
+            .'</w:t></w:r></w:p>';
+    }
+
+    private function wordTableRow(array $cells, ?string $fill = null): string
+    {
+        $xml = '<w:tr>';
+        foreach ($cells as $cell) {
+            $xml .= $this->wordTableCell(
+                (string) ($cell['text'] ?? ''),
+                (int) ($cell['width'] ?? 1000),
+                (bool) ($cell['bold'] ?? false),
+                (bool) ($cell['center'] ?? false),
+                (bool) ($cell['right'] ?? false),
+                $fill,
+                (int) ($cell['gridSpan'] ?? 1),
+                (bool) ($cell['italic'] ?? false)
+            );
+        }
+
+        return $xml.'</w:tr>';
+    }
+
+    private function wordTableCell(string $text, int $width, bool $bold = false, bool $center = false, bool $right = false, ?string $fill = null, int $gridSpan = 1, bool $italic = false): string
+    {
+        $jc = $center ? 'center' : ($right ? 'right' : 'left');
+        $shading = $fill ? '<w:shd w:fill="'.$fill.'"/>' : '';
+        $boldXml = $bold ? '<w:b/>' : '';
+        $italicXml = $italic ? '<w:i/>' : '';
+        $spanXml = $gridSpan > 1 ? '<w:gridSpan w:val="'.$gridSpan.'"/>' : '';
+
+        return '<w:tc><w:tcPr><w:tcW w:w="'.$width.'" w:type="dxa"/>'.$spanXml.$shading.'</w:tcPr>'
+            .'<w:p><w:pPr><w:jc w:val="'.$jc.'"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:cs="Arial" w:eastAsia="Arial" w:hAnsi="Arial"/>'.$boldXml.$italicXml.'<w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t xml:space="preserve">'
+            .htmlspecialchars($text, ENT_XML1 | ENT_COMPAT, 'UTF-8')
+            .'</w:t></w:r></w:p></w:tc>';
     }
 
     private function appendValueAfterText(string $xml, string $label, string $value, int $limit = 0): string

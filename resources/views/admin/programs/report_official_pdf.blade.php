@@ -180,6 +180,39 @@
             text-align: center;
             background-color: #f7f7f7;
         }
+        table.tbl-survey {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0 7px 0;
+            font-size: 7.2pt;
+        }
+        table.tbl-survey th, table.tbl-survey td {
+            border: 0.75pt solid #000;
+            padding: 3px 3px;
+            vertical-align: middle;
+        }
+        table.tbl-survey th {
+            font-weight: bold;
+            text-align: center;
+            background: #f0f0f0;
+        }
+        table.tbl-survey .category-row td {
+            background: #e5e5e5;
+            font-weight: bold;
+            font-style: italic;
+        }
+        table.tbl-survey .number-cell {
+            text-align: center;
+            white-space: nowrap;
+        }
+        table.tbl-survey .summary-cell {
+            font-weight: bold;
+            text-align: right;
+        }
+        table.tbl-survey .question-cell {
+            font-size: 7.4pt;
+            line-height: 1.2;
+        }
 
         table.tbl-committee {
             width: 100%;
@@ -248,6 +281,37 @@
             ? strtoupper(\Carbon\Carbon::parse($program->starts_at)->locale('ms')->translatedFormat('d F Y'))
             : 'TIDAK DIREKODKAN';
         $studentDemographics = $data['student_demographics'] ?? [];
+        $surveyAnalytics = $data['questionnaire_analytics'] ?? [];
+        $surveyQuestionStats = array_values(array_filter(
+            $surveyAnalytics['question_stats'] ?? [],
+            fn ($item) => ($item['type'] ?? null) === 'rating_4'
+        ));
+        $surveyQuestionStats = array_slice($surveyQuestionStats, 0, 10);
+        $surveyCategoryForQuestion = function (string $question): string {
+            $text = mb_strtolower($question);
+            foreach ([
+                'meningkatkan',
+                'pengetahuan',
+                'pemahaman',
+                'berkeyakinan',
+                'keyakinan',
+                'mengaplikasi',
+                'berjaya',
+                'bermanfaat',
+                'increased',
+                'knowledge',
+                'understanding',
+                'confident',
+                'successful',
+                'beneficial',
+            ] as $keyword) {
+                if (str_contains($text, $keyword)) {
+                    return 'Penilaian Keberkesanan Program Terhadap Peserta';
+                }
+            }
+
+            return 'Penilaian Pelaksanaan Program';
+        };
     @endphp
 
     <!-- ================= PAGE 1: COVER PAGE ================= -->
@@ -465,6 +529,81 @@
     <div class="sec-head">9. BILANGAN PENGLIBATAN/PENYERTAAN KOMUNITI/BELIA (Jika ada): <span style="font-weight: normal;">Tiada</span></div>
 
     <div class="sec-head">10. HASIL KAJI SELIDIK/MAKLUM BALAS PESERTA PROGRAM:</div>
+    @if(count($surveyQuestionStats) > 0)
+        <div class="text-block" style="margin-bottom: 4px;">
+            Soal selidik telah diedarkan secara atas talian. Hasil maklum balas daripada {{ $data['survey_responses'] ?? ($surveyAnalytics['total_responses'] ?? 0) }} responden sistem MyHEP adalah seperti jadual berikut.
+        </div>
+        @php
+            $surveyTotals = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
+            $currentSurveyCategory = null;
+        @endphp
+        <table class="tbl-survey">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 5%;">Bil</th>
+                    <th style="width: 4%;">1</th>
+                    <th style="width: 14%;">Sangat tidak setuju</th>
+                    <th style="width: 4%;">2</th>
+                    <th style="width: 13%;">Tidak setuju</th>
+                    <th style="width: 4%;">3</th>
+                    <th style="width: 13%;">Setuju</th>
+                    <th style="width: 4%;">4</th>
+                    <th style="width: 13%;">Sangat Setuju</th>
+                    <th colspan="4" style="width: 26%;">BIL. RESPON</th>
+                </tr>
+                <tr>
+                    <th colspan="8"></th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($surveyQuestionStats as $idx => $qStat)
+                    @php
+                        $category = $surveyCategoryForQuestion((string) ($qStat['text'] ?? ''));
+                        $breakdown = $qStat['breakdown'] ?? [];
+                        for ($score = 1; $score <= 4; $score++) {
+                            $surveyTotals[$score] += (int) ($breakdown[$score] ?? 0);
+                        }
+                    @endphp
+                    @if($category !== $currentSurveyCategory)
+                        @php $currentSurveyCategory = $category; @endphp
+                        <tr class="category-row">
+                            <td></td>
+                            <td colspan="12">{{ $category }}</td>
+                        </tr>
+                    @endif
+                    <tr>
+                        <td class="number-cell">{{ $idx + 1 }}.</td>
+                        <td colspan="8" class="question-cell">{{ $qStat['text'] ?? 'Soalan' }}</td>
+                        <td class="number-cell">{{ (int) ($breakdown[1] ?? 0) }}</td>
+                        <td class="number-cell">{{ (int) ($breakdown[2] ?? 0) }}</td>
+                        <td class="number-cell">{{ (int) ($breakdown[3] ?? 0) }}</td>
+                        <td class="number-cell">{{ (int) ($breakdown[4] ?? 0) }}</td>
+                    </tr>
+                @endforeach
+                @php $surveyGrandTotal = max(1, array_sum($surveyTotals)); @endphp
+                <tr>
+                    <td></td>
+                    <td colspan="8" class="summary-cell">Jumlah</td>
+                    <td class="number-cell">{{ $surveyTotals[1] }}</td>
+                    <td class="number-cell">{{ $surveyTotals[2] }}</td>
+                    <td class="number-cell">{{ $surveyTotals[3] }}</td>
+                    <td class="number-cell">{{ $surveyTotals[4] }}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td colspan="8" class="summary-cell">Peratus (%)</td>
+                    <td class="number-cell">{{ number_format(($surveyTotals[1] / $surveyGrandTotal) * 100, 1) }}</td>
+                    <td class="number-cell">{{ number_format(($surveyTotals[2] / $surveyGrandTotal) * 100, 1) }}</td>
+                    <td class="number-cell">{{ number_format(($surveyTotals[3] / $surveyGrandTotal) * 100, 1) }}</td>
+                    <td class="number-cell">{{ number_format(($surveyTotals[4] / $surveyGrandTotal) * 100, 1) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    @endif
     <div class="text-block">{{ $report['survey_summary'] }}</div>
 
     <div class="sec-head">11. HASIL KAJI SELIDIK/MAKLUM BALAS KOMUNITI/ PENERIMA MANFAAT (Jika berkaitan): <span style="font-weight: normal;">Tiada</span></div>

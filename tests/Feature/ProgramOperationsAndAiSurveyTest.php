@@ -946,6 +946,112 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->assertDatabaseHas('programs', ['id' => $programId, 'status' => 'completed']);
     }
 
+    public function test_generated_report_includes_questionnaire_breakdown_table_for_section_ten(): void
+    {
+        config(['services.gemini.key' => null, 'services.openai.key' => null, 'services.deepseek.key' => null]);
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1,
+            'registration_type' => 'attendance_only_activity',
+            'title' => 'Survey Table Program',
+            'paperwork_method' => 'none',
+            'questionnaire_enabled' => true,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $attendanceIds = [];
+        foreach ([1, 2, 3] as $index) {
+            $attendanceIds[] = DB::table('program_attendances')->insertGetId([
+                'program_id' => $programId,
+                'attendee_type' => 'internal',
+                'full_name' => 'Survey Student '.$index,
+                'identifier' => 'PB-SURVEY-'.$index,
+                'checked_in_at' => now(),
+                'geofence_valid' => true,
+                'validation_status' => 'valid',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $surveyId = DB::table('program_surveys')->insertGetId([
+            'program_id' => $programId,
+            'title' => 'Borang SA-04',
+            'status' => 'published',
+            'created_by' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $objectiveQuestionId = DB::table('program_survey_questions')->insertGetId([
+            'program_survey_id' => $surveyId,
+            'question_text' => 'Objektif program tercapai.',
+            'question_type' => 'rating_4',
+            'sort_order' => 1,
+            'is_required' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $benefitQuestionId = DB::table('program_survey_questions')->insertGetId([
+            'program_survey_id' => $surveyId,
+            'question_text' => 'Program ini berjaya dan bermanfaat.',
+            'question_type' => 'rating_4',
+            'sort_order' => 2,
+            'is_required' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $answers = [
+            [$attendanceIds[0], $objectiveQuestionId, 4],
+            [$attendanceIds[1], $objectiveQuestionId, 3],
+            [$attendanceIds[2], $objectiveQuestionId, 4],
+            [$attendanceIds[0], $benefitQuestionId, 4],
+            [$attendanceIds[1], $benefitQuestionId, 4],
+            [$attendanceIds[2], $benefitQuestionId, 2],
+        ];
+        foreach ($answers as [$attendanceId, $questionId, $answer]) {
+            DB::table('program_survey_responses')->insert([
+                'program_survey_id' => $surveyId,
+                'program_attendance_id' => $attendanceId,
+                'question_id' => $questionId,
+                'answer_value' => (string) $answer,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->signIn(1, 'lecturer')->post(route('admin.programs.report.generate', $programId), [
+            'program_images' => [UploadedFile::fake()->createWithContent(
+                'activity.png',
+                base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+            )],
+            'output_format' => 'docx',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $docxPath = DB::table('program_reports')->where('program_id', $programId)->value('docx_path');
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open(Storage::disk('local')->path($docxPath)) === true);
+        $documentXml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        $this->assertIsString($documentXml);
+        $this->assertNotFalse(simplexml_load_string($documentXml), 'Generated DOCX document.xml must be valid XML.');
+        $plainText = preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($documentXml)));
+        $this->assertStringContainsString('Soal selidik telah diedarkan secara atas talian', $plainText);
+        $this->assertStringContainsString('Sangat tidak setuju', $plainText);
+        $this->assertStringContainsString('Sangat Setuju', $plainText);
+        $this->assertStringContainsString('BIL. RESPON', $plainText);
+        $this->assertStringContainsString('Penilaian Pelaksanaan Program', $plainText);
+        $this->assertStringContainsString('Penilaian Keberkesanan Program Terhadap Peserta', $plainText);
+        $this->assertStringContainsString('Objektif program tercapai.', $plainText);
+        $this->assertStringContainsString('Program ini berjaya dan bermanfaat.', $plainText);
+        $this->assertStringContainsString('Jumlah', $plainText);
+        $this->assertStringContainsString('Peratus (%)', $plainText);
+        $this->assertStringContainsString('Ulasan Urusetia:', $plainText);
+        $this->assertGreaterThanOrEqual(6, substr_count($documentXml, '<w:tbl>'), 'Section 10 should add a survey breakdown table.');
+    }
+
     public function test_report_generation_blocks_incomplete_sources(): void
     {
         $programId = DB::table('programs')->insertGetId([
