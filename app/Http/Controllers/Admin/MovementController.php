@@ -151,7 +151,7 @@ class MovementController extends Controller
             ] : null,
             'token' => $dynamicData['token'] ?? null,
             'scan_url' => $scanUrl,
-            'expires_in' => $dynamicData['expires_in'] ?? 30,
+            'expires_in' => $dynamicData['expires_in'] ?? DynamicQrToken::DEFAULT_CHECKPOINT_ROTATION_SECONDS,
             'server_time' => time(),
         ]);
     }

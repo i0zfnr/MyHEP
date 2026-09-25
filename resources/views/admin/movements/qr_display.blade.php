@@ -314,14 +314,14 @@
             <img id="qrImage" class="qr-image" alt="Dynamic Movement QR Code" src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&data={{ urlencode($scanUrl ?? '') }}">
         </div>
 
-        <!-- 30-Second Rolling Countdown -->
+        <!-- 15-Second Rolling Countdown -->
         <div class="countdown-bar">
             <svg class="timer-svg" viewBox="0 0 30 30">
                 <circle class="timer-track" cx="15" cy="15" r="12" />
                 <circle class="timer-circle" id="timerRing" cx="15" cy="15" r="12" />
             </svg>
             <div class="countdown-text">
-                Kod QR dijana semula dalam <span class="countdown-number" id="countdownNumber">30</span>s
+                Kod QR dijana semula dalam <span class="countdown-number" id="countdownNumber">15</span>s
             </div>
         </div>
 
@@ -339,7 +339,7 @@
 
     <script>
     (function() {
-        const ROTATION_SECONDS = 30;
+        const ROTATION_SECONDS = 15;
         let currentRemaining = ROTATION_SECONDS;
         const statusUrl = @json(route('admin.movements.qr.status'));
         const qrImage = document.getElementById('qrImage');

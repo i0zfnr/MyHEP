@@ -263,7 +263,7 @@ class MovementController extends Controller
                     return DB::table('movement_checkpoints')->where('id', $extractedId)->first();
                 }
 
-                // Invalid signature or expired beyond 45s
+                // Invalid signature or expired beyond the movement QR rotation and grace window.
                 return null;
             }
         }

@@ -26,7 +26,7 @@
     </div>
 
     <div class="qr-warning">
-        {{ __('This QR dynamically rotates every 30 seconds with signed cryptographic tokens. Display it on a live screen at the guard house or hostel to prevent screenshot sharing.') }}
+        {{ __('This QR dynamically rotates every 15 seconds with signed cryptographic tokens. Display it on a live screen at the guard house or hostel to prevent screenshot sharing.') }}
     </div>
 
     <div class="qr-wrap">
@@ -43,7 +43,7 @@
                     <div class="qr-box" id="qrBox">
                         <img id="qrImage" alt="{{ __('Movement QR Code') }}" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ urlencode($scanUrl) }}">
                     </div>
-                    <p class="qr-help">{{ __('This QR dynamically rotates every 30 seconds with signed cryptographic HMAC tokens. Scans expire after 45 seconds to guarantee physical presence.') }}</p>
+                    <p class="qr-help">{{ __('This QR dynamically rotates every 15 seconds with signed cryptographic HMAC tokens. Scans expire after 30 seconds to guarantee physical presence.') }}</p>
                     <p class="qr-url" id="qrUrl">{{ $scanUrl }}</p>
                     <p class="qr-stamp" id="qrLastUpdated">{{ __('Waiting for latest QR sync...') }}</p>
                 @else

@@ -7,7 +7,8 @@ use Illuminate\Support\Str;
 class DynamicQrToken
 {
     public const DEFAULT_ROTATION_SECONDS = 30;
-    public const DEFAULT_GRACE_PERIOD_SECONDS = 15; // 30s rotation + 15s grace = 45s max age
+    public const DEFAULT_CHECKPOINT_ROTATION_SECONDS = 15;
+    public const DEFAULT_GRACE_PERIOD_SECONDS = 15; // 15s rotation + 15s grace = 30s max age
 
     /**
      * Generate a signed time-based token for a program.
@@ -93,7 +94,7 @@ class DynamicQrToken
     /**
      * Generate a signed time-based token for a movement checkpoint.
      */
-    public static function generateForCheckpoint(int $checkpointId, int $validSeconds = self::DEFAULT_ROTATION_SECONDS): array
+    public static function generateForCheckpoint(int $checkpointId, int $validSeconds = self::DEFAULT_CHECKPOINT_ROTATION_SECONDS): array
     {
         $timestamp = time();
         $payloadData = [
@@ -116,7 +117,11 @@ class DynamicQrToken
     /**
      * Verify the signed token against checkpoint ID and age.
      */
-    public static function verifyForCheckpoint(?string $token, int $checkpointId, int $maxAgeSeconds = 45): bool
+    public static function verifyForCheckpoint(
+        ?string $token,
+        int $checkpointId,
+        int $maxAgeSeconds = self::DEFAULT_CHECKPOINT_ROTATION_SECONDS + self::DEFAULT_GRACE_PERIOD_SECONDS
+    ): bool
     {
         if (blank($token) || ! str_contains($token, '.')) {
             return false;
