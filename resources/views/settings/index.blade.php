@@ -153,6 +153,38 @@
                 </section>
             @endif
 
+            @if($canToggleLiquidDesign)
+                <section class="settings-section" role="group" aria-labelledby="settingsLiquidDesignTitle">
+                    <h3 class="settings-section-title" id="settingsLiquidDesignTitle">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 3h10l4 7-9 11L3 10l4-7Z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m3 10 9 3 9-3M12 13v8"/>
+                        </svg>
+                        {{ __('ui.liquid_design_title') }}
+                    </h3>
+                    <p class="settings-section-copy">{{ __('ui.liquid_design_hint') }}</p>
+
+                    <input type="hidden" name="liquid_design_enabled" value="0">
+                    <label class="settings-liquid-toggle">
+                        <span class="settings-liquid-toggle-copy">
+                            <strong>{{ __('ui.liquid_design_toggle') }}</strong>
+                        </span>
+                        <span class="settings-liquid-toggle-control">
+                            <input
+                                type="checkbox"
+                                name="liquid_design_enabled"
+                                value="1"
+                                data-liquid-design-toggle
+                                role="switch"
+                                aria-label="{{ __('ui.liquid_design_toggle') }}"
+                                @checked($currentLiquidDesignEnabled)
+                            >
+                            <span class="settings-liquid-switch" aria-hidden="true"><span></span></span>
+                        </span>
+                    </label>
+                </section>
+            @endif
+
             @if($canAdjustGlass)
                 <section class="settings-section glass-control-section" role="group" aria-labelledby="settingsGlassTitle">
                     <h3 class="settings-section-title" id="settingsGlassTitle">

@@ -333,7 +333,7 @@ class AiHelperFeatureControlTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_system_admin_can_disable_liquid_design_for_other_administrators(): void
+    public function test_system_admin_can_switch_liquid_design_for_all_admin_roles(): void
     {
         $this->actingAsSystemAdmin()
             ->patch('/admin/features/admin_liquid_design', ['enabled' => 0])
@@ -345,10 +345,25 @@ class AiHelperFeatureControlTest extends TestCase
         ]);
 
         $features = app(SystemFeatures::class);
-        $this->assertFalse($features->adminLiquidDesignEnabled('discipline_admin'));
-        $this->assertFalse($features->adminLiquidDesignEnabled('scholarship_admin'));
-        $this->assertFalse($features->adminLiquidDesignEnabled('student_affairs_head'));
+        foreach (['system_admin', 'discipline_admin', 'scholarship_admin', 'student_affairs_head', 'lecturer', 'guard'] as $role) {
+            $this->assertFalse($features->adminLiquidDesignAvailable($role));
+            $this->assertFalse($features->adminLiquidDesignEnabled($role, true));
+        }
+        $this->assertFalse($features->adminLiquidDesignAvailable('unknown_role'));
+        $this->assertFalse($features->adminLiquidDesignAvailable(null));
+
+        $this->actingAsSystemAdmin()
+            ->patch('/admin/features/admin_liquid_design', ['enabled' => 1])
+            ->assertRedirect('/admin/features');
+
+        foreach (['system_admin', 'discipline_admin', 'scholarship_admin', 'student_affairs_head', 'lecturer', 'guard'] as $role) {
+            $this->assertTrue($features->adminLiquidDesignAvailable($role));
+        }
         $this->assertTrue($features->adminLiquidDesignEnabled('system_admin'));
+        $this->assertFalse($features->adminLiquidDesignEnabled('discipline_admin'));
+        $this->assertTrue($features->adminLiquidDesignEnabled('discipline_admin', true));
+        $this->assertFalse($features->adminLiquidDesignEnabled('unknown_role', true));
+        $this->assertFalse($features->adminLiquidDesignEnabled(null, true));
     }
 
     private function actingAsSystemAdmin(): static

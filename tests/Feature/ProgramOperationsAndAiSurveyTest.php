@@ -81,6 +81,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->text('address')->nullable();
             $table->text('study_address')->nullable();
             $table->string('oku_status', 10)->nullable();
+            $table->boolean('profile_completion_bypass')->default(false);
             $table->timestamps();
         });
 
@@ -1243,6 +1244,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
     {
         $studentId = DB::table('students')->insertGetId([
             'full_name' => 'Siti Student', 'matric_no' => 'PB2001', 'program' => 'Diploma IT',
+            'profile_completion_bypass' => true,
             'created_at' => now(), 'updated_at' => now(),
         ]);
         $programId = DB::table('programs')->insertGetId([
@@ -1282,6 +1284,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             'full_name' => 'Quick Scan Student',
             'matric_no' => 'PB9001',
             'program' => 'DIT',
+            'profile_completion_bypass' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -1328,7 +1331,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
 
     public function test_program_owner_can_use_attendance_only_mode_and_students_still_earn_points(): void
     {
-        $studentId = DB::table('students')->insertGetId(['full_name' => 'Attendance Student', 'matric_no' => 'PB3001', 'program' => 'DIT', 'created_at' => now(), 'updated_at' => now()]);
+        $studentId = DB::table('students')->insertGetId(['full_name' => 'Attendance Student', 'matric_no' => 'PB3001', 'program' => 'DIT', 'profile_completion_bypass' => true, 'created_at' => now(), 'updated_at' => now()]);
         $programId = DB::table('programs')->insertGetId([
             'created_by' => 1, 'title' => 'Sports Activity', 'paperwork_method' => 'pdf', 'status' => 'active',
             'attendance_status' => 'closed', 'questionnaire_enabled' => true, 'venue' => 'Field',
@@ -1397,7 +1400,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
 
     public function test_permitted_student_can_open_dynamic_qr_presenter_but_not_bypass_attendance_token(): void
     {
-        $studentId = DB::table('students')->insertGetId(['full_name' => 'Permitted Student', 'matric_no' => 'PB4003', 'program' => 'DBF', 'created_at' => now(), 'updated_at' => now()]);
+        $studentId = DB::table('students')->insertGetId(['full_name' => 'Permitted Student', 'matric_no' => 'PB4003', 'program' => 'DBF', 'profile_completion_bypass' => true, 'created_at' => now(), 'updated_at' => now()]);
         $programId = DB::table('programs')->insertGetId([
             'created_by' => 1, 'title' => 'QR Only Permission Program', 'paperwork_method' => 'pdf',
             'venue' => 'Dewan Utama', 'status' => 'active', 'attendance_status' => 'open',

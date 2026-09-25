@@ -130,19 +130,20 @@ const applyGlassTransparency = (value, persist = true) => {
     const transparency = updateGlassControls(value);
     const ratio = transparency / 100;
     const root = document.documentElement;
+    const liquidDesignEnabled = root.dataset.liquidDesign === 'on';
 
     // Transparency controls a bounded physical material, never raw element opacity.
     // Shared Liquid Glass surfaces consume this token; navigation keeps its
     // dedicated values for its compact mobile contrast requirements.
-    root.style.setProperty('--glass-user-transparency', ratio.toFixed(2));
-    root.style.setProperty('--glass-opacity', (0.86 - (ratio * 0.34)).toFixed(2));
-    root.style.setProperty('--student-nav-material-alpha', (0.86 - (ratio * 0.34)).toFixed(2));
-    root.style.setProperty('--student-nav-active-alpha', (0.80 - (ratio * 0.18)).toFixed(2));
-    root.style.setProperty('--student-nav-reflection-alpha', (0.34 - (ratio * 0.16)).toFixed(2));
-    root.style.setProperty('--student-nav-active-reflection-alpha', (0.46 - (ratio * 0.24)).toFixed(2));
-    root.style.setProperty('--student-nav-blur', `${18 + (ratio * 8)}px`);
-    root.style.setProperty('--student-nav-active-blur', `${10 + (ratio * 4)}px`);
-    root.style.setProperty('--student-nav-saturation', `${132 + (ratio * 16)}%`);
+    root.style.setProperty('--glass-user-transparency', liquidDesignEnabled ? ratio.toFixed(2) : '0');
+    root.style.setProperty('--glass-opacity', liquidDesignEnabled ? (0.86 - (ratio * 0.34)).toFixed(2) : '1');
+    root.style.setProperty('--student-nav-material-alpha', liquidDesignEnabled ? (0.86 - (ratio * 0.34)).toFixed(2) : '1');
+    root.style.setProperty('--student-nav-active-alpha', liquidDesignEnabled ? (0.80 - (ratio * 0.18)).toFixed(2) : '1');
+    root.style.setProperty('--student-nav-reflection-alpha', liquidDesignEnabled ? (0.34 - (ratio * 0.16)).toFixed(2) : '0');
+    root.style.setProperty('--student-nav-active-reflection-alpha', liquidDesignEnabled ? (0.46 - (ratio * 0.24)).toFixed(2) : '0');
+    root.style.setProperty('--student-nav-blur', liquidDesignEnabled ? `${18 + (ratio * 8)}px` : '0px');
+    root.style.setProperty('--student-nav-active-blur', liquidDesignEnabled ? `${10 + (ratio * 4)}px` : '0px');
+    root.style.setProperty('--student-nav-saturation', liquidDesignEnabled ? `${132 + (ratio * 16)}%` : '100%');
     root.dataset.glassTransparency = String(transparency);
     root.dataset.glassHigh = transparency >= 70 ? 'true' : 'false';
 
@@ -151,11 +152,27 @@ const applyGlassTransparency = (value, persist = true) => {
         document.body.dataset.glassHigh = transparency >= 70 ? 'true' : 'false';
     }
 
-    if (persist) {
+    if (persist && liquidDesignEnabled) {
         window.localStorage.setItem(GLASS_TRANSPARENCY_KEY, String(transparency));
     }
 
     return transparency;
+};
+
+const applyAdminLiquidDesign = (enabled) => {
+    const isEnabled = Boolean(enabled);
+    const root = document.documentElement;
+    const body = document.body;
+
+    root.dataset.liquidDesign = isEnabled ? 'on' : 'off';
+    if (body) {
+        body.dataset.liquidDesign = root.dataset.liquidDesign;
+        body.classList.toggle('liquid-design-enabled', isEnabled);
+        body.classList.toggle('liquid-design-disabled', !isEnabled);
+        body.classList.toggle('admin-liquid-disabled', !isEnabled);
+    }
+
+    applyGlassTransparency(root.dataset.glassTransparency ?? '40', false);
 };
 
 const applyTheme = (theme, persist = true) => {
@@ -274,6 +291,8 @@ const registerThemeUi = () => {
         });
         const autosave = settingsForm.querySelector('[data-settings-autosave]');
         const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const glassInput = settingsForm.querySelector('input[name="glass_transparency"]');
+        const liquidDesignToggle = settingsForm.querySelector('[data-liquid-design-toggle]');
         let saveTimer = null;
         let saveSequence = 0;
 
@@ -286,11 +305,15 @@ const registerThemeUi = () => {
             const sequence = ++saveSequence;
             setAutosaveStatus('Saving...', 'saving');
             try {
+                const preferences = new FormData(settingsForm);
+                if (liquidDesignToggle) {
+                    preferences.set('liquid_design_enabled', liquidDesignToggle.checked ? '1' : '0');
+                }
                 const response = await fetch(settingsForm.action, {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf || '' },
-                    body: new FormData(settingsForm),
+                    body: preferences,
                 });
                 if (!response.ok) throw new Error('Unable to save changes.');
                 const saved = await response.json();
@@ -316,7 +339,12 @@ const registerThemeUi = () => {
         settingsForm.querySelectorAll('input[type="radio"]').forEach((input) => {
             input.addEventListener('change', savePreferences);
         });
-        const glassInput = settingsForm.querySelector('input[name="glass_transparency"]');
+        liquidDesignToggle?.addEventListener('change', () => {
+            applyAdminLiquidDesign(liquidDesignToggle.checked);
+            window.clearTimeout(saveTimer);
+            savePreferences();
+        });
+
         let glassPreviewFrame = null;
 
         glassInput?.addEventListener('input', () => {
@@ -1644,7 +1672,7 @@ const registerAiSessionCleanup = () => {
 
         try {
             Object.keys(sessionStorage)
-                .filter((key) => key.startsWith('studentedge.ai.active.'))
+                .filter((key) => key.startsWith('myhep.ai.active.') || key.startsWith('studentedge.ai.active.'))
                 .forEach((key) => sessionStorage.removeItem(key));
         } catch (_) {
             // Logout must continue even when browser storage is unavailable.

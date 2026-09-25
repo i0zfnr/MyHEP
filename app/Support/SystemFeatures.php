@@ -7,6 +7,15 @@ use Illuminate\Support\Facades\Schema;
 
 class SystemFeatures
 {
+    private const ADMIN_LIQUID_DESIGN_ROLES = [
+        'system_admin',
+        'student_affairs_head',
+        'scholarship_admin',
+        'discipline_admin',
+        'lecturer',
+        'guard',
+    ];
+
     public const FEATURES = [
         'document_centre' => [
             'label' => 'Document Centre',
@@ -25,8 +34,8 @@ class SystemFeatures
             'description' => 'Allow regular authorized administrators to use the AI Helper. System administrators always retain access.',
         ],
         'admin_liquid_design' => [
-            'label' => 'Liquid Design for Administrators',
-            'description' => 'Use liquid glass effects for non-system administrators. Turn this off for solid, higher-contrast panels with clearer borders and reduced visual effects.',
+            'label' => 'Liquid Glass for Staff and Admin',
+            'description' => 'Allow Liquid Glass styling for System Admin and let other staff/admin roles opt in from Settings. Turn this off to force the solid, higher-contrast interface for all admin roles. Student styling is unchanged.',
         ],
         'enforce_student_profile_photo' => [
             'label' => 'Mandatory Student Profile Photo (Beta)',
@@ -45,8 +54,12 @@ class SystemFeatures
 
     public function enabled(string $key): bool
     {
-        if (! $this->exists($key) || ! Schema::hasTable('system_features')) {
+        if (! $this->exists($key)) {
             return false;
+        }
+
+        if (! Schema::hasTable('system_features')) {
+            return $key !== 'enforce_student_profile_photo';
         }
 
         $value = DB::table('system_features')->where('feature_key', $key)->value('enabled');
@@ -65,9 +78,16 @@ class SystemFeatures
         })->values()->all();
     }
 
-    public function adminLiquidDesignEnabled(?string $adminRole): bool
+    public function adminLiquidDesignAvailable(?string $adminRole): bool
     {
-        return $adminRole === 'system_admin' || $this->enabled('admin_liquid_design');
+        return in_array($adminRole, self::ADMIN_LIQUID_DESIGN_ROLES, true)
+            && $this->enabled('admin_liquid_design');
+    }
+
+    public function adminLiquidDesignEnabled(?string $adminRole, bool $userOptIn = false): bool
+    {
+        return $this->adminLiquidDesignAvailable($adminRole)
+            && ($adminRole === 'system_admin' || $userOptIn);
     }
 
     public function set(string $key, bool $enabled, int $adminId): void

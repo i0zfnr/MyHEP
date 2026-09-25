@@ -136,7 +136,11 @@
     .viz-mode-btn[aria-pressed="true"] { background:var(--c-accent); color:#fff; }
     .viz-mode-btn[aria-pressed="true"] svg { color:inherit; }
     .viz-mode-btn:focus-visible { outline:none; box-shadow:var(--shadow-focus); }
-    @media (max-width:640px) { .dash-hero { align-items:flex-start; } .dash-hero-actions { width:100%; justify-content:space-between; } }
+    @media (max-width:640px) {
+        .dash-hero { align-items:flex-start; flex-direction:column; }
+        .dash-hero-text { min-width:0; width:100%; overflow-wrap:anywhere; }
+        .dash-hero-actions { width:100%; min-width:0; justify-content:space-between; }
+    }
 
     /* ── Alert ── */
     .ui-alert-success {
@@ -1823,9 +1827,12 @@
 
 .staff-program-board {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
+
+.staff-program-board > * { min-width: 0; }
 
 /* Header */
 .program-board-head {

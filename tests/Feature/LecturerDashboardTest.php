@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -73,5 +74,38 @@ class LecturerDashboardTest extends TestCase
             ->assertSee('Program Status Distribution')
             ->assertSee('Program Activity')
             ->assertDontSee('Jumlah Pelajar');
+    }
+
+    public function test_staff_dashboard_caches_program_rows_as_arrays_and_renders_cache_hits(): void
+    {
+        DB::table('programs')->insert([
+            'created_by' => 1,
+            'title' => 'Cache-safe program',
+            'status' => 'draft',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $session = [
+            'auth_user' => [
+                'id' => 1,
+                'role' => 'admin',
+                'admin_role' => 'lecturer',
+                'staff_category' => 'general',
+                'name' => 'General Lecturer',
+            ],
+        ];
+
+        $this->withSession($session)->get('/admin/dashboard')
+            ->assertOk()
+            ->assertSee('Cache-safe program');
+
+        $cached = Cache::get('myhep.dashboard.staff_programs.v2.1');
+        $this->assertIsArray($cached['recent']);
+        $this->assertIsArray($cached['recent'][0]);
+
+        $this->withSession($session)->get('/admin/dashboard')
+            ->assertOk()
+            ->assertSee('Cache-safe program');
     }
 }

@@ -337,6 +337,7 @@ if (!function_exists('clearProgramCaches')) {
     function clearProgramCaches(?int $staffId = null): void
     {
         if ($staffId !== null) {
+            Cache::forget("myhep.dashboard.staff_programs.v2.{$staffId}");
             Cache::forget("myhep.dashboard.staff_programs.{$staffId}");
         }
         clearSystemCaches();

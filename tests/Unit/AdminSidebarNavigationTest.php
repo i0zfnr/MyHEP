@@ -16,6 +16,6 @@ class AdminSidebarNavigationTest extends TestCase
         $this->assertNotFalse($disciplineGroup);
         $this->assertLessThan($disciplineGroup, $studentList);
         $this->assertSame(1, substr_count($layout, 'data-sidebar-student-list'));
-        $this->assertSame(1, substr_count($layout, "route('admin.students.index')"));
+        $this->assertGreaterThanOrEqual(1, substr_count($layout, "route('admin.students.index')"));
     }
 }

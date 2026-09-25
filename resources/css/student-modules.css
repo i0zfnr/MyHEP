@@ -3037,7 +3037,7 @@ body[data-theme="dark"] .alert-success p {
         box-shadow: 0 8px 24px rgba(36,26,18,0.06);
         border-color: color-mix(in srgb, var(--primary, #b99150) 40%, var(--border, #eadac8));
     }
-    .sp-item-main { min-width: 260px; flex: 1; }
+    .sp-item-main { min-width: 0; flex: 1 1 260px; overflow-wrap: anywhere; }
     .sp-item-title {
         font-size: 1.08rem;
         font-weight: 800;
@@ -4295,6 +4295,14 @@ body.student-scan-mode :is(
     .scan-frame span:nth-child(3) { bottom: 0; right: 0; border-bottom: 5px solid; border-right: 5px solid; border-radius: 0 0 18px 0; }
     .scan-frame span:nth-child(4) { bottom: 0; left: 0; border-bottom: 5px solid; border-left: 5px solid; border-radius: 0 0 0 18px; }
 
+    @media (max-height: 600px) {
+        .scan-frame {
+            top: calc(35% + (env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 2);
+            width: min(56vw, max(64px, calc(100dvh - 310px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))));
+        }
+        .scan-frame span { width: 25%; height: 25%; }
+    }
+
     .scan-bottom {
         position: absolute;
         left: calc(1rem + env(safe-area-inset-left, 0px));
@@ -4822,6 +4830,11 @@ body.student-scan-mode :is(
             font-size: .95rem;
         }
 
+        .move-page .ui-card:has(.move-options) .ui-card-head,
+        .move-page .ui-card:has(.move-options) .ui-card-body {
+            padding-inline: .78rem;
+        }
+
         .move-grid,
         .move-student-grid,
         .move-meta {
@@ -4873,6 +4886,77 @@ body.student-scan-mode :is(
         .move-live-chip {
             padding: .32rem .58rem;
             font-size: .66rem;
+        }
+
+        .move-page .move-scan-status {
+            padding: .62rem .72rem;
+            border-radius: 10px;
+            font-size: .75rem;
+            line-height: 1.38;
+        }
+
+        .move-page .move-options {
+            gap: .48rem;
+            margin-top: .72rem !important;
+        }
+
+        .move-page .move-option {
+            align-items: center;
+            gap: .6rem;
+            min-height: 58px;
+            padding: .58rem .66rem;
+            border-radius: 11px;
+        }
+
+        .move-page .move-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 20px;
+            margin: 0;
+        }
+
+        .move-page .move-option-title {
+            font-size: .82rem;
+            line-height: 1.18;
+        }
+
+        .move-page .move-option-hint {
+            margin-top: .12rem;
+            font-size: .68rem;
+            line-height: 1.25;
+        }
+
+        .move-page .move-field {
+            gap: .3rem;
+            margin-top: .72rem;
+        }
+
+        .move-page .move-field label {
+            font-size: .72rem;
+        }
+
+        .move-page .move-field small {
+            font-size: .68rem;
+            line-height: 1.35;
+        }
+
+        .move-page .move-field input,
+        .move-page .move-field textarea {
+            min-height: 42px;
+            padding: .62rem .72rem;
+            border-radius: 10px;
+            font-size: .86rem;
+        }
+
+        .move-page .ui-actions {
+            gap: .45rem;
+            margin-top: .72rem !important;
+        }
+
+        .move-page .ui-actions .ui-btn {
+            min-height: 42px;
+            padding: .58rem .82rem;
+            font-size: .82rem;
         }
 
         .move-page .ui-table th,

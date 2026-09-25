@@ -12,18 +12,32 @@ class SecurityHeaders
     {
         $response = $next($request);
 
+        $connectSources = ["'self'", 'https://cloudflareinsights.com'];
+        $scriptSources = ["'self'", "'unsafe-inline'", 'https://static.cloudflareinsights.com'];
+        $styleSources = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'];
+
+        if (app()->environment('local')) {
+            array_push(
+                $connectSources,
+                'http://localhost:5173', 'http://127.0.0.1:5173',
+                'ws://localhost:5173', 'ws://127.0.0.1:5173'
+            );
+            array_push($scriptSources, 'http://localhost:5173', 'http://127.0.0.1:5173');
+            array_push($styleSources, 'http://localhost:5173', 'http://127.0.0.1:5173');
+        }
+
         $response->headers->set('Content-Security-Policy', implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",
-            "connect-src 'self' https://cloudflareinsights.com",
+            'connect-src '.implode(' ', $connectSources),
             "font-src 'self' https://fonts.gstatic.com data:",
             "form-action 'self'",
             "frame-ancestors 'self' https://portfolio.ryz.my.id http://localhost:* http://127.0.0.1:*",
             "frame-src 'self' https://maps.google.com https://www.google.com",
             "img-src 'self' data: blob: https:",
             "object-src 'none'",
-            "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            'script-src '.implode(' ', $scriptSources),
+            'style-src '.implode(' ', $styleSources),
         ]));
         $response->headers->set('Permissions-Policy', 'camera=(self), geolocation=(self), microphone=()');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');

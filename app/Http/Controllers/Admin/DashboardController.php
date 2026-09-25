@@ -233,7 +233,7 @@ class DashboardController extends Controller
             return ['counts' => [], 'status_distribution' => [], 'trend' => [], 'recent' => collect()];
         }
 
-        return systemCacheRemember("myhep.dashboard.staff_programs.{$staffId}", 60, function () use ($staffId): array {
+        $dashboard = systemCacheRemember("myhep.dashboard.staff_programs.v2.{$staffId}", 60, function () use ($staffId): array {
             $statusCounts = DB::table('programs')
                 ->where('created_by', $staffId)
                 ->selectRaw('status, COUNT(*) as c')
@@ -299,6 +299,7 @@ class DashboardController extends Controller
                 ->orderByDesc('updated_at')
                 ->limit(6)
                 ->get();
+            $recent = $recent->map(fn ($program) => (array) $program)->all();
 
             $totalOwned = array_sum($statusCounts);
 
@@ -319,6 +320,13 @@ class DashboardController extends Controller
                 'recent' => $recent,
             ];
         });
+
+        // Keep cached payloads scalar/array-only; database cache unserialization of
+        // framework Collection objects can produce incomplete objects after deploys.
+        $dashboard['recent'] = collect($dashboard['recent'] ?? [])
+            ->map(fn ($program) => (object) $program);
+
+        return $dashboard;
     }
 
     public function live(): JsonResponse

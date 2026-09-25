@@ -17,7 +17,7 @@ class PasswordResetCodeMailTest extends TestCase
             expiresAt: Carbon::parse('2026-08-09 12:15:00'),
         );
 
-        $mail->assertHasSubject('Your StudentEdge password reset code');
+        $mail->assertHasSubject('Your MyHEP password reset code');
         $mail->assertSeeInHtml('Test Student');
         $mail->assertSeeInHtml('482913');
         $mail->assertSeeInHtml('Keep this code private.');

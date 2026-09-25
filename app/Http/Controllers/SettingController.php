@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Support\AccountSessionManager;
 use App\Support\DualRoleSession;
+use App\Support\SystemFeatures;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,9 @@ class SettingController extends Controller
         $currentGlassTransparency = (int) $request->session()->get('glass_transparency', 40);
         $canAdjustGlass = $this->canAdjustGlass($authUser);
         $canAdjustAccentTheme = $this->canAdjustGlass($authUser);
+        $canToggleLiquidDesign = $this->canToggleLiquidDesign($authUser);
+        $currentLiquidDesignEnabled = $canToggleLiquidDesign
+            && (bool) $request->session()->get('liquid_design_enabled', false);
         $backRoute = ($authUser['role'] ?? null) === 'admin' ? 'admin.dashboard' : 'student.dashboard';
 
         $roleMode = [
@@ -46,6 +50,8 @@ class SettingController extends Controller
             'currentGlassTransparency',
             'canAdjustGlass',
             'canAdjustAccentTheme',
+            'canToggleLiquidDesign',
+            'currentLiquidDesignEnabled',
             'backRoute',
             'roleMode',
             'activeSessions'
@@ -60,10 +66,15 @@ class SettingController extends Controller
             'theme' => ['required', 'in:light,dark'],
             'accent_theme' => ['nullable', 'in:gold,candy_blue,lavender,orchid,violet,pink,red'],
             'glass_transparency' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'liquid_design_enabled' => ['sometimes', 'boolean'],
         ]);
 
         if ((array_key_exists('glass_transparency', $validated) || array_key_exists('accent_theme', $validated))
             && ! $this->canAdjustGlass($authUser)) {
+            abort(403);
+        }
+        if (array_key_exists('liquid_design_enabled', $validated)
+            && ! $this->canToggleLiquidDesign($authUser)) {
             abort(403);
         }
 
@@ -75,6 +86,9 @@ class SettingController extends Controller
         if (array_key_exists('glass_transparency', $validated)) {
             $request->session()->put('glass_transparency', $validated['glass_transparency']);
         }
+        if (array_key_exists('liquid_design_enabled', $validated)) {
+            $request->session()->put('liquid_design_enabled', (bool) $validated['liquid_design_enabled']);
+        }
         app()->setLocale($validated['locale']);
 
         if ($request->expectsJson()) {
@@ -83,6 +97,9 @@ class SettingController extends Controller
                 'theme' => $validated['theme'],
                 'accent_theme' => $validated['accent_theme'] ?? null,
                 'glass_transparency' => $validated['glass_transparency'] ?? null,
+                'liquid_design_enabled' => array_key_exists('liquid_design_enabled', $validated)
+                    ? (bool) $validated['liquid_design_enabled']
+                    : null,
             ]);
         }
 
@@ -94,6 +111,13 @@ class SettingController extends Controller
         return ($authUser['role'] ?? null) === 'student'
             || (($authUser['role'] ?? null) === 'admin'
                 && ($authUser['admin_role'] ?? null) === 'system_admin');
+    }
+
+    private function canToggleLiquidDesign(array $authUser): bool
+    {
+        return ($authUser['role'] ?? null) === 'admin'
+            && ($authUser['admin_role'] ?? null) !== 'system_admin'
+            && app(SystemFeatures::class)->adminLiquidDesignAvailable($authUser['admin_role'] ?? null);
     }
 
     public function updateTheme(Request $request): JsonResponse|RedirectResponse

@@ -11,8 +11,26 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $layout = file_get_contents(__DIR__.'/../../resources/views/layouts/app.blade.php');
 
         $this->assertStringContainsString("'role-student student-mobile-shell'", $layout);
+        $this->assertStringContainsString("'role-admin '", $layout);
+        $this->assertStringContainsString("'role-staff '", $layout);
         $this->assertStringContainsString("'role-system-admin system-admin-shell '", $layout);
+        $this->assertStringContainsString("'liquid-design-enabled '", $layout);
+        $this->assertStringContainsString("'liquid-design-disabled '", $layout);
+        $this->assertStringContainsString('data-ui-role="{{ $uiRole }}"', $layout);
+        $this->assertStringContainsString('data-liquid-design="{{ $liquidDesignEnabled ?', $layout);
         $this->assertStringContainsString("'resources/css/design-system.css', 'resources/css/liquid-glass.css'", $layout);
+    }
+
+    public function test_mobile_page_header_is_compact_and_left_aligned(): void
+    {
+        $styles = file_get_contents(__DIR__.'/../../resources/css/design-system.css');
+        $mobileHeaderRules = substr($styles, strpos($styles, '/* Keep the compact page header and account menu stable on narrow screens.'));
+
+        $this->assertStringContainsString('min-height: 0 !important;', $mobileHeaderRules);
+        $this->assertStringContainsString('display: flex !important;', $mobileHeaderRules);
+        $this->assertStringContainsString('align-items: center !important;', $mobileHeaderRules);
+        $this->assertStringContainsString('justify-content: flex-start !important;', $mobileHeaderRules);
+        $this->assertStringContainsString('width: auto !important;', $mobileHeaderRules);
     }
 
     public function test_student_liquid_css_is_limited_to_transient_navigation_and_drawer_surfaces(): void
@@ -33,8 +51,17 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('stroke: currentColor !important;', $styles);
         $this->assertStringNotContainsString('body.role-student .sdash', $styles);
         $this->assertStringContainsString('body.role-student .app-layout .sidebar.is-open', $styles);
-        $this->assertStringContainsString('backdrop-filter: blur(30px) saturate(145%) !important;', $styles);
-        $this->assertStringContainsString('rgb(17 15 13 / max(.78, var(--glass-opacity))) !important;', $styles);
+        $this->assertStringContainsString('isolation: isolate;', $styles);
+        $this->assertStringContainsString('backdrop-filter: blur(38px) saturate(155%) !important;', $styles);
+        $this->assertStringContainsString('rgb(255 252 247 / max(.96, var(--glass-opacity))) !important;', $styles);
+        $this->assertStringContainsString('rgb(17 15 13 / max(.96, var(--glass-opacity))) !important;', $styles);
+        $this->assertStringContainsString('.sidebar.is-open .sb-header', $styles);
+        $this->assertStringContainsString('rgb(255 252 247 / max(.98, var(--glass-opacity)))', $styles);
+        $this->assertStringContainsString('rgb(17 15 13 / max(.98, var(--glass-opacity)))', $styles);
+        $this->assertStringContainsString('body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar.is-open', $styles);
+        $this->assertStringContainsString('@media (min-width: 1024px)', $styles);
+        $this->assertStringContainsString('rgb(255 252 247 / 1) !important;', $styles);
+        $this->assertStringContainsString('rgb(17 15 13 / 1) !important;', $styles);
         $this->assertStringNotContainsString('body.role-student .topbar', $styles);
         $this->assertStringNotContainsString('body.role-student :is(.liquid-glass-surface, .liquid-glass-card)', $styles);
         $this->assertStringContainsString('+ 2rem)', $styles);
@@ -123,5 +150,41 @@ class LiquidGlassRoleIsolationTest extends TestCase
         $this->assertStringContainsString('selectedGlassTransparency !== undefined', $script);
         $this->assertStringContainsString("document.documentElement.style.setProperty('--student-nav-active-alpha'", $bootstrap);
         $this->assertStringContainsString("document.documentElement.style.setProperty('--glass-opacity'", $bootstrap);
+        $this->assertStringContainsString("document.documentElement.dataset.liquidDesign = liquidDesignEnabled ? 'on' : 'off'", $bootstrap);
+        $this->assertStringContainsString("root.dataset.liquidDesign === 'on'", $script);
+    }
+
+    public function test_admin_glass_preference_is_feature_gated_and_has_a_live_switch(): void
+    {
+        $layout = file_get_contents(__DIR__.'/../../resources/views/layouts/app.blade.php');
+        $bootstrap = file_get_contents(__DIR__.'/../../resources/views/partials/theme_bootstrap.blade.php');
+        $settings = file_get_contents(__DIR__.'/../../resources/views/settings/index.blade.php');
+        $script = file_get_contents(__DIR__.'/../../resources/js/app.js');
+
+        $this->assertStringContainsString("(bool) session('liquid_design_enabled', false)", $layout);
+        $this->assertStringContainsString("(bool) session('liquid_design_enabled', false)", $bootstrap);
+        $this->assertStringContainsString('@if($canToggleLiquidDesign)', $settings);
+        $this->assertStringContainsString('data-liquid-design-toggle', $settings);
+        $this->assertStringContainsString("preferences.set('liquid_design_enabled'", $script);
+        $this->assertStringContainsString("body.classList.toggle('liquid-design-enabled'", $script);
+    }
+
+    public function test_regular_staff_navigation_is_solid_while_student_and_system_admin_share_material_tokens(): void
+    {
+        $styles = file_get_contents(__DIR__.'/../../resources/css/liquid-glass.css');
+        $designSystem = file_get_contents(__DIR__.'/../../resources/css/design-system.css');
+
+        $this->assertStringContainsString('body.role-staff.liquid-design-disabled .mobile-bottom-nav.mobile-bottom-nav--staff', $styles);
+        $this->assertStringContainsString('background: var(--se-material-solid) !important;', $styles);
+        $this->assertStringContainsString('backdrop-filter: none !important;', $styles);
+        $this->assertStringContainsString('--liquid-surface: var(--se-material-glass);', $styles);
+        $this->assertStringContainsString('var(--se-material-nav) !important;', $styles);
+        $this->assertStringContainsString('html[data-liquid-design="on"]', $designSystem);
+        $this->assertStringContainsString('html[data-liquid-design="off"]', $designSystem);
+        $this->assertStringContainsString('--se-material-blur: var(--student-nav-blur, 22px);', $designSystem);
+        $this->assertStringContainsString('body.role-admin.liquid-design-enabled', $styles);
+        $this->assertStringContainsString('body.role-admin.liquid-design-disabled', $styles);
+        $this->assertStringContainsString('--glass-bg: var(--se-material-glass);', $styles);
+        $this->assertStringContainsString('--glass-bg: var(--se-material-solid);', $styles);
     }
 }

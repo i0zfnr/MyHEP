@@ -149,6 +149,92 @@ class AppearanceSettingsTest extends TestCase
             ->assertSessionHas('accent_theme', 'violet');
     }
 
+    public function test_regular_admin_can_turn_liquid_design_on_and_off_when_available(): void
+    {
+        $session = [
+            'auth_user' => [
+                'id' => 2,
+                'role' => 'admin',
+                'admin_role' => 'discipline_admin',
+                'name' => 'Discipline Admin',
+            ],
+        ];
+
+        $this->withSession($session)->postJson('/settings', [
+            'locale' => 'en',
+            'theme' => 'light',
+            'liquid_design_enabled' => true,
+        ])->assertOk()
+            ->assertJson(['liquid_design_enabled' => true])
+            ->assertSessionHas('liquid_design_enabled', true);
+
+        $this->withSession(array_merge($session, ['liquid_design_enabled' => true]))
+            ->postJson('/settings', [
+                'locale' => 'en',
+                'theme' => 'light',
+                'liquid_design_enabled' => false,
+            ])->assertOk()
+            ->assertJson(['liquid_design_enabled' => false])
+            ->assertSessionHas('liquid_design_enabled', false);
+    }
+
+    public function test_regular_admin_settings_page_shows_the_switch_and_uses_the_saved_choice(): void
+    {
+        $authUser = [
+            'id' => 2,
+            'role' => 'admin',
+            'admin_role' => 'discipline_admin',
+            'name' => 'Discipline Admin',
+        ];
+
+        $this->withSession(['auth_user' => $authUser])
+            ->get('/settings')
+            ->assertOk()
+            ->assertSee('data-liquid-design-toggle', false)
+            ->assertSee('data-liquid-design="off"', false)
+            ->assertSee('liquid-design-disabled', false);
+
+        $this->withSession([
+            'auth_user' => $authUser,
+            'liquid_design_enabled' => true,
+        ])->get('/settings')
+            ->assertOk()
+            ->assertSee('data-liquid-design-toggle', false)
+            ->assertSee('data-liquid-design="on"', false)
+            ->assertSee('liquid-design-enabled', false);
+    }
+
+    public function test_regular_admin_cannot_enable_liquid_design_when_system_admin_disables_it(): void
+    {
+        Schema::create('system_features', function (Blueprint $table): void {
+            $table->id();
+            $table->string('feature_key')->unique();
+            $table->boolean('enabled');
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->timestamps();
+        });
+        DB::table('system_features')->insert([
+            'feature_key' => 'admin_liquid_design',
+            'enabled' => false,
+            'updated_by' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->withSession([
+            'auth_user' => [
+                'id' => 2,
+                'role' => 'admin',
+                'admin_role' => 'discipline_admin',
+                'name' => 'Discipline Admin',
+            ],
+        ])->postJson('/settings', [
+            'locale' => 'en',
+            'theme' => 'light',
+            'liquid_design_enabled' => true,
+        ])->assertForbidden();
+    }
+
     public function test_other_admin_roles_cannot_change_beta_visual_settings(): void
     {
         $this->withSession([

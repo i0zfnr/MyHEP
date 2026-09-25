@@ -58,6 +58,18 @@ html[data-theme="light"] {
     --liquid-rim: rgba(255, 255, 255, .94);
     --liquid-depth: rgba(85, 58, 34, .18);
 
+    /* Shared material contract. Students keep selected glass surfaces; admin
+       roles use Liquid Glass only when the system feature and user setting allow it. */
+    --se-material-solid: var(--se-surface);
+    --se-material-raised: var(--se-surface-soft);
+    --se-material-glass: var(--se-surface);
+    --se-material-glass-strong: var(--se-surface);
+    --se-material-nav: var(--se-surface);
+    --se-material-border: var(--se-border);
+    --se-material-shadow: var(--se-shadow-md);
+    --se-material-blur: 0px;
+    --se-material-saturation: 100%;
+
     /* Compatibility with existing page tokens. */
     --primary: var(--se-primary);
     --primary-dark: var(--se-primary-strong);
@@ -108,6 +120,33 @@ html[data-theme="light"] {
     --feather: var(--se-bg);
     --text-primary: var(--se-text);
     --text-secondary: var(--se-text-soft);
+}
+
+html[data-liquid-design="on"] {
+    --se-material-glass: rgb(255 255 255 / var(--glass-opacity, .72));
+    --se-material-glass-strong: rgb(255 255 255 / calc(var(--glass-opacity, .72) + .12));
+    --se-material-nav: rgb(252 250 247 / var(--student-nav-material-alpha, .72));
+    --se-material-border: var(--liquid-stroke);
+    --se-material-shadow: 0 30px 60px rgba(0, 0, 0, .12), 0 10px 25px rgba(200, 169, 106, .08), inset 0 1px rgba(255, 255, 255, .75), inset 0 -1px rgba(0, 0, 0, .05);
+    --se-material-blur: var(--student-nav-blur, 22px);
+    --se-material-saturation: var(--student-nav-saturation, 142%);
+}
+
+html[data-liquid-design="on"][data-theme="dark"] {
+    --se-material-glass: rgb(29 26 23 / var(--glass-opacity, .72));
+    --se-material-glass-strong: rgb(29 26 23 / calc(var(--glass-opacity, .72) + .12));
+    --se-material-nav: rgb(24 23 22 / var(--student-nav-material-alpha, .72));
+}
+
+html[data-liquid-design="off"] {
+    --glass-opacity: 1;
+    --student-nav-material-alpha: 1;
+    --student-nav-active-alpha: 1;
+    --student-nav-reflection-alpha: 0;
+    --student-nav-active-reflection-alpha: 0;
+    --student-nav-blur: 0px;
+    --student-nav-active-blur: 0px;
+    --student-nav-saturation: 100%;
 }
 
 /* Global accent-aware scrollbars for every role and scrollable surface. */
@@ -259,8 +298,10 @@ body.admin-liquid-disabled .page-body :is(input, select, textarea, button, .btn,
     min-height: 44px;
 }
 
-body.admin-liquid-disabled .page-body :is(p, small, .muted, .hint, .help, .stat-label) {
-    color: var(--text-muted) !important;
+/* Provide a readable fallback without overriding component-owned contrast
+   colours on hero banners, reports, cards, and other dark surfaces. */
+body.admin-liquid-disabled .page-body :where(p, small, .muted, .hint, .help, .stat-label) {
+    color: var(--text-muted);
 }
 
 body.admin-liquid-disabled :is(.card, .panel, .ui-card, .portal-card, .stat-card):hover {
@@ -1307,6 +1348,99 @@ body[data-theme="dark"] .se-page-number.is-current {
 .settings-option:has(input:focus-visible) {
     outline: 2px solid var(--se-primary);
     outline-offset: 3px;
+}
+
+.settings-liquid-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 64px;
+    padding: .9rem 1rem;
+    border: 1px solid var(--se-border);
+    border-radius: 14px;
+    background: var(--se-surface-soft);
+    color: var(--se-text);
+    cursor: pointer;
+    transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+}
+
+.settings-liquid-toggle:hover {
+    border-color: var(--se-primary-muted);
+    box-shadow: var(--se-shadow-sm);
+}
+
+.settings-liquid-toggle:has(input:checked) {
+    border-color: var(--se-primary);
+    background: var(--se-primary-soft);
+}
+
+.settings-liquid-toggle-copy strong {
+    display: block;
+    color: var(--se-text);
+    font-size: .88rem;
+}
+
+.settings-liquid-toggle-control {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.settings-liquid-toggle-control input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    opacity: 0;
+}
+
+.settings-liquid-switch {
+    display: inline-flex;
+    align-items: center;
+    width: 52px;
+    height: 30px;
+    padding: 3px;
+    border: 1px solid var(--se-border-strong);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--se-text-muted) 20%, var(--se-surface));
+    transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.settings-liquid-switch > span {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--se-surface);
+    box-shadow: 0 1px 3px rgba(22, 18, 14, .24);
+    transition: transform .18s ease;
+}
+
+.settings-liquid-toggle-control input:checked + .settings-liquid-switch {
+    border-color: var(--se-primary-strong);
+    background: var(--se-primary);
+}
+
+.settings-liquid-toggle-control input:checked + .settings-liquid-switch > span {
+    transform: translateX(22px);
+}
+
+.settings-liquid-toggle-control input:focus-visible + .settings-liquid-switch {
+    outline: 3px solid color-mix(in srgb, var(--se-primary) 64%, white);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .settings-liquid-toggle,
+    .settings-liquid-switch,
+    .settings-liquid-switch > span {
+        transition: none;
+    }
 }
 
 .settings-option-line {
@@ -2533,7 +2667,10 @@ body > .card {
     }
 
     .app-layout .page-header-inner {
-        display: block !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        min-height: 0 !important;
     }
 
     .app-layout .page-header-left {
@@ -2541,14 +2678,15 @@ body > .card {
         flex-direction: column !important;
         align-items: flex-start !important;
         gap: .08rem !important;
-        width: 100%;
+        width: auto !important;
+        flex: 0 1 auto !important;
         min-width: 0;
         overflow: visible !important;
     }
 
     .app-layout .page-header-title {
         display: block;
-        width: 100%;
+        width: auto !important;
         min-width: 0;
     }
 
@@ -4387,21 +4525,26 @@ body[data-theme="dark"] .se-notification-panel {
 /* Keep the compact page header and account menu stable on narrow screens. */
 @media (max-width: 767px) {
     .app-layout .page-header {
-        min-height: 54px !important;
+        min-height: 0 !important;
         height: auto !important;
-        padding: .64rem .95rem .68rem !important;
+        padding: .52rem .95rem !important;
         width: calc(100% - 1rem) !important;
-        margin: .6rem auto 0 !important;
-        border-radius: 16px !important;
+        margin: .4rem auto 0 !important;
+        border-radius: 14px !important;
         overflow: visible !important;
     }
 
     .app-layout .page-header-inner {
-        align-items: flex-start !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        min-height: 0 !important;
         gap: .45rem !important;
     }
 
     .app-layout .page-header-left {
+        width: auto !important;
+        flex: 0 1 auto !important;
         min-width: 0;
         overflow: visible !important;
     }
@@ -4752,6 +4895,23 @@ body[data-theme="dark"] .se-notification-panel {
         min-width: 680px !important;
         width: max-content !important;
         max-width: none !important;
+    }
+
+    /* Card layouts own their width; only tabular layouts need horizontal scrolling. */
+    @media (max-width: 760px) {
+        .page-body .sch-table {
+            min-width: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page-body .docs-table {
+            min-width: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
     }
 
     .page-body :where(th, td) {
@@ -5780,7 +5940,7 @@ body[data-theme="dark"] .glass-range::-moz-range-thumb {
 }
 
 @media (max-width: 767px) {
-    .page-body :where(.ui-card, .card, .portal-card, .stat-card, .data-card, .panel, .settings-panel) {
+    html[data-liquid-design="on"] .page-body :where(.ui-card, .card, .portal-card, .stat-card, .data-card, .panel, .settings-panel) {
         backdrop-filter: blur(14px) saturate(135%) !important;
         -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
     }
@@ -5798,33 +5958,33 @@ body[data-theme="dark"] .glass-range::-moz-range-thumb {
 
 /* Apply the user-selected material strength to shared application chrome. */
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-    .app-layout .sidebar {
+    html[data-liquid-design="on"] .app-layout .sidebar {
         background:
             linear-gradient(180deg, rgb(255 255 255 / .18), transparent 58%),
             radial-gradient(circle at top left, rgb(201 174 149 / .12), transparent 34%),
             var(--liquid-shell) !important;
     }
 
-    body[data-theme="dark"] .app-layout .sidebar {
+    html[data-liquid-design="on"] body[data-theme="dark"] .app-layout .sidebar {
         background:
             linear-gradient(180deg, rgb(255 255 255 / .07), transparent 58%),
             radial-gradient(circle at top left, rgb(215 191 168 / .09), transparent 34%),
             var(--liquid-shell) !important;
     }
 
-    .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) {
+    html[data-liquid-design="on"] .app-layout :is(.topbar, .mobile-more-sheet, .header-user) {
         background:
             linear-gradient(118deg, rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .24)) 0%, rgb(255 255 255 / calc(.02 + var(--glass-opacity) * .08)) 38%, transparent 72%),
             var(--liquid-nav) !important;
     }
 
-    body[data-theme="dark"] .app-layout :is(.topbar, .mobile-bottom-nav, .mobile-more-sheet, .header-user) {
+    html[data-liquid-design="on"] body[data-theme="dark"] .app-layout :is(.topbar, .mobile-more-sheet, .header-user) {
         background:
             linear-gradient(118deg, rgb(255 255 255 / calc(.04 + var(--glass-opacity) * .12)) 0%, rgb(255 255 255 / calc(.015 + var(--glass-opacity) * .04)) 38%, transparent 72%),
             var(--liquid-nav) !important;
     }
 
-    .app-layout .topbar :is(.btn-ham, .topbar-brand-mark, .se-notification-trigger--topbar, .header-user) {
+    html[data-liquid-design="on"] .app-layout .topbar :is(.btn-ham, .topbar-brand-mark, .se-notification-trigger--topbar, .header-user) {
         border-color: rgb(255 255 255 / calc(var(--glass-opacity) + .18)) !important;
         background:
             linear-gradient(145deg, rgb(255 255 255 / calc(var(--glass-opacity) + .16)), rgb(255 248 239 / calc(var(--glass-opacity) * .72))),
@@ -5836,7 +5996,7 @@ body[data-theme="dark"] .glass-range::-moz-range-thumb {
         -webkit-backdrop-filter: blur(22px) saturate(155%) !important;
     }
 
-    body[data-theme="dark"] .app-layout .topbar :is(.btn-ham, .topbar-brand-mark, .se-notification-trigger--topbar, .header-user) {
+    html[data-liquid-design="on"] body[data-theme="dark"] .app-layout .topbar :is(.btn-ham, .topbar-brand-mark, .se-notification-trigger--topbar, .header-user) {
         border-color: rgb(231 211 168 / calc(.12 + var(--glass-opacity) * .16)) !important;
         background:
             linear-gradient(145deg, rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .12)), transparent 62%),
@@ -5846,15 +6006,15 @@ body[data-theme="dark"] .glass-range::-moz-range-thumb {
             inset 0 1px 0 rgb(255 255 255 / calc(.08 + var(--glass-opacity) * .14)) !important;
     }
 
-    .app-layout .header-user-menu,
-    :is(.confirm-dialog, .se-media-dialog, .se-notification-panel, .se-filter-sheet) {
+    html[data-liquid-design="on"] .app-layout .header-user-menu,
+    html[data-liquid-design="on"] :is(.confirm-dialog, .se-media-dialog, .se-notification-panel, .se-filter-sheet) {
         background:
             linear-gradient(145deg, rgb(255 255 255 / .18), transparent 48%),
             var(--liquid-popup) !important;
     }
 
-    body[data-theme="dark"] .app-layout .header-user-menu,
-    body[data-theme="dark"] :is(.confirm-dialog, .se-media-dialog, .se-notification-panel, .se-filter-sheet) {
+    html[data-liquid-design="on"] body[data-theme="dark"] .app-layout .header-user-menu,
+    html[data-liquid-design="on"] body[data-theme="dark"] :is(.confirm-dialog, .se-media-dialog, .se-notification-panel, .se-filter-sheet) {
         background:
             linear-gradient(145deg, rgb(255 255 255 / .10), transparent 48%),
             var(--liquid-popup) !important;
@@ -5862,11 +6022,11 @@ body[data-theme="dark"] .glass-range::-moz-range-thumb {
 }
 
 /* Page surfaces share the same live material while retaining their own borders and shadows. */
-.page-body :is(.ui-card, .card, .portal-card, .stat-card, .data-card, .panel, .settings-panel, .monitor-card, .monitor-kpi, .bugs-card, .settings-option, .ui-stat-card) {
+html[data-liquid-design="on"] .page-body :is(.ui-card, .card, .portal-card, .stat-card, .data-card, .panel, .settings-panel, .monitor-card, .monitor-kpi, .bugs-card, .settings-option, .ui-stat-card) {
     background: var(--liquid-surface-strong) !important;
 }
 
-.page-body :is(.ui-card-head, .table-wrap thead th, .ui-table-wrap thead th) {
+html[data-liquid-design="on"] .page-body :is(.ui-card-head, .table-wrap thead th, .ui-table-wrap thead th) {
     background: var(--liquid-shell-strong) !important;
 }
 
@@ -6532,7 +6692,7 @@ body[data-theme="dark"].admin-liquid-disabled {
     --text-muted: #d2c8be;
 }
 
-body.admin-liquid-disabled :is(.topbar, .sidebar, .page-header, .sb-user, .header-control, .header-user, .ui-card, .card, .panel, .portal-card, .stat-card, .data-card, .settings-panel, .settings-intro, .settings-option, .account-card, .manage-form-card, .laptop-card, .laptop-panel) {
+body.admin-liquid-disabled :is(.topbar, .sidebar, .page-header, .sb-user, .header-control, .header-user, .header-user-menu, .mobile-bottom-nav, .mobile-more-sheet, .ui-card, .card, .panel, .portal-card, .stat-card, .data-card, .settings-panel, .settings-intro, .settings-option, .account-card, .manage-form-card, .laptop-card, .laptop-panel) {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background-color: var(--surface) !important;
@@ -6569,7 +6729,7 @@ body[data-theme="dark"] .page-body .adash :is(.monitor-card,.monitor-kpi) {
 /* The open mobile drawer has a higher-specificity liquid background. Keep the
    accessibility fallback fully opaque so dashboard content cannot bleed
    through the navigation when Liquid Glass is disabled. */
-body.admin-liquid-disabled .app-layout :is(.sidebar, .sidebar.is-open, .topbar, .page-header, .sb-user) {
+body.admin-liquid-disabled .app-layout :is(.sidebar, .sidebar.is-open, .topbar, .page-header, .sb-user, .mobile-bottom-nav, .mobile-more-sheet) {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: var(--surface) !important;
@@ -6586,8 +6746,8 @@ body[data-theme="dark"].admin-liquid-disabled .app-layout .sidebar.is-open {
     box-shadow: 14px 0 38px rgba(0, 0, 0, .48) !important;
 }
 
-body.admin-liquid-disabled .app-layout :is(.sidebar, .topbar, .page-header, .sb-user)::before,
-body.admin-liquid-disabled .app-layout :is(.sidebar, .topbar, .page-header, .sb-user)::after {
+body.admin-liquid-disabled .app-layout :is(.sidebar, .topbar, .page-header, .sb-user, .mobile-bottom-nav, .mobile-more-sheet)::before,
+body.admin-liquid-disabled .app-layout :is(.sidebar, .topbar, .page-header, .sb-user, .mobile-bottom-nav, .mobile-more-sheet)::after {
     display: none !important;
 }
 

@@ -149,7 +149,12 @@
     $studentAiHelperEnabled = $systemFeatures->enabled('student_ai_helper');
     $lecturerAiHelperEnabled = $systemFeatures->enabled('lecturer_ai_helper');
     $adminAiHelperEnabled = $adminScope === 'system_admin' || $systemFeatures->enabled('admin_ai_helper');
-    $adminLiquidDesignEnabled = ! $isAdmin || $systemFeatures->adminLiquidDesignEnabled($adminScope);
+    $adminLiquidDesignEnabled = $isAdmin && $systemFeatures->adminLiquidDesignEnabled(
+        $adminScope,
+        (bool) session('liquid_design_enabled', false)
+    );
+    $liquidDesignEnabled = $isStudent || $adminLiquidDesignEnabled;
+    $uiRole = $isStudent ? 'student' : ($isAdmin && $adminScope === 'system_admin' ? 'system-admin' : ($isAdmin ? 'staff' : 'public'));
     $studentMoreActive = request()->routeIs('student.movements.index')
         || request()->routeIs('student.documents.*')
         || request()->routeIs('student.vehicle-stickers.*')
@@ -158,6 +163,8 @@
         || request()->routeIs('settings.*');
     $bodyClasses = trim(
         ($isStudent ? 'role-student student-mobile-shell' : '') . ' ' .
+        ($isAdmin ? 'role-admin ' : '') .
+        ($isAdmin && $adminScope !== 'system_admin' ? 'role-staff ' : '') .
         ($showStaffBottomNav ? 'role-qr-staff ' : '') .
         ($isStudent && request()->routeIs('student.scholarships.index') ? 'student-liquid-aid' : '') . ' ' .
         ($isStudent && request()->routeIs('student.offenses.index') ? 'student-liquid-fines' : '') . ' ' .
@@ -166,12 +173,13 @@
         (request()->routeIs('student.movements.scan', 'admin.laptops.scan') ? 'student-scan-mode ' : '') .
         ($isStudent && $studentOnDashboard ? 'student-dashboard-mobile-sidebar ' : '') .
         ($isAdmin && $adminScope === 'system_admin' ? 'role-system-admin system-admin-shell ' : '') .
-        (! $adminLiquidDesignEnabled ? 'admin-liquid-disabled ' : '') .
+        ($liquidDesignEnabled ? 'liquid-design-enabled ' : 'liquid-design-disabled ') .
+        ($isAdmin && ! $adminLiquidDesignEnabled ? 'admin-liquid-disabled ' : '') .
         ($adminOnDashboard ? 'admin-dashboard-page ' : '') .
         (request()->routeIs('admin.ai-helper.*', 'student.ai-helper.*', 'lecturer.ai-helper.*') ? 'admin-ai-helper-page ' : '')
     );
 @endphp
-<body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" class="{{ $bodyClasses }}">
+<body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" data-ui-role="{{ $uiRole }}" data-liquid-design="{{ $liquidDesignEnabled ? 'on' : 'off' }}" class="{{ $bodyClasses }}">
 <div class="app-layout">
 
     @if($showSidebar)
