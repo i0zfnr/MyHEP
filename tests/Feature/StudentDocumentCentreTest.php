@@ -20,6 +20,10 @@ class StudentDocumentCentreTest extends TestCase
             $table->id();
             $table->string('full_name');
             $table->string('matric_no')->nullable();
+            $table->string('ic_no')->nullable();
+            $table->string('program')->nullable();
+            $table->string('semester')->nullable();
+            $table->string('academic_session')->nullable();
             $table->string('photo')->nullable();
         });
         Schema::create('admins', function (Blueprint $table): void {
@@ -76,8 +80,8 @@ class StudentDocumentCentreTest extends TestCase
         });
 
         DB::table('students')->insert([
-            ['id' => 1, 'full_name' => 'First Student', 'matric_no' => 'PB001', 'photo' => 'students/first.jpg'],
-            ['id' => 2, 'full_name' => 'Second Student', 'matric_no' => 'PB002', 'photo' => 'students/second.jpg'],
+            ['id' => 1, 'full_name' => 'First Student', 'matric_no' => '34DBF25F1001', 'ic_no' => '070101030001', 'program' => 'DBF', 'semester' => '3', 'academic_session' => 'SESI I: 2025/2026', 'photo' => 'students/first.jpg'],
+            ['id' => 2, 'full_name' => 'Second Student', 'matric_no' => '34DIT25F1002', 'ic_no' => '070202030002', 'program' => 'DIT', 'semester' => '2', 'academic_session' => 'SESI I: 2025/2026', 'photo' => 'students/second.jpg'],
         ]);
         DB::table('student_scholarship_status_forms')->insert([
             ['student_id' => 1, 'has_scholarship' => 0, 'submitted_at' => now()],
@@ -200,6 +204,113 @@ class StudentDocumentCentreTest extends TestCase
         $this->studentSession(1)->get('/student/documents')
             ->assertStatus(503)
             ->assertSee('currently unavailable');
+    }
+
+    public function test_student_can_review_prefilled_data_and_generate_study_verification_pdf(): void
+    {
+        $this->studentSession(1)->get('/student/documents/study-verification-letter')
+            ->assertOk()
+            ->assertSee('FIRST STUDENT')
+            ->assertSee('070101-03-0001')
+            ->assertSee('34DBF25F1001')
+            ->assertSee('DIPLOMA REKABENTUK FESYEN BATIK')
+            ->assertSee('SESI I: 2025/2026')
+            ->assertSee('Generate DOCX Letter')
+            ->assertSee('Generate PDF Letter');
+
+        $response = $this->post('/student/documents/study-verification-letter', [
+            'study_start_session' => 'SESI I: 2025/2026',
+            'study_end_session' => 'SESI II: 2027/2028',
+            'study_duration' => '3 TAHUN',
+            'current_study_year' => '2026',
+            'current_semester' => 3,
+            'sponsorship_details' => 'TIADA',
+            'details_confirmed' => '1',
+            'format' => 'pdf',
+        ]);
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->assertStringContainsString('attachment; filename="Surat-Pengesahan-Pengajian-34DBF25F1001.pdf"', (string) $response->headers->get('Content-Disposition'));
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
+    }
+
+    public function test_student_can_generate_study_verification_docx(): void
+    {
+        $response = $this->studentSession(1)->post('/student/documents/study-verification-letter', [
+            'study_start_session' => 'SESI I: 2025/2026',
+            'study_end_session' => 'SESI II: 2027/2028',
+            'study_duration' => '3 TAHUN',
+            'current_study_year' => '2026',
+            'current_semester' => 3,
+            'sponsorship_details' => 'TIADA',
+            'details_confirmed' => '1',
+            'format' => 'docx',
+        ]);
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->assertStringContainsString('attachment; filename="Surat-Pengesahan-Pengajian-34DBF25F1001.docx"', (string) $response->headers->get('Content-Disposition'));
+        $this->assertStringStartsWith('PK', $response->getContent());
+
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'myhep-docx-test-');
+        $this->assertNotFalse($temporaryPath);
+        file_put_contents($temporaryPath, $response->getContent());
+
+        try {
+            $archive = new \ZipArchive();
+            $this->assertTrue($archive->open($temporaryPath) === true);
+            $this->assertNotFalse($archive->locateName('[Content_Types].xml'));
+            $this->assertNotFalse($archive->locateName('word/document.xml'));
+            $this->assertNotFalse($archive->locateName('word/styles.xml'));
+            $documentXml = (string) $archive->getFromName('word/document.xml');
+            $archive->close();
+        } finally {
+            @unlink($temporaryPath);
+        }
+
+        $documentText = html_entity_decode(strip_tags($documentXml), ENT_QUOTES | ENT_XML1, 'UTF-8');
+        $this->assertStringContainsString('FIRST STUDENT', $documentText);
+        $this->assertStringContainsString('070101-03-0001', $documentText);
+        $this->assertStringContainsString('34DBF25F1001', $documentText);
+        $this->assertStringContainsString('SESI II: 2027/2028', $documentText);
+        $this->assertStringContainsString('AZLAN BIN ALI', $documentText);
+    }
+
+    public function test_study_verification_letter_requires_manual_details_and_confirmation(): void
+    {
+        $this->studentSession(1)->post('/student/documents/study-verification-letter', [
+            'study_start_session' => 'SESI I: 2025/2026',
+            'study_end_session' => '',
+            'study_duration' => '3 TAHUN',
+            'current_study_year' => '2026',
+            'current_semester' => 13,
+            'sponsorship_details' => '',
+            'format' => 'pdf',
+        ])->assertSessionHasErrors([
+            'study_end_session',
+            'current_semester',
+            'sponsorship_details',
+            'details_confirmed',
+        ]);
+    }
+
+    public function test_incomplete_locked_student_record_cannot_generate_study_verification_letter(): void
+    {
+        DB::table('students')->where('id', 1)->update(['ic_no' => null]);
+
+        $this->studentSession(1)->post('/student/documents/study-verification-letter', [
+            'study_start_session' => 'SESI I: 2025/2026',
+            'study_end_session' => 'SESI II: 2027/2028',
+            'study_duration' => '3 TAHUN',
+            'current_study_year' => '2026',
+            'current_semester' => 3,
+            'sponsorship_details' => 'TIADA',
+            'details_confirmed' => '1',
+            'format' => 'pdf',
+        ])->assertSessionHasErrors('student_record');
     }
 
     public function test_scholarship_admin_can_download_contextual_offer_letter(): void

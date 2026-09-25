@@ -8,10 +8,22 @@
     <h2>{{ __('Document Centre') }}</h2>
 @endsection
 
+@push('styles')
+    @vite('resources/css/student-verification-letter.css')
+@endpush
+
 @section('content')
 <div class="docs-shell">
     @if(session('success'))<div class="se-feedback se-feedback--success">{{ session('success') }}</div>@endif
     @if(isset($errors) && $errors->any())<div class="se-feedback se-feedback--error">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+
+    <section class="svl-launch-card">
+        <div class="svl-launch-copy">
+            <div class="svl-launch-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h6M9 16h6"/></svg></div>
+            <div><strong>{{ __('Generate Study Verification Letter') }}</strong><p>{{ __('Review your MyHEP details, complete the study information, and download the official PDF without waiting for manual preparation.') }}</p></div>
+        </div>
+        <a class="ui-btn primary" href="{{ route('student.documents.study-verification-letter') }}">{{ __('Generate Letter') }}</a>
+    </section>
 
     @if(!empty($isSem3Or5))
         <section class="ui-card" style="padding:16px 20px;border-radius:16px;border:1px solid @if(!$insuranceDoc || $insuranceDoc->status === 'rejected') #fca5a5;background:#fff5f5; @elseif($insuranceDoc->status === 'pending') #fef08a;background:#fffbeb; @else #bbf7d0;background:#f0fdf4; @endif">

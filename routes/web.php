@@ -154,6 +154,12 @@ Route::get('/student/documents', [StudentDocumentController::class, 'index'])
 Route::post('/student/documents', [StudentDocumentController::class, 'store'])
     ->middleware(['auth.session:student', 'feature.enabled:document_centre', 'throttle:10,1'])
     ->name('student.documents.store');
+Route::get('/student/documents/study-verification-letter', [StudentDocumentController::class, 'studyVerificationLetter'])
+    ->middleware(['auth.session:student', 'feature.enabled:document_centre'])
+    ->name('student.documents.study-verification-letter');
+Route::post('/student/documents/study-verification-letter', [StudentDocumentController::class, 'generateStudyVerificationLetter'])
+    ->middleware(['auth.session:student', 'feature.enabled:document_centre', 'throttle:5,10'])
+    ->name('student.documents.study-verification-letter.generate');
 Route::get('/student/documents/{id}/download', [StudentDocumentController::class, 'download'])
     ->middleware(['auth.session:student', 'feature.enabled:document_centre'])
     ->name('student.documents.download');

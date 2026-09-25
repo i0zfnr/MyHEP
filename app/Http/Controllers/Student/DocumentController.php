@@ -3,14 +3,19 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Services\StudentStudyVerificationLetter;
 use App\Support\StudentDocumentOptions;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentController extends Controller
@@ -99,6 +104,85 @@ class DocumentController extends Controller
         return redirect()->route('student.documents.index')->with('success', __('Document uploaded for review.'));
     }
 
+    public function studyVerificationLetter(StudentStudyVerificationLetter $letter): View
+    {
+        $student = $this->student();
+
+        return view('student.documents.study-verification-letter', [
+            'student' => $student,
+            'identity' => $letter->identity($student),
+            'defaults' => $letter->defaults($student),
+        ]);
+    }
+
+    public function generateStudyVerificationLetter(
+        Request $request,
+        StudentStudyVerificationLetter $letter
+    ): Response {
+        $validated = $request->validate([
+            'study_start_session' => ['required', 'string', 'max:40', 'regex:/^[\pL\pN\s:\/.,()\-]+$/u'],
+            'study_end_session' => ['required', 'string', 'max:40', 'regex:/^[\pL\pN\s:\/.,()\-]+$/u'],
+            'study_duration' => ['required', 'string', 'max:50', 'regex:/^[\pL\pN\s.,()\-]+$/u'],
+            'current_study_year' => ['required', 'string', 'max:20', 'regex:/^[\pL\pN\s.\-]+$/u'],
+            'current_semester' => ['required', 'integer', 'min:1', 'max:12'],
+            'sponsorship_details' => ['required', 'string', 'max:500'],
+            'details_confirmed' => ['accepted'],
+            'format' => ['required', Rule::in(['docx', 'pdf'])],
+        ], [
+            'details_confirmed.accepted' => __('Please confirm that the information is correct before generating the letter.'),
+        ]);
+
+        $student = $this->student();
+        if (collect($letter->identity($student))->contains(fn (string $value): bool => blank($value))) {
+            throw ValidationException::withMessages([
+                'student_record' => __('Your MyHEP student record is incomplete. Please contact HEP before generating this letter.'),
+            ]);
+        }
+        $document = $letter->documentData($student, $validated);
+
+        if ($validated['format'] === 'docx') {
+            auditLog(
+                'student_documents.generate_study_verification_letter',
+                'students',
+                (int) $student->id,
+                'Generated DOCX study verification letter '.$document['reference_number']
+            );
+
+            return response($letter->docx($document), 200, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'Content-Disposition' => 'attachment; filename="'.$letter->filename($student, 'docx').'"',
+                'Cache-Control' => 'private, no-store, max-age=0',
+                'Pragma' => 'no-cache',
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
+        }
+
+        $options = new Options();
+        $options->set('defaultFont', 'Arial');
+        $options->set('isRemoteEnabled', false);
+        $options->set('isHtml5ParserEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->setPaper('a4', 'portrait');
+        $dompdf->loadHtml(view('student.documents.study-verification-letter-pdf', $document)->render());
+        $dompdf->render();
+
+        auditLog(
+            'student_documents.generate_study_verification_letter',
+            'students',
+            (int) $student->id,
+            'Generated PDF study verification letter '.$document['reference_number']
+        );
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$letter->filename($student, 'pdf').'"',
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'Pragma' => 'no-cache',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     public function download(int $id): StreamedResponse
     {
         $document = $this->ownedDocument($id);
@@ -130,6 +214,14 @@ class DocumentController extends Controller
             ->where('id', $id)
             ->where('student_id', session('auth_user.id'))
             ->first();
+    }
+
+    private function student(): object
+    {
+        $student = DB::table('students')->where('id', (int) session('auth_user.id'))->first();
+        abort_unless($student, 404);
+
+        return $student;
     }
 
     private function safeFilename(string $filename): string
