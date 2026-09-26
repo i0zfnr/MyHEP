@@ -99,16 +99,17 @@
             </form>
         </div>
 
+        <p class="ins-table-scroll-hint">{{ __('Swipe table horizontally to view all columns.') }}</p>
         <div class="ins-table-wrap" data-lenis-prevent>
             <table class="ins-table">
                 <thead>
                     <tr>
                         <th class="ins-col-no">#</th>
-                        <th>{{ __('Pelajar') }}</th>
-                        <th>{{ __('Semester') }}</th>
-                        <th>{{ __('Status Bayaran') }}</th>
-                        <th>{{ __('Resit Bayaran') }}</th>
-                        <th>{{ __('Tarikh / Disemak Oleh') }}</th>
+                        <th class="ins-col-student">{{ __('Pelajar') }}</th>
+                        <th class="ins-col-semester">{{ __('Semester') }}</th>
+                        <th class="ins-col-status">{{ __('Status Bayaran') }}</th>
+                        <th class="ins-col-receipt">{{ __('Resit Bayaran') }}</th>
+                        <th class="ins-col-review">{{ __('Tarikh / Disemak Oleh') }}</th>
                         <th class="ins-col-actions">{{ __('Tindakan') }}</th>
                     </tr>
                 </thead>
@@ -118,27 +119,27 @@
                             <td class="ins-row-no">
                                 {{ $students->firstItem() + $index }}
                             </td>
-                            <td>
+                            <td class="ins-col-student">
                                 <strong class="ins-student-name">{{ $s->full_name }}</strong>
                                 <div class="ins-student-meta">
                                     {{ $s->matric_no }} &middot; {{ $s->ic_no }} &middot; <span>{{ $s->program }}</span> ({{ $s->class_name ?: '-' }})
                                 </div>
                             </td>
-                            <td>
+                            <td class="ins-col-semester">
                                 <span class="ins-badge sem">Sem {{ $s->semester }}</span>
                             </td>
-                            <td>
+                            <td class="ins-col-status">
                                 @if($s->doc_status === 'approved')
-                                    <span class="ins-badge approved">✓ {{ __('Disahkan') }}</span>
+                                    <span class="ins-badge approved"><svg class="ins-status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>{{ __('Disahkan') }}</span>
                                 @elseif($s->doc_status === 'pending')
-                                    <span class="ins-badge pending">⏳ {{ __('Menunggu Semakan') }}</span>
+                                    <span class="ins-badge pending"><svg class="ins-status-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ __('Menunggu Semakan') }}</span>
                                 @elseif($s->doc_status === 'rejected')
-                                    <span class="ins-badge rejected">✕ {{ __('Ditolak') }}</span>
+                                    <span class="ins-badge rejected"><svg class="ins-status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>{{ __('Ditolak') }}</span>
                                 @else
-                                    <span class="ins-badge unpaid">● {{ __('Belum Bayar') }}</span>
+                                    <span class="ins-badge unpaid"><svg class="ins-status-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>{{ __('Belum Bayar') }}</span>
                                 @endif
                             </td>
-                            <td>
+                            <td class="ins-col-receipt">
                                 @if($s->doc_id)
                                     <a href="{{ route('admin.insurance.download-receipt', $s->doc_id) }}" class="ins-btn ins-btn-compact" title="{{ __('Muat turun resit') }}">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -153,7 +154,7 @@
                                     <span class="ins-muted">{{ __('Tiada fail dimuat naik') }}</span>
                                 @endif
                             </td>
-                            <td>
+                            <td class="ins-col-review">
                                 @if($s->doc_created_at)
                                     <div class="ins-review-date">
                                         {{ substr((string)$s->doc_created_at, 0, 10) }}
@@ -238,10 +239,10 @@
                 <div style="display:flex;gap:10px;justify-content:flex-end;">
                     <button type="button" class="ins-btn" onclick="closeReviewModal()">{{ __('Batal') }}</button>
                     <button type="submit" class="ins-btn danger" onclick="document.getElementById('modalStatusInput').value='rejected'">
-                        {{ __('✕ Tolak Resit') }}
+                        <svg class="ins-status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>{{ __('Tolak Resit') }}
                     </button>
                     <button type="submit" class="ins-btn success" onclick="document.getElementById('modalStatusInput').value='approved'">
-                        {{ __('✓ Sahkan Bayaran') }}
+                        <svg class="ins-status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>{{ __('Sahkan Bayaran') }}
                     </button>
                 </div>
             </div>

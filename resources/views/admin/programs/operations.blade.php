@@ -250,7 +250,7 @@
 
                 <!-- Attendance Action Options -->
                 @if($canManageAttendance)
-                    <div style="background: var(--bg-alt, #faf7f2); border: 1px solid var(--border); border-radius: 12px; padding: 1.15rem; margin-bottom: 1.25rem;">
+                    <div class="pmr-mode-panel pmr-operation-options" style="margin-bottom: 1.25rem;">
                         <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.65rem;">
                             {{ __('Attendance Action Options:') }}
                         </span>
@@ -348,7 +348,7 @@
 
                 <!-- Publishing Mode Options -->
                 @if($canManageAttendance)
-                    <div style="background: var(--bg-alt, #faf7f2); border: 1px solid var(--border); border-radius: 12px; padding: 1.15rem; margin-bottom: 1.25rem;">
+                    <div class="pmr-mode-panel pmr-operation-options" style="margin-bottom: 1.25rem;">
                         <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.65rem;">
                             {{ __('Questionnaire Publishing Options:') }}
                         </span>
