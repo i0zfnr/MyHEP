@@ -597,6 +597,7 @@ const syncPwaDisplayMode = () => {
 
     const standalone = isStandaloneMode();
     body.classList.toggle('pwa-standalone', standalone);
+    document.documentElement.classList.toggle('pwa-standalone', standalone);
     body.classList.toggle(
         'has-student-bottom-nav',
         standalone && (
@@ -1826,7 +1827,7 @@ if ('serviceWorker' in navigator) {
             return;
         }
 
-        navigator.serviceWorker.register('/sw.js?v=14').catch(() => {
+        navigator.serviceWorker.register('/sw.js?v=15').catch(() => {
             // Keep the app usable even if PWA registration fails.
         });
     });

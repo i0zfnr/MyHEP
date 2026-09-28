@@ -28,6 +28,19 @@ body:is(.role-student, .role-qr-staff) {
     --student-nav-bottom-offset: 0px;
 }
 
+/* In an installed PWA, place the glass surface through the bottom safe-area
+   inset. The navigation items remain clear of the home indicator because the
+   same inset is included in the bar's bottom padding below. */
+@media (display-mode: standalone) {
+    body:is(.role-student, .role-qr-staff) {
+        --student-nav-bottom-offset: calc(-1 * var(--safe-bottom));
+    }
+}
+
+html.pwa-standalone body:is(.role-student, .role-qr-staff) {
+    --student-nav-bottom-offset: calc(-1 * var(--safe-bottom));
+}
+
 body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
     --student-nav-text: #fffaf5;
     --student-nav-muted: #bdb2a8;
