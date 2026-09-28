@@ -513,10 +513,13 @@
                 'pending_tpsa' => __(':branch review', ['branch' => $reportBranchLabel]),
                 'pending_director' => __('Polytechnic Director review'),
                 'pending_kj_hep' => __('KJ HEP acceptance'),
-                'archived' => __('Archived under KJ HEP'),
             ];
             $operationStageKeys = array_keys($operationStages);
-            $operationCurrentKey = $operationReportStatus === 'rejected' ? 'draft' : $operationReportStatus;
+            $operationCurrentKey = match ($operationReportStatus) {
+                'rejected' => 'draft',
+                'archived' => 'pending_kj_hep',
+                default => $operationReportStatus,
+            };
             $operationCurrentIndex = array_search($operationCurrentKey, $operationStageKeys, true);
         @endphp
         <div class="pmr-report-flow" aria-label="{{ __('Post-program report workflow') }}">
@@ -524,7 +527,8 @@
                 @php
                     $stageIndex = array_search($stageKey, $operationStageKeys, true);
                     $stageState = $operationReportStatus === 'not_generated' ? 'waiting'
-                        : ($stageIndex < $operationCurrentIndex ? 'complete' : ($stageIndex === $operationCurrentIndex ? 'current' : 'waiting'));
+                        : ($operationReportStatus === 'archived' && $stageIndex <= $operationCurrentIndex ? 'complete'
+                            : ($stageIndex < $operationCurrentIndex ? 'complete' : ($stageIndex === $operationCurrentIndex ? 'current' : 'waiting')));
                     $stageText = $stageState === 'complete' ? __('Completed')
                         : ($stageState === 'current' ? ($operationReportStatus === 'rejected' ? __('Returned for correction') : __('Current stage')) : __('Waiting'));
                 @endphp
@@ -549,6 +553,54 @@
                 <div class="pmr-source-item {{ $sourceAttendance > 0 ? 'is-ready' : '' }}"><span>{{ __('Attendance') }}</span><strong>{{ trans_choice(':count record|:count records', $sourceAttendance, ['count' => $sourceAttendance]) }}</strong></div>
                 <div class="pmr-source-item {{ $sourceResponses > 0 ? 'is-ready' : '' }}"><span>{{ __('Questionnaire') }}</span><strong>{{ $program->questionnaire_enabled ? trans_choice(':count response|:count responses', $sourceResponses, ['count' => $sourceResponses]) : __('Not required') }}</strong></div>
             </div>
+        @endif
+
+        <details class="pmr-mode-panel" style="margin:0 0 1rem;">
+            <summary style="font-weight:750;cursor:pointer;">{{ __('Approval signature') }} @if($currentStaffSignature)<span class="pmr-badge active">{{ __('Saved') }}</span>@elseif($currentSignatureOptional)<span class="pmr-badge">{{ __('Optional') }}</span>@else<span class="pmr-badge pending_tpsa">{{ __('Required') }}</span>@endif</summary>
+            <p>{{ __('Upload a clear PNG or JPG image of your signature. It will be captured on the report when you approve it.') }}</p>
+            <form method="post" action="{{ route('admin.programs.approval-signatures.upload', ['program' => $program->id, 'staff' => session('auth_user.id')]) }}" enctype="multipart/form-data" class="pmr-actions">
+                @csrf
+                <input type="file" name="signature" accept="image/png,image/jpeg" required>
+                <button class="pmr-btn primary" type="submit">{{ $currentStaffSignature ? __('Replace my signature') : __('Save my signature') }}</button>
+            </form>
+        </details>
+
+        @if($canManageStaffSignatures)
+            <details class="pmr-mode-panel" style="margin:0 0 1rem;">
+                <summary style="font-weight:750;cursor:pointer;">{{ __('Staff signature register') }}</summary>
+                <p>{{ __('KJ HEP can store, replace, or remove an active staff member signature. Historical report approvals keep the signature snapshot used at approval time.') }}</p>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;">
+                        <thead><tr><th style="text-align:left;padding:.55rem;">{{ __('Staff') }}</th><th style="text-align:left;padding:.55rem;">{{ __('Position') }}</th><th style="text-align:left;padding:.55rem;">{{ __('Signature') }}</th><th style="text-align:left;padding:.55rem;">{{ __('Actions') }}</th></tr></thead>
+                        <tbody>
+                        @foreach($staffSignatures as $staffSignature)
+                            <tr>
+                                <td style="padding:.55rem;">{{ $staffSignature->full_name }}</td>
+                                <td style="padding:.55rem;">{{ $staffSignature->position ?: '—' }} @unless($staffSignature->is_active)<span class="pmr-badge">{{ __('Inactive') }}</span>@endunless</td>
+                                <td style="padding:.55rem;">{{ $staffSignature->signature_path ? __('Saved') : __('Not uploaded') }}</td>
+                                <td style="padding:.55rem;">
+                                    <div class="pmr-actions">
+                                        @if($staffSignature->is_active)
+                                            <form method="post" action="{{ route('admin.programs.approval-signatures.upload', ['program' => $program->id, 'staff' => $staffSignature->admin_id]) }}" enctype="multipart/form-data">
+                                                @csrf
+                                                <input type="file" name="signature" accept="image/png,image/jpeg" required aria-label="{{ __('Replace signature for :name', ['name' => $staffSignature->full_name]) }}">
+                                                <button class="pmr-btn" type="submit">{{ __('Replace') }}</button>
+                                            </form>
+                                        @endif
+                                        @if($staffSignature->signature_path)
+                                            <form method="post" action="{{ route('admin.programs.approval-signatures.delete', ['program' => $program->id, 'staff' => $staffSignature->admin_id]) }}" onsubmit="return confirm('{{ __('Remove this staff signature?') }}')">
+                                                @csrf @method('DELETE')
+                                                <button class="pmr-btn" type="submit">{{ __('Delete') }}</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </details>
         @endif
 
         @if(!$report && $canManageReport)

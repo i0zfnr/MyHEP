@@ -217,6 +217,8 @@ Route::prefix('/admin/programs')->middleware('auth.session:admin')->name('admin.
     Route::post('/{program}/report/upload-edited', [ProgramOperationController::class, 'uploadEditedReport'])->name('report.upload-edited');
     Route::post('/{program}/report/submit', [ProgramOperationController::class, 'submitReport'])->name('report.submit');
     Route::post('/{program}/report/review', [ProgramOperationController::class, 'reviewReport'])->name('report.review');
+    Route::post('/approval-signatures/{staff}/upload', [ProgramOperationController::class, 'uploadApprovalSignature'])->name('approval-signatures.upload');
+    Route::delete('/approval-signatures/{staff}', [ProgramOperationController::class, 'deleteApprovalSignature'])->name('approval-signatures.delete');
     Route::get('/{program}/presenter', [ProgramOperationController::class, 'presenter'])->name('presenter');
     Route::get('/{program}/live-token', [ProgramOperationController::class, 'liveToken'])->name('live-token');
     Route::post('/{program}/certificates/generate', [ProgramCertificateController::class, 'generate'])->name('certificates.generate');

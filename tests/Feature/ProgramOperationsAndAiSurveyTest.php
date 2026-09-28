@@ -188,6 +188,18 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             $table->timestamp('kj_hep_reviewed_at')->nullable();
             $table->text('kj_hep_review_note')->nullable();
             $table->timestamp('archived_at')->nullable();
+            $table->string('program_director_signature_path')->nullable();
+            $table->string('tpsa_signature_path')->nullable();
+            $table->string('director_signature_path')->nullable();
+            $table->string('kj_hep_signature_path')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('staff_approval_signatures', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('admin_id')->unique();
+            $table->string('signature_path');
+            $table->string('signature_mime', 40);
+            $table->unsignedBigInteger('uploaded_by');
             $table->timestamps();
         });
         Schema::create('program_certificates', function (Blueprint $table): void {
@@ -888,6 +900,7 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
 
     public function test_final_report_routes_from_program_director_to_tpsa_director_and_kj_hep(): void
     {
+        Storage::fake('local');
         config(['services.gemini.key' => null, 'services.openai.key' => null, 'services.deepseek.key' => null]);
         $programId = DB::table('programs')->insertGetId([
             'created_by' => 1, 'registration_type' => 'attendance_only_activity', 'title' => 'Student Leadership & Service Program', 'paperwork_method' => 'none',
@@ -935,6 +948,13 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
             5
         ));
 
+        foreach ([1 => 'lecturer', 2 => 'lecturer', 4 => 'student_affairs_head'] as $staffId => $staffRole) {
+            $this->signIn($staffId, $staffRole)
+                ->post(route('admin.programs.approval-signatures.upload', ['program' => $programId, 'staff' => $staffId]), [
+                    'signature' => UploadedFile::fake()->image('approval-'.$staffId.'.png', 200, 70),
+                ])
+                ->assertRedirect()->assertSessionHasNoErrors();
+        }
         $this->signIn(1, 'lecturer')->post(route('admin.programs.report.submit', $programId))->assertRedirect();
         $this->assertDatabaseHas('program_reports', ['status' => 'pending_tpsa', 'tpsa_reviewer_id' => 2, 'director_reviewer_id' => 3, 'kj_hep_reviewer_id' => 4]);
 
@@ -945,6 +965,193 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $this->signIn(4, 'student_affairs_head')->post(route('admin.programs.report.review', $programId), ['decision' => 'approve'])->assertRedirect();
         $this->assertDatabaseHas('program_reports', ['status' => 'archived']);
         $this->assertDatabaseHas('programs', ['id' => $programId, 'status' => 'completed']);
+    }
+
+    public function test_fake_program_report_requires_and_stamps_signatures_through_every_approval_stage(): void
+    {
+        Storage::fake('local');
+        config(['services.gemini.key' => null, 'services.openai.key' => null, 'services.deepseek.key' => null]);
+
+        $programId = DB::table('programs')->insertGetId([
+            'created_by' => 1,
+            'registration_type' => 'approved_program',
+            'approval_branch' => 'tpsa',
+            'title' => 'FAKE SIGNATURE WORKFLOW PROGRAM',
+            'paperwork_method' => 'manual',
+            'questionnaire_enabled' => false,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $paperworkPath = 'program-paperworks/'.$programId.'/fake-approved-paperwork.pdf';
+        Storage::disk('local')->put($paperworkPath, "%PDF-1.4\nFake approved paperwork\n%%EOF");
+        DB::table('program_paperworks')->insert([
+            'program_id' => $programId,
+            'version' => 1,
+            'method' => 'manual',
+            'disk' => 'local',
+            'path' => $paperworkPath,
+            'original_name' => 'fake-approved-paperwork.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => Storage::disk('local')->size($paperworkPath),
+            'created_by' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('program_attendances')->insert([
+            'program_id' => $programId,
+            'attendee_type' => 'internal',
+            'full_name' => 'Fake Test Student',
+            'identifier' => 'FAKE-REPORT-001',
+            'checked_in_at' => now(),
+            'geofence_valid' => true,
+            'validation_status' => 'valid',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $activityPhoto = UploadedFile::fake()->image('fake-program-photo.png', 40, 40);
+        $this->signIn(1, 'lecturer')
+            ->post(route('admin.programs.report.generate', $programId), [
+                'output_format' => 'both',
+                'program_images' => [$activityPhoto],
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $report = DB::table('program_reports')->where('program_id', $programId)->first();
+        $this->assertSame('draft', $report->status);
+        $this->assertTrue(Storage::disk('local')->exists($paperworkPath));
+        $this->assertTrue(Storage::disk('local')->exists($report->docx_path));
+        $this->assertTrue(Storage::disk('local')->exists($report->pdf_path));
+
+        $this->signIn(1, 'lecturer')
+            ->post(route('admin.programs.report.submit', $programId))
+            ->assertRedirect()
+            ->assertSessionHasErrors('signature');
+        $this->assertDatabaseHas('program_reports', ['program_id' => $programId, 'status' => 'draft']);
+
+        $this->signIn(1, 'lecturer')
+            ->post(route('admin.programs.approval-signatures.upload', ['program' => $programId, 'staff' => 1]), [
+                'signature' => UploadedFile::fake()->image('program-director.png', 200, 70),
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+        $programDirectorSignature = DB::table('staff_approval_signatures')->where('admin_id', 1)->value('signature_path');
+        $this->assertTrue(Storage::disk('local')->exists($programDirectorSignature));
+
+        $this->signIn(1, 'lecturer')
+            ->post(route('admin.programs.approval-signatures.upload', ['program' => $programId, 'staff' => 2]), [
+                'signature' => UploadedFile::fake()->image('forbidden-signature.png'),
+            ])
+            ->assertForbidden();
+
+        $this->signIn(1, 'lecturer')->post(route('admin.programs.report.submit', $programId))
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $report = DB::table('program_reports')->where('program_id', $programId)->first();
+        $this->assertSame('pending_tpsa', $report->status);
+        $this->assertNotSame($programDirectorSignature, $report->program_director_signature_path, 'The submitted report should retain its own signature snapshot.');
+        $this->assertTrue(Storage::disk('local')->exists($report->program_director_signature_path));
+        $this->signIn(4, 'student_affairs_head')
+            ->delete(route('admin.programs.approval-signatures.delete', ['program' => $programId, 'staff' => 1]))
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertFalse(Storage::disk('local')->exists($programDirectorSignature));
+        $this->assertTrue(Storage::disk('local')->exists($report->program_director_signature_path), 'Removing a staff registry signature must not alter an existing report snapshot.');
+
+        $this->signIn(2, 'lecturer')->post(route('admin.programs.report.review', $programId), ['decision' => 'approve'])
+            ->assertRedirect()->assertSessionHasErrors('signature');
+        $this->assertDatabaseHas('program_reports', ['program_id' => $programId, 'status' => 'pending_tpsa']);
+        $this->signIn(2, 'lecturer')
+            ->post(route('admin.programs.approval-signatures.upload', ['program' => $programId, 'staff' => 2]), [
+                'signature' => UploadedFile::fake()->image('tpsa.png', 200, 70),
+            ])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->signIn(2, 'lecturer')->post(route('admin.programs.report.review', $programId), ['decision' => 'approve'])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('program_reports', ['program_id' => $programId, 'status' => 'pending_director']);
+
+        // Polytechnic Director approval is optional-signature; absent a saved
+        // signature, the exact generated-document notice is stamped instead.
+        $this->signIn(3, 'lecturer')
+            ->post(route('admin.programs.approval-signatures.upload', ['program' => $programId, 'staff' => 3]), [
+                'signature' => UploadedFile::fake()->image('optional-director.png', 200, 70),
+            ])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $directorSignature = DB::table('staff_approval_signatures')->where('admin_id', 3)->value('signature_path');
+        $this->signIn(4, 'student_affairs_head')
+            ->delete(route('admin.programs.approval-signatures.delete', ['program' => $programId, 'staff' => 3]))
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertFalse(Storage::disk('local')->exists($directorSignature));
+        $this->signIn(3, 'lecturer')->post(route('admin.programs.report.review', $programId), ['decision' => 'approve'])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $report = DB::table('program_reports')->where('program_id', $programId)->first();
+        $this->assertSame('pending_kj_hep', $report->status);
+        $this->assertNull($report->director_signature_path);
+        $this->signIn(4, 'student_affairs_head')
+            ->get(route('admin.programs.operations', $programId))
+            ->assertOk()
+            ->assertSee('KJ HEP acceptance')
+            ->assertDontSee('Archived under KJ HEP');
+
+        $this->signIn(4, 'student_affairs_head')->post(route('admin.programs.report.review', $programId), ['decision' => 'approve'])
+            ->assertRedirect()->assertSessionHasErrors('signature');
+        $this->signIn(4, 'student_affairs_head')
+            ->post(route('admin.programs.approval-signatures.upload', ['program' => $programId, 'staff' => 4]), [
+                'signature' => UploadedFile::fake()->image('kj-hep.png', 200, 70),
+            ])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $kjHepSignature = DB::table('staff_approval_signatures')->where('admin_id', 4)->value('signature_path');
+
+        // KJ HEP can retain a signature for another staff member and revoke
+        // the registry entry later without deleting the report's snapshot.
+        $this->signIn(4, 'student_affairs_head')
+            ->post(route('admin.programs.approval-signatures.upload', ['program' => $programId, 'staff' => 5]), [
+                'signature' => UploadedFile::fake()->image('staff-five.png'),
+            ])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $staffFiveSignature = DB::table('staff_approval_signatures')->where('admin_id', 5)->value('signature_path');
+        $this->signIn(4, 'student_affairs_head')
+            ->delete(route('admin.programs.approval-signatures.delete', ['program' => $programId, 'staff' => 5]))
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseMissing('staff_approval_signatures', ['admin_id' => 5]);
+        $this->assertFalse(Storage::disk('local')->exists($staffFiveSignature));
+
+        $this->signIn(4, 'student_affairs_head')->post(route('admin.programs.report.review', $programId), ['decision' => 'approve'])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $report = DB::table('program_reports')->where('program_id', $programId)->first();
+        $this->assertSame('archived', $report->status);
+        $this->assertTrue(Storage::disk('local')->exists($report->kj_hep_signature_path));
+        $this->assertTrue(Storage::disk('local')->exists($kjHepSignature));
+        $this->assertDatabaseHas('programs', ['id' => $programId, 'status' => 'completed']);
+        $completedOperations = $this->signIn(4, 'student_affairs_head')
+            ->get(route('admin.programs.operations', $programId))
+            ->assertOk()
+            ->assertSee('KJ HEP acceptance')
+            ->assertDontSee('Archived under KJ HEP');
+        $this->assertSame(4, substr_count($completedOperations->getContent(), 'pmr-report-step is-complete'));
+
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open(Storage::disk('local')->path($report->docx_path)) === true);
+        $documentXml = (string) $zip->getFromName('word/document.xml');
+        $relationships = (string) $zip->getFromName('word/_rels/document.xml.rels');
+        $this->assertStringContainsString('dokumen ini dijana oleh system dan tidak memerlukan tandatangan', $documentXml);
+        $this->assertStringContainsString('rIdApproval', $relationships);
+        $mediaNames = [];
+        for ($index = 0; $index < $zip->numFiles; $index++) {
+            $name = $zip->getNameIndex($index);
+            if (str_starts_with((string) $name, 'word/media/approval-signature-')) {
+                $mediaNames[] = $name;
+            }
+        }
+        $zip->close();
+        $this->assertNotEmpty($mediaNames, 'Approval signature image assets should be embedded in the signed DOCX.');
+        $this->assertStringContainsString('approval-signature-program_director-', implode(' ', $mediaNames));
+        $this->assertStringContainsString('approval-signature-tpsa-', implode(' ', $mediaNames));
+        $this->assertStringContainsString('approval-signature-kj_hep-', implode(' ', $mediaNames));
+        $this->assertStringStartsWith('%PDF-', (string) file_get_contents(Storage::disk('local')->path($report->pdf_path), false, null, 0, 5));
+
+        $this->signIn(1, 'lecturer')->get(route('admin.programs.report.download', [$programId, 'pdf']))->assertOk();
+        $this->signIn(1, 'lecturer')->get(route('admin.programs.report.download', [$programId, 'docx']))->assertOk();
     }
 
     public function test_generated_report_includes_questionnaire_breakdown_table_for_section_ten(): void

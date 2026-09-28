@@ -159,6 +159,18 @@ class ProgramOperationController extends Controller
             'pending_kj_hep' => (int) $report->kj_hep_reviewer_id === $authId,
             default => false,
         };
+        $currentSignatureOptional = $canReviewReport && $report->status === 'pending_director';
+        $currentStaffSignature = Schema::hasTable('staff_approval_signatures')
+            ? DB::table('staff_approval_signatures')->where('admin_id', $authId)->first()
+            : null;
+        $staffSignatures = Schema::hasTable('staff_approval_signatures')
+            ? DB::table('admins')
+                ->leftJoin('staff_approval_signatures as signatures', 'admins.id', '=', 'signatures.admin_id')
+                ->where(fn ($query) => $query->where('admins.is_active', true)->orWhereNotNull('signatures.admin_id'))
+                ->orderBy('admins.full_name')
+                ->get(['admins.id as admin_id', 'signatures.signature_path', 'admins.full_name', 'admins.position', 'admins.is_active'])
+            : collect();
+        $canManageStaffSignatures = (string) session('auth_user.admin_role') === 'student_affairs_head';
 
         return view('admin.programs.operations', compact(
             'program',
@@ -180,6 +192,10 @@ class ProgramOperationController extends Controller
             'canManageCertificates',
             'certificateTemplates',
             'canReviewReport',
+            'currentSignatureOptional',
+            'currentStaffSignature',
+            'staffSignatures',
+            'canManageStaffSignatures',
             'canManageAttendance',
             'canManageStudentPagePermissions',
             'studentPagePermissions',
@@ -535,7 +551,7 @@ class ProgramOperationController extends Controller
         $file = $request->file('final_report');
         $extension = strtolower($file->getClientOriginalExtension());
         $path = $file->storeAs('program-reports/'.$program->id, 'laporan-final-'.$program->id.'-'.now()->format('Ymd_His').'.'.$extension, 'local');
-        $updates = ['output_format' => $extension, $extension.'_path' => $path, 'updated_at' => now()];
+        $updates = ['output_format' => $extension, 'docx_path' => null, 'pdf_path' => null, $extension.'_path' => $path, 'updated_at' => now()];
         DB::table('program_reports')->where('id', $report->id)->update($updates);
         auditLog('program_reports.final_file_upload', 'programs', $program->id, 'Final report file uploaded for organization review');
 
@@ -557,8 +573,23 @@ class ProgramOperationController extends Controller
         if (Schema::hasColumn('program_reports', 'docx_path') && blank($report->docx_path) && blank($report->pdf_path)) {
             return back()->withErrors(['report' => __('Upload the final DOCX or PDF report before sending it for review.')]);
         }
+        $programDirectorSignature = DB::table('staff_approval_signatures')->where('admin_id', $program->created_by)->value('signature_path');
+        if (! $programDirectorSignature || ! Storage::disk('local')->exists($programDirectorSignature)) {
+            return back()->withErrors(['signature' => __('The Program Director must upload an approval signature before submitting the report.')]);
+        }
+        if (! Schema::hasColumn('program_reports', 'program_director_signature_path')) {
+            abort(409);
+        }
+        $programDirectorSignature = $this->snapshotApprovalSignature($programDirectorSignature, $report->id, 'program-director');
+        app(OfficialProgramReportExporter::class)->applyApprovalSignatures($report, [
+            'program_director' => [
+                'absolute_path' => Storage::disk('local')->path($programDirectorSignature),
+                'extension' => pathinfo($programDirectorSignature, PATHINFO_EXTENSION),
+            ],
+        ]);
         DB::table('program_reports')->where('id', $report->id)->update([
             'status' => 'pending_tpsa',
+            'program_director_signature_path' => $programDirectorSignature,
             'tpsa_reviewer_id' => $deputy->id,
             'director_reviewer_id' => $director->id,
             'kj_hep_reviewer_id' => $kjHep->id,
@@ -590,15 +621,60 @@ class ProgramOperationController extends Controller
         abort_unless($stage && (int) $report->{$stage['reviewer']} === $adminId, 403);
         $approved = $validated['decision'] === 'approve';
         $nextStatus = $approved ? $stage['next'] : 'rejected';
+        $signaturePathColumn = match ($report->status) {
+            'pending_tpsa' => 'tpsa_signature_path',
+            'pending_director' => 'director_signature_path',
+            'pending_kj_hep' => 'kj_hep_signature_path',
+            default => null,
+        };
+        $signaturePath = null;
+        if ($approved && $report->status !== 'pending_director') {
+            abort_unless($signaturePathColumn && Schema::hasColumn('program_reports', $signaturePathColumn), 409);
+            $signaturePath = DB::table('staff_approval_signatures')
+                ->where('admin_id', $adminId)
+                ->value('signature_path');
+            if (! $signaturePath || ! Storage::disk('local')->exists($signaturePath)) {
+                return back()->withErrors(['signature' => __('Upload your approval signature before approving this report.')]);
+            }
+        } elseif ($approved && $report->status === 'pending_director') {
+            $signaturePath = DB::table('staff_approval_signatures')->where('admin_id', $adminId)->value('signature_path');
+            if ($signaturePath && ! Storage::disk('local')->exists($signaturePath)) {
+                $signaturePath = null;
+            }
+        }
+        if ($approved && $signaturePath) {
+            $signaturePath = $this->snapshotApprovalSignature($signaturePath, $report->id, $report->status);
+        }
         $payload = [
             'status' => $nextStatus,
             $stage['reviewed'] => now(),
             $stage['note'] => $note,
             'updated_at' => now(),
         ];
+        if ($approved && $signaturePathColumn) {
+            $payload[$signaturePathColumn] = $signaturePath;
+        }
         if ($nextStatus === 'archived') {
             $payload['archived_at'] = now();
         }
+        if ($approved) {
+            $signatureKey = match ($signaturePathColumn) {
+                'tpsa_signature_path' => 'tpsa',
+                'director_signature_path' => 'director',
+                'kj_hep_signature_path' => 'kj_hep',
+                default => null,
+            };
+            $currentSignature = $signaturePath && Storage::disk('local')->exists($signaturePath)
+                ? ['absolute_path' => Storage::disk('local')->path($signaturePath), 'extension' => pathinfo($signaturePath, PATHINFO_EXTENSION)]
+                : ($signatureKey === 'director'
+                    ? ['text' => 'dokumen ini dijana oleh system dan tidak memerlukan tandatangan']
+                    : []);
+            if ($signatureKey !== null) {
+                $stampKey = $signatureKey === 'tpsa' ? 'tpsa' : ($signatureKey === 'kj_hep' ? 'kj_hep' : 'director');
+                app(OfficialProgramReportExporter::class)->applyApprovalSignatures($report, [$stampKey => $currentSignature]);
+            }
+        }
+
         DB::transaction(function () use ($report, $program, $payload, $nextStatus): void {
             DB::table('program_reports')->where('id', $report->id)->update($payload);
             if ($nextStatus === 'archived') {
@@ -614,6 +690,47 @@ class ProgramOperationController extends Controller
         } : __('Report returned to the Program Director for correction.');
 
         return back()->with('success', $message);
+    }
+
+    public function uploadApprovalSignature(Request $request, int $staffId): RedirectResponse
+    {
+        abort_unless(Schema::hasTable('staff_approval_signatures'), 409);
+        $adminId = (int) session('auth_user.id');
+        $isKjHep = (string) session('auth_user.admin_role') === 'student_affairs_head';
+        abort_unless($adminId === $staffId || $isKjHep, 403);
+        $staff = DB::table('admins')->where('id', $staffId)->where('is_active', true)->first();
+        abort_unless($staff, 404);
+        $validated = $request->validate([
+            'signature' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+        $file = $request->file('signature');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $path = $file->storeAs('staff-approval-signatures/'.$staffId, 'signature-'.now()->format('YmdHis').'.'.$extension, 'local');
+        $oldPath = DB::table('staff_approval_signatures')->where('admin_id', $staffId)->value('signature_path');
+        DB::table('staff_approval_signatures')->updateOrInsert(
+            ['admin_id' => $staffId],
+            ['signature_path' => $path, 'signature_mime' => $file->getMimeType(), 'uploaded_by' => $adminId, 'updated_at' => now(), 'created_at' => now()]
+        );
+        if ($oldPath && $oldPath !== $path) {
+            Storage::disk('local')->delete($oldPath);
+        }
+        auditLog('staff_approval_signatures.upload', 'admins', $staffId, 'Approval signature uploaded or replaced');
+
+        return back()->with('success', __('Approval signature saved.'));
+    }
+
+    public function deleteApprovalSignature(int $staffId): RedirectResponse
+    {
+        abort_unless((string) session('auth_user.admin_role') === 'student_affairs_head', 403);
+        abort_unless(Schema::hasTable('staff_approval_signatures'), 409);
+        $record = DB::table('staff_approval_signatures')->where('admin_id', $staffId)->first();
+        if ($record) {
+            DB::table('staff_approval_signatures')->where('admin_id', $staffId)->delete();
+            Storage::disk('local')->delete($record->signature_path);
+            auditLog('staff_approval_signatures.delete', 'admins', $staffId, 'Approval signature removed by KJ HEP');
+        }
+
+        return back()->with('success', __('Approval signature removed.'));
     }
 
     public function generateAiQuestionnaire(Request $request, int $id)
@@ -1425,6 +1542,16 @@ class ProgramOperationController extends Controller
                     ->orWhere('kj_hep_reviewer_id', $authId);
             })
             ->exists();
+    }
+
+    private function snapshotApprovalSignature(string $sourcePath, int $reportId, string $stage): string
+    {
+        $extension = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION)) ?: 'png';
+        $snapshotPath = 'program-reports/'.$reportId.'/approvals/'.$stage.'-'.now()->format('YmdHisv').'.'.$extension;
+        Storage::disk('local')->makeDirectory(dirname($snapshotPath));
+        abort_unless(Storage::disk('local')->copy($sourcePath, $snapshotPath), 500);
+
+        return $snapshotPath;
     }
 
     private function reportBranch(object $program): string

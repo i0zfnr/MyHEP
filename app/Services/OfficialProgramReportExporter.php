@@ -67,6 +67,130 @@ class OfficialProgramReportExporter
         return $paths;
     }
 
+    /** Apply the captured workflow signatures to the report files kept for this approval. */
+    public function applyApprovalSignatures(object $report, array $signatures): void
+    {
+        if (filled($report->docx_path ?? null) && Storage::disk('local')->exists($report->docx_path)) {
+            $this->applyDocxApprovalSignatures(Storage::disk('local')->path($report->docx_path), $signatures);
+        }
+
+        if (filled($report->pdf_path ?? null) && Storage::disk('local')->exists($report->pdf_path)) {
+            $this->applyPdfApprovalSignatures(Storage::disk('local')->path($report->pdf_path), $signatures);
+        }
+    }
+
+    private function applyDocxApprovalSignatures(string $path, array $signatures): void
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($path) !== true) {
+            throw new \RuntimeException('Unable to open the approved DOCX report.');
+        }
+
+        try {
+            $xml = $zip->getFromName('word/document.xml');
+            if (! is_string($xml)) {
+                throw new \RuntimeException('The approved DOCX report has no document body.');
+            }
+
+            $imageRelationships = [];
+            $relationshipXml = $zip->getFromName('word/_rels/document.xml.rels') ?: '';
+            $nextRelationship = 1;
+            if (preg_match_all('/Id="rId(?:Approval)?(\\d+)"/', $relationshipXml, $relationshipMatches) && $relationshipMatches[1] !== []) {
+                $nextRelationship = max(array_map('intval', $relationshipMatches[1])) + 1;
+            }
+            $nextImage = 1;
+
+            foreach (['program_director' => 'Disediakan Oleh', 'tpsa' => 'Disemak Oleh', 'kj_hep' => 'Disemak Oleh', 'director' => 'Disahkan Oleh'] as $key => $heading) {
+                $signature = $signatures[$key] ?? null;
+                $needle = htmlspecialchars($heading, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+                $position = strpos($xml, $needle);
+                if ($position === false) {
+                    continue;
+                }
+                $paragraphStart = strrpos(substr($xml, 0, $position), '<w:p');
+                $paragraphEnd = strpos($xml, '</w:p>', $position);
+                if ($paragraphStart === false || $paragraphEnd === false) {
+                    continue;
+                }
+                $paragraphEnd += strlen('</w:p>');
+                $insert = '';
+                if (is_array($signature) && filled($signature['absolute_path'] ?? null) && is_file($signature['absolute_path'])) {
+                    $imageName = 'approval-signature-'.$key.'-'.$nextImage.'.'.$signature['extension'];
+                    $mediaTarget = 'media/'.$imageName;
+                    $zip->addFile($signature['absolute_path'], 'word/'.$mediaTarget);
+                    $relationshipId = 'rIdApproval'.$nextRelationship++;
+                    $relationshipXml = str_replace('</Relationships>', '<Relationship Id="'.$relationshipId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="'.$mediaTarget.'"/></Relationships>', $relationshipXml);
+                    $insert = $this->wordSignatureImageXml($relationshipId);
+                    if ($key === 'kj_hep') {
+                        $insert = $this->wordParagraph('KJ HEP').$insert;
+                    }
+                    $imageRelationships[$key] = true;
+                    $nextImage++;
+                } elseif (($signature['text'] ?? '') !== '') {
+                    $insert = $this->wordParagraph((string) $signature['text']);
+                }
+                if ($insert !== '') {
+                    $xml = substr_replace($xml, $insert, $paragraphEnd, 0);
+                }
+            }
+
+            if ($imageRelationships !== []) {
+                $zip->addFromString('word/_rels/document.xml.rels', $relationshipXml);
+            }
+            $zip->addFromString('word/document.xml', $xml);
+        } finally {
+            $zip->close();
+        }
+    }
+
+    private function wordSignatureImageXml(string $relationshipId): string
+    {
+        $drawingId = (string) (1000 + hexdec(substr(hash('sha1', $relationshipId), 0, 6)));
+        return '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><wp:extent cx="1143000" cy="457200"/><wp:docPr id="'.$drawingId.'" name="ApprovalSignature"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="'.$drawingId.'" name="ApprovalSignature"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="'.$relationshipId.'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1143000" cy="457200"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
+    }
+
+    private function applyPdfApprovalSignatures(string $path, array $signatures): void
+    {
+        $pdf = new \setasign\Fpdi\Fpdi();
+        $pageCount = $pdf->setSourceFile($path);
+        for ($page = 1; $page <= $pageCount; $page++) {
+            $template = $pdf->importPage($page);
+            $size = $pdf->getTemplateSize($template);
+            $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+            $pdf->useTemplate($template);
+            if ($page === $pageCount) {
+                $pdf->SetAutoPageBreak(false);
+                $margin = 15;
+                $y = $pdf->GetPageHeight() - 48;
+                $columnWidth = ($pdf->GetPageWidth() - $margin * 2) / 3;
+                foreach (['program_director', 'tpsa', 'kj_hep', 'director'] as $key) {
+                    $indexPosition = match ($key) {
+                        'program_director' => 0,
+                        'tpsa', 'kj_hep' => 1,
+                        'director' => 2,
+                    };
+                    $verticalOffset = $key === 'kj_hep' ? 16 : 0;
+                    $signature = $signatures[$key] ?? null;
+                    $x = $margin + $indexPosition * $columnWidth;
+                    if ($key === 'kj_hep') {
+                        $pdf->SetXY($x, $y + $verticalOffset);
+                        $pdf->SetFont('Arial', 'B', 6);
+                        $pdf->Cell($columnWidth - 3, 4, 'KJ HEP', 0, 1);
+                    }
+                    if (is_array($signature) && filled($signature['absolute_path'] ?? null) && is_file($signature['absolute_path'])) {
+                        $pdf->Image($signature['absolute_path'], $x, $y + $verticalOffset + 5, min(38, $columnWidth - 6), 10);
+                    } elseif (($signature['text'] ?? '') !== '') {
+                        $pdf->SetXY($x, $y + $verticalOffset + 5);
+                        $pdf->SetFont('Arial', '', 5.5);
+                        $pdf->MultiCell($columnWidth - 3, 3, iconv('UTF-8', 'windows-1252//TRANSLIT', $signature['text']));
+                    }
+                }
+            }
+        }
+
+        $pdf->Output('F', $path);
+    }
+
     private function writeDocxDirect(object $program, array $data, array $report, string $destination, array $imagePaths): void
     {
         $template = resource_path('report-templates/FORMAT LAPORAN POLIBESUT 2025.docx');

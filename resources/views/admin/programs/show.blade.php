@@ -91,7 +91,7 @@
             'pending_tpsa' => __($reportBranchLabel),
             'pending_director' => __('Polytechnic Director'),
             'pending_kj_hep' => __('KJ HEP'),
-            'archived' => __('Archived under KJ HEP'),
+            'archived' => __('KJ HEP completed acceptance'),
             default => __('Not started'),
         };
         $reportStages = [
@@ -99,10 +99,13 @@
             'pending_tpsa' => __(':branch review', ['branch' => $reportBranchLabel]),
             'pending_director' => __('Polytechnic Director review'),
             'pending_kj_hep' => __('KJ HEP acceptance'),
-            'archived' => __('Archived under KJ HEP'),
         ];
         $reportStageKeys = array_keys($reportStages);
-        $currentStageKey = $reportStatus === 'rejected' ? 'draft' : $reportStatus;
+        $currentStageKey = match ($reportStatus) {
+            'rejected' => 'draft',
+            'archived' => 'pending_kj_hep',
+            default => $reportStatus,
+        };
         $currentStageIndex = array_search($currentStageKey, $reportStageKeys, true);
     @endphp
     <section class="pmr-card">
@@ -126,7 +129,8 @@
                 @php
                     $stageIndex = array_search($stageKey, $reportStageKeys, true);
                     $stageState = $reportStatus === 'not_generated' ? 'waiting'
-                        : ($stageIndex < $currentStageIndex ? 'complete' : ($stageIndex === $currentStageIndex ? 'current' : 'waiting'));
+                        : ($reportStatus === 'archived' && $stageIndex <= $currentStageIndex ? 'complete'
+                            : ($stageIndex < $currentStageIndex ? 'complete' : ($stageIndex === $currentStageIndex ? 'current' : 'waiting')));
                     $stageText = $stageState === 'complete' ? __('Completed')
                         : ($stageState === 'current' ? ($reportStatus === 'rejected' ? __('Returned for correction') : __('Current stage')) : __('Waiting'));
                 @endphp
