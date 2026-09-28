@@ -371,8 +371,8 @@
                 </tbody>
             </table>
         </div>
-        </div>
         <div class="student-pagination" style="margin-top:14px;padding:0 1rem 1rem;">{{ $students->onEachSide(1)->links('vendor.pagination.myhep') }}</div>
+        </div>
     </div>
 </div>
 @endsection

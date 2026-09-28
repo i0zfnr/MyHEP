@@ -804,6 +804,7 @@
                 </div>
             </div>
         @else
+            <div data-ajax-page-fragment="program-roster">
             <div class="pmr-table-wrap pmr-roster-table-wrap">
                 <table class="pmr-table">
                     <thead>
@@ -887,6 +888,7 @@
             </div>
             <div class="pmr-roster-pagination">
                 {{ $attendances->onEachSide(1)->links('vendor.pagination.myhep') }}
+            </div>
             </div>
         @endif
     </section>

@@ -23,8 +23,9 @@ body:is(.role-student, .role-qr-staff) {
     --student-nav-inner: rgba(255, 255, 255, .72);
     --student-liquid-nav-height: 64px;
     --student-liquid-nav-gap: 8px;
-    /* Keep interactive controls above the iPhone home-indicator safe area. */
-    --student-nav-bottom-offset: max(var(--student-liquid-nav-gap), var(--safe-bottom));
+    /* Place the bar's glass surface inside the bottom inset; its content stays
+       above the home indicator while the surface fills that area. */
+    --student-nav-bottom-offset: 0px;
 }
 
 body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
@@ -79,7 +80,7 @@ body.role-admin.liquid-design-disabled {
         max-width: 420px;
         margin-inline: auto;
         min-height: var(--student-liquid-nav-height) !important;
-        padding: .3rem .34rem !important;
+        padding: .3rem .34rem calc(.3rem + var(--safe-bottom)) !important;
         gap: .08rem !important;
         transform: translateZ(0) !important;
         border: 1px solid color-mix(in srgb, var(--student-nav-border) 34%, transparent) !important;
@@ -100,7 +101,7 @@ body.role-admin.liquid-design-disabled {
         max-width: 420px;
         margin-inline: auto;
         min-height: var(--student-liquid-nav-height) !important;
-        padding: .3rem .34rem !important;
+        padding: .3rem .34rem calc(.3rem + var(--safe-bottom)) !important;
         gap: .08rem !important;
         transform: translateZ(0) !important;
         border: 1px solid color-mix(in srgb, var(--student-nav-border) 34%, transparent) !important;

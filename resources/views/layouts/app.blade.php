@@ -758,7 +758,7 @@
             </div>
         @endif
 
-        <main class="page-body">@yield('content')</main>
+        <main class="page-body" data-ajax-page-navigation>@yield('content')</main>
         @include('partials.app_footer')
         </div>
         </div>

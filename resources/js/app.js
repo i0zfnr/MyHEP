@@ -1,5 +1,5 @@
-const initializeLiveFilters = () => {
-    document.querySelectorAll('[data-live-filter-form]').forEach((form) => {
+const initializeLiveFilters = (root = document) => {
+    root.querySelectorAll('[data-live-filter-form]').forEach((form) => {
         if (!(form instanceof HTMLFormElement) || form.dataset.liveFilterReady === 'true') return;
         form.dataset.liveFilterReady = 'true';
         const status = form.querySelector('[data-live-filter-status]');
@@ -28,6 +28,7 @@ const initializeLiveFilters = () => {
                 current.replaceWith(next);
                 registerVirtualTables();
                 window.history.replaceState({}, '', `${url.pathname}${url.search}`);
+                document.dispatchEvent(new CustomEvent('student-edge:student-results-updated', { detail: { root: next } }));
                 if (status) status.textContent = 'Results updated';
             } catch (error) {
                 if (error.name !== 'AbortError' && status) status.textContent = 'Unable to update results';
@@ -46,8 +47,144 @@ const initializeLiveFilters = () => {
     });
 };
 
-const registerVirtualTables = () => {
-    document.querySelectorAll('.account-table-wrap, .laptop-table-wrap, .admin-doc-table-wrap, [data-virtual-table]').forEach((wrap) => {
+const initializeAjaxPagination = () => {
+    const pageCache = new Map();
+    let activeRequest = null;
+    const pageRoot = () => document.querySelector('main.page-body[data-ajax-page-navigation]');
+    const currentFragment = () => pageRoot()?.querySelector('[data-ajax-page-fragment]') || null;
+    const paginationSelector = 'nav[role="navigation"], [class*="pagination"], .visitor-pages, .fb-pagination';
+
+    const loadPage = (url) => {
+        const key = url.href;
+        if (!pageCache.has(key)) {
+            pageCache.set(key, fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            }).then(async (response) => {
+                if (!response.ok) throw new Error('Page request failed');
+                return await response.text();
+            }).catch((error) => {
+                pageCache.delete(key);
+                throw error;
+            }));
+        }
+        return pageCache.get(key);
+    };
+
+    const prefetchNeighborPages = (root) => {
+        const urls = [...root.querySelectorAll(`${paginationSelector} a[rel="prev"], ${paginationSelector} a[rel="next"]`)]
+            .map((link) => new URL(link.href, window.location.href))
+            .filter((url) => url.origin === window.location.origin && url.pathname === window.location.pathname
+                && (url.searchParams.has('page') || url.searchParams.has('roster_page')));
+        const allowedUrls = new Set(urls.map((url) => url.href));
+        for (const cachedUrl of pageCache.keys()) {
+            if (!allowedUrls.has(cachedUrl)) pageCache.delete(cachedUrl);
+        }
+        urls.forEach((url) => loadPage(url).catch(() => {}));
+    };
+
+    const replacePageContent = (html, url, pushHistory = false, preferredFragmentName = null) => {
+        const parsedPage = new DOMParser().parseFromString(html, 'text/html');
+        const currentMain = document.querySelector('main.page-body[data-ajax-page-navigation]');
+        if (!currentMain) throw new Error('Paginated page content is missing');
+
+        const liveFragment = currentFragment();
+        const fragmentName = preferredFragmentName || liveFragment?.getAttribute('data-ajax-page-fragment');
+        if (fragmentName) {
+            const nextFragment = [...parsedPage.querySelectorAll('[data-ajax-page-fragment]')]
+                .find((fragment) => fragment.getAttribute('data-ajax-page-fragment') === fragmentName);
+            const currentTarget = liveFragment?.getAttribute('data-ajax-page-fragment') === fragmentName
+                ? liveFragment
+                : [...currentMain.querySelectorAll('[data-ajax-page-fragment]')]
+                    .find((fragment) => fragment.getAttribute('data-ajax-page-fragment') === fragmentName);
+            if (!nextFragment || !currentTarget) throw new Error('Paginated results are missing');
+            currentTarget.replaceWith(nextFragment);
+            registerVirtualTables(nextFragment);
+            initializeLiveFilters(nextFragment);
+            pageCache.delete(url.href);
+            if (pushHistory) window.history.pushState({}, '', `${url.pathname}${url.search}`);
+            window.scrollTo(0, 0);
+            prefetchNeighborPages(nextFragment);
+            return;
+        }
+
+        const nextMain = parsedPage.querySelector('main.page-body[data-ajax-page-navigation]');
+        if (!nextMain) throw new Error('Paginated page content is missing');
+
+        currentMain.innerHTML = nextMain.innerHTML;
+        registerVirtualTables(currentMain);
+        initializeLiveFilters(currentMain);
+        pageCache.delete(url.href);
+        if (pushHistory) window.history.pushState({}, '', `${url.pathname}${url.search}`);
+        window.scrollTo(0, 0);
+        prefetchNeighborPages(currentMain);
+    };
+
+    document.addEventListener('click', async (event) => {
+        if (event.defaultPrevented || !(event.target instanceof Element)) return;
+        const main = pageRoot();
+        const link = event.target.closest('a[href]');
+        if (!main || !link || !main.contains(link) || link.target || link.hasAttribute('download') || event.button !== 0
+            || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+
+        const url = new URL(link.href, window.location.href);
+        const paginationControl = link.closest(paginationSelector);
+        const pageLink = paginationControl && url.origin === window.location.origin
+            && url.pathname === window.location.pathname
+            && (url.searchParams.has('page') || url.searchParams.has('roster_page'));
+        if (pageLink) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+        if (!pageLink) return;
+        const requestToken = {};
+        activeRequest = requestToken;
+        link.setAttribute('aria-busy', 'true');
+
+        try {
+            const html = await loadPage(url);
+            if (activeRequest !== requestToken) return;
+            const fragmentName = currentFragment()?.getAttribute('data-ajax-page-fragment') || null;
+            window.history.pushState({ ajaxPaginationFragment: fragmentName }, '', `${url.pathname}${url.search}`);
+            replacePageContent(html, url, false, fragmentName);
+        } catch (error) {
+            if (activeRequest === requestToken) {
+                console.error('AJAX pagination failed; using normal navigation.', error);
+                window.location.assign(url.href);
+            }
+        } finally {
+            link.removeAttribute('aria-busy');
+        }
+    }, true);
+
+    window.addEventListener('popstate', async () => {
+        const url = new URL(window.location.href);
+        const current = pageRoot();
+        if (!current) return;
+        const requestToken = {};
+        activeRequest = requestToken;
+        try {
+            const html = await loadPage(url);
+            if (activeRequest !== requestToken) return;
+            const state = window.history.state || {};
+            replacePageContent(html, url, false, state.ajaxPaginationFragment || null);
+        } catch {
+            if (activeRequest === requestToken) window.location.reload();
+        }
+    });
+
+    const initialResults = currentFragment() || pageRoot();
+    if (initialResults) prefetchNeighborPages(initialResults);
+    document.addEventListener('student-edge:student-results-updated', (event) => {
+        const result = event.detail?.root instanceof HTMLElement ? event.detail.root : null;
+        const pageContent = result?.closest('[data-ajax-page-fragment]')
+            || result?.closest('main.page-body[data-ajax-page-navigation]');
+        if (pageContent) prefetchNeighborPages(pageContent);
+    });
+};
+
+const registerVirtualTables = (root = document) => {
+    root.querySelectorAll('.account-table-wrap, .laptop-table-wrap, .admin-doc-table-wrap, [data-virtual-table]').forEach((wrap) => {
         if (!(wrap instanceof HTMLElement) || wrap.dataset.virtualizedReady === 'true') return;
         if (wrap.hasAttribute('data-no-virtual')) return;
         const table = wrap.querySelector('table');
@@ -1698,6 +1835,7 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('DOMContentLoaded', () => {
     registerVirtualTables();
     initializeLiveFilters();
+    initializeAjaxPagination();
     syncPwaDisplayMode();
     registerThemeUi();
     registerLiquidGlassUi();

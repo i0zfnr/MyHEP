@@ -99,6 +99,7 @@
             </form>
         </div>
 
+        <div data-ajax-page-fragment="insurance-results">
         <p class="ins-table-scroll-hint">{{ __('Swipe table horizontally to view all columns.') }}</p>
         <div class="ins-table-wrap" data-lenis-prevent>
             <table class="ins-table">
@@ -202,6 +203,7 @@
                 {{ $students->onEachSide(1)->links('vendor.pagination.myhep') }}
             </div>
         @endif
+        </div>
     </div>
 </div>
 

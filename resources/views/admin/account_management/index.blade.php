@@ -53,7 +53,7 @@
             </form>
         </div>
 
-        <div data-live-filter-results>
+        <div data-live-filter-results data-ajax-page-fragment="account-results">
         <div class="account-table-wrap" data-no-virtual>
             <table class="account-table">
                 <thead><tr><th>{{ $mode === 'staff' ? 'Staff member' : 'Account' }}</th><th>{{ __('IC Number') }}</th>@if($mode === 'staff')<th>{{ __('Position') }}</th><th>{{ __('Department / Unit') }}</th>@endif<th>{{ __('Status') }}</th><th>{{ __('Actions') }}</th></tr></thead>

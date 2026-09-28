@@ -155,6 +155,7 @@
         </section>
     </form>
 
+    <div data-ajax-page-fragment="certificate-templates">
     <section class="cert-saved card">
         <div class="cert-saved-head">
             <h2>{{ __('Saved Templates') }}</h2>
@@ -216,6 +217,7 @@
     </section>
 
     {{ $templates->links() }}
+    </div>
 </main>
 
 <style>

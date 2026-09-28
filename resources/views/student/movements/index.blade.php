@@ -188,6 +188,7 @@
         <div class="ui-card-head">
             <strong>{{ __('Movement History') }}</strong>
         </div>
+        <div data-ajax-page-fragment="movement-history">
         <div class="move-history-scroll" style="overflow-x:auto;">
             <table class="ui-table">
                 <thead>
@@ -218,6 +219,7 @@
         </div>
         <div class="ui-card-body mv-pagination-wrap">
             {{ $records->onEachSide(1)->links('vendor.pagination.myhep') }}
+        </div>
         </div>
     </section>
 </div>
