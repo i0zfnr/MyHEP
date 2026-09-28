@@ -64,16 +64,16 @@ class ProgramCertificateController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'program_id' => ['nullable', 'integer', Rule::exists('programs', 'id')],
-            'template_pdf' => ['required', 'file', 'mimes:pdf', 'max:20480'],
+            'template_pdf' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg', 'max:20480'],
             'source_page' => ['required', 'integer', 'min:1'],
-            'name_x_mm' => ['required', 'numeric', 'min:0', 'max:297'],
-            'name_y_mm' => ['required', 'numeric', 'min:0', 'max:210'],
-            'name_width_mm' => ['required', 'numeric', 'min:20', 'max:297'],
-            'name_font_size' => ['required', 'integer', 'min:8', 'max:72'],
-            'ic_x_mm' => ['required', 'numeric', 'min:0', 'max:297'],
-            'ic_y_mm' => ['required', 'numeric', 'min:0', 'max:210'],
-            'ic_width_mm' => ['required', 'numeric', 'min:20', 'max:297'],
-            'ic_font_size' => ['required', 'integer', 'min:8', 'max:72'],
+            'included_fields' => ['required', 'array', 'min:1'],
+            'included_fields.*' => ['required', 'string', Rule::in(['student_name', 'ic_no', 'matric_no', 'program_title', 'program_date', 'program_venue', 'institution_logo'])],
+            'field_settings' => ['required', 'array'],
+            'field_settings.*.x_mm' => ['required', 'numeric', 'min:0', 'max:500'],
+            'field_settings.*.y_mm' => ['required', 'numeric', 'min:0', 'max:500'],
+            'field_settings.*.width_mm' => ['required', 'numeric', 'min:5', 'max:500'],
+            'field_settings.*.height_mm' => ['nullable', 'numeric', 'min:5', 'max:500'],
+            'field_settings.*.font_size' => ['nullable', 'integer', 'min:8', 'max:72'],
             'ai_cleaned' => ['required', 'boolean'],
             'name_cover_x_mm' => ['required', 'numeric', 'min:0', 'max:297'],
             'name_cover_y_mm' => ['required', 'numeric', 'min:0', 'max:210'],
@@ -102,11 +102,42 @@ class ProgramCertificateController extends Controller
         }
 
         $storedAt = now()->format('YmdHis');
-        $path = $file->storeAs(
+        $extension = strtolower($file->getClientOriginalExtension());
+        $rawPath = $file->storeAs(
             'certificate-templates',
-            $slug.'-'.$storedAt.'-original.pdf',
+            $slug.'-'.$storedAt.'-source.'.$extension,
             'local'
         );
+        $path = $rawPath;
+        if ($extension !== 'pdf') {
+            $path = 'certificate-templates/'.$slug.'-'.$storedAt.'-original.pdf';
+            $imagePath = Storage::disk('local')->path($rawPath);
+            $pdfPath = Storage::disk('local')->path($path);
+            try {
+                $imageSize = getimagesize($imagePath);
+                if (! $imageSize) {
+                    throw new \RuntimeException('Invalid image dimensions.');
+                }
+                [$imageWidth, $imageHeight] = $imageSize;
+                $orientation = $imageWidth >= $imageHeight ? 'L' : 'P';
+                $pageWidth = $orientation === 'L' ? 297 : 210;
+                $pageHeight = $orientation === 'L' ? 210 : 297;
+                $scale = min($pageWidth / $imageWidth, $pageHeight / $imageHeight);
+                $drawWidth = $imageWidth * $scale;
+                $drawHeight = $imageHeight * $scale;
+                $pdf = new \FPDF($orientation, 'mm', 'A4');
+                $pdf->AddPage();
+                $pdf->Image($imagePath, ($pageWidth - $drawWidth) / 2, ($pageHeight - $drawHeight) / 2, $drawWidth, $drawHeight);
+                $pdf->Output('F', $pdfPath);
+                Storage::disk('local')->delete($rawPath);
+            } catch (\Throwable $exception) {
+                Storage::disk('local')->delete(array_filter([$rawPath, $path]));
+
+                return back()->withInput()->withErrors([
+                    'template_pdf' => __('This image could not be converted into a certificate page. Please use a standard PNG or JPG image.'),
+                ]);
+            }
+        }
         $cleanedPath = null;
 
         try {
@@ -210,30 +241,27 @@ class ProgramCertificateController extends Controller
                 }
             }
 
-            $fields = [
-                [
-                    'field_key' => 'student_name',
-                    'label' => 'Student Name',
-                    'x_mm' => $validated['name_x_mm'],
-                    'y_mm' => $validated['name_y_mm'],
-                    'width_mm' => $validated['name_width_mm'],
-                    'height_mm' => 9,
-                    'font_size' => $validated['name_font_size'],
-                    'font_weight' => 'bold',
-                    'cover_background' => $coverBackground,
-                ],
-                [
-                    'field_key' => 'ic_no',
-                    'label' => 'IC Number',
-                    'x_mm' => $validated['ic_x_mm'],
-                    'y_mm' => $validated['ic_y_mm'],
-                    'width_mm' => $validated['ic_width_mm'],
-                    'height_mm' => 7,
-                    'font_size' => $validated['ic_font_size'],
-                    'font_weight' => 'regular',
-                    'cover_background' => false,
-                ],
+            $fieldLabels = [
+                'student_name' => 'Student Name', 'ic_no' => 'IC Number',
+                'matric_no' => 'Matric Number', 'program_title' => 'Program Name',
+                'program_date' => 'Program Date', 'program_venue' => 'Venue',
+                'institution_logo' => 'Politeknik Besut Logo',
             ];
+            $fields = [];
+            foreach (array_values(array_unique($validated['included_fields'])) as $key) {
+                $settings = $validated['field_settings'][$key] ?? [];
+                $fields[] = [
+                    'field_key' => $key,
+                    'label' => $fieldLabels[$key],
+                    'x_mm' => $settings['x_mm'],
+                    'y_mm' => $settings['y_mm'],
+                    'width_mm' => $settings['width_mm'],
+                    'height_mm' => $settings['height_mm'] ?? ($key === 'institution_logo' ? 24 : 9),
+                    'font_size' => $key === 'institution_logo' ? 1 : ($settings['font_size'] ?? 12),
+                    'font_weight' => in_array($key, ['student_name', 'ic_no'], true) ? 'bold' : 'regular',
+                    'cover_background' => $key === 'student_name' ? $coverBackground : false,
+                ];
+            }
 
             foreach ($fields as $field) {
                 DB::table('certificate_template_fields')->insert([
@@ -625,29 +653,28 @@ class ProgramCertificateController extends Controller
 
     private function validateFieldBounds(array $validated, float $pageWidth, float $pageHeight): void
     {
-        $fields = [
-            'name' => __('Student Name'),
-            'ic' => __('IC Number'),
-        ];
-
         $errors = [];
-        foreach ($fields as $prefix => $label) {
-            $x = (float) $validated[$prefix.'_x_mm'];
-            $y = (float) $validated[$prefix.'_y_mm'];
-            $width = (float) $validated[$prefix.'_width_mm'];
+        foreach ($validated['included_fields'] as $key) {
+            $settings = $validated['field_settings'][$key] ?? [];
+            $x = (float) ($settings['x_mm'] ?? 0);
+            $y = (float) ($settings['y_mm'] ?? 0);
+            $width = (float) ($settings['width_mm'] ?? 0);
+            $height = (float) ($settings['height_mm'] ?? 9);
 
-            if ($x > $pageWidth || $y > $pageHeight || ($x + $width) > ($pageWidth + 1)) {
-                $errors[$prefix.'_x_mm'] = __(':field is outside the PDF page area. Move it inside the template preview.', ['field' => $label]);
+            if ($x > $pageWidth || $y > $pageHeight || ($x + $width) > ($pageWidth + 1) || ($y + $height) > ($pageHeight + 1)) {
+                $errors['field_settings.'.$key.'.x_mm'] = __(':field is outside the PDF page area. Move it inside the template preview.', ['field' => $key]);
             }
         }
 
-        foreach (['name' => __('Student Name'), 'ic' => __('IC Number')] as $prefix => $label) {
-            $coverX = (float) $validated[$prefix.'_cover_x_mm'];
-            $coverY = (float) $validated[$prefix.'_cover_y_mm'];
-            $coverWidth = (float) $validated[$prefix.'_cover_width_mm'];
-            $coverHeight = (float) $validated[$prefix.'_cover_height_mm'];
-            if ($coverX + $coverWidth > $pageWidth + 1 || $coverY + $coverHeight > $pageHeight + 1) {
-                $errors[$prefix.'_cover_x_mm'] = __(':field placeholder cover is outside the PDF page.', ['field' => $label]);
+        if ((bool) $validated['ai_cleaned']) {
+            foreach (['name' => __('Student Name'), 'ic' => __('IC Number')] as $prefix => $label) {
+                $coverX = (float) $validated[$prefix.'_cover_x_mm'];
+                $coverY = (float) $validated[$prefix.'_cover_y_mm'];
+                $coverWidth = (float) $validated[$prefix.'_cover_width_mm'];
+                $coverHeight = (float) $validated[$prefix.'_cover_height_mm'];
+                if ($coverX + $coverWidth > $pageWidth + 1 || $coverY + $coverHeight > $pageHeight + 1) {
+                    $errors[$prefix.'_cover_x_mm'] = __(':field placeholder cover is outside the PDF page.', ['field' => $label]);
+                }
             }
         }
 

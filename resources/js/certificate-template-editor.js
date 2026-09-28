@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fields = Array.from(document.querySelectorAll('.cert-drag-field'));
     const covers = Array.from(document.querySelectorAll('[data-cover-for]'));
     const pills = Array.from(document.querySelectorAll('[data-focus-field]'));
+    const fieldToggles = Array.from(document.querySelectorAll('[data-toggle-field]'));
+    const includedInputs = Array.from(document.querySelectorAll('[data-included-field]'));
 
     if (!input || !canvas || !(pdfCanvas instanceof HTMLCanvasElement)) return;
 
@@ -28,6 +30,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let renderTask = null;
 
     const getInput = (prefix, suffix) => document.querySelector(`[data-field-input="${prefix}_${suffix}"]`);
+    const setInput = (prefix, suffix, value) => {
+        document.querySelectorAll(`[data-field-input="${prefix}_${suffix}"]`).forEach((input) => { input.value = value; });
+    };
+
+    const fitFieldsToPage = () => {
+        fields.forEach((field) => {
+            const prefix = field.dataset.prefix;
+            const width = Number(getInput(prefix, 'w')?.value || 100);
+            const fittedWidth = Math.min(width, pageSize.w - 10);
+            const x = Math.min(Number(getInput(prefix, 'x')?.value || 0), pageSize.w - fittedWidth);
+            setInput(prefix, 'w', fittedWidth.toFixed(1));
+            setInput(prefix, 'x', Math.max(0, x).toFixed(1));
+        });
+    };
 
     const usePlacementOnly = () => {
         const aiCleanedInput = document.querySelector('[data-ai-cleaned]');
@@ -45,6 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const width = Number(getInput(prefix, 'w')?.value || 100);
         field.style.left = `${((x + (width / 2)) / pageSize.w) * 100}%`;
         field.style.top = `${(y / pageSize.h) * 100}%`;
+        if (prefix === 'logo') {
+            field.style.width = `${(width / pageSize.w) * 100}%`;
+            field.style.height = `${(Number(getInput(prefix, 'h')?.value || 24) / pageSize.h) * 100}%`;
+        }
     };
 
     const placeCoverFromInputs = (cover) => {
@@ -90,12 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
             pageSize.h = Number((viewport.height * 25.4 / 72).toFixed(2));
             canvas.dataset.pageWidthMm = String(pageSize.w);
             canvas.dataset.pageHeightMm = String(pageSize.h);
+            fitFieldsToPage();
             fields.forEach(placeFieldFromInputs);
             covers.forEach(placeCoverFromInputs);
 
             renderTask = page.render({ canvasContext: context, viewport: scaled });
             await renderTask.promise;
             status.textContent = `${input.files?.[0]?.name || 'PDF'} · Page ${requestedPage}/${pdf.numPages}`;
+            if (saveButton) saveButton.disabled = false;
         } catch (error) {
             if (error?.name === 'RenderingCancelledException') return;
             pdfCanvas.hidden = true;
@@ -103,6 +125,45 @@ document.addEventListener('DOMContentLoaded', () => {
             empty.querySelector('strong').textContent = 'PDF preview could not be rendered';
             empty.querySelector('span').textContent = 'Try another exported PDF file, or save and let the server validation show the exact issue.';
             status.textContent = 'Preview failed';
+        }
+    };
+
+    const renderImagePreview = async (file) => {
+        const image = new Image();
+        const imageUrl = URL.createObjectURL(file);
+        try {
+            await new Promise((resolve, reject) => {
+                image.onload = resolve;
+                image.onerror = reject;
+                image.src = imageUrl;
+            });
+            pageSize.w = image.width >= image.height ? 297 : 210;
+            pageSize.h = image.width >= image.height ? 210 : 297;
+            canvas.dataset.pageWidthMm = String(pageSize.w);
+            canvas.dataset.pageHeightMm = String(pageSize.h);
+            canvas.style.aspectRatio = `${pageSize.w} / ${pageSize.h}`;
+            const targetWidth = canvas.clientWidth || 960;
+            const targetHeight = targetWidth * pageSize.h / pageSize.w;
+            pdfCanvas.width = Math.floor(targetWidth * window.devicePixelRatio);
+            pdfCanvas.height = Math.floor(targetHeight * window.devicePixelRatio);
+            pdfCanvas.style.width = '100%';
+            pdfCanvas.style.height = '100%';
+            pdfCanvas.hidden = false;
+            empty.style.display = 'none';
+            const context = pdfCanvas.getContext('2d');
+            context.scale(window.devicePixelRatio, window.devicePixelRatio);
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, targetWidth, targetHeight);
+            const scale = Math.min(targetWidth / image.width, targetHeight / image.height);
+            const drawWidth = image.width * scale;
+            const drawHeight = image.height * scale;
+            context.drawImage(image, (targetWidth - drawWidth) / 2, (targetHeight - drawHeight) / 2, drawWidth, drawHeight);
+            fitFieldsToPage();
+            fields.forEach(placeFieldFromInputs);
+            status.textContent = `${file.name} · Image design`;
+            if (saveButton) saveButton.disabled = false;
+        } finally {
+            URL.revokeObjectURL(imageUrl);
         }
     };
 
@@ -115,10 +176,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nameInput && !nameInput.value.trim()) {
             nameInput.value = file.name.replace(/\.pdf$/i, '').replace(/[-_]+/g, ' ').trim();
         }
-        currentPdfBytes = await file.arrayBuffer();
-        await renderPdfPreview();
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        if (isPdf) {
+            currentPdfBytes = await file.arrayBuffer();
+            await renderPdfPreview();
+            if (analyzeButton) analyzeButton.hidden = false;
+        } else {
+            currentPdfBytes = null;
+            if (analyzeButton) analyzeButton.hidden = true;
+            try {
+                await renderImagePreview(file);
+            } catch {
+                aiStatus.textContent = 'Image preview failed. Please choose a valid PNG or JPG design.';
+                aiStatus.className = 'cert-ai-status error';
+                return;
+            }
+        }
         canvas.classList.add('has-pdf');
-        analyzeButton?.click();
+        aiStatus.textContent = 'Blank design selected. Choose the fields you need and drag them into position.';
+        aiStatus.className = 'cert-ai-status success';
     });
 
     pageInput?.addEventListener('change', renderPdfPreview);
@@ -127,6 +203,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = input.files?.[0];
         if (!file) {
             aiStatus.textContent = 'Choose a certificate PDF containing Name and IC placeholders or sample details first.';
+            aiStatus.className = 'cert-ai-status error';
+            return;
+        }
+        if (!['student_name', 'ic_no'].every((key) => fieldToggles.find((toggle) => toggle.dataset.toggleField === key)?.checked)) {
+            aiStatus.textContent = 'AI cleanup is optional and requires both Name and IC fields. You can still position the selected fields manually.';
             aiStatus.className = 'cert-ai-status error';
             return;
         }
@@ -161,8 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 const temporaryFailure = [429, 500, 502, 503, 504].includes(response.status);
                 const fallbackMessage = temporaryFailure
-                    ? 'Gemini or the hosting server is temporarily busy. Please wait a moment and try again, or position both fields manually.'
-                    : `AI detection failed (HTTP ${response.status}). Please try again or position both fields manually.`;
+                ? 'AI is temporarily unavailable. You can still position the fields manually.'
+                    : `AI detection failed (HTTP ${response.status}). You can still position the fields manually.`;
                 throw new Error(result.message || fallbackMessage);
             }
 
@@ -171,15 +252,15 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.entries({ student_name: 'name', ic_no: 'ic' }).forEach(([key, prefix]) => {
                 const detected = result.fields?.[key];
                 if (!detected) return;
-                getInput(prefix, 'x').value = detected.x_mm;
-                getInput(prefix, 'y').value = detected.y_mm;
-                getInput(prefix, 'w').value = detected.width_mm;
-                getInput(prefix, 'font').value = detected.font_size;
-                getInput(prefix, 'cover_x').value = detected.cover.x_mm;
-                getInput(prefix, 'cover_y').value = detected.cover.y_mm;
-                getInput(prefix, 'cover_w').value = detected.cover.width_mm;
-                getInput(prefix, 'cover_h').value = detected.cover.height_mm;
-                getInput(prefix, 'cover_color').value = detected.cover.color;
+                setInput(prefix, 'x', detected.x_mm);
+                setInput(prefix, 'y', detected.y_mm);
+                setInput(prefix, 'w', detected.width_mm);
+                setInput(prefix, 'font', detected.font_size);
+                setInput(prefix, 'cover_x', detected.cover.x_mm);
+                setInput(prefix, 'cover_y', detected.cover.y_mm);
+                setInput(prefix, 'cover_w', detected.cover.width_mm);
+                setInput(prefix, 'cover_h', detected.cover.height_mm);
+                setInput(prefix, 'cover_color', detected.cover.color);
             });
             fields.forEach(placeFieldFromInputs);
             covers.forEach(placeCoverFromInputs);
@@ -194,6 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
             aiStatus.textContent = error.message || 'AI detection failed. Position the fields manually.';
             aiStatus.className = 'cert-ai-status error';
             canvas.classList.remove('is-detected');
+            if (saveButton && currentPdfBytes) saveButton.disabled = false;
         } finally {
             analyzeButton.disabled = false;
             analyzeButton.hidden = false;
@@ -204,10 +286,21 @@ document.addEventListener('DOMContentLoaded', () => {
         pill.addEventListener('click', () => setActive(pill.dataset.focusField));
     });
 
+    fieldToggles.forEach((toggle) => {
+        toggle.addEventListener('change', () => {
+            const key = toggle.dataset.toggleField;
+            const field = fields.find((item) => item.dataset.certField === key);
+            const included = includedInputs.find((item) => item.value === key);
+            if (field) field.hidden = !toggle.checked;
+            if (included) included.disabled = !toggle.checked;
+            if (toggle.checked && field) setActive(key);
+            if (document.querySelector('[data-ai-cleaned]')?.value === '1') usePlacementOnly();
+        });
+    });
+
     fields.forEach((field) => {
         field.addEventListener('pointerdown', (event) => {
             event.preventDefault();
-            usePlacementOnly();
             field.setPointerCapture(event.pointerId);
             setActive(field.dataset.certField);
             field.style.cursor = 'grabbing';
@@ -250,6 +343,17 @@ document.addEventListener('DOMContentLoaded', () => {
         control.addEventListener('input', () => {
             const prefix = control.dataset.fieldInput.replace(/_w$/, '');
             const field = fields.find((item) => item.dataset.prefix === prefix);
+            if (field) placeFieldFromInputs(field);
+        });
+    });
+
+    document.querySelectorAll('[data-field-input]').forEach((control) => {
+        control.addEventListener('input', () => {
+            const name = control.dataset.fieldInput;
+            document.querySelectorAll(`[data-field-input="${name}"]`).forEach((other) => {
+                if (other !== control) other.value = control.value;
+            });
+            const field = fields.find((item) => item.dataset.prefix === name.replace(/_(?:w|h|font|x|y)$/, ''));
             if (field) placeFieldFromInputs(field);
         });
     });

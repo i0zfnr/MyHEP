@@ -168,6 +168,26 @@ class GenerateProgramCertificate implements ShouldQueue
             $pdf->useTemplate($page, 0, 0, $width, $height);
 
             foreach ($fields as $field) {
+                if ((string) $field->field_key === 'institution_logo') {
+                    $logoPath = public_path('images/logo-politeknik-besut.png');
+                    if (is_file($logoPath)) {
+                        $boxWidth = (float) $field->width_mm;
+                        $boxHeight = (float) ($field->height_mm ?: 24);
+                        [$pixelWidth, $pixelHeight] = getimagesize($logoPath);
+                        $scale = min($boxWidth / max(1, $pixelWidth), $boxHeight / max(1, $pixelHeight));
+                        $imageWidth = $pixelWidth * $scale;
+                        $imageHeight = $pixelHeight * $scale;
+                        $pdf->Image(
+                            $logoPath,
+                            (float) $field->x_mm + (($boxWidth - $imageWidth) / 2),
+                            (float) $field->y_mm + (($boxHeight - $imageHeight) / 2),
+                            $imageWidth,
+                            $imageHeight
+                        );
+                    }
+                    continue;
+                }
+
                 if (str_starts_with((string) $field->field_key, 'background_cover')) {
                     $recipientKey = match ((string) $field->field_key) {
                         'background_cover_name' => 'student_name',
@@ -333,11 +353,27 @@ class GenerateProgramCertificate implements ShouldQueue
         return match ($fieldKey) {
             'student_name' => (string) $certificate->student_name,
             'ic_no' => $this->studentIcNo($certificate),
+            'matric_no' => (string) $certificate->matric_no,
             'program_title' => (string) $program->title,
-            'program_date' => $program->starts_at ? date('d M Y', strtotime($program->starts_at)) : '',
+            'program_date' => $this->programDateLabel($program),
+            'program_venue' => (string) ($program->venue ?? ''),
             'serial_no' => (string) $certificate->serial_no,
             default => '',
         };
+    }
+
+    private function programDateLabel(object $program): string
+    {
+        if (! $program->starts_at) {
+            return '';
+        }
+
+        $start = date('d M Y', strtotime($program->starts_at));
+        if (! $program->ends_at || date('Y-m-d', strtotime($program->starts_at)) === date('Y-m-d', strtotime($program->ends_at))) {
+            return $start;
+        }
+
+        return $start.' - '.date('d M Y', strtotime($program->ends_at));
     }
 
     private function studentIcNo(object $certificate): string
