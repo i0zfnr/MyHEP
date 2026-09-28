@@ -23,22 +23,8 @@ body:is(.role-student, .role-qr-staff) {
     --student-nav-inner: rgba(255, 255, 255, .72);
     --student-liquid-nav-height: 64px;
     --student-liquid-nav-gap: 8px;
-    /* Place the bar's glass surface inside the bottom inset; its content stays
-       above the home indicator while the surface fills that area. */
+    /* Preserve the established position outside the iOS-specific override. */
     --student-nav-bottom-offset: 0px;
-}
-
-/* In an installed PWA, place the glass surface through the bottom safe-area
-   inset. The navigation items remain clear of the home indicator because the
-   same inset is included in the bar's bottom padding below. */
-@media (display-mode: standalone) {
-    body:is(.role-student, .role-qr-staff) {
-        --student-nav-bottom-offset: calc(-1 * var(--safe-bottom));
-    }
-}
-
-html.pwa-standalone body:is(.role-student, .role-qr-staff) {
-    --student-nav-bottom-offset: calc(-1 * var(--safe-bottom));
 }
 
 body:is(.role-student, .role-qr-staff)[data-theme="dark"] {
@@ -125,6 +111,35 @@ body.role-admin.liquid-design-disabled {
         box-shadow: 0 10px 24px rgba(39, 34, 30, .11), 0 2px 5px rgba(39, 34, 30, .04), inset 0 1px 0 var(--student-nav-inner), inset 0 -1px 0 var(--student-nav-edge) !important;
         backdrop-filter: blur(var(--se-material-blur)) saturate(var(--se-material-saturation)) !important;
         -webkit-backdrop-filter: blur(var(--se-material-blur)) saturate(var(--se-material-saturation)) !important;
+    }
+
+    /* iPhone Safari and installed iPhone PWAs use the device safe area for
+       nav placement. Android keeps the existing zero-offset layout above. */
+    @supports (-webkit-touch-callout: none) {
+        body:is(.role-student, .role-qr-staff) {
+            --student-nav-bottom-offset: max(var(--student-liquid-nav-gap), var(--safe-bottom));
+        }
+
+        body.role-student .mobile-bottom-nav.mobile-bottom-nav--student,
+        body.role-qr-staff .mobile-bottom-nav.mobile-bottom-nav--staff {
+            bottom: var(--student-nav-bottom-offset) !important;
+            padding: .3rem .34rem !important;
+        }
+
+        body:is(.role-student, .role-qr-staff):is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav:is(.mobile-bottom-nav--student, .mobile-bottom-nav--staff)::after {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            top: calc(100% - 1rem);
+            right: -.35rem;
+            bottom: calc(-1 * var(--safe-bottom));
+            left: -.35rem;
+            border-radius: 0 0 1rem 1rem;
+            background: var(--se-material-nav);
+            backdrop-filter: blur(var(--se-material-blur)) saturate(var(--se-material-saturation));
+            -webkit-backdrop-filter: blur(var(--se-material-blur)) saturate(var(--se-material-saturation));
+            pointer-events: none;
+        }
     }
 
     body.role-qr-staff[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--staff {

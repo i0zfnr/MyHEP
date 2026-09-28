@@ -416,25 +416,27 @@
         }
 
         /* iOS installed PWAs can report 100dvh/100% without the bottom safe
-           area. Use the full viewport height in standalone mode so the fixed
-           app shell and navigation reach the physical screen edge. */
-        @media (display-mode: standalone) {
-            html,
-            body,
-            .app-layout {
+           area. Use the full viewport height there; leave Android's viewport
+           sizing unchanged. */
+        @supports (-webkit-touch-callout: none) {
+            @media (display-mode: standalone) {
+                html,
+                body,
+                .app-layout {
+                    height: 100vh !important;
+                    min-height: 100vh !important;
+                    max-height: 100vh !important;
+                }
+            }
+
+            html.pwa-standalone,
+            html.pwa-standalone body,
+            body.pwa-standalone,
+            body.pwa-standalone > .app-layout {
                 height: 100vh !important;
                 min-height: 100vh !important;
                 max-height: 100vh !important;
             }
-        }
-
-        html.pwa-standalone,
-        html.pwa-standalone body,
-        body.pwa-standalone,
-        body.pwa-standalone > .app-layout {
-            height: 100vh !important;
-            min-height: 100vh !important;
-            max-height: 100vh !important;
         }
 
         .ui-shell { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
