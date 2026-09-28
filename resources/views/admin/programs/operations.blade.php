@@ -204,11 +204,16 @@
         </article>
     </section>
 
-    <!-- Dual Operations Grid: Attendance & Live Check-in (Left) + Questionnaire & Feedback (Right) -->
+    <section class="pmr-card" style="margin-bottom: 1.25rem;">
+        <strong>{{ __('Recommended order') }}</strong>
+        <p>{{ __('Before the program: prepare and publish the questionnaire if required. During the program: open attendance. After the program: close attendance, prepare the report, and submit it for review.') }}</p>
+    </section>
+
+    <!-- Questionnaire setup comes before event-day attendance actions. -->
     <div class="pmr-grid-2" style="margin-bottom: 1.25rem;">
 
-        <!-- 1. Attendance & Live Check-in Control Card -->
-        <section class="pmr-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <!-- 2. Attendance & Live Check-in Control Card -->
+        <section class="pmr-card" style="order: 2; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap;">
                     <div>
@@ -305,8 +310,8 @@
             </div>
         </section>
 
-        <!-- 2. Questionnaire & Feedback Control Card -->
-        <section class="pmr-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <!-- 1. Questionnaire & Feedback Control Card -->
+        <section class="pmr-card" style="order: 1; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap;">
                     <div>
@@ -552,8 +557,8 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
                     <div>
                         <label for="programReportImages">{{ __('Program activity photos') }}</label>
-                        <input id="programReportImages" type="file" name="program_images[]" accept="image/jpeg,image/png,image/webp" multiple required style="width:100%;padding:.7rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);">
-                        <p>{{ __('Paperwork, attendance, and questionnaire responses are collected automatically. Add up to 8 activity photos.') }}</p>
+                        <input id="programReportImages" type="file" name="program_images[]" accept="image/jpeg,image/png,image/webp" multiple style="width:100%;padding:.7rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);">
+                        <p>{{ __('Paperwork, attendance, and questionnaire responses are collected automatically. Activity photos are optional; add up to 8 if available.') }}</p>
                     </div>
                     <div>
                         <label for="reportOutputFormat">{{ __('Report file format') }}</label>

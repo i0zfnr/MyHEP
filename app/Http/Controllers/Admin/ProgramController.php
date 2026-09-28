@@ -63,6 +63,7 @@ class ProgramController extends Controller
             $program->can_view_detail = true;
             $program->is_owned = (int) $program->created_by === (int) session('auth_user.id');
             $program->can_manage = (session('auth_user.admin_role') === 'system_admin') || $program->is_owned;
+            $program->lifecycle_status = $this->lifecycleStatus($program);
         });
 
         $stats = [
@@ -126,10 +127,20 @@ class ProgramController extends Controller
     {
         $record = $this->program($program);
         abort_unless($this->canViewDetail($record), 403);
+        $reportBranch = $record->approval_branch;
+        if (blank($reportBranch)) {
+            $owner = DB::table('admins')->where('id', $record->created_by)->first(['reporting_branch', 'staff_department', 'position']);
+            $reportBranch = $owner?->reporting_branch
+                ?: ProgramApprovalRouting::inferBranch($owner?->staff_department, $owner?->position)
+                ?: 'tpsa';
+        }
+
         return view('admin.programs.show', [
             'program' => $record,
+            'lifecycleStatus' => $this->lifecycleStatus($record),
             'canEdit' => $this->canManage($record),
             'report' => DB::table('program_reports')->where('program_id', $program)->first(),
+            'reportBranchLabel' => strtoupper($reportBranch),
         ]);
     }
 
@@ -325,6 +336,20 @@ class ProgramController extends Controller
     {
         return (int) $program->created_by === (int) session('auth_user.id')
             || in_array(session('auth_user.admin_role'), ['student_affairs_head', 'system_admin'], true);
+    }
+
+    private function lifecycleStatus(object $program): string
+    {
+        if (filled($program->starts_at) && filled($program->ends_at)) {
+            $startsAt = \Illuminate\Support\Carbon::parse($program->starts_at);
+            $endsAt = \Illuminate\Support\Carbon::parse($program->ends_at);
+
+            return now()->lt($startsAt)
+                ? 'Pending to Run'
+                : (now()->gt($endsAt) ? 'Program Closed' : 'Program Running');
+        }
+
+        return $program->status === 'completed' ? 'Program Closed' : 'Pending to Run';
     }
 
     private function canViewPaperwork(object $program): bool

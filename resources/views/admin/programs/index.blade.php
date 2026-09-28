@@ -49,7 +49,7 @@
             <strong class="pmr-tone-accent">{{ number_format($stats['pending'] ?? 0) }}</strong>
         </article>
         <article class="pmr-kpi">
-            <span>{{ __('Active Programs') }}</span>
+            <span>{{ __('Program Records Open for Updates') }}</span>
             <strong class="pmr-tone-success">{{ number_format($stats['active'] ?? 0) }}</strong>
         </article>
         <article class="pmr-kpi">
@@ -67,7 +67,7 @@
                 <option value="">{{ __('All statuses') }}</option>
                 @foreach(['active','completed'] as $status)
                     <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>
-                        {{ __(str_replace('_',' ',ucfirst($status))) }}
+                        {{ $status === 'active' ? __('Open Records') : __('Reports Archived') }}
                     </option>
                 @endforeach
             </select>
@@ -87,8 +87,8 @@
             <div class="pmr-tab-group">
                 <span class="pmr-tab-group-label">{{ __('Status') }}</span>
                 <a href="{{ route('admin.programs.index', ['scope' => $filters['scope'] ?? 'mine']) }}" class="pmr-tab-link {{ blank($filters['status'] ?? null) ? 'active' : '' }}">{{ __('All') }}</a>
-                <a href="{{ route('admin.programs.index', array_filter(['status' => 'active', 'scope' => $filters['scope'] ?? 'mine'])) }}" class="pmr-tab-link {{ ($filters['status'] ?? '') === 'active' ? 'active' : '' }}">{{ __('Active') }}</a>
-                <a href="{{ route('admin.programs.index', array_filter(['status' => 'completed', 'scope' => $filters['scope'] ?? 'mine'])) }}" class="pmr-tab-link {{ ($filters['status'] ?? '') === 'completed' ? 'active' : '' }}">{{ __('Completed / Archived') }}</a>
+                <a href="{{ route('admin.programs.index', array_filter(['status' => 'active', 'scope' => $filters['scope'] ?? 'mine'])) }}" class="pmr-tab-link {{ ($filters['status'] ?? '') === 'active' ? 'active' : '' }}">{{ __('Open Records') }}</a>
+                <a href="{{ route('admin.programs.index', array_filter(['status' => 'completed', 'scope' => $filters['scope'] ?? 'mine'])) }}" class="pmr-tab-link {{ ($filters['status'] ?? '') === 'completed' ? 'active' : '' }}">{{ __('Reports Archived') }}</a>
             </div>
         </nav>
     </section>
@@ -132,6 +132,11 @@
                 </thead>
                 <tbody>
                     @foreach($programs as $program)
+                        @php
+                            $reportStatus = $program->report_status;
+                            $reportDone = $reportStatus === 'archived';
+                            $reportStarted = filled($reportStatus) && $reportStatus !== 'draft';
+                        @endphp
                         <tr>
                             <td>
                                 <strong style="font-size: 0.95rem; color: var(--text-primary, #241d16);">{{ $program->title }}</strong>
@@ -145,11 +150,18 @@
                                 <div style="color: var(--text-secondary, #746b62); font-size: 0.8rem;">{{ __('Program Director') }}</div>
                             </td>
                             <td>
-                                <span class="pmr-badge {{ $program->status }}">
-                                    {{ __(str_replace('_',' ',$program->status)) }}
+                                <span class="pmr-badge {{ $program->lifecycle_status === 'Program Running' ? 'active' : ($program->lifecycle_status === 'Program Closed' ? 'completed' : 'pending_tpsa') }}">
+                                    {{ __($program->lifecycle_status) }}
                                 </span>
                                 <div style="color: var(--text-secondary, #746b62); font-size: 0.8rem; margin-top: 2px;">
-                                    {{ $program->registration_type === 'attendance_only_activity' ? __('Attendance-only activity') : strtoupper($program->paperwork_method) }} &middot; {{ __('Report:') }} {{ __(str_replace('_', ' ', $program->report_status ?: 'not generated')) }}
+                                    {{ $program->registration_type === 'attendance_only_activity' ? __('Attendance-only activity') : strtoupper($program->paperwork_method) }} &middot; {{ __('Report:') }}
+                                    @if($reportDone)
+                                        {{ __('Completed') }}
+                                    @elseif($reportStarted)
+                                        {{ __(str_replace('_', ' ', $reportStatus)) }}
+                                    @else
+                                        {{ __('Not started') }}
+                                    @endif
                                 </div>
                                 @if(($filters['scope'] ?? '') === 'review')
                                     <div style="color:var(--pm-accent);font-size:.76rem;font-weight:800;margin-top:.3rem;">

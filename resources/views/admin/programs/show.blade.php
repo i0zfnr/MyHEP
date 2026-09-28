@@ -28,7 +28,7 @@
     <!-- Hero Header -->
     <header class="pmr-hero">
         <div>
-            <span class="pmr-badge {{ $program->status }}">{{ __(str_replace('_',' ',$program->status)) }}</span>
+            <span class="pmr-badge {{ $lifecycleStatus === 'Program Running' ? 'active' : ($lifecycleStatus === 'Program Closed' ? 'completed' : 'pending_tpsa') }}">{{ __($lifecycleStatus) }}</span>
             <h1>{{ $program->title }}</h1>
             <p>{{ $program->reference_no ?: __('No reference number') }} &middot; {{ __('Directed by') }} <strong>{{ $program->director_name }}</strong></p>
         </div>
@@ -88,7 +88,7 @@
         $reportStatus = $report?->status ?? 'not_generated';
         $reportStage = match($reportStatus) {
             'draft', 'rejected' => __('Program Director'),
-            'pending_tpsa' => __('TPSA'),
+            'pending_tpsa' => __($reportBranchLabel),
             'pending_director' => __('Polytechnic Director'),
             'pending_kj_hep' => __('KJ HEP'),
             'archived' => __('Archived under KJ HEP'),
@@ -96,7 +96,7 @@
         };
         $reportStages = [
             'draft' => __('Program Director draft'),
-            'pending_tpsa' => __('TPSA review'),
+            'pending_tpsa' => __(':branch review', ['branch' => $reportBranchLabel]),
             'pending_director' => __('Polytechnic Director review'),
             'pending_kj_hep' => __('KJ HEP acceptance'),
             'archived' => __('Archived under KJ HEP'),
@@ -136,7 +136,7 @@
                 </div>
             @endforeach
         </div>
-        <p style="margin-top: 1rem;">{{ __('The final report moves from the Program Director to TPSA, the Polytechnic Director, and KJ HEP before it is archived.') }}</p>
+        <p style="margin-top: 1rem;">{{ __('The final report moves from the Program Director to :branch, the Polytechnic Director, and KJ HEP before it is archived.', ['branch' => $reportBranchLabel]) }}</p>
     </section>
 
 </main>
