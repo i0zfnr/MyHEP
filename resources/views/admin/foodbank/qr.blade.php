@@ -18,6 +18,26 @@
         .back-btn:hover { color:var(--gold); }
         .print-btn { padding:0 16px; border:1px solid #493220; border-radius:9px; background:#493220; color:#fff; cursor:pointer; }
         .print-btn:hover { background:#684729; }
+        .poster-upload-btn,.poster-download-btn { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 14px; border:1px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); font:inherit; font-size:.82rem; font-weight:750; cursor:pointer; }
+        .poster-download-btn { border-color:#28684b; background:#28684b; color:#fff; }
+        .poster-download-btn:disabled { opacity:.45; cursor:not-allowed; }
+        .no-print-bar { flex-wrap:wrap; }
+        .poster-upload-input { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+        .poster-upload-status { flex:1 1 100%; color:var(--muted); font-size:.76rem; }
+        .poster-upload-status[data-state="error"] { color:#a12424; }
+        .poster-upload-status[data-state="success"] { color:#17643d; }
+        .poster-edit-panel { display:none; width:min(100%,210mm); padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:#fff; box-shadow:0 8px 24px rgba(48,34,24,.08); }
+        .poster-edit-panel h2 { margin:0 0 4px; font-size:.95rem; }
+        .poster-edit-panel p { margin:0 0 12px; color:var(--muted); font-size:.75rem; }
+        .poster-adjustments { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+        .poster-adjustments label { display:grid; gap:4px; color:var(--muted); font-size:.7rem; font-weight:750; }
+        .poster-adjustments input { width:100%; accent-color:#28684b; }
+        .uploaded-poster-sheet { display:none; position:relative; width:min(100%,210mm); overflow:hidden; background:#fff; box-shadow:0 20px 60px rgba(48,34,24,.16); }
+        .uploaded-poster-sheet canvas { display:block; width:100%; height:auto; }
+        .uploaded-poster-sheet .qr-overlay { position:absolute; z-index:2; width:24%; aspect-ratio:1; max-width:none; object-fit:contain; cursor:move; touch-action:none; user-select:none; -webkit-user-drag:none; }
+        body.custom-poster-active .poster-sheet,body.custom-poster-active .poster-edit-panel,body.custom-poster-active .uploaded-poster-sheet { display:block; }
+        body.custom-poster-active .poster-sheet { display:none; }
+        body.poster-landscape .uploaded-poster-sheet { width:min(100%,297mm); }
         .no-print-bar :focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
 
         .poster-sheet { position:relative; display:flex; flex-direction:column; width:210mm; min-height:297mm; overflow:hidden; padding:16mm 18mm 14mm; border:1px solid #d6c2aa; border-radius:8px; background:radial-gradient(circle at 100% 0,rgba(204,161,102,.12),transparent 31%),var(--paper); box-shadow:0 20px 60px rgba(48,34,24,.16); }
@@ -53,7 +73,8 @@
         @media (max-width:700px) {
             body { padding:12px; }
             .no-print-bar { flex-wrap:wrap; }
-            .no-print-bar a,.no-print-bar button { width:100%; }
+            .no-print-bar a,.no-print-bar button,.poster-upload-btn,.poster-download-btn { width:100%; }
+            .poster-adjustments { grid-template-columns:1fr; gap:6px; }
             .poster-sheet { width:100%; min-height:0; padding:26px 22px 30px 26px; }
             .poster-sheet::before { width:5px; }
             .poster-header { align-items:flex-start; gap:8px; }
@@ -76,10 +97,18 @@
         }
 
         @page { size:A4; margin:0; }
+        @page poster-landscape { size:A4 landscape; margin:0; }
         @media print {
             html,body { width:210mm; height:297mm; }
+            html:has(body.poster-landscape),body.poster-landscape { width:297mm; height:210mm; }
             body { display:block; min-height:0; padding:0; background:#fff; }
             .no-print-bar { display:none !important; }
+            .poster-edit-panel { display:none !important; }
+            body.custom-poster-active .poster-sheet { display:none !important; }
+            body.custom-poster-active .uploaded-poster-sheet { display:block !important; width:auto; height:auto; max-width:100%; max-height:285mm; margin:0 auto; box-shadow:none; break-inside:avoid; }
+            body.custom-poster-active .uploaded-poster-sheet canvas { width:auto; max-width:100%; max-height:285mm; margin:0 auto; }
+            body.custom-poster-active .uploaded-poster-sheet .qr-overlay { width:var(--qr-size-print); }
+            body.poster-landscape.custom-poster-active #uploadedPosterSheet { page:poster-landscape; }
             .poster-sheet { width:210mm; height:297mm; min-height:0; padding:16mm 18mm 14mm; border-radius:0; box-shadow:none; break-inside:avoid; }
             .poster-sheet::before { width:4mm; }
             .poster-header { align-items:center; gap:10mm; }
@@ -102,7 +131,7 @@
         }
     </style>
 </head>
-<body>
+<body data-qr-target="{{ $staticQrUrl }}">
     <div class="no-print-bar">
         <a href="{{ route('admin.foodbank.index') }}" class="back-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -112,7 +141,26 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             {{ __('Cetak Poster Ini (A4)') }}
         </button>
+        <label for="posterUpload" class="poster-upload-btn">{{ __('Muat Naik Poster Pelanggan') }}</label>
+        <input id="posterUpload" class="poster-upload-input" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf">
+        <button id="downloadComposedPoster" type="button" class="poster-download-btn" disabled>{{ __('Muat Turun Poster Dengan QR') }}</button>
+        <div id="posterUploadStatus" class="poster-upload-status" role="status" aria-live="polite">{{ __('Muat naik poster PNG, JPG, WebP atau PDF. Sistem akan mencari ruang kosong untuk QR.') }} {{ __('Fail diproses dalam pelayar dan tidak disimpan.') }}</div>
     </div>
+
+    <section id="posterEditPanel" class="poster-edit-panel" aria-label="{{ __('Laraskan kedudukan QR') }}">
+        <h2>{{ __('Semak kedudukan QR') }}</h2>
+        <p>{{ __('QR dijana untuk borang Food Bank. Seret QR ke lokasi yang sesuai atau gunakan pelaras di bawah sebelum memuat turun atau mencetak.') }}</p>
+        <div class="poster-adjustments">
+            <label>{{ __('Kedudukan mendatar') }} <input id="qrPositionX" type="range" min="0" max="100" value="38"></label>
+            <label>{{ __('Kedudukan menegak') }} <input id="qrPositionY" type="range" min="0" max="100" value="45"></label>
+            <label>{{ __('Saiz QR') }} <input id="qrSize" type="range" min="10" max="60" value="24"></label>
+        </div>
+    </section>
+
+    <section id="uploadedPosterSheet" class="uploaded-poster-sheet" aria-label="{{ __('Poster pelanggan dengan kod QR') }}">
+        <canvas id="posterSourceCanvas"></canvas>
+        <img id="qrOverlay" class="qr-overlay" alt="{{ __('QR Food Bank') }}" draggable="false">
+    </section>
 
     <main class="poster-sheet">
         <header class="poster-header">
@@ -162,5 +210,18 @@
             <span>MyHEP <span aria-hidden="true">·</span> {{ __('POLITEKNIK BESUT TERENGGANU') }}</span>
         </footer>
     </main>
+<script>
+    window.foodBankPosterText = {
+        qrError: @json(__('QR tidak dapat dijana. Sila muat semula halaman.')),
+        fileSizeError: @json(__('Fail poster melebihi had 20 MB.')),
+        reading: @json(__('Sedang membaca poster dan mencari ruang QR...')),
+        fileTypeError: @json(__('Pilih fail PNG, JPG, WebP atau PDF.')),
+        detected: @json(__('Ruang kosong yang sesuai dikesan. Seret QR jika kedudukan perlu dilaraskan.')),
+        fallback: @json(__('Ruang QR tidak dapat dikenal pasti dengan yakin. QR diletakkan di tengah; seret atau laraskan kedudukannya.')),
+        readError: @json(__('Poster tidak dapat dibaca. Cuba fail lain.')),
+        downloadError: @json(__('Poster tidak dapat dimuat turun.')),
+    };
+</script>
+@vite(['resources/js/foodbank-poster.js'])
 </body>
 </html>

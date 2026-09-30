@@ -13,6 +13,15 @@
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
+    <section class="sch-form-count-card" aria-label="{{ __('Students who submitted scholarship details') }}">
+        <div class="sch-form-count-icon" aria-hidden="true">✓</div>
+        <div>
+            <span class="sch-form-count-label">{{ __('Students who submitted scholarship details') }}</span>
+            <strong class="sch-form-count-value">{{ number_format($studentsWithSubmittedScholarshipDetails) }}</strong>
+            <span class="sch-form-count-note">{{ __('Counted once per student from submitted student forms') }}</span>
+        </div>
+    </section>
+
     <div class="sch-record-card">
         <div class="sch-record-head">
             <h1>{{ __('Pengurusan Rekod Scholarship') }}</h1>

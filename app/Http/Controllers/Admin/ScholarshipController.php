@@ -23,6 +23,9 @@ class ScholarshipController extends Controller
     public function index(Request $request): View
     {
         $filters = $this->validateFilters($request);
+        $studentsWithSubmittedScholarshipDetails = Schema::hasTable('student_scholarship_status_forms')
+            ? DB::table('student_scholarship_status_forms')->distinct()->count('student_id')
+            : 0;
         $records = $this->filteredQuery($filters)
             ->select(
                 'scholarships.id',
@@ -39,7 +42,7 @@ class ScholarshipController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.scholarships.index', compact('records', 'filters'));
+        return view('admin.scholarships.index', compact('records', 'filters', 'studentsWithSubmittedScholarshipDetails'));
     }
 
     public function welfare(Request $request): View

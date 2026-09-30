@@ -23,7 +23,7 @@ export default defineConfig({
     },
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/css/auth.css', 'resources/css/design-system.css', 'resources/css/liquid-glass.css', 'resources/css/student-verification-letter.css', 'resources/js/app.js', 'resources/js/certificate-template-editor.js', 'resources/js/password-reset-firebase.js'],
+            input: ['resources/css/app.css', 'resources/css/auth.css', 'resources/css/design-system.css', 'resources/css/liquid-glass.css', 'resources/css/student-verification-letter.css', 'resources/js/app.js', 'resources/js/certificate-template-editor.js', 'resources/js/password-reset-firebase.js', 'resources/js/foodbank-poster.js'],
             refresh: true,
         }),
         tailwindcss(),

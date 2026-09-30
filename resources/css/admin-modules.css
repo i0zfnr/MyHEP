@@ -1251,6 +1251,32 @@ body[data-theme="dark"] .students-table tbody tr:hover {
     display: grid;
     gap: .85rem;
 }
+.sch-form-count-card {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid color-mix(in srgb, var(--se-primary, var(--primary)) 22%, var(--se-border, var(--border)));
+    border-radius: 10px;
+    background: linear-gradient(115deg, color-mix(in srgb, var(--se-primary-soft, var(--primary-hover)) 54%, var(--se-surface, var(--surface))), var(--se-surface, var(--surface)) 74%);
+    box-shadow: var(--se-shadow-sm, 0 2px 8px rgba(73, 50, 29, .06));
+}
+.sch-form-count-icon {
+    display: grid;
+    place-items: center;
+    width: 2.7rem;
+    height: 2.7rem;
+    flex: none;
+    border-radius: 10px;
+    background: var(--se-primary, var(--primary));
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 850;
+}
+.sch-form-count-card > div:last-child { display: grid; gap: .1rem; }
+.sch-form-count-label { color: var(--se-text-muted, var(--text-muted)); font-size: .78rem; font-weight: 750; }
+.sch-form-count-value { color: var(--se-text, var(--text)); font-size: 1.7rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.sch-form-count-note { color: var(--se-text-muted, var(--text-muted)); font-size: .68rem; }
 .sch-record-card {
     border: 1px solid var(--se-border, var(--border));
     border-radius: 8px;
