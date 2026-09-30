@@ -44,7 +44,7 @@
                 @endif
             </form>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="student-sch-table-wrap">
             <table class="student-sch-table">
                 <thead>
                     <tr>

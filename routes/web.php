@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\GuardManagementController;
 use App\Http\Controllers\Admin\LaptopController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\MovementController as AdminMovementController;
+use App\Http\Controllers\Admin\ModuleDashboardController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\ProgramOperationController;
@@ -178,6 +179,12 @@ Route::post('/student/foodbank/claim', [StudentFoodBankController::class, 'store
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
     ->name('admin.dashboard');
+Route::get('/admin/scholarships/dashboard', [ModuleDashboardController::class, 'scholarship'])
+    ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
+    ->name('admin.scholarships.dashboard');
+Route::get('/admin/discipline/dashboard', [ModuleDashboardController::class, 'discipline'])
+    ->middleware(['auth.session:admin', 'admin.scope:discipline'])
+    ->name('admin.discipline.dashboard');
 Route::get('/admin/program-participation-points', [ProgramParticipationPointController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:discipline'])
     ->name('admin.program-participation-points.index');

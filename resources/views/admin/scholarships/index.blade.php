@@ -27,6 +27,9 @@
             <h1>{{ __('Pengurusan Rekod Scholarship') }}</h1>
             <div class="sch-record-actions">
                 <a class="sch-record-btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                @if(in_array(session('auth_user.admin_role'), ['system_admin', 'student_affairs_head'], true))
+                    <a class="sch-record-btn" href="{{ route('admin.scholarships.dashboard') }}">{{ __('Scholarship Dashboard') }}</a>
+                @endif
                 <a class="sch-record-btn" href="{{ route('admin.scholarships.export', request()->query()) }}">{{ __('Export CSV') }}</a>
                 <span class="sch-record-btn is-disabled" aria-disabled="true" title="{{ __('Unavailable') }}">{{ __('Unavailable') }}</span>
             </div>

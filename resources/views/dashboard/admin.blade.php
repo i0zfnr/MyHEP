@@ -99,12 +99,24 @@
                     {{ __('Senarai Kesalahan') }}
                 </a>
                 @endif
+                @if(in_array(session('auth_user.admin_role'), ['system_admin', 'student_affairs_head'], true))
+                    <a href="{{ route('admin.discipline.dashboard') }}" class="portal-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 15v-3m4 3V8m4 7V5m4 10v-5"/></svg>
+                        {{ __('Discipline Dashboard') }}
+                    </a>
+                @endif
             @endif
             @if($hasScholarshipAccess)
                 <a href="{{ route('admin.scholarships.index') }}" class="portal-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0-6l-3.5-2M12 20l-9-5"/></svg>
                     {{ __('Rekod Scholarship') }}
                 </a>
+                @if(in_array(session('auth_user.admin_role'), ['system_admin', 'student_affairs_head'], true))
+                    <a href="{{ route('admin.scholarships.dashboard') }}" class="portal-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 15v-3m4 3V8m4 7V5m4 10v-5"/></svg>
+                        {{ __('Scholarship Dashboard') }}
+                    </a>
+                @endif
                 @unless($hasMovementAccess)
                     <a href="{{ route('admin.students.index') }}" class="portal-link">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z"/></svg>

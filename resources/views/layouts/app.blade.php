@@ -124,6 +124,7 @@
         && !empty($authUser['id'])
         && \App\Http\Controllers\Student\ProgramActivityController::studentHasQrPresenterAccess((int) $authUser['id']);
     $adminOnDiscipline = request()->routeIs('admin.offenses.*')
+        || request()->routeIs('admin.discipline.*')
         || request()->routeIs('admin.vehicle-stickers.*')
         || request()->routeIs('admin.insurance.*')
         || request()->routeIs('admin.movements.*')
@@ -445,6 +446,12 @@
                         @else
                             <div>
                         @endif
+                                @if(in_array($adminScope, ['system_admin', 'student_affairs_head'], true))
+                                    <a href="{{ route('admin.scholarships.dashboard') }}" class="nav-link {{ request()->routeIs('admin.scholarships.dashboard') ? 'active' : '' }}">
+                                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 15v-3m4 3V8m4 7V5m4 10v-5"/></svg>
+                                        {{ __('Scholarship Dashboard') }}
+                                    </a>
+                                @endif
                                 <a href="{{ route('admin.scholarships.index') }}" class="nav-link {{ request()->routeIs('admin.scholarships.index') || request()->routeIs('admin.scholarships.edit') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
                                     {{ __('Rekod Scholarship') }}
@@ -493,6 +500,12 @@
                         @else
                             <div>
                         @endif
+                                @if(in_array($adminScope, ['system_admin', 'student_affairs_head'], true))
+                                    <a href="{{ route('admin.discipline.dashboard') }}" class="nav-link {{ request()->routeIs('admin.discipline.dashboard') ? 'active' : '' }}">
+                                        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m9-9H3m15-6-12 12m0-12 12 12"/></svg>
+                                        {{ __('Discipline Dashboard') }}
+                                    </a>
+                                @endif
                                 <a href="{{ route('admin.offenses.index') }}" class="nav-link {{ request()->routeIs('admin.offenses.index') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6"/></svg>
                                     {{ __('Senarai Kesalahan') }}
