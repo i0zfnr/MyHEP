@@ -122,8 +122,9 @@ class FoodBankTest extends TestCase
             ->get('/admin/foodbank/export');
 
         $response->assertOk();
-        $this->assertStringContainsString('text/csv', $response->headers->get('content-type'));
-        $this->assertStringContainsString('Ahmad Pelajar', $response->streamedContent());
+        $this->assertStringContainsString('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', $response->headers->get('content-type'));
+        $this->assertSame('xlsx', pathinfo($response->headers->get('content-disposition'), PATHINFO_EXTENSION));
+        $this->assertSame('PK', substr($response->streamedContent(), 0, 2));
     }
 
     public function test_student_can_view_food_bank_hub(): void

@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -147,33 +145,15 @@ class FoodBankController extends Controller
             'month' => ['nullable', 'date_format:Y-m'],
         ]);
 
-        $selectCols = [
-            'student_food_bank_claims.id',
-            'student_food_bank_claims.student_id',
+        $query = DB::table('student_food_bank_claims')
+            ->leftJoin('students', 'students.id', '=', 'student_food_bank_claims.student_id')
+            ->select(
             'student_food_bank_claims.claimed_at',
-            'student_food_bank_claims.academic_session',
-            'student_food_bank_claims.semester',
-            'student_food_bank_claims.meal_type',
-            'student_food_bank_claims.notes',
-            'student_food_bank_claims.location',
             'student_food_bank_claims.item_count',
             'student_food_bank_claims.is_b40',
             DB::raw('COALESCE(student_food_bank_claims.student_name, students.full_name) as student_name'),
-            DB::raw('COALESCE(student_food_bank_claims.matric_no, students.matric_no) as matric_no'),
-            'students.ic_no',
-            'students.program',
-            'students.phone',
-        ];
-
-        if (Schema::hasColumn('students', 'family_income')) {
-            $selectCols[] = 'students.family_income';
-        } else {
-            $selectCols[] = DB::raw('NULL as family_income');
-        }
-
-        $query = DB::table('student_food_bank_claims')
-            ->leftJoin('students', 'students.id', '=', 'student_food_bank_claims.student_id')
-            ->select($selectCols);
+            DB::raw('COALESCE(student_food_bank_claims.matric_no, students.matric_no) as matric_no')
+        );
 
         if (! empty($filters['q'])) {
             $search = '%' . trim($filters['q']) . '%';
@@ -208,80 +188,13 @@ class FoodBankController extends Controller
                 ->whereMonth('student_food_bank_claims.claimed_at', (int) $parts[1]);
         }
 
-        $records = $query->orderBy('student_food_bank_claims.claimed_at', 'asc')->get();
+        $records = $query->orderBy('student_food_bank_claims.claimed_at')->get();
+        $filePath = app(\App\Services\FoodBankReportTemplateExporter::class)->generate($records);
+        $filename = 'Laporan_HQ_FoodBank_PoliBesut_' . now()->format('Ymd_His') . '.xlsx';
 
-        $totalRecords = $records->count();
-        $uniqueBeneficiaries = $records->pluck('matric_no')->filter()->unique()->count();
-        $generatedAt = now()->format('d/m/Y H:i:s');
-
-        // Department breakdown for summary
-        $deptCounts = $records->groupBy('program')->map->count();
-        $deptSummary = $deptCounts->map(fn ($c, $p) => ($p ?: 'Lain-lain') . ": $c")->implode(' | ');
-
-        $filename = 'Laporan_HQ_FoodBank_PoliBesut_' . now()->format('Ymd_His') . '.csv';
-
-        return response()->streamDownload(function () use ($records, $totalRecords, $uniqueBeneficiaries, $generatedAt, $deptSummary) {
-            $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM for Excel
-            $csvText = static function (?string $value): string {
-                $value = $value ?? '';
-                return preg_match('/^\s*[=+\-@]/u', $value) ? "'" . $value : $value;
-            };
-
-            // HQ Executive Summary Header
-            fputcsv($handle, ['LAPORAN STATISTIK PENGGUNAAN FOOD BANK SISWA']);
-            fputcsv($handle, ['INSTITUSI', 'POLITEKNIK BESUT TERENGGANU']);
-            fputcsv($handle, ['UNIT / BAHAGIAN', 'HAL EHWAL PELAJAR (UNIT BIASISWA & KEBAJIKAN)']);
-            fputcsv($handle, ['TARIKH DIJANA', $generatedAt]);
-            fputcsv($handle, ['JUMLAH BANTUAN MAKANAN DITEBUS', $totalRecords]);
-            fputcsv($handle, ['JUMLAH PELAJAR UNIK (PENERIMA MANFAAT)', $uniqueBeneficiaries]);
-            fputcsv($handle, ['PECAHAN MENGIKUT PROGRAM', $deptSummary]);
-            fputcsv($handle, []); // Empty row separator
-            fputcsv($handle, ['--- SENARAI TERPERINCI PENEBUSAN MAKANAN OLEH PELAJAR ---']);
-
-            // Table Headers
-            fputcsv($handle, [
-                'BIL',
-                'TARIKH TERIMA BANTUAN',
-                'NAMA PELAJAR',
-                'NO PENDAFTARAN',
-                'JUMLAH ITEM',
-                'PELAJAR B40 (YA/TIDAK)',
-                'NO. KAD PENGENALAN',
-                'PROGRAM / JABATAN',
-                'SEMESTER',
-                'SESI PENGAJIAN',
-                'NO. TELEFON',
-                'PENDAPATAN KELUARGA (RM)',
-                'LOKASI FOOD BANK',
-                'CATATAN',
-            ]);
-
-            $index = 1;
-            foreach ($records as $row) {
-                $claimedTime = $row->claimed_at ? Carbon::parse($row->claimed_at)->format('d/m/Y h:i A') : '-';
-                fputcsv($handle, [
-                    $index++,
-                    $claimedTime,
-                    $csvText($row->student_name),
-                    $csvText($row->matric_no),
-                    $row->item_count ?? '',
-                    $row->is_b40 === null ? '' : ((int) $row->is_b40 === 1 ? 'YA' : 'TIDAK'),
-                    $row->ic_no,
-                    $csvText($row->program ?: '-'),
-                    $row->semester ?: '-',
-                    $row->academic_session ?: '-',
-                    $row->phone ?: '-',
-                    $row->family_income ? number_format((float) $row->family_income, 2) : '-',
-                    $csvText($row->location ?: 'Food Bank Siswa Politeknik Besut'),
-                    $csvText($row->notes ?: '-'),
-                ]);
-            }
-
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
+        return response()->download($filePath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
     }
 
     public function qr(): View

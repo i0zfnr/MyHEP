@@ -9514,3 +9514,63 @@ body.student-scan-mode :is(.topbar,.page-header,.sidebar,.sb-overlay,.app-footer
         body.student-mobile-shell.admin-ai-helper-page .ai-input { height:38px !important; min-height:38px !important; max-height:92px !important; }
         body.student-mobile-shell.admin-ai-helper-page .ai-send { width:36px !important; height:36px !important; }
     }
+
+/* Food Bank adapts to the table panel width, which can be narrow beside the admin sidebar. */
+.fb-table-container { container: foodbank-records / inline-size; }
+.page-body .fb-table-responsive { min-width: 0; }
+.page-body table.fb-table { table-layout: auto; }
+@container foodbank-records (max-width: 760px) {
+    .page-body .fb-table-responsive { overflow: visible !important; }
+    .page-body table.fb-table {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: auto !important;
+    }
+    .page-body .fb-table thead { display: none !important; }
+    .page-body .fb-table tbody {
+        display: grid !important;
+        gap: .75rem;
+        padding: .75rem;
+    }
+    .page-body .fb-table tbody tr {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .7rem 1rem;
+        min-width: 0;
+        padding: .85rem;
+        border: 1px solid var(--se-border, var(--border));
+        border-radius: 10px;
+        background: var(--se-surface, var(--surface));
+    }
+    .page-body .fb-table tbody td {
+        display: flex !important;
+        flex-direction: column;
+        gap: .2rem;
+        min-width: 0 !important;
+        width: auto !important;
+        padding: 0 !important;
+        border: 0 !important;
+        text-align: left !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+    }
+    .page-body .fb-table tbody td::before {
+        content: attr(data-label);
+        color: var(--se-text-muted, var(--text-muted));
+        font-size: .65rem;
+        font-weight: 750;
+        letter-spacing: .045em;
+        text-transform: uppercase;
+    }
+    .page-body .fb-table tbody td:nth-child(3),
+    .page-body .fb-table tbody td:nth-child(9),
+    .page-body .fb-table tbody td:nth-child(10) { grid-column: 1 / -1; }
+    .page-body .fb-table tbody td:nth-child(10) {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: .5rem !important;
+        border-top: 1px solid var(--se-border, var(--border)) !important;
+    }
+}
