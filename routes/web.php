@@ -170,11 +170,10 @@ Route::get('/student/foodbank', [StudentFoodBankController::class, 'index'])
     ->middleware('auth.session:student')
     ->name('student.foodbank.index');
 Route::get('/student/foodbank/claim', [StudentFoodBankController::class, 'claimView'])
-    ->middleware('auth.session:student')
     ->name('student.foodbank.claim');
-Route::post('/student/foodbank/quick-scan', [StudentFoodBankController::class, 'quickScan'])
-    ->middleware('auth.session:student')
-    ->name('student.foodbank.quick_scan');
+Route::post('/student/foodbank/claim', [StudentFoodBankController::class, 'storeClaim'])
+    ->middleware('throttle:10,1')
+    ->name('student.foodbank.store');
 
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
@@ -305,18 +304,6 @@ Route::get('/admin/student-scholarship-status', [StudentScholarshipStatusControl
 Route::get('/admin/student-scholarship-status/documents/{id}/download', [StudentScholarshipStatusController::class, 'downloadOfferLetter'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.student-scholarship-status.documents.download');
-Route::get('/admin/foodbank', [AdminFoodBankController::class, 'index'])
-    ->middleware(['auth.session:admin', 'admin.scope:foodbank'])
-    ->name('admin.foodbank.index');
-Route::get('/admin/foodbank/export', [AdminFoodBankController::class, 'export'])
-    ->middleware(['auth.session:admin', 'admin.scope:foodbank'])
-    ->name('admin.foodbank.export');
-Route::get('/admin/foodbank/qr', [AdminFoodBankController::class, 'printQr'])
-    ->middleware(['auth.session:admin', 'admin.scope:foodbank'])
-    ->name('admin.foodbank.qr');
-Route::delete('/admin/foodbank/{id}', [AdminFoodBankController::class, 'destroy'])
-    ->middleware(['auth.session:admin', 'admin.scope:foodbank'])
-    ->name('admin.foodbank.destroy');
 Route::get('/admin/ai-helper', [AdminAiHelperController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:backoffice', 'feature.enabled:admin_ai_helper,system_admin'])
     ->name('admin.ai-helper.index');

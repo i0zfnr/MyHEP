@@ -30,7 +30,7 @@ class FoodBankController extends Controller
         ]);
 
         $query = DB::table('student_food_bank_claims')
-            ->join('students', 'students.id', '=', 'student_food_bank_claims.student_id')
+            ->leftJoin('students', 'students.id', '=', 'student_food_bank_claims.student_id')
             ->select(
                 'student_food_bank_claims.id',
                 'student_food_bank_claims.student_id',
@@ -40,8 +40,10 @@ class FoodBankController extends Controller
                 'student_food_bank_claims.meal_type',
                 'student_food_bank_claims.notes',
                 'student_food_bank_claims.location',
-                'students.full_name as student_name',
-                'students.matric_no',
+                'student_food_bank_claims.item_count',
+                'student_food_bank_claims.is_b40',
+                DB::raw('COALESCE(student_food_bank_claims.student_name, students.full_name) as student_name'),
+                DB::raw('COALESCE(student_food_bank_claims.matric_no, students.matric_no) as matric_no'),
                 'students.ic_no',
                 'students.program',
                 'students.phone',
@@ -54,6 +56,8 @@ class FoodBankController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('students.full_name', 'like', $search)
                     ->orWhere('students.matric_no', 'like', $search)
+                    ->orWhere('student_food_bank_claims.student_name', 'like', $search)
+                    ->orWhere('student_food_bank_claims.matric_no', 'like', $search)
                     ->orWhere('students.ic_no', 'like', $search);
             });
         }
@@ -93,7 +97,7 @@ class FoodBankController extends Controller
             ->whereYear('claimed_at', $now->year)
             ->whereMonth('claimed_at', $now->month)
             ->count();
-        $uniqueStudents = DB::table('student_food_bank_claims')->distinct('student_id')->count('student_id');
+        $uniqueStudents = $this->uniqueStudentCount();
 
         // Distribution stats
         $programStats = DB::table('student_food_bank_claims')
@@ -152,8 +156,10 @@ class FoodBankController extends Controller
             'student_food_bank_claims.meal_type',
             'student_food_bank_claims.notes',
             'student_food_bank_claims.location',
-            'students.full_name as student_name',
-            'students.matric_no',
+            'student_food_bank_claims.item_count',
+            'student_food_bank_claims.is_b40',
+            DB::raw('COALESCE(student_food_bank_claims.student_name, students.full_name) as student_name'),
+            DB::raw('COALESCE(student_food_bank_claims.matric_no, students.matric_no) as matric_no'),
             'students.ic_no',
             'students.program',
             'students.phone',
@@ -166,7 +172,7 @@ class FoodBankController extends Controller
         }
 
         $query = DB::table('student_food_bank_claims')
-            ->join('students', 'students.id', '=', 'student_food_bank_claims.student_id')
+            ->leftJoin('students', 'students.id', '=', 'student_food_bank_claims.student_id')
             ->select($selectCols);
 
         if (! empty($filters['q'])) {
@@ -174,6 +180,8 @@ class FoodBankController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('students.full_name', 'like', $search)
                     ->orWhere('students.matric_no', 'like', $search)
+                    ->orWhere('student_food_bank_claims.student_name', 'like', $search)
+                    ->orWhere('student_food_bank_claims.matric_no', 'like', $search)
                     ->orWhere('students.ic_no', 'like', $search);
             });
         }
@@ -203,7 +211,7 @@ class FoodBankController extends Controller
         $records = $query->orderBy('student_food_bank_claims.claimed_at', 'asc')->get();
 
         $totalRecords = $records->count();
-        $uniqueBeneficiaries = $records->pluck('student_id')->unique()->count();
+        $uniqueBeneficiaries = $records->pluck('matric_no')->filter()->unique()->count();
         $generatedAt = now()->format('d/m/Y H:i:s');
 
         // Department breakdown for summary
@@ -215,6 +223,10 @@ class FoodBankController extends Controller
         return response()->streamDownload(function () use ($records, $totalRecords, $uniqueBeneficiaries, $generatedAt, $deptSummary) {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM for Excel
+            $csvText = static function (?string $value): string {
+                $value = $value ?? '';
+                return preg_match('/^\s*[=+\-@]/u', $value) ? "'" . $value : $value;
+            };
 
             // HQ Executive Summary Header
             fputcsv($handle, ['LAPORAN STATISTIK PENGGUNAAN FOOD BANK SISWA']);
@@ -230,9 +242,11 @@ class FoodBankController extends Controller
             // Table Headers
             fputcsv($handle, [
                 'BIL',
-                'TARIKH & MASA',
+                'TARIKH TERIMA BANTUAN',
                 'NAMA PELAJAR',
-                'NO. MATRIK',
+                'NO PENDAFTARAN',
+                'JUMLAH ITEM',
+                'PELAJAR B40 (YA/TIDAK)',
                 'NO. KAD PENGENALAN',
                 'PROGRAM / JABATAN',
                 'SEMESTER',
@@ -249,16 +263,18 @@ class FoodBankController extends Controller
                 fputcsv($handle, [
                     $index++,
                     $claimedTime,
-                    $row->student_name,
-                    $row->matric_no,
+                    $csvText($row->student_name),
+                    $csvText($row->matric_no),
+                    $row->item_count ?? '',
+                    $row->is_b40 === null ? '' : ((int) $row->is_b40 === 1 ? 'YA' : 'TIDAK'),
                     $row->ic_no,
-                    $row->program ?: '-',
+                    $csvText($row->program ?: '-'),
                     $row->semester ?: '-',
                     $row->academic_session ?: '-',
                     $row->phone ?: '-',
                     $row->family_income ? number_format((float) $row->family_income, 2) : '-',
-                    $row->location ?: 'Food Bank Siswa Politeknik Besut',
-                    $row->notes ?: '-',
+                    $csvText($row->location ?: 'Food Bank Siswa Politeknik Besut'),
+                    $csvText($row->notes ?: '-'),
                 ]);
             }
 
@@ -279,7 +295,7 @@ class FoodBankController extends Controller
         return view('admin.foodbank.qr', [
             'staticQrUrl' => $staticQrUrl,
             'totalClaims' => DB::table('student_food_bank_claims')->count(),
-            'uniqueStudents' => DB::table('student_food_bank_claims')->distinct('student_id')->count('student_id'),
+            'uniqueStudents' => $this->uniqueStudentCount(),
         ]);
     }
 
@@ -296,5 +312,13 @@ class FoodBankController extends Controller
         }
 
         return redirect()->route('admin.foodbank.index')->with('success', __('Rekod Food Bank berjaya dipadam.'));
+    }
+
+    private function uniqueStudentCount(): int
+    {
+        return (int) DB::table('student_food_bank_claims')
+            ->leftJoin('students', 'students.id', '=', 'student_food_bank_claims.student_id')
+            ->selectRaw('COUNT(DISTINCT COALESCE(student_food_bank_claims.matric_no, students.matric_no)) as total')
+            ->first()->total;
     }
 }

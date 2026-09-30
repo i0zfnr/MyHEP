@@ -44,7 +44,7 @@
     <div class="fb-top-bar">
         <div>
             <h3 class="fb-section-title">{{ __('Rekod Penebusan Makanan Siswa') }}</h3>
-            <p class="fb-section-copy">{{ __('Pelajar mengimbas QR kod statik di kaunter Food Bank untuk mengambil makanan percuma.') }}</p>
+            <p class="fb-section-copy">{{ __('Pelajar mengimbas QR dan menghantar borang penerimaan di kaunter Food Bank.') }}</p>
         </div>
         <div class="fb-actions">
             <a href="{{ route('admin.foodbank.qr') }}" target="_blank" class="fb-btn fb-btn-primary">
@@ -116,7 +116,7 @@
         @if($records->isEmpty())
             <div class="fb-empty">
                 <p class="fb-empty-title">{{ __('Tiada rekod penebusan Food Bank dijumpai.') }}</p>
-                <p class="fb-empty-copy">{{ __('Pelajar yang mengimbas QR di kaunter Food Bank akan dipaparkan secara automatik di sini.') }}</p>
+                <p class="fb-empty-copy">{{ __('Rekod akan dipaparkan selepas pelajar menghantar borang QR Food Bank.') }}</p>
             </div>
         @else
         <div class="fb-table-responsive">
@@ -126,6 +126,8 @@
                         <th class="fb-col-number">{{ __('Bil') }}</th>
                         <th>{{ __('Tarikh & Masa') }}</th>
                         <th>{{ __('Maklumat Pelajar') }}</th>
+                        <th>{{ __('Jumlah Item') }}</th>
+                        <th>{{ __('Pelajar B40') }}</th>
                         <th>{{ __('Program / Jabatan') }}</th>
                         <th>{{ __('Semester') }}</th>
                         <th>{{ __('No. Telefon') }}</th>
@@ -136,30 +138,32 @@
                 <tbody>
                     @foreach($records as $index => $record)
                     <tr>
-                        <td class="fb-muted-strong">{{ $records->firstItem() + $index }}</td>
-                        <td>
+                        <td class="fb-muted-strong" data-label="{{ __('Bil') }}">{{ $records->firstItem() + $index }}</td>
+                        <td data-label="{{ __('Tarikh & Masa') }}">
                             <strong class="fb-date">{{ \Carbon\Carbon::parse($record->claimed_at)->format('d/m/Y') }}</strong>
                             <span class="fb-subtext">{{ \Carbon\Carbon::parse($record->claimed_at)->format('h:i A') }}</span>
                         </td>
-                        <td>
+                        <td data-label="{{ __('Maklumat Pelajar') }}">
                             <div class="fb-student-cell">
                                 <span class="fb-student-name">{{ $record->student_name }}</span>
-                                <span class="fb-student-meta">{{ $record->matric_no }} &middot; {{ $record->ic_no }}</span>
+                                <span class="fb-student-meta">{{ $record->matric_no }}@if($record->ic_no) &middot; {{ $record->ic_no }}@endif</span>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="{{ __('Jumlah Item') }}">{{ $record->item_count ?? '-' }}</td>
+                        <td data-label="{{ __('Pelajar B40') }}">{{ $record->is_b40 === null ? '-' : ((int) $record->is_b40 === 1 ? __('Ya') : __('Tidak')) }}</td>
+                        <td data-label="{{ __('Program / Jabatan') }}">
                             <span class="fb-badge">{{ $record->program ?: __('N/A') }}</span>
                         </td>
-                        <td>
+                        <td data-label="{{ __('Semester') }}">
                             <span class="fb-badge fb-badge-muted">{{ __('Sem') }} {{ $record->semester ?: '-' }}</span>
                         </td>
-                        <td>
+                        <td data-label="{{ __('No. Telefon') }}">
                             <span class="fb-subtext">{{ $record->phone ?: '-' }}</span>
                         </td>
-                        <td>
+                        <td data-label="{{ __('Lokasi') }}">
                             <span class="fb-subtext">{{ $record->location ?: __('Food Bank Siswa') }}</span>
                         </td>
-                        <td class="fb-col-action">
+                        <td class="fb-col-action" data-label="{{ __('Tindakan') }}">
                             <form method="POST" action="{{ route('admin.foodbank.destroy', $record->id) }}" onsubmit="return confirm('{{ __('Adakah anda pasti mahu memadam rekod penebusan ini?') }}');">
                                 @csrf
                                 @method('DELETE')

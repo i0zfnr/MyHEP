@@ -78,7 +78,7 @@
     const jsQr = window.jsQR || null;
     const canvasContext = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
     const movementUrl = new URL(@json(route('student.movements.index')), window.location.origin);
-    const foodBankUrl = new URL(@json(route('student.foodbank.index')), window.location.origin);
+    const foodBankUrl = new URL(@json(route('student.foodbank.claim')), window.location.origin);
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     let stream = null;
@@ -227,39 +227,6 @@
         }, 2200);
     };
 
-    const handleFoodBankClaim = async () => {
-        setStatus(@json(__('QR Food Bank Dikesan. Merekodkan penebusan...')), 'ok');
-        stopScanner();
-
-        try {
-            const res = await fetch(@json(route('student.foodbank.quick_scan')), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                }
-            });
-
-            const data = await res.json();
-            if (res.ok && data.success) {
-                showDoneModal(data);
-            } else {
-                setStatus(data.message || @json(__('Ralat semasa merekod penebusan Food Bank.')), 'danger');
-                setTimeout(() => {
-                    isProcessing = false;
-                    startScanner();
-                }, 2800);
-            }
-        } catch (err) {
-            setStatus(@json(__('Ralat rangkaian. Sila cuba lagi.')), 'danger');
-            setTimeout(() => {
-                isProcessing = false;
-                startScanner();
-            }, 2500);
-        }
-    };
-
     const handleProgramAttendance = async (programId, token) => {
         setStatus(@json(__('QR Program Dikesan. Merekodkan kehadiran...')), 'ok');
         stopScanner();
@@ -343,7 +310,7 @@
         isProcessing = true;
 
         if (parsed.type === 'foodbank') {
-            setStatus(@json(__('Food Bank QR detected. Opening Food Bank page...')), 'ok');
+            setStatus(@json(__('Food Bank QR detected. Opening Food Bank form...')), 'ok');
             stopScanner();
             window.location.assign(foodBankUrl.toString());
             return;

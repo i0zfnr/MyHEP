@@ -22,6 +22,7 @@ class FoodBankTest extends TestCase
             $table->integer('semester')->nullable();
             $table->string('academic_session')->nullable();
             $table->string('phone')->nullable();
+            $table->decimal('family_income', 10, 2)->nullable();
             $table->string('photo')->nullable();
             $table->timestamps();
         });
@@ -36,7 +37,11 @@ class FoodBankTest extends TestCase
 
         Schema::create('student_food_bank_claims', function (Blueprint $table): void {
             $table->id();
-            $table->unsignedBigInteger('student_id')->index();
+            $table->unsignedBigInteger('student_id')->nullable()->index();
+            $table->string('student_name')->nullable();
+            $table->string('matric_no', 50)->nullable();
+            $table->unsignedSmallInteger('item_count')->nullable();
+            $table->boolean('is_b40')->nullable();
             $table->timestamp('claimed_at');
             $table->string('academic_session', 50)->nullable();
             $table->unsignedTinyInteger('semester')->nullable();
@@ -129,38 +134,44 @@ class FoodBankTest extends TestCase
             ->assertSee('Food Bank');
     }
 
-    public function test_student_can_claim_food_aid_via_qr_landing_page(): void
+    public function test_public_qr_form_records_claim_only_after_submission(): void
     {
-        $response = $this->actingAsStudent(1)
-            ->get('/student/foodbank/claim');
+        $response = $this->get('/student/foodbank/claim');
 
         $response->assertOk()
-            ->assertSee('PB22001')
-            ->assertSee('DIT');
+            ->assertSee('Borang Penerimaan Food Bank');
+        $this->assertDatabaseCount('student_food_bank_claims', 0);
+
+        $this->post('/student/foodbank/claim', [
+            'student_name' => 'Ahmad Pelajar',
+            'matric_no' => 'PB22001',
+            'item_count' => 3,
+            'is_b40' => '1',
+        ])->assertRedirect('/student/foodbank/claim');
 
         $this->assertDatabaseHas('student_food_bank_claims', [
             'student_id' => 1,
+            'student_name' => 'Ahmad Pelajar',
+            'matric_no' => 'PB22001',
+            'item_count' => 3,
+            'is_b40' => 1,
             'location' => 'Food Bank Siswa Politeknik Besut',
         ]);
     }
 
-    public function test_student_quick_scan_api_records_claim_and_throttles_duplicates(): void
+    public function test_public_form_rejects_invalid_and_immediate_duplicate_claims(): void
     {
-        // First scan succeeds
-        $firstResponse = $this->actingAsStudent(1)
-            ->postJson('/student/foodbank/quick-scan');
+        $this->post('/student/foodbank/claim', [
+            'student_name' => 'Siti Nurhaliza',
+            'matric_no' => 'PB22002',
+            'item_count' => 0,
+            'is_b40' => '2',
+        ])->assertSessionHasErrors(['item_count', 'is_b40']);
 
-        $firstResponse->assertOk()
-            ->assertJsonPath('success', true)
-            ->assertJsonPath('already_claimed', false);
-
-        // Immediate subsequent scan notifies recent claim
-        $secondResponse = $this->actingAsStudent(1)
-            ->postJson('/student/foodbank/quick-scan');
-
-        $secondResponse->assertOk()
-            ->assertJsonPath('success', true)
-            ->assertJsonPath('already_claimed', true);
+        $claim = ['student_name' => 'Siti Nurhaliza', 'matric_no' => 'PB22002', 'item_count' => 2, 'is_b40' => '0'];
+        $this->post('/student/foodbank/claim', $claim)->assertRedirect('/student/foodbank/claim');
+        $this->post('/student/foodbank/claim', $claim)->assertSessionHasErrors('matric_no');
+        $this->assertDatabaseCount('student_food_bank_claims', 1);
     }
 
     private function actingAsAdmin(int $id, string $adminRole): static

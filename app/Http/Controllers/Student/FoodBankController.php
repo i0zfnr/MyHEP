@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -52,120 +50,68 @@ class FoodBankController extends Controller
         ));
     }
 
-    public function claimView(Request $request): View|RedirectResponse
+    public function claimView(): View
     {
-        $studentId = (int) session('auth_user.id');
-        if (! $studentId) {
-            return redirect()->route('login')->with('warning', __('Sila log masuk terlebih dahulu untuk menebus Food Bank.'));
-        }
-
-        $student = DB::table('students')->where('id', $studentId)->first();
-        if (! $student) {
-            abort(404, __('Maklumat pelajar tidak dijumpai.'));
-        }
-
-        // Check if student claimed within the last 5 minutes (avoid duplicate instant double-scan)
-        $recentClaim = DB::table('student_food_bank_claims')
-            ->where('student_id', $studentId)
-            ->where('claimed_at', '>=', now()->subMinutes(5))
-            ->orderByDesc('claimed_at')
-            ->first();
-
-        if ($recentClaim) {
-            $claim = $recentClaim;
-            $isNew = false;
-        } else {
-            $claimId = DB::table('student_food_bank_claims')->insertGetId([
-                'student_id' => $student->id,
-                'claimed_at' => now(),
-                'academic_session' => $student->academic_session,
-                'semester' => $student->semester,
-                'meal_type' => 'makanan_percuma',
-                'notes' => 'Penebusan melalui Imbasan QR Rasmi Food Bank',
-                'location' => 'Food Bank Siswa Politeknik Besut',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $claim = DB::table('student_food_bank_claims')->where('id', $claimId)->first();
-            $isNew = true;
-
-            auditLog('foodbank.claim', 'student_food_bank_claims', $claimId, 'Student claimed food from Food Bank');
-        }
-
-        $totalStudentClaims = DB::table('student_food_bank_claims')
-            ->where('student_id', $studentId)
-            ->count();
-
-        return view('student.foodbank.claim', compact(
-            'student',
-            'claim',
-            'isNew',
-            'totalStudentClaims'
-        ));
+        return view('student.foodbank.claim');
     }
 
-    public function quickScan(Request $request): JsonResponse
+    public function storeClaim(Request $request): RedirectResponse
     {
-        $studentId = (int) session('auth_user.id');
-        if (! $studentId) {
-            return response()->json([
-                'success' => false,
-                'message' => __('Sesi tamat. Sila log masuk semula.'),
-            ], 401);
+        $data = $request->validate([
+            'student_name' => ['required', 'string', 'max:255'],
+            'matric_no' => ['required', 'string', 'max:50'],
+            'item_count' => ['required', 'integer', 'min:1', 'max:999'],
+            'is_b40' => ['required', 'boolean'],
+        ]);
+
+        $name = trim(preg_replace('/\s+/u', ' ', $data['student_name']));
+        $matricNo = strtoupper(trim($data['matric_no']));
+        if ($name === '' || $matricNo === '') {
+            return back()->withInput()->withErrors(['student_name' => __('Sila lengkapkan nama dan nombor matrik.')]);
         }
 
-        $student = DB::table('students')->where('id', $studentId)->first();
-        if (! $student) {
-            return response()->json([
-                'success' => false,
-                'message' => __('Profil pelajar tidak dijumpai.'),
-            ], 404);
-        }
+        // Link matching student accounts for their own history, but allow public submissions.
+        $student = DB::table('students')->where('matric_no', $matricNo)->first();
+        $studentId = $student && mb_strtolower(trim($student->full_name)) === mb_strtolower($name)
+            ? $student->id
+            : null;
+        $linkedStudent = $studentId ? $student : null;
 
-        // Avoid double-submit within 3 minutes
         $recentClaim = DB::table('student_food_bank_claims')
-            ->where('student_id', $studentId)
+            ->where('matric_no', $matricNo)
             ->where('claimed_at', '>=', now()->subMinutes(3))
-            ->first();
-
-        if (! $recentClaim) {
-            $claimId = DB::table('student_food_bank_claims')->insertGetId([
-                'student_id' => $student->id,
-                'claimed_at' => now(),
-                'academic_session' => $student->academic_session,
-                'semester' => $student->semester,
-                'meal_type' => 'makanan_percuma',
-                'notes' => 'Imbasan QR dalam aplikasi MyHEP',
-                'location' => 'Food Bank Siswa Politeknik Besut',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            auditLog('foodbank.quick_scan', 'student_food_bank_claims', $claimId, 'Student quick-scanned food bank QR');
+            ->exists();
+        if ($recentClaim) {
+            return back()->withInput()->withErrors(['matric_no' => __('Penebusan untuk nombor matrik ini baru sahaja direkodkan. Sila semak dengan petugas Food Bank.')]);
         }
 
-        $totalClaims = DB::table('student_food_bank_claims')->where('student_id', $studentId)->count();
+        $claimedAt = now();
+        $claimId = DB::table('student_food_bank_claims')->insertGetId([
+            'student_id' => $studentId,
+            'student_name' => $name,
+            'matric_no' => $matricNo,
+            'item_count' => (int) $data['item_count'],
+            'is_b40' => (bool) $data['is_b40'],
+            'claimed_at' => $claimedAt,
+            'academic_session' => $linkedStudent->academic_session ?? null,
+            'semester' => $linkedStudent->semester ?? null,
+            'meal_type' => 'makanan_percuma',
+            'notes' => 'Borang awam QR Food Bank',
+            'location' => 'Food Bank Siswa Politeknik Besut',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => $claimedAt,
+            'updated_at' => $claimedAt,
+        ]);
 
-        return response()->json([
-            'success' => true,
-            'already_claimed' => (bool) $recentClaim,
-            'message' => $recentClaim ? __('Penebusan anda telah direkodkan sebentar tadi.') : __('Makanan Food Bank Berjaya Ditebus!'),
-            'student' => [
-                'full_name' => $student->full_name,
-                'matric_no' => $student->matric_no,
-                'program' => $student->program ?: 'Politeknik Besut',
-                'semester' => $student->semester ? 'Semester ' . $student->semester : '',
-            ],
-            'claim' => [
-                'claimed_at' => now()->format('d/m/Y h:i A'),
-                'total_claims' => $totalClaims,
-                'location' => 'Food Bank Siswa Politeknik Besut',
-            ],
+        auditLog('foodbank.claim', 'student_food_bank_claims', $claimId, 'Public Food Bank form submitted');
+
+        return redirect()->route('student.foodbank.claim')->with('foodbank_receipt', [
+            'student_name' => $name,
+            'matric_no' => $matricNo,
+            'item_count' => (int) $data['item_count'],
+            'is_b40' => (bool) $data['is_b40'],
+            'claimed_at' => $claimedAt->format('d/m/Y, h:i A'),
         ]);
     }
 }
