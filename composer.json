@@ -11,11 +11,13 @@
         "firebase/php-jwt": "7.0",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
+        "masbug/flysystem-google-drive-ext": "^2.5.0",
         "minishlink/web-push": "9.0",
         "phpoffice/phpword": "^1.4",
         "resend/resend-php": "1.0",
         "setasign/fpdf": "^1.8.6",
-        "setasign/fpdi": "^2.6"
+        "setasign/fpdi": "^2.6",
+        "spatie/laravel-backup": "^10.3.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

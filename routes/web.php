@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AiHelperController as AdminAiHelperController;
 use App\Http\Controllers\Admin\ActiveVisitorController;
 use App\Http\Controllers\Admin\BugReportController as AdminBugReportController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\FeatureController;
 use App\Http\Controllers\Admin\FoodBankController as AdminFoodBankController;
 use App\Http\Controllers\Admin\GuardManagementController;
@@ -179,6 +180,12 @@ Route::post('/student/foodbank/claim', [StudentFoodBankController::class, 'store
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware('auth.session:admin')
     ->name('admin.dashboard');
+Route::get('/admin/backups', [BackupController::class, 'index'])
+    ->middleware(['auth.session:admin', 'admin.scope:system'])
+    ->name('admin.backups.index');
+Route::post('/admin/backups', [BackupController::class, 'store'])
+    ->middleware(['auth.session:admin', 'admin.scope:system', 'throttle:2,5'])
+    ->name('admin.backups.store');
 Route::get('/admin/scholarships/dashboard', [ModuleDashboardController::class, 'scholarship'])
     ->middleware(['auth.session:admin', 'admin.scope:scholarship'])
     ->name('admin.scholarships.dashboard');

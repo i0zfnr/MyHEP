@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use App\Services\Backups\BackupSettings;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -89,3 +90,22 @@ Artisan::command('ai:prune-conversations', function (): void {
 })->purpose('Delete inactive student and admin AI conversations');
 
 Schedule::command('ai:prune-conversations')->dailyAt('02:15')->withoutOverlapping();
+
+Schedule::command('myhep:backup-dispatch database --scheduled')
+    ->hourlyAt((int) config('myhep-backups.database_schedule_minute', 10))
+    ->withoutOverlapping(80);
+
+Schedule::command('myhep:backup-dispatch full --scheduled')
+    ->dailyAt((string) config('myhep-backups.full_schedule_time', '00:20'))
+    ->withoutOverlapping(1440);
+
+Schedule::command('myhep:backup-clean')
+    ->dailyAt((string) config('myhep-backups.cleanup_schedule_time', '02:30'))
+    ->withoutOverlapping(180);
+
+// Cron-only fallback for hosts where a persistent queue worker cannot be kept alive.
+Schedule::command('queue:work backups --queue=backups --stop-when-empty --tries=1 --timeout=14400')
+    ->everyMinute()
+    ->withoutOverlapping(300)
+    ->when(fn (): bool => (bool) config('myhep-backups.queue_cron_fallback', true)
+        && app(BackupSettings::class)->isConfigured());
