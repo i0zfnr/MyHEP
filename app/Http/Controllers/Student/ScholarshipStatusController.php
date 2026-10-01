@@ -37,7 +37,16 @@ class ScholarshipStatusController extends Controller
                 ->first()
             : null;
 
-        return view('student.scholarship_status.form', compact('student', 'submission', 'document'));
+        $hasScholarshipEvidence = $document
+            && ($document->category ?? null) === 'scholarship'
+            && filled($document->path ?? null)
+            && Storage::disk($document->disk ?: 'student_documents')->exists($document->path);
+        $hasWelfareEvidence = $document
+            && ($document->category ?? null) === 'welfare'
+            && filled($document->path ?? null)
+            && Storage::disk($document->disk ?: 'student_documents')->exists($document->path);
+
+        return view('student.scholarship_status.form', compact('student', 'submission', 'document', 'hasScholarshipEvidence', 'hasWelfareEvidence'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -47,6 +56,14 @@ class ScholarshipStatusController extends Controller
         $existingDoc = $existingSubmission
             ? DB::table('student_documents')->where('source_type', 'scholarship_status')->where('source_id', $existingSubmission->id)->first()
             : null;
+        $hasScholarshipEvidence = $existingDoc
+            && ($existingDoc->category ?? null) === 'scholarship'
+            && filled($existingDoc->path ?? null)
+            && Storage::disk($existingDoc->disk ?: 'student_documents')->exists($existingDoc->path);
+        $hasWelfareEvidence = $existingDoc
+            && ($existingDoc->category ?? null) === 'welfare'
+            && filled($existingDoc->path ?? null)
+            && Storage::disk($existingDoc->disk ?: 'student_documents')->exists($existingDoc->path);
 
         if (! $request->has('application_type') && $request->has('has_scholarship')) {
             $request->merge([
@@ -62,7 +79,7 @@ class ScholarshipStatusController extends Controller
             // Scholarship fields
             'sponsor_name' => ['nullable', 'string', 'max:150', Rule::requiredIf(fn () => $type === 'scholarship')],
             'monthly_amount' => ['nullable', 'numeric', 'min:0', Rule::requiredIf(fn () => $type === 'scholarship')],
-            'offer_letter' => [$type === 'scholarship' && ! $existingDoc ? 'required' : 'nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
+            'offer_letter' => [Rule::requiredIf(fn () => $type === 'scholarship' && ! $hasScholarshipEvidence), 'nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
             
             // Welfare fields
             'guardian_name' => ['nullable', 'string', 'max:150', Rule::requiredIf(fn () => $type === 'welfare')],
@@ -74,7 +91,7 @@ class ScholarshipStatusController extends Controller
             'welfare_category' => ['nullable', 'string', 'max:100', Rule::requiredIf(fn () => $type === 'welfare')],
             'welfare_description' => ['nullable', 'string', 'max:2000', Rule::requiredIf(fn () => $type === 'welfare')],
             'welfare_amount' => ['nullable', 'numeric', 'min:0'],
-            'welfare_proof' => [$type === 'welfare' && ! $existingDoc ? 'required' : 'nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
+            'welfare_proof' => [Rule::requiredIf(fn () => $type === 'welfare' && ! $hasWelfareEvidence), 'nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
             
             // Common
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -151,7 +168,7 @@ class ScholarshipStatusController extends Controller
                 if (in_array($validated['application_type'], ['scholarship', 'welfare'], true) && $newPath && $uploadedFile) {
                     $docTitle = $validated['application_type'] === 'welfare'
                         ? 'Dokumen Bukti Permohonan Kebajikan'
-                        : 'Surat Tawaran Biasiswa';
+                        : 'Dokumen Bukti Biasiswa';
                     $docCategory = $validated['application_type'] === 'welfare'
                         ? 'welfare'
                         : 'scholarship';
@@ -241,4 +258,3 @@ class ScholarshipStatusController extends Controller
                 : __('Maklumat biasiswa/bantuan anda berjaya dikemaskini.'));
     }
 }
-

@@ -111,10 +111,10 @@
                     </div>
 
                     <div style="margin-top:12px;">
-                        <label for="offer_letter">{{ __('Surat Tawaran Biasiswa (PDF / Imej)') }} @if(!$document)<span class="req">*</span>@endif</label>
-                        <input id="offer_letter" type="file" name="offer_letter" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp">
-                        <p class="hint">{{ __('Format diterima: PDF, JPG, PNG sehingga 10 MB. Dokumen ini wajib untuk pengesahan.') }}</p>
-                        @if($document && ($submission->application_type ?? '') === 'scholarship')
+                        <label for="offer_letter">{{ __('Bukti Biasiswa (PDF / Imej)') }} @if(!$hasScholarshipEvidence)<span class="req">*</span>@endif</label>
+                        <input id="offer_letter" type="file" name="offer_letter" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" @if(($currentType ?? '') === 'scholarship' && !$hasScholarshipEvidence) required @endif>
+                        <p class="hint">{{ __('Wajib jika menerima biasiswa. Contoh: surat tawaran, penyata bayaran, atau tangkap layar portal penaja. PDF/JPG/PNG/WEBP, maksimum 10 MB.') }}</p>
+                        @if($hasScholarshipEvidence && ($submission->application_type ?? '') === 'scholarship')
                             <div style="margin-top:8px;">
                                 <a class="btn" href="{{ route('student.documents.download', $document->id) }}">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -209,10 +209,10 @@
                     </div>
 
                     <div style="margin-top:12px;">
-                        <label for="welfare_proof">{{ __('Dokumen Bukti Kebajikan (PDF / Imej)') }} @if(!$document)<span class="req">*</span>@endif</label>
-                        <input id="welfare_proof" type="file" name="welfare_proof" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp">
+                        <label for="welfare_proof">{{ __('Dokumen Bukti Kebajikan (PDF / Imej)') }} @if(!$hasWelfareEvidence)<span class="req">*</span>@endif</label>
+                        <input id="welfare_proof" type="file" name="welfare_proof" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" @if(($currentType ?? '') === 'welfare' && !$hasWelfareEvidence) required @endif>
                         <p class="hint">{{ __('Contoh dokumen: Slip Gaji Ibu Bapa / Surat Pengesahan Pendapatan Penghulu / Sijil Kematian / Laporan Polis / Surat Hospital (Maksimum 10 MB).') }}</p>
-                        @if($document && ($submission->application_type ?? '') === 'welfare')
+                        @if($hasWelfareEvidence && ($submission->application_type ?? '') === 'welfare')
                             <div style="margin-top:8px;">
                                 <a class="btn" href="{{ route('student.documents.download', $document->id) }}">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -267,7 +267,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const welfareDesc = document.getElementById('welfare_description');
     const welfareFileInput = document.getElementById('welfare_proof');
 
-    const hasExistingDoc = @json((bool) $document);
+    const hasExistingScholarshipEvidence = @json((bool) $hasScholarshipEvidence);
+    const hasExistingWelfareEvidence = @json((bool) $hasWelfareEvidence);
 
     function syncType() {
         const type = document.querySelector('input[name="application_type"]:checked')?.value || 'none';
@@ -285,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const isSch = (type === 'scholarship');
         if (sponsorInput) sponsorInput.required = isSch;
         if (amountInput) amountInput.required = isSch;
-        if (offerFileInput) offerFileInput.required = isSch && !hasExistingDoc;
+        if (offerFileInput) offerFileInput.required = isSch && !hasExistingScholarshipEvidence;
 
         // Welfare requirements
         const isWel = (type === 'welfare');
@@ -294,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (guardianPhone) guardianPhone.required = isWel;
         if (famIncome) famIncome.required = isWel;
         if (welfareDesc) welfareDesc.required = isWel;
-        if (welfareFileInput) welfareFileInput.required = isWel && !hasExistingDoc;
+        if (welfareFileInput) welfareFileInput.required = isWel && !hasExistingWelfareEvidence;
     }
 
     document.querySelectorAll('input[name="application_type"]').forEach(function (radio) {
