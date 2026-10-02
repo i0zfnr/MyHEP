@@ -3003,5 +3003,13 @@
     "Server error while recording attendance. Please ask admin to check the Laravel log.": "Ralat pelayan semasa merekod kehadiran. Sila minta admin semak log Laravel.",
     "Unable to read the server response. Please try again.": "Tidak dapat membaca respons pelayan. Sila cuba lagi.",
     "Attendance could not be recorded. Please ask the admin to check the server log.": "Kehadiran tidak dapat direkodkan. Sila minta admin semak log pelayan.",
-    "Food Bank QR detected. Opening Food Bank page...": "QR Food Bank dikesan. Membuka halaman Food Bank..."
+    "Food Bank QR detected. Opening Food Bank page...": "QR Food Bank dikesan. Membuka halaman Food Bank...",
+    "Scholarship & Welfare": "Biasiswa & Kebajikan",
+    "Scholarship and welfare sections": "Bahagian biasiswa dan kebajikan",
+    "Student Overview": "Ringkasan Pelajar",
+    "Submitted Forms": "Borang Dihantar",
+    "Students with submitted forms": "Pelajar yang telah menghantar borang",
+    "Unique students with a submitted status form": "Kiraan pelajar unik berdasarkan borang status yang dihantar",
+    "Manage scholarship award records, including provider, amount and status. The count below shows students with submitted forms; use Student Overview to review full scholarship and welfare details.": "Urus rekod anugerah biasiswa termasuk penaja, jumlah dan status. Kiraan di bawah menunjukkan pelajar yang telah menghantar borang; gunakan Ringkasan Pelajar untuk menyemak butiran penuh biasiswa dan kebajikan.",
+    "View every student and their scholarship or welfare status, including form details, supporting documents and students who have not submitted.": "Lihat status biasiswa atau kebajikan setiap pelajar, termasuk butiran borang, dokumen sokongan dan pelajar yang belum menghantar borang."
 }

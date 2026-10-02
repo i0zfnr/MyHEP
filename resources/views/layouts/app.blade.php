@@ -452,17 +452,13 @@
                                         {{ __('Scholarship Dashboard') }}
                                     </a>
                                 @endif
-                                <a href="{{ route('admin.scholarships.index') }}" class="nav-link {{ request()->routeIs('admin.scholarships.index') || request()->routeIs('admin.scholarships.edit') ? 'active' : '' }}">
+                                <a href="{{ route('admin.student-scholarship-status.index') }}" class="nav-link {{ request()->routeIs('admin.scholarships.index') || request()->routeIs('admin.scholarships.edit') || request()->routeIs('admin.scholarships.create') || request()->routeIs('admin.student-scholarship-status.*') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-                                    {{ __('Rekod Scholarship') }}
+                                    {{ __('Scholarship & Welfare') }}
                                 </a>
                                 <a href="{{ route('admin.scholarships.b40-tvet') }}" class="nav-link {{ request()->routeIs('admin.scholarships.b40-tvet*') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h10"/></svg>
                                     {{ __('SCHOLARSHIP B40 TVET') }}
-                                </a>
-                                <a href="{{ route('admin.student-scholarship-status.index') }}" class="nav-link {{ request()->routeIs('admin.student-scholarship-status.*') ? 'active' : '' }}">
-                                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-7.5A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5h7.5A2.25 2.25 0 0116.5 6.75z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h4.5M8.25 12.75h4.5"/></svg>
-                                    {{ __('Data Status Biasiswa') }}
                                 </a>
                                 <a href="{{ route('admin.welfare.index') }}" class="nav-link {{ request()->routeIs('admin.welfare.*') ? 'active' : '' }}">
                                     <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -898,11 +894,11 @@
         $staffCategory = $authUser['staff_category'] ?? null;
         [$staffWorkRoute, $staffWorkLabel, $staffWorkActive] = match ($adminScope) {
             'guard' => [route('admin.movements.index'), __('Movements'), request()->routeIs('admin.movements.*')],
-            'scholarship_admin' => [route('admin.scholarships.index'), __('Scholarships'), request()->routeIs('admin.scholarships.*')],
+            'scholarship_admin' => [route('admin.student-scholarship-status.index'), __('Scholarships'), request()->routeIs('admin.scholarships.index') || request()->routeIs('admin.scholarships.edit') || request()->routeIs('admin.scholarships.create') || request()->routeIs('admin.student-scholarship-status.*')],
             'discipline_admin' => [route('admin.offenses.index'), __('Discipline'), request()->routeIs('admin.offenses.*')],
             'student_affairs_head' => [route('admin.students.index'), __('Students'), request()->routeIs('admin.students.*')],
             default => match ($staffCategory) {
-                'scholarship' => [route('admin.scholarships.index'), __('Scholarships'), request()->routeIs('admin.scholarships.*')],
+                'scholarship' => [route('admin.student-scholarship-status.index'), __('Scholarships'), request()->routeIs('admin.scholarships.index') || request()->routeIs('admin.scholarships.edit') || request()->routeIs('admin.scholarships.create') || request()->routeIs('admin.student-scholarship-status.*')],
                 'discipline' => [route('admin.offenses.index'), __('Discipline'), request()->routeIs('admin.offenses.*')],
                 default => [route('admin.dashboard'), __('Work'), false],
             },

@@ -1,30 +1,32 @@
 @extends('layouts.app')
 
-@section('title', __('Rekod Scholarship'))
+@section('title', __('Scholarship & Welfare'))
 
 
 
 @section('header')
-    <h2 class="sch-record-page-title">{{ __('Rekod Scholarship') }}</h2>
+    <h2 class="sch-record-page-title">{{ __('Scholarship & Welfare') }}</h2>
 @endsection
 
 @section('content')
 <div class="wrap sch-record-page">
+    @include('admin.scholarships._module_tabs')
+
     @if(session('success'))<div class="ok">{{ session('success') }}</div>@endif
     @if($errors->any())<div class="err">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 
-    <section class="sch-form-count-card" aria-label="{{ __('Students who submitted scholarship details') }}">
+    <section class="sch-form-count-card" aria-label="{{ __('Students with submitted forms') }}">
         <div class="sch-form-count-icon" aria-hidden="true">✓</div>
         <div>
-            <span class="sch-form-count-label">{{ __('Students who submitted scholarship details') }}</span>
+            <span class="sch-form-count-label">{{ __('Students with submitted forms') }}</span>
             <strong class="sch-form-count-value">{{ number_format($studentsWithSubmittedScholarshipDetails) }}</strong>
-            <span class="sch-form-count-note">{{ __('Counted once per student from submitted student forms') }}</span>
+            <span class="sch-form-count-note">{{ __('Unique students with a submitted status form') }}</span>
         </div>
     </section>
 
     <div class="sch-record-card">
         <div class="sch-record-head">
-            <h1>{{ __('Pengurusan Rekod Scholarship') }}</h1>
+            <h1>{{ __('Scholarship Record Management') }}</h1>
             <div class="sch-record-actions">
                 <a class="sch-record-btn" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
                 @if(in_array(session('auth_user.admin_role'), ['system_admin', 'student_affairs_head'], true))

@@ -2893,5 +2893,13 @@
     "Attendance could not be recorded. Please ask the admin to check the server log.": "Attendance could not be recorded. Please ask the admin to check the server log.",
     "Food Bank QR detected. Opening Food Bank page...": "Food Bank QR detected. Opening Food Bank page...",
     "Students who submitted scholarship details": "Students who submitted scholarship details",
-    "Counted once per student from submitted student forms": "Counted once per student from submitted student forms"
+    "Counted once per student from submitted student forms": "Counted once per student from submitted student forms",
+    "Scholarship & Welfare": "Scholarship & Welfare",
+    "Scholarship and welfare sections": "Scholarship and welfare sections",
+    "Student Overview": "Student Overview",
+    "Submitted Forms": "Submitted Forms",
+    "Students with submitted forms": "Students with submitted forms",
+    "Unique students with a submitted status form": "Unique students with a submitted status form",
+    "Manage scholarship award records, including provider, amount and status. The count below shows students with submitted forms; use Student Overview to review full scholarship and welfare details.": "Manage scholarship award records, including provider, amount and status. The count below shows students with submitted forms; use Student Overview to review full scholarship and welfare details.",
+    "View every student and their scholarship or welfare status, including form details, supporting documents and students who have not submitted.": "View every student and their scholarship or welfare status, including form details, supporting documents and students who have not submitted."
 }

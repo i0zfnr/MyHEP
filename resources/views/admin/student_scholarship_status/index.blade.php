@@ -1,15 +1,17 @@
 @extends('layouts.app')
 
-@section('title', __('Pengumpulan Data Biasiswa Pelajar'))
+@section('title', __('Scholarship & Welfare'))
 
 
 
 @section('header')
-    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Pengumpulan Data Biasiswa Pelajar') }}</h2>
+    <h2 style="margin:0;font-size:1.1rem;font-weight:700;color:#2d1f14;">{{ __('Scholarship & Welfare') }}</h2>
 @endsection
 
 @section('content')
 <div class="wrap student-sch-wrap">
+    @include('admin.scholarships._module_tabs')
+
     <div class="stats student-sch-stats">
         <div class="stat"><div class="label">{{ __('Jumlah Pelajar') }}</div><div class="value">{{ number_format($summary['total_students']) }}</div></div>
         <div class="stat"><div class="label">{{ __('Borang Dihantar') }}</div><div class="value">{{ number_format($summary['submitted']) }}</div></div>
