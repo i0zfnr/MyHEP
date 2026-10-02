@@ -2,16 +2,6 @@
 
 return [
 
-    'firebase' => [
-        'project_id' => env('FIREBASE_PROJECT_ID') ?: env('VITE_FIREBASE_PROJECT_ID'),
-        'web' => [
-            'apiKey' => env('VITE_FIREBASE_API_KEY'),
-            'authDomain' => env('VITE_FIREBASE_AUTH_DOMAIN'),
-            'projectId' => env('VITE_FIREBASE_PROJECT_ID') ?: env('FIREBASE_PROJECT_ID'),
-            'appId' => env('VITE_FIREBASE_APP_ID'),
-        ],
-    ],
-
 
     /*
     |--------------------------------------------------------------------------

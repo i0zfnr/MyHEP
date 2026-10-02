@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\PasswordResetCode;
 use App\Support\AccountSessionManager;
-use App\Services\FirebasePhoneTokenVerifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -160,13 +158,9 @@ class LoginController extends Controller
             'identifier' => ['required', 'string', 'max:150'],
         ]);
 
-        if ($validated['role'] === 'student') {
-            return redirect()->route('password.forgot')
-                ->withErrors(['identifier' => 'Student password recovery uses SMS verification.'])
-                ->withInput();
+        if ($validated['role'] === 'admin') {
+            $validated['email'] = $request->validate(['email' => ['required', 'email', 'max:150']])['email'];
         }
-
-        $validated['email'] = $request->validate(['email' => ['required', 'email', 'max:150']])['email'];
 
         $requestKey = $this->resetRequestThrottleKey($validated, $request);
         if (RateLimiter::tooManyAttempts($requestKey, 3)) {
@@ -177,11 +171,17 @@ class LoginController extends Controller
         RateLimiter::hit($requestKey, 900);
 
         $account = $this->findAccount($validated['role'], trim($validated['identifier']));
-        $email = strtolower(trim($validated['email']));
-
-        if (! $account || empty($account->email) || strtolower((string) $account->email) !== $email) {
+        if (! $account) {
             return redirect()->route('password.forgot')
-                ->withErrors(['identifier' => 'Maklumat pemulihan akaun tidak sepadan.'])
+                ->withErrors(['identifier' => 'Maklumat pemulihan akaun tidak sepadan atau alamat email berdaftar tidak tersedia.'])
+                ->withInput();
+        }
+
+        $email = strtolower(trim((string) ($account->email ?? '')));
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)
+            || ($validated['role'] === 'admin' && $email !== strtolower(trim($validated['email'])))) {
+            return redirect()->route('password.forgot')
+                ->withErrors(['identifier' => 'Maklumat pemulihan akaun tidak sepadan atau alamat email berdaftar tidak tersedia.'])
                 ->withInput();
         }
 
@@ -209,7 +209,6 @@ class LoginController extends Controller
             'updated_at' => now(),
         ]);
 
-        $deliveryMessage = null;
         try {
             Mail::to($email)->send(new PasswordResetCode(
                 recipientName: (string) $account->full_name,
@@ -217,132 +216,21 @@ class LoginController extends Controller
                 reference: $ref,
                 expiresAt: $expiresAt,
             ));
-        } catch (\Throwable $e) {
-            $deliveryMessage = config('app.debug')
-                ? "Penghantaran email gagal pada persekitaran ini. Guna kod debug: {$code}"
-                : 'Penghantaran email gagal. Sila hubungi pentadbir sistem.';
+        } catch (\Throwable) {
+            DB::table('password_reset_codes')
+                ->where('ref', $ref)
+                ->whereNull('used_at')
+                ->update(['used_at' => now(), 'updated_at' => now()]);
+
+            return redirect()->route('password.forgot')
+                ->withErrors(['identifier' => 'Kod reset tidak dapat dihantar melalui email sekarang. Sila cuba lagi kemudian atau hubungi pentadbir sistem.'])
+                ->withInput();
         }
 
         $masked = $this->maskEmail($email);
 
         return redirect()->route('password.verify', ['ref' => $ref])
-            ->with('success', "Kod verifikasi telah dihantar ke {$masked}.")
-            ->with('delivery_info', $deliveryMessage);
-    }
-
-    public function prepareStudentPhoneReset(Request $request): \Illuminate\Http\JsonResponse
-    {
-        $validated = $request->validate([
-            'identifier' => ['required', 'string', 'max:100'],
-            'phone' => ['required', 'string', 'max:30'],
-        ]);
-
-        $key = 'password-reset:sms:prepare:'.hash('sha256', strtolower(trim($validated['identifier'])).'|'.$request->ip());
-        if (RateLimiter::tooManyAttempts($key, 3)) {
-            return response()->json(['message' => 'Too many requests. Please try again later.'], 429);
-        }
-        RateLimiter::hit($key, 900);
-
-        $student = DB::table('students')
-            ->select('id', 'phone')
-            ->where('matric_no', trim($validated['identifier']))
-            ->first();
-        $enteredPhone = $this->normalizeMalaysianPhone($validated['phone']);
-        $savedPhone = $student ? $this->normalizeMalaysianPhone((string) $student->phone) : null;
-
-        if (! $student || ! $enteredPhone || ! $savedPhone || ! hash_equals($savedPhone, $enteredPhone)) {
-            return response()->json(['message' => 'The student ID and phone number do not match our records.'], 422);
-        }
-
-        $phoneRateKey = 'password-reset:sms:phone:'.hash('sha256', $savedPhone);
-        if (RateLimiter::tooManyAttempts($phoneRateKey, 3)) {
-            return response()->json(['message' => 'Too many codes were requested for this phone number. Please try again later.'], 429);
-        }
-        RateLimiter::hit($phoneRateKey, 900);
-
-        $challengeId = (string) Str::uuid();
-        $request->session()->put('password_reset.firebase_phone_challenge', [
-            'id' => $challengeId,
-            'student_id' => (int) $student->id,
-            'phone_hash' => hash('sha256', $savedPhone),
-            'expires_at' => now()->addMinutes(10)->timestamp,
-        ]);
-
-        return response()->json([
-            'challenge_id' => $challengeId,
-            'phone' => $savedPhone,
-        ]);
-    }
-
-    public function completeStudentPhoneReset(Request $request, FirebasePhoneTokenVerifier $firebase): \Illuminate\Http\JsonResponse
-    {
-        $validated = $request->validate([
-            'challenge_id' => ['required', 'uuid'],
-            'identifier' => ['required', 'string', 'max:100'],
-            'id_token' => ['required', 'string', 'max:10000'],
-        ]);
-
-        $challenge = $request->session()->get('password_reset.firebase_phone_challenge');
-        if (! is_array($challenge)
-            || ! hash_equals((string) ($challenge['id'] ?? ''), $validated['challenge_id'])
-            || (int) ($challenge['expires_at'] ?? 0) < now()->timestamp) {
-            return response()->json(['message' => 'This verification session expired. Start again.'], 422);
-        }
-
-        $student = DB::table('students')
-            ->select('id', 'full_name', 'email', 'phone')
-            ->where('id', (int) $challenge['student_id'])
-            ->where('matric_no', trim($validated['identifier']))
-            ->first();
-        $savedPhone = $student ? $this->normalizeMalaysianPhone((string) $student->phone) : null;
-
-        if (! $student || ! $savedPhone || ! hash_equals((string) $challenge['phone_hash'], hash('sha256', $savedPhone))) {
-            $request->session()->forget('password_reset.firebase_phone_challenge');
-
-            return response()->json(['message' => 'The saved phone number changed. Start recovery again.'], 422);
-        }
-
-        try {
-            $claims = $firebase->verify($validated['id_token']);
-        } catch (\Throwable $exception) {
-            Log::warning('Firebase phone verification failed for student password recovery.', [
-                'student_id' => (int) $student->id,
-                'error' => $exception->getMessage(),
-            ]);
-
-            return response()->json(['message' => 'Phone verification failed. Please try again.'], 422);
-        }
-
-        $verifiedPhone = $this->normalizeMalaysianPhone((string) ($claims['phone_number'] ?? ''));
-        if (! $verifiedPhone || ! hash_equals($savedPhone, $verifiedPhone)) {
-            return response()->json(['message' => 'The verified phone number does not match this student account.'], 422);
-        }
-
-        DB::table('password_reset_codes')
-            ->where('role', 'student')
-            ->where('target_id', $student->id)
-            ->whereNull('used_at')
-            ->update(['used_at' => now(), 'updated_at' => now()]);
-
-        $ref = (string) Str::uuid();
-        $expiresAt = now()->addMinutes(15);
-        DB::table('password_reset_codes')->insert([
-            'ref' => $ref,
-            'role' => 'student',
-            'target_id' => $student->id,
-            'email' => (string) ($student->email ?? ''),
-            'code_hash' => Hash::make(Str::random(48)),
-            'verification_method' => 'firebase_phone',
-            'expires_at' => $expiresAt,
-            'verified_at' => now(),
-            'used_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $request->session()->forget('password_reset.firebase_phone_challenge');
-
-        return response()->json(['redirect' => route('password.reset', ['ref' => $ref])]);
+            ->with('success', "Kod verifikasi telah dihantar ke {$masked}.");
     }
 
     public function verifyForm(Request $request): View|RedirectResponse
@@ -372,15 +260,6 @@ class LoginController extends Controller
         if (! $reset) {
             return redirect()->route('password.forgot')
                 ->withErrors(['identifier' => 'Sesi verifikasi tidak sah atau telah tamat.']);
-        }
-
-        if ($reset->role === 'student') {
-            if ($reset->verification_method !== 'firebase_phone') {
-                DB::table('password_reset_codes')->where('id', $reset->id)->update(['used_at' => now(), 'updated_at' => now()]);
-            }
-
-            return redirect()->route('password.forgot')
-                ->withErrors(['identifier' => 'Student password recovery uses SMS verification.']);
         }
 
         $verifyKey = $this->resetVerifyThrottleKey($validated['ref'], $request);
@@ -420,10 +299,6 @@ class LoginController extends Controller
             ->where('ref', $ref)
             ->whereNull('used_at')
             ->whereNotNull('verified_at')
-            ->where(function ($methodQuery) {
-                $methodQuery->where('role', '!=', 'student')
-                    ->orWhere('verification_method', 'firebase_phone');
-            })
             ->where('expires_at', '>', now())
             ->first();
 
@@ -447,10 +322,6 @@ class LoginController extends Controller
                 ->where('ref', $validated['ref'])
                 ->whereNull('used_at')
                 ->whereNotNull('verified_at')
-                ->where(function ($methodQuery) {
-                    $methodQuery->where('role', '!=', 'student')
-                        ->orWhere('verification_method', 'firebase_phone');
-                })
                 ->where('expires_at', '>', now())
                 ->lockForUpdate()
                 ->first();
@@ -540,20 +411,6 @@ class LoginController extends Controller
             ->first();
     }
 
-    private function normalizeMalaysianPhone(string $phone): ?string
-    {
-        $phone = preg_replace('/[\s().-]+/', '', trim($phone)) ?? '';
-        if (str_starts_with($phone, '00')) {
-            $phone = '+'.substr($phone, 2);
-        } elseif (str_starts_with($phone, '0')) {
-            $phone = '+60'.substr($phone, 1);
-        } elseif (str_starts_with($phone, '60')) {
-            $phone = '+'.$phone;
-        }
-
-        return preg_match('/^\+[1-9]\d{7,14}$/', $phone) ? $phone : null;
-    }
-
     private function getActiveResetByRef(string $ref): ?object
     {
         if ($ref === '') {
@@ -584,7 +441,6 @@ class LoginController extends Controller
         return 'password-reset:request:'.hash('sha256', implode('|', [
             $validated['role'],
             strtolower(trim($validated['identifier'])),
-            strtolower(trim($validated['email'])),
             $request->ip(),
         ]));
     }

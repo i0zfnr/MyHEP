@@ -65,8 +65,6 @@ Route::get('/login', [LoginController::class, 'create'])->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.submit');
 Route::get('/password/forgot', [LoginController::class, 'forgotForm'])->name('password.forgot');
 Route::post('/password/forgot', [LoginController::class, 'sendResetCode'])->middleware('throttle:5,15')->name('password.forgot.send');
-Route::post('/password/forgot/student/prepare', [LoginController::class, 'prepareStudentPhoneReset'])->middleware('throttle:5,15')->name('password.forgot.student.prepare');
-Route::post('/password/forgot/student/complete', [LoginController::class, 'completeStudentPhoneReset'])->middleware('throttle:5,15')->name('password.forgot.student.complete');
 Route::get('/password/verify', [LoginController::class, 'verifyForm'])->name('password.verify');
 Route::post('/password/verify', [LoginController::class, 'verifyCode'])->name('password.verify.check');
 Route::get('/password/reset', [LoginController::class, 'resetForm'])->name('password.reset');

@@ -2901,5 +2901,8 @@
     "Students with submitted forms": "Students with submitted forms",
     "Unique students with a submitted status form": "Unique students with a submitted status form",
     "Manage scholarship award records, including provider, amount and status. The count below shows students with submitted forms; use Student Overview to review full scholarship and welfare details.": "Manage scholarship award records, including provider, amount and status. The count below shows students with submitted forms; use Student Overview to review full scholarship and welfare details.",
-    "View every student and their scholarship or welfare status, including form details, supporting documents and students who have not submitted.": "View every student and their scholarship or welfare status, including form details, supporting documents and students who have not submitted."
+    "View every student and their scholarship or welfare status, including form details, supporting documents and students who have not submitted.": "View every student and their scholarship or welfare status, including form details, supporting documents and students who have not submitted.",
+    "Password reset codes are sent to the registered email address on each account.": "Password reset codes are sent to the registered email address on each account.",
+    "Maklumat pemulihan akaun tidak sepadan atau alamat email berdaftar tidak tersedia.": "The recovery details do not match or a registered email address is unavailable.",
+    "Kod reset tidak dapat dihantar melalui email sekarang. Sila cuba lagi kemudian atau hubungi pentadbir sistem.": "The reset code could not be sent by email right now. Please try again later or contact the system administrator."
 }
