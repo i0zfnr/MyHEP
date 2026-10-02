@@ -1235,34 +1235,18 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 }
 
 @media (max-width: 767px) {
-    /* One bottom inset belongs to the bar and one to the scroll clearance. */
+    /* Keep the browser's floating pill in the installed PWA. Lift the whole
+       control above the home indicator instead of adding the inset inside it. */
     body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student {
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        max-width: none !important;
-        min-height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
-        margin: 0 !important;
-        padding: .3rem max(.5rem, env(safe-area-inset-right, 0px)) calc(.3rem + env(safe-area-inset-bottom, 0px)) max(.5rem, env(safe-area-inset-left, 0px)) !important;
-        transform: none !important;
-        border: 0 !important;
-        border-top: 1px solid var(--myhep-glass-border) !important;
-        border-radius: 22px 22px 0 0 !important;
-        background:
-            linear-gradient(165deg, rgb(255 255 255 / .27), transparent 32%),
-            radial-gradient(110% 130% at 50% -35%, color-mix(in srgb, var(--se-primary) 11%, transparent), transparent 72%),
-            var(--myhep-glass-nav) !important;
-        box-shadow: 0 -8px 26px rgb(42 32 21 / .12), inset 0 1px 0 var(--myhep-glass-highlight) !important;
-        backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-        -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-    }
-
-    body.role-student.pwa-standalone.has-student-bottom-nav[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student {
-        background:
-            linear-gradient(165deg, rgb(255 255 255 / .07), transparent 32%),
-            radial-gradient(110% 130% at 50% -35%, color-mix(in srgb, var(--se-primary) 7%, transparent), transparent 72%),
-            var(--myhep-glass-nav) !important;
+        left: max(.5rem, env(safe-area-inset-left, 0px)) !important;
+        right: max(.5rem, env(safe-area-inset-right, 0px)) !important;
+        bottom: max(.5rem, env(safe-area-inset-bottom, 0px)) !important;
+        width: auto !important;
+        max-width: 420px !important;
+        min-height: 64px !important;
+        margin-inline: auto !important;
+        padding: .3rem .34rem !important;
+        border-radius: 999px !important;
     }
 
     body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student::after {
@@ -1271,12 +1255,6 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 
     body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button) {
         min-height: 48px !important;
-    }
-
-    body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab {
-        min-height: 48px !important;
-        margin: 0 !important;
-        border-radius: 16px !important;
     }
 
     body.role-student.pwa-standalone.has-student-bottom-nav .app-layout .page-body {
