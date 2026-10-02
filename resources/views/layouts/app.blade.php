@@ -1024,6 +1024,39 @@ document.addEventListener('click', function (event) {
     var mobileMoreToggle = document.getElementById('mobileMoreToggle');
     var mobileMoreSheet = document.getElementById('mobileMoreSheet');
     var mobileMoreBackdrop = document.getElementById('mobileMoreBackdrop');
+    var mobileStudentNav = document.querySelector('.mobile-bottom-nav--student');
+
+    if (mobileStudentNav) {
+        var navTabs = Array.from(mobileStudentNav.children).filter(function (item) {
+            return item.matches('a, button');
+        });
+        var activeNavTab = mobileStudentNav.querySelector(':scope > a.active, :scope > button.active');
+        var navTabCenter = function (item) {
+            var rect = item.getBoundingClientRect();
+            return rect.left + rect.width / 2;
+        };
+
+        try {
+            var storedNavTab = window.sessionStorage.getItem('myhep-student-nav-from');
+            var previousNavTab = Number(storedNavTab);
+            window.sessionStorage.removeItem('myhep-student-nav-from');
+            if (storedNavTab !== null && activeNavTab && Number.isInteger(previousNavTab) && previousNavTab >= 0
+                && previousNavTab < navTabs.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                var slide = navTabCenter(navTabs[previousNavTab]) - navTabCenter(activeNavTab);
+                activeNavTab.style.setProperty('--student-nav-slide', slide + 'px');
+            }
+        } catch (error) {
+            // Storage may be unavailable in private browsing; the CSS bubble still appears.
+        }
+
+        navTabs.forEach(function (item, index) {
+            if (item.tagName !== 'A') return;
+            item.addEventListener('click', function (event) {
+                if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                try { window.sessionStorage.setItem('myhep-student-nav-from', String(index)); } catch (error) {}
+            });
+        });
+    }
 
     if (headerUserMenu && !headerUserMenu.classList.contains('is-open')) {
         headerUserMenu.setAttribute('aria-hidden', 'true');
@@ -1216,6 +1249,13 @@ document.addEventListener('click', function (event) {
     if (mobileMoreToggle && mobileMoreSheet) {
         mobileMoreToggle.addEventListener('click', function (event) {
             event.stopPropagation();
+            if (mobileStudentNav && !mobileMoreSheet.classList.contains('is-open')) {
+                var currentTab = mobileStudentNav.querySelector(':scope > a.active');
+                if (currentTab) {
+                    mobileMoreToggle.style.setProperty('--student-nav-slide',
+                        (navTabCenter(currentTab) - navTabCenter(mobileMoreToggle)) + 'px');
+                }
+            }
             setMobileMore(!mobileMoreSheet.classList.contains('is-open'));
         });
         if (mobileMoreBackdrop) mobileMoreBackdrop.addEventListener('click', closeMobileMore);
