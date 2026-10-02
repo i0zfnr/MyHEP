@@ -17,6 +17,7 @@ class DashboardController extends Controller
         $authUser = session('auth_user');
         $adminRole = $authUser['admin_role'] ?? null;
         $isLecturer = $adminRole === 'lecturer';
+        $staffCategory = $authUser['staff_category'] ?? null;
         $lecturerId = (int) ($authUser['id'] ?? 0);
         $showSystemMonitoring = $adminRole === 'system_admin';
 
@@ -25,6 +26,37 @@ class DashboardController extends Controller
         $hasDisciplineAccess = $canAccessDisciplineModule || $isLecturer;
         $hasMovementAccess = $canAccessMovementModule || $isLecturer;
         $hasScholarshipAccess = canAccessScholarshipAdmin();
+        $isDisciplineDashboardUser = $adminRole === 'discipline_admin'
+            || ($isLecturer && $staffCategory === 'discipline' && $canAccessDisciplineModule);
+        $isScholarshipDashboardUser = $adminRole === 'scholarship_admin'
+            || ($isLecturer && $staffCategory === 'scholarship' && $hasScholarshipAccess);
+        $showStaffProgramDashboard = $isLecturer && ! $isDisciplineDashboardUser && ! $isScholarshipDashboardUser;
+        $staffModuleDashboard = $isScholarshipDashboardUser
+            ? $this->buildStaffModuleDashboard('scholarship')
+            : ($isDisciplineDashboardUser ? $this->buildStaffModuleDashboard('discipline') : null);
+        if ($isScholarshipDashboardUser) {
+            $dashboardTitle = __('Scholarship Dashboard');
+            $dashboardDescription = __('Overview of scholarship records, award statuses, and recent activity.');
+        } elseif ($isDisciplineDashboardUser) {
+            $dashboardTitle = __('Discipline Dashboard');
+            $dashboardDescription = __('Overview of student discipline cases, case statuses, and recent activity.');
+        } elseif ($isLecturer) {
+            $dashboardTitle = __('Staff Dashboard');
+            $dashboardDescription = __('Overview of your programs, approval workflow, and assigned reviews.');
+        } else {
+            $dashboardTitle = __('Admin Dashboard');
+            if ($hasDisciplineAccess && $hasScholarshipAccess) {
+                $dashboardDescription = __('Overview of the discipline and scholarship modules.');
+            } elseif ($hasMovementAccess && !$hasDisciplineAccess && !$hasScholarshipAccess) {
+                $dashboardDescription = __('Overview of guard house monitoring and student movement.');
+            } elseif ($hasDisciplineAccess) {
+                $dashboardDescription = __('Overview of the student discipline module.');
+            } elseif ($hasScholarshipAccess) {
+                $dashboardDescription = __('Overview of the student scholarship module.');
+            } else {
+                $dashboardDescription = __('This account has no module access.');
+            }
+        }
         $canViewOffenseList = ! $isLecturer || $lecturerPages->enabled($lecturerId, 'offense_list');
         $canRegisterOffense = ! $isLecturer || $lecturerPages->enabled($lecturerId, 'offense_register');
 
@@ -43,7 +75,7 @@ class DashboardController extends Controller
         $pendingScholarships = 0;
         $recentScholarshipRecords = collect();
         $recentScholarshipAnnouncements = collect();
-        $programDashboard = $isLecturer ? $this->buildStaffProgramDashboard($lecturerId) : null;
+        $programDashboard = $showStaffProgramDashboard ? $this->buildStaffProgramDashboard($lecturerId) : null;
 
         if ($hasMovementAccess) {
             $movementStats = systemCacheRemember('myhep.dashboard.movement_stats', 45, function (): array {
@@ -177,7 +209,7 @@ class DashboardController extends Controller
             ? systemCacheRemember('myhep.dashboard.system_monitoring', 10, fn () => $this->buildSystemMonitoring())
             : null;
 
-        $canViewAnalytics = ! $isLecturer;
+        $canViewAnalytics = ! $isLecturer && ! $isDisciplineDashboardUser && ! $isScholarshipDashboardUser;
         $analyticsScope = implode('.', array_map(
             fn (bool $enabled) => $enabled ? '1' : '0',
             [
@@ -199,6 +231,12 @@ class DashboardController extends Controller
         return view('dashboard.admin', compact(
             'authUser',
             'isLecturer',
+            'isDisciplineDashboardUser',
+            'isScholarshipDashboardUser',
+            'showStaffProgramDashboard',
+            'staffModuleDashboard',
+            'dashboardTitle',
+            'dashboardDescription',
             'programDashboard',
             'showSystemMonitoring',
             'systemMonitoring',
@@ -225,6 +263,53 @@ class DashboardController extends Controller
             'recentScholarshipRecords',
             'recentScholarshipAnnouncements'
         ));
+    }
+
+    private function buildStaffModuleDashboard(string $module): array
+    {
+        $table = $module === 'scholarship' ? 'scholarships' : 'offenses';
+
+        if (! Schema::hasTable($table)) {
+            return ['module' => $module, 'total' => 0, 'trend' => [], 'statuses' => []];
+        }
+
+        return systemCacheRemember("myhep.dashboard.staff_module.{$module}.v1", 90, function () use ($module, $table): array {
+            $statuses = Schema::hasColumn($table, 'status')
+                ? DB::table($table)
+                    ->select('status')
+                    ->selectRaw('COUNT(*) as total')
+                    ->groupBy('status')
+                    ->orderByDesc('total')
+                    ->get()
+                    ->map(fn ($row): array => [
+                        'label' => trim((string) ($row->status ?? '')) ?: 'Not set',
+                        'value' => (int) $row->total,
+                    ])
+                    ->all()
+                : [];
+
+            $trend = [];
+            if (Schema::hasColumn($table, 'created_at')) {
+                for ($offset = 5; $offset >= 0; $offset--) {
+                    $start = now()->subMonthsNoOverflow($offset)->startOfMonth();
+                    $end = $start->copy()->addMonth();
+                    $trend[] = [
+                        'label' => $start->format('M'),
+                        'value' => (int) DB::table($table)
+                            ->where('created_at', '>=', $start)
+                            ->where('created_at', '<', $end)
+                            ->count(),
+                    ];
+                }
+            }
+
+            return [
+                'module' => $module,
+                'total' => (int) DB::table($table)->count(),
+                'trend' => $trend,
+                'statuses' => $statuses,
+            ];
+        });
     }
 
     private function buildStaffProgramDashboard(int $staffId): array

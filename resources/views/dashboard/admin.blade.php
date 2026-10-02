@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ($isLecturer ?? false) ? __('Staff Dashboard') : __('Admin Dashboard'))
+@section('title', $dashboardTitle)
 
 @push('styles')
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,7 +11,7 @@
 @endpush
 
 @section('header')
-    <h2 style="margin:0;font-size:1rem;font-weight:600;color:var(--c-text-primary,#1A1714);">{{ ($isLecturer ?? false) ? __('Staff Dashboard') : __('Admin Dashboard') }}</h2>
+    <h2 style="margin:0;font-size:1rem;font-weight:600;color:var(--c-text-primary,#1A1714);">{{ $dashboardTitle }}</h2>
 @endsection
 
 @section('content')
@@ -24,26 +24,12 @@
     {{-- ── Hero ── --}}
     <div class="dash-hero">
         <div class="dash-hero-text">
-            <span class="dash-hero-label">{{ __('Overview') }}</span>
-            <h3>{{ ($isLecturer ?? false) ? __('Staff Dashboard') : __('Admin Dashboard') }}</h3>
-            <p>
-                @if($isLecturer ?? false)
-                    {{ __('Overview of your programs, approval workflow, and assigned reviews.') }}
-                @elseif($hasDisciplineAccess && $hasScholarshipAccess)
-                    {{ __('Overview of the discipline and scholarship modules.') }}
-                @elseif($hasMovementAccess && !$hasDisciplineAccess && !$hasScholarshipAccess)
-                    {{ __('Overview of guard house monitoring and student movement.') }}
-                @elseif($hasDisciplineAccess)
-                    {{ __('Overview of the student discipline module.') }}
-                @elseif($hasScholarshipAccess)
-                    {{ __('Overview of the student scholarship module.') }}
-                @else
-                    {{ __('This account has no module access.') }}
-                @endif
-            </p>
+            <span class="dash-hero-label">{{ $isScholarshipDashboardUser ? __('Scholarship') : ($isDisciplineDashboardUser ? __('Discipline') : __('Overview')) }}</span>
+            <h3>{{ $dashboardTitle }}</h3>
+            <p>{{ $dashboardDescription }}</p>
         </div>
         <div class="dash-hero-actions">
-            @if(!empty($analytics['domains']))
+            @if(!empty($analytics['domains']) && !$isDisciplineDashboardUser && !$isScholarshipDashboardUser)
             <div class="viz-mode" data-dashboard-visualization-toggle role="group" aria-label="{{ __('Dashboard view mode') }}">
                 <button type="button" class="viz-mode-btn" data-dashboard-mode="cards" aria-pressed="true">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 17a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zm10-6a1 1 0 011-1h4a1 1 0 011 1v8a1 1 0 01-1 1h-4a1 1 0 01-1-1v-8z"/></svg>
@@ -131,7 +117,13 @@
         </div>
     </div>
 
-    @include('dashboard.partials.admin_analytics', ['analytics' => $analytics])
+    @if(!$isDisciplineDashboardUser && !$isScholarshipDashboardUser)
+        @include('dashboard.partials.admin_analytics', ['analytics' => $analytics])
+    @endif
+
+    @if($staffModuleDashboard)
+        @include('dashboard.partials.staff_module_dashboard', ['staffModuleDashboard' => $staffModuleDashboard])
+    @endif
 
     @if(($showSystemMonitoring ?? false) && !empty($systemMonitoring))
         <p class="section-heading">{{ __('System Monitoring') }}</p>
@@ -263,7 +255,7 @@
         </div>
     @endif
 
-    @if($isLecturer ?? false)
+    @if($showStaffProgramDashboard ?? false)
         @include('dashboard.partials.staff_program_dashboard')
     @endif
 
