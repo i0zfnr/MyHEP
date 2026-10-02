@@ -196,27 +196,41 @@
                     </h3>
                     <p class="settings-section-copy">{{ __('ui.glass_transparency_hint') }}</p>
 
+                    <input type="hidden" name="glass_solid" value="0">
+                    <label class="settings-liquid-toggle glass-solid-toggle">
+                        <span class="settings-liquid-toggle-copy">
+                            <strong>{{ __('ui.glass_solid_toggle') }}</strong>
+                            <small>{{ __('ui.glass_solid_hint') }}</small>
+                        </span>
+                        <span class="settings-liquid-toggle-control">
+                            <input type="checkbox" name="glass_solid" value="1" data-glass-solid-toggle role="switch" @checked($currentGlassSolid)>
+                            <span class="settings-liquid-switch" aria-hidden="true"><span></span></span>
+                        </span>
+                    </label>
+
                     <div class="glass-control" data-glass-control>
                         <div class="glass-control-preview" aria-hidden="true">
                             <span>{{ __('ui.glass_preview') }}</span>
-                            <strong data-glass-output>{{ $currentGlassTransparency }}%</strong>
+                            <strong data-glass-output data-solid-label="{{ __('ui.glass_solid') }}">{{ $currentGlassSolid ? __('ui.glass_solid') : $currentGlassTransparency.'%' }}</strong>
                         </div>
                         <div class="glass-slider" style="--glass-range-progress: {{ $currentGlassTransparency }}%;">
                             <span class="glass-slider-icon" title="{{ __('ui.glass_more_solid') }}" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3.5" y="5" width="14" height="11" rx="3"/><rect x="7" y="8" width="13.5" height="10.5" rx="3"/></svg>
                             </span>
-                            <input
-                                id="glassTransparency"
-                                class="glass-range"
-                                type="range"
-                                name="glass_transparency"
-                                min="0"
-                                max="100"
-                                step="1"
-                                value="{{ $currentGlassTransparency }}"
-                                aria-label="{{ __('ui.glass_transparency') }}"
-                                aria-describedby="settingsGlassTitle"
-                            >
+                            <span class="glass-range-frame">
+                                <input
+                                    id="glassTransparency"
+                                    class="glass-range"
+                                    type="range"
+                                    name="glass_transparency"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    value="{{ $currentGlassTransparency }}"
+                                    aria-label="{{ __('ui.glass_transparency') }}"
+                                    aria-describedby="settingsGlassTitle"
+                                >
+                            </span>
                             <span class="glass-slider-icon glass-slider-icon--clear" title="{{ __('ui.glass_more_clear') }}" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3.5" y="5" width="14" height="11" rx="3"/><rect x="7" y="8" width="13.5" height="10.5" rx="3" fill="currentColor" fill-opacity=".17"/></svg>
                             </span>

@@ -5820,6 +5820,13 @@ body[data-theme="dark"] {
 .glass-slider-icon svg { width: 23px; height: 23px; }
 .glass-slider-icon--clear { color: color-mix(in srgb, var(--se-text) 72%, transparent); }
 
+.glass-range-frame {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+}
+
 .glass-range {
     width: 100%;
     height: 34px;

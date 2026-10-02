@@ -23,6 +23,7 @@ class SettingController extends Controller
         $currentTheme = $request->session()->get('theme', 'light');
         $currentAccentTheme = $request->session()->get('accent_theme', 'gold');
         $currentGlassTransparency = (int) $request->session()->get('glass_transparency', 40);
+        $currentGlassSolid = (bool) $request->session()->get('glass_solid', false);
         $canAdjustGlass = $this->canAdjustGlass($authUser);
         $canAdjustAccentTheme = $this->canAdjustGlass($authUser);
         $canToggleLiquidDesign = $this->canToggleLiquidDesign($authUser);
@@ -48,6 +49,7 @@ class SettingController extends Controller
             'currentTheme',
             'currentAccentTheme',
             'currentGlassTransparency',
+            'currentGlassSolid',
             'canAdjustGlass',
             'canAdjustAccentTheme',
             'canToggleLiquidDesign',
@@ -66,10 +68,11 @@ class SettingController extends Controller
             'theme' => ['required', 'in:light,dark'],
             'accent_theme' => ['nullable', 'in:gold,candy_blue,lavender,orchid,violet,pink,red'],
             'glass_transparency' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'glass_solid' => ['sometimes', 'boolean'],
             'liquid_design_enabled' => ['sometimes', 'boolean'],
         ]);
 
-        if ((array_key_exists('glass_transparency', $validated) || array_key_exists('accent_theme', $validated))
+        if ((array_key_exists('glass_transparency', $validated) || array_key_exists('glass_solid', $validated) || array_key_exists('accent_theme', $validated))
             && ! $this->canAdjustGlass($authUser)) {
             abort(403);
         }
@@ -86,6 +89,9 @@ class SettingController extends Controller
         if (array_key_exists('glass_transparency', $validated)) {
             $request->session()->put('glass_transparency', $validated['glass_transparency']);
         }
+        if (array_key_exists('glass_solid', $validated)) {
+            $request->session()->put('glass_solid', (bool) $validated['glass_solid']);
+        }
         if (array_key_exists('liquid_design_enabled', $validated)) {
             $request->session()->put('liquid_design_enabled', (bool) $validated['liquid_design_enabled']);
         }
@@ -97,6 +103,9 @@ class SettingController extends Controller
                 'theme' => $validated['theme'],
                 'accent_theme' => $validated['accent_theme'] ?? null,
                 'glass_transparency' => $validated['glass_transparency'] ?? null,
+                'glass_solid' => array_key_exists('glass_solid', $validated)
+                    ? (bool) $validated['glass_solid']
+                    : null,
                 'liquid_design_enabled' => array_key_exists('liquid_design_enabled', $validated)
                     ? (bool) $validated['liquid_design_enabled']
                     : null,

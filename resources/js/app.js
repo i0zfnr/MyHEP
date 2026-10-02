@@ -246,6 +246,7 @@ const PUSH_PROMPT_KEY = 'studentedge-push-dismissed-v1';
 const THEME_KEY = 'studentedge-theme';
 const ACCENT_THEME_KEY = 'studentedge-accent-theme';
 const GLASS_TRANSPARENCY_KEY = 'studentedge-glass-transparency';
+const GLASS_SOLID_KEY = 'studentedge-glass-solid';
 
 const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
 const normalizeAccentTheme = (theme) => ['gold', 'candy_blue', 'lavender', 'orchid', 'violet', 'pink', 'red'].includes(theme) ? theme : 'gold';
@@ -253,8 +254,14 @@ const normalizeGlassTransparency = (value) => Math.min(100, Math.max(0, Number.i
 const updateGlassControls = (value) => {
     const transparency = normalizeGlassTransparency(value);
 
+    document.querySelectorAll('input[name="glass_transparency"]').forEach((input) => {
+        input.value = String(transparency);
+    });
+
     document.querySelectorAll('[data-glass-output]').forEach((output) => {
-        output.textContent = `${transparency}%`;
+        output.textContent = document.documentElement.dataset.glassMaterial === 'solid'
+            ? output.dataset.solidLabel || 'Solid'
+            : `${transparency}%`;
     });
     document.querySelectorAll('.glass-slider').forEach((slider) => {
         slider.style.setProperty('--glass-range-progress', `${transparency}%`);
@@ -268,25 +275,35 @@ const applyGlassTransparency = (value, persist = true) => {
     const ratio = transparency / 100;
     const root = document.documentElement;
     const liquidDesignEnabled = root.dataset.liquidDesign === 'on';
+    const glassActive = liquidDesignEnabled && root.dataset.glassMaterial !== 'solid';
 
     // Transparency controls a bounded physical material, never raw element opacity.
     // Shared Liquid Glass surfaces consume this token; navigation keeps its
     // dedicated values for its compact mobile contrast requirements.
-    root.style.setProperty('--glass-user-transparency', liquidDesignEnabled ? ratio.toFixed(2) : '0');
-    root.style.setProperty('--glass-opacity', liquidDesignEnabled ? (0.86 - (ratio * 0.34)).toFixed(2) : '1');
-    root.style.setProperty('--student-nav-material-alpha', liquidDesignEnabled ? (0.86 - (ratio * 0.34)).toFixed(2) : '1');
-    root.style.setProperty('--student-nav-active-alpha', liquidDesignEnabled ? (0.80 - (ratio * 0.18)).toFixed(2) : '1');
-    root.style.setProperty('--student-nav-reflection-alpha', liquidDesignEnabled ? (0.34 - (ratio * 0.16)).toFixed(2) : '0');
-    root.style.setProperty('--student-nav-active-reflection-alpha', liquidDesignEnabled ? (0.46 - (ratio * 0.24)).toFixed(2) : '0');
-    root.style.setProperty('--student-nav-blur', liquidDesignEnabled ? `${18 + (ratio * 8)}px` : '0px');
-    root.style.setProperty('--student-nav-active-blur', liquidDesignEnabled ? `${10 + (ratio * 4)}px` : '0px');
-    root.style.setProperty('--student-nav-saturation', liquidDesignEnabled ? `${132 + (ratio * 16)}%` : '100%');
+    root.style.setProperty('--glass-user-transparency', glassActive ? ratio.toFixed(2) : '0');
+    root.style.setProperty('--glass-opacity', glassActive ? (0.86 - (ratio * 0.34)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-nav-opacity', glassActive ? (0.88 - (ratio * 0.22)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-nav-opacity-dark', glassActive ? (0.92 - (ratio * 0.18)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-header-opacity', glassActive ? (0.88 - (ratio * 0.22)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-header-opacity-dark', glassActive ? (0.90 - (ratio * 0.20)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-popup-opacity', glassActive ? (0.96 - (ratio * 0.22)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-popup-opacity-dark', glassActive ? (0.97 - (ratio * 0.17)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-drawer-opacity', glassActive ? (0.80 - (ratio * 0.34)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-drawer-opacity-dark', glassActive ? (0.86 - (ratio * 0.25)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-user-blur', glassActive ? `${12 + (ratio * 10)}px` : '0px');
+    root.style.setProperty('--student-nav-material-alpha', glassActive ? (0.98 - (ratio * 0.10)).toFixed(2) : '1');
+    root.style.setProperty('--student-nav-active-alpha', glassActive ? (0.80 - (ratio * 0.18)).toFixed(2) : '1');
+    root.style.setProperty('--student-nav-reflection-alpha', glassActive ? (0.34 - (ratio * 0.16)).toFixed(2) : '0');
+    root.style.setProperty('--student-nav-active-reflection-alpha', glassActive ? (0.46 - (ratio * 0.24)).toFixed(2) : '0');
+    root.style.setProperty('--student-nav-blur', glassActive ? `${18 + (ratio * 8)}px` : '0px');
+    root.style.setProperty('--student-nav-active-blur', glassActive ? `${10 + (ratio * 4)}px` : '0px');
+    root.style.setProperty('--student-nav-saturation', glassActive ? `${132 + (ratio * 16)}%` : '100%');
     root.dataset.glassTransparency = String(transparency);
-    root.dataset.glassHigh = transparency >= 70 ? 'true' : 'false';
+    root.dataset.glassHigh = glassActive && transparency >= 70 ? 'true' : 'false';
 
     if (document.body) {
         document.body.dataset.glassTransparency = String(transparency);
-        document.body.dataset.glassHigh = transparency >= 70 ? 'true' : 'false';
+        document.body.dataset.glassHigh = glassActive && transparency >= 70 ? 'true' : 'false';
     }
 
     if (persist && liquidDesignEnabled) {
@@ -294,6 +311,22 @@ const applyGlassTransparency = (value, persist = true) => {
     }
 
     return transparency;
+};
+
+const applyGlassMaterial = (solid, persist = true) => {
+    const root = document.documentElement;
+    root.dataset.glassMaterial = solid ? 'solid' : 'glass';
+    document.querySelectorAll('[data-glass-solid-toggle]').forEach((toggle) => {
+        toggle.checked = solid;
+    });
+    document.querySelectorAll('input[name="glass_transparency"]').forEach((input) => {
+        input.disabled = solid;
+    });
+    document.querySelectorAll('[data-glass-control]').forEach((control) => {
+        control.dataset.solid = solid ? 'true' : 'false';
+    });
+    applyGlassTransparency(root.dataset.glassTransparency ?? '40', false);
+    if (persist) window.localStorage.setItem(GLASS_SOLID_KEY, solid ? '1' : '0');
 };
 
 const applyAdminLiquidDesign = (enabled) => {
@@ -407,6 +440,8 @@ const registerThemeUi = () => {
         ?? document.documentElement.dataset.glassTransparency
         ?? '40';
     applyGlassTransparency(initialGlassTransparency, false);
+    applyGlassMaterial((window.localStorage.getItem(GLASS_SOLID_KEY)
+        ?? (document.documentElement.dataset.glassMaterial === 'solid' ? '1' : '0')) === '1', false);
     const settingsForm = document.querySelector('[data-settings-form]');
 
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
@@ -429,6 +464,7 @@ const registerThemeUi = () => {
         const autosave = settingsForm.querySelector('[data-settings-autosave]');
         const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const glassInput = settingsForm.querySelector('input[name="glass_transparency"]');
+        const glassSolidToggle = settingsForm.querySelector('[data-glass-solid-toggle]');
         const liquidDesignToggle = settingsForm.querySelector('[data-liquid-design-toggle]');
         let saveTimer = null;
         let saveSequence = 0;
@@ -445,6 +481,9 @@ const registerThemeUi = () => {
                 const preferences = new FormData(settingsForm);
                 if (liquidDesignToggle) {
                     preferences.set('liquid_design_enabled', liquidDesignToggle.checked ? '1' : '0');
+                }
+                if (glassSolidToggle) {
+                    preferences.set('glass_solid', glassSolidToggle.checked ? '1' : '0');
                 }
                 const response = await fetch(settingsForm.action, {
                     method: 'POST',
@@ -478,6 +517,11 @@ const registerThemeUi = () => {
         });
         liquidDesignToggle?.addEventListener('change', () => {
             applyAdminLiquidDesign(liquidDesignToggle.checked);
+            window.clearTimeout(saveTimer);
+            savePreferences();
+        });
+        glassSolidToggle?.addEventListener('change', () => {
+            applyGlassMaterial(glassSolidToggle.checked);
             window.clearTimeout(saveTimer);
             savePreferences();
         });
@@ -522,6 +566,12 @@ const registerThemeUi = () => {
 };
 
 const registerLiquidGlassUi = () => {
+    // The student and system-admin material is deliberately static: moving a
+    // light spot over every surface adds repaints without helping navigation.
+    if (document.body?.matches('.role-student, .role-system-admin')) {
+        return;
+    }
+
     const canTrackPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

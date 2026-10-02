@@ -2,15 +2,18 @@
  * receive glass tokens only when the system feature and account preference
  * enable them; disabled admin pages use solid tokens. */
 
+:root {
+    --student-nav-material-alpha: .72;
+    --student-nav-active-alpha: .74;
+    --student-nav-reflection-alpha: .26;
+    --student-nav-active-reflection-alpha: .34;
+}
+
 body:is(.role-student, .role-qr-staff) {
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
-    --student-nav-material-alpha: .72;
-    --student-nav-active-alpha: .74;
-    --student-nav-reflection-alpha: .26;
-    --student-nav-active-reflection-alpha: .34;
     --student-nav-blur: 22px;
     --student-nav-active-blur: 12px;
     --student-nav-saturation: 142%;
@@ -799,6 +802,57 @@ body.role-system-admin:not(.admin-liquid-disabled) .sidebar .nav-link.active {
     }
 }
 
+/* A separate solid choice keeps the saved slider value while removing glass
+   from navigation and floating controls. It also works before app.js loads. */
+html[data-glass-material="solid"] body:is(.role-student, .role-system-admin.liquid-design-enabled) {
+    --myhep-glass-nav: var(--se-surface);
+    --myhep-glass-header: var(--se-surface);
+    --myhep-glass-popup: var(--se-surface);
+    --myhep-glass-drawer: var(--se-surface);
+}
+
+html[data-liquid-design="on"][data-glass-material="solid"] body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.topbar, .page-header, .sidebar.is-open, .mobile-bottom-nav, .mobile-more-sheet, .se-notification-panel, .header-user-menu) {
+    background: var(--se-surface) !important;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+    html[data-liquid-design="on"][data-glass-material="solid"] body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.topbar, .page-header, .sidebar.is-open, .mobile-bottom-nav, .mobile-more-sheet, .se-notification-panel, .header-user-menu) {
+        backdrop-filter: none !important;
+    }
+}
+
+@supports (-webkit-backdrop-filter: blur(1px)) {
+    html[data-liquid-design="on"][data-glass-material="solid"] body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.topbar, .page-header, .sidebar.is-open, .mobile-bottom-nav, .mobile-more-sheet, .se-notification-panel, .header-user-menu) {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+}
+
+.glass-solid-toggle .settings-liquid-toggle-copy small {
+    display: block;
+    margin-top: .3rem;
+    color: var(--se-text-muted);
+    font-size: .78rem;
+    line-height: 1.4;
+}
+
+.glass-control[data-solid="true"] {
+    opacity: .55;
+}
+
+/* The selected More label stays legible on its warm capsule even when a
+   contrasting page scrolls beneath the mobile navigation. */
+html[data-liquid-design="on"] body.role-student:not([data-theme="dark"]) .mobile-bottom-nav.mobile-bottom-nav--student #mobileMoreToggle:is(.active, [aria-expanded="true"]) {
+    color: color-mix(in srgb, var(--se-primary-strong) 72%, #1c1712) !important;
+}
+
+@media (forced-colors: active) {
+    html[data-liquid-design="on"][data-glass-material="solid"] body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.topbar, .page-header, .sidebar.is-open, .mobile-bottom-nav, .mobile-more-sheet, .se-notification-panel, .header-user-menu) {
+        background: Canvas !important;
+        border-color: CanvasText !important;
+    }
+}
+
 /* Student Dashboard intentionally keeps its drawer as an overlay on wide
    screens too. Give that desktop overlay the same high-opacity material as
    the mobile drawer so dashboard text cannot show through the navigation. */
@@ -897,5 +951,837 @@ body.role-system-admin:not(.admin-liquid-disabled) .sidebar .nav-link.active {
         line-height: 1.16 !important;
         letter-spacing: -.015em;
         overflow-wrap: anywhere;
+    }
+}
+
+/* Student and System Admin share a quiet material contract. Navigation and
+   transient controls carry the glass; content remains a readable layer. */
+body:is(.role-student, .role-system-admin.liquid-design-enabled) {
+    --myhep-glass-nav: rgb(255 253 249 / var(--myhep-nav-opacity, .79));
+    --myhep-glass-header: rgb(255 253 249 / var(--myhep-header-opacity, .79));
+    --myhep-glass-popup: rgb(255 253 249 / var(--myhep-popup-opacity, .87));
+    --myhep-glass-drawer: rgb(248 245 239 / var(--myhep-drawer-opacity, .66));
+    --myhep-content: rgb(255 255 255 / .97);
+    --myhep-content-muted: rgb(251 249 245 / .98);
+    --myhep-field: rgb(255 255 255 / .98);
+    --myhep-control: rgb(255 253 249 / .92);
+    --myhep-glass-border: rgb(115 91 61 / .18);
+    --myhep-glass-highlight: rgb(255 255 255 / .72);
+    --myhep-glass-shadow: 0 12px 30px rgb(54 39 23 / .10), inset 0 1px 0 var(--myhep-glass-highlight);
+    --myhep-content-shadow: 0 6px 22px rgb(54 39 23 / .065), inset 0 1px 0 rgb(255 255 255 / .54);
+    --myhep-blur: var(--myhep-user-blur, 16px);
+    --myhep-radius-sm: 12px;
+    --myhep-radius-md: 18px;
+    --myhep-radius-lg: 24px;
+    --myhep-motion: 180ms ease;
+    --liquid-surface: var(--myhep-content);
+    --liquid-surface-strong: var(--myhep-content-muted);
+    --liquid-field: var(--myhep-field);
+    --liquid-stroke-soft: var(--myhep-glass-border);
+    --liquid-highlight: var(--myhep-glass-highlight);
+    --liquid-glow: transparent;
+    --liquid-shadow: var(--myhep-content-shadow);
+    background:
+        radial-gradient(38rem circle at 9% -10%, color-mix(in srgb, var(--se-primary) 10%, transparent), transparent 70%),
+        radial-gradient(32rem circle at 100% 12%, color-mix(in srgb, var(--se-primary-muted) 12%, transparent), transparent 74%),
+        var(--se-bg) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] {
+    --myhep-glass-nav: rgb(29 27 25 / var(--myhep-nav-opacity-dark, .85));
+    --myhep-glass-header: rgb(29 27 25 / var(--myhep-header-opacity-dark, .82));
+    --myhep-glass-popup: rgb(28 26 24 / var(--myhep-popup-opacity-dark, .90));
+    --myhep-glass-drawer: rgb(29 27 25 / var(--myhep-drawer-opacity-dark, .76));
+    --myhep-content: rgb(31 29 27 / .97);
+    --myhep-content-muted: rgb(38 35 32 / .98);
+    --myhep-field: rgb(37 35 33 / .98);
+    --myhep-control: rgb(42 39 35 / .94);
+    --myhep-glass-border: rgb(243 227 205 / .16);
+    --myhep-glass-highlight: rgb(255 255 255 / .09);
+    --myhep-glass-shadow: 0 14px 34px rgb(0 0 0 / .30), inset 0 1px 0 var(--myhep-glass-highlight);
+    --myhep-content-shadow: 0 7px 24px rgb(0 0 0 / .20), inset 0 1px 0 rgb(255 255 255 / .05);
+    background:
+        radial-gradient(38rem circle at 9% -10%, color-mix(in srgb, var(--se-primary) 8%, transparent), transparent 70%),
+        radial-gradient(32rem circle at 100% 12%, color-mix(in srgb, var(--se-primary-muted) 7%, transparent), transparent 74%),
+        var(--se-bg) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled).pwa-standalone {
+    --myhep-content: rgb(255 255 255 / .98);
+    --myhep-content-muted: rgb(251 249 245 / .99);
+    --myhep-field: rgb(255 255 255 / .99);
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled).pwa-standalone[data-theme="dark"] {
+    --myhep-content: rgb(31 29 27 / .98);
+    --myhep-content-muted: rgb(38 35 32 / .99);
+    --myhep-field: rgb(37 35 33 / .99);
+}
+
+/* Scrolling navigation and page content stay opaque enough to read. Blur is
+   reserved for floating headers, menus and dialogs. */
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar {
+    border-color: var(--myhep-glass-border) !important;
+    background: linear-gradient(155deg, var(--myhep-content-muted), var(--se-bg)) !important;
+    box-shadow: 8px 0 28px rgb(52 38 23 / .06) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .page-header, .page-header--system-liquid),
+body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.header-support, .header-user, .header-user-menu, .se-theme-toggle, .se-notification-trigger, .se-back-to-top) {
+    border-color: var(--myhep-glass-border) !important;
+    background: linear-gradient(145deg, var(--myhep-glass-highlight), transparent 44%), var(--myhep-glass-nav) !important;
+    box-shadow: var(--myhep-glass-shadow) !important;
+    backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+}
+
+@media (max-width: 767px) {
+    body:is(.role-student, .role-system-admin.liquid-design-enabled).pwa-standalone .app-layout :is(.topbar, .page-header) {
+        background:
+            radial-gradient(13rem circle at 25% 125%, color-mix(in srgb, var(--se-atmosphere-primary) 15%, transparent), transparent 70%),
+            radial-gradient(12rem circle at 78% 115%, color-mix(in srgb, var(--se-atmosphere-secondary) 13%, transparent), transparent 72%),
+            var(--myhep-glass-nav) !important;
+    }
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-header--system-liquid {
+    border-radius: var(--myhep-radius-lg) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar .nav-link {
+    border-radius: var(--myhep-radius-sm) !important;
+    transition: background-color var(--myhep-motion), color var(--myhep-motion), border-color var(--myhep-motion) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar .nav-link.active {
+    border-color: color-mix(in srgb, var(--se-primary) 36%, var(--myhep-glass-border)) !important;
+    background: color-mix(in srgb, var(--se-primary-soft) 76%, var(--myhep-content)) !important;
+    color: var(--se-primary-strong) !important;
+    box-shadow: inset 0 1px 0 var(--myhep-glass-highlight) !important;
+}
+
+/* Content containers use a quiet, high-opacity material without per-card blur. */
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(
+    .ui-card, .card, .portal-card, .stat-card, .stat, .data-card,
+    .monitor-card, .monitor-kpi, .settings-card, .filter-card, .form-card,
+    .panel, .table-wrap, .maint-card, .maint-hero, .summary-card,
+    .bugs-card, .bugs-stat, .mv-kpi, .mv-live-kpi, .ann-stat,
+    .pmr-card, .pmr-kpi, .report-card, .sch-card, .ann-item, .rule-row,
+    .feature-row, .ai-form-card, .settings-intro, .settings-panel, .settings-option
+) {
+    border-color: var(--myhep-glass-border) !important;
+    border-radius: var(--myhep-radius-md) !important;
+    background: var(--myhep-content) !important;
+    box-shadow: var(--myhep-content-shadow) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .settings-shell .settings-section-title,
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .settings-shell .settings-option strong {
+    font-weight: 700 !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(
+    .ui-card-head, .card-head, .data-card-head, .panel-head, .report-card-head,
+    .head, .section-head, .sec-head, .filters, .disc-toolbar, .ann-toolbar,
+    .rules-toolbar, .account-toolbar, .sch-record-filters, .welfare-filters,
+    .bugs-filters, .student-filters-bar, .ins-filter-bar, .laptop-filter,
+    .admin-doc-filter, .fb-filter-card, .liquid-command-bar
+) {
+    border-color: var(--myhep-glass-border) !important;
+    background: var(--myhep-content-muted) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled).pwa-standalone .app-layout .page-body :is(
+    .filters, .disc-toolbar, .ann-toolbar, .rules-toolbar, .account-toolbar,
+    .sch-record-filters, .welfare-filters, .bugs-filters, .student-filters-bar,
+    .ins-filter-bar, .laptop-filter, .admin-doc-filter, .fb-filter-card,
+    .liquid-command-bar
+) {
+    background: var(--myhep-glass-nav) !important;
+    backdrop-filter: blur(10px) saturate(125%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(125%) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(table, .ui-table) {
+    background: var(--myhep-content) !important;
+    color: var(--se-text) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(th, thead th) {
+    border-color: var(--myhep-glass-border) !important;
+    background: var(--myhep-content-muted) !important;
+    color: var(--se-text-soft) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body td {
+    border-color: var(--myhep-glass-border) !important;
+    background: transparent !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+    select, textarea
+) {
+    min-height: 44px !important;
+    border-color: var(--myhep-glass-border) !important;
+    border-radius: var(--myhep-radius-sm) !important;
+    background: var(--myhep-field) !important;
+    color: var(--se-text) !important;
+    box-shadow: inset 0 1px 0 var(--myhep-glass-highlight) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: border-color var(--myhep-motion), box-shadow var(--myhep-motion), background-color var(--myhep-motion) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(.btn, .ui-btn, .action-btn, .pmr-btn, .stu-btn, .sch-record-btn, .account-btn, .ins-btn, .bugs-btn, .portal-link) {
+    min-height: 44px !important;
+    border-color: var(--myhep-glass-border) !important;
+    border-radius: var(--myhep-radius-sm) !important;
+    background: var(--myhep-control) !important;
+    color: var(--se-text) !important;
+    box-shadow: 0 3px 12px rgb(48 35 21 / .07), inset 0 1px 0 var(--myhep-glass-highlight) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: background-color var(--myhep-motion), border-color var(--myhep-motion), box-shadow var(--myhep-motion), transform var(--myhep-motion) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(.btn-primary, .ui-btn.primary, .pmr-btn-primary, .bugs-btn.primary, button.primary, .alert-action) {
+    border-color: var(--se-primary-strong) !important;
+    background: var(--se-primary-strong) !important;
+    color: var(--se-primary-button-text) !important;
+    box-shadow: 0 5px 14px color-mix(in srgb, var(--se-primary) 19%, transparent) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(
+    .confirm-dialog, .se-notification-panel, .se-media-dialog, .ins-modal-card,
+    .account-import-dialog, .done-modal-card, .profile-crop-modal,
+    .mobile-more-sheet, .pwa-prompt
+) {
+    border-color: var(--myhep-glass-border) !important;
+    border-radius: var(--myhep-radius-lg) !important;
+    background: var(--myhep-glass-popup) !important;
+    box-shadow: 0 24px 56px rgb(42 32 21 / .20), inset 0 1px 0 var(--myhep-glass-highlight) !important;
+    backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+}
+
+/* These floating menus share the same saved transparency setting. Their
+   individual rows remain opaque so labels stay clear over page content. */
+html[data-liquid-design="on"] body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.se-notification-panel, .header-user-menu, .mobile-more-sheet),
+html[data-liquid-design="on"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.header-user-menu, .mobile-more-sheet) {
+    border-color: var(--myhep-glass-border) !important;
+    background: linear-gradient(155deg, var(--myhep-glass-highlight), transparent 34%), var(--myhep-glass-popup) !important;
+    box-shadow: 0 22px 48px rgb(33 26 20 / .22), inset 0 1px 0 var(--myhep-glass-highlight) !important;
+    backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .se-notification-panel .se-notification-item {
+    background: var(--myhep-content-muted) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(
+    .se-notification-trigger, .se-icon-button, .sb-close, .header-user,
+    .header-support, .se-back-to-top
+) {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(button, a, input, select, textarea):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--se-primary) 72%, white) !important;
+    outline-offset: 2px !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(input, select, textarea)[aria-invalid="true"] {
+    border-color: var(--se-danger) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--se-danger) 18%, transparent) !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(button, input, select, textarea, .btn, .ui-btn):disabled,
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(button, .btn, .ui-btn)[aria-disabled="true"] {
+    opacity: .58 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(button, .btn, .ui-btn)[aria-busy="true"] {
+    cursor: progress !important;
+    opacity: .72 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(.btn, .ui-btn, .action-btn, .pmr-btn, .stu-btn, .portal-link):not(:disabled):hover {
+        border-color: color-mix(in srgb, var(--se-primary) 45%, var(--myhep-glass-border)) !important;
+        background: color-mix(in srgb, var(--se-primary-soft) 28%, var(--myhep-control)) !important;
+        box-shadow: 0 6px 18px rgb(48 35 21 / .11) !important;
+    }
+
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(.btn-primary, .ui-btn.primary, .pmr-btn-primary):not(:disabled):hover {
+        background: var(--se-primary-button-end) !important;
+        color: var(--se-primary-button-text) !important;
+    }
+}
+
+body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .page-body :is(.btn, .ui-btn, .action-btn, .pmr-btn, .stu-btn, .portal-link):not(:disabled):active {
+    transform: scale(.985) !important;
+}
+
+@media (max-width: 767px) {
+    /* One bottom inset belongs to the bar and one to the scroll clearance. */
+    body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student {
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+        margin: 0 !important;
+        padding: .3rem max(.5rem, env(safe-area-inset-right, 0px)) calc(.3rem + env(safe-area-inset-bottom, 0px)) max(.5rem, env(safe-area-inset-left, 0px)) !important;
+        transform: none !important;
+        border: 0 !important;
+        border-top: 1px solid var(--myhep-glass-border) !important;
+        border-radius: 22px 22px 0 0 !important;
+        background:
+            linear-gradient(165deg, rgb(255 255 255 / .27), transparent 32%),
+            radial-gradient(110% 130% at 50% -35%, color-mix(in srgb, var(--se-primary) 11%, transparent), transparent 72%),
+            var(--myhep-glass-nav) !important;
+        box-shadow: 0 -8px 26px rgb(42 32 21 / .12), inset 0 1px 0 var(--myhep-glass-highlight) !important;
+        backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    }
+
+    body.role-student.pwa-standalone.has-student-bottom-nav[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student {
+        background:
+            linear-gradient(165deg, rgb(255 255 255 / .07), transparent 32%),
+            radial-gradient(110% 130% at 50% -35%, color-mix(in srgb, var(--se-primary) 7%, transparent), transparent 72%),
+            var(--myhep-glass-nav) !important;
+    }
+
+    body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student::after {
+        display: none !important;
+    }
+
+    body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button) {
+        min-height: 48px !important;
+    }
+
+    body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab {
+        min-height: 48px !important;
+        margin: 0 !important;
+        border-radius: 16px !important;
+    }
+
+    body.role-student.pwa-standalone.has-student-bottom-nav .app-layout .page-body {
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 1.25rem) !important;
+    }
+
+    body.role-student.pwa-standalone.has-student-bottom-nav .mobile-more-sheet {
+        bottom: calc(64px + env(safe-area-inset-bottom, 0px) + .5rem) !important;
+    }
+
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
+        background:
+            linear-gradient(155deg, rgb(255 255 255 / .16), transparent 54%),
+            var(--myhep-glass-drawer) !important;
+        box-shadow: 14px 0 38px rgb(40 30 20 / .15), inset -1px 0 0 var(--myhep-glass-highlight) !important;
+        backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    }
+
+    body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open {
+        background:
+            linear-gradient(155deg, rgb(255 255 255 / .045), transparent 54%),
+            var(--myhep-glass-drawer) !important;
+    }
+
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    body:is(.role-student, .role-system-admin.liquid-design-enabled).pwa-standalone .app-layout .page-body {
+        padding-left: max(1rem, env(safe-area-inset-left, 0px)) !important;
+        padding-right: max(1rem, env(safe-area-inset-right, 0px)) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.btn, .ui-btn, .action-btn, .pmr-btn, .portal-link, .nav-link, input, select, textarea) {
+        transition-duration: .01ms !important;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) {
+        --myhep-glass-nav: var(--se-surface);
+        --myhep-glass-header: var(--se-surface);
+        --myhep-glass-popup: var(--se-surface);
+        --myhep-glass-drawer: var(--se-surface);
+        --myhep-content: var(--se-surface);
+        --myhep-content-muted: var(--se-surface-soft);
+    }
+
+}
+
+/* Keep filter declarations in separate feature queries. The Vite CSS
+   optimizer drops a combined prefixed/unprefixed declaration in this file. */
+@supports (backdrop-filter: blur(1px)) {
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .page-header, .page-header--system-liquid),
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.header-support, .header-user, .header-user-menu, .se-theme-toggle, .se-notification-trigger, .se-back-to-top),
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.confirm-dialog, .se-notification-panel, .se-media-dialog, .ins-modal-card, .account-import-dialog, .done-modal-card, .profile-crop-modal, .mobile-more-sheet, .pwa-prompt) {
+        backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    }
+
+    @media (max-width: 767px) {
+        body.role-student.liquid-design-enabled .mobile-bottom-nav.mobile-bottom-nav--student {
+            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        }
+    }
+
+    @media (max-width: 767px) {
+        body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
+            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        }
+
+        body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student {
+            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        }
+    }
+}
+
+@supports (-webkit-backdrop-filter: blur(1px)) {
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .page-header, .page-header--system-liquid),
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.header-support, .header-user, .header-user-menu, .se-theme-toggle, .se-notification-trigger, .se-back-to-top),
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.confirm-dialog, .se-notification-panel, .se-media-dialog, .ins-modal-card, .account-import-dialog, .done-modal-card, .profile-crop-modal, .mobile-more-sheet, .pwa-prompt) {
+        -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    }
+
+    @media (max-width: 767px) {
+        body.role-student.liquid-design-enabled .mobile-bottom-nav.mobile-bottom-nav--student {
+            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        }
+    }
+
+    @media (max-width: 767px) {
+        body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
+            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        }
+
+        body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student {
+            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        }
+    }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) {
+        --myhep-glass-nav: var(--se-surface);
+        --myhep-glass-header: var(--se-surface);
+        --myhep-glass-popup: var(--se-surface);
+        --myhep-glass-drawer: var(--se-surface);
+    }
+}
+
+/* Give the light floating bar a readable edge against near-white pages.
+   Keep its glass material and leave the dark and solid variants unchanged. */
+@media (max-width: 767px) {
+    body.role-student:not(.pwa-standalone) .mobile-bottom-nav.mobile-bottom-nav--student {
+        bottom: max(.5rem, var(--student-nav-bottom-offset)) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:not([data-theme="dark"]) .mobile-bottom-nav.mobile-bottom-nav--student {
+        border-color: rgb(92 77 73 / .30) !important;
+        background:
+            linear-gradient(155deg, rgb(255 255 255 / .56), transparent 42%, rgb(220 209 207 / .12)),
+            rgb(242 239 237 / var(--myhep-nav-opacity, .80)) !important;
+        box-shadow:
+            0 11px 30px rgb(47 37 34 / .20),
+            0 2px 8px rgb(47 37 34 / .09),
+            inset 0 1px 0 rgb(255 255 255 / .88),
+            inset 0 -1px 0 rgb(83 66 61 / .14) !important;
+    }
+}
+
+/* This follows the feature queries so accessibility preferences win. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .page-header, .sidebar.is-open, .mobile-bottom-nav),
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.header-support, .header-user, .header-user-menu, .se-theme-toggle, .se-notification-trigger, .se-back-to-top, .mobile-bottom-nav, .mobile-more-sheet, .confirm-dialog, .se-notification-panel, .se-media-dialog, .ins-modal-card, .account-import-dialog, .done-modal-card, .profile-crop-modal, .pwa-prompt) {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student {
+        background: var(--se-surface) !important;
+    }
+
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open,
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.header-user-menu, .mobile-more-sheet, .se-notification-panel) {
+        background: var(--se-surface) !important;
+    }
+}
+
+@media (forced-colors: active) {
+    body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student,
+    body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .page-header, .sidebar.is-open) {
+        border: 1px solid CanvasText !important;
+        background: Canvas !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+/* The mobile top bar uses its own bounded transparency so the setting is
+   noticeable without weakening the labels in the bottom navigation. */
+@media (max-width: 767px) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar {
+        background:
+            linear-gradient(112deg, rgb(255 255 255 / .18), transparent 43%),
+            var(--myhep-glass-header) !important;
+        border-bottom: 1px solid var(--myhep-glass-border) !important;
+        box-shadow: 0 9px 24px rgb(37 27 17 / .12), inset 0 1px 0 var(--myhep-glass-highlight) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .topbar {
+        background:
+            linear-gradient(112deg, rgb(255 255 255 / .09), transparent 43%),
+            var(--myhep-glass-header) !important;
+        box-shadow: 0 9px 26px rgb(0 0 0 / .28), inset 0 1px 0 var(--myhep-glass-highlight) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar::before {
+        opacity: .55;
+        transition: opacity 200ms ease !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar:has(:is(.btn-ham, .se-notification-trigger--topbar, .header-user):active)::before {
+        opacity: 1;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar :is(.btn-ham, .se-notification-trigger--topbar, .header-user) {
+        transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar :is(.btn-ham, .se-notification-trigger--topbar, .header-user):active {
+        transform: scale(.96);
+    }
+}
+
+@media (max-width: 767px) and ((prefers-reduced-transparency: reduce) or (prefers-contrast: more)) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar {
+        background: var(--se-surface) !important;
+    }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar::before,
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar :is(.btn-ham, .se-notification-trigger--topbar, .header-user) {
+        transition: none !important;
+    }
+}
+
+@media (max-width: 767px) and (forced-colors: active) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar {
+        background: Canvas !important;
+        border-color: CanvasText !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Restore the warm translucent mobile drawer without changing its navigation.
+   The background stays legible through one blurred sheet; its controls remain
+   crisp layers above that sheet. */
+@media (max-width: 1023px) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / .13), transparent 48%),
+            var(--myhep-glass-drawer) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open {
+        background:
+            linear-gradient(145deg, rgb(255 255 255 / .055), transparent 48%),
+            var(--myhep-glass-drawer) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
+        background: transparent !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open .sb-user {
+        background: rgb(255 255 255 / .36) !important;
+        border-color: rgb(255 255 255 / .76) !important;
+        box-shadow: 0 8px 20px rgb(51 39 27 / .10), inset 0 1px 0 rgb(255 255 255 / .65) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open .sb-user {
+        background: rgb(255 255 255 / .07) !important;
+        border-color: rgb(255 255 255 / .20) !important;
+        box-shadow: 0 8px 20px rgb(0 0 0 / .15), inset 0 1px 0 rgb(255 255 255 / .08) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open .nav-link.active {
+        background: color-mix(in srgb, var(--se-primary) 12%, rgb(255 255 255 / .52)) !important;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / .54) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open .nav-link.active {
+        background: color-mix(in srgb, var(--se-primary) 14%, rgb(255 255 255 / .09)) !important;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / .08) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled):not([data-theme="dark"]) .app-layout .sidebar.is-open .nav-link:not([aria-disabled="true"]) {
+        color: #251e19 !important;
+        opacity: 1 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled):not([data-theme="dark"]) .app-layout .sidebar.is-open :is(.nav-icon, .nav-chevron) {
+        color: #4d3c2e !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled):not([data-theme="dark"]) .app-layout .sidebar.is-open .nav-label {
+        color: #382d25 !important;
+        opacity: 1 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled):not([data-theme="dark"]) .app-layout .sidebar.is-open :is(.sb-brand-name, .sb-user-name) {
+        color: #211b17 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled):not([data-theme="dark"]) .app-layout .sidebar.is-open :is(.sb-brand-sub, .sb-user-role) {
+        color: #493b31 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled):not([data-theme="dark"]) .app-layout .sidebar.is-open .nav-link[aria-disabled="true"] {
+        color: #554b43 !important;
+        opacity: .72 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open .nav-link:not([aria-disabled="true"]) {
+        color: #f7f2eb !important;
+        opacity: 1 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open :is(.nav-icon, .nav-chevron) {
+        color: #ead4ab !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open .nav-label {
+        color: #e5d9c9 !important;
+        opacity: 1 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open :is(.sb-brand-name, .sb-user-name) {
+        color: #fffaf3 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open :is(.sb-brand-sub, .sb-user-role) {
+        color: #ddd0be !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open .nav-link[aria-disabled="true"] {
+        color: #d6cbbb !important;
+        opacity: .68 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open :is(.nav-link.active, .nav-group.active > .nav-group-toggle, .nav-group[open] > .nav-group-toggle) {
+        color: var(--se-primary-strong) !important;
+        text-shadow: none;
+    }
+}
+
+@supports (backdrop-filter: blur(1px)) {
+    @media (max-width: 1023px) {
+        html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
+            backdrop-filter: blur(26px) saturate(92%) !important;
+        }
+    }
+}
+
+@supports (-webkit-backdrop-filter: blur(1px)) {
+    @media (max-width: 1023px) {
+        html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
+            -webkit-backdrop-filter: blur(26px) saturate(92%) !important;
+        }
+    }
+}
+
+@media (max-width: 1023px) and ((prefers-reduced-transparency: reduce) or (prefers-contrast: more)) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
+        background: var(--se-surface) !important;
+    }
+}
+
+@media (max-width: 1023px) and (forced-colors: active) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
+        background: Canvas !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open :is(.nav-link, .nav-icon, .nav-chevron, .nav-label) {
+        color: CanvasText !important;
+        text-shadow: none !important;
+    }
+}
+
+/* A small refractive capsule on the appearance slider expresses the material
+   without putting decorative glass behind form text. The native range input
+   remains the full-sized keyboard and touch target. */
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range-frame {
+    position: relative;
+    height: 34px;
+    border: 1px solid color-mix(in srgb, var(--se-primary) 12%, var(--myhep-glass-border));
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--se-surface) 82%, transparent);
+    box-shadow: inset 0 1px 2px rgb(46 32 18 / .08), 0 1px 0 rgb(255 255 255 / .42);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
+    min-height: 44px;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--se-primary) 0 var(--glass-range-progress), color-mix(in srgb, var(--se-text-muted) 27%, transparent) var(--glass-range-progress) 100%) !important;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-webkit-slider-thumb {
+    width: 35px;
+    height: 24px;
+    margin-top: -10px;
+    border: 1px solid rgb(255 255 255 / .88);
+    border-radius: 10px;
+    background:
+        linear-gradient(180deg, transparent 44%, color-mix(in srgb, var(--se-primary) 24%, transparent) 45% 56%, transparent 57%),
+        linear-gradient(155deg, rgb(255 255 255 / .92), rgb(255 255 255 / .32) 42%, rgb(255 255 255 / .65) 100%),
+        rgb(250 247 243 / .42);
+    box-shadow: 0 7px 13px rgb(42 31 22 / .19), 0 1px 3px rgb(42 31 22 / .12), inset 0 1px 0 rgb(255 255 255 / .98), inset 0 -1px 0 rgb(109 89 72 / .16);
+    backdrop-filter: blur(8px) saturate(145%);
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range:active::-webkit-slider-thumb {
+    border-color: color-mix(in srgb, var(--se-primary) 44%, white);
+    box-shadow: 0 4px 8px rgb(42 31 22 / .18), inset 0 1px 0 rgb(255 255 255 / .98), 0 0 0 3px color-mix(in srgb, var(--se-primary) 14%, transparent);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-moz-range-track {
+    height: 4px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--se-text-muted) 27%, transparent);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-moz-range-progress {
+    height: 4px;
+    border-radius: 999px;
+    background: var(--se-primary);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-moz-range-thumb {
+    width: 35px;
+    height: 24px;
+    border: 1px solid rgb(255 255 255 / .88);
+    border-radius: 10px;
+    background:
+        linear-gradient(180deg, transparent 44%, color-mix(in srgb, var(--se-primary) 24%, transparent) 45% 56%, transparent 57%),
+        linear-gradient(155deg, rgb(255 255 255 / .92), rgb(255 255 255 / .32) 42%, rgb(255 255 255 / .65) 100%),
+        rgb(250 247 243 / .42);
+    box-shadow: 0 7px 13px rgb(42 31 22 / .19), 0 1px 3px rgb(42 31 22 / .12), inset 0 1px 0 rgb(255 255 255 / .98);
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range:active::-moz-range-thumb {
+    border-color: color-mix(in srgb, var(--se-primary) 44%, white);
+    box-shadow: 0 4px 8px rgb(42 31 22 / .18), inset 0 1px 0 rgb(255 255 255 / .98), 0 0 0 3px color-mix(in srgb, var(--se-primary) 14%, transparent);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .glass-slider .glass-range-frame {
+    background: rgb(53 48 44 / .72) !important;
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / .26), 0 1px 0 rgb(255 255 255 / .06) !important;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .glass-slider .glass-range::-webkit-slider-thumb {
+    border-color: rgb(255 255 255 / .48);
+    background:
+        linear-gradient(180deg, transparent 44%, color-mix(in srgb, var(--se-primary) 32%, transparent) 45% 56%, transparent 57%),
+        linear-gradient(155deg, rgb(255 255 255 / .48), rgb(255 255 255 / .12) 42%, rgb(255 255 255 / .30) 100%),
+        rgb(91 83 76 / .64);
+    box-shadow: 0 8px 16px rgb(0 0 0 / .34), inset 0 1px 0 rgb(255 255 255 / .60), inset 0 -1px 0 rgb(0 0 0 / .14);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .glass-slider .glass-range::-moz-range-thumb {
+    border-color: rgb(255 255 255 / .48);
+    background:
+        linear-gradient(180deg, transparent 44%, color-mix(in srgb, var(--se-primary) 32%, transparent) 45% 56%, transparent 57%),
+        linear-gradient(155deg, rgb(255 255 255 / .48), rgb(255 255 255 / .12) 42%, rgb(255 255 255 / .30) 100%),
+        rgb(91 83 76 / .64);
+    box-shadow: 0 8px 16px rgb(0 0 0 / .34), inset 0 1px 0 rgb(255 255 255 / .60), inset 0 -1px 0 rgb(0 0 0 / .14);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .glass-slider .glass-range:active::-webkit-slider-thumb {
+    border-color: color-mix(in srgb, var(--se-primary) 48%, white);
+    box-shadow: 0 4px 9px rgb(0 0 0 / .30), inset 0 1px 0 rgb(255 255 255 / .60), 0 0 0 3px color-mix(in srgb, var(--se-primary) 18%, transparent);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .glass-slider .glass-range:active::-moz-range-thumb {
+    border-color: color-mix(in srgb, var(--se-primary) 48%, white);
+    box-shadow: 0 4px 9px rgb(0 0 0 / .30), inset 0 1px 0 rgb(255 255 255 / .60), 0 0 0 3px color-mix(in srgb, var(--se-primary) 18%, transparent);
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-webkit-slider-thumb {
+        background: var(--se-surface);
+        backdrop-filter: none;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-moz-range-thumb {
+        background: var(--se-surface);
+    }
+}
+
+@media (pointer: coarse) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-webkit-slider-thumb {
+        backdrop-filter: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-webkit-slider-thumb {
+        transition: none;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range::-moz-range-thumb {
+        transition: none;
     }
 }
