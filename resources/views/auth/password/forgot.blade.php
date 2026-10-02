@@ -11,8 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{{ __('Lupa Kata Laluan') }}</title>
     @include('partials.brand_icons')
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/password-reset.js'])
-    @vite('resources/css/design-system.css')
+    @vite(['resources/css/app.css', 'resources/css/design-system.css', 'resources/css/auth.css', 'resources/js/app.js', 'resources/js/password-reset.js'])
 </head>
 <body data-theme="{{ session('theme', 'light') }}" class="auth-page">
 @include('partials.theme_toggle', ['themeToggleClass' => 'se-theme-toggle--standalone'])

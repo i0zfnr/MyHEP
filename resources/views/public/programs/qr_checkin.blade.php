@@ -2,11 +2,12 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{{ __('Program Check-in & Evaluation') }} &bull; {{ $program->title }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/public-qr-checkin.css')
 
 </head>
 <body class="public-qr-checkin-page">
@@ -93,7 +94,7 @@
                         </div>
                         <h2 class="section-title">{{ __('Participant Information') }}</h2>
                     </div>
-                    <span class="section-tag">{{ __('Step 1 of 2') }}</span>
+                    <span class="section-tag">{{ $program->questionnaire_enabled ? __('Step 1 of 2') : __('Step 1 of 1') }}</span>
                 </div>
 
                 <!-- Full Name -->
@@ -222,7 +223,7 @@
                                         </div>
                                     @else
                                         <!-- Text / Written Comments -->
-                                        <textarea name="answers[{{ $q->id }}]" class="textarea-control" rows="3" @required($q->is_required)" placeholder="{{ __('Sila nyatakan ulasan / pandangan anda...') }}">{{ old('answers.'.$q->id) }}</textarea>
+                                        <textarea name="answers[{{ $q->id }}]" class="textarea-control" rows="3" @required($q->is_required) placeholder="{{ __('Sila nyatakan ulasan / pandangan anda...') }}">{{ old('answers.'.$q->id) }}</textarea>
                                     @endif
                                 </div>
                             @endforeach

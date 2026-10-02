@@ -6,9 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Borrow {{ $laptop->name }} | MyHEP</title>
     @include('partials.brand_icons')
+    @vite('resources/css/site-shared.css')
 
 </head>
-<body>
+<body class="public-laptop-borrow-page">
     <main class="borrow-card">
         <header class="borrow-head">
             <div class="borrow-brand"><img src="{{ asset('images/myhep-mark.png') }}?v=10" alt="">MyHEP</div>

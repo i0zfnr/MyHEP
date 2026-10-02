@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#171412">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    @vite('resources/css/site-shared.css')
 
 </head>
 <body class="error-page">

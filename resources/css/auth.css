@@ -53,7 +53,7 @@ body.auth-page {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 1.25rem;
+    padding: 1.25rem !important;
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
@@ -379,8 +379,8 @@ body[data-theme="dark"] .form-panel {
 
 .auth-recovery-shell {
     width: min(100%, 520px);
-    min-height: calc(100vh - 5.5rem);
-    min-height: calc(100dvh - 5.5rem);
+    flex: 1 0 auto;
+    min-height: 0;
     display: grid;
     place-items: center;
     position: relative;
@@ -424,7 +424,7 @@ body[data-theme="dark"] .form-panel {
 .auth-recovery-brand span {
     display: block;
     font-size: 1.12rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: -.03em;
     color: var(--text);
 }
@@ -434,7 +434,7 @@ body[data-theme="dark"] .form-panel {
     margin-top: .08rem;
     color: var(--text-muted);
     font-size: .72rem;
-    font-weight: 800;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .06em;
 }
@@ -447,7 +447,7 @@ body[data-theme="dark"] .form-panel {
     margin: 0 0 .32rem;
     color: #9a7135;
     font-size: .75rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: .12em;
     text-transform: uppercase;
 }
@@ -478,7 +478,7 @@ body[data-theme="dark"] .form-panel {
     margin-bottom: .42rem;
     color: var(--text-muted);
     font-size: .78rem;
-    font-weight: 800;
+    font-weight: 600;
 }
 
 .auth-recovery-field :is(input, select) {
@@ -505,6 +505,70 @@ body[data-theme="dark"] .form-panel {
     grid-template-columns: 1fr 1fr;
     gap: .7rem;
     margin-top: .25rem;
+}
+
+.auth-recovery-actions :is(.btn-submit, .btn-home) {
+    min-height: 48px;
+    margin-top: 0;
+}
+
+.auth-recovery-actions .btn-submit {
+    background: linear-gradient(135deg, #6f4a26 0%, #8a632f 100%);
+    border: 1px solid #6f4a26;
+    color: #fff;
+}
+
+.auth-recovery-password {
+    position: relative;
+}
+
+.auth-recovery-password input {
+    padding-right: 3.5rem !important;
+}
+
+.auth-recovery-password .password-toggle {
+    position: absolute;
+    inset-block: 2px;
+    right: 2px;
+    width: 46px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.auth-recovery-password .password-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.auth-recovery-password .password-toggle .eye-off,
+.auth-recovery-password .password-toggle[aria-pressed="true"] .eye {
+    display: none;
+}
+
+.auth-recovery-password .password-toggle[aria-pressed="true"] .eye-off {
+    display: block;
+}
+
+.auth-recovery-card :is(.ok, .err) {
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    padding: .75rem .9rem;
+    line-height: 1.45;
+}
+
+.auth-recovery-card :is(input, button, a):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
 }
 
 body[data-theme="dark"] .auth-recovery-card {
@@ -535,7 +599,7 @@ body[data-theme="dark"] .auth-recovery-heading p {
         padding:
             max(.75rem, env(safe-area-inset-top))
             1rem
-            max(.75rem, env(safe-area-inset-bottom));
+            max(.75rem, env(safe-area-inset-bottom)) !important;
     }
     .login-shell {
         min-height: 0;
@@ -603,8 +667,7 @@ body[data-theme="dark"] .auth-recovery-heading p {
         padding: 0 .75rem .5rem;
     }
     .auth-recovery-shell {
-        min-height: calc(100svh - max(1.5rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
-        padding-top: 3.25rem;
+        padding-top: max(3.25rem, env(safe-area-inset-top));
     }
     .auth-recovery-card {
         padding: 1rem;
@@ -627,8 +690,8 @@ body[data-theme="dark"] .auth-recovery-heading p {
 
 @media (max-width: 420px) {
     body.auth-page {
-        padding-left: .5rem;
-        padding-right: .5rem;
+        padding-left: .5rem !important;
+        padding-right: .5rem !important;
     }
     .page-wrapper {
         border-radius: 16px;
