@@ -14,6 +14,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
@@ -95,6 +96,7 @@ class RunMyHepBackup implements ShouldQueue
                 'finished_at' => now(),
             ])->save();
             $successRecorded = true;
+            $this->notifyBackupResult($run, 'successful', null, $settings);
 
             try {
                 Log::info('MyHEP backup completed and verified.', [
@@ -129,6 +131,8 @@ class RunMyHepBackup implements ShouldQueue
                         'error' => $settings->safeError($recordingException),
                     ]);
                 }
+
+                $this->notifyBackupResult($run, 'failed', $safeError, $settings);
             }
 
             Log::error('MyHEP backup failed.', [
@@ -155,6 +159,8 @@ class RunMyHepBackup implements ShouldQueue
                     'error_message' => $safeError,
                     'finished_at' => now(),
                 ])->save();
+
+                $this->notifyBackupResult($run, 'failed', $safeError, $settings);
 
                 Log::error('MyHEP backup queue job failed.', [
                     'backup_run_id' => $run->id,
@@ -187,6 +193,44 @@ class RunMyHepBackup implements ShouldQueue
             Log::warning('Could not remove an incomplete MyHEP backup archive.', [
                 'remote_path' => $remotePath,
                 'error' => $settings->safeError($exception),
+            ]);
+        }
+    }
+
+    private function notifyBackupResult(BackupRun $run, string $status, ?string $detail, BackupSettings $settings): void
+    {
+        try {
+            $recipient = $settings->notificationEmail();
+            if (! $recipient) {
+                return;
+            }
+
+            $type = $run->type === 'database' ? 'database' : 'full';
+            $lines = [
+                'A MyHEP '.$type.' backup '.$status.'.',
+                'Finished: '.($run->finished_at?->timezone(config('app.timezone'))->format('Y-m-d H:i:s') ?? now()->format('Y-m-d H:i:s')),
+            ];
+            if ($status === 'successful' && $run->size_bytes) {
+                $lines[] = 'Verified archive size: '.$run->size_bytes.' bytes.';
+            }
+            if (filled($detail)) {
+                $lines[] = 'Details: '.mb_substr($detail, 0, 900);
+            }
+
+            Mail::raw(implode("\n\n", $lines), function ($message) use ($recipient, $type, $status): void {
+                $message->to($recipient)->subject('MyHEP '.$type.' backup '.$status);
+            });
+        } catch (Throwable $exception) {
+            try {
+                $safeError = $settings->safeError($exception);
+            } catch (Throwable) {
+                $safeError = $exception::class;
+            }
+
+            Log::warning('MyHEP backup result email could not be sent.', [
+                'backup_run_id' => $run->id,
+                'status' => $status,
+                'error' => $safeError,
             ]);
         }
     }

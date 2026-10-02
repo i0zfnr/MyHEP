@@ -9,13 +9,15 @@ use App\Services\Backups\BackupSettings;
 use App\Services\Backups\GoogleDriveConnection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class BackupController
 {
-    public function index(GoogleDriveConnection $drive, BackupHealthService $health): View
+    public function index(GoogleDriveConnection $drive, BackupHealthService $health, BackupSettings $settings): View
     {
+        $settings->applyStoredConfig();
         $connection = $drive->status();
         $snapshot = $health->snapshot($connection['connected']);
         $recentBackups = BackupRun::query()
@@ -33,7 +35,35 @@ class BackupController
                 'monthly' => __('backup.retention_monthly'),
             ],
             'missingRequirements' => app(BackupSettings::class)->missingRequirements(),
+            'backupSettings' => $settings->formState(),
         ]);
+    }
+
+    public function updateSettings(Request $request, BackupSettings $settings): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'notification_email' => ['nullable', 'email', 'max:255'],
+            'google_drive_client_id' => ['nullable', 'string', 'max:1024'],
+            'google_drive_client_secret' => ['nullable', 'string', 'max:8192'],
+            'google_drive_refresh_token' => ['nullable', 'string', 'max:8192'],
+            'google_drive_folder_id' => ['nullable', 'string', 'max:1024'],
+            'archive_password' => ['nullable', 'string', 'min:32', 'max:4096'],
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput($request->only([
+                    'notification_email',
+                    'google_drive_client_id',
+                    'google_drive_folder_id',
+                ]));
+        }
+
+        $settings->saveFromAdmin($validator->validated(), (int) $request->session()->get('auth_user.id', 0));
+        auditLog('backup_settings.update', 'backup_settings', 1, 'Backup connection and notification settings updated.');
+
+        return redirect()->route('admin.backups.index')->with('success', __('backup.settings_saved'));
     }
 
     public function store(

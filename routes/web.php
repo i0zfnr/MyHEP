@@ -183,6 +183,9 @@ Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
 Route::get('/admin/backups', [BackupController::class, 'index'])
     ->middleware(['auth.session:admin', 'admin.scope:system'])
     ->name('admin.backups.index');
+Route::post('/admin/backups/settings', [BackupController::class, 'updateSettings'])
+    ->middleware(['auth.session:admin', 'admin.scope:system', 'throttle:5,1'])
+    ->name('admin.backups.settings.update');
 Route::post('/admin/backups', [BackupController::class, 'store'])
     ->middleware(['auth.session:admin', 'admin.scope:system', 'throttle:2,5'])
     ->name('admin.backups.store');

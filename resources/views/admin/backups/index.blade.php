@@ -70,6 +70,52 @@
     </div>
 
     <section class="ui-card" style="margin-top:14px;">
+        <div class="ui-card-head"><strong>{{ __('backup.settings_title') }}</strong></div>
+        <div class="ui-card-body">
+            <p style="margin:0 0 14px;color:var(--text-muted,#746b62);">{{ __('backup.settings_help') }}</p>
+            @if($errors->any())
+                <div class="se-feedback se-feedback--error" role="alert" style="margin-bottom:14px;">
+                    <ul style="margin:0;padding-left:20px;">
+                        @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+                    </ul>
+                </div>
+            @endif
+            <form method="POST" action="{{ route('admin.backups.settings.update') }}">
+                @csrf
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px;">
+                    <label for="backup_notification_email" style="display:grid;gap:6px;">
+                        <span>{{ __('backup.notification_email') }}</span>
+                        <input id="backup_notification_email" type="email" name="notification_email" maxlength="255" value="{{ old('notification_email', $backupSettings['notification_email']) }}" autocomplete="email">
+                        <small style="color:var(--text-muted,#746b62);">{{ __('backup.notification_email_help') }}</small>
+                    </label>
+                    <label for="backup_google_client_id" style="display:grid;gap:6px;">
+                        <span>{{ __('backup.google_client_id') }}</span>
+                        <input id="backup_google_client_id" type="text" name="google_drive_client_id" maxlength="1024" value="{{ old('google_drive_client_id', $backupSettings['google_drive_client_id']) }}" autocomplete="off">
+                    </label>
+                    <label for="backup_google_folder_id" style="display:grid;gap:6px;">
+                        <span>{{ __('backup.google_folder_id') }}</span>
+                        <input id="backup_google_folder_id" type="text" name="google_drive_folder_id" maxlength="1024" value="{{ old('google_drive_folder_id', $backupSettings['google_drive_folder_id']) }}" autocomplete="off">
+                    </label>
+                    <label for="backup_google_client_secret" style="display:grid;gap:6px;">
+                        <span>{{ __('backup.google_client_secret') }}</span>
+                        <input id="backup_google_client_secret" type="password" name="google_drive_client_secret" maxlength="8192" autocomplete="new-password" placeholder="{{ $backupSettings['client_secret_configured'] ? __('backup.secret_saved') : __('backup.secret_not_set') }}">
+                    </label>
+                    <label for="backup_google_refresh_token" style="display:grid;gap:6px;">
+                        <span>{{ __('backup.google_refresh_token') }}</span>
+                        <input id="backup_google_refresh_token" type="password" name="google_drive_refresh_token" maxlength="8192" autocomplete="new-password" placeholder="{{ $backupSettings['refresh_token_configured'] ? __('backup.secret_saved') : __('backup.secret_not_set') }}">
+                    </label>
+                    <label for="backup_archive_password" style="display:grid;gap:6px;">
+                        <span>{{ __('backup.archive_password') }}</span>
+                        <input id="backup_archive_password" type="password" name="archive_password" minlength="32" maxlength="4096" autocomplete="new-password" placeholder="{{ $backupSettings['archive_password_configured'] ? __('backup.secret_saved') : __('backup.secret_not_set') }}">
+                    </label>
+                </div>
+                <p style="margin:12px 0;color:var(--text-muted,#746b62);">{{ __('backup.secret_help') }}</p>
+                <button class="ui-btn primary" type="submit">{{ __('backup.save_settings') }}</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="ui-card" style="margin-top:14px;">
         <div class="ui-card-head"><strong>{{ __('backup.backup_now') }}</strong></div>
         <div class="ui-card-body">
             <form method="POST" action="{{ route('admin.backups.store') }}" style="display:flex;align-items:end;gap:12px;flex-wrap:wrap;">
