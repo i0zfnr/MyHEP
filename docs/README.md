@@ -1,6 +1,6 @@
-# StudentEdge documentation
+# MyHEP documentation
 
-Documentation baseline: **14 August 2026**. It reflects the routes, middleware, controllers, migrations, services, views, and automated tests in this repository.
+Documentation baseline: **14 August 2026**. These detailed guides describe that snapshot. For current installation steps and the final validation results, see the [root README](../README.md); use the current source and tests for behavior added since this baseline.
 
 | Document | Purpose |
 |---|---|
@@ -13,4 +13,3 @@ Documentation baseline: **14 August 2026**. It reflects the routes, middleware, 
 | [PROJECT_STATUS.md](PROJECT_STATUS.md) | Implemented capabilities, known limitations, and next work |
 
 When behavior changes, update the relevant document in the same change. Source code and tests remain the authority if documentation and implementation disagree.
-

@@ -28,6 +28,7 @@ class PasswordResetEmailTest extends TestCase
             $table->string('role', 20);
             $table->unsignedBigInteger('target_id');
             $table->string('email', 150);
+            $table->string('verification_method', 20)->default('email');
             $table->string('code_hash');
             $table->timestamp('expires_at');
             $table->timestamp('verified_at')->nullable();

@@ -24,6 +24,7 @@ class FoodBankTest extends TestCase
             $table->string('phone')->nullable();
             $table->decimal('family_income', 10, 2)->nullable();
             $table->string('photo')->nullable();
+            $table->boolean('profile_completion_bypass')->default(false);
             $table->timestamps();
         });
 
@@ -64,6 +65,7 @@ class FoodBankTest extends TestCase
                 'academic_session' => '2025/2026',
                 'phone' => '0123456789',
                 'photo' => 'students/ahmad.jpg',
+                'profile_completion_bypass' => true,
             ],
             [
                 'id' => 2,
@@ -75,6 +77,7 @@ class FoodBankTest extends TestCase
                 'academic_session' => '2025/2026',
                 'phone' => '0198765432',
                 'photo' => 'students/siti.jpg',
+                'profile_completion_bypass' => true,
             ],
         ]);
 
@@ -140,7 +143,7 @@ class FoodBankTest extends TestCase
         $response = $this->get('/student/foodbank/claim');
 
         $response->assertOk()
-            ->assertSee('Borang Penerimaan Food Bank');
+            ->assertSee('Food Bank Receipt Form');
         $this->assertDatabaseCount('student_food_bank_claims', 0);
 
         $this->post('/student/foodbank/claim', [

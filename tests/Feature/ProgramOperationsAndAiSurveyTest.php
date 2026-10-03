@@ -335,6 +335,11 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $pdf = new UploadedFile(resource_path('certificates/batik-run.pdf'), 'batik-run.pdf', 'application/pdf', null, true);
         $response = $this->signIn(1, 'lecturer')->post(route('admin.program-certificate-templates.store'), [
             'name' => 'Batik Run Clean Master', 'template_pdf' => $pdf, 'source_page' => 1, 'ai_cleaned' => 1,
+            'included_fields' => ['student_name', 'ic_no'],
+            'field_settings' => [
+                'student_name' => ['x_mm' => 73.5, 'y_mm' => 75.3, 'width_mm' => 150, 'height_mm' => 9, 'font_size' => 14],
+                'ic_no' => ['x_mm' => 73.5, 'y_mm' => 87.1, 'width_mm' => 150, 'height_mm' => 9, 'font_size' => 10],
+            ],
             'name_x_mm' => 73.5, 'name_y_mm' => 75.3, 'name_width_mm' => 150, 'name_font_size' => 14,
             'ic_x_mm' => 73.5, 'ic_y_mm' => 87.1, 'ic_width_mm' => 150, 'ic_font_size' => 10,
             'name_cover_x_mm' => 143, 'name_cover_y_mm' => 69.5, 'name_cover_width_mm' => 28, 'name_cover_height_mm' => 11.5, 'name_cover_color' => '#f4ebd6',
@@ -360,6 +365,11 @@ class ProgramOperationsAndAiSurveyTest extends TestCase
         $pdf = new UploadedFile(resource_path('certificates/batik-run.pdf'), 'blank-certificate.pdf', 'application/pdf', null, true);
         $response = $this->signIn(1, 'lecturer')->post(route('admin.program-certificate-templates.store'), [
             'name' => 'Blank Placement Template', 'template_pdf' => $pdf, 'source_page' => 1, 'ai_cleaned' => 0,
+            'included_fields' => ['student_name', 'ic_no'],
+            'field_settings' => [
+                'student_name' => ['x_mm' => 73.5, 'y_mm' => 75.3, 'width_mm' => 150, 'height_mm' => 9, 'font_size' => 18],
+                'ic_no' => ['x_mm' => 73.5, 'y_mm' => 87.1, 'width_mm' => 150, 'height_mm' => 9, 'font_size' => 14],
+            ],
             'name_x_mm' => 73.5, 'name_y_mm' => 75.3, 'name_width_mm' => 150, 'name_font_size' => 18,
             'ic_x_mm' => 73.5, 'ic_y_mm' => 87.1, 'ic_width_mm' => 150, 'ic_font_size' => 14,
             'name_cover_x_mm' => 73.5, 'name_cover_y_mm' => 75.3, 'name_cover_width_mm' => 150, 'name_cover_height_mm' => 10, 'name_cover_color' => '#f4ebd6',

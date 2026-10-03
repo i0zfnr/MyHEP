@@ -1,42 +1,48 @@
-# StudentEdge
+# MyHEP
 
-StudentEdge is a Laravel 13 student-affairs platform for Politeknik Besut. It combines student records, scholarship and welfare management, discipline, student movement, JHEP laptop loans, program attendance, questionnaires, participation points, certificates, AI-assisted reporting, notifications, and operational administration.
+MyHEP is a student affairs management system for Politeknik Besut. Students, HEP staff, administrators, and security guards use it to manage scholarships and welfare, discipline and fines, campus movement, laptop loans, programs, attendance, questionnaires, participation points, certificates, documents, and notifications. The interface supports English and Bahasa Melayu and includes responsive browser and PWA layouts.
 
-## Current baseline
+## Technology
 
-- PHP 8.3+, Laravel 13, MySQL/MariaDB
-- FPDI-based certificate-template cleaning with no Python runtime dependency
-- Vite 8 and Tailwind CSS 4
-- PHPWord for editable DOCX reports and Dompdf for PDF output
-- Queue-backed bulk certificate generation and email/push integrations
-- English and Bahasa Melayu user interfaces
-- 220 registered routes and 37 automated test files as of 14 August 2026
+- PHP 8.3+, Laravel 13, MySQL or MariaDB
+- Vite 8, Tailwind CSS 4, Blade, and JavaScript
+- Database queues for background jobs, including bulk certificate generation and backups
+- PHPWord and Dompdf for reports; FPDI for certificate templates
 
-## Local setup
+## Local installation
 
 ```powershell
 composer install
 Copy-Item .env.example .env
 php artisan key:generate
-php artisan migrate
-npm install
+npm ci
 npm run build
+php artisan migrate
 php artisan storage:link
+composer run dev
 ```
 
-For development, run `composer run dev`. A queue worker must be running for queued work such as bulk certificate generation.
+Set the database connection in `.env` before migrating. Start a queue worker for queued features:
+
+```powershell
+php artisan queue:work
+```
+
+The development `.env.example` is a template. For HTTPS production, set `APP_ENV=production`, `APP_DEBUG=false`, the real `APP_URL` and `ALLOWED_HOSTS`, and `SESSION_SECURE_COOKIE=true`. Configure mail, Web Push, AI, and Google Drive backups only for the features in use. Keep credentials, student documents, private reports, and backup archives outside Git.
 
 ## Validation
 
 ```powershell
-php artisan view:clear
 php artisan test
+composer audit
+npm audit --audit-level=low
 npm run build
 php artisan route:list
+php artisan migrate:status
 ```
 
-Never commit `.env`, production credentials, generated private reports, student documents, or database backups.
+Final local check on **3 October 2026**: 263 PHP tests passed (1,533 assertions), Composer and npm audits reported no known advisories, the production asset build succeeded, and all local migrations completed. The repository currently registers 282 routes and contains 45 test files. Automated tests cover many role and workflow boundaries; connected services such as live SMS, email, payment, AI, push, and Google Drive still need environment-specific acceptance checks. Verify the production migration status, queue workers, scheduler, and backups after deployment.
 
 ## Documentation
 
-Start at [docs/README.md](docs/README.md). The documentation is source-aligned and split into system overview, access control, workflows, developer architecture, operations, testing, and current status.
+See [docs/README.md](docs/README.md) for the module overview, role access matrix, workflows, operations, and UAT checklist. Some detailed documents describe an earlier August 2026 baseline; check the current code and this README for the latest validation results.

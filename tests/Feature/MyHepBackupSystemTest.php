@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\RunMyHepBackup;
 use App\Models\BackupRun;
+use App\Models\BackupSetting;
 use App\Services\Backups\BackupArchiveName;
 use App\Services\Backups\BackupArchiveRunner;
 use App\Services\Backups\BackupCapacity;
@@ -58,6 +59,18 @@ class MyHepBackupSystemTest extends TestCase
             $table->text('error_message')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('backup_settings', function (Blueprint $table): void {
+            $table->id();
+            $table->text('google_drive_client_id')->nullable();
+            $table->text('google_drive_client_secret')->nullable();
+            $table->text('google_drive_refresh_token')->nullable();
+            $table->text('google_drive_folder_id')->nullable();
+            $table->text('archive_password')->nullable();
+            $table->string('notification_email')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
         });
     }
@@ -154,7 +167,7 @@ class MyHepBackupSystemTest extends TestCase
             ->handle(app(BackupSettings::class), $capacity, $runner);
 
         $run->refresh();
-        $this->assertSame('successful', $run->status);
+        $this->assertSame('successful', $run->status, (string) $run->error_message);
         $this->assertSame('google_drive', $run->destination);
         $this->assertStringStartsWith('Database/myhep-db-', $run->remote_path);
         $this->assertGreaterThan(0, $run->size_bytes);
@@ -386,13 +399,14 @@ class MyHepBackupSystemTest extends TestCase
 
     private function configureBackupSecrets(): void
     {
-        config([
-            'filesystems.disks.google_drive.clientId' => 'synthetic-client-id',
-            'filesystems.disks.google_drive.clientSecret' => 'synthetic-client-secret',
-            'filesystems.disks.google_drive.refreshToken' => 'synthetic-refresh-token',
-            'filesystems.disks.google_drive.folderId' => 'synthetic-folder-id',
-            'backup.backup.password' => 'synthetic-archive-password-for-testing-only-2026',
+        BackupSetting::query()->updateOrCreate(['id' => 1], [
+            'google_drive_client_id' => 'synthetic-client-id',
+            'google_drive_client_secret' => 'synthetic-client-secret',
+            'google_drive_refresh_token' => 'synthetic-refresh-token',
+            'google_drive_folder_id' => 'synthetic-folder-id',
+            'archive_password' => 'synthetic-archive-password-for-testing-only-2026',
         ]);
+        app(BackupSettings::class)->applyStoredConfig();
     }
 
     private function protectedProperty(object $object, string $property): mixed

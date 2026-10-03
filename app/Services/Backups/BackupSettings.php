@@ -64,8 +64,20 @@ class BackupSettings
             }
         }
 
+        $driveKeys = [
+            'filesystems.disks.google_drive.clientId',
+            'filesystems.disks.google_drive.clientSecret',
+            'filesystems.disks.google_drive.refreshToken',
+            'filesystems.disks.google_drive.folderId',
+        ];
+        $driveChanged = collect($driveKeys)->contains(
+            fn (string $key): bool => config($key) !== $effective[$key]
+        );
+
         config($effective);
-        Storage::forgetDisk('google_drive');
+        if ($driveChanged) {
+            Storage::forgetDisk('google_drive');
+        }
     }
 
     public function saveFromAdmin(array $values, int $adminId): void
