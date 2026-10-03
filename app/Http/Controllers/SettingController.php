@@ -22,8 +22,9 @@ class SettingController extends Controller
         $currentLocale = app()->getLocale();
         $currentTheme = $request->session()->get('theme', 'light');
         $currentAccentTheme = $request->session()->get('accent_theme', 'gold');
-        $currentGlassTransparency = (int) $request->session()->get('glass_transparency', 40);
-        $currentGlassSolid = (bool) $request->session()->get('glass_solid', false);
+        $savedGlass = (int) $request->session()->get('glass_transparency', 40);
+        $currentGlassTransparency = (int) $request->session()->get('glass_control_version', 1) === 2
+            ? $savedGlass : 100 - $savedGlass;
         $canAdjustGlass = $this->canAdjustGlass($authUser);
         $canAdjustAccentTheme = $this->canAdjustGlass($authUser);
         $canToggleLiquidDesign = $this->canToggleLiquidDesign($authUser);
@@ -49,7 +50,6 @@ class SettingController extends Controller
             'currentTheme',
             'currentAccentTheme',
             'currentGlassTransparency',
-            'currentGlassSolid',
             'canAdjustGlass',
             'canAdjustAccentTheme',
             'canToggleLiquidDesign',
@@ -88,6 +88,7 @@ class SettingController extends Controller
         }
         if (array_key_exists('glass_transparency', $validated)) {
             $request->session()->put('glass_transparency', $validated['glass_transparency']);
+            $request->session()->put('glass_control_version', 2);
         }
         if (array_key_exists('glass_solid', $validated)) {
             $request->session()->put('glass_solid', (bool) $validated['glass_solid']);

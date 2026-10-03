@@ -197,21 +197,25 @@
                     <p class="settings-section-copy">{{ __('ui.glass_transparency_hint') }}</p>
 
                     <input type="hidden" name="glass_solid" value="0">
-                    <label class="settings-liquid-toggle glass-solid-toggle">
-                        <span class="settings-liquid-toggle-copy">
-                            <strong>{{ __('ui.glass_solid_toggle') }}</strong>
-                            <small>{{ __('ui.glass_solid_hint') }}</small>
-                        </span>
-                        <span class="settings-liquid-toggle-control">
-                            <input type="checkbox" name="glass_solid" value="1" data-glass-solid-toggle role="switch" @checked($currentGlassSolid)>
-                            <span class="settings-liquid-switch" aria-hidden="true"><span></span></span>
-                        </span>
-                    </label>
 
                     <div class="glass-control" data-glass-control>
                         <div class="glass-control-preview" aria-hidden="true">
                             <span>{{ __('ui.glass_preview') }}</span>
-                            <strong data-glass-output data-solid-label="{{ __('ui.glass_solid') }}">{{ $currentGlassSolid ? __('ui.glass_solid') : $currentGlassTransparency.'%' }}</strong>
+                            <strong data-glass-output>{{ $currentGlassTransparency }}%</strong>
+                        </div>
+                        <div class="glass-live-scene" aria-hidden="true">
+                            <div class="glass-live-lens">
+                                <span class="glass-live-warp"></span>
+                                <strong class="glass-live-title">MyHEP</strong>
+                                <div class="glass-live-profile">
+                                    <span class="glass-live-mark">M</span>
+                                    <span class="glass-live-copy"><strong>Student Affairs</strong><small>Liquid Glass preview</small></span>
+                                </div>
+                                <div class="glass-live-details">
+                                    <span>Navigation</span><strong>Clear and readable</strong>
+                                    <span>Appearance</span><strong>Live preview</strong>
+                                </div>
+                            </div>
                         </div>
                         <div class="glass-slider" style="--glass-range-progress: {{ $currentGlassTransparency }}%;">
                             <span class="glass-slider-icon" title="{{ __('ui.glass_more_solid') }}" aria-hidden="true">

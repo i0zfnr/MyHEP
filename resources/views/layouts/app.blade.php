@@ -181,6 +181,16 @@
     );
 @endphp
 <body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" data-ui-role="{{ $uiRole }}" data-liquid-design="{{ $liquidDesignEnabled ? 'on' : 'off' }}" class="{{ $bodyClasses }}">
+    @if($liquidDesignEnabled)
+        <svg class="myhep-glass-filter" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <defs>
+                <filter id="myhepGlassRefraction" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.025" numOctaves="1" seed="3" result="glassNoise"/>
+                    <feDisplacementMap in="SourceGraphic" in2="glassNoise" scale="15" xChannelSelector="R" yChannelSelector="B" data-glass-displacement/>
+                </filter>
+            </defs>
+        </svg>
+    @endif
 <div class="app-layout">
 
     @if($showSidebar)

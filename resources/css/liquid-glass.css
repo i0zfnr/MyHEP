@@ -7,6 +7,9 @@
     --student-nav-active-alpha: .74;
     --student-nav-reflection-alpha: .26;
     --student-nav-active-reflection-alpha: .34;
+    --student-nav-blur: 22px;
+    --student-nav-active-blur: 12px;
+    --student-nav-saturation: 142%;
 }
 
 body:is(.role-student, .role-qr-staff) {
@@ -14,9 +17,6 @@ body:is(.role-student, .role-qr-staff) {
     --safe-right: env(safe-area-inset-right, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
-    --student-nav-blur: 22px;
-    --student-nav-active-blur: 12px;
-    --student-nav-saturation: 142%;
     --student-nav-text: #241d17;
     --student-nav-muted: #70645a;
     /* The selected accent is expressive; the glass material stays neutral. */
@@ -518,24 +518,21 @@ body.role-admin.liquid-design-disabled {
     }
 }
 
-/* The Student drawer is a single, bounded Liquid Glass sheet. It inherits the
-   shared --glass-opacity setting, so the appearance control affects it and
-   every other glass surface without making navigation text compete with the
-   dashboard behind it. */
+/* The Student drawer is a single, bounded Liquid Glass sheet. The shared
+   setting adjusts its tint and blur while menu text remains above the sheet. */
 @media (max-width: 1023px) {
-    /* The dashboard uses this drawer as an overlay at every width. Keep its
-       Liquid Glass highlights, but make the material itself opaque so page
-       text and cards cannot bleed through the navigation. */
+    /* Keep dashboard navigation readable while letting the one glass control
+       adjust the drawer material. */
     body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar.is-open {
         background:
             linear-gradient(145deg, rgb(255 255 255 / .16), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 12%, transparent), transparent 70%),
-            rgb(255 252 247 / 1) !important;
+            rgb(255 252 247 / max(.72, var(--myhep-drawer-opacity, .72))) !important;
     }
 
     body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
-        background-color: rgb(255 252 247 / 1) !important;
+        background-color: transparent !important;
     }
 
     body.role-student[data-theme="dark"].student-dashboard-mobile-sidebar .app-layout .sidebar.is-open {
@@ -543,19 +540,19 @@ body.role-admin.liquid-design-disabled {
             linear-gradient(145deg, rgb(255 255 255 / .055), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 16%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 10%, transparent), transparent 70%),
-            rgb(17 15 13 / 1) !important;
+            rgb(17 15 13 / max(.74, var(--myhep-drawer-opacity-dark, .74))) !important;
     }
 
     body.role-student[data-theme="dark"].student-dashboard-mobile-sidebar .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
-        background-color: rgb(17 15 13 / 1) !important;
+        background-color: transparent !important;
     }
 
     body.role-student .app-layout .sidebar.is-open .sb-header {
         background:
             linear-gradient(125deg, rgb(255 255 255 / .34), transparent 52%),
-            rgb(255 252 247 / max(.98, var(--glass-opacity))) !important;
-        backdrop-filter: blur(24px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+            rgb(255 252 247 / max(.78, var(--glass-opacity))) !important;
+        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(150%) !important;
     }
 
     body.role-student .app-layout .sidebar.is-open {
@@ -565,27 +562,27 @@ body.role-admin.liquid-design-disabled {
             linear-gradient(145deg, rgb(255 255 255 / calc(.10 + var(--glass-opacity) * .18)), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 12%, transparent), transparent 70%),
-            rgb(255 252 247 / max(.96, var(--glass-opacity))) !important;
+            rgb(255 252 247 / max(.72, var(--myhep-drawer-opacity, .72))) !important;
         box-shadow:
             18px 0 42px rgb(35 24 16 / .20),
             inset -1px 0 0 rgb(255 255 255 / calc(.18 + var(--glass-opacity) * .28)),
             inset 0 1px 0 rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .20)) !important;
-        backdrop-filter: blur(38px) saturate(155%) !important;
-        -webkit-backdrop-filter: blur(38px) saturate(155%) !important;
+        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(155%) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(155%) !important;
     }
 
     body.role-student .app-layout .sidebar.is-open .sb-user {
         border-color: color-mix(in srgb, var(--se-primary) 34%, var(--liquid-stroke-soft)) !important;
         background:
             linear-gradient(145deg, rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .18)), transparent 52%),
-            rgb(255 252 247 / max(.98, var(--glass-opacity))) !important;
+            rgb(255 252 247 / max(.72, var(--glass-opacity))) !important;
         box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(.20 + var(--glass-opacity) * .22)) !important;
     }
 
     body.role-student[data-theme="dark"] .app-layout .sidebar.is-open .sb-header {
         background:
             linear-gradient(125deg, rgb(255 255 255 / .10), transparent 52%),
-            rgb(17 15 13 / max(.98, var(--glass-opacity))) !important;
+            rgb(17 15 13 / max(.78, var(--glass-opacity))) !important;
     }
 
     body.role-student[data-theme="dark"] .app-layout .sidebar.is-open {
@@ -595,7 +592,7 @@ body.role-admin.liquid-design-disabled {
             linear-gradient(145deg, rgb(255 255 255 / calc(.035 + var(--glass-opacity) * .08)), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 16%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 10%, transparent), transparent 70%),
-            rgb(17 15 13 / max(.96, var(--glass-opacity))) !important;
+            rgb(17 15 13 / max(.74, var(--myhep-drawer-opacity-dark, .74))) !important;
         box-shadow:
             18px 0 46px rgb(0 0 0 / .46),
             inset -1px 0 0 rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .12)),
@@ -606,7 +603,7 @@ body.role-admin.liquid-design-disabled {
         border-color: color-mix(in srgb, var(--se-primary) 30%, var(--liquid-stroke-soft)) !important;
         background:
             linear-gradient(145deg, rgb(255 255 255 / calc(.045 + var(--glass-opacity) * .09)), transparent 52%),
-            rgb(17 15 13 / max(.98, var(--glass-opacity))) !important;
+            rgb(17 15 13 / max(.72, var(--glass-opacity))) !important;
         box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .11)) !important;
     }
 }
@@ -854,9 +851,8 @@ html[data-liquid-design="on"] body.role-student:not([data-theme="dark"]) .mobile
     }
 }
 
-/* Student Dashboard intentionally keeps its drawer as an overlay on wide
-   screens too. Give that desktop overlay the same high-opacity material as
-   the mobile drawer so dashboard text cannot show through the navigation. */
+/* Student Dashboard keeps its drawer as an overlay on wide screens too.
+   Use the same adjustable material at every viewport width. */
 @media (min-width: 1024px) {
     body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar.is-open {
         isolation: isolate;
@@ -865,13 +861,13 @@ html[data-liquid-design="on"] body.role-student:not([data-theme="dark"]) .mobile
             linear-gradient(145deg, rgb(255 255 255 / .16), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 12%, transparent), transparent 70%),
-            rgb(255 252 247 / 1) !important;
-        backdrop-filter: blur(38px) saturate(155%) !important;
-        -webkit-backdrop-filter: blur(38px) saturate(155%) !important;
+            rgb(255 252 247 / max(.72, var(--myhep-drawer-opacity, .72))) !important;
+        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
     }
 
     body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
-        background-color: rgb(255 252 247 / 1) !important;
+        background-color: transparent !important;
     }
 
     body.role-student[data-theme="dark"].student-dashboard-mobile-sidebar .app-layout .sidebar.is-open {
@@ -879,11 +875,11 @@ html[data-liquid-design="on"] body.role-student:not([data-theme="dark"]) .mobile
             linear-gradient(145deg, rgb(255 255 255 / .055), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 16%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 10%, transparent), transparent 70%),
-            rgb(17 15 13 / 1) !important;
+            rgb(17 15 13 / max(.74, var(--myhep-drawer-opacity-dark, .74))) !important;
     }
 
     body.role-student[data-theme="dark"].student-dashboard-mobile-sidebar .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
-        background-color: rgb(17 15 13 / 1) !important;
+        background-color: transparent !important;
     }
 }
 
@@ -1177,7 +1173,11 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(
 html[data-liquid-design="on"] body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.se-notification-panel, .header-user-menu, .mobile-more-sheet),
 html[data-liquid-design="on"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.header-user-menu, .mobile-more-sheet) {
     border-color: var(--myhep-glass-border) !important;
-    background: linear-gradient(155deg, var(--myhep-glass-highlight), transparent 34%), var(--myhep-glass-popup) !important;
+    background:
+        radial-gradient(circle at 0 0, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 25%),
+        radial-gradient(circle at 100% 0, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 25%),
+        linear-gradient(155deg, var(--myhep-glass-highlight), transparent 34%),
+        var(--myhep-glass-popup) !important;
     box-shadow: 0 22px 48px rgb(33 26 20 / .22), inset 0 1px 0 var(--myhep-glass-highlight) !important;
     backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
     -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
@@ -1428,6 +1428,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 @media (max-width: 767px) {
     html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar {
         background:
+            radial-gradient(circle at 0 0, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 18%),
+            radial-gradient(circle at 100% 0, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 18%),
             linear-gradient(112deg, rgb(255 255 255 / .18), transparent 43%),
             var(--myhep-glass-header) !important;
         border-bottom: 1px solid var(--myhep-glass-border) !important;
@@ -1436,6 +1438,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 
     html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .topbar {
         background:
+            radial-gradient(circle at 0 0, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 18%),
+            radial-gradient(circle at 100% 0, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 18%),
             linear-gradient(112deg, rgb(255 255 255 / .09), transparent 43%),
             var(--myhep-glass-header) !important;
         box-shadow: 0 9px 26px rgb(0 0 0 / .28), inset 0 1px 0 var(--myhep-glass-highlight) !important;
@@ -1595,7 +1599,7 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 @supports (backdrop-filter: blur(1px)) {
     @media (max-width: 1023px) {
         html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
-            backdrop-filter: blur(26px) saturate(92%) !important;
+            backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
         }
     }
 }
@@ -1603,7 +1607,7 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 @supports (-webkit-backdrop-filter: blur(1px)) {
     @media (max-width: 1023px) {
         html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
-            -webkit-backdrop-filter: blur(26px) saturate(92%) !important;
+            -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
         }
     }
 }
@@ -1625,9 +1629,192 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     }
 }
 
-/* A small refractive capsule on the appearance slider expresses the material
-   without putting decorative glass behind form text. The native range input
-   remains the full-sized keyboard and touch target. */
+/* The settings preview keeps its sample text above the refracted backdrop.
+   The native range input remains the keyboard and touch target. */
+.glass-live-scene {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 236px;
+    overflow: hidden;
+    border: 1px solid var(--myhep-glass-border, rgb(115 91 61 / .18));
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at 14% 24%, #f3d391, transparent 32%),
+        radial-gradient(circle at 81% 12%, #a1cfcc, transparent 31%),
+        radial-gradient(circle at 63% 88%, #a37478, transparent 34%),
+        linear-gradient(115deg, #62684f, #b79a6c 48%, #566f79);
+}
+
+.glass-live-scene::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(92deg, transparent 0 27px, rgb(37 34 30 / .32) 28px 33px, transparent 34px 73px);
+    opacity: .7;
+}
+
+.glass-live-scene::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset-inline: 0;
+    top: 58%;
+    height: 17px;
+    background: rgb(20 30 34 / .82);
+    box-shadow: 0 -4px 12px rgb(219 235 218 / .18), 0 5px 12px rgb(13 19 22 / .23);
+}
+
+.myhep-glass-filter {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.glass-live-lens {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    align-content: center;
+    gap: .8rem;
+    box-sizing: border-box;
+    width: min(calc(100% - 2rem), 350px);
+    min-height: 182px;
+    padding: 1.1rem 1.35rem;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / .78);
+    border-radius: 28px;
+    background: transparent;
+    box-shadow:
+        0 16px 36px rgb(30 22 20 / .27),
+        inset 4px 0 14px rgb(151 92 221 / var(--myhep-edge-prism-alpha, .25)),
+        inset -4px 0 14px rgb(51 212 244 / var(--myhep-edge-prism-alpha, .25)),
+        inset 0 -3px 12px rgb(242 105 64 / var(--myhep-edge-prism-alpha, .25)),
+        inset 0 1px 0 rgb(255 255 255 / .82);
+}
+
+.glass-live-warp {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        linear-gradient(145deg, rgb(255 255 255 / .12), transparent 38%),
+        rgb(29 27 27 / calc(.20 + var(--glass-user-transparency, .6) * .32));
+    backdrop-filter: blur(var(--myhep-preview-blur, 12px)) saturate(var(--student-nav-saturation, 135%));
+    -webkit-backdrop-filter: blur(var(--myhep-preview-blur, 12px)) saturate(var(--student-nav-saturation, 135%));
+}
+
+@supports (backdrop-filter: url(#myhepGlassRefraction)) and (not (-webkit-touch-callout: none)) {
+    .glass-live-warp {
+        backdrop-filter: blur(var(--myhep-preview-blur, 12px)) saturate(var(--student-nav-saturation, 135%)) url(#myhepGlassRefraction);
+    }
+}
+
+@media (max-width: 767px) {
+    @supports (backdrop-filter: url(#myhepGlassRefraction)) and (not (-webkit-touch-callout: none)) {
+        html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .mobile-bottom-nav.mobile-bottom-nav--student {
+            backdrop-filter: blur(var(--student-nav-blur)) saturate(var(--student-nav-saturation)) url(#myhepGlassRefraction) !important;
+        }
+    }
+}
+
+@media (max-width: 767px) and ((prefers-reduced-transparency: reduce) or (prefers-contrast: more) or (forced-colors: active)) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .mobile-bottom-nav.mobile-bottom-nav--student {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+.glass-live-lens::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 0 0, rgb(232 77 171 / calc(var(--myhep-edge-prism-alpha, .3) * 1.8)), transparent 42%),
+        radial-gradient(circle at 100% 0, rgb(50 218 235 / calc(var(--myhep-edge-prism-alpha, .3) * 1.8)), transparent 39%),
+        radial-gradient(circle at 100% 100%, rgb(245 122 62 / calc(var(--myhep-edge-prism-alpha, .3) * 1.8)), transparent 42%),
+        radial-gradient(circle at 0 100%, rgb(99 122 239 / calc(var(--myhep-edge-prism-alpha, .3) * 1.8)), transparent 40%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .8), inset 0 -1px 0 rgb(255 255 255 / .35);
+}
+
+.glass-live-title,
+.glass-live-profile,
+.glass-live-details {
+    position: relative;
+    z-index: 1;
+}
+
+.glass-live-title {
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.15;
+    text-shadow: 0 1px 8px rgb(0 0 0 / .65);
+}
+
+.glass-live-profile {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+}
+
+.glass-live-mark {
+    display: grid;
+    place-items: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgb(43 35 30 / .54);
+    color: white;
+    font-weight: 800;
+}
+
+.glass-live-copy {
+    display: grid;
+    gap: .08rem;
+    color: #fff;
+    text-shadow: 0 1px 8px rgb(0 0 0 / .7);
+}
+
+.glass-live-copy strong { font-size: .86rem; line-height: 1.15; }
+.glass-live-copy small { color: #fff !important; font-size: .7rem; line-height: 1.2; }
+
+.glass-live-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .25rem .7rem;
+    color: #fff;
+    font-size: .68rem;
+    line-height: 1.2;
+    text-shadow: 0 1px 7px rgb(0 0 0 / .75);
+}
+
+.glass-live-details strong {
+    font-weight: 700;
+    text-align: right;
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+    .glass-live-lens {
+        background: var(--se-surface) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .glass-live-lens::before { display: none; }
+
+    .glass-live-warp { display: none; }
+
+    .glass-live-lens :is(.glass-live-title, .glass-live-copy, .glass-live-copy small, .glass-live-details) {
+        color: var(--se-text, CanvasText) !important;
+        text-shadow: none;
+    }
+}
+
 html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .glass-slider .glass-range-frame {
     position: relative;
     height: 34px;
@@ -1778,6 +1965,8 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
         pointer-events: none;
         background:
             radial-gradient(ellipse 80% 15% at 18% 0%, rgb(255 255 255 / .26), transparent 78%),
+            radial-gradient(ellipse 12% 60% at 0% 32%, rgb(247 148 113 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
+            radial-gradient(ellipse 12% 60% at 100% 66%, rgb(112 203 225 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
             radial-gradient(ellipse 42% 50% at 105% 30%, rgb(255 255 255 / .13), transparent 75%);
     }
 
@@ -1801,6 +1990,8 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
     html[data-liquid-design="on"][data-glass-material="glass"] body.role-student[data-theme="dark"] .app-layout .sidebar.is-open::before {
         background:
             radial-gradient(ellipse 80% 15% at 18% 0%, rgb(255 255 255 / .10), transparent 78%),
+            radial-gradient(ellipse 12% 60% at 0% 32%, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
+            radial-gradient(ellipse 12% 60% at 100% 66%, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
             radial-gradient(ellipse 42% 50% at 105% 30%, rgb(255 255 255 / .045), transparent 75%);
     }
 
@@ -1818,14 +2009,20 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
         z-index: 3;
         border: 1px solid rgb(255 255 255 / .58);
         border-radius: inherit;
-        background: radial-gradient(ellipse 58% 60% at 22% 0%, rgb(255 255 255 / .25), transparent 80%);
+        background:
+            radial-gradient(ellipse 58% 60% at 22% 0%, rgb(255 255 255 / .25), transparent 80%),
+            radial-gradient(ellipse 12% 95% at 0% 50%, rgb(247 148 113 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
+            radial-gradient(ellipse 12% 95% at 100% 50%, rgb(112 203 225 / var(--myhep-edge-prism-alpha, .15)), transparent 85%);
         box-shadow: inset 0 1px 0 rgb(255 255 255 / .42);
         pointer-events: none;
     }
 
     html[data-liquid-design="on"][data-glass-material="glass"] body.role-student[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student::before {
         border-color: rgb(255 255 255 / .16);
-        background: radial-gradient(ellipse 58% 60% at 22% 0%, rgb(255 255 255 / .09), transparent 80%);
+        background:
+            radial-gradient(ellipse 58% 60% at 22% 0%, rgb(255 255 255 / .09), transparent 80%),
+            radial-gradient(ellipse 12% 95% at 0% 50%, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
+            radial-gradient(ellipse 12% 95% at 100% 50%, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 85%);
         box-shadow: inset 0 1px 0 rgb(255 255 255 / .12);
     }
 
@@ -1854,5 +2051,14 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
     html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .app-layout .sidebar.is-open::after,
     html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .mobile-bottom-nav.mobile-bottom-nav--student::before {
         display: none !important;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .sidebar.is-open),
+    html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.se-notification-panel, .header-user-menu, .mobile-more-sheet) {
+        background: var(--se-surface) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 }
