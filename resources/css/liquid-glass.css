@@ -1608,6 +1608,7 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     @media (max-width: 1023px) {
         html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
             -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
+            backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
         }
     }
 }
