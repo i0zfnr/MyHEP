@@ -2054,6 +2054,20 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
     }
 }
 
+/* Browser drawers need an opaque base so dashboard headings stay behind
+   the menu. The glass control still adjusts the edge highlights. */
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:not(.pwa-standalone) .app-layout .sidebar.is-open {
+    background:
+        linear-gradient(145deg, rgb(255 255 255 / .18), transparent 48%),
+        rgb(255 252 247 / 1) !important;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:not(.pwa-standalone)[data-theme="dark"] .app-layout .sidebar.is-open {
+    background:
+        linear-gradient(145deg, rgb(255 255 255 / .06), transparent 48%),
+        rgb(18 17 16 / 1) !important;
+}
+
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
     html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .sidebar.is-open),
     html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.se-notification-panel, .header-user-menu, .mobile-more-sheet) {
