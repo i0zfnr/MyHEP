@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -191,6 +192,13 @@ class AccountSessionManager
 
     public function revokeAccount(string $ownerType, int $ownerId, ?string $exceptPublicId = null): int
     {
+        if ($ownerType === 'student' && Schema::hasTable('personal_access_tokens')) {
+            DB::table('personal_access_tokens')
+                ->where('tokenable_type', Student::class)
+                ->where('tokenable_id', $ownerId)
+                ->delete();
+        }
+
         if (! $this->available()) {
             return 0;
         }
