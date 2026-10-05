@@ -58,7 +58,9 @@
             document.documentElement.style.setProperty('--student-nav-blur', glassActive ? (6 + (glassRatio * 24)) + 'px' : '0px');
             document.documentElement.style.setProperty('--student-nav-active-blur', glassActive ? (4 + (glassRatio * 17)) + 'px' : '0px');
             document.documentElement.style.setProperty('--student-nav-saturation', glassActive ? Math.round(300 - (glassRatio * 200)) + '%' : '100%');
-            document.documentElement.style.setProperty('--myhep-edge-prism-alpha', glassActive ? (0.38 - (glassRatio * 0.25)).toFixed(2) : '0');
+            var prismStrength = glassActive ? 0.38 - (glassRatio * 0.25) : 0;
+            document.documentElement.style.setProperty('--myhep-edge-prism-strength', Math.round(prismStrength * 100) + '%');
+            document.documentElement.style.setProperty('--myhep-edge-prism-strength-strong', Math.round(prismStrength * 115) + '%');
             document.documentElement.dataset.glassTransparency = String(glass);
             document.documentElement.dataset.glassHigh = glassActive && glass <= 30 ? 'true' : 'false';
         } catch (error) {
@@ -86,7 +88,8 @@
             document.documentElement.style.setProperty('--student-nav-blur', @json($themeLiquidDesignEnabled) ? '22px' : '0px');
             document.documentElement.style.setProperty('--student-nav-active-blur', @json($themeLiquidDesignEnabled) ? '12px' : '0px');
             document.documentElement.style.setProperty('--student-nav-saturation', @json($themeLiquidDesignEnabled) ? '220%' : '100%');
-            document.documentElement.style.setProperty('--myhep-edge-prism-alpha', @json($themeLiquidDesignEnabled) ? '.28' : '0');
+            document.documentElement.style.setProperty('--myhep-edge-prism-strength', @json($themeLiquidDesignEnabled) ? '28%' : '0%');
+            document.documentElement.style.setProperty('--myhep-edge-prism-strength-strong', @json($themeLiquidDesignEnabled) ? '32%' : '0%');
         }
     })();
 </script>

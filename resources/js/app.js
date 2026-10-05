@@ -299,7 +299,9 @@ const applyGlassTransparency = (value, persist = true) => {
     root.style.setProperty('--student-nav-active-blur', glassActive ? `${4 + (ratio * 17)}px` : '0px');
     // The clear end matches the vivid 300% reference; frosting eases it to 100%.
     root.style.setProperty('--student-nav-saturation', glassActive ? `${Math.round(300 - (ratio * 200))}%` : '100%');
-    root.style.setProperty('--myhep-edge-prism-alpha', glassActive ? (0.38 - (ratio * 0.25)).toFixed(2) : '0');
+    const prismStrength = glassActive ? 0.38 - (ratio * 0.25) : 0;
+    root.style.setProperty('--myhep-edge-prism-strength', `${Math.round(prismStrength * 100)}%`);
+    root.style.setProperty('--myhep-edge-prism-strength-strong', `${Math.round(prismStrength * 115)}%`);
     document.querySelectorAll('[data-glass-displacement]').forEach((map) => {
         map.setAttribute('scale', String(Math.round(30 - (ratio * 24))));
     });

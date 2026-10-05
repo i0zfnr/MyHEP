@@ -10,6 +10,8 @@
     --student-nav-blur: 22px;
     --student-nav-active-blur: 12px;
     --student-nav-saturation: 220%;
+    --myhep-edge-prism-strength: 15%;
+    --myhep-edge-prism-strength-strong: 18%;
 }
 
 body:is(.role-student, .role-qr-staff) {
@@ -1221,8 +1223,8 @@ html[data-liquid-design="on"] body:is(.role-student, .role-system-admin.liquid-d
 html[data-liquid-design="on"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.header-user-menu, .mobile-more-sheet) {
     border-color: var(--myhep-glass-border) !important;
     background:
-        radial-gradient(circle at 0 0, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 25%),
-        radial-gradient(circle at 100% 0, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 25%),
+        radial-gradient(circle at 0 0, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 25%),
+        radial-gradient(circle at 100% 0, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 25%),
         linear-gradient(155deg, var(--myhep-glass-highlight), transparent 34%),
         var(--myhep-glass-popup) !important;
     box-shadow: 0 22px 48px rgb(33 26 20 / .22), inset 0 1px 0 var(--myhep-glass-highlight) !important;
@@ -1475,8 +1477,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 @media (max-width: 767px) {
     html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .topbar {
         background:
-            radial-gradient(circle at 0 0, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 18%),
-            radial-gradient(circle at 100% 0, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 18%),
+            radial-gradient(circle at 0 0, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 18%),
+            radial-gradient(circle at 100% 0, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 18%),
             linear-gradient(112deg, rgb(255 255 255 / .18), transparent 43%),
             var(--myhep-glass-header) !important;
         border-bottom: 1px solid var(--myhep-glass-border) !important;
@@ -1485,8 +1487,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 
     html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .topbar {
         background:
-            radial-gradient(circle at 0 0, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 18%),
-            radial-gradient(circle at 100% 0, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 18%),
+            radial-gradient(circle at 0 0, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 18%),
+            radial-gradient(circle at 100% 0, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 18%),
             linear-gradient(112deg, rgb(255 255 255 / .09), transparent 43%),
             var(--myhep-glass-header) !important;
         box-shadow: 0 9px 26px rgb(0 0 0 / .28), inset 0 1px 0 var(--myhep-glass-highlight) !important;
@@ -1732,9 +1734,9 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     background: transparent;
     box-shadow:
         0 20px 38px rgb(30 22 20 / .27),
-        inset 5px 0 12px rgb(151 92 221 / var(--myhep-edge-prism-alpha, .25)),
-        inset -5px 0 12px rgb(51 212 244 / var(--myhep-edge-prism-alpha, .25)),
-        inset 0 -4px 10px rgb(242 105 64 / var(--myhep-edge-prism-alpha, .25)),
+        inset 5px 0 12px color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength-strong, 18%), transparent),
+        inset -5px 0 12px color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength-strong, 18%), transparent),
+        inset 0 -4px 10px color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength-strong, 18%), transparent),
         inset 0 1px 0 rgb(255 255 255 / .82);
 }
 
@@ -1786,10 +1788,10 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(circle at 0 0, rgb(232 77 171 / calc(var(--myhep-edge-prism-alpha, .3) * 1.15)), transparent 31%),
-        radial-gradient(circle at 100% 0, rgb(50 218 235 / calc(var(--myhep-edge-prism-alpha, .3) * 1.15)), transparent 30%),
-        radial-gradient(circle at 100% 100%, rgb(245 122 62 / calc(var(--myhep-edge-prism-alpha, .3) * 1.15)), transparent 32%),
-        radial-gradient(circle at 0 100%, rgb(99 122 239 / calc(var(--myhep-edge-prism-alpha, .3) * 1.15)), transparent 31%);
+        radial-gradient(circle at 0 0, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength-strong, 18%), transparent), transparent 31%),
+        radial-gradient(circle at 100% 0, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength-strong, 18%), transparent), transparent 30%),
+        radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength-strong, 18%), transparent), transparent 32%),
+        radial-gradient(circle at 0 100%, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength-strong, 18%), transparent), transparent 31%);
     box-shadow: inset 0 1px 0 rgb(255 255 255 / .8), inset 0 -1px 0 rgb(255 255 255 / .35);
 }
 
@@ -2017,8 +2019,8 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
         pointer-events: none;
         background:
             radial-gradient(ellipse 80% 15% at 18% 0%, rgb(255 255 255 / .26), transparent 78%),
-            radial-gradient(ellipse 12% 60% at 0% 32%, rgb(247 148 113 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
-            radial-gradient(ellipse 12% 60% at 100% 66%, rgb(112 203 225 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
+            radial-gradient(ellipse 12% 60% at 0% 32%, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 85%),
+            radial-gradient(ellipse 12% 60% at 100% 66%, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 85%),
             radial-gradient(ellipse 42% 50% at 105% 30%, rgb(255 255 255 / .13), transparent 75%);
     }
 
@@ -2042,8 +2044,8 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
     html[data-liquid-design="on"][data-glass-material="glass"] body.role-student[data-theme="dark"] .app-layout .sidebar.is-open::before {
         background:
             radial-gradient(ellipse 80% 15% at 18% 0%, rgb(255 255 255 / .10), transparent 78%),
-            radial-gradient(ellipse 12% 60% at 0% 32%, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
-            radial-gradient(ellipse 12% 60% at 100% 66%, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
+            radial-gradient(ellipse 12% 60% at 0% 32%, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 85%),
+            radial-gradient(ellipse 12% 60% at 100% 66%, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 85%),
             radial-gradient(ellipse 42% 50% at 105% 30%, rgb(255 255 255 / .045), transparent 75%);
     }
 
@@ -2063,8 +2065,8 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
         border-radius: inherit;
         background:
             radial-gradient(ellipse 58% 60% at 22% 0%, rgb(255 255 255 / .25), transparent 80%),
-            radial-gradient(ellipse 12% 95% at 0% 50%, rgb(247 148 113 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
-            radial-gradient(ellipse 12% 95% at 100% 50%, rgb(112 203 225 / var(--myhep-edge-prism-alpha, .15)), transparent 85%);
+            radial-gradient(ellipse 12% 95% at 0% 50%, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 85%),
+            radial-gradient(ellipse 12% 95% at 100% 50%, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 85%);
         box-shadow: inset 0 1px 0 rgb(255 255 255 / .42);
         pointer-events: none;
     }
@@ -2073,8 +2075,8 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
         border-color: rgb(255 255 255 / .16);
         background:
             radial-gradient(ellipse 58% 60% at 22% 0%, rgb(255 255 255 / .09), transparent 80%),
-            radial-gradient(ellipse 12% 95% at 0% 50%, rgb(232 77 171 / var(--myhep-edge-prism-alpha, .15)), transparent 85%),
-            radial-gradient(ellipse 12% 95% at 100% 50%, rgb(50 218 235 / var(--myhep-edge-prism-alpha, .15)), transparent 85%);
+            radial-gradient(ellipse 12% 95% at 0% 50%, color-mix(in srgb, var(--se-atmosphere-primary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 85%),
+            radial-gradient(ellipse 12% 95% at 100% 50%, color-mix(in srgb, var(--se-atmosphere-secondary) var(--myhep-edge-prism-strength, 15%), transparent), transparent 85%);
         box-shadow: inset 0 1px 0 rgb(255 255 255 / .12);
     }
 
@@ -2181,8 +2183,8 @@ html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:not
         border: 1px solid rgb(255 255 255 / .27);
         border-radius: inherit;
         background:
-            radial-gradient(ellipse 12px 30px at 0% 28%, rgb(240 133 192 / .24), transparent 100%),
-            radial-gradient(ellipse 12px 34px at 100% 70%, rgb(112 212 235 / .25), transparent 100%),
+            radial-gradient(ellipse 12px 30px at 0% 28%, color-mix(in srgb, var(--se-atmosphere-primary) 24%, transparent), transparent 100%),
+            radial-gradient(ellipse 12px 34px at 100% 70%, color-mix(in srgb, var(--se-atmosphere-secondary) 25%, transparent), transparent 100%),
             linear-gradient(180deg, rgb(255 255 255 / .21), transparent 27%, transparent 76%, rgb(255 255 255 / .12));
         pointer-events: none;
     }
