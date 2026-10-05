@@ -147,6 +147,7 @@
     // actually use the laptop QR scanner. System Admin retains its desktop UI.
     $showStaffBottomNav = $isAdmin && $adminScope !== 'system_admin' && $canUseLaptops;
     $studentBrowserBottomNavEnabled = $systemFeatures->enabled('student_browser_bottom_nav');
+    $studentAuroraEnabled = $isStudent && $systemFeatures->enabled('student_aurora_background');
     $studentAiHelperEnabled = $systemFeatures->enabled('student_ai_helper');
     $lecturerAiHelperEnabled = $systemFeatures->enabled('lecturer_ai_helper');
     $adminAiHelperEnabled = $adminScope === 'system_admin' || $systemFeatures->enabled('admin_ai_helper');
@@ -164,6 +165,7 @@
         || request()->routeIs('settings.*');
     $bodyClasses = trim(
         ($isStudent ? 'role-student student-mobile-shell' : '') . ' ' .
+        ($studentAuroraEnabled ? 'student-aurora-enabled ' : '') .
         ($isAdmin ? 'role-admin ' : '') .
         ($isAdmin && $adminScope !== 'system_admin' ? 'role-staff ' : '') .
         ($showStaffBottomNav ? 'role-qr-staff ' : '') .
@@ -181,6 +183,14 @@
     );
 @endphp
 <body data-theme="{{ session('theme', 'light') }}" data-accent-theme="{{ session('accent_theme', 'gold') }}" data-ui-role="{{ $uiRole }}" data-liquid-design="{{ $liquidDesignEnabled ? 'on' : 'off' }}" class="{{ $bodyClasses }}">
+    @if($studentAuroraEnabled)
+        <script>
+            document.body.classList.toggle('student-aurora-paused', document.hidden);
+            document.addEventListener('visibilitychange', function () {
+                document.body.classList.toggle('student-aurora-paused', document.hidden);
+            });
+        </script>
+    @endif
     @if($liquidDesignEnabled)
         <svg class="myhep-glass-filter" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
             <defs>
@@ -866,6 +876,8 @@
     </div>
 
     <nav class="mobile-bottom-nav mobile-bottom-nav--student" aria-label="{{ __('Student mobile navigation') }}">
+        <span class="student-nav-indicator" aria-hidden="true"></span>
+        <span class="student-nav-group-light" aria-hidden="true"></span>
         <a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
             <span class="mobile-nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
@@ -1035,37 +1047,168 @@ document.addEventListener('click', function (event) {
     var mobileMoreSheet = document.getElementById('mobileMoreSheet');
     var mobileMoreBackdrop = document.getElementById('mobileMoreBackdrop');
     var mobileStudentNav = document.querySelector('.mobile-bottom-nav--student');
+    var syncStudentNav;
 
     if (mobileStudentNav) {
         var navTabs = Array.from(mobileStudentNav.children).filter(function (item) {
             return item.matches('a, button');
         });
-        var activeNavTab = mobileStudentNav.querySelector(':scope > a.active, :scope > button.active');
-        var navTabCenter = function (item) {
-            var rect = item.getBoundingClientRect();
-            return rect.left + rect.width / 2;
+        navTabs.forEach(function (item) { if (item.tagName === 'A') item.draggable = false; });
+        mobileStudentNav.addEventListener('dragstart', function (event) { event.preventDefault(); });
+        var indicator = mobileStudentNav.querySelector('.student-nav-indicator');
+        var groupLight = mobileStudentNav.querySelector('.student-nav-group-light');
+        var reducedNavMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        var navState = { x: 0, y: 0, width: 0, vx: 0, vy: 0, vw: 0, target: null, frame: 0, ready: false, dragging: false };
+        var pointerStart = null;
+        var suppressPointerClick = false;
+        var navActivationTimer;
+        var navNavigationTimer;
+        var navTargetIndex = function () {
+            var current = mobileStudentNav.querySelector(':scope > button[aria-expanded="true"]')
+                || mobileStudentNav.querySelector(':scope > a.active, :scope > button.active');
+            return Math.max(0, navTabs.indexOf(current));
         };
-
-        try {
-            var storedNavTab = window.sessionStorage.getItem('myhep-student-nav-from');
-            var previousNavTab = Number(storedNavTab);
-            window.sessionStorage.removeItem('myhep-student-nav-from');
-            if (storedNavTab !== null && activeNavTab && Number.isInteger(previousNavTab) && previousNavTab >= 0
-                && previousNavTab < navTabs.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                var slide = navTabCenter(navTabs[previousNavTab]) - navTabCenter(activeNavTab);
-                activeNavTab.style.setProperty('--student-nav-slide', slide + 'px');
+        var navGeometry = function (index) {
+            var bar = mobileStudentNav.getBoundingClientRect();
+            var tab = navTabs[index].getBoundingClientRect();
+            var width = Math.min(62, Math.max(44, tab.width - 4));
+            var normalTab = navTabs[index].classList.contains('mobile-scan-tab') ? navTabs[1].getBoundingClientRect() : tab;
+            return { x: tab.left - bar.left + (tab.width - width) / 2,
+                y: normalTab.top - bar.top + (normalTab.height - 52) / 2, width: width };
+        };
+        var drawNavIndicator = function () {
+            indicator.style.width = navState.width + 'px';
+            indicator.style.transform = 'translate3d(' + navState.x + 'px,' + navState.y + 'px,0)';
+            if (groupLight) {
+                groupLight.style.width = navState.width + 20 + 'px';
+                groupLight.style.transform = 'translate3d(' + (navState.x - 10) + 'px,' + (navState.y - 5) + 'px,0)';
             }
-        } catch (error) {
-            // Storage may be unavailable in private browsing; the CSS bubble still appears.
-        }
-
-        navTabs.forEach(function (item, index) {
-            if (item.tagName !== 'A') return;
-            item.addEventListener('click', function (event) {
-                if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-                try { window.sessionStorage.setItem('myhep-student-nav-from', String(index)); } catch (error) {}
+        };
+        var stopNavSpring = function () {
+            if (navState.frame) window.cancelAnimationFrame(navState.frame);
+            navState.frame = 0;
+        };
+        var springNavIndicator = function () {
+            navState.frame = 0;
+            if (navState.dragging || !navState.target) return;
+            ['x', 'y', 'width'].forEach(function (key) {
+                var velocity = 'v' + (key === 'width' ? 'w' : key);
+                navState[velocity] = (navState[velocity] + (navState.target[key] - navState[key]) * .18) * .72;
+                navState[key] += navState[velocity];
             });
+            drawNavIndicator();
+            if (Math.abs(navState.target.x - navState.x) + Math.abs(navState.target.y - navState.y)
+                + Math.abs(navState.target.width - navState.width) + Math.abs(navState.vx) + Math.abs(navState.vy) + Math.abs(navState.vw) > .16) {
+                navState.frame = window.requestAnimationFrame(springNavIndicator);
+            } else {
+                Object.assign(navState, navState.target, { vx: 0, vy: 0, vw: 0 });
+                drawNavIndicator();
+            }
+        };
+        var showNavIndex = function (index) {
+            navTabs.forEach(function (item, tabIndex) { item.classList.toggle('is-current', tabIndex === index); });
+        };
+        var moveNavIndicator = function (index, immediate) {
+            if (!indicator || !mobileStudentNav.getBoundingClientRect().width) return;
+            navState.target = navGeometry(index);
+            showNavIndex(index);
+            if (!navState.ready || immediate || reducedNavMotion.matches) {
+                stopNavSpring();
+                Object.assign(navState, navState.target, { vx: 0, vy: 0, vw: 0, ready: true });
+                drawNavIndicator();
+                mobileStudentNav.classList.add('has-shared-indicator');
+            } else if (!navState.dragging && !navState.frame) {
+                navState.frame = window.requestAnimationFrame(springNavIndicator);
+            }
+        };
+        syncStudentNav = function () { moveNavIndicator(navTargetIndex(), false); };
+        var previousIndex = -1;
+        try {
+            var storedIndex = window.sessionStorage.getItem('myhep-student-nav-from');
+            window.sessionStorage.removeItem('myhep-student-nav-from');
+            if (storedIndex !== null && Number.isInteger(Number(storedIndex))) previousIndex = Number(storedIndex);
+        } catch (error) { /* Private browsing may disable storage. */ }
+        window.requestAnimationFrame(function () {
+            if (previousIndex >= 0 && previousIndex < navTabs.length && !reducedNavMotion.matches) {
+                moveNavIndicator(previousIndex, true);
+                window.requestAnimationFrame(syncStudentNav);
+            } else syncStudentNav();
         });
+        var nearestNavIndex = function (clientX) {
+            return navTabs.reduce(function (closest, item, index) {
+                var rect = item.getBoundingClientRect();
+                var distance = Math.abs(clientX - rect.left - rect.width / 2);
+                return distance < closest.distance ? { index: index, distance: distance } : closest;
+            }, { index: 0, distance: Infinity }).index;
+        };
+        mobileStudentNav.addEventListener('pointerdown', function (event) {
+            if (event.button !== 0 || !event.target.closest('a, button') || !navState.ready) return;
+            window.clearTimeout(navActivationTimer);
+            pointerStart = { id: event.pointerId, x: event.clientX, y: event.clientY };
+        });
+        mobileStudentNav.addEventListener('pointermove', function (event) {
+            if (!pointerStart || pointerStart.id !== event.pointerId) return;
+            var dx = event.clientX - pointerStart.x;
+            var dy = event.clientY - pointerStart.y;
+            if (!navState.dragging) {
+                if (Math.abs(dx) < 7 || Math.abs(dx) <= Math.abs(dy)) return;
+                navState.dragging = true;
+                stopNavSpring();
+                mobileStudentNav.classList.add('is-dragging');
+                mobileStudentNav.setPointerCapture(event.pointerId);
+            }
+            event.preventDefault();
+            var first = navGeometry(0);
+            var last = navGeometry(navTabs.length - 1);
+            navState.x = Math.max(first.x, Math.min(last.x, navState.x + event.clientX - (pointerStart.lastX ?? pointerStart.x)));
+            pointerStart.lastX = event.clientX;
+            var indicatorCenter = mobileStudentNav.getBoundingClientRect().left + navState.x + navState.width / 2;
+            navState.y = navGeometry(nearestNavIndex(indicatorCenter)).y;
+            drawNavIndicator();
+            showNavIndex(nearestNavIndex(indicatorCenter));
+        });
+        var finishNavDrag = function (event) {
+            if (!pointerStart || pointerStart.id !== event.pointerId) return;
+            pointerStart = null;
+            if (!navState.dragging) return;
+            event.preventDefault();
+            navState.dragging = false;
+            mobileStudentNav.classList.remove('is-dragging');
+            suppressPointerClick = true;
+            window.setTimeout(function () { suppressPointerClick = false; }, 80);
+            var index = nearestNavIndex(mobileStudentNav.getBoundingClientRect().left + navState.x + navState.width / 2);
+            moveNavIndicator(index, false);
+            navActivationTimer = window.setTimeout(function () { navTabs[index].click(); }, reducedNavMotion.matches ? 0 : 180);
+        };
+        mobileStudentNav.addEventListener('pointerup', finishNavDrag);
+        mobileStudentNav.addEventListener('pointercancel', function (event) {
+            pointerStart = null;
+            if (!navState.dragging) return;
+            navState.dragging = false;
+            mobileStudentNav.classList.remove('is-dragging');
+            syncStudentNav();
+        });
+        mobileStudentNav.addEventListener('click', function (event) {
+            if (suppressPointerClick && event.detail !== 0) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            var item = event.target.closest('a, button');
+            var index = navTabs.indexOf(item);
+            if (index < 0 || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            window.clearTimeout(navNavigationTimer);
+            if (item.tagName === 'A') {
+                event.preventDefault();
+                try { window.sessionStorage.setItem('myhep-student-nav-from', String(navTargetIndex())); } catch (error) {}
+            }
+            moveNavIndicator(index, false);
+            if (item.tagName === 'A') {
+                navNavigationTimer = window.setTimeout(function () { window.location.assign(item.href); }, reducedNavMotion.matches ? 0 : 300);
+            }
+        }, true);
+        if (window.ResizeObserver) new ResizeObserver(function () { moveNavIndicator(navTargetIndex(), true); }).observe(mobileStudentNav);
+        window.addEventListener('resize', function () { moveNavIndicator(navTargetIndex(), true); });
     }
 
     if (headerUserMenu && !headerUserMenu.classList.contains('is-open')) {
@@ -1112,6 +1255,7 @@ document.addEventListener('click', function (event) {
             mobileMoreBackdrop.setAttribute('aria-hidden', 'true');
         }
         if (mobileMoreToggle) mobileMoreToggle.setAttribute('aria-expanded', 'false');
+        if (syncStudentNav) syncStudentNav();
         if (!document.querySelector('.se-notification-center.is-open, .se-media-modal.is-open, .se-filter-sheet.is-open')) {
             document.body.style.overflow = '';
         }
@@ -1125,6 +1269,7 @@ document.addEventListener('click', function (event) {
         mobileMoreSheet.classList.toggle('is-open', open);
         mobileMoreSheet.setAttribute('aria-hidden', open ? 'false' : 'true');
         mobileMoreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (syncStudentNav) syncStudentNav();
         if (mobileMoreBackdrop) {
             mobileMoreBackdrop.classList.toggle('is-open', open);
             mobileMoreBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
@@ -1259,13 +1404,6 @@ document.addEventListener('click', function (event) {
     if (mobileMoreToggle && mobileMoreSheet) {
         mobileMoreToggle.addEventListener('click', function (event) {
             event.stopPropagation();
-            if (mobileStudentNav && !mobileMoreSheet.classList.contains('is-open')) {
-                var currentTab = mobileStudentNav.querySelector(':scope > a.active');
-                if (currentTab) {
-                    mobileMoreToggle.style.setProperty('--student-nav-slide',
-                        (navTabCenter(currentTab) - navTabCenter(mobileMoreToggle)) + 'px');
-                }
-            }
             setMobileMore(!mobileMoreSheet.classList.contains('is-open'));
         });
         if (mobileMoreBackdrop) mobileMoreBackdrop.addEventListener('click', closeMobileMore);

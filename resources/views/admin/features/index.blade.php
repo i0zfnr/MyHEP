@@ -18,6 +18,25 @@
         </div>
     </section>
     <section class="ui-card" style="margin-top:16px;">
+        <div class="ui-card-head"><strong>{{ __('Student Appearance') }}</strong></div>
+        <div class="ui-card-body feature-list">
+            <div class="feature-row">
+                <div class="feature-copy">
+                    <strong>{{ __($studentAuroraFeature['label']) }}</strong>
+                    <p>{{ __($studentAuroraFeature['description']) }}</p>
+                </div>
+                <form method="POST" action="{{ route('admin.features.update', $studentAuroraFeature['key']) }}">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="enabled" value="{{ $studentAuroraFeature['enabled'] ? 0 : 1 }}">
+                    <button class="ui-btn {{ $studentAuroraFeature['enabled'] ? 'btn-danger' : 'primary' }}" type="submit" aria-label="{{ $studentAuroraFeature['enabled'] ? __('Turn off :feature', ['feature' => __($studentAuroraFeature['label'])]) : __('Turn on :feature', ['feature' => __($studentAuroraFeature['label'])]) }}">
+                        {{ $studentAuroraFeature['enabled'] ? __('Turn Off') : __('Turn On') }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+    <section class="ui-card" style="margin-top:16px;">
         <div class="ui-card-head"><strong>{{ __('Session Security') }}</strong></div>
         <div class="ui-card-body">
             <div class="feature-row feature-row--session">

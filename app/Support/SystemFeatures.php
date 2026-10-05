@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 class SystemFeatures
 {
+    private const DISABLED_BY_DEFAULT = [
+        'enforce_student_profile_photo',
+        'student_aurora_background',
+    ];
+
     private const ADMIN_LIQUID_DESIGN_ROLES = [
         'system_admin',
         'student_affairs_head',
@@ -45,6 +50,10 @@ class SystemFeatures
             'label' => 'Student Bottom Navigation in Browser',
             'description' => 'Show the student mobile bottom navigation in normal mobile browsers. Installed PWA mode always keeps the bottom navigation available.',
         ],
+        'student_aurora_background' => [
+            'label' => 'Student Aurora Background',
+            'description' => 'Add a soft, slowly moving accent glow behind student pages. Refresh any already-open student page to see the change. Staff and admin pages are unchanged.',
+        ],
     ];
 
     public function exists(string $key): bool
@@ -59,13 +68,13 @@ class SystemFeatures
         }
 
         if (! Schema::hasTable('system_features')) {
-            return $key !== 'enforce_student_profile_photo';
+            return ! in_array($key, self::DISABLED_BY_DEFAULT, true);
         }
 
         $value = DB::table('system_features')->where('feature_key', $key)->value('enabled');
 
         if ($value === null) {
-            return $key === 'enforce_student_profile_photo' ? false : true;
+            return ! in_array($key, self::DISABLED_BY_DEFAULT, true);
         }
 
         return (bool) $value;

@@ -13,8 +13,11 @@ class FeatureController extends Controller
 {
     public function index(SystemFeatures $features, SystemSettings $settings): View
     {
+        $featureList = $features->all();
+
         return view('admin.features.index', [
-            'features' => $features->all(),
+            'features' => array_values(array_filter($featureList, fn (array $feature): bool => $feature['key'] !== 'student_aurora_background')),
+            'studentAuroraFeature' => collect($featureList)->firstWhere('key', 'student_aurora_background'),
             'sessionLifetimeDays' => (int) ceil($settings->sessionLifetime() / 1440),
         ]);
     }
@@ -25,7 +28,11 @@ class FeatureController extends Controller
         $features->set($feature, (bool) $validated['enabled'], (int) session('auth_user.id'));
         auditLog('system_features.update', 'system_features', null, $feature.': '.($validated['enabled'] ? 'enabled' : 'disabled'));
 
-        return redirect()->route('admin.features.index')->with('success', __('Feature availability updated.'));
+        $message = $feature === 'student_aurora_background'
+            ? __('Student Aurora Background updated. Refresh any open student page to see the change.')
+            : __('Feature availability updated.');
+
+        return redirect()->route('admin.features.index')->with('success', $message);
     }
 
     public function updateSessionLifetime(Request $request, SystemSettings $settings): RedirectResponse

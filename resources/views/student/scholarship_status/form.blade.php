@@ -26,7 +26,7 @@
         
         <div class="card">
             <div class="head">
-                <strong style="font-size:15px; color:#2d221a;">{{ __('Maklumat Pengesahan Biasiswa & Permohonan Kebajikan') }}</strong>
+                <strong>{{ __('Maklumat Pengesahan Biasiswa & Permohonan Kebajikan') }}</strong>
             </div>
             <div class="body">
                 <p class="hint" style="margin-bottom:14px;">
@@ -112,7 +112,11 @@
 
                     <div style="margin-top:12px;">
                         <label for="offer_letter">{{ __('Bukti Biasiswa (PDF / Imej)') }} @if(!$hasScholarshipEvidence)<span class="req">*</span>@endif</label>
-                        <input id="offer_letter" type="file" name="offer_letter" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" @if(($currentType ?? '') === 'scholarship' && !$hasScholarshipEvidence) required @endif>
+                        <div class="scholarship-file-picker">
+                            <input id="offer_letter" type="file" name="offer_letter" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" @if(($currentType ?? '') === 'scholarship' && !$hasScholarshipEvidence) required @endif>
+                            <span class="scholarship-file-trigger" aria-hidden="true">{{ __('Choose File') }}</span>
+                            <span class="scholarship-file-name" data-file-name data-empty-label="{{ __('No file chosen') }}" aria-live="polite">{{ __('No file chosen') }}</span>
+                        </div>
                         <p class="hint">{{ __('Wajib jika menerima biasiswa. Contoh: surat tawaran, penyata bayaran, atau tangkap layar portal penaja. PDF/JPG/PNG/WEBP, maksimum 10 MB.') }}</p>
                         @if($hasScholarshipEvidence && ($submission->application_type ?? '') === 'scholarship')
                             <div style="margin-top:8px;">
@@ -210,7 +214,11 @@
 
                     <div style="margin-top:12px;">
                         <label for="welfare_proof">{{ __('Dokumen Bukti Kebajikan (PDF / Imej)') }} @if(!$hasWelfareEvidence)<span class="req">*</span>@endif</label>
-                        <input id="welfare_proof" type="file" name="welfare_proof" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" @if(($currentType ?? '') === 'welfare' && !$hasWelfareEvidence) required @endif>
+                        <div class="scholarship-file-picker">
+                            <input id="welfare_proof" type="file" name="welfare_proof" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" @if(($currentType ?? '') === 'welfare' && !$hasWelfareEvidence) required @endif>
+                            <span class="scholarship-file-trigger" aria-hidden="true">{{ __('Choose File') }}</span>
+                            <span class="scholarship-file-name" data-file-name data-empty-label="{{ __('No file chosen') }}" aria-live="polite">{{ __('No file chosen') }}</span>
+                        </div>
                         <p class="hint">{{ __('Contoh dokumen: Slip Gaji Ibu Bapa / Surat Pengesahan Pendapatan Penghulu / Sijil Kematian / Laporan Polis / Surat Hospital (Maksimum 10 MB).') }}</p>
                         @if($hasWelfareEvidence && ($submission->application_type ?? '') === 'welfare')
                             <div style="margin-top:8px;">
@@ -300,6 +308,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('input[name="application_type"]').forEach(function (radio) {
         radio.addEventListener('change', syncType);
+    });
+
+    document.querySelectorAll('.scholarship-file-picker input[type="file"]').forEach(function (input) {
+        const fileName = input.parentElement.querySelector('[data-file-name]');
+        input.addEventListener('change', function () {
+            fileName.textContent = input.files?.[0]?.name || fileName.dataset.emptyLabel;
+        });
     });
 
     syncType();

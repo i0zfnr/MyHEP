@@ -9,7 +9,7 @@
     --student-nav-active-reflection-alpha: .34;
     --student-nav-blur: 22px;
     --student-nav-active-blur: 12px;
-    --student-nav-saturation: 142%;
+    --student-nav-saturation: 220%;
 }
 
 body:is(.role-student, .role-qr-staff) {
@@ -243,6 +243,21 @@ body.role-admin.liquid-design-disabled {
         transform: scale(.96) !important;
     }
 
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).is-pressed > span {
+        transform: translateY(1px) scale(.93, 1.04);
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).is-rebounding > span {
+        animation: student-nav-label-spring 420ms cubic-bezier(.22, .75, .25, 1) both;
+    }
+
+    @keyframes student-nav-label-spring {
+        0% { transform: translateY(1px) scale(.93, 1.04); }
+        55% { transform: translateY(-1px) scale(1.05, .97); }
+        78% { transform: translateY(0) scale(.985, 1.01); }
+        100% { transform: translateY(0) scale(1); }
+    }
+
     /* The link is a positioning and touch layer only; ::before is the single
      * visible selected capsule in both browser and standalone Student modes. */
     body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).active,
@@ -275,13 +290,45 @@ body.role-admin.liquid-design-disabled {
         -webkit-backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
         pointer-events: none;
         transform: translate(-50%, -50%) scale(1);
-        animation: student-nav-bubble-in 240ms cubic-bezier(.2, .8, .2, 1) both;
+        animation: student-nav-bubble-in 420ms cubic-bezier(.2, .8, .2, 1) both;
     }
 
     @keyframes student-nav-bubble-in {
-        0% { opacity: .7; transform: translate(calc(-50% + var(--student-nav-slide, 0px)), -50%) scale(.9, 1.08); border-radius: 27px; }
-        62% { opacity: 1; transform: translate(-50%, -50%) scale(1.025, .98); border-radius: 20px; }
+        0% { opacity: .82; transform: translate(calc(-50% + var(--student-nav-slide, 0px)), -50%) scale(1.12, .90); border-radius: 28px; }
+        58% { opacity: 1; transform: translate(-50%, -50%) scale(.91, 1.07); border-radius: 25px; }
+        78% { transform: translate(-50%, -50%) scale(1.035, .975); border-radius: 20px; }
         100% { opacity: 1; transform: translate(-50%, -50%) scale(1); border-radius: 22px; }
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).is-pressed:is(.active, [aria-expanded="true"])::before {
+        animation: none !important;
+        transform: translate(-50%, -50%) scale(.86, 1.09) !important;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).is-rebounding:is(.active, [aria-expanded="true"])::before {
+        animation: student-nav-bubble-release 420ms cubic-bezier(.22, .75, .25, 1) both !important;
+    }
+
+    @keyframes student-nav-bubble-release {
+        0% { transform: translate(-50%, -50%) scale(.86, 1.09); }
+        54% { transform: translate(-50%, -50%) scale(1.06, .95); }
+        78% { transform: translate(-50%, -50%) scale(.985, 1.015); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab.is-pressed {
+        scale: .92 1.06;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab.is-rebounding {
+        animation: student-scan-spring 420ms cubic-bezier(.22, .75, .25, 1) both;
+    }
+
+    @keyframes student-scan-spring {
+        0% { scale: .92 1.06; }
+        56% { scale: 1.055 .96; }
+        78% { scale: .985 1.01; }
+        100% { scale: 1; }
     }
 
     body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button).active > span,
@@ -460,8 +507,8 @@ body.role-admin.liquid-design-disabled {
             linear-gradient(125deg, rgb(255 255 255 / .34), transparent 32%, rgb(255 255 255 / .06) 72%),
             rgba(250, 248, 245, .96) !important;
         box-shadow: 0 18px 46px rgba(30, 24, 20, .24), inset 0 1px 0 rgba(255,255,255,.76) !important;
-        backdrop-filter: blur(24px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+        backdrop-filter: blur(24px) saturate(var(--student-nav-saturation, 220%)) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(var(--student-nav-saturation, 220%)) !important;
         transform: translate3d(0, 18px, 0) scale(.98) !important;
         transform-origin: bottom center;
     }
@@ -528,7 +575,7 @@ body.role-admin.liquid-design-disabled {
             linear-gradient(145deg, rgb(255 255 255 / .16), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 12%, transparent), transparent 70%),
-            rgb(255 252 247 / max(.72, var(--myhep-drawer-opacity, .72))) !important;
+            rgb(255 252 247 / var(--myhep-drawer-opacity, .72)) !important;
     }
 
     body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
@@ -540,7 +587,7 @@ body.role-admin.liquid-design-disabled {
             linear-gradient(145deg, rgb(255 255 255 / .055), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 16%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 10%, transparent), transparent 70%),
-            rgb(17 15 13 / max(.74, var(--myhep-drawer-opacity-dark, .74))) !important;
+            rgb(17 15 13 / var(--myhep-drawer-opacity-dark, .74)) !important;
     }
 
     body.role-student[data-theme="dark"].student-dashboard-mobile-sidebar .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
@@ -550,9 +597,9 @@ body.role-admin.liquid-design-disabled {
     body.role-student .app-layout .sidebar.is-open .sb-header {
         background:
             linear-gradient(125deg, rgb(255 255 255 / .34), transparent 52%),
-            rgb(255 252 247 / max(.78, var(--glass-opacity))) !important;
-        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(150%) !important;
+            rgb(255 252 247 / var(--myhep-popup-opacity, .84)) !important;
+        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
     }
 
     body.role-student .app-layout .sidebar.is-open {
@@ -562,27 +609,27 @@ body.role-admin.liquid-design-disabled {
             linear-gradient(145deg, rgb(255 255 255 / calc(.10 + var(--glass-opacity) * .18)), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 12%, transparent), transparent 70%),
-            rgb(255 252 247 / max(.72, var(--myhep-drawer-opacity, .72))) !important;
+            rgb(255 252 247 / var(--myhep-drawer-opacity, .72)) !important;
         box-shadow:
             18px 0 42px rgb(35 24 16 / .20),
             inset -1px 0 0 rgb(255 255 255 / calc(.18 + var(--glass-opacity) * .28)),
             inset 0 1px 0 rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .20)) !important;
-        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(155%) !important;
-        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(155%) !important;
+        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
     }
 
     body.role-student .app-layout .sidebar.is-open .sb-user {
         border-color: color-mix(in srgb, var(--se-primary) 34%, var(--liquid-stroke-soft)) !important;
         background:
             linear-gradient(145deg, rgb(255 255 255 / calc(.12 + var(--glass-opacity) * .18)), transparent 52%),
-            rgb(255 252 247 / max(.72, var(--glass-opacity))) !important;
+            rgb(255 252 247 / var(--myhep-popup-opacity, .84)) !important;
         box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(.20 + var(--glass-opacity) * .22)) !important;
     }
 
     body.role-student[data-theme="dark"] .app-layout .sidebar.is-open .sb-header {
         background:
             linear-gradient(125deg, rgb(255 255 255 / .10), transparent 52%),
-            rgb(17 15 13 / max(.78, var(--glass-opacity))) !important;
+            rgb(17 15 13 / var(--myhep-popup-opacity-dark, .88)) !important;
     }
 
     body.role-student[data-theme="dark"] .app-layout .sidebar.is-open {
@@ -592,7 +639,7 @@ body.role-admin.liquid-design-disabled {
             linear-gradient(145deg, rgb(255 255 255 / calc(.035 + var(--glass-opacity) * .08)), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 16%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 10%, transparent), transparent 70%),
-            rgb(17 15 13 / max(.74, var(--myhep-drawer-opacity-dark, .74))) !important;
+            rgb(17 15 13 / var(--myhep-drawer-opacity-dark, .74)) !important;
         box-shadow:
             18px 0 46px rgb(0 0 0 / .46),
             inset -1px 0 0 rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .12)),
@@ -603,7 +650,7 @@ body.role-admin.liquid-design-disabled {
         border-color: color-mix(in srgb, var(--se-primary) 30%, var(--liquid-stroke-soft)) !important;
         background:
             linear-gradient(145deg, rgb(255 255 255 / calc(.045 + var(--glass-opacity) * .09)), transparent 52%),
-            rgb(17 15 13 / max(.72, var(--glass-opacity))) !important;
+            rgb(17 15 13 / var(--myhep-popup-opacity-dark, .88)) !important;
         box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(.06 + var(--glass-opacity) * .11)) !important;
     }
 }
@@ -861,9 +908,9 @@ html[data-liquid-design="on"] body.role-student:not([data-theme="dark"]) .mobile
             linear-gradient(145deg, rgb(255 255 255 / .16), transparent 48%),
             radial-gradient(26rem circle at 100% -8%, color-mix(in srgb, var(--se-atmosphere-primary) 18%, transparent), transparent 64%),
             radial-gradient(22rem circle at 0% 108%, color-mix(in srgb, var(--se-atmosphere-secondary) 12%, transparent), transparent 70%),
-            rgb(255 252 247 / max(.72, var(--myhep-drawer-opacity, .72))) !important;
-        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
-        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
+            rgb(255 252 247 / var(--myhep-browser-drawer-opacity, .88)) !important;
+        backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
     }
 
     body.role-student.student-dashboard-mobile-sidebar .app-layout .sidebar.is-open :is(.sb-header, .sb-footer, .sb-user) {
@@ -1030,8 +1077,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.header-sup
     border-color: var(--myhep-glass-border) !important;
     background: linear-gradient(145deg, var(--myhep-glass-highlight), transparent 44%), var(--myhep-glass-nav) !important;
     box-shadow: var(--myhep-glass-shadow) !important;
-    backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
+    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
 }
 
 @media (max-width: 767px) {
@@ -1164,8 +1211,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(
     border-radius: var(--myhep-radius-lg) !important;
     background: var(--myhep-glass-popup) !important;
     box-shadow: 0 24px 56px rgb(42 32 21 / .20), inset 0 1px 0 var(--myhep-glass-highlight) !important;
-    backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
+    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
 }
 
 /* These floating menus share the same saved transparency setting. Their
@@ -1179,8 +1226,8 @@ html[data-liquid-design="on"] body:is(.role-student, .role-system-admin.liquid-d
         linear-gradient(155deg, var(--myhep-glass-highlight), transparent 34%),
         var(--myhep-glass-popup) !important;
     box-shadow: 0 22px 48px rgb(33 26 20 / .22), inset 0 1px 0 var(--myhep-glass-highlight) !important;
-    backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+    backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
+    -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
 }
 
 body:is(.role-student, .role-system-admin.liquid-design-enabled) .se-notification-panel .se-notification-item {
@@ -1271,8 +1318,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
             linear-gradient(155deg, rgb(255 255 255 / .16), transparent 54%),
             var(--myhep-glass-drawer) !important;
         box-shadow: 14px 0 38px rgb(40 30 20 / .15), inset -1px 0 0 var(--myhep-glass-highlight) !important;
-        backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-        -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
     }
 
     body:is(.role-student, .role-system-admin.liquid-design-enabled)[data-theme="dark"] .app-layout .sidebar.is-open {
@@ -1317,22 +1364,22 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .page-header, .page-header--system-liquid),
     body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.header-support, .header-user, .header-user-menu, .se-theme-toggle, .se-notification-trigger, .se-back-to-top),
     body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.confirm-dialog, .se-notification-panel, .se-media-dialog, .ins-modal-card, .account-import-dialog, .done-modal-card, .profile-crop-modal, .mobile-more-sheet, .pwa-prompt) {
-        backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
     }
 
     @media (max-width: 767px) {
         body.role-student.liquid-design-enabled .mobile-bottom-nav.mobile-bottom-nav--student {
-            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
         }
     }
 
     @media (max-width: 767px) {
         body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
-            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
         }
 
         body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student {
-            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
         }
     }
 }
@@ -1341,26 +1388,26 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout :is(.topbar, .page-header, .page-header--system-liquid),
     body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.header-support, .header-user, .header-user-menu, .se-theme-toggle, .se-notification-trigger, .se-back-to-top),
     body:is(.role-student, .role-system-admin.liquid-design-enabled) :is(.confirm-dialog, .se-notification-panel, .se-media-dialog, .ins-modal-card, .account-import-dialog, .done-modal-card, .profile-crop-modal, .mobile-more-sheet, .pwa-prompt) {
-        -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-        backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+        -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
+        backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
     }
 
     @media (max-width: 767px) {
         body.role-student.liquid-design-enabled .mobile-bottom-nav.mobile-bottom-nav--student {
-            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
         }
     }
 
     @media (max-width: 767px) {
         body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
-            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
         }
 
         body.role-student.pwa-standalone.has-student-bottom-nav .mobile-bottom-nav.mobile-bottom-nav--student {
-            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
-            backdrop-filter: blur(var(--myhep-blur)) saturate(135%) !important;
+            -webkit-backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
+            backdrop-filter: blur(var(--myhep-blur)) saturate(var(--student-nav-saturation, 220%)) !important;
         }
     }
 }
@@ -1599,7 +1646,7 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 @supports (backdrop-filter: blur(1px)) {
     @media (max-width: 1023px) {
         html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
-            backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
+            backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
         }
     }
 }
@@ -1607,8 +1654,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
 @supports (-webkit-backdrop-filter: blur(1px)) {
     @media (max-width: 1023px) {
         html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .sidebar.is-open {
-            -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
-            backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(135%) !important;
+            -webkit-backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
+            backdrop-filter: blur(var(--myhep-blur, 16px)) saturate(var(--student-nav-saturation, 220%)) !important;
         }
     }
 }
@@ -1636,23 +1683,18 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     position: relative;
     display: grid;
     place-items: center;
-    min-height: 236px;
+    min-height: 248px;
     overflow: hidden;
     border: 1px solid var(--myhep-glass-border, rgb(115 91 61 / .18));
     border-radius: 18px;
-    background:
-        radial-gradient(circle at 14% 24%, #f3d391, transparent 32%),
-        radial-gradient(circle at 81% 12%, #a1cfcc, transparent 31%),
-        radial-gradient(circle at 63% 88%, #a37478, transparent 34%),
-        linear-gradient(115deg, #62684f, #b79a6c 48%, #566f79);
+    background: #8b795f url('../images/glass-preview-street.webp') center 48% / cover no-repeat;
 }
 
 .glass-live-scene::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(92deg, transparent 0 27px, rgb(37 34 30 / .32) 28px 33px, transparent 34px 73px);
-    opacity: .7;
+    background: linear-gradient(90deg, rgb(21 20 18 / .16), transparent 37%, rgb(21 20 18 / .12));
 }
 
 .glass-live-scene::after {
@@ -1660,10 +1702,10 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     position: absolute;
     z-index: 0;
     inset-inline: 0;
-    top: 58%;
-    height: 17px;
-    background: rgb(20 30 34 / .82);
-    box-shadow: 0 -4px 12px rgb(219 235 218 / .18), 0 5px 12px rgb(13 19 22 / .23);
+    top: auto;
+    bottom: 0;
+    height: 32%;
+    background: linear-gradient(transparent, rgb(25 20 17 / .12));
 }
 
 .myhep-glass-filter {
@@ -1682,17 +1724,17 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     gap: .8rem;
     box-sizing: border-box;
     width: min(calc(100% - 2rem), 350px);
-    min-height: 182px;
+    min-height: 190px;
     padding: 1.1rem 1.35rem;
     overflow: hidden;
-    border: 1px solid rgb(255 255 255 / .78);
+    border: 1px solid rgb(255 255 255 / .74);
     border-radius: 28px;
     background: transparent;
     box-shadow:
-        0 16px 36px rgb(30 22 20 / .27),
-        inset 4px 0 14px rgb(151 92 221 / var(--myhep-edge-prism-alpha, .25)),
-        inset -4px 0 14px rgb(51 212 244 / var(--myhep-edge-prism-alpha, .25)),
-        inset 0 -3px 12px rgb(242 105 64 / var(--myhep-edge-prism-alpha, .25)),
+        0 20px 38px rgb(30 22 20 / .27),
+        inset 5px 0 12px rgb(151 92 221 / var(--myhep-edge-prism-alpha, .25)),
+        inset -5px 0 12px rgb(51 212 244 / var(--myhep-edge-prism-alpha, .25)),
+        inset 0 -4px 10px rgb(242 105 64 / var(--myhep-edge-prism-alpha, .25)),
         inset 0 1px 0 rgb(255 255 255 / .82);
 }
 
@@ -1702,8 +1744,8 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     border-radius: inherit;
     pointer-events: none;
     background:
-        linear-gradient(145deg, rgb(255 255 255 / .12), transparent 38%),
-        rgb(29 27 27 / calc(.20 + var(--glass-user-transparency, .6) * .32));
+        linear-gradient(145deg, rgb(255 255 255 / .20), transparent 36%),
+        rgb(23 22 21 / calc(.34 + var(--glass-user-transparency, .6) * .20));
     backdrop-filter: blur(var(--myhep-preview-blur, 12px)) saturate(var(--student-nav-saturation, 135%));
     -webkit-backdrop-filter: blur(var(--myhep-preview-blur, 12px)) saturate(var(--student-nav-saturation, 135%));
 }
@@ -1722,6 +1764,15 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     }
 }
 
+@media (max-width: 767px) {
+    @supports (-webkit-backdrop-filter: blur(1px)) {
+        html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab,
+        body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .student-nav-indicator {
+            -webkit-backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation)) !important;
+        }
+    }
+}
+
 @media (max-width: 767px) and ((prefers-reduced-transparency: reduce) or (prefers-contrast: more) or (forced-colors: active)) {
     html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .mobile-bottom-nav.mobile-bottom-nav--student {
         backdrop-filter: none !important;
@@ -1735,10 +1786,10 @@ body:is(.role-student, .role-system-admin.liquid-design-enabled) .app-layout .pa
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(circle at 0 0, rgb(232 77 171 / calc(var(--myhep-edge-prism-alpha, .3) * 1.8)), transparent 42%),
-        radial-gradient(circle at 100% 0, rgb(50 218 235 / calc(var(--myhep-edge-prism-alpha, .3) * 1.8)), transparent 39%),
-        radial-gradient(circle at 100% 100%, rgb(245 122 62 / calc(var(--myhep-edge-prism-alpha, .3) * 1.8)), transparent 42%),
-        radial-gradient(circle at 0 100%, rgb(99 122 239 / calc(var(--myhep-edge-prism-alpha, .3) * 1.8)), transparent 40%);
+        radial-gradient(circle at 0 0, rgb(232 77 171 / calc(var(--myhep-edge-prism-alpha, .3) * 1.15)), transparent 31%),
+        radial-gradient(circle at 100% 0, rgb(50 218 235 / calc(var(--myhep-edge-prism-alpha, .3) * 1.15)), transparent 30%),
+        radial-gradient(circle at 100% 100%, rgb(245 122 62 / calc(var(--myhep-edge-prism-alpha, .3) * 1.15)), transparent 32%),
+        radial-gradient(circle at 0 100%, rgb(99 122 239 / calc(var(--myhep-edge-prism-alpha, .3) * 1.15)), transparent 31%);
     box-shadow: inset 0 1px 0 rgb(255 255 255 / .8), inset 0 -1px 0 rgb(255 255 255 / .35);
 }
 
@@ -2055,18 +2106,321 @@ html[data-liquid-design="on"][data-glass-material="glass"] body:is(.role-student
     }
 }
 
-/* Browser drawers need an opaque base so dashboard headings stay behind
-   the menu. The glass control still adjusts the edge highlights. */
+/* The browser drawer stays dense enough to separate headings behind it while
+   the shared slider still changes the actual material. */
 html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:not(.pwa-standalone) .app-layout .sidebar.is-open {
     background:
         linear-gradient(145deg, rgb(255 255 255 / .18), transparent 48%),
-        rgb(255 252 247 / 1) !important;
+        rgb(255 252 247 / var(--myhep-browser-drawer-opacity, .88)) !important;
+}
+
+/* One movable lens serves all five student tabs. The existing per-tab bubble
+   remains as a no-JavaScript fallback until layout measurements are ready. */
+@media (max-width: 767px) {
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student {
+        position: fixed;
+        overflow: visible !important;
+        touch-action: pan-y;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button) {
+        position: relative;
+        z-index: 2;
+        touch-action: pan-y;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab {
+        z-index: 4 !important;
+        border-color: rgb(255 255 255 / .73) !important;
+        background:
+            linear-gradient(160deg, rgb(255 255 255 / .49), transparent 50%),
+            color-mix(in srgb, var(--se-primary) 18%, rgb(255 251 247 / .42)) !important;
+        box-shadow: 0 9px 20px color-mix(in srgb, var(--se-primary) 17%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / .78), inset 0 -1px 0 rgb(87 61 55 / .11) !important;
+        backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation)) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab:is(.active, :active) {
+        background:
+            linear-gradient(160deg, rgb(255 255 255 / .55), transparent 52%),
+            color-mix(in srgb, var(--se-primary) 30%, rgb(255 251 247 / .48)) !important;
+        color: var(--student-nav-accent) !important;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .student-nav-indicator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        width: 62px;
+        height: 52px;
+        box-sizing: border-box;
+        border: 1px solid rgb(255 255 255 / .74);
+        border-radius: 24px;
+        background:
+            radial-gradient(ellipse at 22% 0%, rgb(255 255 255 / .39), transparent 55%),
+            linear-gradient(145deg, rgb(255 255 255 / .15), transparent 48%),
+            color-mix(in srgb, var(--se-primary) 7%, rgb(255 255 255 / .22));
+        box-shadow:
+            0 6px 15px rgb(42 32 35 / .13),
+            0 2px 5px color-mix(in srgb, var(--se-primary) 13%, transparent),
+            inset 0 1px 0 rgb(255 255 255 / .82),
+            inset 0 -1px 0 rgb(64 54 57 / .13),
+            inset 1px 0 0 rgb(255 255 255 / .33);
+        backdrop-filter: blur(var(--student-nav-active-blur)) saturate(var(--student-nav-saturation));
+        opacity: 0;
+        pointer-events: none;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .student-nav-indicator::after {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border: 1px solid rgb(255 255 255 / .27);
+        border-radius: inherit;
+        background:
+            radial-gradient(ellipse 12px 30px at 0% 28%, rgb(240 133 192 / .24), transparent 100%),
+            radial-gradient(ellipse 12px 34px at 100% 70%, rgb(112 212 235 / .25), transparent 100%),
+            linear-gradient(180deg, rgb(255 255 255 / .21), transparent 27%, transparent 76%, rgb(255 255 255 / .12));
+        pointer-events: none;
+    }
+
+    /* One soft reflection follows the shared lens, echoing the grouped
+       material in the Landmarks sample without adding per-tab surfaces. */
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .student-nav-group-light {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        width: 82px;
+        height: 62px;
+        border-radius: 999px;
+        background: radial-gradient(ellipse 65% 68% at 50% 22%, rgb(255 255 255 / .44), transparent 83%);
+        filter: blur(5px);
+        opacity: 0;
+        pointer-events: none;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student .student-nav-group-light {
+        background: radial-gradient(ellipse 65% 68% at 50% 22%, rgb(255 255 255 / .22), transparent 83%);
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .mobile-bottom-nav.mobile-bottom-nav--student.has-shared-indicator .student-nav-group-light {
+        opacity: .8;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student.has-shared-indicator .student-nav-indicator {
+        opacity: 1;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student.has-shared-indicator :is(a, button).active::before,
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student.has-shared-indicator #mobileMoreToggle[aria-expanded="true"]::before {
+        display: none !important;
+        content: none !important;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student.has-shared-indicator :is(a, button):not(.is-current),
+    html[data-liquid-design="on"] body.role-student:not([data-theme="dark"]) .mobile-bottom-nav.mobile-bottom-nav--student.has-shared-indicator #mobileMoreToggle:not(.is-current) {
+        color: var(--student-nav-muted) !important;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student.has-shared-indicator :is(a, button).is-current,
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student.has-shared-indicator .mobile-scan-tab.is-current {
+        color: var(--student-nav-accent) !important;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(a, button) > span {
+        transition: color 190ms ease;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:not([data-theme="dark"]) .mobile-bottom-nav.mobile-bottom-nav--student {
+        background:
+            linear-gradient(155deg, rgb(255 255 255 / .43), transparent 45%, rgb(220 209 207 / .08)),
+            color-mix(in srgb, rgb(242 239 237 / var(--myhep-nav-opacity, .80)) 72%, transparent) !important;
+        border-color: rgb(255 255 255 / .66) !important;
+        box-shadow: 0 13px 32px rgb(47 37 34 / .16), 0 2px 7px rgb(47 37 34 / .07),
+            inset 0 1px 0 rgb(255 255 255 / .86), inset 0 -1px 0 rgb(83 66 61 / .12) !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student {
+        background:
+            linear-gradient(155deg, rgb(255 255 255 / .12), transparent 48%),
+            color-mix(in srgb, rgb(24 23 22 / var(--myhep-nav-opacity-dark, .80)) 74%, transparent) !important;
+    }
+
+    body.role-student[data-theme="dark"] .mobile-bottom-nav.mobile-bottom-nav--student .student-nav-indicator {
+        border-color: rgb(255 255 255 / .34);
+        background: linear-gradient(155deg, rgb(255 255 255 / .15), transparent 54%),
+            color-mix(in srgb, var(--se-primary) 9%, rgb(45 42 43 / .31));
+        box-shadow: 0 6px 16px rgb(0 0 0 / .29), inset 0 1px 0 rgb(255 255 255 / .32),
+            inset 0 -1px 0 rgb(0 0 0 / .16);
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student[data-theme="dark"]:is(.student-bottom-nav-eligible, .has-student-bottom-nav) .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab {
+        border-color: rgb(255 255 255 / .25) !important;
+        background: linear-gradient(160deg, rgb(255 255 255 / .20), transparent 55%),
+            color-mix(in srgb, var(--se-primary) 16%, rgb(45 42 43 / .48)) !important;
+    }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student :is(.student-nav-indicator, .student-nav-group-light) {
+        will-change: auto;
+    }
+}
+
+@media (max-width: 767px) and ((prefers-reduced-transparency: reduce) or (prefers-contrast: more) or (forced-colors: active)) {
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .mobile-scan-tab,
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .student-nav-indicator {
+        background: var(--se-surface);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    body.role-student .mobile-bottom-nav.mobile-bottom-nav--student .student-nav-group-light {
+        display: none;
+    }
+}
+
+/* Optional student-only atmosphere. The page surface remains unchanged; a
+   restrained accent layer drifts beneath content and the floating glass. */
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled .app-layout .page-body {
+    position: relative;
+    isolation: isolate;
+}
+
+/* Keep the animated atmosphere from extending this page's scroll range. */
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-liquid-aid.student-aurora-enabled .app-layout .page-body {
+    overflow: clip;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-liquid-aid.student-aurora-enabled .app-layout .main-scroll-viewport {
+    background: var(--se-bg);
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled .app-layout .page-body::before,
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled .app-layout .page-body::after {
+    content: "";
+    position: fixed;
+    z-index: -1;
+    inset: -12%;
+    pointer-events: none;
+    will-change: transform;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled .app-layout .page-body::before {
+    background:
+        radial-gradient(ellipse 25rem 22rem at 19% 65%, color-mix(in srgb, var(--se-atmosphere-primary) 38%, transparent), transparent 76%),
+        radial-gradient(ellipse 19rem 17rem at 78% 25%, color-mix(in srgb, var(--se-primary-muted) 24%, transparent), transparent 78%);
+    opacity: .74;
+    animation: student-aurora-flow-a 20s ease-in-out infinite alternate;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled .app-layout .page-body::after {
+    background:
+        radial-gradient(ellipse 26rem 21rem at 77% 72%, color-mix(in srgb, var(--se-atmosphere-secondary) 35%, transparent), transparent 77%),
+        radial-gradient(ellipse 18rem 16rem at 35% 27%, color-mix(in srgb, var(--se-primary-muted) 20%, transparent), transparent 78%);
+    opacity: .68;
+    animation: student-aurora-flow-b 25s ease-in-out infinite alternate;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled[data-theme="dark"] .app-layout .page-body::before,
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled[data-theme="dark"] .app-layout .page-body::after {
+    opacity: .55;
+}
+
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled[data-accent-theme="pink"] .app-layout .page-body::before,
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled[data-accent-theme="pink"] .app-layout .page-body::after,
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled[data-accent-theme="red"] .app-layout .page-body::before,
+html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled[data-accent-theme="red"] .app-layout .page-body::after {
+    opacity: .64;
+}
+
+@keyframes student-aurora-flow-a {
+    from { transform: translate3d(-8%, 4%, 0) scale(1.02); }
+    to { transform: translate3d(9%, -6%, 0) scale(1.10); }
+}
+
+@keyframes student-aurora-flow-b {
+    from { transform: translate3d(8%, -5%, 0) scale(1.08); }
+    to { transform: translate3d(-9%, 6%, 0) scale(1.02); }
+}
+
+body.role-student.student-aurora-paused .app-layout .page-body::before,
+body.role-student.student-aurora-paused .app-layout .page-body::after {
+    animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.role-student.student-aurora-enabled .app-layout .page-body::before,
+    body.role-student.student-aurora-enabled .app-layout .page-body::after {
+        animation: none !important;
+        transform: none !important;
+        will-change: auto;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active), print {
+    body.role-student.student-aurora-enabled .app-layout .page-body::before,
+    body.role-student.student-aurora-enabled .app-layout .page-body::after {
+        display: none !important;
+    }
+}
+
+/* Let the discipline navigation buttons sit over the student atmosphere,
+   without the opaque band that otherwise appears between them. */
+@media (max-width: 767px) {
+    html[data-liquid-design="on"] body.role-student .app-layout .page-body .disc-toolbar {
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    body.role-student .app-layout .page-body .disc-actions {
+        gap: .45rem;
+    }
+
+    body.role-student.student-mobile-shell .app-layout .page-body .disc-actions .disc-chip {
+        padding: .55rem .65rem !important;
+    }
+
+    html[data-liquid-design="on"][data-glass-material="glass"] body.role-student.student-aurora-enabled .app-layout .page-body .disc-toolbar {
+        background:
+            radial-gradient(ellipse 75% 150% at 16% 50%, color-mix(in srgb, var(--se-atmosphere-primary) 23%, transparent), transparent 78%),
+            radial-gradient(ellipse 75% 150% at 84% 50%, color-mix(in srgb, var(--se-atmosphere-secondary) 20%, transparent), transparent 78%) !important;
+        background-size: 145% 140% !important;
+        animation: student-toolbar-aurora 19s ease-in-out infinite alternate;
+    }
+
+    body.role-student.student-aurora-paused .app-layout .page-body .disc-toolbar {
+        animation-play-state: paused !important;
+    }
+}
+
+@keyframes student-toolbar-aurora {
+    from { background-position: 0% 45%; }
+    to { background-position: 100% 55%; }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+    body.role-student.student-aurora-enabled .app-layout .page-body .disc-toolbar {
+        animation: none !important;
+    }
+}
+
+@media (max-width: 767px) and ((prefers-reduced-transparency: reduce) or (prefers-contrast: more) or (forced-colors: active)) {
+    body.role-student.student-aurora-enabled .app-layout .page-body .disc-toolbar {
+        background: transparent !important;
+    }
 }
 
 html[data-liquid-design="on"][data-glass-material="glass"] body.role-student:not(.pwa-standalone)[data-theme="dark"] .app-layout .sidebar.is-open {
     background:
         linear-gradient(145deg, rgb(255 255 255 / .06), transparent 48%),
-        rgb(18 17 16 / 1) !important;
+        rgb(18 17 16 / var(--myhep-browser-drawer-opacity-dark, .90)) !important;
 }
 
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {

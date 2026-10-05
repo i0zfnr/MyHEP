@@ -840,7 +840,7 @@
     "Hantar Kod Verifikasi": "Hantar Kod Verifikasi",
     "Hantar Notis Peringatan": "Hantar Notis Peringatan",
     "Hantar Permohonan": "Hantar Permohonan",
-    "Hantar Permohonan / Kemaskini": "Hantar Permohonan / Kemaskini",
+    "Hantar Permohonan / Kemaskini": "Hantar / Kemas Kini Permohonan",
     "Hantar Semula": "Hantar Semula",
     "Hantar Soal Selidik": "Hantar Soal Selidik",
     "Hebahan umum berkaitan tajaan dan maklumat tambahan.": "Hebahan umum berkaitan tajaan dan maklumat tambahan.",
@@ -3034,5 +3034,8 @@
     "No status records available yet.": "Belum ada rekod status.",
     "Password reset codes are sent to the registered email address on each account.": "Kod reset dihantar ke alamat email yang berdaftar pada setiap akaun.",
     "Maklumat pemulihan akaun tidak sepadan atau alamat email berdaftar tidak tersedia.": "Maklumat pemulihan akaun tidak sepadan atau alamat email berdaftar tidak tersedia.",
-    "Kod reset tidak dapat dihantar melalui email sekarang. Sila cuba lagi kemudian atau hubungi pentadbir sistem.": "Kod reset tidak dapat dihantar melalui email sekarang. Sila cuba lagi kemudian atau hubungi pentadbir sistem."
+    "Kod reset tidak dapat dihantar melalui email sekarang. Sila cuba lagi kemudian atau hubungi pentadbir sistem.": "Kod reset tidak dapat dihantar melalui email sekarang. Sila cuba lagi kemudian atau hubungi pentadbir sistem.",
+    "No file chosen": "Tiada fail dipilih",
+    "Bukti Biasiswa (PDF / Imej)": "Bukti Biasiswa (PDF / Imej)",
+    "Wajib jika menerima biasiswa. Contoh: surat tawaran, penyata bayaran, atau tangkap layar portal penaja. PDF/JPG/PNG/WEBP, maksimum 10 MB.": "Wajib jika menerima biasiswa. Contoh: surat tawaran, penyata bayaran, atau tangkap layar portal penaja. PDF/JPG/PNG/WEBP, maksimum 10 MB."
 }

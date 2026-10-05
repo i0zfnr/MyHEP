@@ -278,25 +278,28 @@ const applyGlassTransparency = (value, persist = true) => {
     // One control moves every glass surface from clear to frosted. The tint
     // remains bounded so foreground labels stay readable at either end.
     root.style.setProperty('--glass-user-transparency', glassActive ? ratio.toFixed(2) : '0');
-    root.style.setProperty('--glass-opacity', glassActive ? (0.56 + (ratio * 0.24)).toFixed(2) : '1');
-    root.style.setProperty('--myhep-nav-opacity', glassActive ? (0.66 + (ratio * 0.18)).toFixed(2) : '1');
-    root.style.setProperty('--myhep-nav-opacity-dark', glassActive ? (0.72 + (ratio * 0.16)).toFixed(2) : '1');
-    root.style.setProperty('--myhep-header-opacity', glassActive ? (0.64 + (ratio * 0.20)).toFixed(2) : '1');
-    root.style.setProperty('--myhep-header-opacity-dark', glassActive ? (0.70 + (ratio * 0.17)).toFixed(2) : '1');
+    root.style.setProperty('--glass-opacity', glassActive ? (0.54 + (ratio * 0.28)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-nav-opacity', glassActive ? (0.62 + (ratio * 0.26)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-nav-opacity-dark', glassActive ? (0.68 + (ratio * 0.20)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-header-opacity', glassActive ? (0.60 + (ratio * 0.26)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-header-opacity-dark', glassActive ? (0.66 + (ratio * 0.21)).toFixed(2) : '1');
     root.style.setProperty('--myhep-popup-opacity', glassActive ? (0.76 + (ratio * 0.16)).toFixed(2) : '1');
     root.style.setProperty('--myhep-popup-opacity-dark', glassActive ? (0.82 + (ratio * 0.13)).toFixed(2) : '1');
-    root.style.setProperty('--myhep-drawer-opacity', glassActive ? (0.72 + (ratio * 0.20)).toFixed(2) : '1');
-    root.style.setProperty('--myhep-drawer-opacity-dark', glassActive ? (0.74 + (ratio * 0.18)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-drawer-opacity', glassActive ? (0.62 + (ratio * 0.27)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-drawer-opacity-dark', glassActive ? (0.68 + (ratio * 0.21)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-browser-drawer-opacity', glassActive ? (0.84 + (ratio * 0.11)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-browser-drawer-opacity-dark', glassActive ? (0.86 + (ratio * 0.09)).toFixed(2) : '1');
     root.style.setProperty('--myhep-user-blur', glassActive ? `${8 + (ratio * 24)}px` : '0px');
-    root.style.setProperty('--myhep-preview-blur', glassActive ? `${3 + (ratio * ratio * 25)}px` : '0px');
-    root.style.setProperty('--student-nav-material-alpha', glassActive ? (0.78 + (ratio * 0.16)).toFixed(2) : '1');
+    root.style.setProperty('--myhep-preview-blur', glassActive ? `${1 + (ratio * ratio * 23)}px` : '0px');
+    root.style.setProperty('--student-nav-material-alpha', glassActive ? (0.68 + (ratio * 0.20)).toFixed(2) : '1');
     root.style.setProperty('--student-nav-active-alpha', glassActive ? (0.58 + (ratio * 0.22)).toFixed(2) : '1');
     root.style.setProperty('--student-nav-reflection-alpha', glassActive ? (0.34 - (ratio * 0.10)).toFixed(2) : '0');
     root.style.setProperty('--student-nav-active-reflection-alpha', glassActive ? (0.46 - (ratio * 0.14)).toFixed(2) : '0');
     root.style.setProperty('--student-nav-blur', glassActive ? `${6 + (ratio * 24)}px` : '0px');
     root.style.setProperty('--student-nav-active-blur', glassActive ? `${4 + (ratio * 17)}px` : '0px');
-    root.style.setProperty('--student-nav-saturation', glassActive ? `${115 + (ratio * 35)}%` : '100%');
-    root.style.setProperty('--myhep-edge-prism-alpha', glassActive ? (0.44 - (ratio * 0.30)).toFixed(2) : '0');
+    // The clear end matches the vivid 300% reference; frosting eases it to 100%.
+    root.style.setProperty('--student-nav-saturation', glassActive ? `${Math.round(300 - (ratio * 200))}%` : '100%');
+    root.style.setProperty('--myhep-edge-prism-alpha', glassActive ? (0.38 - (ratio * 0.25)).toFixed(2) : '0');
     document.querySelectorAll('[data-glass-displacement]').forEach((map) => {
         map.setAttribute('scale', String(Math.round(30 - (ratio * 24))));
     });
